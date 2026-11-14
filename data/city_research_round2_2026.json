@@ -1,0 +1,125 @@
+{
+  "schema_version": "1.0",
+  "checked_at": "2026-11-14",
+  "study": "Casal, 55–65 noites na França após setembro/2027, sem carro, home office. Comparação exploratória de indicadores publicados em 2026; nenhum é cotação de estadia.",
+  "method": {
+    "rent": "MeilleursAgents, aluguel estimado de apartamento convencional em €/m²/mês, novembro/2026. Não é oferta de imóvel mobiliado para 55–65 noites, nem custo contratado.",
+    "restaurant": "Numbeo, preço colaborativo de refeição intermediária com três pratos para dois (sem bebidas), páginas da cidade consultadas em novembro/2026. Não é cotação nem amostra aleatória. Os preços podem variar.",
+    "coworking": "Alternativas pesquisadas separadamente, com ofertas heterogêneas e fontes de tipos diferentes; NÃO comparar como ranking de preços ou garantir atendimento noturno.",
+    "work_hours": "Fuso brasileiro e europeu varia com a mudança de horário de verão. Coworkings que fecham antes do final do expediente não substituem home office com internet confiável.",
+    "legal": "Service-Public confirma existência de bail mobilité de 1–10 meses para determinados perfis; elegibilidade individual e eventual contrato turístico pendentes."
+  },
+  "common_sources": [
+    {
+      "id": "rent_indicator",
+      "url": "https://www.meilleursagents.com/prix-immobilier/grand-est/",
+      "source_type": "published_estimate",
+      "as_of": "2026-11-01",
+      "unit": "EUR/m²/month",
+      "restriction": "Mercado convencional de apartamentos, não temporada mobiliada"
+    },
+    {
+      "id": "legal",
+      "url": "https://www.service-public.gouv.fr/particuliers/vosdroits/F1165",
+      "source_type": "official",
+      "as_of": "checked 2026-11-14",
+      "restriction": "Comparação de modalidades: bail mobilité elegível 1–10 meses, sem depósito; não assumir elegibilidade"
+    },
+    {
+      "id": "legal_mobility",
+      "url": "https://www.service-public.gouv.fr/particuliers/vosdroits/F34759",
+      "source_type": "official",
+      "as_of": "checked 2026-11-14",
+      "restriction": "Exige situação qualificadora"
+    },
+    {
+      "id": "cost_method",
+      "url": "https://fr.numbeo.com/co%C3%BBt-de-la-vie/pays/France",
+      "source_type": "crowdsourced",
+      "as_of": "November 2026",
+      "restriction": "Amostras pequenas e variáveis; comparação não representativa"
+    }
+  ],
+  "cities": [
+    {
+      "id": "mulhouse",
+      "name": "Mulhouse",
+      "residential_rent_eur_sqm_month": 13.7,
+      "restaurant_two_midrange_eur": 67.5,
+      "restaurant_source_url": "https://fr.numbeo.com/co%C3%BBt-de-la-vie/ville/Mulhouse",
+      "coworking": {
+        "name": "La Jonction / Mulhouse Coworking",
+        "price_eur": 15,
+        "price_basis": "day excluding tax (with €30 excluding tax monthly plan giving 1 day included)",
+        "source_url": "https://www.mulhouse-coworking.fr/",
+        "source_type": "provider",
+        "schedule": "6h30–22h30 weekdays for dedicated spaces; day/nomad access conditions must be verified",
+        "verified_2027": false,
+        "late_work_compatible": false,
+        "note": "Acesso dedicado até 22h30 não cobre necessariamente 23h durante horário de verão francês; elegibilidade do plano e uso noturno exigem confirmação."
+      }
+    },
+    {
+      "id": "strasbourg",
+      "name": "Strasbourg",
+      "residential_rent_eur_sqm_month": 15.6,
+      "restaurant_two_midrange_eur": 62.5,
+      "restaurant_source_url": "https://fr.numbeo.com/co%C3%BBt-de-la-vie/ville/Strasbourg",
+      "coworking": {
+        "name": "DOKO BÜRO",
+        "price_eur": 175,
+        "price_basis": "month (published, no six-month commitment claimed for monthly option)",
+        "source_url": "https://label-tiers-lieux.grandest.fr/tiers-lieux/doko-buro/",
+        "source_type": "regional_directory",
+        "schedule": "8h–19h weekdays, lunch interruption",
+        "verified_2027": false,
+        "late_work_compatible": false,
+        "note": "Não atende trabalho após 19h sem condições especiais."
+      }
+    },
+    {
+      "id": "metz",
+      "name": "Metz",
+      "residential_rent_eur_sqm_month": 14.2,
+      "restaurant_two_midrange_eur": 60,
+      "restaurant_source_url": "https://fr.numbeo.com/co%C3%BBt-de-la-vie/ville/Metz-France",
+      "coworking": {
+        "name": "B'CoWorker Metz (levantamento de mercado)",
+        "price_eur": 15,
+        "price_basis": "day (second-hand directory; verify provider quote)",
+        "source_url": "https://comparatifcoworking.com/coworking/metz/",
+        "source_type": "secondary_directory",
+        "schedule": null,
+        "verified_2027": false,
+        "late_work_compatible": null,
+        "note": "Site secundário publica €15/dia e €190/mês para o operador; horários e acesso pessoal ainda não confirmados."
+      }
+    },
+    {
+      "id": "nancy",
+      "name": "Nancy",
+      "residential_rent_eur_sqm_month": 14.2,
+      "restaurant_two_midrange_eur": 60,
+      "restaurant_source_url": "https://fr.numbeo.com/co%C3%BBt-de-la-vie/ville/Nancy",
+      "coworking": {
+        "name": "Charlie Coworking",
+        "price_eur": 90,
+        "price_basis": "month, full-time flex with no guaranteed seat; association yearly fee €75 per person mentioned",
+        "source_url": "https://www.coworking-nancy.org/",
+        "source_type": "provider",
+        "schedule": "24/7 access via member key for eligible participants; plan terms require confirmation",
+        "verified_2027": false,
+        "late_work_compatible": null,
+        "note": "Acesso 24/7 anunciado, mas não está confirmado para o plano flexível, nem para dois meses ou trabalhador estrangeiro."
+      }
+    }
+  ],
+  "pending_common": [
+    "Receber três cotações independentes de imóveis para janela exata, casal, contas, wifi e contrato em cada cidade",
+    "Conferir coworking após 22h/23h, ruído e videoconferências por turno de trabalho",
+    "Montar cesta idêntica de supermercado por loja de bairro e itens, restaurantes por estabelecimento real",
+    "Verificar pelo menos cinco passeios porta a porta e retornos aos domingos para cada base",
+    "Calcular custo Itália→França→Brasil com mala para o casal nas datas efetivas",
+    "Verificar elegibilidade de contrato, trabalho remoto e proteção social com empregador e profissionais competentes"
+  ]
+}
