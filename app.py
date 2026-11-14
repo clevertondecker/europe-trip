@@ -9,6 +9,7 @@ import streamlit as st
 
 from data_model import STATUS_COLORS, STATUS_LABEL, calculate_scenario, get_scenario, load_data, money_brl, select_places
 from drive_sync import load_live_updates, update_map_places
+from city_compare import get_preset, load_cities, normalized_weights, rank_cities
 
 st.set_page_config(page_title="Nossa Europa 2027", page_icon="🌍", layout="wide", initial_sidebar_state="expanded")
 data = load_data()
@@ -258,6 +259,22 @@ a{color:#1684B2 !important;}
  .page-stat{min-height:92px;padding:13px;}
 }
 
+
+/* Evolução 1 — painel de comparação, reutilizando o design A+B existente */
+.city-score{background:#fff;border:1px solid #E4EBF3;border-radius:18px;padding:20px;
+  margin-bottom:12px;box-shadow:0 5px 20px rgba(24,65,90,.035);}
+.city-score__top{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.city-score__rank{font-size:.7rem;color:#138D83;background:#EBF8F4;border-radius:9px;
+  padding:6px 10px;font-weight:800;}
+.city-score__name{color:#19394D;font-size:1.3rem;font-weight:800;margin:13px 0 4px;letter-spacing:-.04em;}
+.city-score__number{font-size:1.7rem;font-weight:800;color:#168CB3;letter-spacing:-.045em;}
+.city-score__bar{height:9px;background:#E5EDF4;border-radius:12px;overflow:hidden;margin:10px 0;}
+.city-score__bar span{display:block;height:100%;background:#16A092;border-radius:12px;}
+.city-score__detail{font-size:.8rem;color:#678195;line-height:1.55;}
+.city-compare-caveat{border:1px solid #DCECF3;border-radius:13px;padding:13px 16px;
+  background:#F0F8FC;font-size:.84rem;color:#36657C;line-height:1.55;margin:12px 0;}
+.city-compare-source{font-size:.8rem;color:#627D8F;line-height:1.55;}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -352,7 +369,7 @@ with st.sidebar:
       <small>TRAVEL JOURNAL · 2027</small>
       <strong>✧ Nossa Europa</strong>
       <span>Lua de mel & temporada na França</span></div>""", unsafe_allow_html=True)
-    page = st.radio("Explorar", ["Visão geral", "Mapa & destinos", "Roteiro", "Orçamento", "Pesquisas & decisões"], label_visibility="collapsed", key="main_navigation", format_func=lambda name: {"Visão geral": "⌂  Visão geral", "Mapa & destinos": "▣  Mapa & destinos", "Roteiro": "▦  Roteiro", "Orçamento": "◉  Orçamento", "Pesquisas & decisões": "☑  Pesquisas & decisões"}[name])
+    page = st.radio("Explorar", ["Visão geral", "Mapa & destinos", "Comparar cidades", "Roteiro", "Orçamento", "Pesquisas & decisões"], label_visibility="collapsed", key="main_navigation", format_func=lambda name: {"Visão geral": "⌂  Visão geral", "Mapa & destinos": "▣  Mapa & destinos", "Comparar cidades": "▤  Comparar cidades", "Roteiro": "▦  Roteiro", "Orçamento": "◉  Orçamento", "Pesquisas & decisões": "☑  Pesquisas & decisões"}[name])
     st.divider()
     st.caption("**ORIGEM DOS DADOS**")
     st.caption("Drive sincronizado" if sync_status == "live" else ("Drive parcialmente sincronizado" if sync_status == "partial" else "Snapshot de 14/11/2026"))
@@ -552,6 +569,124 @@ elif page == "Mapa & destinos":
                 "Cidades e coordenadas vêm do catálogo histórico; a decisão sobre uma cidade-base francesa "
                 "pode atualizar o status a partir do documento do Drive. Os demais pontos não são atualizados "
                 "automaticamente por cotações ou reservas.</div>", unsafe_allow_html=True)
+
+elif page == "Comparar cidades":
+    city_data = load_cities()
+    criteria_ids = [criterion["id"] for criterion in city_data["criteria"]]
+    st.markdown("<div class='page-eyebrow'>FRANÇA · ESCOLHA DA CIDADE-BASE</div>"
+                "<div class='page-title'>Onde vamos morar na França?</div>"
+                "<div class='page-subtitle'>Compare quatro cidades com as notas históricas da planilha. "
+                "Altere as prioridades para entender os trade-offs; nenhuma cidade foi aprovada ainda.</div>",
+                unsafe_allow_html=True)
+    st.markdown("<div class='city-compare-caveat'>"
+                "As notas (0–5) são avaliações editoriais históricas de novembro/2026, "
+                "não indicadores oficiais de qualidade de vida. Aluguéis são envelopes de planejamento "
+                "em €/mês, e não ofertas disponíveis para setembro–novembro/2027. "
+                "A mudança dos pesos NÃO altera o Drive, a decisão D-004 nem o orçamento global.</div>",
+                unsafe_allow_html=True)
+    st.markdown("<div class='page-section'>Personalize suas prioridades</div>", unsafe_allow_html=True)
+    profile = st.selectbox("Perfil de comparação", city_data["presets"],
+                           format_func=lambda item: item["label"], key="city_compare_profile",
+                           help="Perfis transcritos da aba 12 PESOS CIDADES do Excel histórico.")
+    profile_id = profile["id"]
+    if st.session_state.get("_last_city_profile") != profile_id:
+        for crit_id, value in get_preset(city_data, profile_id).items():
+            st.session_state[f"city_weight_{crit_id}"] = int(value)
+        st.session_state["_last_city_profile"] = profile_id
+    cols = st.columns(3, gap="medium")
+    weights = {}
+    for idx, criterion in enumerate(city_data["criteria"]):
+        with cols[idx % 3]:
+            weights[criterion["id"]] = st.slider(
+                criterion["label"], min_value=0, max_value=100, step=5,
+                key=f"city_weight_{criterion['id']}",
+                help=criterion["explanation"])
+    total_weights = sum(weights.values())
+    if total_weights == 0:
+        st.warning("Escolha ao menos um critério com peso acima de zero para calcular o ranking.")
+    else:
+        actual_weights = normalized_weights(weights, criteria_ids)
+        st.caption(f"Pesos inseridos: {total_weights}% no total. "
+                   "Normalização automática para 100%: "
+                   + " · ".join(f"{criterion['label']}: {actual_weights[criterion['id']]*100:.0f}%"
+                                for criterion in city_data["criteria"]))
+        ranking = rank_cities(city_data["cities"], weights, criteria_ids)
+        st.markdown("<div class='page-section'>Ranking por suas preferências</div>",
+                    unsafe_allow_html=True)
+        for start in range(0, len(ranking), 2):
+            for col, (pos, item) in zip(st.columns(2, gap="medium"),
+                                         list(enumerate(ranking, 1))[start:start+2]):
+                city = item["city"]
+                with col:
+                    percentage = min(100.0, max(0.0, item["score"] / 5.0 * 100.0))
+                    st.markdown(
+                        "<div class='city-score'>"
+                        f"<div class='city-score__top'><span class='city-score__rank'>#{pos} · Ranking simulado</span>"
+                        f"<span class='city-score__number'>{item['score']:.3f}/5</span></div>"
+                        f"<div class='city-score__name'>{escape(city['name'])}</div>"
+                        f"<div class='city-score__bar'><span style='width:{percentage:.2f}%'></span></div>"
+                        f"<div class='city-score__detail'>{escape(city['summary'])}</div>"
+                        f"<div class='city-score__detail' style='margin-top:10px'>"
+                        f"Aluguel de referência histórica: <b>€ {city['reference_rent_eur']:,.0f}/mês</b> "
+                        f"· Envelope € {city['range_eur'][0]:,.0f}–{city['range_eur'][1]:,.0f}/mês</div></div>",
+                        unsafe_allow_html=True)
+        st.markdown("<div class='page-section'>Notas por critério</div>",unsafe_allow_html=True)
+        import pandas as pd
+        table_rows = []
+        for item in ranking:
+            city = item["city"]
+            table_rows.append({"Cidade": city["name"],"Score ponderado":round(item["score"],3),
+                               "Ranking histórico":city["historic_score"],
+                               "Aluguel ref. €/mês":city["reference_rent_eur"],
+                               **{c["label"]:city["scores"][c["id"]] for c in city_data["criteria"]}})
+        st.dataframe(pd.DataFrame(table_rows),use_container_width=True,hide_index=True,
+                     column_config={"Score ponderado":st.column_config.NumberColumn(format="%.3f"),
+                                    "Ranking histórico":st.column_config.NumberColumn(format="%.3f"),
+                                    "Aluguel ref. €/mês":st.column_config.NumberColumn(format="€ %.0f")},
+                     height=190)
+
+        st.markdown("<div class='page-section'>Comparação lado a lado</div>",unsafe_allow_html=True)
+        city_names = [city["name"] for city in city_data["cities"]]
+        selected = st.multiselect("Selecione até duas cidades",city_names,
+                                  default=["Mulhouse","Strasbourg"],max_selections=2,
+                                  key="city_compare_pair")
+        compare_index = {item["city"]["name"]:item for item in ranking}
+        if not selected:
+            st.info("Escolha uma ou duas cidades para ver os detalhes.")
+        for col, city_name in zip(st.columns(2, gap="medium"),selected):
+            city = compare_index[city_name]["city"]
+            with col:
+                st.markdown(
+                    f"<div class='page-panel'><div class='page-panel__title'>{escape(city_name)}</div>"
+                    f"<div class='page-panel__desc'>{escape(city['summary'])}</div>"
+                    f"<div class='page-panel__meta'>Score atual: {compare_index[city_name]['score']:.3f}/5 "
+                    f"· Referência histórica: € {city['reference_rent_eur']:,.0f}/mês</div></div>",
+                    unsafe_allow_html=True)
+                st.markdown("**Pontos favoráveis (históricos)**")
+                for advantage in city["advantages"]:
+                    st.markdown(f"- {advantage}")
+                st.markdown("**Riscos e verificações**")
+                for risk in city["risks"]:
+                    st.markdown(f"- {risk}")
+                with st.expander("Exemplos de anúncios pesquisados em 2026"):
+                    st.caption("Links e preços históricos; não significam disponibilidade nem adequação contratual.")
+                    for ad in city["sample_ads"]:
+                        st.link_button(ad["label"], ad["url"], use_container_width=True)
+    st.markdown("<div class='page-section'>Antes de escolher a cidade</div>",unsafe_allow_html=True)
+    st.markdown("<div class='page-panel'>"
+                "<div class='page-panel__title'>O que ainda precisa de confirmação</div>"
+                "<div class='page-panel__desc'>Apartamentos mobiliados que aceitem 55–65 noites para duas pessoas; "
+                "internet para home office; contrato aplicável; taxa total com contas, depósito e limpeza; "
+                "custo de chegar da Itália e voltar ao Brasil; proximidade da estação e vida social."
+                "</div></div>",unsafe_allow_html=True)
+    source_url = city_data["source"]["url"]
+    col1,col2=st.columns(2,gap="medium")
+    with col1:
+        st.link_button("Consultar matriz e pesos no Excel",source_url,use_container_width=True)
+    with col2:
+        st.link_button("Consultar decisão D-004 no Drive",data["sources"]["decisions"],use_container_width=True)
+    st.caption("Fonte: abas 11, 12, 13 e 15 do Excel do projeto (novembro/2026). "
+               "Notas de especialistas e preferências do planejamento, não dados objetivos atualizados.")
 
 elif page == "Roteiro":
     st.markdown("<div class='page-eyebrow'>PLANEJAMENTO · ETAPAS DA VIAGEM</div>"
