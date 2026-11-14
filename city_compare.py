@@ -45,3 +45,17 @@ def get_preset(data: dict[str, Any], preset_id: str) -> dict[str, float]:
     if len(matches) != 1:
         raise ValueError("Perfil não encontrado")
     return dict(matches[0])
+
+def initialize_weight_state(state: dict[str, Any], preset_id: str,
+                            preset_weights: dict[str, float]) -> None:
+    """Restore slider values on first visit, navigation back, or preset change.
+
+    Streamlit deletes widget keys when their page no longer renders. Remembering
+    the preset alone is not sufficient: missing slider keys must be restored.
+    """
+    changed = state.get("_last_city_profile") != preset_id
+    for criterion, weight in preset_weights.items():
+        key = f"city_weight_{criterion}"
+        if changed or key not in state:
+            state[key] = int(weight)
+    state["_last_city_profile"] = preset_id
