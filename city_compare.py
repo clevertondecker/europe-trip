@@ -44,4 +44,4 @@ def get_preset(data: dict[str, Any], preset_id: str) -> dict[str, float]:
     matches = [preset["weights"] for preset in data["presets"] if preset["id"] == preset_id]
     if len(matches) != 1:
         raise ValueError("Perfil não encontrado")
-    return dict(matches[0]["weights"])
+    return dict(matches[0])
