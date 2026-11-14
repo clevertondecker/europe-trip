@@ -8,25 +8,41 @@ import pydeck as pdk
 import streamlit as st
 
 from data_model import STATUS_COLORS, STATUS_LABEL, calculate_scenario, get_scenario, load_data, money_brl, select_places
-from drive_sync import load_live_updates
+from drive_sync import load_live_updates, update_map_places
 
 st.set_page_config(page_title="Nossa Europa 2027", page_icon="🌍", layout="wide", initial_sidebar_state="expanded")
 data = load_data()
 
 @st.cache_data(ttl=300, show_spinner=False)
 def fetch_live():
+    # st.secrets does not exist locally until configured; never log secret contents.
     credentials = dict(st.secrets["gcp_service_account"])
     return load_live_updates(credentials)
 
 sync_status = "snapshot"
+sync_time = ""
 sync_error = ""
+sync_sources = {name: {"status": "snapshot"} for name in ("decisions", "tasks", "finance")}
+sync_issues = []
 try:
     if "gcp_service_account" in st.secrets:
         live = fetch_live()
-        data["decisions"] = live["decisions"]
-        data["tasks"] = live["tasks"]
-        sync_status = "live"
         sync_time = live["synced_at"]
+        sync_sources.update(live["source_status"])
+        sync_issues = live["issues"]
+        if sync_sources["decisions"]["status"] == "live":
+            data["decisions"] = live["decisions"]
+            data["places"] = update_map_places(data["places"], data["decisions"])
+        if sync_sources["tasks"]["status"] == "live":
+            data["tasks"] = live["tasks"]
+        if sync_sources["finance"]["status"] == "live":
+            data["budget_scenarios"] = live["budget_scenarios"]
+            data["timeline"] = live["timeline"]
+            data.update(live["trip_metadata"])
+        if all(value["status"] == "live" for value in sync_sources.values()):
+            sync_status = "live"
+        elif any(value["status"] == "live" for value in sync_sources.values()):
+            sync_status = "partial"
 except Exception as exc:
     sync_error = type(exc).__name__
 
@@ -134,11 +150,12 @@ def mini_budget() -> None:
 
 
 def bottom_source() -> None:
-    status_text = (f"Decisões e pendências sincronizadas às {escape(sync_time)} (UTC)." if sync_status == "live"
-                   else f"Decisões e pendências em snapshot de {escape(data['snapshot_date'])}.")
-    st.markdown(f"<div class='source-footer'>{status_text} "
-                "Mapa, roteiro e orçamento seguem no snapshot histórico, sem cotações atuais. "
-                "Mapas exibem pontos aproximados, não rotas contratadas.</div>", unsafe_allow_html=True)
+    status_text = (f"Fontes do Drive verificadas às {escape(sync_time)} (UTC)." if sync_time
+                   else f"Snapshot local de {escape(data['snapshot_date'])}.")
+    details = " · ".join(f"{name}: {'Drive' if status['status'] == 'live' else 'snapshot'}" for name, status in sync_sources.items())
+    st.markdown(f"<div class='source-footer'>{status_text} {escape(details)}. "
+                "As finanças são estimativas, não preços cotados nem reservas. "
+                "O mapa usa uma base geográfica de referência, não rotas contratadas.</div>", unsafe_allow_html=True)
     with st.expander("Fontes e documentação do projeto"):
         for title,key in [("Pasta do Drive","project_folder"),("Estado atual","decisions"),("Planilha financeira","spreadsheet"),
                            ("Markdown completo","knowledge"),("Pendências","tasks")]:
@@ -151,12 +168,19 @@ with st.sidebar:
     page = st.radio("Explorar", ["Visão geral", "Mapa & destinos", "Roteiro", "Orçamento", "Pesquisas & decisões"], label_visibility="collapsed")
     st.divider()
     st.caption("**ORIGEM DOS DADOS**")
-    st.caption("Drive: decisões/pendências sincronizadas" if sync_status == "live" else "Snapshot local · 14/11/2026")
+    st.caption("Drive sincronizado" if sync_status == "live" else ("Drive parcialmente sincronizado" if sync_status == "partial" else "Snapshot de 14/11/2026"))
+    for source_name, source_label in (("decisions", "Decisões"), ("tasks", "Pendências"), ("finance", "Financeiro e roteiro")):
+        state = sync_sources[source_name]
+        st.caption(f"{'✅' if state['status'] == 'live' else '⚪'} {source_label}: {state['status']}" + (f" · {state['modified_at'][:10]}" if state.get('modified_at') else ""))
     if st.button("Atualizar dados do Drive", use_container_width=True):
         fetch_live.clear()
         st.rerun()
     if sync_error:
-        st.warning("Sincronização indisponível; exibindo snapshot. Verifique as permissões da conta de serviço.")
+        st.warning("Sincronização indisponível; exibindo snapshot. Confira configuração e permissões da conta de serviço.")
+    if sync_issues:
+        with st.expander(f"Avisos de sincronização ({len(sync_issues)})"):
+            for issue in sync_issues:
+                st.warning(issue)
     st.link_button("Abrir pasta no Drive", data["sources"]["project_folder"], use_container_width=True)
     st.info("Painel em desenvolvimento. Nenhum voo, imóvel ou passeio foi reservado.")
 
@@ -166,14 +190,14 @@ if page == "Visão geral":
       <h2>Do início da nossa lua de mel às semanas vivendo na Europa.</h2>
       <p>Uma viagem para explorar, viver e decidir com tranquilidade.</p></div></div>''',unsafe_allow_html=True)
     kpis=st.columns(4)
-    for col,(lab,val) in zip(kpis,[("Casamento","04/09/2027"),("Permanência proposta","65–75 dias"),
-                                    ("Viajantes","2 pessoas"),("Tetos de orçamento","R$ 60k / 70k")]):
+    for col,(lab,val) in zip(kpis,[("Casamento",data["wedding_date"]),("Permanência proposta",f"{data['duration_min_days']}–{data['duration_max_days']} dias"),
+                                    ("Viajantes",f"{data['travelers']} pessoas"),("Tetos de orçamento","R$ 60k / 70k")]):
         with col: st.metric(lab,val)
     col1,col2=st.columns([1.7,1],gap="large")
     with col1:
         section("Nosso mapa")
         map_view([p for p in data["places"] if p["id"] in {"roma","maiori","napoles","mulhouse","strasbourg","interlaken","luxemburgo","freiburg"}],390)
-        st.caption("Itália é a etapa inicial proposta; Mulhouse/Strasbourg são candidatas e passeios internacionais ainda não estão confirmados.")
+        st.caption("Mapa de cidades de referência: mudanças de status refletem apenas decisões aprovadas no Drive; atrações e viagens não são reservas.")
     with col2:
         section("Orçamento em uma olhada")
         mini_budget()
@@ -196,6 +220,7 @@ if page == "Visão geral":
 elif page == "Mapa & destinos":
     overline("Explorar nossa geografia")
     st.title("Mapa & destinos")
+    st.caption("Catálogo geográfico do snapshot; uma cidade-base aprovada no D-004 muda de marcador automaticamente. As demais atrações não são lidas de rotas em tempo real.")
     st.write("Explore destinos propostos, cidades-base em avaliação e passeios possíveis. Use os filtros para montar sua visão.")
     statuses=st.multiselect("Situação", list(STATUS_LABEL.keys()), default=list(STATUS_LABEL.keys()),format_func=lambda x: STATUS_LABEL[x])
     countries=st.multiselect("Países", sorted(set(p["country"] for p in data["places"])),default=sorted(set(p["country"] for p in data["places"])))
@@ -209,7 +234,7 @@ elif page == "Mapa & destinos":
 elif page == "Roteiro":
     overline("Etapas da viagem")
     st.title("Roteiro & calendário")
-    note("Cronograma ilustrativo. Apenas o casamento em 04/09/2027 é uma data fixa; não existem passagens ou hospedagens emitidas.")
+    note("Cronograma da aba 04 do Excel oficial." if sync_sources['finance']['status'] == 'live' else "Cronograma histórico do snapshot. Apenas o casamento é data fixa; não existem reservas confirmadas.")
     for entry in data["timeline"]:
         st.markdown(f"<div class='timeline-step'><small>{escape(entry['period'])} · {escape(entry['status'].upper())}</small>"
                     f"<br><b>{escape(entry['stage'])}</b><br>{escape(entry['details'])}</div>",unsafe_allow_html=True)
@@ -219,7 +244,7 @@ elif page == "Roteiro":
 elif page == "Orçamento":
     overline("Controle financeiro · dois viajantes")
     st.title("Orçamento & cenários")
-    note("Números obtidos de simulações de 14/11/2026. O orçamento total já inclui reserva emergencial; não duplicar categorias. Fórmulas do Excel não são recalculadas aqui.")
+    note("Valores calculados das premissas vigentes da aba 03 do Excel, conferidos com o cache da aba 02. São estimativas, não cotações. Reserva já incluída." if sync_sources['finance']['status'] == 'live' else "Números do snapshot histórico de 14/11/2026. Reserva já incluída. Não usar como tarifa real de 2027.")
     choice=st.radio("Cenário base",["60k","70k"],format_func=lambda x:"R$ 60 mil · ~65 dias" if x=="60k" else "R$ 70 mil · ~70 dias",horizontal=True)
     scenario=get_scenario(data,choice)
     c1,c2,c3=st.columns(3)
@@ -250,7 +275,7 @@ elif page == "Orçamento":
 elif page == "Pesquisas & decisões":
     overline("Registro do planejamento")
     st.title("Pesquisas, decisões e pendências")
-    st.caption("Decisões e pendências: leitura do Drive com cache de até 5 minutos." if sync_status == "live" else "Dados locais históricos; sincronização indisponível.")
+    st.caption("Decisões e pendências: leitura atualizada do Drive (cache de até 5 min)." if sync_status == "live" else "Dados locais históricos; sincronização não configurada ou indisponível.")
     section("Decisões")
     for d in data["decisions"]:
         with st.expander(f"{d['id']} · {d['title']} · {d['status']}"):
