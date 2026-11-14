@@ -15,6 +15,8 @@ from city_market import load_market, observed_rent_summary, example_train_couple
 from city_research_round2 import load_round2
 from finance_lifestyle import FRENCH_BUDGET, audit_subtotals, lifestyle_outcome
 from itinerary_planner import load_itinerary, select_outings, basket_totals, visible_map_places
+from catalog import build_catalog, filter_catalog
+from unified_budget import resolve_french_budget, scenario_total
 
 st.set_page_config(page_title="Nossa Europa 2027", page_icon="🌍", layout="wide", initial_sidebar_state="expanded")
 data = load_data()
@@ -626,18 +628,18 @@ elif page == "Mapa & destinos":
                 "<div class='page-title'>Mapa & destinos</div>"
                 "<div class='page-subtitle'>Explore as cidades do planejamento, compare alternativas e "
                 "acompanhe o que foi proposto ou ainda está em avaliação.</div>", unsafe_allow_html=True)
-    countries_all = sorted(set(p["country"] for p in data["places"]))
+    countries_all = sorted(set(p["country"] for p in build_catalog(data["places"], load_itinerary())))
     c1, c2, c3 = st.columns(3, gap="small")
     with c1:
         st.markdown(f"<div class='page-stat page-stat--blue'><div class='page-stat__label'>Destinos mapeados</div>"
-                    f"<div class='page-stat__value'>{len(data['places'])}</div>"
+                    f"<div class='page-stat__value'>{len(build_catalog(data['places'], load_itinerary()))}</div>"
                     "<div class='page-stat__hint'>Referências geográficas</div></div>", unsafe_allow_html=True)
     with c2:
         st.markdown(f"<div class='page-stat page-stat--mint'><div class='page-stat__label'>Países</div>"
                     f"<div class='page-stat__value'>{len(countries_all)}</div>"
                     "<div class='page-stat__hint'>Candidatos e passeios</div></div>", unsafe_allow_html=True)
     with c3:
-        candidates = sum(p["status"] == "candidata" for p in data["places"])
+        candidates = sum(p["status"] == "candidata" for p in build_catalog(data["places"], load_itinerary()))
         st.markdown(f"<div class='page-stat page-stat--cream'><div class='page-stat__label'>Alternativas em avaliação</div>"
                     f"<div class='page-stat__value'>{candidates}</div>"
                     "<div class='page-stat__hint'>Sem escolha definitiva</div></div>", unsafe_allow_html=True)
@@ -650,11 +652,16 @@ elif page == "Mapa & destinos":
         statuses = st.multiselect("Etapa de decisão", list(STATUS_LABEL.keys()),
                                   default=list(STATUS_LABEL.keys()), format_func=lambda key: STATUS_LABEL[key],
                                   key="map_statuses")
-    current = select_places(data["places"], countries, statuses)
+    itinerary_catalog = load_itinerary()
+    catalog = build_catalog(data["places"], itinerary_catalog)
+    current = filter_catalog(catalog, countries=countries, statuses=statuses)
     st.markdown(f"<div class='page-filter-hint'>{len(current)} destinos encontrados · "
                 "Os pontos não representam reservas, trajetos ou disponibilidade.</div>",
                 unsafe_allow_html=True)
-    map_view(current, 460, show_labels=False)
+    if current:
+        map_view(current, 460, show_labels=False)
+    else:
+        st.info("Nenhum ponto atende aos filtros. Reative uma seleção para exibir destinos.")
     st.caption("Passe o cursor sobre um ponto para ver o nome e a classificação. "
                "Os marcadores são referências geográficas, não rotas de transporte.")
 
@@ -673,12 +680,14 @@ elif page == "Mapa & destinos":
                                 f"<div class='page-panel__meta'>Duração: {escape(place['duration'])}</div></div>",
                                 unsafe_allow_html=True)
                     source_url = data["sources"].get(place.get("source", ""))
+                    if place.get("source") == "itinerary_research_2026":
+                        source_url = "https://github.com/clevertondecker/europe-trip/blob/main/data/itinerary_options_2027.json"
                     if source_url:
                         st.link_button("Consultar fonte", source_url, use_container_width=True)
     else:
         st.info("Nenhum destino corresponde aos filtros. Selecione mais países ou etapas.")
     st.markdown("<div class='page-alert page-alert--neutral'>"
-                "Cidades e coordenadas vêm do catálogo histórico; a decisão sobre uma cidade-base francesa "
+                "Cidades e coordenadas vêm do catálogo unificado de pesquisas históricas; a decisão sobre uma cidade-base francesa "
                 "pode atualizar o status a partir do documento do Drive. Os demais pontos não são atualizados "
                 "automaticamente por cotações ou reservas.</div>", unsafe_allow_html=True)
 
