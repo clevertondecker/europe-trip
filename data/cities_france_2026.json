@@ -1,0 +1,226 @@
+{
+  "source": {
+    "name": "Europa_2027_COMPLETO_ORGANIZADO.xlsm",
+    "sheets": [
+      "11 RANK CIDADES",
+      "12 PESOS CIDADES",
+      "13 SCORE CIDADES",
+      "15 IMÓVEIS HISTÓRICOS"
+    ],
+    "period": "novembro de 2026",
+    "url": "https://drive.google.com/file/d/1LeTrUWLLzIe_mZS26gMt_KMnnX4jelZ4/view",
+    "qualification": "Notas editoriais e envelopes históricos; não são preços confirmados nem disponibilidade para setembro-novembro/2027."
+  },
+  "criteria": [
+    {
+      "id": "attractions",
+      "label": "Acesso a atrações e países",
+      "explanation": "Destinos viáveis, sem equiparar número de fronteiras a qualidade dos passeios."
+    },
+    {
+      "id": "rent",
+      "label": "Economia do aluguel",
+      "explanation": "Nota editorial histórica, não uma oferta garantida para 55–65 noites."
+    },
+    {
+      "id": "rail",
+      "label": "Transporte interurbano",
+      "explanation": "Rede e custos entre cidades; horários futuros não confirmados."
+    },
+    {
+      "id": "nature",
+      "label": "Natureza e montanhas",
+      "explanation": "Acesso a paisagens e trilhas, dependente de sazonalidade."
+    },
+    {
+      "id": "urban",
+      "label": "Vida urbana",
+      "explanation": "Cafés, restaurantes e cotidiano, não métricas estatísticas."
+    },
+    {
+      "id": "carfree",
+      "label": "Mobilidade sem carro",
+      "explanation": "Viabilidade de viver a pé e de transporte público."
+    }
+  ],
+  "presets": [
+    {
+      "id": "balanced",
+      "label": "Perfil equilibrado",
+      "weights": {
+        "attractions": 25,
+        "rent": 20,
+        "rail": 20,
+        "nature": 15,
+        "urban": 10,
+        "carfree": 10
+      }
+    },
+    {
+      "id": "economy",
+      "label": "Priorizar aluguel",
+      "weights": {
+        "attractions": 15,
+        "rent": 35,
+        "rail": 25,
+        "nature": 10,
+        "urban": 10,
+        "carfree": 5
+      }
+    },
+    {
+      "id": "nature",
+      "label": "Priorizar natureza",
+      "weights": {
+        "attractions": 20,
+        "rent": 15,
+        "rail": 15,
+        "nature": 30,
+        "urban": 10,
+        "carfree": 10
+      }
+    }
+  ],
+  "cities": [
+    {
+      "id": "mulhouse",
+      "name": "Mulhouse",
+      "scores": {
+        "attractions": 4.5,
+        "rent": 4.3,
+        "rail": 4.5,
+        "nature": 4.8,
+        "urban": 3.2,
+        "carfree": 4.5
+      },
+      "reference_rent_eur": 980,
+      "range_eur": [
+        750,
+        1350
+      ],
+      "historic_score": 4.375,
+      "summary": "Alternativa econômica próxima de Basel, Colmar e Freiburg; confirmar a oferta real de imóvel e a vida social desejada.",
+      "advantages": [
+        "Acesso à região de Basel e EuroAirport",
+        "Referência histórica de aluguel relativamente menor"
+      ],
+      "risks": [
+        "Menor vida urbana na matriz editorial",
+        "Contratos de curta duração exigem confirmação"
+      ],
+      "sample_ads": [
+        {
+          "label": "Rue du Lieutenant Jean de Loisy · 40 m² · €750/mês (histórico)",
+          "url": "https://housinganywhere.com/room/ut1714632/fr/Mulhouse/rue-du-lieutenant-jean-de-loisy"
+        },
+        {
+          "label": "Rue des Franciscains · 48 m² · €1.350/mês (histórico)",
+          "url": "https://housinganywhere.com/room/ut1682493/fr/Mulhouse/rue-des-franciscains"
+        }
+      ]
+    },
+    {
+      "id": "strasbourg",
+      "name": "Strasbourg",
+      "scores": {
+        "attractions": 4.6,
+        "rent": 3.5,
+        "rail": 4.8,
+        "nature": 4,
+        "urban": 4.6,
+        "carfree": 4.9
+      },
+      "reference_rent_eur": 1130,
+      "range_eur": [
+        900,
+        1500
+      ],
+      "historic_score": 4.36,
+      "summary": "Boa vida urbana e ferroviária, com aluguel temporário potencialmente mais caro.",
+      "advantages": [
+        "Vida urbana e transporte sem carro bem avaliados",
+        "Rede ferroviária regional na matriz histórica"
+      ],
+      "risks": [
+        "Maior custo de aluguel estimado",
+        "Verificar custos e duração de contrato real"
+      ],
+      "sample_ads": [
+        {
+          "label": "Avenue de Colmar · 50 m² · €950/mês (histórico)",
+          "url": "https://housinganywhere.com/room/ut1190355/fr/Strasbourg/avenue-de-colmar"
+        },
+        {
+          "label": "Rue de la Ziegelau · 38 m² · €850/mês (histórico)",
+          "url": "https://housinganywhere.com/room/ut1693197/fr/Strasbourg/rue-de-la-ziegelau"
+        }
+      ]
+    },
+    {
+      "id": "metz",
+      "name": "Metz",
+      "scores": {
+        "attractions": 4.5,
+        "rent": 4.1,
+        "rail": 4.4,
+        "nature": 3.3,
+        "urban": 4.1,
+        "carfree": 4.6
+      },
+      "reference_rent_eur": 1000,
+      "range_eur": [
+        850,
+        1300
+      ],
+      "historic_score": 4.19,
+      "summary": "Base com acesso ao Luxemburgo e ao nordeste da França; validar logística aérea da viagem.",
+      "advantages": [
+        "Proximidade estratégica do Luxemburgo",
+        "Mobilidade sem carro favorável no ranking histórico"
+      ],
+      "risks": [
+        "Acesso às áreas alpinas menos conveniente",
+        "Anúncios adequados a dois meses ainda pendentes"
+      ],
+      "sample_ads": [
+        {
+          "label": "Rue du Maître Échevin · 80 m² · €1.250/mês (histórico)",
+          "url": "https://housinganywhere.com/room/ut1639224/fr/Metz/rue-du-ma-tre-chevin"
+        }
+      ]
+    },
+    {
+      "id": "nancy",
+      "name": "Nancy",
+      "scores": {
+        "attractions": 3.8,
+        "rent": 4.3,
+        "rail": 4,
+        "nature": 3.1,
+        "urban": 4.3,
+        "carfree": 4.3
+      },
+      "reference_rent_eur": 900,
+      "range_eur": [
+        700,
+        1150
+      ],
+      "historic_score": 3.935,
+      "summary": "Alternativa de custo moderado e vida urbana, com menor acesso à natureza na matriz histórica.",
+      "advantages": [
+        "Referência histórica de aluguel moderado",
+        "Boa oferta urbana no julgamento editorial"
+      ],
+      "risks": [
+        "Menor pontuação editorial de natureza",
+        "Verificar custos de aeroporto e contrato temporário"
+      ],
+      "sample_ads": [
+        {
+          "label": "Rue Christian Moench · 60 m² · €850/mês (histórico)",
+          "url": "https://housinganywhere.com/room/ut1360359/fr/Nancy/rue-christian-moench"
+        }
+      ]
+    }
+  ]
+}
