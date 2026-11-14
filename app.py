@@ -217,6 +217,33 @@ if page == "Visão geral":
                         f"<div class='home-kpi__detail'>{escape(detail)}</div></div>",
                         unsafe_allow_html=True)
 
+    st.markdown("<div class='page-section'>Situação atual do planejamento</div>",unsafe_allow_html=True)
+    tasks_done=sum(t.get("status")=="concluído" for t in data["tasks"])
+    tasks_total=len(data["tasks"])
+    open_decisions=sum(d["status"].casefold() in {"aberta","não decidida","nao decidida"}
+                       for d in data["decisions"])
+    sources_live=sum(v["status"]=="live" for v in sync_sources.values())
+    progress_cards=[
+        ("Pesquisas concluídas",f"{tasks_done}/{tasks_total}","Registro de tarefas no Drive"),
+        ("Decisões ainda abertas",str(open_decisions),"Aguardando definição"),
+        ("Fontes sincronizadas",f"{sources_live}/3","Docs e planilha do Drive"),
+        ("Reservas confirmadas","0","Nenhum compromisso registrado")
+    ]
+    for col,(label,value,detail) in zip(st.columns(4,gap="small"),progress_cards):
+        with col:
+            st.markdown("<div class='page-stat'>"
+                        f"<div class='page-stat__label'>{escape(label)}</div>"
+                        f"<div class='page-stat__value'>{escape(value)}</div>"
+                        f"<div class='page-stat__hint'>{escape(detail)}</div></div>",
+                        unsafe_allow_html=True)
+    action1,action2=st.columns(2,gap="medium")
+    with action1:
+        st.button("Continuar pelo orçamento →",use_container_width=True,
+                  key="home_next_budget",on_click=navigate_page,args=("Orçamento",))
+    with action2:
+        st.button("Ver pesquisas prioritárias →",use_container_width=True,
+                  key="home_next_tasks",on_click=navigate_page,args=("Pesquisas & decisões",))
+
     overview_left, overview_map, overview_budget = st.columns([1.06, 1.42, 1.08], gap="medium")
     with overview_left:
         st.markdown("<div class='home-overview-copy'><div class='home-section-label'>VISÃO DA VIAGEM</div>"
@@ -228,7 +255,8 @@ if page == "Visão geral":
 
     with overview_map:
         # The map displays real reference coordinates but no invented connecting route.
-        map_view([p for p in data["places"] if p["id"] in {"roma", "maiori", "mulhouse", "strasbourg"}], 190)
+        map_view([p for p in build_catalog(data["places"],load_itinerary())
+                  if p["id"] in {"rome","maiori","mulhouse","strasbourg"}],190)
         st.caption("Mapa de referência · cidades ainda em avaliação")
 
     with overview_budget:
@@ -242,7 +270,7 @@ if page == "Visão geral":
             "<div class='home-mini-budget'><div class='home-mini-budget__eyebrow'>◉ Resumo do orçamento</div>"
             f"<div class='home-mini-budget__amount'>{escape(money_brl(calc['total']))}</div>"
             f"<div class='home-mini-budget__track'><div class='home-mini-budget__fill' style='width:{used_pct:.1f}%'></div></div>"
-            f"<div class='home-mini-budget__foot'>Margem: {escape(money_brl(calc['balance']))} · estimativa histórica</div></div>",
+            f"<div class='home-mini-budget__foot'>Margem: {escape(money_brl(calc['balance']))} · {'premissas do Drive' if sync_sources['finance']['status']=='live' else 'snapshot histórico'}</div></div>",
             unsafe_allow_html=True)
         st.button("Ver orçamento completo →", use_container_width=True,
                   on_click=navigate_page, args=("Orçamento",), key="home_go_budget")
