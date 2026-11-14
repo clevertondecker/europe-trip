@@ -348,6 +348,40 @@ padding:17px 20px;margin:0 0 10px;}
 }
 @media(max-width:800px){.city-digest__metrics{grid-template-columns:1fr 1fr;}.city-digest{padding:15px;}}
 
+
+/* Comparador navigation: native Streamlit segmented control, prominent selection. */
+[data-testid="stSegmentedControl"]{
+  background:#E8F3FB !important;
+  border:1px solid #CFDFEB !important;
+  padding:9px !important;
+  border-radius:16px !important;
+  margin:12px 0 25px !important;
+}
+[data-testid="stSegmentedControl"] [role="radiogroup"]{
+  display:flex !important;
+  flex-wrap:wrap !important;
+  gap:8px !important;
+}
+[data-testid="stSegmentedControl"] button{
+  min-height:49px !important;
+  padding:11px 18px !important;
+  border-radius:11px !important;
+  font-size:.93rem !important;
+  font-weight:800 !important;
+}
+[data-testid="stSegmentedControl"] button[aria-checked="true"],
+[data-testid="stSegmentedControl"] button[aria-pressed="true"],
+[data-testid="stSegmentedControl"] [data-state="checked"]{
+  background:#153C53 !important;
+  color:white !important;
+  border-color:#153C53 !important;
+  box-shadow:0 4px 12px rgba(15,57,80,.18) !important;
+}
+[data-testid="stSegmentedControl"] button:focus-visible{
+  outline:3px solid #6EBBE2 !important;
+  outline-offset:2px;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -677,11 +711,24 @@ elif page == "Comparar cidades":
                 f"<div class='page-stat__hint'>{escape(info)}</div></div>",
                 unsafe_allow_html=True,
             )
-    tab_overview, tab_housing, tab_transport, tab_compare = st.tabs([
-        "◉ Visão rápida", "⌂ Moradia", "⇄ Transporte e custos", "⚖ Comparar e ajustar"
-    ])
+    # Native segmented control has its own selected-state visual; it does not rely
+    # on fragile CSS selectors for Streamlit tab internals.
+    sections = ["Visão rápida", "Moradia", "Transporte e custos", "Comparar e ajustar"]
+    active_section = st.segmented_control(
+        "Seção do comparador", sections, default="Visão rápida",
+        selection_mode="single", key="city_compare_section",
+        label_visibility="collapsed",
+        format_func=lambda section: {
+            "Visão rápida": "◉  Visão rápida",
+            "Moradia": "⌂  Moradia",
+            "Transporte e custos": "⇄  Transporte e custos",
+            "Comparar e ajustar": "⚖  Comparar e ajustar",
+        }[section],
+    )
+    if active_section is None:
+        active_section = "Visão rápida"
 
-    with tab_overview:
+    if active_section == "Visão rápida":
         st.markdown("<div class='page-section'>Quatro cidades, principais indicadores</div>",
                     unsafe_allow_html=True)
         st.caption("Aluguel: mediana de somente três anúncios observados em 2026, não média de mercado "
@@ -735,7 +782,7 @@ elif page == "Comparar cidades":
         st.caption("Use Moradia e Transporte para examinar evidências. "
                    "Use Comparar e ajustar para recalcular somente as notas editoriais de 2026.")
 
-    with tab_housing:
+    elif active_section == "Moradia":
         st.markdown("<div class='page-section'>Aluguéis observados por cidade</div>",
                     unsafe_allow_html=True)
         st.markdown(
@@ -782,7 +829,7 @@ elif page == "Comparar cidades":
                     f"Premissa logística: €{audit['alternative_logistics_rent_eur']}/mês. "
                     "São parâmetros diferentes, não duas cotações equivalentes.")
 
-    with tab_transport:
+    elif active_section == "Transporte e custos":
         st.markdown("<div class='page-section'>Passes urbanos publicados</div>",
                     unsafe_allow_html=True)
         pass_rows = [
@@ -836,7 +883,7 @@ elif page == "Comparar cidades":
             "</div>", unsafe_allow_html=True)
         st.link_button("Consultar origem da cesta no Drive", basket["source_url"])
 
-    with tab_compare:
+    elif active_section == "Comparar e ajustar":
         st.markdown("<div class='page-section'>Ranking de preferências históricas</div>",
                     unsafe_allow_html=True)
         st.caption("A pontuação de 0 a 5 vem de avaliações editoriais de 2026. "
