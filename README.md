@@ -56,3 +56,14 @@ Nova página **Comparar cidades**: Mulhouse, Strasbourg, Metz e Nancy com notas 
 O ranking não prevê disponibilidade, aluguel por 55–65 dias, internet, elegibilidade para contratos ou preços finais para 2027. Alterar sliders não edita o Drive e não muda o orçamento oficial.
 
 Para validar: `python -m unittest discover -s tests -v`; a rotina GitHub Actions executa os testes e a compilação.
+
+
+## Auditoria da confiabilidade das cidades (14/11/2026)
+As notas de Mulhouse, Strasbourg, Metz e Nancy são *históricas/editoriais*, não medições objetivas. Os valores de aluguel não são cotações para 55–65 noites após o casamento. Em 14/11/2026 nenhuma cidade possui 3 ofertas confirmadas para a janela 2027; o aplicativo exibe essa limitação separada do ranking de preferências.
+- [Prompt mestre de auditoria](PROMPT_AUDITORIA_CIDADES.md)
+- [Relatório detalhado e divergências da planilha](RELATORIO_AUDITORIA_CIDADES.md)
+- [Modelo obrigatório para nova cidade](TEMPLATE_NOVA_CIDADE.md)
+- [Critérios de auditoria e dados estruturados](data/city_research_audit_2026.json)
+- [Validação automática](city_research.py) e [testes](tests/test_city_research.py)
+
+A matriz histórica continua versionada e separada do Drive live; revisar manualmente quando novas fontes estiverem verificadas. O arquivo `city_research_audit_2026.json` não significa sincronização de anúncios em tempo real. Nunca transformar status de pesquisa em decisão oficial sem registrar aprovação no documento de decisões.
