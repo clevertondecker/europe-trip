@@ -360,7 +360,7 @@ if page == "Visão geral":
 
     with overview_budget:
         selected = st.radio("Cenário em estudo", ["60k", "70k"],
-                            format_func=lambda x: f"R$ {x} mil",
+                            format_func=lambda x: f"R$ {x[:-1]} mil",
                             horizontal=True, key="home_budget_choice")
         scenario = get_scenario(data, selected)
         calc = calculate_scenario(scenario)
