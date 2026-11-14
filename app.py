@@ -14,6 +14,7 @@ from city_research import city_readiness, load_audit
 from city_market import load_market, observed_rent_summary, example_train_couple_return
 from city_research_round2 import load_round2
 from finance_lifestyle import FRENCH_BUDGET, audit_subtotals, lifestyle_outcome
+from itinerary_planner import load_itinerary, select_outings, basket_totals, visible_map_places
 
 st.set_page_config(page_title="Nossa Europa 2027", page_icon="🌍", layout="wide", initial_sidebar_state="expanded")
 data = load_data()
@@ -406,7 +407,8 @@ def section(text: str) -> None:
     st.markdown(f'<div class="section-title">{escape(text)}</div>', unsafe_allow_html=True)
 
 
-def map_view(places: list[dict], height: int = 430, show_labels: bool = True) -> None:
+def map_view(places: list[dict], height: int = 430, show_labels: bool = True,
+             center: tuple[float, float] | None = None, zoom: float = 4.0) -> None:
     points = [dict(p, color=STATUS_COLORS[p["status"]], status_label=STATUS_LABEL[p["status"]]) for p in places]
     if not points:
         st.info("Nenhum destino corresponde aos filtros.")
@@ -421,7 +423,8 @@ def map_view(places: list[dict], height: int = 430, show_labels: bool = True) ->
         get_size=13, size_min_pixels=10, get_color=[27, 53, 64],
         get_pixel_offset=[0, 15], get_text_anchor="'middle'", pickable=True,
     )
-    view = pdk.ViewState(latitude=45.3, longitude=10.1, zoom=4.0, min_zoom=2, max_zoom=14)
+    latitude, longitude = center if center is not None else (45.3, 10.1)
+    view = pdk.ViewState(latitude=latitude, longitude=longitude, zoom=zoom, min_zoom=2, max_zoom=14)
     deck = pdk.Deck(
         map_style="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
         initial_view_state=view, layers=[scatter, label] if show_labels else [scatter],
@@ -1057,43 +1060,205 @@ elif page == "Comparar cidades":
             st.link_button("Decisão D-004 no Drive", data["sources"]["decisions"])
 
 elif page == "Roteiro":
-    st.markdown("<div class='page-eyebrow'>PLANEJAMENTO · ETAPAS DA VIAGEM</div>"
-                "<div class='page-title'>Roteiro & calendário</div>"
-                "<div class='page-subtitle'>Da lua de mel na Itália até a temporada francesa. "
-                "As datas e durações, exceto o casamento, ainda são hipóteses de planejamento.</div>",
-                unsafe_allow_html=True)
-    finance_live = sync_sources["finance"]["status"] == "live"
-    c1,c2,c3 = st.columns(3, gap="small")
-    metrics = [
-        ("Casamento", "04/09/2027", "Data fixa"),
-        ("Duração prevista", f"{data['duration_min_days']}–{data['duration_max_days']} dias", "Estimativa para o casal"),
-        ("Etapa italiana", f"~{data['italy_days_approx']} dias", "Roma e Costa Amalfitana"),
+    itinerary = load_itinerary()
+    st.markdown(
+        "<div class='page-eyebrow'>NOSSA EUROPA · ITÁLIA → FRANÇA</div>"
+        "<div class='page-title'>Roteiro, destinos & deslocamentos</div>"
+        "<div class='page-subtitle'>Veja o que fazer em cada etapa, compare passeios e explore "
+        "o mapa. Valores de bilhetes são referências publicadas, não reservas para 2027.</div>",
+        unsafe_allow_html=True)
+    c1,c2,c3,c4=st.columns(4,gap="small")
+    trip_metrics=[
+        ("Casamento","04/09/2027","Data fixa"),
+        ("Viagem completa","65–75 dias","Duração em estudo"),
+        ("Itália","~10 dias","Roma + Costa Amalfitana"),
+        ("França","~55–65 dias","Base ainda em avaliação")
     ]
-    for col, (label, value, hint) in zip((c1,c2,c3), metrics):
+    for col,(label,val,hint) in zip((c1,c2,c3,c4),trip_metrics):
         with col:
-            st.markdown(f"<div class='page-stat page-stat--blue'>"
+            st.markdown("<div class='page-stat page-stat--blue'>"
                         f"<div class='page-stat__label'>{escape(label)}</div>"
-                        f"<div class='page-stat__value'>{escape(value)}</div>"
-                        f"<div class='page-stat__hint'>{escape(hint)}</div></div>", unsafe_allow_html=True)
-    source_label = ("Cronograma sincronizado: aba 04 do Excel no Drive" if finance_live
-                    else "Cronograma histórico do snapshot local — sincronização indisponível")
-    st.markdown(f"<div class='page-alert page-alert--neutral'>◷ {escape(source_label)}. "
-                "O roteiro é ilustrativo; não há passagens ou hospedagens emitidas.</div>",
+                        f"<div class='page-stat__value'>{escape(val)}</div>"
+                        f"<div class='page-stat__hint'>{escape(hint)}</div></div>",
+                        unsafe_allow_html=True)
+    st.markdown("<div class='page-alert page-alert--neutral'>"
+                "Plano em estudo: a ordem Itália → França está definida como direção de planejamento, "
+                "mas datas, cidade-base, hotéis e deslocamento Itália → França não foram reservados. "
+                "Férias iniciais de 20–30 dias; depois trabalho remoto, sujeito a validação de regras.</div>",
                 unsafe_allow_html=True)
-    st.markdown("<div class='page-section'>A jornada, etapa por etapa</div>", unsafe_allow_html=True)
-    for index, entry in enumerate(data["timeline"], start=1):
-        st.markdown(
-            f"<div class='page-timeline'><div class='page-timeline__number'>{index:02d}</div>"
-            "<div class='page-timeline__content'>"
-            f"<div class='page-timeline__period'>{escape(entry['period'])} · {escape(entry['status'].upper())}</div>"
-            f"<div class='page-timeline__stage'>{escape(entry['stage'])}</div>"
-            f"<div class='page-timeline__desc'>{escape(entry['details'])}</div></div></div>",
-            unsafe_allow_html=True)
-    c1,c2=st.columns(2)
-    with c1:
-        st.link_button("Ver decisões no Drive",data["sources"]["decisions"],use_container_width=True)
-    with c2:
-        st.link_button("Abrir cronograma financeiro",data["sources"]["spreadsheet"],use_container_width=True)
+
+    sections=["Visão geral","Itália e Costa Amalfitana","França e escapadas","Transportes e custos","Cronograma oficial"]
+    itinerary_section=st.segmented_control("Seção do roteiro",sections,default="Visão geral",
+                                           selection_mode="single",key="itinerary_section",
+                                           label_visibility="collapsed")
+    if itinerary_section is None:
+        itinerary_section="Visão geral"
+
+    def itinerary_map(phase: str, zoom: float, center: tuple[float,float], height: int=400) -> None:
+        # Convert research-place roles into existing project status colors; no fake route lines.
+        markers=[]
+        for point in visible_map_places(itinerary,phase):
+            status=("roteiro_proposto" if point["role"] in
+                    ("Cidade principal","Logística","Passeio desejado") else
+                    "candidata" if "Base candidata" in point["role"] else "opcional")
+            markers.append({**point,"status":status})
+        map_view(markers,height=height,show_labels=False,zoom=zoom,center=center)
+
+    if itinerary_section == "Visão geral":
+        st.markdown("<div class='page-section'>A viagem em quatro momentos</div>",unsafe_allow_html=True)
+        steps=[
+            ("01","Lua de mel na Itália","~10 dias","Roma (3–4 dias), Costa Amalfitana e passeios de ferry; bases Salerno/Maiori em avaliação."),
+            ("02","Mudança para França","Deslocamento a cotar","Saída via Nápoles/Roma até a cidade francesa a decidir, com bagagens."),
+            ("03","Instalação e férias","3–5 dias + passeios","Organizar apartamento/internet e aproveitar os Alpes e países vizinhos durante as férias."),
+            ("04","Rotina francesa e retorno","Últimas semanas","Trabalho remoto, lazer em fins de semana e retorno ao Brasil ainda sem bilhete.")
+        ]
+        for num,title,duration,detail in steps:
+            st.markdown(
+                "<div class='page-timeline'>"
+                f"<div class='page-timeline__number'>{num}</div>"
+                "<div class='page-timeline__content'>"
+                f"<div class='page-timeline__period'>{escape(duration.upper())}</div>"
+                f"<div class='page-timeline__stage'>{escape(title)}</div>"
+                f"<div class='page-timeline__desc'>{escape(detail)}</div></div></div>",
+                unsafe_allow_html=True)
+        st.markdown("<div class='page-section'>Mapa de referências por região</div>",unsafe_allow_html=True)
+        italy_map,france_map=st.columns(2,gap="large")
+        with italy_map:
+            st.markdown("**Itália · Roma e Costa Amalfitana**")
+            itinerary_map("italy",6.5,(40.98,13.7),320)
+        with france_map:
+            st.markdown("**França e países próximos**")
+            itinerary_map("france",5.6,(48.05,7.1),320)
+        st.caption("Mapas de pontos de interesse, NÃO trajetos contratados nem duração porta a porta.")
+
+    elif itinerary_section == "Itália e Costa Amalfitana":
+        st.markdown("<div class='page-section'>Roma e Costa Amalfitana</div>",unsafe_allow_html=True)
+        itinerary_map("italy",6.5,(40.98,13.7),390)
+        st.caption("Roma 3–4 dias; costa 5–6 dias dentro da etapa de aproximadamente 10 dias. "
+                   "Portos, ferry e clima exigem confirmação para setembro/2027.")
+        coast_base=st.radio("Onde ficar na Costa Amalfitana?",["salerno","maiori"],
+                            format_func=lambda x:"Salerno · base prática" if x=="salerno"
+                            else "Maiori · base à beira-mar",horizontal=True,key="route_italy_base")
+        available=select_outings(itinerary,"italy",coast_base)
+        for outing in available:
+            fare=(f"€ {outing['price_eur_person_leg'] * outing['legs'] * 2:.2f} / casal"
+                  if outing["price_eur_person_leg"] is not None else "A cotar")
+            time_info=(f"{outing['duration_minutes_one_way']} min/trecho (sem espera)"
+                       if outing["duration_minutes_one_way"] is not None else "Tempo a cotar")
+            st.markdown(
+                "<div class='page-panel'><div class='page-panel__title'>"
+                f"{escape(outing['title'])}</div><div class='page-panel__desc'>"
+                f"🚢 {escape(outing['mode'])} · {escape(time_info)} · "
+                f"<strong>{escape(fare)}</strong></div>"
+                f"<div class='page-panel__meta'>{escape(outing['notes'])}</div></div>",
+                unsafe_allow_html=True)
+            st.link_button("Consultar operadora / atração",outing["source_url"])
+        st.markdown("<div class='city-fact city-fact--warn'><strong>Reservas ainda necessárias</strong>"
+                    "<p>Hospedagem e bilhetes para 2027, transporte Roma → costa, deslocamento ao porto, "
+                    "Capri, ingressos e bagagens. A tarifa Travelmar é por pessoa em 2026; "
+                    "ela não inclui transporte até o ferry nem eventuais mudanças de rota.</p></div>",
+                    unsafe_allow_html=True)
+        st.link_button("Horários Travelmar 2026",itinerary["sources"]["travelmar_schedule"])
+
+    elif itinerary_section == "França e escapadas":
+        st.markdown("<div class='page-section'>Passeios a partir da nossa futura base</div>",
+                    unsafe_allow_html=True)
+        itinerary_map("france",5.6,(48.05,7.1),390)
+        french_base=st.selectbox("Cidade-base para explorar (não é escolha definitiva)",
+                                  ["mulhouse","strasbourg","metz","nancy"],
+                                  format_func=lambda x:x.capitalize(),
+                                  key="route_france_base")
+        options=select_outings(itinerary,"france",french_base)
+        for outing in options:
+            price=outing["price_eur_person_leg"]
+            cost=("Sem bilhete cotado" if price is None else
+                  f"{outing['currency']} {price*outing['legs']*2:.2f} / casal")
+            time=(str(outing["duration_minutes_one_way"])+" min/trecho"
+                  if outing["duration_minutes_one_way"] is not None else "Tempo total a verificar")
+            st.markdown(
+                "<div class='page-panel'><div class='page-panel__title'>"
+                f"{escape(outing['title'])}</div>"
+                f"<div class='page-panel__desc'>{escape(outing['mode'])} · "
+                f"{escape(time)} · <strong>{escape(cost)}</strong></div>"
+                f"<div class='page-panel__meta'>{escape(outing['notes'])}</div></div>",
+                unsafe_allow_html=True)
+            st.link_button("Ver fonte / operador",outing["source_url"])
+        st.markdown("<div class='city-fact city-fact--info'><strong>Alpes suíços precisam de planejamento próprio</strong>"
+                    "<p>Oeschinensee é uma viagem sazonal e pode exigir pernoite. "
+                    "A tarifa do teleférico não inclui trem desde a base francesa. "
+                    "Priorizar as montanhas durante as férias e confirmar o clima e a operação em 2027.</p></div>",
+                    unsafe_allow_html=True)
+
+    elif itinerary_section == "Transportes e custos":
+        st.markdown("<div class='page-section'>Simulador de passeios para o casal</div>",
+                    unsafe_allow_html=True)
+        a,b=st.columns(2,gap="medium")
+        with a:
+            phase=st.radio("Etapa",["italy","france"],format_func=lambda x:"Itália" if x=="italy" else "França",
+                           horizontal=True,key="route_cost_phase")
+        with b:
+            choices=["salerno","maiori"] if phase=="italy" else ["mulhouse","strasbourg","metz","nancy"]
+            base=st.selectbox("Base de comparação",choices,format_func=lambda x:x.capitalize(),
+                              key=f"route_cost_base_{phase}")
+        available=select_outings(itinerary,phase,base)
+        selected=st.multiselect("Escolha os passeios a incluir",
+                                [x["id"] for x in available],
+                                format_func=lambda x:next(o["title"] for o in available if o["id"]==x),
+                                default=[],key=f"route_cost_options_{phase}_{base}")
+        subtotal=basket_totals(available,selected)
+        eur=subtotal["known_ticket_subtotals"]["EUR"]
+        chf=subtotal["known_ticket_subtotals"]["CHF"]
+        p1,p2,p3=st.columns(3,gap="medium")
+        for col,(title,value,detail) in zip((p1,p2,p3),[
+            ("Bilhetes EUR conhecidos",f"€ {eur:.2f}","Tarifas publicadas, condicionais"),
+            ("Bilhetes CHF conhecidos",f"CHF {chf:.2f}","Não convertido em EUR"),
+            ("Passeios sem preço",str(len(subtotal["unpriced"])),"Ainda precisam de cotação")
+        ]):
+            with col:
+                st.markdown("<div class='page-stat page-stat--mint'>"
+                            f"<div class='page-stat__label'>{escape(title)}</div>"
+                            f"<div class='page-stat__value'>{escape(value)}</div>"
+                            f"<div class='page-stat__hint'>{escape(detail)}</div></div>",
+                            unsafe_allow_html=True)
+        if subtotal["discount_conditional"]:
+            st.warning("Parte das tarifas de trem exige Carte Fluo (não incluída): "
+                       + ", ".join(subtotal["discount_conditional"]))
+        if subtotal["unpriced"]:
+            st.info("Sem preço completo: "+", ".join(subtotal["unpriced"]))
+        st.markdown("<div class='city-fact city-fact--warn'><strong>Este não é o orçamento total dos passeios</strong>"
+                    "<p>O cálculo soma SOMENTE os bilhetes com tarifa histórica publicada "
+                    "para duas pessoas e pernas informadas. Não inclui refeições, hospedagem, "
+                    "transfers, ingressos não cotados, impostos ou descontos elegíveis. "
+                    "EUR e CHF não são somados entre si. Não adicionar automaticamente ao orçamento "
+                    "oficial: a rubrica passeios da França já tem verba prevista.</p></div>",
+                    unsafe_allow_html=True)
+        with st.expander("Ver tarifas e fontes de cada opção"):
+            for entry in available:
+                amount=("A cotar" if entry["price_eur_person_leg"] is None
+                        else f"{entry['currency']} {entry['price_eur_person_leg']:.2f} / pessoa "
+                        f"{'ida e volta' if entry['fare_kind']=='roundtrip_price' else '/ trecho'}")
+                st.markdown(f"**{escape(entry['title'])}** · {escape(amount)}")
+                st.caption(entry["season"]+" · "+entry["notes"])
+                st.link_button("Abrir fonte",entry["source_url"])
+
+    elif itinerary_section == "Cronograma oficial":
+        finance_live=sync_sources["finance"]["status"]=="live"
+        st.markdown("<div class='page-section'>Cronograma do projeto</div>",unsafe_allow_html=True)
+        st.caption("Origem: aba 04 do Excel no Drive" if finance_live
+                   else "Mostrando snapshot de referência: falha na sincronização do Excel")
+        for idx,entry in enumerate(data["timeline"],start=1):
+            st.markdown(
+                f"<div class='page-timeline'><div class='page-timeline__number'>{idx:02d}</div>"
+                "<div class='page-timeline__content'>"
+                f"<div class='page-timeline__period'>{escape(entry['period'])} · {escape(entry['status'].upper())}</div>"
+                f"<div class='page-timeline__stage'>{escape(entry['stage'])}</div>"
+                f"<div class='page-timeline__desc'>{escape(entry['details'])}</div></div></div>",
+                unsafe_allow_html=True)
+        col1,col2=st.columns(2)
+        with col1:
+            st.link_button("Documento de decisões no Drive",data["sources"]["decisions"],use_container_width=True)
+        with col2:
+            st.link_button("Planilha do cronograma no Drive",data["sources"]["spreadsheet"],use_container_width=True)
 
 elif page == "Orçamento":
     st.markdown("<div class='page-eyebrow'>PLANEJAMENTO FINANCEIRO · DOIS VIAJANTES</div>"
