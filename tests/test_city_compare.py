@@ -1,6 +1,6 @@
 """Regression tests for historical, non-binding French city comparison."""
 import unittest
-from city_compare import get_preset, load_cities, normalized_weights, rank_cities, score_city
+from city_compare import get_preset, initialize_weight_state, load_cities, normalized_weights, rank_cities, score_city
 
 class CityCompareTests(unittest.TestCase):
     @classmethod
@@ -31,6 +31,33 @@ class CityCompareTests(unittest.TestCase):
         self.assertEqual(score, city["scores"]["nature"])
         self.assertEqual(city["scores"], original)
         self.assertNotEqual(score, score_city(city, normalized_weights(baseline, self.ids)))
+
+    def test_initial_slider_weights_and_return_navigation(self):
+        preset = get_preset(self.data, "balanced")
+        state = {}
+        initialize_weight_state(state, "balanced", preset)
+        self.assertEqual([state[f"city_weight_{key}"] for key in self.ids],
+                         [25, 20, 20, 15, 10, 10])
+        # Simulate Streamlit removing widget keys when navigating elsewhere.
+        for key in self.ids:
+            del state[f"city_weight_{key}"]
+        initialize_weight_state(state, "balanced", preset)
+        self.assertEqual(sum(state[f"city_weight_{key}"] for key in self.ids), 100)
+
+    def test_profile_change_updates_slider_weights(self):
+        state = {}
+        initialize_weight_state(state, "balanced", get_preset(self.data, "balanced"))
+        initialize_weight_state(state, "nature", get_preset(self.data, "nature"))
+        self.assertEqual(state["city_weight_nature"], 30)
+        self.assertEqual(sum(state[f"city_weight_{key}"] for key in self.ids), 100)
+
+    def test_manual_adjustments_survive_rerun(self):
+        state = {}
+        preset = get_preset(self.data, "balanced")
+        initialize_weight_state(state, "balanced", preset)
+        state["city_weight_rent"] = 45
+        initialize_weight_state(state, "balanced", preset)
+        self.assertEqual(state["city_weight_rent"], 45)
 
     def test_zero_weights_rejected(self):
         with self.assertRaises(ValueError):
