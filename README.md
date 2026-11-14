@@ -46,3 +46,13 @@ streamlit run app.py
 ```
 
 O script usa apenas Python padrão para inspecionar o ZIP/OOXML do XLSM e o Google Drive API para buscar os arquivos. Ele nunca grava no XLSM.
+
+## Evolução 1 — Comparador de cidades francesas
+
+Nova página **Comparar cidades**: Mulhouse, Strasbourg, Metz e Nancy com notas históricas 0–5 (arquivo `data/cities_france_2026.json`), calculadora de ranking com pesos ajustáveis e três perfis originais do modelo financeiro. Exibe comparação lado a lado, envelopes históricos de aluguel e links de pesquisas de 2026.
+
+**Fontes e governança:** abas 11, 12, 13 e 15 de `Europa_2027_COMPLETO_ORGANIZADO.xlsm`, com cópia editorial de referência versionada no GitHub. Essas abas históricas NÃO fazem parte da sincronização automática atualmente estabelecida (que lê decisões, pendências e as abas operacionais 02–04 do Excel). Para atualizar as notas editoriais ou anúncios históricos, é necessário revisar a fonte e este arquivo JSON no repositório. Se D-004 do documento de decisões continuar "Não decidida", a página jamais deve declarar uma vencedora oficial.
+
+O ranking não prevê disponibilidade, aluguel por 55–65 dias, internet, elegibilidade para contratos ou preços finais para 2027. Alterar sliders não edita o Drive e não muda o orçamento oficial.
+
+Para validar: `python -m unittest discover -s tests -v`; a rotina GitHub Actions executa os testes e a compilação.
