@@ -9,7 +9,7 @@ DATA_FILE = Path(__file__).resolve().parent / "data" / "city_market_observations
 def validate_market(data: dict) -> None:
     if not 55 <= data["planned_nights_min"] <= data["planned_nights_max"] <= 75:
         raise ValueError("Janela planejada inválida")
-    if data["travelers"] != 2 or len(data["cities"]) != 4:
+    if data["travelers"] != 2 or len(data["cities"]) < 4:
         raise ValueError("Escopo das cidades ou de viajantes inválido")
     ids = set()
     for city in data["cities"]:
