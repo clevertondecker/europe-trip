@@ -478,6 +478,12 @@ def navigate_page(destination: str) -> None:
     """Navigation from homepage controls, applied before the radio on rerun."""
     st.session_state["main_navigation"] = destination
 
+def simulate_city_in_budget(city_name: str) -> None:
+    """Carry a hypothetical base to the finance page, without approving D-004."""
+    st.session_state["unified_city"] = city_name
+    st.session_state["unified_override_rent"] = True
+    st.session_state["main_navigation"] = "Orçamento"
+
 
 with st.sidebar:
     st.markdown("""<div class='sidebar-brand'>
@@ -778,6 +784,33 @@ elif page == "Comparar cidades":
                         unsafe_allow_html=True,
                     )
 
+
+        st.markdown("<div class='page-section'>Custos ilustrativos do mesmo estilo de vida</div>",
+                    unsafe_allow_html=True)
+        st.caption("Cenário de R$70 mil, casal, 60 dias na França, duas saídas de €60 por semana "
+                   "e câmbio hipotético R$6,30/€. Substitui apenas o aluguel e a verba de restaurantes "
+                   "pelas hipóteses indicadas; não inclui taxas adicionais de locação nem comprova disponibilidade.")
+        example_scenario=get_scenario(data,"70k")
+        example_split=resolve_french_budget(example_scenario,sync_sources["finance"]["status"]=="live")
+        quick=[]
+        for city in city_data["cities"]:
+            guess=scenario_total(example_scenario,example_split,french_days=example_split["french_days"],
+                    outings_weekly=2,outing_couple_eur=60,fx_brl_per_eur=6.3,
+                    rent_override_eur_month=city["reference_rent_eur"])
+            quick.append({"Cidade":city["name"],
+                          "Aluguel hipotético €/mês":city["reference_rent_eur"],
+                          "Viagem simulada (R$)":guess["total"],
+                          "Margem até o teto (R$)":guess["margin"],
+                          "Confiabilidade":"Referência histórica — não cotada"})
+        st.dataframe(pd.DataFrame(quick),hide_index=True,use_container_width=True,
+                     column_config={
+                        "Aluguel hipotético €/mês":st.column_config.NumberColumn(format="€ %.0f"),
+                        "Viagem simulada (R$)":st.column_config.NumberColumn(format="R$ %.0f"),
+                        "Margem até o teto (R$)":st.column_config.NumberColumn(format="R$ %.0f"),
+                     })
+        st.caption("Esta comparação é uma análise de sensibilidade, não uma previsão verificável do "
+                   "custo completo. O indicador de confiabilidade para reserva continua insuficiente.")
+
         st.markdown("<div class='page-section'>O que já sabemos — e o que não sabemos</div>",
                     unsafe_allow_html=True)
         known, unknown = st.columns(2, gap="medium")
@@ -1053,6 +1086,9 @@ elif page == "Comparar cidades":
                         "<ul>" + "".join(f"<li>{escape(value)}</li>" for value in
                                         (city["risks"] + audit_by_name[city_name]["risks"][:1])) +
                         "</ul></div>", unsafe_allow_html=True)
+                    st.button(f"Simular {city_name} no orçamento →",key=f"city_budget_{city_name}",
+                              use_container_width=True,on_click=simulate_city_in_budget,
+                              args=(city_name,))
                     with st.expander(f"Exemplos históricos em {city_name}"):
                         for ad in city["sample_ads"]:
                             st.link_button(ad["label"], ad["url"], use_container_width=True)
