@@ -14,7 +14,9 @@ class CityComparisonLayoutTests(unittest.TestCase):
     def test_four_navigation_tabs(self):
         for title in ("Visão rápida", "Moradia", "Transporte e custos", "Comparar e ajustar"):
             self.assertIn(title, self.page)
-        self.assertIn("st.tabs(", self.page)
+        self.assertIn("st.segmented_control(", self.page)
+        self.assertIn("active_section", self.page)
+        self.assertNotIn("st.tabs(", self.page)
 
     def test_cards_and_tables_have_evidence_labels(self):
         for field in ("Mediana de 3 anúncios", "Cotações válidas para 2027",
