@@ -10,6 +10,7 @@ import streamlit as st
 from data_model import STATUS_COLORS, STATUS_LABEL, calculate_scenario, get_scenario, load_data, money_brl, select_places
 from drive_sync import load_live_updates, update_map_places
 from city_compare import get_preset, initialize_weight_state, load_cities, normalized_weights, rank_cities
+from city_research import city_readiness, load_audit
 
 st.set_page_config(page_title="Nossa Europa 2027", page_icon="🌍", layout="wide", initial_sidebar_state="expanded")
 data = load_data()
@@ -572,6 +573,8 @@ elif page == "Mapa & destinos":
 
 elif page == "Comparar cidades":
     city_data = load_cities()
+    city_audit = load_audit()
+    audit_by_name = {item["name"]: item for item in city_audit["cities"]}
     criteria_ids = [criterion["id"] for criterion in city_data["criteria"]]
     st.markdown("<div class='page-eyebrow'>FRANÇA · ESCOLHA DA CIDADE-BASE</div>"
                 "<div class='page-title'>Onde vamos morar na França?</div>"
@@ -579,10 +582,48 @@ elif page == "Comparar cidades":
                 "Altere as prioridades para entender os trade-offs; nenhuma cidade foi aprovada ainda.</div>",
                 unsafe_allow_html=True)
     st.markdown("<div class='city-compare-caveat'>"
-                "As notas (0–5) são avaliações editoriais históricas de novembro/2026, "
-                "não indicadores oficiais de qualidade de vida. Aluguéis são envelopes de planejamento "
-                "em €/mês, e não ofertas disponíveis para setembro–novembro/2027. "
-                "A mudança dos pesos NÃO altera o Drive, a decisão D-004 nem o orçamento global.</div>",
+                "Auditoria de 14/11/2026: as 4 cidades têm lacunas críticas. "
+                "Aluguéis e notas são referências históricas, NÃO preços verificáveis para "
+                "setembro–novembro/2027. Nenhuma cidade está pronta para reserva. "
+                "Alterar os pesos NÃO muda o Drive, a decisão D-004 nem o orçamento principal.</div>",
+                unsafe_allow_html=True)
+    st.markdown("<div class='page-section'>Estado da pesquisa e confiabilidade</div>",
+                unsafe_allow_html=True)
+    st.markdown("<div class='page-subtitle'>A pontuação abaixo mede preferências editoriais de 2026; "
+                "o selo de auditoria mede se existe base suficiente para uma decisão de locação em 2027. "
+                "São conceitos separados.</div>", unsafe_allow_html=True)
+    for first in range(0, len(city_audit["cities"]), 4):
+        for col, item in zip(st.columns(4, gap="small"), city_audit["cities"][first:first+4]):
+            with col:
+                readiness = city_readiness(item)
+                st.markdown(
+                    "<div class='page-panel'>"
+                    f"<div class='page-panel__title'>{escape(item['name'])}</div>"
+                    "<span class='page-chip page-chip--candidate'>Pesquisa insuficiente</span>"
+                    f"<div class='page-panel__desc'>"
+                    f"{readiness['eligible_quotes']} cotações elegíveis para 2027 · "
+                    f"{readiness['completed']}/{readiness['total']} requisitos comprovados</div>"
+                    "<div class='page-panel__meta'>Ranking histórico ≠ avaliação verificada</div></div>",
+                    unsafe_allow_html=True)
+    with st.expander("Padrão de pesquisa obrigatório para cidades novas", expanded=False):
+        st.caption("Adicionar cidade exige os mesmos requisitos, evidências e validações; "
+                   "sem comprovação, a cidade permanece com pesquisa incompleta.")
+        for index, gate in enumerate(city_audit["standards"], start=1):
+            st.markdown(f"**{index}. {escape(gate['label'])}**")
+            st.caption(gate["gate"])
+        st.link_button("Ver auditoria detalhada no GitHub",
+            "https://github.com/clevertondecker/europe-trip/blob/main/RELATORIO_AUDITORIA_CIDADES.md")
+    with st.expander("Contradições e lacunas por cidade", expanded=False):
+        for item in city_audit["cities"]:
+            st.markdown(f"**{escape(item['name'])}**")
+            st.caption(f"Referência de aluguel da matriz: €{item['historic_reference_rent_eur']}/mês · "
+                       f"Premissa de outra aba: €{item['alternative_logistics_rent_eur']}/mês. "
+                       "Nenhum dos valores representa cotação válida para 2027.")
+            for risk in item["risks"]:
+                st.markdown(f"- {escape(risk)}")
+            for source_url in item["source_urls"]:
+                st.link_button("Ver fonte", source_url)
+    st.markdown("<div class='page-section'>Preferências e ranking histórico</div>",
                 unsafe_allow_html=True)
     st.markdown("<div class='page-section'>Personalize suas prioridades</div>", unsafe_allow_html=True)
     profile = st.selectbox("Perfil de comparação", city_data["presets"],
