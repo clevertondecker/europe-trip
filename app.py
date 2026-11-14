@@ -1472,80 +1472,101 @@ elif page == "Orçamento":
                        use_container_width=True)
 
 elif page == "Pesquisas & decisões":
-    st.markdown("<div class='page-eyebrow'>CENTRAL DE PLANEJAMENTO</div>"
-                "<div class='page-title'>Pesquisas & decisões</div>"
-                "<div class='page-subtitle'>Acompanhe o que foi decidido e quais investigações "
-                "ainda precisam de atenção. O Google Drive continua como fonte oficial.</div>",unsafe_allow_html=True)
-    tasks = data["tasks"]
-    done = sum(t.get("status")=="concluído" for t in tasks)
-    c1,c2,c3=st.columns(3,gap="small")
-    summary=[
-        ("Pesquisas registradas",str(len(tasks)),"Tarefas no planejamento"),
-        ("Pendentes",str(len(tasks)-done),"Aguardando investigação"),
-        ("Concluídas",str(done),"Registradas no Drive"),
+    st.markdown("<div class='page-eyebrow'>CENTRAL DE PLANEJAMENTO · FONTES DO DRIVE</div>"
+                "<div class='page-title'>Pesquisas, decisões & próximos passos</div>"
+                "<div class='page-subtitle'>O que falta resolver, por prioridade, e onde estão os "
+                "registros oficiais. O painel é somente leitura.</div>",unsafe_allow_html=True)
+    tasks=data["tasks"]
+    completed=sum(task.get("status")=="concluído" for task in tasks)
+    decision_pending=sum(d["status"].casefold() in {"aberta","não decidida","nao decidida"}
+                         for d in data["decisions"])
+    summaries=[
+        ("Pesquisas registradas",str(len(tasks)),"Documento de pendências"),
+        ("Por concluir",str(len(tasks)-completed),"Prioridades P0–P3"),
+        ("Concluídas",str(completed),"Registradas no Drive"),
+        ("Decisões abertas",str(decision_pending),"Sem aprovação automática")
     ]
-    for col,(label,value,hint) in zip((c1,c2,c3),summary):
+    for col,(label,value,hint) in zip(st.columns(4,gap="small"),summaries):
         with col:
-            st.markdown(f"<div class='page-stat page-stat--blue'><div class='page-stat__label'>{escape(label)}</div>"
+            st.markdown(f"<div class='page-stat page-stat--blue'>"
+                        f"<div class='page-stat__label'>{escape(label)}</div>"
                         f"<div class='page-stat__value'>{escape(value)}</div>"
-                        f"<div class='page-stat__hint'>{escape(hint)}</div></div>",unsafe_allow_html=True)
-    st.markdown("<div class='page-alert page-alert--neutral'>"
-                "Painel somente leitura: para registrar decisões ou concluir pendências, "
-                "atualize o documento oficial no Drive. O app sincroniza essas mudanças.</div>",
-                unsafe_allow_html=True)
-
-    st.markdown("<div class='page-section'>Decisões registradas</div>",unsafe_allow_html=True)
-    for decision in data["decisions"]:
-        status=decision["status"]
-        current_status=status.casefold()
-        tone="proposed" if current_status.startswith(("vigente","aprovada","decidida")) else (
-            "candidate" if current_status in {"aberta","não decidida","nao decidida"} else "optional")
-        st.markdown(f"<div class='page-panel'>"
-                    f"<span class='page-chip page-chip--{tone}'>{escape(status)}</span>"
-                    f"<div class='page-panel__title' style='margin-top:9px'>{escape(decision['id'])} · {escape(decision['title'])}</div>"
-                    f"<div class='page-panel__desc'>{escape(decision.get('note',''))}</div></div>",
-                    unsafe_allow_html=True)
-    st.link_button("Ver registro de decisões no Drive",data["sources"]["decisions"],use_container_width=True)
-
-    st.markdown("<div class='page-section'>Fila de pesquisas</div>",unsafe_allow_html=True)
-    priority_options=["Todas","P0","P1","P2","P3"]
-    priority_titles={"P0":"Crítica","P1":"Alta","P2":"Média","P3":"Organização"}
-    a,b=st.columns([1,1],gap="medium")
-    with a:
-        selected_priority=st.selectbox("Prioridade",priority_options,
-                                       format_func=lambda p: p if p=="Todas" else f"{p} · {priority_titles[p]}",
-                                       key="task_priority_filter")
-    with b:
-        status_filter=st.selectbox("Situação",["Todas","Pendentes","Concluídas"],key="task_status_filter")
-    filtered=[item for item in tasks if (selected_priority=="Todas" or item["priority"]==selected_priority)
-              and (status_filter=="Todas" or
-                   (status_filter=="Pendentes" and item.get("status")!="concluído") or
-                   (status_filter=="Concluídas" and item.get("status")=="concluído"))]
-    st.markdown(f"<div class='page-filter-hint'>{len(filtered)} pesquisas encontradas · "
-                "O status é controlado pelos documentos oficiais.</div>",unsafe_allow_html=True)
-    if not filtered:
-        st.info("Nenhuma pesquisa corresponde aos filtros selecionados.")
-    for task in filtered:
-        priority=task["priority"].lower()
-        complete=task.get("status")=="concluído"
-        st.markdown(
-            f"<div class='page-task page-task--{priority}{' page-task--done' if complete else ''}'>"
-            f"<div class='page-task__tag'>{escape(task['priority'])}</div>"
-            f"<div class='page-task__body'>{escape(task['title'])}</div>"
-            f"<div class='page-task__status'>{'✓ Concluída' if complete else '○ Pendente'}</div></div>",
-            unsafe_allow_html=True)
-    st.link_button("Abrir pendências no Drive",data["sources"]["tasks"],use_container_width=True)
-
-    st.markdown("<div class='page-section'>Documentação e fontes</div>",unsafe_allow_html=True)
-    source_items=[
-        ("Guia de planejamento","guide"),("Estado atual e decisões","decisions"),
-        ("Registro de pesquisas","evidence"),("Base de conhecimento","knowledge"),
-        ("Modelo financeiro","spreadsheet")]
-    for col,(label,key) in zip(st.columns(2,gap="small"),source_items[:2]):
-        with col:
-            st.link_button(label,data["sources"][key],use_container_width=True)
-    for col,(label,key) in zip(st.columns(3,gap="small"),source_items[2:]):
-        with col:
-            st.link_button(label,data["sources"][key],use_container_width=True)
+                        f"<div class='page-stat__hint'>{escape(hint)}</div></div>",
+                        unsafe_allow_html=True)
+    st.info("As pendências oficiais têm apenas status **pendente** ou **concluído**. "
+            "Não inventei uma coluna 'Em andamento': será possível acrescentá-la "
+            "quando a fonte registrar esse status.")
+    view=st.segmented_control("Navegar por",["Fila por prioridade","Decisões oficiais","Fontes & atualização"],
+                              default="Fila por prioridade",key="tasks_view",
+                              selection_mode="single",label_visibility="collapsed")
+    if view is None: view="Fila por prioridade"
+    if view=="Fila por prioridade":
+        filters=st.columns([1,1],gap="medium")
+        with filters[0]:
+            priority=st.selectbox("Prioridade",["Todas","P0","P1","P2","P3"],
+                                  key="tasks_priority_new")
+        with filters[1]:
+            situation=st.selectbox("Situação",["Pendentes","Todas","Concluídas"],
+                                   key="tasks_status_new")
+        labels={"P0":"Crítica · documentos e autorização",
+                "P1":"Alta · gastos e reservas",
+                "P2":"Média · passeios e refinamento",
+                "P3":"Organização e evidências"}
+        visible=[t for t in tasks
+                if (priority=="Todas" or t["priority"]==priority)
+                and (situation=="Todas" or
+                     (situation=="Pendentes" and t.get("status")!="concluído") or
+                     (situation=="Concluídas" and t.get("status")=="concluído"))]
+        if not visible:
+            st.info("Nenhuma pesquisa corresponde aos filtros escolhidos.")
+        for cat in ("P0","P1","P2","P3"):
+            grouped=[t for t in visible if t["priority"]==cat]
+            if grouped:
+                st.markdown(f"<div class='page-section'>{cat} · {escape(labels[cat])}"
+                            f" <small style='color:#718796'>({len(grouped)})</small></div>",
+                            unsafe_allow_html=True)
+                for task in grouped:
+                    done=task.get("status")=="concluído"
+                    st.markdown(f"<div class='page-task page-task--{cat.lower()} "
+                                f"{'page-task--done' if done else ''}'>"
+                                f"<div class='page-task__tag'>{cat}</div>"
+                                f"<div class='page-task__body'>{escape(task['title'])}</div>"
+                                f"<div class='page-task__status'>{'✓ Concluída' if done else '○ Pendente'}"
+                                "</div></div>",unsafe_allow_html=True)
+        st.link_button("Atualizar pendências no Drive",data["sources"]["tasks"],
+                       use_container_width=True)
+    elif view=="Decisões oficiais":
+        st.markdown("<div class='page-section'>Registro de decisões</div>",unsafe_allow_html=True)
+        for decision in data["decisions"]:
+            tone=("proposed" if decision["status"].casefold().startswith(("vigente","aprovada"))
+                  else "candidate")
+            st.markdown(f"<div class='page-panel'>"
+                        f"<span class='page-chip page-chip--{tone}'>{escape(decision['status'])}</span>"
+                        f"<div class='page-panel__title' style='margin-top:9px'>"
+                        f"{escape(decision['id'])} · {escape(decision['title'])}</div>"
+                        f"<div class='page-panel__desc'>{escape(decision.get('note',''))}</div>"
+                        "</div>",unsafe_allow_html=True)
+        st.link_button("Consultar documento de decisões",data["sources"]["decisions"],
+                       use_container_width=True)
+    else:
+        st.markdown("<div class='page-section'>Integridade e origem</div>",unsafe_allow_html=True)
+        for key,title in [("decisions","Decisões"),("tasks","Pendências"),("finance","Finanças e cronograma")]:
+            src=sync_sources[key]
+            st.markdown(f"**{escape(title)}:** {escape(src['status'])}" +
+                        (f" · modificado {escape(src['modified_at'][:10])}" if src.get("modified_at") else
+                         " · usando snapshot ou sem data verificada"))
+        st.warning("Ranking e auditorias de cidades, anúncios, tarifas e roteiros detalhados "
+                   "são pesquisas históricas versionadas no GitHub. "
+                   "A sincronização do Drive não atualiza essas fontes automaticamente.")
+        docs=[
+            ("Guia do projeto","guide"),("Decisões e premissas","decisions"),
+            ("Proveniência de pesquisas","evidence"),("Pendências","tasks"),
+            ("Base de conhecimento","knowledge"),("Modelo financeiro","spreadsheet")]
+        for col,(label,key) in zip(st.columns(2,gap="medium"),docs[:2]):
+            with col: st.link_button(label,data["sources"][key],use_container_width=True)
+        for col,(label,key) in zip(st.columns(2,gap="medium"),docs[2:4]):
+            with col: st.link_button(label,data["sources"][key],use_container_width=True)
+        for col,(label,key) in zip(st.columns(2,gap="medium"),docs[4:]):
+            with col: st.link_button(label,data["sources"][key],use_container_width=True)
 
 bottom_source()
