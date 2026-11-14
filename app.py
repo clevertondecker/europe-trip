@@ -9,7 +9,7 @@ import streamlit as st
 
 from data_model import STATUS_COLORS, STATUS_LABEL, calculate_scenario, get_scenario, load_data, money_brl, select_places
 from drive_sync import load_live_updates, update_map_places
-from city_compare import get_preset, load_cities, normalized_weights, rank_cities
+from city_compare import get_preset, initialize_weight_state, load_cities, normalized_weights, rank_cities
 
 st.set_page_config(page_title="Nossa Europa 2027", page_icon="🌍", layout="wide", initial_sidebar_state="expanded")
 data = load_data()
@@ -589,10 +589,7 @@ elif page == "Comparar cidades":
                            format_func=lambda item: item["label"], key="city_compare_profile",
                            help="Perfis transcritos da aba 12 PESOS CIDADES do Excel histórico.")
     profile_id = profile["id"]
-    if st.session_state.get("_last_city_profile") != profile_id:
-        for crit_id, value in get_preset(city_data, profile_id).items():
-            st.session_state[f"city_weight_{crit_id}"] = int(value)
-        st.session_state["_last_city_profile"] = profile_id
+    initialize_weight_state(st.session_state, profile_id, get_preset(city_data, profile_id))
     cols = st.columns(3, gap="medium")
     weights = {}
     for idx, criterion in enumerate(city_data["criteria"]):
