@@ -11,6 +11,7 @@ from data_model import STATUS_COLORS, STATUS_LABEL, calculate_scenario, get_scen
 from drive_sync import load_live_updates, update_map_places
 from city_compare import get_preset, initialize_weight_state, load_cities, normalized_weights, rank_cities
 from city_research import city_readiness, load_audit
+from city_market import load_market, observed_rent_summary, example_train_couple_return
 
 st.set_page_config(page_title="Nossa Europa 2027", page_icon="🌍", layout="wide", initial_sidebar_state="expanded")
 data = load_data()
@@ -574,6 +575,7 @@ elif page == "Mapa & destinos":
 elif page == "Comparar cidades":
     city_data = load_cities()
     city_audit = load_audit()
+    market = load_market()
     audit_by_name = {item["name"]: item for item in city_audit["cities"]}
     criteria_ids = [criterion["id"] for criterion in city_data["criteria"]]
     st.markdown("<div class='page-eyebrow'>FRANÇA · ESCOLHA DA CIDADE-BASE</div>"
@@ -623,6 +625,93 @@ elif page == "Comparar cidades":
                 st.markdown(f"- {escape(risk)}")
             for source_url in item["source_urls"]:
                 st.link_button("Ver fonte", source_url)
+    st.markdown("<div class='page-section'>Primeira observação do mercado · novembro/2026</div>",
+                unsafe_allow_html=True)
+    st.markdown("<div class='page-subtitle'>Uma mesma plataforma de moradia foi consultada para as quatro cidades. "
+                "Os valores abaixo são três exemplos de anúncios por cidade, não médias estatísticas nem disponibilidade em 2027. "
+                "Apartamentos sem custo integral, ocupação, internet e contrato confirmado continuam sem cotação elegível.</div>",
+                unsafe_allow_html=True)
+    rows = []
+    for item in market["cities"]:
+        summary = observed_rent_summary(item)
+        rows.append({
+            "Cidade": item["name"],
+            "Anúncios observados": summary["sample_count"],
+            "Menor €/mês": summary["min_eur_month"],
+            "Mediana dos 3 €/mês": summary["sample_median_eur_month"],
+            "Maior €/mês": summary["max_eur_month"],
+            "Passe urbano €/pessoa/mês": item["urban_pass"]["fare_eur_month_person"],
+            "Cotações elegíveis 2027": item["rental_quote_eligible_2027"]
+        })
+    import pandas as pd
+    st.dataframe(pd.DataFrame(rows), hide_index=True, use_container_width=True,
+                 column_config={
+                     "Menor €/mês": st.column_config.NumberColumn(format="€ %.0f"),
+                     "Mediana dos 3 €/mês": st.column_config.NumberColumn(format="€ %.0f"),
+                     "Maior €/mês": st.column_config.NumberColumn(format="€ %.0f"),
+                     "Passe urbano €/pessoa/mês": st.column_config.NumberColumn(format="€ %.2f")
+                 })
+    st.caption("A mediana refere-se apenas a três imóveis heterogêneos por cidade, com contas nem sempre incluídas. "
+               "NÃO comparar como custo total de hospedagem, previsão de 60 noites ou preço de mercado. "
+               "Os passes são tarifas publicadas em 2025–26 e dependem de condições de uso.")
+
+    with st.expander("Ver os 12 imóveis observados e suas fontes",expanded=False):
+        for item in market["cities"]:
+            st.markdown(f"**{escape(item['name'])}**")
+            for offer in item["offers"]:
+                included = {"included":"contas incluídas", "excluded":"contas excluídas",
+                            "partial":"contas parcialmente incluídas"}.get(offer["utilities"],"contas não especificadas")
+                st.markdown(f"- {escape(offer['street'])} · {offer['size_m2']} m² · "
+                            f"€ {offer['observed_eur_month']:,.0f}/mês · {included}")
+            st.link_button(f"Consultar catálogo de {item['name']}", item["housing_catalogue"])
+            st.caption("A página de catálogo não identifica cada anúncio individual de forma estável. "
+                       "Preços podem mudar; não foi confirmada ocupação ou contrato para dois meses.")
+
+    st.markdown("<div class='page-section'>Transporte: evidências de operadores</div>",
+                unsafe_allow_html=True)
+    st.markdown("<div class='page-subtitle'>Exemplos de trajetos ferroviários diretos e tarifas reduzidas "
+                "Carte Fluo por pessoa e trecho. A tarifa pode exigir cartão e não foi verificada para 2027. "
+                "O tempo é de estação a estação, não porta a porta.</div>",unsafe_allow_html=True)
+    for row in range(0,len(market["cities"]),2):
+        for column,item in zip(st.columns(2,gap="medium"),market["cities"][row:row+2]):
+            with column:
+                st.markdown(
+                    f"<div class='page-panel'><div class='page-panel__title'>{escape(item['name'])}</div>"
+                    f"<div class='page-panel__desc'>Transporte urbano: € {item['urban_pass']['fare_eur_month_person']:.2f}"
+                    " / pessoa / mês (tarifa publicada, não preço de 2027).</div>"
+                    f"<div class='page-panel__meta'>{escape(item['urban_pass']['price_period'])}</div></div>",
+                    unsafe_allow_html=True)
+                st.link_button("Tarifa urbana oficial", item["urban_pass"]["source_url"],
+                               use_container_width=True)
+                for route in item["rail"]:
+                    fare = route["discounted_eur_leg_person"]
+                    fare_display = (f"€{fare:.2f} por pessoa/trecho com Carte Fluo" if fare is not None
+                                    else "tarifa não confirmada")
+                    st.markdown(f"<div class='page-budget-row'><span class='page-budget-row__name'>"
+                                f"{escape(item['name'])} → {escape(route['destination'])} "
+                                f"· {route['train_minutes']} min</span>"
+                                f"<span class='page-budget-row__amount'>{fare_display}</span></div>",
+                                unsafe_allow_html=True)
+                    st.link_button(f"Fonte TER: {item['name']} → {route['destination']}",
+                                   route["source_url"],use_container_width=True)
+    st.markdown("<div class='page-section'>Alimentação, lazer e custo total</div>",
+                unsafe_allow_html=True)
+    basket = market["common_costs"]
+    st.markdown("<div class='page-panel'>"
+                "<div class='page-panel__title'>Cesta histórica compartilhada: "
+                f"€ {basket['groceries_eur_week_couple']:.2f}/semana para duas pessoas</div>"
+                "<div class='page-panel__desc'>É a mesma hipótese para todas as cidades, retirada da base do Drive. "
+                "Ainda não existem quatro cestas locais verificadas com o mesmo carrinho, nem orçamento comparável "
+                "por bairro para academia, restaurantes e vida noturna. Portanto, não há diferencial urbano confiável "
+                "de alimentação ou custo total da temporada nesta etapa.</div></div>",unsafe_allow_html=True)
+    st.link_button("Consultar cesta histórica do Drive",basket["source_url"])
+    st.markdown("<div class='city-compare-caveat'>"
+                "A primeira comparação de mercado é EXPLORATÓRIA: nenhum preço anunciado foi confirmado "
+                "para as 55–65 noites e dois ocupantes. Faltam ainda custos de limpeza, caução, "
+                "contrato, internet, localização exata e retorno aéreo. Não usar esta tabela para "
+                "reservar ou recalcular o orçamento oficial sem reconciliar todas as despesas.</div>",
+                unsafe_allow_html=True)
+
     st.markdown("<div class='page-section'>Preferências e ranking histórico</div>",
                 unsafe_allow_html=True)
     st.markdown("<div class='page-section'>Personalize suas prioridades</div>", unsafe_allow_html=True)
