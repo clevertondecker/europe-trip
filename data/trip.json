@@ -1,0 +1,75 @@
+{
+  "project": "Europa 2027 — lua de mel e temporada na França",
+  "snapshot_date": "2026-11-14",
+  "data_status": "Cópia de visualização derivada das pesquisas do Drive; não sincroniza automaticamente",
+  "wedding_date": "2027-09-04",
+  "departure_candidate": "2027-09-09",
+  "travelers": 2,
+  "duration_min_days": 65,
+  "duration_max_days": 75,
+  "italy_days_approx": 10,
+  "france_days_estimate": "55–65 dias",
+  "initial_vacation_days": "20–30 dias",
+  "strategy": "Itália primeiro → residência temporária na França → retorno ao Brasil",
+  "hero_image_url": "https://upload.wikimedia.org/wikipedia/commons/4/4d/Maiori_Amalfi_coast.jpg",
+  "hero_image_credit": "Foto: Antonio 42 years old. / Wikimedia Commons · CC BY-SA 2.0 · Maiori (2007)",
+  "hero_image_credit_url": "https://commons.wikimedia.org/wiki/File:Maiori_Amalfi_coast.jpg",
+  "sources": {
+    "guide": "https://docs.google.com/document/d/1KZ2pW0-IF4nIYGXeLZeUemCPYh1F0bXYWIiDDkQUDdg/edit",
+    "decisions": "https://docs.google.com/document/d/12O55HyOZsyv68qntsZbbVAeiw4tQnKrpG61i2_kZJBo/edit",
+    "evidence": "https://docs.google.com/document/d/1CFUIr6tt5enx_j46iQYRMp9WFa3Yg7M9qD64oyt0nVA/edit",
+    "tasks": "https://docs.google.com/document/d/1kFvDkGO8tGXoVGcBMisntyoVGZNTDHwUT7Me7vVH1pY/edit",
+    "knowledge": "https://drive.google.com/file/d/1_PgDDM-wPR5hlUyTRjdpxAwrnE0hhaqu/view",
+    "spreadsheet": "https://drive.google.com/file/d/1LeTrUWLLzIe_mZS26gMt_KMnnX4jelZ4/view",
+    "briefing": "https://docs.google.com/document/d/12UHMYb4nM1j-mZD__IMo1T1-54uUVgoinAa87UpEC9M/edit",
+    "project_folder": "https://drive.google.com/drive/folders/1FCQAHuU1W3wnxDFeXbxsywZC96W5ta1r"
+  },
+  "places": [
+    {"id":"roma","name":"Roma","country":"Itália","lat":41.9028,"lon":12.4964,"status":"roteiro_proposto","role":"Roteiro Itália","description":"Início da lua de mel; patrimônio histórico, gastronomia e caminhadas.","duration":"3–4 dias (referência)","source":"decisions"},
+    {"id":"maiori","name":"Maiori","country":"Itália","lat":40.6485,"lon":14.6401,"status":"candidata","role":"Base Costa Amalfitana","description":"Alternativa de base com praia para a fase italiana; sem reserva.","duration":"~5 dias de costa no conjunto da Itália","source":"knowledge"},
+    {"id":"salerno","name":"Salerno","country":"Itália","lat":40.6824,"lon":14.7681,"status":"candidata","role":"Base Costa Amalfitana","description":"Alternativa a Maiori, possivelmente mais favorável a logística e orçamento.","duration":"A definir","source":"knowledge"},
+    {"id":"napoles","name":"Nápoles","country":"Itália","lat":40.8518,"lon":14.2681,"status":"roteiro_proposto","role":"Logística da Itália","description":"Possível pernoite final antes do voo para a região francesa.","duration":"1 noite ilustrativa","source":"decisions"},
+    {"id":"capri","name":"Capri","country":"Itália","lat":40.5507,"lon":14.2426,"status":"opcional","role":"Passeio na Itália","description":"Visita condicionada a mar, horários de ferry e custo.","duration":"Bate-volta possível","source":"knowledge"},
+    {"id":"mulhouse","name":"Mulhouse","country":"França","lat":47.7508,"lon":7.3359,"status":"candidata","role":"Cidade-base francesa","description":"Boa conexão com fronteiras, transporte e regiões de natureza; não escolhida.","duration":"55–65 dias em uma base francesa, a definir","source":"decisions"},
+    {"id":"strasbourg","name":"Strasbourg","country":"França","lat":48.5734,"lon":7.7521,"status":"candidata","role":"Cidade-base francesa","description":"Alternativa com oferta urbana, restaurantes e boa rede ferroviária.","duration":"55–65 dias em uma base francesa, a definir","source":"decisions"},
+    {"id":"metz","name":"Metz","country":"França","lat":49.1193,"lon":6.1757,"status":"candidata","role":"Cidade-base francesa","description":"Alternativa em estudo no ranking histórico.","duration":"A definir","source":"knowledge"},
+    {"id":"nancy","name":"Nancy","country":"França","lat":48.6921,"lon":6.1844,"status":"candidata","role":"Cidade-base francesa","description":"Alternativa em estudo no ranking histórico.","duration":"A definir","source":"knowledge"},
+    {"id":"colmar","name":"Colmar","country":"França","lat":48.0794,"lon":7.3585,"status":"opcional","role":"Visita / alternativa","description":"Cidade histórica próxima às candidatas na Alsácia.","duration":"Bate-volta possível","source":"knowledge"},
+    {"id":"interlaken","name":"Interlaken","country":"Suíça","lat":46.6863,"lon":7.8632,"status":"opcional","role":"Passeio alpino","description":"Base potencial para montanhas e vales; sem datas confirmadas.","duration":"A definir","source":"knowledge"},
+    {"id":"lauterbrunnen","name":"Lauterbrunnen","country":"Suíça","lat":46.5935,"lon":7.9085,"status":"opcional","role":"Passeio alpino","description":"Vale alpino desejado, dependente de logística e sazonalidade.","duration":"A definir","source":"knowledge"},
+    {"id":"luxemburgo","name":"Luxemburgo","country":"Luxemburgo","lat":49.6116,"lon":6.1319,"status":"opcional","role":"Passeio internacional","description":"Visita desejada; ainda sem duração ou datas.","duration":"A definir","source":"knowledge"},
+    {"id":"freiburg","name":"Freiburg im Breisgau","country":"Alemanha","lat":47.9990,"lon":7.8421,"status":"opcional","role":"Passeio internacional","description":"Cidade alemã próxima às possíveis bases na Alsácia.","duration":"A definir","source":"knowledge"}
+  ],
+  "budget_scenarios": [
+    {"id":"60k","label":"R$ 60 mil","cap_brl":60000,"reported_total_brl":59975,"emergency_reserve_brl":4000,"days":65,"components":[{"name":"Passagens e deslocamentos aéreos do casal","amount":16620},{"name":"Itália (~10 dias)","amount":12545},{"name":"França (moradia, compras, lazer)","amount":23659},{"name":"Instalação na França","amount":1200},{"name":"Seguro e taxas","amount":1950},{"name":"Reserva emergencial (incluída)","amount":4000}]},
+    {"id":"70k","label":"R$ 70 mil","cap_brl":70000,"reported_total_brl":69683,"emergency_reserve_brl":5000,"days":70,"components":[{"name":"Passagens e deslocamentos aéreos do casal","amount":16920},{"name":"Itália (~10 dias)","amount":14636},{"name":"França (moradia, compras, lazer)","amount":29427},{"name":"Instalação na França","amount":1500},{"name":"Seguro e taxas","amount":2200},{"name":"Reserva emergencial (incluída)","amount":5000}]}
+  ],
+  "timeline": [
+    {"stage":"Casamento","period":"04/09/2027","status":"fixo","details":"Data do casamento; a viagem começa depois."},
+    {"stage":"Saída do Brasil","period":"A partir de 05/09; referência 09/09","status":"hipotese","details":"Escolher passagens após simulações porta a porta para dois viajantes."},
+    {"stage":"Roma","period":"~3–4 dias após a chegada","status":"proposta","details":"Patrimônio, passeios e gastronomia."},
+    {"stage":"Costa Amalfitana","period":"~5 dias, dentro da Itália","status":"proposta","details":"Escolher Maiori, Salerno ou outra base após cotação."},
+    {"stage":"Saída via Nápoles / deslocamento","period":"Final da etapa italiana","status":"proposta","details":"Transporte Itália → França a verificar."},
+    {"stage":"Instalação na França","period":"~3–5 dias","status":"proposta","details":"Apartamento, internet, serviços e rotina."},
+    {"stage":"Férias e passeios internacionais","period":"Restante dos 20–30 dias iniciais de férias","status":"proposta","details":"Alpes e países vizinhos, dependentes de orçamento, clima e transporte."},
+    {"stage":"Trabalho remoto + bate-voltas","period":"Últimas semanas na França","status":"proposta","details":"Rotina profissional e passeios em fins de semana."},
+    {"stage":"Retorno ao Brasil","period":"Outubro/novembro de 2027, a definir","status":"hipotese","details":"Aeroporto e bilhetes ainda não escolhidos."}
+  ],
+  "decisions": [
+    {"id":"D-001","status":"vigente","title":"Casamento em 04/09/2027","note":"Data fixa; partida sempre posterior."},
+    {"id":"D-002","status":"direcao","title":"Itália antes da França","note":"Preferência de planejamento, não reserva confirmada."},
+    {"id":"D-003","status":"vigente","title":"Comparar R$ 60 mil e R$ 70 mil","note":"Orçamentos completos para dois viajantes."},
+    {"id":"D-004","status":"aberta","title":"Cidade-base francesa","note":"Mulhouse, Strasbourg, Metz e Nancy seguem em avaliação."},
+    {"id":"D-005","status":"aberta","title":"Duração e passagens","note":"Sem data definitiva de retorno."}
+  ],
+  "tasks": [
+    {"priority":"P0","title":"Validar documentação e regras oficiais para o casal","status":"pendente"},
+    {"priority":"P0","title":"Revisar enquadramento de trabalho remoto, tributos e previdência","status":"pendente"},
+    {"priority":"P1","title":"Cotar passagens multidestinos para dois, com bagagens","status":"pendente"},
+    {"priority":"P1","title":"Comparar aluguel mobiliado real por 55–65 dias","status":"pendente"},
+    {"priority":"P1","title":"Auditar fórmulas, cenários e custos sem dupla contagem","status":"pendente"},
+    {"priority":"P2","title":"Definir base italiana e passeios de praia","status":"pendente"},
+    {"priority":"P2","title":"Organizar passeios alpinos antes do inverno","status":"pendente"},
+    {"priority":"P2","title":"Revisar frequência de bares/restaurantes versus orçamento","status":"pendente"}
+  ]
+}
