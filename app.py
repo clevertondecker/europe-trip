@@ -257,11 +257,12 @@ if page == "Visão geral":
     wedding = date.fromisoformat(data["wedding_date"])
     departure = date.fromisoformat(data["departure_candidate"])
     departure_label = departure.strftime("%d/%m/%Y") if departure > wedding else "A definir"
+    cap_label = " / ".join(f"R$ {int(item['cap_brl'] / 1000)} mil" for item in data["budget_scenarios"])
     cards = [
         ("Casamento", wedding.strftime("%d/%m/%Y"), "Data fixa do casal"),
         ("Partida em estudo", departure_label, "Hipótese, sem bilhete emitido"),
         ("Permanência proposta", f"{data['duration_min_days']}–{data['duration_max_days']} dias", "Para dois viajantes"),
-        ("Orçamento completo", "R$ 60–70 mil", "Tetos de planejamento, não cotações"),
+        ("Orçamento completo", cap_label, "Tetos de planejamento, não cotações"),
     ]
     for col, (label, value, detail) in zip(st.columns(4, gap="small"), cards):
         with col:
