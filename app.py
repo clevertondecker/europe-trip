@@ -176,7 +176,18 @@ with st.sidebar:
         fetch_live.clear()
         st.rerun()
     if sync_error:
-        st.warning("Sincronização indisponível; exibindo snapshot. Confira configuração e permissões da conta de serviço.")
+        # Exception class only; never expose keys, tokens or raw API errors.
+        st.warning("Sincronização indisponível; exibindo snapshot.")
+        diagnosis = {
+            "StreamlitSecretNotFoundError": "Secrets ausentes: configure [gcp_service_account] em Settings → Secrets.",
+            "KeyError": "O campo [gcp_service_account] ou um campo obrigatório está ausente.",
+            "ValueError": "Formato da credencial inválido. Confira especialmente os caracteres de nova linha na chave privada.",
+            "MalformedError": "A chave privada não pôde ser interpretada.",
+            "RefreshError": "O Google rejeitou a autenticação. Confira se a chave está ativa.",
+        }.get(sync_error, "Verifique os logs do aplicativo no Streamlit Cloud.")
+        st.error(f"Diagnóstico: {sync_error}. {diagnosis}")
+    elif not any(state["status"] == "live" for state in sync_sources.values()):
+        st.info("Nenhuma fonte sincronizada. Confira os Secrets e os avisos abaixo.")
     if sync_issues:
         with st.expander(f"Avisos de sincronização ({len(sync_issues)})"):
             for issue in sync_issues:
