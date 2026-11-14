@@ -78,3 +78,50 @@ A página **Comparar cidades** apresenta, além do ranking editorial, uma amostr
 - [Validador](city_market.py) e [testes](tests/test_city_market.py)
 
 A inclusão futura de uma cidade deve seguir o template de auditoria e coletar o mesmo tipo de evidência. Nenhuma observação desta pesquisa altera a planilha oficial ou a decisão D-004 no Drive.
+
+
+## Evolução integral — consolidação das cinco fases
+
+**Implementação:** 14/11/2026 · Prompt mestre: [PROMPT_MESTRE_EVOLUCAO_INTEGRAL_2027.md](PROMPT_MESTRE_EVOLUCAO_INTEGRAL_2027.md).
+
+### Fase 1 · Integridade
+- `catalog.py` combina as referências de destino do snapshot com os pontos detalhados de `data/itinerary_options_2027.json` usando IDs canônicos (Roma/rome, Nápoles/naples, Luxemburgo/luxembourg). Mantém as notas da fonte oficial quando disponíveis e não inventa preços.
+- O filtro do mapa agora considera a seleção vazia como **zero resultados**, e não como "mostrar todos".
+- `unified_budget.py` obtém as cinco subverbas francesas do cenário **atualmente sincronizado** quando os dados do Drive estão live; em snapshot usa os valores históricos explicitamente sinalizados. Fonte Drive continua somente leitura.
+- O CSS passou para `assets/styles.css`, facilitando consistência visual e manutenção.
+
+### Fase 2 · Orçamento unificado
+- Página **Orçamento** substitui simuladores desconectados por uma única projeção: teto do casal, duração na França, frequência e preço de saídas, cidade-base opcional, aluguel hipotético, câmbio e deltas de voos, passeios, transporte e taxas de moradia.
+- Aluguel indicado **substitui**, e não adiciona, a verba original de aluguel. O mesmo vale para saídas/restaurantes. Variações adicionais só entram uma vez.
+- Reserva de emergência já está dentro do total da planilha, nunca reaproveitada como verba de consumo.
+- Três perfis de comportamento são **hipóteses ilustrativas**, não preços reais: Econômico, Equilibrado, Mais ativo.
+- Custos de mercado de 2026 **não** significam disponibilidade ou taxa contratada para 2027.
+- Atenção: ajustar duração escala linearmente compras/transporte/passeios e aluguel como hipótese. Isso não é necessariamente o preço praticado para contratos de locação, feriados, descontos ou pernoites.
+
+### Fase 3 · Roteiro e mapas
+- Página **Roteiro → Calendário** calcula a distribuição ilustrativa dos dias a partir de partida posterior ao casamento: Itália, instalação francesa, férias/escapadas, dias úteis de trabalho remoto e fins de semana.
+- Permite mudar a data candidata, duração, férias, dias italianos e instalação, sem gravar no Drive.
+- **Transportes e custos** pode exibir dois pinos de origem/destino quando o arquivo de pesquisa contém ambas as coordenadas. **Não** gera trajeto geográfico real nem tempo porta a porta; usa apenas tempo ferroviário/marítimo publicado e referências de preço catalogadas.
+- EUR e CHF continuam separados; descontos Carte Fluo são condicionais; valores "a cotar" continuam desconhecidos. Passeios não são somados novamente à verba já reservada no orçamento.
+
+### Fase 4 · Comparação de cidade-base
+- Página **Comparar cidades → Visão rápida** apresenta simulações financeiras equivalentes para as quatro cidades, usando o mesmo padrão de consumo e alugueis **editoriais de 2026**, apenas para sensibilidade do teto de R$70 mil.
+- Em **Comparar e ajustar**, "Simular ... no orçamento" carrega a cidade selecionada para o simulador unificado. Não altera a decisão D-004 sobre a cidade-base.
+- Auditoria dos oito gates e ausências de cotação ainda bloqueia status "pronto para reserva". O aluguel exibido nunca é convertido silenciosamente em oferta de 2027.
+
+### Fase 5 · Acompanhamento e UX
+- **Visão geral** agora indica número de pesquisas concluídas, decisões abertas, fontes Drive sincronizadas e ausência de reservas confirmadas, com atalhos para o orçamento e prioridades.
+- **Pesquisas & decisões** passou a ter visão por prioridade P0–P3, decisões oficiais e documentos/fontes. A origem registra somente "pendente/concluído"; status intermediário **não é inventado**.
+- Fontes Drive (decisões, pendências, orçamento/cronograma) sincronizam com cache; pesquisas de mercado e preços de passeios são arquivos versionados do GitHub, que **não são atualizados automaticamente** pelo Drive.
+
+### Validação e limitações
+- `tests/test_catalog.py`, `tests/test_unified_budget.py`, `tests/test_calendar_model.py`, `tests/test_route_preview.py` protegem os contratos novos.
+- `tests/test_app_smoke.py` usa Streamlit AppTest para executar as seis páginas sem Secrets reais. Essa prova não é um teste visual de navegador.
+- O CI compila todos os módulos e roda os testes, incluindo o legado.
+- **Não resolvido por código**: três ofertas imobiliárias elegíveis para 55–65 noites nas datas reais por cidade; transporte público porta a porta e últimos trens de fim de semana; tarifas de 2027; autorização de trabalho remoto e contratos; passagens multidestino para duas pessoas. Esses itens precisam de pesquisa/contato real antes de qualquer reserva.
+- **Segurança**: uma chave de conta de serviço do Google Cloud já foi inserida em conversa anterior. Recomenda-se **revogar/rotacionar** essa chave no GCP e atualizar os Streamlit Secrets. Nenhuma chave foi publicada nestes arquivos.
+
+### Workflow operacional
+1. Editar decisões, pendências e premissas financeiras no Drive; depois clicar **Atualizar dados do Drive** no aplicativo.
+2. Registrar novas pesquisas verificadas com fonte, URL, validade, moeda e distinção entre preço observado/cotação em arquivos versionados no GitHub.
+3. Explorar cenários no Streamlit sem aprovar reservas automaticamente; quando tiver orçamento comparável e cotação real, registrar a decisão oficial D-004 no documento do Drive.
