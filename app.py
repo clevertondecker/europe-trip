@@ -126,6 +126,70 @@ a{color:#286F69 !important;}
   .home-hero h1{font-size:1.9rem !important;}.home-hero p{font-size:.9rem;}
   .home-kpi{min-height:102px;padding:15px;}.home-stage{min-height:0;}
   .block-container{padding-left:1rem;padding-right:1rem;}}
+
+/* FASE 1B — modern travel app / minimal A+B approved by user */
+:root {--ui-navy:#132B3D;--ui-blue:#168AC6;--ui-mint:#0B967E;--ui-bg:#F8FBFE;--ui-border:#E3EBF2;}
+html,body,[class*="css"],[data-testid="stMarkdownContainer"]{font-family:'DM Sans',system-ui,sans-serif !important;}
+[data-testid="stAppViewContainer"]{background:#FAFCFE !important;}
+[data-testid="stSidebar"]{background:#FFFFFF !important;border-right:1px solid #E9EFF5 !important;}
+[data-testid="stSidebar"] .stRadio [role="radiogroup"] > label{border-radius:10px;padding:8px 10px;margin:0 0 2px;transition:background .15s;}
+[data-testid="stSidebar"] .stRadio [role="radiogroup"] > label:hover{background:#EFF8FF;}
+[data-testid="stSidebar"] .stRadio [role="radiogroup"] > label:has(input:checked){background:#E5F4FF;}
+[data-testid="stSidebar"] .stRadio [role="radiogroup"] > label p{color:#17354A !important;font-weight:600;}
+[data-testid="stSidebar"] [data-testid="stInfo"]{background:#EDF7FC;border:1px solid #E0EBF3;color:#2C5870;}
+.block-container{max-width:1520px;padding-top:1.25rem;padding-bottom:3rem;}
+h1,h2,h3{font-family:'DM Sans',system-ui,sans-serif !important;color:#16364B !important;letter-spacing:-.035em;}
+a{color:#1684B2 !important;}
+.sidebar-brand{margin-bottom:14px;border-bottom:1px solid #E9EFF4;padding:4px 0 20px;}
+.sidebar-brand small{color:#078F88;}
+.sidebar-brand strong{font-family:'DM Sans',system-ui,sans-serif !important;font-size:1.55rem;font-weight:800;letter-spacing:-.045em;}
+.sidebar-brand span{color:#647E91;}
+.home-hero{min-height:272px;margin:8px 0 16px;padding:clamp(26px,3.7vw,55px);border-radius:20px;box-shadow:none;
+  background:linear-gradient(90deg,rgba(7,47,71,.93) 0%,rgba(10,56,76,.76) 36%,rgba(8,65,82,.17) 78%),url('https://upload.wikimedia.org/wikipedia/commons/4/4d/Maiori_Amalfi_coast.jpg') center 48%/cover;}
+.home-hero__content{max-width:740px;}
+.home-hero__eyebrow{font-size:.70rem;letter-spacing:.17em;color:#D7F3F8;font-weight:800;}
+.home-hero h1{font-family:'DM Sans',system-ui,sans-serif !important;font-size:clamp(2.1rem,3.35vw,3.2rem) !important;font-weight:800;line-height:1.1;letter-spacing:-.045em;margin:13px 0;}
+.home-hero p{font-size:.96rem;line-height:1.52;max-width:570px;}
+.home-hero__chips{gap:9px;}
+.home-hero__chips span{background:rgba(255,255,255,.11);border:1px solid rgba(255,255,255,.46);font-size:.75rem;padding:6px 10px;backdrop-filter:blur(4px);}
+.home-kpi{position:relative;background:#F2F8FC;border:0;border-radius:15px;min-height:109px;padding:15px 18px;margin:0;box-shadow:none;}
+.home-kpi--wedding{background:#FCF8F4;}
+.home-kpi--departure{background:#EDF7FE;}
+.home-kpi--duration{background:#EEF9F7;}
+.home-kpi--budget{background:#EEF7FD;}
+.home-kpi__label{letter-spacing:0;text-transform:none;color:#21475D;font-size:.78rem;font-weight:700;padding-left:38px;}
+.home-kpi__icon{position:absolute;left:17px;top:17px;font-size:1.35rem;line-height:1;}
+.home-kpi__value{font-size:clamp(1.05rem,1.65vw,1.58rem);color:#102C41;letter-spacing:-.04em;margin:8px 0 5px;overflow-wrap:normal;}
+.home-kpi__detail{color:#637B8D;font-size:.77rem;}
+.home-section-label{color:#168D82;margin:22px 0 6px;letter-spacing:.11em;}
+.home-section-title{font-family:'DM Sans',system-ui,sans-serif;font-size:clamp(1.5rem,2.1vw,2rem);font-weight:800;letter-spacing:-.04em;margin:0 0 7px;}
+.home-section-sub{color:#647F90;line-height:1.55;}
+.home-overview-copy{padding:12px 2px 0;}
+.home-overview-copy h2{font-family:'DM Sans',system-ui,sans-serif !important;font-size:clamp(1.38rem,1.85vw,1.8rem);font-weight:800;line-height:1.25;}
+.home-overview-copy p{font-size:.87rem;color:#638093;line-height:1.65;}
+.home-mini-budget{border:1px solid #E4ECF4;background:#FFF;padding:17px 19px;border-radius:17px;min-height:182px;box-shadow:0 5px 20px rgba(34,69,95,.035);}
+.home-mini-budget__eyebrow{font-size:.76rem;color:#27475A;font-weight:700;}
+.home-mini-budget__amount{font-size:clamp(1.3rem,2vw,1.9rem);color:#0B947D;font-weight:800;letter-spacing:-.045em;margin:14px 0 10px;}
+.home-mini-budget__track{height:9px;background:#E7EDF2;border-radius:20px;overflow:hidden;margin:8px 0 11px;}
+.home-mini-budget__fill{height:100%;background:#0B9E89;border-radius:20px;}
+.home-mini-budget__foot{font-size:.77rem;color:#647C8B;}
+.home-map-caption{font-size:.76rem;color:#617D8D;margin-top:5px;}
+.home-decision{min-height:85px;padding:14px 16px;border-radius:13px;border:1px solid #E4ECF4;box-shadow:0 4px 15px rgba(32,65,85,.03);}
+.home-decision strong{font-size:.89rem;font-weight:700;}
+.home-decision p{font-size:.78rem;margin:7px 0 0;}
+.home-stage{border:1px solid #E1E9F1;border-radius:17px;padding:0;overflow:hidden;min-height:0;box-shadow:0 5px 17px rgba(33,70,87,.045);border-top:0;}
+.home-stage__image{height:112px;background-size:cover;background-position:center 48%;}
+.home-stage__inside{padding:12px 16px 17px;}
+.home-stage__no{font-size:.69rem;letter-spacing:.1em;color:#A76A20;}
+.home-stage__name{font-family:'DM Sans',system-ui,sans-serif;font-weight:800;letter-spacing:-.03em;font-size:1.12rem;margin:6px 0 5px;}
+.home-stage__desc{font-size:.79rem;color:#67808C;line-height:1.5;}
+.home-disclaimer{background:#F2F7FB;border:1px solid #E0EAF1;border-radius:12px;color:#5B7481;}
+.home-sync-pill{display:flex;align-items:center;gap:8px;background:#EEF9F6;border:1px solid #D7EAE4;padding:10px 12px;border-radius:11px;color:#136F60;font-size:.81rem;font-weight:700;margin:10px 0;}
+@media(max-width:1050px){.home-hero{min-height:230px;}.home-kpi__label{padding-left:0;}.home-kpi__icon{position:static;display:block;margin-bottom:5px;}}
+@media(max-width:640px){.block-container{padding:1rem !important;}.home-hero{padding:24px 19px;min-height:260px;border-radius:14px;}
+.home-hero h1{font-size:2rem !important;}.home-stage__image{height:135px;}.home-kpi{min-height:95px;}
+.home-overview-copy{padding:0 0 9px;}}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -210,12 +274,17 @@ def bottom_source() -> None:
             st.markdown(f"- [{title}]({data['sources'][key]})")
         st.markdown(f"Crédito da fotografia: [{data['hero_image_credit']}]({data['hero_image_credit_url']}).")
 
+def navigate_page(destination: str) -> None:
+    """Navigation from homepage controls, applied before the radio on rerun."""
+    st.session_state["main_navigation"] = destination
+
+
 with st.sidebar:
     st.markdown("""<div class='sidebar-brand'>
       <small>TRAVEL JOURNAL · 2027</small>
       <strong>✧ Nossa Europa</strong>
       <span>Lua de mel & temporada na França</span></div>""", unsafe_allow_html=True)
-    page = st.radio("Explorar", ["Visão geral", "Mapa & destinos", "Roteiro", "Orçamento", "Pesquisas & decisões"], label_visibility="collapsed")
+    page = st.radio("Explorar", ["Visão geral", "Mapa & destinos", "Roteiro", "Orçamento", "Pesquisas & decisões"], label_visibility="collapsed", key="main_navigation", format_func=lambda name: {"Visão geral": "⌂  Visão geral", "Mapa & destinos": "▣  Mapa & destinos", "Roteiro": "▦  Roteiro", "Orçamento": "◉  Orçamento", "Pesquisas & decisões": "☑  Pesquisas & decisões"}[name])
     st.divider()
     st.caption("**ORIGEM DOS DADOS**")
     st.caption("Drive sincronizado" if sync_status == "live" else ("Drive parcialmente sincronizado" if sync_status == "partial" else "Snapshot de 14/11/2026"))
@@ -246,15 +315,12 @@ with st.sidebar:
     st.info("Painel em desenvolvimento. Nenhum voo, imóvel ou passeio foi reservado.")
 
 if page == "Visão geral":
-    overline("DIÁRIO DE VIAGEM · EUROPA 2027")
-    st.markdown("""<div class='home-hero' role='region' aria-label='Apresentação da viagem'>
-      <div class='home-hero__content'>
-      <div class='home-hero__eyebrow'>ITÁLIA → FRANÇA · 2027</div>
+    st.markdown("""<div class="home-hero" role="region" aria-label="Apresentação da viagem">
+      <div class="home-hero__content"><div class="home-hero__eyebrow">ITÁLIA → FRANÇA · 2027</div>
       <h1>Uma viagem para viver,<br>não só visitar.</h1>
       <p>Uma lua de mel entre cidades históricas, costa italiana e semanas vivendo como moradores na França.</p>
-      <div class='home-hero__chips'><span>♡ Dois viajantes</span>
-      <span>✧ Sem reservas confirmadas</span>
-      <span>◌ Longa temporada em estudo</span></div>
+      <div class="home-hero__chips"><span>♡ Dois viajantes</span>
+      <span>✧ Sem reservas confirmadas</span><span>◷ Longa temporada em estudo</span></div>
       </div></div>""", unsafe_allow_html=True)
 
     from datetime import date
@@ -262,64 +328,100 @@ if page == "Visão geral":
     departure = date.fromisoformat(data["departure_candidate"])
     departure_label = departure.strftime("%d/%m/%Y") if departure > wedding else "A definir"
     cap_values = sorted({int(item["cap_brl"] / 1000) for item in data["budget_scenarios"]})
-    cap_label = f"R$ {cap_values[0]}–{cap_values[-1]} mil" if len(cap_values) > 1 else f"R$ {cap_values[0]} mil"
+    cap_label = f"R$ {cap_values[0]} mil / R$ {cap_values[-1]} mil" if len(cap_values) > 1 else f"R$ {cap_values[0]} mil"
     cards = [
-        ("Casamento", wedding.strftime("%d/%m/%Y"), "Data fixa do casal"),
-        ("Partida em estudo", departure_label, "Hipótese, sem bilhete emitido"),
-        ("Permanência proposta", f"{data['duration_min_days']}–{data['duration_max_days']} dias", "Para dois viajantes"),
-        ("Orçamento completo", cap_label, "Tetos de planejamento, não cotações"),
+        ("Casamento", wedding.strftime("%d/%m/%Y"), "Data fixa do casal", "♡", "wedding"),
+        ("Partida em estudo", departure_label, "Hipótese, sem bilhete emitido", "▦", "departure"),
+        ("Permanência proposta", f"{data['duration_min_days']}–{data['duration_max_days']} dias", "Para dois viajantes", "✈", "duration"),
+        ("Orçamento", cap_label, "Tetos de planejamento, não cotações", "◎", "budget"),
     ]
-    for col, (label, value, detail) in zip(st.columns(4, gap="small"), cards):
+    for col, (label, value, detail, glyph, tone) in zip(st.columns(4, gap="small"), cards):
         with col:
-            st.markdown(f"<div class='home-kpi'><div class='home-kpi__label'>{escape(label)}</div>"
+            st.markdown(f"<div class='home-kpi home-kpi--{tone}'>"
+                        f"<span class='home-kpi__icon' aria-hidden='true'>{glyph}</span>"
+                        f"<div class='home-kpi__label'>{escape(label)}</div>"
                         f"<div class='home-kpi__value'>{escape(value)}</div>"
-                        f"<div class='home-kpi__detail'>{escape(detail)}</div></div>", unsafe_allow_html=True)
+                        f"<div class='home-kpi__detail'>{escape(detail)}</div></div>",
+                        unsafe_allow_html=True)
 
-    st.markdown("<div class='home-section-label'>VISÃO DA VIAGEM</div>", unsafe_allow_html=True)
-    st.markdown("<div class='home-section-title'>O que estamos construindo</div>", unsafe_allow_html=True)
-    st.markdown("<div class='home-section-sub'>Destinos, orçamento e escolhas do casal em um só lugar. "
-                "Os pontos no mapa são referências, não reservas.</div>", unsafe_allow_html=True)
-    col1, col2 = st.columns([1.65, 1], gap="large")
-    with col1:
-        section("Nosso mapa")
-        map_view([p for p in data["places"] if p["id"] in {"roma","maiori","napoles","mulhouse","strasbourg","interlaken","luxemburgo","freiburg"}], 390)
-        st.caption("Destinos propostos, alternativas e passeios opcionais; o mapa será aprimorado na Fase 2.")
-    with col2:
-        section("Orçamento em uma olhada")
-        mini_budget()
+    overview_left, overview_map, overview_budget = st.columns([1.06, 1.42, 1.08], gap="medium")
+    with overview_left:
+        st.markdown("<div class='home-overview-copy'><div class='home-section-label'>VISÃO DA VIAGEM</div>"
+                    "<h2>O que estamos construindo</h2>"
+                    "<p>Destinos, orçamento e escolhas do casal em um só lugar. "
+                    "Os pontos do mapa são referências, não reservas.</p></div>", unsafe_allow_html=True)
+        st.button("Explorar destinos →", use_container_width=True,
+                  on_click=navigate_page, args=("Mapa & destinos",), key="home_go_map")
 
-    st.markdown("<div class='home-section-label'>PRÓXIMAS ESCOLHAS</div>", unsafe_allow_html=True)
-    st.markdown("<div class='home-section-title'>Decisões em aberto</div>", unsafe_allow_html=True)
+    with overview_map:
+        # The map displays real reference coordinates but no invented connecting route.
+        map_view([p for p in data["places"] if p["id"] in {"roma", "maiori", "mulhouse", "strasbourg"}], 190)
+        st.caption("Mapa de referência · cidades ainda em avaliação")
+
+    with overview_budget:
+        selected = st.radio("Cenário em estudo", ["60k", "70k"],
+                            format_func=lambda x: f"R$ {x} mil",
+                            horizontal=True, key="home_budget_choice")
+        scenario = get_scenario(data, selected)
+        calc = calculate_scenario(scenario)
+        used_pct = max(0, min(100, 100 * calc["total"] / scenario["cap_brl"]))
+        st.markdown(
+            "<div class='home-mini-budget'><div class='home-mini-budget__eyebrow'>◉ Resumo do orçamento</div>"
+            f"<div class='home-mini-budget__amount'>{escape(money_brl(calc['total']))}</div>"
+            f"<div class='home-mini-budget__track'><div class='home-mini-budget__fill' style='width:{used_pct:.1f}%'></div></div>"
+            f"<div class='home-mini-budget__foot'>Margem: {escape(money_brl(calc['balance']))} · estimativa histórica</div></div>",
+            unsafe_allow_html=True)
+        st.button("Ver orçamento completo →", use_container_width=True,
+                  on_click=navigate_page, args=("Orçamento",), key="home_go_budget")
+
+    left, right = st.columns([2.3, 1], vertical_alignment="center")
+    with left:
+        st.markdown("<div class='home-section-label'>DECISÕES EM ABERTO</div>", unsafe_allow_html=True)
+    with right:
+        st.button("Ver todas as decisões →", use_container_width=True,
+                  on_click=navigate_page, args=("Pesquisas & decisões",),
+                  key="home_go_decisions")
+
     outstanding = [d for d in data["decisions"] if d["status"].casefold() in {"aberta", "não decidida", "nao decidida"}]
     if outstanding:
-        for col, decision in zip(st.columns(min(3, len(outstanding)), gap="medium"), outstanding[:3]):
+        for col, decision in zip(st.columns(min(3, len(outstanding)), gap="small"), outstanding[:3]):
             with col:
-                note_text = decision.get("note", "").strip()
-                if not note_text or note_text == decision["title"].strip():
-                    note_text = "Pendente de definição."
-                st.markdown(f"<div class='home-decision'><strong>{escape(decision['title'])}</strong>"
-                            f"<p>{escape(note_text)}</p></div>", unsafe_allow_html=True)
+                detail = decision.get("note", "").strip()
+                if not detail or detail.rstrip(".") == decision["title"].strip().rstrip("."):
+                    detail = "Aguardando definição no Drive."
+                st.markdown(
+                    f"<div class='home-decision'><strong>{escape(decision['title'])}</strong>"
+                    f"<p>{escape(detail)}</p></div>", unsafe_allow_html=True)
     else:
-        st.caption("Nenhuma decisão em aberto identificada no documento sincronizado.")
-    st.link_button("Consultar decisões no Drive", data["sources"]["decisions"])
+        st.caption("Nenhuma decisão pendente identificada no documento sincronizado.")
 
     st.markdown("<div class='home-section-label'>TRÊS MOMENTOS</div>", unsafe_allow_html=True)
     st.markdown("<div class='home-section-title'>Da lua de mel à vida francesa</div>", unsafe_allow_html=True)
     stages = [
         ("01 · NOSSA CHEGADA", "Itália",
-         f"Cerca de {data['italy_days_approx']} dias entre Roma e uma base a escolher na Costa Amalfitana."),
+         f"Cerca de {data['italy_days_approx']} dias entre Roma e uma base a escolher na Costa Amalfitana.",
+         "https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=1000&auto=format&fit=crop&q=85", "Roteiro"),
         ("02 · NOSSA BASE", "Instalação",
-         "Cerca de 3–5 dias para organizar moradia, internet e rotina na França."),
+         "Cerca de 3–5 dias para organizar moradia, internet e rotina na França.",
+         "https://images.unsplash.com/photo-1449844908441-8829872d2607?w=1000&auto=format&fit=crop&q=85", "Roteiro"),
         ("03 · NOSSO COTIDIANO", "França",
-         f"{data['france_days_estimate']} no total, incluindo férias e trabalho remoto."),
+         f"{data['france_days_estimate']} no total, incluindo férias e trabalho remoto.",
+         "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=1000&auto=format&fit=crop&q=85", "Roteiro"),
     ]
-    for col, (number, title, description) in zip(st.columns(3, gap="medium"), stages):
+    for idx, (col, (number, title, description, photo, dest)) in enumerate(zip(st.columns(3, gap="medium"), stages)):
         with col:
-            st.markdown(f"<div class='home-stage'><div class='home-stage__no'>{escape(number)}</div>"
-                        f"<div class='home-stage__name'>{escape(title)}</div>"
-                        f"<div class='home-stage__desc'>{escape(description)}</div></div>", unsafe_allow_html=True)
-    st.markdown("<div class='home-disclaimer'>Nenhum voo, imóvel ou passeio foi reservado. "
-                "Datas, cidades e custos permanecem em estudo. As simulações históricas não substituem cotações reais.</div>",
+            st.markdown(
+                f"<div class='home-stage'><div class='home-stage__image' role='img' aria-label='Imagem ilustrativa: {escape(title)}' "
+                f"style='background-image:url({photo})'></div>"
+                f"<div class='home-stage__inside'><div class='home-stage__no'>{escape(number)}</div>"
+                f"<div class='home-stage__name'>{escape(title)}</div>"
+                f"<div class='home-stage__desc'>{escape(description)}</div></div></div>",
+                unsafe_allow_html=True)
+            st.button(f"Ver etapa: {title} →", key=f"home_stage_{idx}", use_container_width=True,
+                      on_click=navigate_page, args=(dest,))
+
+    st.markdown("<div class='home-disclaimer'>Planejamento em desenvolvimento: voos, imóveis e passeios ainda não reservados. "
+                "As estimativas históricas não substituem cotações reais. Imagens ilustrativas: Wikimedia Commons e Unsplash.</div>",
                 unsafe_allow_html=True)
 
 elif page == "Mapa & destinos":
