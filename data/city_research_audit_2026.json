@@ -1,0 +1,284 @@
+{
+  "schema_version": "1.0",
+  "audited_at": "2026-11-14",
+  "scope": "Dois adultos, imóvel mobiliado inteiro por 55–65 noites após 04/09/2027, internet de trabalho remoto, sem carro, França como base depois da Itália",
+  "source_workbook": "https://drive.google.com/file/d/1LeTrUWLLzIe_mZS26gMt_KMnnX4jelZ4/view",
+  "standards": [
+    {
+      "id": "rental_inventory",
+      "label": "Amostra de apartamentos realmente elegíveis",
+      "gate": "Pelo menos 3 imóveis independentes por cidade, de 35–65 m² preferencialmente, casal permitido, internet, possibilidade contratual para 55–65 noites e preço completo para datas específicas; registrar recusas"
+    },
+    {
+      "id": "rental_total",
+      "label": "Custo integral do imóvel",
+      "gate": "Informar noites, aluguel total em EUR, contas, internet, limpeza, taxas de plataforma, caução reembolsável, câmbio da data, custo em BRL e política de cancelamento"
+    },
+    {
+      "id": "living_cost",
+      "label": "Despesas reais de dois adultos",
+      "gate": "Orçamento de supermercado semanal, refeições, lazer, transporte local, academia, seguro quando aplicável; identificar basket, quantidade, fonte, data e prevenir dupla contagem"
+    },
+    {
+      "id": "intercity",
+      "label": "Passeios por ferrovia e conexões",
+      "gate": "Pelo menos 5 destinos de interesse, tempo porta a porta, frequência em sábado/domingo, última volta, tarifa ida e volta casal, fontes operadoras; não comparar só distância"
+    },
+    {
+      "id": "flights",
+      "label": "Logística Itália → França → Brasil",
+      "gate": "Comparar pelo menos 2 aeroportos de retorno e a conexão de Nápoles/Roma; duas pessoas com bagagem e translados totais"
+    },
+    {
+      "id": "daily_life",
+      "label": "Vida cotidiana e trabalho remoto",
+      "gate": "Bairro, internet confirmada, mesa, videochamadas, mercado, academia, transporte noturno e deslocamento a pé medidos desde cada imóvel"
+    },
+    {
+      "id": "eligibility",
+      "label": "Legalidade e adequação do contrato",
+      "gate": "Confirmar modalidade de locação, se o perfil do casal é elegível, limites de duração e documento contratual com proprietário/plataforma"
+    },
+    {
+      "id": "evidence",
+      "label": "Rastreabilidade e qualidade de evidências",
+      "gate": "URL individual, origem primária/segundária, consulta, vigência, unidade e condições. Dados faltantes explícitos. Revisão até 30 dias antes de compromisso"
+    }
+  ],
+  "scoring_policy": {
+    "historical_scores": "Preservar separadamente notas editoriais existentes de 0–5, pois não equivalem a indicadores auditados.",
+    "verified_scores": "Não atribuir novas notas nem classificar vencedora quando os gates críticos estiverem pendentes.",
+    "confidence_levels": {
+      "insufficient": "Sem base para decidir reserva/cidade definitiva",
+      "preliminary": "Fontes identificadas, mas há lacunas críticas",
+      "decision_ready": "Evidência completa datada, comparável e contratos/datas verificados"
+    },
+    "minimum_independent_housing_offers": 3,
+    "completeness_rule": "Somente decision_ready se todos os gates estiverem comprovados; contagem de anúncios encontrados não equivale a propostas elegíveis."
+  },
+  "shared_sources": [
+    {
+      "id": "rent_index",
+      "url": "https://www.123loger.com/wp-content/uploads/2026/04/Barometre-des-Loyers-Avril-2026_compressed.pdf",
+      "published": "2026-04",
+      "type": "publicado",
+      "limitation": "Aluguel residencial de mercado para 2 cômodos, NÃO temporada mobiliada de 55–65 noites"
+    },
+    {
+      "id": "lease_mobility",
+      "url": "https://www.service-public.gouv.fr/particuliers/vosdroits/F34759?lang=fr",
+      "type": "oficial",
+      "limitation": "Bail mobilité tem perfil de elegibilidade específico; cidadão UE e emprego remoto não garantem direito automático"
+    },
+    {
+      "id": "tourist_lease",
+      "url": "https://www.service-public.gouv.fr/particuliers/vosdroits/F2045",
+      "type": "oficial",
+      "limitation": "Meublé de tourisme é modalidade distinta de aluguel residencial e precisa respeitar condições"
+    },
+    {
+      "id": "train_operator",
+      "url": "https://www.ter.sncf.com/grand-est/se-deplacer/lignes",
+      "type": "oficial",
+      "limitation": "Serviços e frequências 2026; rever para datas reais e domingos"
+    },
+    {
+      "id": "numbeo",
+      "url": "https://ja-robinhood-ar-dns.numbeo.com/cost-of-living/country_result.jsp?country=France",
+      "type": "crowdsourced",
+      "published": "2026-11-13",
+      "limitation": "Dados colaborativos não cobrem igualmente cidades pequenas e não são orçamento específico do casal"
+    }
+  ],
+  "cities": [
+    {
+      "id": "mulhouse",
+      "name": "Mulhouse",
+      "historic_score": 4.375,
+      "historic_reference_rent_eur": 980,
+      "alternative_logistics_rent_eur": 790,
+      "residential_2room_index_eur": 620,
+      "housing_samples_2026": 3,
+      "eligible_2027_quotes": 0,
+      "housing": [
+        "Rua Lieutenant Jean de Loisy: 40 m², €750/mês em 2026, casal expresso; 2 meses não confirmados; anúncio individual registrado na planilha",
+        "Rua Guillaume Tell: 78 m², €900/mês com contas à parte; prazo/ocupantes não confirmados",
+        "Rue des Franciscains: 48 m², €1.350/mês, contas incluídas, anuncia 1–10 meses, mas elegibilidade contratual e setembro–novembro/2027 não comprovadas"
+      ],
+      "transport": [
+        "Conexões históricas com Basel, Strasbourg e Colmar; faltam custo porta-a-porta e retorno no fim de semana"
+      ],
+      "urban": [
+        "Vida noturna menos pontuada na matriz editorial; amostra objetiva por bairro não documentada"
+      ],
+      "cost": [
+        "Cesta de mercado específica da cidade ausente",
+        "Custo total de 55–65 noites e contas ainda não cotado"
+      ],
+      "source_urls": [
+        "https://housinganywhere.com/s/Mulhouse--France/apartment-for-rent",
+        "https://www.ter.sncf.com/grand-est"
+      ],
+      "risks": [
+        "€790/mês na aba 14 não equivale a €980 na aba 11; bases de cálculo distintas",
+        "Não confundir valores de contrato anual com estadia temporária",
+        "Bail mobilité possivelmente inaplicável sem comprovação de elegibilidade"
+      ],
+      "audit_status": "insufficient",
+      "completed_gates": [],
+      "pending_gates": [
+        "rental_inventory",
+        "rental_total",
+        "living_cost",
+        "intercity",
+        "flights",
+        "daily_life",
+        "eligibility",
+        "evidence"
+      ],
+      "confidence": "Baixa para decisão de compra; histórica/editorial para comparação exploratória"
+    },
+    {
+      "id": "strasbourg",
+      "name": "Strasbourg",
+      "historic_score": 4.36,
+      "historic_reference_rent_eur": 1130,
+      "alternative_logistics_rent_eur": 1050,
+      "residential_2room_index_eur": 901,
+      "housing_samples_2026": 2,
+      "eligible_2027_quotes": 0,
+      "housing": [
+        "Avenue de Colmar: 50 m², €950/mês em 2026, internet divulgada; conta de energia pode ter acerto; 2 meses e datas não confirmados",
+        "Rue de la Ziegelau: 38 m², €850/mês em 2026; casal, contrato e 2027 não confirmados"
+      ],
+      "transport": [
+        "CTS publica tarifas e sistema urbano; TER tem acesso à rede Alsácia e Alemanha, mas custo de passeios do casal por destino ainda não auditado",
+        "Referência oficial de Strasbourg–Nancy disponível, porém horários 2027 não confirmados"
+      ],
+      "urban": [
+        "Vida urbana alta segundo análise editorial; falta censo de restaurantes/academias por bairros de imóveis"
+      ],
+      "cost": [
+        "Gastos semanais locais de casal não comprovados",
+        "Exposição a aluguel temporário mais caro no cenário"
+      ],
+      "source_urls": [
+        "https://housinganywhere.com/s/Strasbourg--France",
+        "https://www.cts-strasbourg.eu/export/sites/default/pdf/04SeDeplacer/CTS_FR_GUIDE_VOYAGEUR_Janvier-2026_WEB.pdf",
+        "https://www.ter.sncf.com/grand-est/trajet-strasbourg-nancy"
+      ],
+      "risks": [
+        "€1.130/mês na aba 11 vs €1.050/mês na aba 14 são envelopes históricos diferentes",
+        "2 anúncios históricos não são amostra mínima de 3 elegíveis",
+        "Estimativa de vida noturna não substitui disponibilidade de transportes após expediente BR"
+      ],
+      "audit_status": "insufficient",
+      "completed_gates": [],
+      "pending_gates": [
+        "rental_inventory",
+        "rental_total",
+        "living_cost",
+        "intercity",
+        "flights",
+        "daily_life",
+        "eligibility",
+        "evidence"
+      ],
+      "confidence": "Baixa para decisão de compra; histórica/editorial para comparação exploratória"
+    },
+    {
+      "id": "metz",
+      "name": "Metz",
+      "historic_score": 4.19,
+      "historic_reference_rent_eur": 1000,
+      "alternative_logistics_rent_eur": 880,
+      "residential_2room_index_eur": 724,
+      "housing_samples_2026": 1,
+      "eligible_2027_quotes": 0,
+      "housing": [
+        "Rue du Maître Échevin: 80 m², €1.250/mês em 2026, adicionais de água/energia/fibra possíveis, caução €1.200; 2 meses não confirmados",
+        "Rue de Vercly: residência para estudante, indisponível na consulta — EXCLUÍDA",
+        "Rue du Vignoble: 15 m², inadequado para casal em home office — EXCLUÍDO"
+      ],
+      "transport": [
+        "TER Grand Est descreve Metz–Nancy e Metz–Thionville; retorno por Luxemburgo/Frankfurt ou outros aeroportos precisa cotação porta-a-porta"
+      ],
+      "urban": [
+        "Proximidade a Luxemburgo é vantagem histórica, mas visitas concretas ainda sem orçamento detalhado"
+      ],
+      "cost": [
+        "Não existe custo integrado validado de chegada desde Itália, 55–65 noites e retorno BR",
+        "€880 na aba 14 vs €1.000 na aba 11; preço observado do exemplo principal €1.250"
+      ],
+      "source_urls": [
+        "https://housinganywhere.com/s/Metz--France/furnished-apartments",
+        "https://www.ter.sncf.com/grand-est/se-deplacer/lignes"
+      ],
+      "risks": [
+        "Número de imóveis adequados insuficiente",
+        "Anúncios de 15–20 m² não devem contar como moradia adequada para casal remoto",
+        "Elegibilidade de contrato e custo total não comprovados"
+      ],
+      "audit_status": "insufficient",
+      "completed_gates": [],
+      "pending_gates": [
+        "rental_inventory",
+        "rental_total",
+        "living_cost",
+        "intercity",
+        "flights",
+        "daily_life",
+        "eligibility",
+        "evidence"
+      ],
+      "confidence": "Baixa para decisão de compra; histórica/editorial para comparação exploratória"
+    },
+    {
+      "id": "nancy",
+      "name": "Nancy",
+      "historic_score": 3.935,
+      "historic_reference_rent_eur": 900,
+      "alternative_logistics_rent_eur": 790,
+      "residential_2room_index_eur": 603,
+      "housing_samples_2026": 2,
+      "eligible_2027_quotes": 0,
+      "housing": [
+        "Rue Christian Moench: 60 m², €850/mês no portal, texto antigo €730 + €100 = €830; discrepância a esclarecer, caução histórica €1.400, 2 meses pendentes",
+        "Boulevard d'Haussonville: 32 m², €660/mês, casal e duração não confirmados"
+      ],
+      "transport": [
+        "Stan publicou rede e tarifas a partir de agosto de 2026; fins de semana apresentam regras diferentes",
+        "TER Nancy–Metz e Nancy–Strasbourg têm linhas documentadas; custo ida-volta casal para passeios ainda não simulado"
+      ],
+      "urban": [
+        "Potencial boa experiência urbana, mas carência de evidência sobre bairros/vida noturna pós-expediente"
+      ],
+      "cost": [
+        "Aba 11 usa €900 de aluguel, aba 14 €790; anúncios não confirmam total 55–65 noites",
+        "Gastos de mercado e restaurantes não aferidos de forma comparável à outra cidade"
+      ],
+      "source_urls": [
+        "https://www.reseau-stan.com/titres-tarifs/tous-les-titres",
+        "https://www.ter.sncf.com/grand-est/se-deplacer/lignes"
+      ],
+      "risks": [
+        "Anúncio Christian Moench tem inconsistência €850 vs €830",
+        "Desconto/gratuidade de transporte para moradores não deve ser presumido para visitantes",
+        "Nenhum orçamento de locação por período exato validado"
+      ],
+      "audit_status": "insufficient",
+      "completed_gates": [],
+      "pending_gates": [
+        "rental_inventory",
+        "rental_total",
+        "living_cost",
+        "intercity",
+        "flights",
+        "daily_life",
+        "eligibility",
+        "evidence"
+      ],
+      "confidence": "Baixa para decisão de compra; histórica/editorial para comparação exploratória"
+    }
+  ]
+}
