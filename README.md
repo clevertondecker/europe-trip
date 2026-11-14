@@ -67,3 +67,14 @@ As notas de Mulhouse, Strasbourg, Metz e Nancy são *históricas/editoriais*, n�
 - [Validação automática](city_research.py) e [testes](tests/test_city_research.py)
 
 A matriz histórica continua versionada e separada do Drive live; revisar manualmente quando novas fontes estiverem verificadas. O arquivo `city_research_audit_2026.json` não significa sincronização de anúncios em tempo real. Nunca transformar status de pesquisa em decisão oficial sem registrar aprovação no documento de decisões.
+
+## Primeira comparação factual de mercado — novembro de 2026
+
+A página **Comparar cidades** apresenta, além do ranking editorial, uma amostra padronizada de três anúncios por cidade no mesmo catálogo, passes urbanos nominais e exemplos de trens TER com tarifa Carte Fluo. Os números **não são preços integrais de 55–65 noites**, não garantem imóvel para dois adultos nem inclusão de contas, internet e contrato. A cesta de €137,06/semana é hipótese compartilhada do Drive, não pesquisa local. A separação é intencional para evitar falsa precisão.
+
+- [Prompt executado](PROMPT_PRIMEIRA_COMPARACAO_REAL.md)
+- [Pesquisa com URLs, datas e ressalvas](RELATORIO_PRIMEIRA_COMPARACAO_REAL.md)
+- [Dados estruturados](data/city_market_observations_2026.json)
+- [Validador](city_market.py) e [testes](tests/test_city_market.py)
+
+A inclusão futura de uma cidade deve seguir o template de auditoria e coletar o mesmo tipo de evidência. Nenhuma observação desta pesquisa altera a planilha oficial ou a decisão D-004 no Drive.
