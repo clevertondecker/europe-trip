@@ -112,6 +112,10 @@ a{color:#286F69 !important;}
 .home-stage__desc{color:#637983;font-size:.84rem;line-height:1.58;}
 .home-disclaimer{background:#F0EAE0;border:1px solid #E3D8C8;padding:14px 16px;
   border-radius:12px;color:#5E696D;font-size:.82rem;line-height:1.58;margin-top:10px;}
+.home-decision{background:#fff;border:1px solid #E4E0D8;border-radius:14px;
+  padding:17px 19px;margin-bottom:10px;min-height:114px;box-shadow:0 5px 18px rgba(30,56,58,.025);}
+.home-decision strong{display:block;color:#163A4D;font-size:.98rem;}
+.home-decision p{color:#677C82;font-size:.84rem;line-height:1.5;margin:10px 0 0;}
 .sidebar-brand{padding:6px 0 10px;margin-bottom:12px;}
 .sidebar-brand small{display:block;font-size:.65rem;letter-spacing:.18em;font-weight:700;color:#2E7668;}
 .sidebar-brand strong{font-family:'Playfair Display',Georgia,serif;display:block;color:#163A4D;
@@ -257,7 +261,8 @@ if page == "Visão geral":
     wedding = date.fromisoformat(data["wedding_date"])
     departure = date.fromisoformat(data["departure_candidate"])
     departure_label = departure.strftime("%d/%m/%Y") if departure > wedding else "A definir"
-    cap_label = " / ".join(f"R$ {int(item['cap_brl'] / 1000)} mil" for item in data["budget_scenarios"])
+    cap_values = sorted({int(item["cap_brl"] / 1000) for item in data["budget_scenarios"]})
+    cap_label = f"R$ {cap_values[0]}–{cap_values[-1]} mil" if len(cap_values) > 1 else f"R$ {cap_values[0]} mil"
     cards = [
         ("Casamento", wedding.strftime("%d/%m/%Y"), "Data fixa do casal"),
         ("Partida em estudo", departure_label, "Hipótese, sem bilhete emitido"),
@@ -282,13 +287,21 @@ if page == "Visão geral":
     with col2:
         section("Orçamento em uma olhada")
         mini_budget()
-        section("Decisões em aberto")
-        outstanding = [d for d in data["decisions"] if d["status"].casefold() in {"aberta","não decidida","nao decidida"}]
-        for decision in outstanding[:3]:
-            st.markdown(f"**{escape(decision['title'])}**")
-            st.caption(decision["note"])
-        if not outstanding:
-            st.caption("Acompanhe as decisões na página Pesquisas & decisões.")
+
+    st.markdown("<div class='home-section-label'>PRÓXIMAS ESCOLHAS</div>", unsafe_allow_html=True)
+    st.markdown("<div class='home-section-title'>Decisões em aberto</div>", unsafe_allow_html=True)
+    outstanding = [d for d in data["decisions"] if d["status"].casefold() in {"aberta", "não decidida", "nao decidida"}]
+    if outstanding:
+        for col, decision in zip(st.columns(min(3, len(outstanding)), gap="medium"), outstanding[:3]):
+            with col:
+                note_text = decision.get("note", "").strip()
+                if not note_text or note_text == decision["title"].strip():
+                    note_text = "Pendente de definição."
+                st.markdown(f"<div class='home-decision'><strong>{escape(decision['title'])}</strong>"
+                            f"<p>{escape(note_text)}</p></div>", unsafe_allow_html=True)
+    else:
+        st.caption("Nenhuma decisão em aberto identificada no documento sincronizado.")
+    st.link_button("Consultar decisões no Drive", data["sources"]["decisions"])
 
     st.markdown("<div class='home-section-label'>TRÊS MOMENTOS</div>", unsafe_allow_html=True)
     st.markdown("<div class='home-section-title'>Da lua de mel à vida francesa</div>", unsafe_allow_html=True)
