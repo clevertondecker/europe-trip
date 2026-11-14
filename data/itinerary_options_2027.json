@@ -1,0 +1,589 @@
+{
+  "schema_version": "1.0",
+  "checked_at": "2026-11-14",
+  "travelers": 2,
+  "wedding": "2027-09-04",
+  "status": "proposta",
+  "budget_policy": "Passagens, hospedagem e passeios já têm verbas agregadas no orçamento. Totais parciais calculados aqui NÃO se somam novamente à planilha.",
+  "sources": {
+    "travelmar_fares": "https://www.travelmar.it/_download/tariffe-2026.pdf",
+    "travelmar_schedule": "https://www.travelmar.it/_download/orari-travelmar-dal-primo-aprile-2026.pdf",
+    "oeschinen": "https://www.oeschinensee.ch/en/tarife-fahrplan/",
+    "drive": "https://drive.google.com/file/d/1_PgDDM-wPR5hlUyTRjdpxAwrnE0hhaqu/view"
+  },
+  "places": [
+    {
+      "id": "rome",
+      "name": "Roma",
+      "country": "Itália",
+      "lat": 41.9028,
+      "lon": 12.4964,
+      "phase": "italy",
+      "role": "Cidade principal",
+      "description": "3–4 dias de passeios históricos; ingressos e transporte urbano a cotar"
+    },
+    {
+      "id": "naples",
+      "name": "Nápoles",
+      "country": "Itália",
+      "lat": 40.8518,
+      "lon": 14.2681,
+      "phase": "italy",
+      "role": "Logística",
+      "description": "Possível última noite antes do deslocamento para França"
+    },
+    {
+      "id": "salerno",
+      "name": "Salerno",
+      "country": "Itália",
+      "lat": 40.6824,
+      "lon": 14.7681,
+      "phase": "italy",
+      "role": "Base candidata",
+      "description": "Alternativa de hospedagem e conexão com ferries da costa"
+    },
+    {
+      "id": "maiori",
+      "name": "Maiori",
+      "country": "Itália",
+      "lat": 40.6485,
+      "lon": 14.6401,
+      "phase": "italy",
+      "role": "Base candidata",
+      "description": "Alternativa de estadia na costa; horários de ferry sazonais"
+    },
+    {
+      "id": "amalfi",
+      "name": "Amalfi",
+      "country": "Itália",
+      "lat": 40.634,
+      "lon": 14.6027,
+      "phase": "italy",
+      "role": "Passeio",
+      "description": "Centro histórico e paisagem"
+    },
+    {
+      "id": "positano",
+      "name": "Positano",
+      "country": "Itália",
+      "lat": 40.6281,
+      "lon": 14.4843,
+      "phase": "italy",
+      "role": "Passeio",
+      "description": "Visita costeira; ferries dependem de mar"
+    },
+    {
+      "id": "minori",
+      "name": "Minori",
+      "country": "Itália",
+      "lat": 40.649,
+      "lon": 14.6271,
+      "phase": "italy",
+      "role": "Passeio",
+      "description": "Passeio rápido a partir de Maiori"
+    },
+    {
+      "id": "capri",
+      "name": "Capri",
+      "country": "Itália",
+      "lat": 40.5507,
+      "lon": 14.2426,
+      "phase": "italy",
+      "role": "Passeio opcional",
+      "description": "Ferry e logística a cotar; não está na tarifa Travelmar investigada"
+    },
+    {
+      "id": "mulhouse",
+      "name": "Mulhouse",
+      "country": "França",
+      "lat": 47.7508,
+      "lon": 7.3359,
+      "phase": "france",
+      "role": "Base candidata",
+      "description": "Conexões a Basel, Colmar e Strasbourg"
+    },
+    {
+      "id": "strasbourg",
+      "name": "Strasbourg",
+      "country": "França",
+      "lat": 48.5734,
+      "lon": 7.7521,
+      "phase": "france",
+      "role": "Base candidata",
+      "description": "Vida urbana e conexões ferroviárias regionais"
+    },
+    {
+      "id": "metz",
+      "name": "Metz",
+      "country": "França",
+      "lat": 49.1193,
+      "lon": 6.1757,
+      "phase": "france",
+      "role": "Base candidata",
+      "description": "Eixo de Nancy e Luxemburgo"
+    },
+    {
+      "id": "nancy",
+      "name": "Nancy",
+      "country": "França",
+      "lat": 48.6921,
+      "lon": 6.1844,
+      "phase": "france",
+      "role": "Base candidata",
+      "description": "Eixo Metz e Strasbourg"
+    },
+    {
+      "id": "colmar",
+      "name": "Colmar",
+      "country": "França",
+      "lat": 48.0794,
+      "lon": 7.3585,
+      "phase": "france",
+      "role": "Passeio",
+      "description": "Cidade histórica da Alsácia"
+    },
+    {
+      "id": "freiburg",
+      "name": "Freiburg",
+      "country": "Alemanha",
+      "lat": 47.999,
+      "lon": 7.8421,
+      "phase": "france",
+      "role": "Passeio opcional",
+      "description": "Conexão ferroviária a cotar conforme base"
+    },
+    {
+      "id": "basel",
+      "name": "Basel",
+      "country": "Suíça",
+      "lat": 47.5596,
+      "lon": 7.5886,
+      "phase": "france",
+      "role": "Passeio",
+      "description": "Cidade suíça próxima da Alsácia"
+    },
+    {
+      "id": "luxembourg",
+      "name": "Luxemburgo",
+      "country": "Luxemburgo",
+      "lat": 49.6116,
+      "lon": 6.1319,
+      "phase": "france",
+      "role": "Passeio desejado",
+      "description": "Conexão e tarifa dependem da cidade-base"
+    },
+    {
+      "id": "interlaken",
+      "name": "Interlaken",
+      "country": "Suíça",
+      "lat": 46.6863,
+      "lon": 7.8632,
+      "phase": "france",
+      "role": "Viagem alpina",
+      "description": "Pode exigir pernoite, NÃO tratar como bate-volta simples"
+    },
+    {
+      "id": "oeschinen",
+      "name": "Oeschinensee (Kandersteg)",
+      "country": "Suíça",
+      "lat": 46.4989,
+      "lon": 7.7261,
+      "phase": "france",
+      "role": "Viagem alpina",
+      "description": "Teleférico e acesso ferroviário; operação sazonal"
+    }
+  ],
+  "outings": [
+    {
+      "id": "ferry_salerno_amalfi",
+      "phase": "italy",
+      "title": "Salerno → Amalfi (ida e volta)",
+      "origin": "Salerno",
+      "destination": "Amalfi",
+      "mode": "Ferry",
+      "duration_minutes_one_way": 35,
+      "price_eur_person_leg": 12,
+      "legs": 2,
+      "currency": "EUR",
+      "fare_kind": "full",
+      "source_url": "https://www.travelmar.it/_download/tariffe-2026.pdf",
+      "notes": "€12 por passageiro e trecho em 2026; 35 min de navegação no cronograma de abril/2026, sem espera ou deslocamento até píer.",
+      "season": "Horários e mar exigem revalidação em 2027",
+      "base_ids": [
+        "salerno"
+      ]
+    },
+    {
+      "id": "ferry_salerno_positano",
+      "phase": "italy",
+      "title": "Salerno → Positano (ida e volta)",
+      "origin": "Salerno",
+      "destination": "Positano",
+      "mode": "Ferry",
+      "duration_minutes_one_way": 70,
+      "price_eur_person_leg": 17,
+      "legs": 2,
+      "currency": "EUR",
+      "fare_kind": "full",
+      "source_url": "https://www.travelmar.it/_download/tariffe-2026.pdf",
+      "notes": "€17 por pessoa e trecho em 2026. Navegação 70 min, se trajeto direto no horário publicado.",
+      "season": "Ferries condicionados ao mar",
+      "base_ids": [
+        "salerno"
+      ]
+    },
+    {
+      "id": "ferry_salerno_maiori",
+      "phase": "italy",
+      "title": "Salerno → Maiori (transfer único)",
+      "origin": "Salerno",
+      "destination": "Maiori",
+      "mode": "Ferry",
+      "duration_minutes_one_way": 30,
+      "price_eur_person_leg": 10,
+      "legs": 1,
+      "currency": "EUR",
+      "fare_kind": "full",
+      "source_url": "https://www.travelmar.it/_download/tariffe-2026.pdf",
+      "notes": "Apenas bilhete de ida; deslocamento com bagagem não cotado.",
+      "season": "Conferir horários setembro/2027",
+      "base_ids": [
+        "salerno"
+      ]
+    },
+    {
+      "id": "ferry_maiori_amalfi",
+      "phase": "italy",
+      "title": "Maiori → Amalfi (ida e volta)",
+      "origin": "Maiori",
+      "destination": "Amalfi",
+      "mode": "Ferry",
+      "duration_minutes_one_way": 15,
+      "price_eur_person_leg": 5,
+      "legs": 2,
+      "currency": "EUR",
+      "fare_kind": "full",
+      "source_url": "https://www.travelmar.it/_download/tariffe-2026.pdf",
+      "notes": "Bilhete tarifa regular para 2026, sem traslado até píer.",
+      "season": "Horários 2027 a verificar",
+      "base_ids": [
+        "maiori"
+      ]
+    },
+    {
+      "id": "ferry_maiori_positano",
+      "phase": "italy",
+      "title": "Maiori → Positano (ida e volta)",
+      "origin": "Maiori",
+      "destination": "Positano",
+      "mode": "Ferry",
+      "duration_minutes_one_way": 40,
+      "price_eur_person_leg": 15,
+      "legs": 2,
+      "currency": "EUR",
+      "fare_kind": "full",
+      "source_url": "https://www.travelmar.it/_download/tariffe-2026.pdf",
+      "notes": "Exige conexão em Amalfi; 40 min apenas de navegação, não inclui espera entre barcos.",
+      "season": "Horários e mar a validar",
+      "base_ids": [
+        "maiori"
+      ]
+    },
+    {
+      "id": "ferry_maiori_minori",
+      "phase": "italy",
+      "title": "Maiori → Minori (ida e volta)",
+      "origin": "Maiori",
+      "destination": "Minori",
+      "mode": "Ferry",
+      "duration_minutes_one_way": 5,
+      "price_eur_person_leg": 3,
+      "legs": 2,
+      "currency": "EUR",
+      "fare_kind": "full",
+      "source_url": "https://www.travelmar.it/_download/tariffe-2026.pdf",
+      "notes": "Ferry opcional; percurso pode ser feito por outro meio, a verificar.",
+      "season": "Horários 2027 a verificar",
+      "base_ids": [
+        "maiori"
+      ]
+    },
+    {
+      "id": "capri",
+      "phase": "italy",
+      "title": "Passeio a Capri",
+      "origin": "Costa Amalfitana",
+      "destination": "Capri",
+      "mode": "Ferry",
+      "duration_minutes_one_way": null,
+      "price_eur_person_leg": null,
+      "legs": 2,
+      "currency": "EUR",
+      "fare_kind": "unknown",
+      "source_url": "https://www.travelmar.it/",
+      "notes": "Ainda falta confirmar porto, bilhetes de ferry e horário de retorno.",
+      "season": "Verificar clima e operação",
+      "base_ids": [
+        "salerno",
+        "maiori"
+      ]
+    },
+    {
+      "id": "rome_sites",
+      "phase": "italy",
+      "title": "Coliseu, Fórum e centros históricos",
+      "origin": "Roma",
+      "destination": "Roma",
+      "mode": "A pé + transporte urbano",
+      "duration_minutes_one_way": null,
+      "price_eur_person_leg": null,
+      "legs": 1,
+      "currency": "EUR",
+      "fare_kind": "unknown",
+      "source_url": "https://colosseo.it/",
+      "notes": "Ingressos, horários e deslocamentos por dia ainda não cotados.",
+      "season": "Reservas e vagas em 2027 não abertas",
+      "base_ids": [
+        "salerno",
+        "maiori"
+      ]
+    },
+    {
+      "id": "mulhouse_colmar",
+      "phase": "france",
+      "title": "Mulhouse → Colmar (bate-volta)",
+      "origin": "Mulhouse",
+      "destination": "Colmar",
+      "mode": "TER",
+      "duration_minutes_one_way": 18,
+      "price_eur_person_leg": 5.4,
+      "legs": 2,
+      "currency": "EUR",
+      "fare_kind": "discount",
+      "source_url": "https://www.ter.sncf.com/grand-est/trajet-mulhouse-colmar",
+      "notes": "Tarifa reduzida por trecho Carte Fluo, não incluir custo do cartão ou conexões. Retorno do fim de semana a verificar.",
+      "season": "Base 2026, datas 2027 não verificadas",
+      "base_ids": [
+        "mulhouse"
+      ]
+    },
+    {
+      "id": "mulhouse_basel",
+      "phase": "france",
+      "title": "Mulhouse → Basel (bate-volta)",
+      "origin": "Mulhouse",
+      "destination": "Basel",
+      "mode": "TER",
+      "duration_minutes_one_way": 22,
+      "price_eur_person_leg": 4.7,
+      "legs": 2,
+      "currency": "EUR",
+      "fare_kind": "discount",
+      "source_url": "https://www.ter.sncf.com/grand-est/trajet-mulhouse-bale",
+      "notes": "Tarifa reduzida Carte Fluo publicada, elegibilidade e datas não confirmadas.",
+      "season": "Confirmar trem internacional",
+      "base_ids": [
+        "mulhouse"
+      ]
+    },
+    {
+      "id": "mulhouse_strasbourg",
+      "phase": "france",
+      "title": "Mulhouse → Strasbourg (bate-volta)",
+      "origin": "Mulhouse",
+      "destination": "Strasbourg",
+      "mode": "TER",
+      "duration_minutes_one_way": 53,
+      "price_eur_person_leg": 11.7,
+      "legs": 2,
+      "currency": "EUR",
+      "fare_kind": "discount",
+      "source_url": "https://www.ter.sncf.com/grand-est/trajet-mulhouse-strasbourg",
+      "notes": "Somente tarifa reduzida por pessoa e trecho, ida e volta ilustrativas.",
+      "season": "Confirmar trem 2027",
+      "base_ids": [
+        "mulhouse"
+      ]
+    },
+    {
+      "id": "strasbourg_colmar",
+      "phase": "france",
+      "title": "Strasbourg → Colmar (bate-volta)",
+      "origin": "Strasbourg",
+      "destination": "Colmar",
+      "mode": "TER",
+      "duration_minutes_one_way": 32,
+      "price_eur_person_leg": 7.9,
+      "legs": 2,
+      "currency": "EUR",
+      "fare_kind": "discount",
+      "source_url": "https://www.ter.sncf.com/grand-est/trajet-strasbourg-colmar",
+      "notes": "Tarifa reduzida por trecho Carte Fluo; cartão não incluso.",
+      "season": "Confirmar 2027",
+      "base_ids": [
+        "strasbourg"
+      ]
+    },
+    {
+      "id": "strasbourg_nancy",
+      "phase": "france",
+      "title": "Strasbourg → Nancy (bate-volta)",
+      "origin": "Strasbourg",
+      "destination": "Nancy",
+      "mode": "TER",
+      "duration_minutes_one_way": 104,
+      "price_eur_person_leg": 16.3,
+      "legs": 2,
+      "currency": "EUR",
+      "fare_kind": "discount",
+      "source_url": "https://www.ter.sncf.com/grand-est/trajet-strasbourg-nancy",
+      "notes": "Trecho longo; confirmar última volta aos fins de semana.",
+      "season": "Confirmar 2027",
+      "base_ids": [
+        "strasbourg"
+      ]
+    },
+    {
+      "id": "metz_nancy",
+      "phase": "france",
+      "title": "Metz → Nancy (bate-volta)",
+      "origin": "Metz",
+      "destination": "Nancy",
+      "mode": "TER",
+      "duration_minutes_one_way": 38,
+      "price_eur_person_leg": 7,
+      "legs": 2,
+      "currency": "EUR",
+      "fare_kind": "discount",
+      "source_url": "https://www.ter.sncf.com/grand-est/trajet-nancy-metz",
+      "notes": "Tarifa reduzida Carte Fluo, elegibilidade não comprovada.",
+      "season": "Confirmar 2027",
+      "base_ids": [
+        "metz"
+      ]
+    },
+    {
+      "id": "metz_thionville",
+      "phase": "france",
+      "title": "Metz → Thionville (bate-volta)",
+      "origin": "Metz",
+      "destination": "Thionville",
+      "mode": "TER",
+      "duration_minutes_one_way": 25,
+      "price_eur_person_leg": 4.3,
+      "legs": 2,
+      "currency": "EUR",
+      "fare_kind": "discount",
+      "source_url": "https://www.ter.sncf.com/grand-est/trajet-metz-thionville",
+      "notes": "Tarifa reduzida Carte Fluo, não inclui ida ao Luxemburgo.",
+      "season": "Confirmar 2027",
+      "base_ids": [
+        "metz"
+      ]
+    },
+    {
+      "id": "nancy_metz",
+      "phase": "france",
+      "title": "Nancy → Metz (bate-volta)",
+      "origin": "Nancy",
+      "destination": "Metz",
+      "mode": "TER",
+      "duration_minutes_one_way": 38,
+      "price_eur_person_leg": 7,
+      "legs": 2,
+      "currency": "EUR",
+      "fare_kind": "discount",
+      "source_url": "https://www.ter.sncf.com/grand-est/trajet-nancy-metz",
+      "notes": "Tarifa reduzida Carte Fluo, cartão extra.",
+      "season": "Confirmar 2027",
+      "base_ids": [
+        "nancy"
+      ]
+    },
+    {
+      "id": "nancy_strasbourg",
+      "phase": "france",
+      "title": "Nancy → Strasbourg (bate-volta)",
+      "origin": "Nancy",
+      "destination": "Strasbourg",
+      "mode": "TER",
+      "duration_minutes_one_way": 104,
+      "price_eur_person_leg": 16.3,
+      "legs": 2,
+      "currency": "EUR",
+      "fare_kind": "discount",
+      "source_url": "https://www.ter.sncf.com/grand-est/trajet-nancy-strasbourg",
+      "notes": "Confirmar trem de retorno após passeios.",
+      "season": "Confirmar 2027",
+      "base_ids": [
+        "nancy"
+      ]
+    },
+    {
+      "id": "oeschinen_cable",
+      "phase": "france",
+      "title": "Oeschinensee: teleférico de Kandersteg (casal)",
+      "origin": "Kandersteg",
+      "destination": "Oeschinensee",
+      "mode": "Teleférico",
+      "duration_minutes_one_way": null,
+      "price_eur_person_leg": 36,
+      "legs": 1,
+      "currency": "CHF",
+      "fare_kind": "roundtrip_price",
+      "source_url": "https://www.oeschinensee.ch/en/tarife-fahrplan/",
+      "notes": "CHF36 por pessoa já cobre subida e descida (tarifa outono 2026); o acesso ferroviário até Kandersteg é DESCONHECIDO, pode exigir pernoite. Não usar 2x para ida/volta.",
+      "season": "Página oficial informa operação de outono 20/09–07/11/2027, tarifa de 2027 não publicada",
+      "base_ids": [
+        "mulhouse",
+        "strasbourg",
+        "metz",
+        "nancy"
+      ]
+    },
+    {
+      "id": "luxembourg_trip",
+      "phase": "france",
+      "title": "Visita a Luxemburgo",
+      "origin": "Base francesa",
+      "destination": "Luxemburgo",
+      "mode": "Trem (a cotar)",
+      "duration_minutes_one_way": null,
+      "price_eur_person_leg": null,
+      "legs": 2,
+      "currency": "EUR",
+      "fare_kind": "unknown",
+      "source_url": "https://www.ter.sncf.com/grand-est/se-deplacer/lignes",
+      "notes": "Desejado pelo casal; tempo e custo dependem da cidade-base.",
+      "season": "Datas 2027 a definir",
+      "base_ids": [
+        "mulhouse",
+        "strasbourg",
+        "metz",
+        "nancy"
+      ]
+    },
+    {
+      "id": "interlaken_trip",
+      "phase": "france",
+      "title": "Interlaken / Alpes suíços (possível pernoite)",
+      "origin": "Base francesa",
+      "destination": "Interlaken",
+      "mode": "Trem + hospedagem (a cotar)",
+      "duration_minutes_one_way": null,
+      "price_eur_person_leg": null,
+      "legs": 2,
+      "currency": "CHF",
+      "fare_kind": "unknown",
+      "source_url": "https://www.sbb.ch/en",
+      "notes": "Viagem com deslocamentos longos e custo de hotel; não tratar como bate-volta simples.",
+      "season": "Priorizar durante as férias e antes do inverno",
+      "base_ids": [
+        "mulhouse",
+        "strasbourg",
+        "metz",
+        "nancy"
+      ]
+    }
+  ]
+}
