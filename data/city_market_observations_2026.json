@@ -1,0 +1,350 @@
+{
+  "schema_version": "1.0",
+  "checked_at": "2026-11-14",
+  "study_period": "2027-09 a 2027-11 (datas exatas não definidas)",
+  "travelers": 2,
+  "planned_nights_min": 55,
+  "planned_nights_max": 65,
+  "method": "Primeira amostra comparativa de anúncios em HousingAnywhere; preços publicados EUR/mês. Não representa média de mercado nem reserva para 2027.",
+  "housing_policy": "Todos os imóveis listados são observações de catálogo; nenhum confirma estadia de 55–65 noites, casal, home office e custo completo. Preços e disponibilidade podem mudar.",
+  "common_costs": {
+    "groceries_eur_week_couple": 137.06,
+    "provenance": "Europa_2027_Base_COMPLETA.md no Drive, cesta histórica ilustrativa de novembro/2026 para duas pessoas; mesmo valor para todas as cidades",
+    "source_url": "https://drive.google.com/file/d/1_PgDDM-wPR5hlUyTRjdpxAwrnE0hhaqu/view",
+    "city_specific": false,
+    "restaurant_budget_eur": null,
+    "notes": "Não somar esta cesta à planilha financeira sem reconciliar a verba de supermercado já incluída. Falta pesquisa comparável de restaurante e academia por bairro."
+  },
+  "legal": {
+    "source": "https://www.service-public.gouv.fr/particuliers/vosdroits/F34759?lang=fr",
+    "limitation": "Bail mobilité exige situação profissional ou educacional qualificada e comprovação; não assumir elegibilidade. Confirmar modalidade de locação turística/residencial para 60 noites."
+  },
+  "cities": [
+    {
+      "id": "mulhouse",
+      "name": "Mulhouse",
+      "housing_catalogue": "https://housinganywhere.com/s/Mulhouse--France/furnished-apartments",
+      "offers": [
+        {
+          "street": "Rue Franklin",
+          "size_m2": 50,
+          "observed_eur_month": 584,
+          "utilities": "excluded",
+          "dwelling": "house",
+          "observed_available_label": "from 1 December; year unspecified in result",
+          "url_type": "catalogue",
+          "quote_for_2027": false,
+          "total_stay_eur": null,
+          "internet_verified": false,
+          "two_occupants_confirmed": false,
+          "contract_confirmed": false,
+          "price_kind": "listing_monthly_advertised_2026",
+          "source_url": "https://housinganywhere.com/s/Mulhouse--France/furnished-apartments"
+        },
+        {
+          "street": "Rue Louis Pasteur",
+          "size_m2": 52,
+          "observed_eur_month": 980,
+          "utilities": "included",
+          "dwelling": "apartment",
+          "observed_available_label": "available now, not 2027",
+          "url_type": "catalogue",
+          "quote_for_2027": false,
+          "total_stay_eur": null,
+          "internet_verified": false,
+          "two_occupants_confirmed": false,
+          "contract_confirmed": false,
+          "price_kind": "listing_monthly_advertised_2026",
+          "source_url": "https://housinganywhere.com/s/Mulhouse--France/furnished-apartments"
+        },
+        {
+          "street": "Rue des Franciscains",
+          "size_m2": 48,
+          "observed_eur_month": 1350,
+          "utilities": "included",
+          "dwelling": "apartment",
+          "observed_available_label": "available from 22 December; no 2027 confirmation",
+          "url_type": "catalogue",
+          "quote_for_2027": false,
+          "total_stay_eur": null,
+          "internet_verified": false,
+          "two_occupants_confirmed": false,
+          "contract_confirmed": false,
+          "price_kind": "listing_monthly_advertised_2026",
+          "source_url": "https://housinganywhere.com/s/Mulhouse--France/furnished-apartments"
+        }
+      ],
+      "urban_pass": {
+        "fare_eur_month_person": 47,
+        "eligibility": "26–64 anos; nominativo",
+        "source_url": "https://www.solea.info/titres-tarifs/abonnements/26-64-ans",
+        "price_period": "2026",
+        "note": "Tarifa nominal; confirmar compra para visitante e quantidade de meses civis faturados"
+      },
+      "rail": [
+        {
+          "destination": "Colmar",
+          "train_minutes": 18,
+          "discounted_eur_leg_person": 5.4,
+          "source_url": "https://www.ter.sncf.com/grand-est/trajet-mulhouse-colmar"
+        },
+        {
+          "destination": "Basel (Bâle)",
+          "train_minutes": 22,
+          "discounted_eur_leg_person": 4.7,
+          "source_url": "https://www.ter.sncf.com/grand-est/trajet-mulhouse-bale"
+        },
+        {
+          "destination": "Strasbourg",
+          "train_minutes": 53,
+          "discounted_eur_leg_person": 11.7,
+          "source_url": "https://www.ter.sncf.com/grand-est/trajet-mulhouse-strasbourg"
+        }
+      ],
+      "rental_quote_eligible_2027": 0
+    },
+    {
+      "id": "strasbourg",
+      "name": "Strasbourg",
+      "housing_catalogue": "https://housinganywhere.com/s/Strasbourg--France/furnished-apartments",
+      "offers": [
+        {
+          "street": "Avenue de Colmar",
+          "size_m2": 50,
+          "observed_eur_month": 950,
+          "utilities": "included",
+          "dwelling": "apartment",
+          "observed_available_label": "from 1 February 2027, not September",
+          "url_type": "catalogue",
+          "quote_for_2027": false,
+          "total_stay_eur": null,
+          "internet_verified": false,
+          "two_occupants_confirmed": false,
+          "contract_confirmed": false,
+          "price_kind": "listing_monthly_advertised_2026",
+          "source_url": "https://housinganywhere.com/s/Strasbourg--France/furnished-apartments"
+        },
+        {
+          "street": "Rue de la Ziegelau",
+          "size_m2": 38,
+          "observed_eur_month": 850,
+          "utilities": "included",
+          "dwelling": "apartment",
+          "observed_available_label": "from 1 January 2027; no September confirmation",
+          "url_type": "catalogue",
+          "quote_for_2027": false,
+          "total_stay_eur": null,
+          "internet_verified": false,
+          "two_occupants_confirmed": false,
+          "contract_confirmed": false,
+          "price_kind": "listing_monthly_advertised_2026",
+          "source_url": "https://housinganywhere.com/s/Strasbourg--France/furnished-apartments"
+        },
+        {
+          "street": "Square de l'Aiguillage",
+          "size_m2": 56,
+          "observed_eur_month": 950,
+          "utilities": "included",
+          "dwelling": "apartment",
+          "observed_available_label": "from 1 January 2027; no September confirmation",
+          "url_type": "catalogue",
+          "quote_for_2027": false,
+          "total_stay_eur": null,
+          "internet_verified": false,
+          "two_occupants_confirmed": false,
+          "contract_confirmed": false,
+          "price_kind": "listing_monthly_advertised_2026",
+          "source_url": "https://housinganywhere.com/s/Strasbourg--France/furnished-apartments"
+        }
+      ],
+      "urban_pass": {
+        "fare_eur_month_person": 56,
+        "eligibility": "26–64 anos; assinatura mensal, validar condições em 2027",
+        "source_url": "https://www.cts-strasbourg.eu/export/sites/default/.galleries/Documents/CGVU-CTS-JANVIER-2026.pdf",
+        "price_period": "tabela 15/10/2025 publicada em guia 2026",
+        "note": "Tarifa histórica da CTS; sujeito a atualização; não confirmado para 2027"
+      },
+      "rail": [
+        {
+          "destination": "Colmar",
+          "train_minutes": 32,
+          "discounted_eur_leg_person": 7.9,
+          "source_url": "https://www.ter.sncf.com/grand-est/trajet-strasbourg-colmar"
+        },
+        {
+          "destination": "Mulhouse",
+          "train_minutes": 53,
+          "discounted_eur_leg_person": 11.7,
+          "source_url": "https://www.ter.sncf.com/grand-est/trajet-mulhouse-strasbourg"
+        },
+        {
+          "destination": "Nancy",
+          "train_minutes": 104,
+          "discounted_eur_leg_person": 16.3,
+          "source_url": "https://www.ter.sncf.com/grand-est/trajet-strasbourg-nancy"
+        }
+      ],
+      "rental_quote_eligible_2027": 0
+    },
+    {
+      "id": "metz",
+      "name": "Metz",
+      "housing_catalogue": "https://housinganywhere.com/s/Metz--France/furnished-apartments",
+      "offers": [
+        {
+          "street": "Rue du Maître Échevin",
+          "size_m2": 80,
+          "observed_eur_month": 1250,
+          "utilities": "excluded",
+          "dwelling": "apartment",
+          "observed_available_label": "from 1 January 2027; above preferred area",
+          "url_type": "catalogue",
+          "quote_for_2027": false,
+          "total_stay_eur": null,
+          "internet_verified": false,
+          "two_occupants_confirmed": false,
+          "contract_confirmed": false,
+          "price_kind": "listing_monthly_advertised_2026",
+          "source_url": "https://housinganywhere.com/s/Metz--France/furnished-apartments"
+        },
+        {
+          "street": "Rue du Maître Échevin",
+          "size_m2": 60,
+          "observed_eur_month": 1350,
+          "utilities": "excluded",
+          "dwelling": "apartment",
+          "observed_available_label": "from 1 January 2027; possible duplicate property/address",
+          "url_type": "catalogue",
+          "quote_for_2027": false,
+          "total_stay_eur": null,
+          "internet_verified": false,
+          "two_occupants_confirmed": false,
+          "contract_confirmed": false,
+          "price_kind": "listing_monthly_advertised_2026",
+          "source_url": "https://housinganywhere.com/s/Metz--France/furnished-apartments"
+        },
+        {
+          "street": "Rue du Docteur Bardot (Montigny-lès-Metz)",
+          "size_m2": 70,
+          "observed_eur_month": 600,
+          "utilities": "excluded",
+          "dwelling": "apartment",
+          "observed_available_label": "available now; outside core city, no 2027 confirmation",
+          "url_type": "catalogue",
+          "quote_for_2027": false,
+          "total_stay_eur": null,
+          "internet_verified": false,
+          "two_occupants_confirmed": false,
+          "contract_confirmed": false,
+          "price_kind": "listing_monthly_advertised_2026",
+          "source_url": "https://housinganywhere.com/s/Metz--France/furnished-apartments"
+        }
+      ],
+      "urban_pass": {
+        "fare_eur_month_person": 45.9,
+        "eligibility": "27–64 anos; mensal Liberté",
+        "source_url": "https://www.lemet.fr/abonnements/",
+        "price_period": "tabela 01/07/2025, não validada para 2027",
+        "note": "Evitar pressupor reembolso de empregador brasileiro; verificar tarifa futura"
+      },
+      "rail": [
+        {
+          "destination": "Nancy",
+          "train_minutes": 38,
+          "discounted_eur_leg_person": 7,
+          "source_url": "https://www.ter.sncf.com/grand-est/trajet-nancy-metz"
+        },
+        {
+          "destination": "Thionville",
+          "train_minutes": 25,
+          "discounted_eur_leg_person": 4.3,
+          "source_url": "https://www.ter.sncf.com/grand-est/trajet-metz-thionville"
+        },
+        {
+          "destination": "Strasbourg",
+          "train_minutes": 96,
+          "discounted_eur_leg_person": null,
+          "source_url": "https://www.ter.sncf.com/grand-est/trajet-metz-strasbourg"
+        }
+      ],
+      "rental_quote_eligible_2027": 0
+    },
+    {
+      "id": "nancy",
+      "name": "Nancy",
+      "housing_catalogue": "https://housinganywhere.com/s/Nancy--France/furnished-apartments",
+      "offers": [
+        {
+          "street": "Place de la Commanderie",
+          "size_m2": 58,
+          "observed_eur_month": 699,
+          "utilities": "included",
+          "dwelling": "apartment",
+          "observed_available_label": "available now; not September 2027",
+          "url_type": "catalogue",
+          "quote_for_2027": false,
+          "total_stay_eur": null,
+          "internet_verified": false,
+          "two_occupants_confirmed": false,
+          "contract_confirmed": false,
+          "price_kind": "listing_monthly_advertised_2026",
+          "source_url": "https://housinganywhere.com/s/Nancy--France/furnished-apartments"
+        },
+        {
+          "street": "Rue de la Salle",
+          "size_m2": 50,
+          "observed_eur_month": 810,
+          "utilities": "excluded",
+          "dwelling": "apartment",
+          "observed_available_label": "available now; not September 2027",
+          "url_type": "catalogue",
+          "quote_for_2027": false,
+          "total_stay_eur": null,
+          "internet_verified": false,
+          "two_occupants_confirmed": false,
+          "contract_confirmed": false,
+          "price_kind": "listing_monthly_advertised_2026",
+          "source_url": "https://housinganywhere.com/s/Nancy--France/furnished-apartments"
+        },
+        {
+          "street": "Avenue du Maréchal Juin",
+          "size_m2": 40,
+          "observed_eur_month": 750,
+          "utilities": "excluded",
+          "dwelling": "apartment",
+          "observed_available_label": "available now; not September 2027",
+          "url_type": "catalogue",
+          "quote_for_2027": false,
+          "total_stay_eur": null,
+          "internet_verified": false,
+          "two_occupants_confirmed": false,
+          "contract_confirmed": false,
+          "price_kind": "listing_monthly_advertised_2026",
+          "source_url": "https://housinganywhere.com/s/Nancy--France/furnished-apartments"
+        }
+      ],
+      "urban_pass": {
+        "fare_eur_month_person": 47,
+        "eligibility": "26–64 anos, mensal Stan",
+        "source_url": "https://www.reseau-stan.com/titres-tarifs/tous-les-titres",
+        "price_period": "tabela válida a partir de 01/08/2026",
+        "note": "Stan anuncia gratuidade para todos aos fins de semana e feriados em 2026; confirmar regra 2027"
+      },
+      "rail": [
+        {
+          "destination": "Metz",
+          "train_minutes": 38,
+          "discounted_eur_leg_person": 7,
+          "source_url": "https://www.ter.sncf.com/grand-est/trajet-nancy-metz"
+        },
+        {
+          "destination": "Strasbourg",
+          "train_minutes": 104,
+          "discounted_eur_leg_person": 16.3,
+          "source_url": "https://www.ter.sncf.com/grand-est/trajet-nancy-strasbourg"
+        }
+      ],
+      "rental_quote_eligible_2027": 0
+    }
+  ]
+}
