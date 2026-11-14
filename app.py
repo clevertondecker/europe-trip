@@ -12,6 +12,7 @@ from drive_sync import load_live_updates, update_map_places
 from city_compare import get_preset, initialize_weight_state, load_cities, normalized_weights, rank_cities
 from city_research import city_readiness, load_audit
 from city_market import load_market, observed_rent_summary, example_train_couple_return
+from city_research_round2 import load_round2
 
 st.set_page_config(page_title="Nossa Europa 2027", page_icon="🌍", layout="wide", initial_sidebar_state="expanded")
 data = load_data()
@@ -682,6 +683,7 @@ elif page == "Comparar cidades":
     city_data = load_cities()
     city_audit = load_audit()
     market = load_market()
+    round2 = load_round2()
     market_by_name = {city["name"]: city for city in market["cities"]}
     audit_by_name = {city["name"]: city for city in city_audit["cities"]}
     criteria_ids = [criterion["id"] for criterion in city_data["criteria"]]
@@ -882,6 +884,69 @@ elif page == "Comparar cidades":
             "por bairro. Evitar somar essa referência novamente ao orçamento oficial.</p>"
             "</div>", unsafe_allow_html=True)
         st.link_button("Consultar origem da cesta no Drive", basket["source_url"])
+
+        st.markdown("<div class='page-section'>Novas evidências de custo de vida</div>",unsafe_allow_html=True)
+        st.markdown(
+            "<div class='city-fact city-fact--info'><strong>Leitura correta dos preços</strong>"
+            "<p>Os aluguéis abaixo são estimativas de contratos residenciais comuns em €/m²/mês "
+            "(não hospedagem de temporada). O jantar para dois é um dado colaborativo do Numbeo, "
+            "não preço de reserva ou média estatisticamente comprovada.</p></div>",
+            unsafe_allow_html=True)
+        economic_rows = []
+        for rec in round2["cities"]:
+            economic_rows.append({
+                "Cidade":rec["name"],
+                "Aluguel residencial €/m²/mês":rec["residential_rent_eur_sqm_month"],
+                "Jantar para dois €":rec["restaurant_two_midrange_eur"],
+                "Fonte jantar":rec["restaurant_source_url"]
+            })
+        st.dataframe(pd.DataFrame(economic_rows), hide_index=True, use_container_width=True,
+                     column_config={
+                         "Aluguel residencial €/m²/mês":st.column_config.NumberColumn(format="€ %.2f"),
+                         "Jantar para dois €":st.column_config.NumberColumn(format="€ %.2f"),
+                         "Fonte jantar":st.column_config.LinkColumn("Numbeo", display_text="Consultar"),
+                     })
+        st.link_button("Metodologia e dados do aluguel residencial",
+                       round2["common_sources"][0]["url"])
+        st.caption("Indicador de aluguel do MeilleursAgents em 01/11/2026, apartamento residencial "
+                   "comum; o jantar é um item comparável nas páginas consultadas em novembro/2026. "
+                   "Metz possui lacunas de amostra em vários produtos. Não converter esses valores "
+                   "em custo real da viagem.")
+
+        st.markdown("<div class='page-section'>Plano B para o trabalho remoto</div>",unsafe_allow_html=True)
+        st.markdown("<div class='page-subtitle'>Opções de coworking publicadas: preços, modalidades "
+                    "e horários não equivalentes. Não garantem videoconferências até o fim "
+                    "do expediente brasileiro.</div>", unsafe_allow_html=True)
+        coworking_rows = []
+        for rec in round2["cities"]:
+            office = rec["coworking"]
+            coworking_rows.append({
+                "Cidade":rec["name"], "Espaço":office["name"],
+                "Preço publicado €":office["price_eur"],
+                "Modalidade":office["price_basis"],
+                "Compatível até 22–23h":("Não" if office["late_work_compatible"] is False else "A confirmar"),
+                "Fonte":office["source_url"]
+            })
+        st.dataframe(pd.DataFrame(coworking_rows), hide_index=True, use_container_width=True,
+                     column_config={
+                         "Preço publicado €":st.column_config.NumberColumn(format="€ %.2f"),
+                         "Fonte":st.column_config.LinkColumn("Fonte", display_text="Consultar")
+                     })
+        with st.expander("Horários, disponibilidade e condições de cada coworking"):
+            for rec in round2["cities"]:
+                office = rec["coworking"]
+                st.markdown(f"**{escape(rec['name'])} — {escape(office['name'])}**")
+                st.caption("Horário: " + (office["schedule"] or "não verificado") +
+                           " · " + office["note"])
+        st.markdown("<div class='city-fact city-fact--warn'><strong>Alojamento e contrato continuam bloqueantes</strong>"
+                    "<p>O bail mobilité francês pode servir para contratos temporários, "
+                    "mas depende de uma situação legal qualificadora. Não assumir que "
+                    "trabalhar remotamente para uma empresa brasileira seja suficiente. "
+                    "Nenhuma oferta foi confirmada para a janela de 2027.</p></div>",
+                    unsafe_allow_html=True)
+        st.link_button("Ver regras de contrato no Service-Public",
+                       round2["common_sources"][1]["url"])
+
 
     elif active_section == "Comparar e ajustar":
         st.markdown("<div class='page-section'>Ranking de preferências históricas</div>",
