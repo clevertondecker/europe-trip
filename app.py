@@ -312,9 +312,40 @@ padding:17px 20px;margin:0 0 10px;}
 .city-side__sample{color:#2E6D60;}
 .city-side small{font-size:.73rem;color:#698194;font-weight:500;}
 .city-side p{font-size:.84rem;color:#658093;line-height:1.6;margin:12px 0 0;}
-[data-testid="stTabs"] button[role="tab"]{font-weight:750;color:#4B7388;padding:12px 16px;}
-[data-testid="stTabs"] button[aria-selected="true"]{color:#126F99;}
-[data-testid="stTabs"] [data-baseweb="tab-highlight"]{background:#1684A6;}
+/* Subnavegação: abas em formato de seletor, com contraste claro do estado ativo */
+[data-testid="stTabs"] [data-baseweb="tab-list"]{
+  display:flex;gap:8px;align-items:stretch;padding:8px !important;
+  background:#EBF3F9;border:1px solid #DCE9F1;border-radius:16px;
+  margin:12px 0 28px;overflow-x:auto;scrollbar-width:thin;
+}
+[data-testid="stTabs"] button[role="tab"]{
+  flex:1 0 auto;min-height:48px;border:1px solid transparent !important;
+  border-radius:11px !important;padding:12px 19px !important;
+  background:transparent !important;color:#405E70 !important;
+  font-weight:750 !important;font-size:.93rem !important;
+  white-space:nowrap;transition:background .16s,color .16s,box-shadow .16s;
+}
+[data-testid="stTabs"] button[role="tab"]:hover{
+  background:#FFFFFF !important;color:#17465F !important;
+}
+[data-testid="stTabs"] button[role="tab"][aria-selected="true"]{
+  background:#153C53 !important;color:#FFFFFF !important;
+  box-shadow:0 3px 11px rgba(20,58,78,.20);
+}
+[data-testid="stTabs"] button[role="tab"][aria-selected="true"] *{
+  color:#FFFFFF !important;
+}
+[data-testid="stTabs"] button[role="tab"]:focus-visible{
+  outline:3px solid #65B8E8;outline-offset:2px;
+}
+[data-testid="stTabs"] [data-baseweb="tab-highlight"],
+[data-testid="stTabs"] [data-baseweb="tab-border"]{
+  display:none !important;
+}
+@media(max-width:850px){
+  [data-testid="stTabs"] [data-baseweb="tab-list"]{gap:5px;padding:6px !important;}
+  [data-testid="stTabs"] button[role="tab"]{flex:0 0 auto;padding:10px 13px !important;font-size:.85rem !important;min-height:43px;}
+}
 @media(max-width:800px){.city-digest__metrics{grid-template-columns:1fr 1fr;}.city-digest{padding:15px;}}
 
 </style>
