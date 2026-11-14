@@ -18,6 +18,7 @@ from itinerary_planner import load_itinerary, select_outings, basket_totals, vis
 from catalog import build_catalog, filter_catalog
 from unified_budget import resolve_french_budget, scenario_total
 from calendar_model import calendar_plan
+from route_preview import route_endpoints
 
 st.set_page_config(page_title="Nossa Europa 2027", page_icon="🌍", layout="wide", initial_sidebar_state="expanded")
 data = load_data()
@@ -961,6 +962,23 @@ elif page == "Roteiro":
                             f"<div class='page-stat__value'>{escape(value)}</div>"
                             f"<div class='page-stat__hint'>{escape(detail)}</div></div>",
                             unsafe_allow_html=True)
+        known_route_choices=[x for x in available if len(route_endpoints(itinerary,x))==2]
+        if known_route_choices:
+            st.markdown("<div class='page-section'>Visualizar origem e destino no mapa</div>",
+                        unsafe_allow_html=True)
+            selected_route=st.selectbox("Deslocamento pesquisado",
+                                        known_route_choices,
+                                        format_func=lambda item:item["title"],
+                                        key=f"route_preview_{phase}_{base}")
+            pins=route_endpoints(itinerary,selected_route)
+            center=(sum(p["lat"] for p in pins)/2,sum(p["lon"] for p in pins)/2)
+            map_view(pins,height=300,show_labels=True,center=center,
+                     zoom=7.5 if phase=="italy" else 6.8)
+            st.caption("Mapa apenas com pontos de partida e chegada, não o traçado real do "
+                       "trem ou do ferry. Tempo publicado, quando existente, é entre "
+                       "estações/portos e não porta a porta.")
+            st.link_button("Consultar trajeto na fonte original",
+                           selected_route["source_url"])
         if subtotal["discount_conditional"]:
             st.warning("Parte das tarifas de trem exige Carte Fluo (não incluída): "
                        + ", ".join(subtotal["discount_conditional"]))
