@@ -17,6 +17,7 @@ from finance_lifestyle import FRENCH_BUDGET, audit_subtotals, lifestyle_outcome
 from itinerary_planner import load_itinerary, select_outings, basket_totals, visible_map_places
 from catalog import build_catalog, filter_catalog
 from unified_budget import resolve_french_budget, scenario_total
+from calendar_model import calendar_plan
 
 st.set_page_config(page_title="Nossa Europa 2027", page_icon="🌍", layout="wide", initial_sidebar_state="expanded")
 data = load_data()
@@ -1096,7 +1097,7 @@ elif page == "Roteiro":
                 "Férias iniciais de 20–30 dias; depois trabalho remoto, sujeito a validação de regras.</div>",
                 unsafe_allow_html=True)
 
-    sections=["Visão geral","Itália e Costa Amalfitana","França e escapadas","Transportes e custos","Cronograma oficial"]
+    sections=["Visão geral","Itália e Costa Amalfitana","França e escapadas","Transportes e custos","Calendário","Cronograma oficial"]
     itinerary_section=st.segmented_control("Seção do roteiro",sections,default="Visão geral",
                                            selection_mode="single",key="itinerary_section",
                                            label_visibility="collapsed")
@@ -1249,6 +1250,40 @@ elif page == "Roteiro":
                 st.markdown(f"**{escape(entry['title'])}** · {escape(amount)}")
                 st.caption(entry["season"]+" · "+entry["notes"])
                 st.link_button("Abrir fonte",entry["source_url"])
+
+    elif itinerary_section == "Calendário":
+        from datetime import date
+        import pandas as pd
+        st.markdown("<div class='page-section'>Calendário ilustrativo da viagem</div>",
+                    unsafe_allow_html=True)
+        st.caption("As etapas são projeções, não compromissos nem bilhetes. "
+                   "Altere as premissas para identificar dias disponíveis aos passeios.")
+        col1,col2,col3 = st.columns(3,gap="medium")
+        with col1:
+            depart=st.date_input("Saída candidata",value=date.fromisoformat(data["departure_candidate"]),
+                                 min_value=date(2027,9,5),key="itinerary_departure")
+        with col2:
+            total_days=st.slider("Duração total (dias)",65,75,70,key="itinerary_total_days")
+        with col3:
+            vacation_days=st.slider("Férias iniciais (dias)",20,30,25,key="itinerary_vacation_days")
+        italy_days=st.slider("Etapa italiana (dias)",8,12,int(data["italy_days_approx"]),
+                             key="itinerary_italy_days")
+        setup_days=st.slider("Instalação na França (dias)",3,5,4,key="itinerary_setup_days")
+        schedule=calendar_plan(depart,total_days,italy_days,vacation_days,setup_days)
+        st.dataframe(pd.DataFrame([
+            {"Dia":r["day"],"Data":r["date"],"Região":r["stage"],
+             "Atividade sugerida":r["activity"]} for r in schedule]),
+            hide_index=True,use_container_width=True,height=450)
+        breakdown={}
+        for row in schedule:
+            breakdown[row["activity"]]=breakdown.get(row["activity"],0)+1
+        st.markdown("<div class='page-section'>Distribuição dos dias</div>",unsafe_allow_html=True)
+        st.bar_chart(pd.DataFrame([{"Atividade":k,"Dias":v} for k,v in breakdown.items()]),
+                     x="Atividade",y="Dias",horizontal=True)
+        st.info("Este calendário distribui etapas por regras simples. Não agenda passeios individuais, "
+                "não calcula horários locais de trabalho nem confirma operações para os dias específicos.")
+        st.link_button("Ver cronograma original no Drive",data["sources"]["spreadsheet"],
+                       use_container_width=True)
 
     elif itinerary_section == "Cronograma oficial":
         finance_live=sync_sources["finance"]["status"]=="live"
