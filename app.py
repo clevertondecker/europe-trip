@@ -190,6 +190,74 @@ a{color:#1684B2 !important;}
 .home-hero h1{font-size:2rem !important;}.home-stage__image{height:135px;}.home-kpi{min-height:95px;}
 .home-overview-copy{padding:0 0 9px;}}
 
+
+/* Remaining screens: shared light travel-app design system */
+.page-eyebrow{font-size:.7rem;letter-spacing:.13em;font-weight:800;color:#0A9889;text-transform:uppercase;margin:10px 0 7px;}
+.page-title{font-family:'DM Sans',system-ui,sans-serif;font-size:clamp(1.75rem,2.7vw,2.55rem);
+  font-weight:800;color:#16364B;letter-spacing:-.045em;line-height:1.16;margin:0 0 9px;}
+.page-subtitle{color:#647E90;font-size:.94rem;line-height:1.55;max-width:760px;margin:0 0 18px;}
+.page-stat{background:#fff;border:1px solid #E3EBF2;border-radius:15px;padding:15px 17px;
+  min-height:108px;box-shadow:0 4px 18px rgba(29,68,93,.028);margin-bottom:9px;}
+.page-stat__label{font-size:.74rem;color:#698396;font-weight:700;}
+.page-stat__value{font-size:clamp(1.18rem,1.8vw,1.7rem);font-weight:800;color:#15364B;margin:8px 0 4px;letter-spacing:-.04em;}
+.page-stat__hint{font-size:.75rem;color:#6B8191;line-height:1.35;}
+.page-stat--mint{background:#EDF9F6;border-color:#E1F1ED;}
+.page-stat--blue{background:#EFF8FE;border-color:#E2F0FA;}
+.page-stat--cream{background:#FCF8F3;border-color:#F4EBE1;}
+.page-panel{background:#fff;border:1px solid #E2EBF2;border-radius:16px;padding:18px 20px;
+  box-shadow:0 6px 18px rgba(23,59,80,.025);margin-bottom:12px;}
+.page-panel__title{font-weight:800;color:#16364B;font-size:1rem;line-height:1.35;}
+.page-panel__desc{color:#667E8C;font-size:.85rem;line-height:1.6;margin:9px 0 10px;}
+.page-panel__meta{color:#758998;font-size:.75rem;}
+.page-chip{display:inline-block;background:#EAF6FD;color:#1777A4;border-radius:99px;
+  padding:5px 10px;font-size:.71rem;font-weight:800;letter-spacing:.015em;}
+.page-chip--candidate{background:#FFF3E5;color:#966226;}
+.page-chip--proposed{background:#E7F7F2;color:#157C6B;}
+.page-chip--optional{background:#EDF1FA;color:#576F95;}
+.page-section{color:#183D53;font-weight:800;font-size:1.21rem;letter-spacing:-.025em;margin:21px 0 12px;}
+.page-timeline{display:flex;gap:16px;align-items:stretch;background:#fff;border:1px solid #E4ECF2;
+  border-radius:15px;padding:16px 20px;margin:0 0 11px;box-shadow:0 4px 15px rgba(30,60,84,.02);}
+.page-timeline__number{display:flex;align-items:center;justify-content:center;flex:0 0 36px;
+  height:36px;border-radius:12px;background:#EAF7FB;color:#1486AC;font-weight:800;font-size:.85rem;}
+.page-timeline__content{flex:1;min-width:0;}
+.page-timeline__period{font-size:.72rem;font-weight:800;color:#178B82;letter-spacing:.055em;}
+.page-timeline__stage{font-size:1.03rem;color:#15384E;font-weight:800;margin:4px 0;}
+.page-timeline__desc{font-size:.85rem;color:#647E90;line-height:1.55;}
+.page-task{background:#fff;border:1px solid #E4EBF1;border-radius:13px;display:flex;align-items:flex-start;
+  gap:13px;padding:14px 15px;margin:0 0 9px;}
+.page-task__tag{flex-shrink:0;padding:5px 9px;border-radius:8px;font-size:.73rem;font-weight:800;background:#EDF4FB;color:#305D8B;}
+.page-task--p0 .page-task__tag{background:#FCEBED;color:#B94955;}
+.page-task--p1 .page-task__tag{background:#FFF3E6;color:#A26B24;}
+.page-task--p2 .page-task__tag{background:#EAF7FC;color:#2180A8;}
+.page-task--p3 .page-task__tag{background:#EFF2F6;color:#6E8090;}
+.page-task__body{flex:1;min-width:0;color:#2A4A5E;font-size:.86rem;line-height:1.55;}
+.page-task__status{flex-shrink:0;color:#7A8E9A;font-size:.74rem;font-weight:700;}
+.page-task--done .page-task__body{color:#748896;}
+.page-budget-track{height:11px;background:#E4ECF0;border-radius:20px;overflow:hidden;margin:9px 0;}
+.page-budget-track span{display:block;height:100%;background:linear-gradient(90deg,#18A596,#1C8BAC);border-radius:20px;}
+.page-budget-row{display:flex;gap:12px;justify-content:space-between;align-items:center;
+  border-bottom:1px solid #EAF0F4;padding:12px 0;font-size:.84rem;}
+.page-budget-row:last-child{border:0;}
+.page-budget-row__name{color:#557080;}
+.page-budget-row__amount{color:#15384D;font-weight:800;white-space:nowrap;}
+.page-alert{border-radius:12px;padding:13px 16px;font-size:.83rem;line-height:1.55;
+  background:#FFF8EA;border:1px solid #F2E4C4;color:#856120;margin:9px 0 14px;}
+.page-alert--neutral{background:#EFF7FC;border-color:#DBE9F2;color:#38657C;}
+.page-filter-hint{color:#698294;font-size:.8rem;margin:2px 0 11px;}
+/* Contrast fix for controls throughout the app, especially previously disabled task checkboxes */
+[data-testid="stSelectbox"] [data-baseweb="select"],[data-testid="stMultiSelect"] [data-baseweb="select"]{
+  color:#1E4258 !important;}
+.stCheckbox label:has(input:disabled){opacity:1;}
+[data-testid="stExpander"]{background:#fff;border:1px solid #E5EDF3;border-radius:13px;}
+[data-testid="stMetricValue"]{color:#15374C;}
+@media(max-width:700px){
+ .page-panel{padding:15px 16px;}
+ .page-task{gap:8px;padding:12px;}
+ .page-task__status{font-size:.68rem;}
+ .page-timeline{padding:13px;gap:10px;}
+ .page-stat{min-height:92px;padding:13px;}
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -212,7 +280,7 @@ def section(text: str) -> None:
     st.markdown(f'<div class="section-title">{escape(text)}</div>', unsafe_allow_html=True)
 
 
-def map_view(places: list[dict], height: int = 430) -> None:
+def map_view(places: list[dict], height: int = 430, show_labels: bool = True) -> None:
     points = [dict(p, color=STATUS_COLORS[p["status"]], status_label=STATUS_LABEL[p["status"]]) for p in places]
     if not points:
         st.info("Nenhum destino corresponde aos filtros.")
@@ -230,7 +298,7 @@ def map_view(places: list[dict], height: int = 430) -> None:
     view = pdk.ViewState(latitude=45.3, longitude=10.1, zoom=4.0, min_zoom=2, max_zoom=14)
     deck = pdk.Deck(
         map_style="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
-        initial_view_state=view, layers=[scatter, label],
+        initial_view_state=view, layers=[scatter, label] if show_labels else [scatter],
         tooltip={"html":"<b>{name}</b><br/>{country}<br/>{status_label}<br/>{role}",
                  "style":{"backgroundColor":"#163A4D","color":"white","fontFamily":"sans-serif"}},
     )
@@ -425,78 +493,257 @@ if page == "Visão geral":
                 unsafe_allow_html=True)
 
 elif page == "Mapa & destinos":
-    overline("Explorar nossa geografia")
-    st.title("Mapa & destinos")
-    st.caption("Catálogo geográfico do snapshot; uma cidade-base aprovada no D-004 muda de marcador automaticamente. As demais atrações não são lidas de rotas em tempo real.")
-    st.write("Explore destinos propostos, cidades-base em avaliação e passeios possíveis. Use os filtros para montar sua visão.")
-    statuses=st.multiselect("Situação", list(STATUS_LABEL.keys()), default=list(STATUS_LABEL.keys()),format_func=lambda x: STATUS_LABEL[x])
-    countries=st.multiselect("Países", sorted(set(p["country"] for p in data["places"])),default=sorted(set(p["country"] for p in data["places"])))
-    current=select_places(data["places"],countries,statuses)
-    map_view(current, 520)
-    st.caption("Cores: verde-petróleo = etapa proposta; âmbar = alternativa; azul-cinza = passeio possível. Não há rotas de deslocamento confirmadas.")
+    st.markdown("<div class='page-eyebrow'>EXPLORAR · EUROPA 2027</div>"
+                "<div class='page-title'>Mapa & destinos</div>"
+                "<div class='page-subtitle'>Explore as cidades do planejamento, compare alternativas e "
+                "acompanhe o que foi proposto ou ainda está em avaliação.</div>", unsafe_allow_html=True)
+    countries_all = sorted(set(p["country"] for p in data["places"]))
+    c1, c2, c3 = st.columns(3, gap="small")
+    with c1:
+        st.markdown(f"<div class='page-stat page-stat--blue'><div class='page-stat__label'>Destinos mapeados</div>"
+                    f"<div class='page-stat__value'>{len(data['places'])}</div>"
+                    "<div class='page-stat__hint'>Referências geográficas</div></div>", unsafe_allow_html=True)
+    with c2:
+        st.markdown(f"<div class='page-stat page-stat--mint'><div class='page-stat__label'>Países</div>"
+                    f"<div class='page-stat__value'>{len(countries_all)}</div>"
+                    "<div class='page-stat__hint'>Candidatos e passeios</div></div>", unsafe_allow_html=True)
+    with c3:
+        candidates = sum(p["status"] == "candidata" for p in data["places"])
+        st.markdown(f"<div class='page-stat page-stat--cream'><div class='page-stat__label'>Alternativas em avaliação</div>"
+                    f"<div class='page-stat__value'>{candidates}</div>"
+                    "<div class='page-stat__hint'>Sem escolha definitiva</div></div>", unsafe_allow_html=True)
+
+    st.markdown("<div class='page-section'>Filtre os destinos</div>", unsafe_allow_html=True)
+    a,b = st.columns([1,1], gap="medium")
+    with a:
+        countries = st.multiselect("Países", countries_all, default=countries_all, key="map_countries")
+    with b:
+        statuses = st.multiselect("Etapa de decisão", list(STATUS_LABEL.keys()),
+                                  default=list(STATUS_LABEL.keys()), format_func=lambda key: STATUS_LABEL[key],
+                                  key="map_statuses")
+    current = select_places(data["places"], countries, statuses)
+    st.markdown(f"<div class='page-filter-hint'>{len(current)} destinos encontrados · "
+                "Os pontos não representam reservas, trajetos ou disponibilidade.</div>",
+                unsafe_allow_html=True)
+    map_view(current, 460, show_labels=False)
+    st.caption("Passe o cursor sobre um ponto para ver o nome e a classificação. "
+               "Os marcadores são referências geográficas, não rotas de transporte.")
+
+    st.markdown("<div class='page-section'>Conheça as opções</div>", unsafe_allow_html=True)
     if current:
-        chosen=st.selectbox("Detalhes do destino",[p["id"] for p in current],format_func=lambda x:next(p["name"]+" · "+p["country"] for p in current if p["id"]==x))
-        with st.container(border=True):show_place(next(p for p in current if p["id"]==chosen))
+        for start_idx in range(0, len(current), 3):
+            row = current[start_idx:start_idx+3]
+            for column, place in zip(st.columns(3, gap="medium"), row):
+                with column:
+                    tone = {"roteiro_proposto":"proposed", "candidata":"candidate", "opcional":"optional"}.get(place["status"], "optional")
+                    st.markdown(f"<div class='page-panel'>"
+                                f"<span class='page-chip page-chip--{tone}'>{escape(STATUS_LABEL[place['status']])}</span>"
+                                f"<div class='page-panel__title' style='margin-top:12px'>⌖ {escape(place['name'])}</div>"
+                                f"<div class='page-panel__meta'>{escape(place['country'])} · {escape(place['role'])}</div>"
+                                f"<p class='page-panel__desc'>{escape(place['description'])}</p>"
+                                f"<div class='page-panel__meta'>Duração: {escape(place['duration'])}</div></div>",
+                                unsafe_allow_html=True)
+                    source_url = data["sources"].get(place.get("source", ""))
+                    if source_url:
+                        st.link_button("Consultar fonte", source_url, use_container_width=True)
+    else:
+        st.info("Nenhum destino corresponde aos filtros. Selecione mais países ou etapas.")
+    st.markdown("<div class='page-alert page-alert--neutral'>"
+                "Cidades e coordenadas vêm do catálogo histórico; a decisão sobre uma cidade-base francesa "
+                "pode atualizar o status a partir do documento do Drive. Os demais pontos não são atualizados "
+                "automaticamente por cotações ou reservas.</div>", unsafe_allow_html=True)
 
 elif page == "Roteiro":
-    overline("Etapas da viagem")
-    st.title("Roteiro & calendário")
-    note("Cronograma da aba 04 do Excel oficial." if sync_sources['finance']['status'] == 'live' else "Cronograma histórico do snapshot. Apenas o casamento é data fixa; não existem reservas confirmadas.")
-    for entry in data["timeline"]:
-        st.markdown(f"<div class='timeline-step'><small>{escape(entry['period'])} · {escape(entry['status'].upper())}</small>"
-                    f"<br><b>{escape(entry['stage'])}</b><br>{escape(entry['details'])}</div>",unsafe_allow_html=True)
-    section("Acompanhar decisões")
-    link("Abrir decisões no Drive", "decisions")
+    st.markdown("<div class='page-eyebrow'>PLANEJAMENTO · ETAPAS DA VIAGEM</div>"
+                "<div class='page-title'>Roteiro & calendário</div>"
+                "<div class='page-subtitle'>Da lua de mel na Itália até a temporada francesa. "
+                "As datas e durações, exceto o casamento, ainda são hipóteses de planejamento.</div>",
+                unsafe_allow_html=True)
+    finance_live = sync_sources["finance"]["status"] == "live"
+    c1,c2,c3 = st.columns(3, gap="small")
+    metrics = [
+        ("Casamento", "04/09/2027", "Data fixa"),
+        ("Duração prevista", f"{data['duration_min_days']}–{data['duration_max_days']} dias", "Estimativa para o casal"),
+        ("Etapa italiana", f"~{data['italy_days_approx']} dias", "Roma e Costa Amalfitana"),
+    ]
+    for col, (label, value, hint) in zip((c1,c2,c3), metrics):
+        with col:
+            st.markdown(f"<div class='page-stat page-stat--blue'>"
+                        f"<div class='page-stat__label'>{escape(label)}</div>"
+                        f"<div class='page-stat__value'>{escape(value)}</div>"
+                        f"<div class='page-stat__hint'>{escape(hint)}</div></div>", unsafe_allow_html=True)
+    source_label = ("Cronograma sincronizado: aba 04 do Excel no Drive" if finance_live
+                    else "Cronograma histórico do snapshot local — sincronização indisponível")
+    st.markdown(f"<div class='page-alert page-alert--neutral'>◷ {escape(source_label)}. "
+                "O roteiro é ilustrativo; não há passagens ou hospedagens emitidas.</div>",
+                unsafe_allow_html=True)
+    st.markdown("<div class='page-section'>A jornada, etapa por etapa</div>", unsafe_allow_html=True)
+    for index, entry in enumerate(data["timeline"], start=1):
+        st.markdown(
+            f"<div class='page-timeline'><div class='page-timeline__number'>{index:02d}</div>"
+            "<div class='page-timeline__content'>"
+            f"<div class='page-timeline__period'>{escape(entry['period'])} · {escape(entry['status'].upper())}</div>"
+            f"<div class='page-timeline__stage'>{escape(entry['stage'])}</div>"
+            f"<div class='page-timeline__desc'>{escape(entry['details'])}</div></div></div>",
+            unsafe_allow_html=True)
+    c1,c2=st.columns(2)
+    with c1:
+        st.link_button("Ver decisões no Drive",data["sources"]["decisions"],use_container_width=True)
+    with c2:
+        st.link_button("Abrir cronograma financeiro",data["sources"]["spreadsheet"],use_container_width=True)
 
 elif page == "Orçamento":
-    overline("Controle financeiro · dois viajantes")
-    st.title("Orçamento & cenários")
-    note("Valores calculados das premissas vigentes da aba 03 do Excel, conferidos com o cache da aba 02. São estimativas, não cotações. Reserva já incluída." if sync_sources['finance']['status'] == 'live' else "Números do snapshot histórico de 14/11/2026. Reserva já incluída. Não usar como tarifa real de 2027.")
-    choice=st.radio("Cenário base",["60k","70k"],format_func=lambda x:"R$ 60 mil · ~65 dias" if x=="60k" else "R$ 70 mil · ~70 dias",horizontal=True)
-    scenario=get_scenario(data,choice)
-    c1,c2,c3=st.columns(3)
-    baseline=calculate_scenario(scenario)
-    c1.metric("Teto do casal",money_brl(scenario["cap_brl"]))
-    c2.metric("Total histórico",money_brl(baseline["total"]))
-    c3.metric("Folga simulada",money_brl(baseline["balance"]))
-    section("Distribuição do orçamento histórico")
-    st.bar_chart([{"Categoria": x["name"], "Valor (R$)": x["amount"]} for x in scenario["components"]], x="Categoria", y="Valor (R$)", horizontal=True, height=330)
-    st.caption("Valores por categoria estão em reais. Reserva emergencial já está dentro do total.")
+    st.markdown("<div class='page-eyebrow'>PLANEJAMENTO FINANCEIRO · DOIS VIAJANTES</div>"
+                "<div class='page-title'>Orçamento & cenários</div>"
+                "<div class='page-subtitle'>Compare os dois limites da viagem completa, entenda os maiores "
+                "custos e simule mudanças antes de tomar decisões.</div>", unsafe_allow_html=True)
+    finance_live = sync_sources["finance"]["status"] == "live"
+    st.markdown(
+        "<div class='page-alert page-alert--neutral'>"
+        + ("Valores recalculados a partir da aba 03 PREMISSAS do Excel sincronizado. "
+           if finance_live else "Valores históricos do snapshot local; planilha não sincronizada. ")
+        + "Os valores são estimativas para o casal, não ofertas confirmadas. "
+        "A reserva emergencial já está incluída no total.</div>", unsafe_allow_html=True)
+    choice=st.radio("Cenário base",["60k","70k"],
+                    format_func=lambda x: "R$ 60 mil · ~65 dias" if x=="60k" else "R$ 70 mil · ~70 dias",
+                    horizontal=True,key="budget_screen_scenario")
+    scenario = get_scenario(data,choice)
+    baseline = calculate_scenario(scenario)
+    metrics = [
+        ("Teto do casal",money_brl(scenario["cap_brl"]),"Limite de planejamento"),
+        ("Total estimado",money_brl(baseline["total"]),"Inclui reserva emergencial"),
+        ("Margem disponível",money_brl(baseline["balance"]),"Antes de cotações reais")
+    ]
+    for col, (label, value, hint) in zip(st.columns(3,gap="small"),metrics):
+        with col:
+            st.markdown(f"<div class='page-stat page-stat--mint'>"
+                        f"<div class='page-stat__label'>{escape(label)}</div>"
+                        f"<div class='page-stat__value'>{escape(value)}</div>"
+                        f"<div class='page-stat__hint'>{escape(hint)}</div></div>",unsafe_allow_html=True)
+    used_pct=max(0.0,min(100.0,baseline["total"]/scenario["cap_brl"]*100))
+    st.markdown(f"<div class='page-panel'><div class='page-panel__title'>Utilização do orçamento · {used_pct:.1f}%</div>"
+                f"<div class='page-budget-track'><span style='width:{used_pct:.1f}%'></span></div>"
+                f"<div class='page-panel__meta'>Margem: {escape(money_brl(baseline['balance']))} · "
+                "Valores em BRL · Dois viajantes</div></div>",unsafe_allow_html=True)
+    if baseline["balance"]<1000:
+        st.warning("Margem insuficiente para variações de câmbio e preços. Não aprovar reservas com base apenas nesta simulação.")
     if baseline["rounding_difference"]:
-        st.info(f"A soma dos componentes difere {money_brl(abs(baseline['rounding_difference']))} do total histórico registrado. Trata-se de uma diferença a reconciliar com as fórmulas originais.")
-    section("Simulação livre: aluguel mais caro")
-    st.write("Teste um aumento hipotético no aluguel mensal, sem alterar a planilha nem afirmar que exista uma oferta nesse preço.")
-    a,b,c=st.columns(3)
-    with a: extra=a.slider("Aumento do aluguel (€/mês)",0,600,200,25)
-    with b: months=b.number_input("Meses cobrados",min_value=1,max_value=4,value=2,step=1)
-    with c: rate=c.number_input("Câmbio hipotético (R$/€)",min_value=4.0,max_value=10.0,value=6.30,step=0.05)
-    res=calculate_scenario(scenario,extra,months,rate)
-    aa,bb,cc=st.columns(3)
-    aa.metric("Acréscimo simulado",money_brl(res["delta"]))
-    bb.metric("Novo total hipotético",money_brl(res["total"]),delta=money_brl(res["delta"]),delta_color="inverse")
-    cc.metric("Saldo até o teto",money_brl(res["balance"]))
-    if res["balance"]<0:st.error("O cenário hipotético ultrapassa o teto. É necessário cortar despesas ou revisar a duração.")
-    else:st.warning("O cenário permanece no teto, mas a margem ainda precisa de proteção e de cotações reais.")
-    link("Abrir o modelo financeiro original", "spreadsheet")
+        st.info(f"A soma dos componentes difere {money_brl(abs(baseline['rounding_difference']))} "
+                "do total calculado; revisar premissas antes de aprovar compras.")
+
+    st.markdown("<div class='page-section'>Para onde vai o dinheiro?</div>",unsafe_allow_html=True)
+    breakdown_chart,breakdown_list=st.columns([1.2,1],gap="large")
+    with breakdown_chart:
+        st.bar_chart([{"Categoria": x["name"],"Valor (R$)":x["amount"]} for x in scenario["components"]],
+                     x="Categoria",y="Valor (R$)",horizontal=True,height=420)
+        st.caption("Distribuição de custos estimados; não há despesas efetivamente contratadas.")
+    with breakdown_list:
+        for component in sorted(scenario["components"],key=lambda item:item["amount"],reverse=True):
+            st.markdown(f"<div class='page-budget-row'><span class='page-budget-row__name'>{escape(component['name'])}</span>"
+                        f"<span class='page-budget-row__amount'>{escape(money_brl(component['amount']))}</span></div>",
+                        unsafe_allow_html=True)
+    st.markdown("<div class='page-section'>Simulador de aluguel</div>",unsafe_allow_html=True)
+    st.write("Teste aumentos hipotéticos do aluguel sem modificar a planilha original.")
+    a,b,c=st.columns(3,gap="medium")
+    with a:
+        extra=st.slider("Aumento de aluguel (€/mês)",0,600,200,25,key="budget_rent_extra")
+    with b:
+        months=st.number_input("Meses cobrados",min_value=1,max_value=4,value=2,step=1,key="budget_months")
+    with c:
+        rate=st.number_input("Câmbio hipotético (R$/€)",min_value=4.0,max_value=10.0,value=6.30,step=0.05,key="budget_rate")
+    simulation=calculate_scenario(scenario,extra,months,rate)
+    figures=[
+        ("Acréscimo hipotético",money_brl(simulation["delta"])),
+        ("Novo custo total",money_brl(simulation["total"])),
+        ("Saldo até o teto",money_brl(simulation["balance"]))
+    ]
+    for col,(label,value) in zip(st.columns(3,gap="small"),figures):
+        with col:
+            st.markdown(f"<div class='page-stat page-stat--blue'><div class='page-stat__label'>{escape(label)}</div>"
+                        f"<div class='page-stat__value'>{escape(value)}</div>"
+                        "<div class='page-stat__hint'>Não altera os documentos oficiais</div></div>",
+                        unsafe_allow_html=True)
+    if simulation["balance"]<0:
+        st.error("Este cenário hipotético ultrapassa o teto escolhido.")
+    else:
+        st.info("O cenário está dentro do teto, mas precisa de folga e validação com cotações reais.")
+    st.link_button("Abrir planilha financeira no Drive",data["sources"]["spreadsheet"],use_container_width=True)
 
 elif page == "Pesquisas & decisões":
-    overline("Registro do planejamento")
-    st.title("Pesquisas, decisões e pendências")
-    st.caption("Decisões e pendências: leitura atualizada do Drive (cache de até 5 min)." if sync_status == "live" else "Dados locais históricos; sincronização não configurada ou indisponível.")
-    section("Decisões")
-    for d in data["decisions"]:
-        with st.expander(f"{d['id']} · {d['title']} · {d['status']}"):
-            st.write(d["note"])
-            st.markdown(f"[Fonte: decisões no Google Drive]({data['sources']['decisions']})")
-    section("Fila de pesquisas")
-    selected_priority=st.selectbox("Prioridade",["Todas","P0","P1","P2","P3"])
-    for item in data["tasks"]:
-        if selected_priority=="Todas" or item["priority"]==selected_priority:
-            st.checkbox(f"{item['priority']} · {item['title']}",value=item.get("status") == "concluído",disabled=True)
-    link("Abrir pendências no Drive", "tasks")
-    section("Fontes principais")
-    for text,key in [("Guia do projeto","guide"),("Estado atual","decisions"),("Padrão de evidências","evidence"),
-                      ("Base completa Markdown","knowledge"),("Planilha de orçamento","spreadsheet")]:
-        st.markdown(f"- [{text}]({data['sources'][key]})")
+    st.markdown("<div class='page-eyebrow'>CENTRAL DE PLANEJAMENTO</div>"
+                "<div class='page-title'>Pesquisas & decisões</div>"
+                "<div class='page-subtitle'>Acompanhe o que foi decidido e quais investigações "
+                "ainda precisam de atenção. O Google Drive continua como fonte oficial.</div>",unsafe_allow_html=True)
+    tasks = data["tasks"]
+    done = sum(t.get("status")=="concluído" for t in tasks)
+    c1,c2,c3=st.columns(3,gap="small")
+    summary=[
+        ("Pesquisas registradas",str(len(tasks)),"Tarefas no planejamento"),
+        ("Pendentes",str(len(tasks)-done),"Aguardando investigação"),
+        ("Concluídas",str(done),"Registradas no Drive"),
+    ]
+    for col,(label,value,hint) in zip((c1,c2,c3),summary):
+        with col:
+            st.markdown(f"<div class='page-stat page-stat--blue'><div class='page-stat__label'>{escape(label)}</div>"
+                        f"<div class='page-stat__value'>{escape(value)}</div>"
+                        f"<div class='page-stat__hint'>{escape(hint)}</div></div>",unsafe_allow_html=True)
+    st.markdown("<div class='page-alert page-alert--neutral'>"
+                "Painel somente leitura: para registrar decisões ou concluir pendências, "
+                "atualize o documento oficial no Drive. O app sincroniza essas mudanças.</div>",
+                unsafe_allow_html=True)
+
+    st.markdown("<div class='page-section'>Decisões registradas</div>",unsafe_allow_html=True)
+    for decision in data["decisions"]:
+        status=decision["status"]
+        current_status=status.casefold()
+        tone="proposed" if current_status.startswith(("vigente","aprovada","decidida")) else (
+            "candidate" if current_status in {"aberta","não decidida","nao decidida"} else "optional")
+        st.markdown(f"<div class='page-panel'>"
+                    f"<span class='page-chip page-chip--{tone}'>{escape(status)}</span>"
+                    f"<div class='page-panel__title' style='margin-top:9px'>{escape(decision['id'])} · {escape(decision['title'])}</div>"
+                    f"<div class='page-panel__desc'>{escape(decision.get('note',''))}</div></div>",
+                    unsafe_allow_html=True)
+    st.link_button("Ver registro de decisões no Drive",data["sources"]["decisions"],use_container_width=True)
+
+    st.markdown("<div class='page-section'>Fila de pesquisas</div>",unsafe_allow_html=True)
+    priority_options=["Todas","P0","P1","P2","P3"]
+    priority_titles={"P0":"Crítica","P1":"Alta","P2":"Média","P3":"Organização"}
+    a,b=st.columns([1,1],gap="medium")
+    with a:
+        selected_priority=st.selectbox("Prioridade",priority_options,
+                                       format_func=lambda p: p if p=="Todas" else f"{p} · {priority_titles[p]}",
+                                       key="task_priority_filter")
+    with b:
+        status_filter=st.selectbox("Situação",["Todas","Pendentes","Concluídas"],key="task_status_filter")
+    filtered=[item for item in tasks if (selected_priority=="Todas" or item["priority"]==selected_priority)
+              and (status_filter=="Todas" or
+                   (status_filter=="Pendentes" and item.get("status")!="concluído") or
+                   (status_filter=="Concluídas" and item.get("status")=="concluído"))]
+    st.markdown(f"<div class='page-filter-hint'>{len(filtered)} pesquisas encontradas · "
+                "O status é controlado pelos documentos oficiais.</div>",unsafe_allow_html=True)
+    if not filtered:
+        st.info("Nenhuma pesquisa corresponde aos filtros selecionados.")
+    for task in filtered:
+        priority=task["priority"].lower()
+        complete=task.get("status")=="concluído"
+        st.markdown(
+            f"<div class='page-task page-task--{priority}{' page-task--done' if complete else ''}'>"
+            f"<div class='page-task__tag'>{escape(task['priority'])}</div>"
+            f"<div class='page-task__body'>{escape(task['title'])}</div>"
+            f"<div class='page-task__status'>{'✓ Concluída' if complete else '○ Pendente'}</div></div>",
+            unsafe_allow_html=True)
+    st.link_button("Abrir pendências no Drive",data["sources"]["tasks"],use_container_width=True)
+
+    st.markdown("<div class='page-section'>Documentação e fontes</div>",unsafe_allow_html=True)
+    source_items=[
+        ("Guia de planejamento","guide"),("Estado atual e decisões","decisions"),
+        ("Registro de pesquisas","evidence"),("Base de conhecimento","knowledge"),
+        ("Modelo financeiro","spreadsheet")]
+    for col,(label,key) in zip(st.columns(2,gap="small"),source_items[:2]):
+        with col:
+            st.link_button(label,data["sources"][key],use_container_width=True)
+    for col,(label,key) in zip(st.columns(3,gap="small"),source_items[2:]):
+        with col:
+            st.link_button(label,data["sources"][key],use_container_width=True)
 
 bottom_source()
