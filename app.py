@@ -13,6 +13,7 @@ from city_compare import get_preset, initialize_weight_state, load_cities, norma
 from city_research import city_readiness, load_audit
 from city_market import load_market, observed_rent_summary, example_train_couple_return
 from city_research_round2 import load_round2
+from finance_lifestyle import FRENCH_BUDGET, audit_subtotals, lifestyle_outcome
 
 st.set_page_config(page_title="Nossa Europa 2027", page_icon="🌍", layout="wide", initial_sidebar_state="expanded")
 data = load_data()
@@ -1132,6 +1133,121 @@ elif page == "Orçamento":
     if baseline["rounding_difference"]:
         st.info(f"A soma dos componentes difere {money_brl(abs(baseline['rounding_difference']))} "
                 "do total calculado; revisar premissas antes de aprovar compras.")
+
+    # Lifestyle model: read-only replacement of dining line in the historical France budget.
+    french_split = FRENCH_BUDGET[choice]
+    st.markdown("<div class='page-section'>Dá para viajar com esse valor?</div>",
+                unsafe_allow_html=True)
+    base_margin = baseline["balance"]
+    verdict = ("Apertado: praticamente sem margem além da reserva emergencial."
+               if base_margin < 0.05 * scenario["cap_brl"] else
+               "Há alguma margem, mas depende de validar voos e hospedagens.")
+    st.markdown(
+        "<div class='city-fact city-fact--warn'><strong>Diagnóstico do orçamento histórico</strong>"
+        f"<p>{escape(verdict)} A reserva de emergência de {escape(money_brl(scenario['emergency_reserve_brl']))} "
+        "já está DENTRO do total estimado: não é dinheiro livre para bares, jantares e passeios. "
+        "Passagens e apartamentos ainda não foram cotados para 2027.</p></div>",
+        unsafe_allow_html=True)
+    st.markdown("<div class='page-section'>França: detalhamento das verbas incluídas</div>",
+                unsafe_allow_html=True)
+    labels = [
+        ("rent","Moradia temporária"),
+        ("groceries","Mercado e alimentação em casa"),
+        ("dining","Bares, cafés e restaurantes"),
+        ("transport","Transporte urbano"),
+        ("excursions","Passeios e ingressos"),
+    ]
+    french_table = [
+        {"Categoria": label, "Já incluído (R$)": french_split[key],
+         "Média semanal (R$)": round(french_split[key]/(french_split["french_days"]/7),2)}
+        for key,label in labels
+    ]
+    import pandas as pd
+    st.dataframe(pd.DataFrame(french_table),hide_index=True,use_container_width=True,
+                 column_config={
+                     "Já incluído (R$)": st.column_config.NumberColumn(format="R$ %.2f"),
+                     "Média semanal (R$)": st.column_config.NumberColumn(format="R$ %.2f")
+                 })
+    st.caption(f"Referência histórica para {french_split['french_days']} dias na França, casal; "
+               "valores já contidos na categoria França do orçamento global. Não somar novamente. "
+               "Gastos da Itália também já possuem verba própria, mas sem divisão auditada de cada refeição.")
+
+    st.markdown("<div class='page-section'>Quantas vezes podemos sair?</div>",
+                unsafe_allow_html=True)
+    st.write("Defina quantas saídas por semana vocês gostariam de fazer e quanto o **casal inteiro** "
+             "gastaria em cada uma. Esta simulação **substitui** a verba de bares/restaurantes "
+             "já prevista — ela não duplica a despesa.")
+    a,b,c=st.columns(3,gap="medium")
+    with a:
+        outings=st.slider("Saídas por semana (casal)",0,7,2,1,key="budget_outings_per_week")
+    with b:
+        outing_eur=st.slider("Gasto por saída para duas pessoas (€)",15,150,60,5,
+                            key="budget_cost_per_outing")
+    with c:
+        fx=st.number_input("Câmbio hipotético (R$/€)",min_value=4.0,max_value=10.0,
+                           value=6.30,step=0.05,key="budget_lifestyle_fx")
+    with st.expander("E se voo, aluguel ou passeios custarem mais?"):
+        aa,bb,cc=st.columns(3,gap="small")
+        with aa:
+            flight_extra=st.number_input("Acréscimo nas passagens (R$)",min_value=0,
+                           max_value=30000,value=0,step=500,key="budget_flights_over")
+        with bb:
+            rental_extra=st.number_input("Acréscimo na moradia (R$)",min_value=0,
+                           max_value=30000,value=0,step=500,key="budget_lodging_over")
+        with cc:
+            excursions_extra=st.number_input("Passeios além da verba prevista (R$)",min_value=0,
+                           max_value=20000,value=0,step=250,key="budget_tours_over")
+    lifestyle=lifestyle_outcome(
+        scenario,choice,outings,outing_eur,fx,
+        extra_excursions_brl=excursions_extra,
+        extra_flights_brl=flight_extra,
+        extra_lodging_brl=rental_extra
+    )
+    for col,(label,value,hint) in zip(st.columns(3,gap="small"),[
+        ("Saídas projetadas na França",f"{lifestyle['outings']:,.1f}",
+         f"~{lifestyle['weeks']:.1f} semanas · {outings} por semana"),
+        ("Bares e restaurantes simulados",money_brl(lifestyle["dining_simulated_brl"]),
+         f"Verba original: {money_brl(lifestyle['dining_allocated_brl'])}"),
+        ("Saldo depois das mudanças",money_brl(lifestyle["remaining_brl"]),
+         "Além da reserva já incluída no total")
+    ]):
+        with col:
+            st.markdown(
+                "<div class='page-stat page-stat--blue'>"
+                f"<div class='page-stat__label'>{escape(label)}</div>"
+                f"<div class='page-stat__value'>{escape(value)}</div>"
+                f"<div class='page-stat__hint'>{escape(hint)}</div></div>",
+                unsafe_allow_html=True)
+    st.markdown(
+        "<div class='page-panel'><div class='page-panel__title'>Leitura do cenário</div>"
+        f"<div class='page-panel__desc'>Total após mudanças: "
+        f"<b>{escape(money_brl(lifestyle['new_total_brl']))}</b> · "
+        f"Variação da verba de saídas: {escape(money_brl(lifestyle['dining_delta_brl']))} · "
+        f"Outros acréscimos: {escape(money_brl(lifestyle['extra_brl']))}."
+        "</div></div>",
+        unsafe_allow_html=True)
+    if not lifestyle["within_cap"]:
+        st.error("Com essas escolhas, a previsão ultrapassa o teto escolhido. "
+                 "Será necessário reduzir outra categoria, mudar hábitos ou aumentar o orçamento.")
+    elif not lifestyle["meets_headroom_5pct"]:
+        st.warning("Ainda fica apertado: a folga depois da simulação é inferior a 5% do teto. "
+                   "Esse é um indicador de prudência, NÃO uma regra de preço confirmado.")
+    else:
+        st.success("Esta combinação deixa uma margem adicional de pelo menos 5% do teto, "
+                   "além da reserva já alocada. Ainda é preciso confirmar os custos reais.")
+    st.caption(
+        f"Na verba histórica, havia aproximadamente {escape(money_brl(lifestyle['dining_per_week_brl']))}"
+        " por semana para bares e restaurantes do casal. "
+        "Os valores por saída são hipóteses escolhidas no controle, não cotações. "
+        "Uma refeição intermediária para dois aparece em dados colaborativos recentes "
+        "por cerca de €60–€67,50 nas quatro cidades; cafés e lanches podem ter custo diferente.")
+    st.markdown("<div class='city-fact city-fact--info'><strong>Importante: reserva não é lazer</strong>"
+                "<p>Este modelo já contém a reserva emergencial no total original. "
+                "A cesta histórica de supermercado e os passeios previstos também estão inclusos "
+                "em suas categorias. Este simulador não modifica a planilha oficial; "
+                "o simulador de aluguel abaixo é independente e seus resultados não são acumulados "
+                "automaticamente com os números desta seção.</p></div>",
+                unsafe_allow_html=True)
 
     st.markdown("<div class='page-section'>Para onde vai o dinheiro?</div>",unsafe_allow_html=True)
     breakdown_chart,breakdown_list=st.columns([1.2,1],gap="large")
