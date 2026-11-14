@@ -78,6 +78,50 @@ a{color:#286F69 !important;}
 .timeline-step b{color:#163A4D;font-size:1.06rem;}
 .source-footer{font-size:.78rem;color:#60757E;border-top:1px solid #E3DED3;padding-top:14px;margin-top:24px;}
 [data-testid="stDataFrame"]{border-radius:12px;}
+
+/* FASE 1: visual editorial para home, sem alterar lógica de dados. */
+.home-hero{display:flex;align-items:center;min-height:300px;padding:clamp(26px,4vw,54px);
+  overflow:hidden;border-radius:23px;margin:7px 0 22px;
+  box-shadow:0 14px 37px rgba(19,53,64,.10);
+  background:linear-gradient(90deg,rgba(12,42,56,.96),rgba(12,42,56,.83) 48%,rgba(12,42,56,.19)),
+  url('https://upload.wikimedia.org/wikipedia/commons/4/4d/Maiori_Amalfi_coast.jpg') center 52%/cover;}
+.home-hero__content{max-width:680px;}
+.home-hero__eyebrow{color:#C8E1D8;font-size:.74rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;}
+.home-hero h1{font-family:'Playfair Display',Georgia,serif !important;color:#fff !important;
+  font-size:clamp(2rem,3.5vw,3.2rem) !important;line-height:1.14;letter-spacing:-.018em;margin:13px 0;}
+.home-hero p{font-size:1rem;color:#E7F2F0;line-height:1.6;max-width:520px;margin-bottom:15px;}
+.home-hero__chips{display:flex;flex-wrap:wrap;gap:8px;}
+.home-hero__chips span{display:inline-block;color:#F4F8F6;background:rgba(18,48,60,.48);
+  border:1px solid rgba(237,245,238,.28);border-radius:50px;padding:6px 11px;font-size:.77rem;font-weight:600;}
+.home-kpi{background:#fff;border:1px solid #E4E0D8;border-radius:16px;
+  min-height:122px;padding:17px 16px 15px;margin:0 0 6px;box-shadow:0 5px 18px rgba(30,56,58,.034);}
+.home-kpi__label{font-size:.73rem;color:#67808A;letter-spacing:.08em;text-transform:uppercase;font-weight:700;}
+.home-kpi__value{color:#163A4D;font-size:clamp(1.2rem,1.9vw,1.67rem);line-height:1.2;
+  margin:10px 0 6px;font-weight:700;letter-spacing:-.032em;overflow-wrap:anywhere;}
+.home-kpi__detail{font-size:.78rem;color:#677C82;line-height:1.45;}
+.home-section-label{color:#2E7668;font-size:.73rem;font-weight:700;letter-spacing:.14em;
+  text-transform:uppercase;margin:27px 0 5px;}
+.home-section-title{color:#163A4D;font-family:'Playfair Display',Georgia,serif;
+  font-size:clamp(1.6rem,2.5vw,2.2rem);letter-spacing:-.025em;margin:0 0 8px;}
+.home-section-sub{color:#667B83;font-size:.9rem;line-height:1.6;margin-bottom:17px;}
+.home-stage{min-height:165px;background:#fff;border:1px solid #E4E0D8;border-radius:16px;
+  padding:19px 18px;box-shadow:0 5px 18px rgba(30,56,58,.032);margin-bottom:8px;border-top:3px solid #2E7668;}
+.home-stage__no{color:#B98132;font-size:.72rem;font-weight:700;letter-spacing:.12em;}
+.home-stage__name{color:#163A4D;font-family:'Playfair Display',Georgia,serif;
+  font-size:1.3rem;font-weight:700;margin:9px 0 7px;}
+.home-stage__desc{color:#637983;font-size:.84rem;line-height:1.58;}
+.home-disclaimer{background:#F0EAE0;border:1px solid #E3D8C8;padding:14px 16px;
+  border-radius:12px;color:#5E696D;font-size:.82rem;line-height:1.58;margin-top:10px;}
+.sidebar-brand{padding:6px 0 10px;margin-bottom:12px;}
+.sidebar-brand small{display:block;font-size:.65rem;letter-spacing:.18em;font-weight:700;color:#2E7668;}
+.sidebar-brand strong{font-family:'Playfair Display',Georgia,serif;display:block;color:#163A4D;
+  font-size:1.7rem;letter-spacing:-.03em;line-height:1.2;margin:8px 0 5px;}
+.sidebar-brand span{font-size:.83rem;color:#607682;}
+@media(max-width:980px){.home-hero{min-height:260px;padding:28px;}.home-hero h1{font-size:2.2rem !important;}}
+@media(max-width:640px){.home-hero{min-height:250px;padding:24px 18px;border-radius:16px;}
+  .home-hero h1{font-size:1.9rem !important;}.home-hero p{font-size:.9rem;}
+  .home-kpi{min-height:102px;padding:15px;}.home-stage{min-height:0;}
+  .block-container{padding-left:1rem;padding-right:1rem;}}
 </style>
 """, unsafe_allow_html=True)
 
@@ -163,8 +207,10 @@ def bottom_source() -> None:
         st.markdown(f"Crédito da fotografia: [{data['hero_image_credit']}]({data['hero_image_credit_url']}).")
 
 with st.sidebar:
-    st.markdown("### ✧ Nossa Europa 2027")
-    st.caption("Lua de mel + temporada francesa")
+    st.markdown("""<div class='sidebar-brand'>
+      <small>TRAVEL JOURNAL · 2027</small>
+      <strong>✧ Nossa Europa</strong>
+      <span>Lua de mel & temporada na França</span></div>""", unsafe_allow_html=True)
     page = st.radio("Explorar", ["Visão geral", "Mapa & destinos", "Roteiro", "Orçamento", "Pesquisas & decisões"], label_visibility="collapsed")
     st.divider()
     st.caption("**ORIGEM DOS DADOS**")
@@ -196,37 +242,71 @@ with st.sidebar:
     st.info("Painel em desenvolvimento. Nenhum voo, imóvel ou passeio foi reservado.")
 
 if page == "Visão geral":
-    overline("Painel de viagem · planejamento 2027")
-    st.markdown('''<div class="banner"><div><div class="eyebrow">Itália → França</div>
-      <h2>Do início da nossa lua de mel às semanas vivendo na Europa.</h2>
-      <p>Uma viagem para explorar, viver e decidir com tranquilidade.</p></div></div>''',unsafe_allow_html=True)
-    kpis=st.columns(4)
-    for col,(lab,val) in zip(kpis,[("Casamento",data["wedding_date"]),("Permanência proposta",f"{data['duration_min_days']}–{data['duration_max_days']} dias"),
-                                    ("Viajantes",f"{data['travelers']} pessoas"),("Tetos de orçamento","R$ 60k / 70k")]):
-        with col: st.metric(lab,val)
-    col1,col2=st.columns([1.7,1],gap="large")
+    overline("DIÁRIO DE VIAGEM · EUROPA 2027")
+    st.markdown("""<div class='home-hero' role='region' aria-label='Apresentação da viagem'>
+      <div class='home-hero__content'>
+      <div class='home-hero__eyebrow'>ITÁLIA → FRANÇA · 2027</div>
+      <h1>Uma viagem para viver,<br>não só visitar.</h1>
+      <p>Uma lua de mel entre cidades históricas, costa italiana e semanas vivendo como moradores na França.</p>
+      <div class='home-hero__chips'><span>♡ Dois viajantes</span>
+      <span>✧ Sem reservas confirmadas</span>
+      <span>◌ Longa temporada em estudo</span></div>
+      </div></div>""", unsafe_allow_html=True)
+
+    from datetime import date
+    wedding = date.fromisoformat(data["wedding_date"])
+    departure = date.fromisoformat(data["departure_candidate"])
+    departure_label = departure.strftime("%d/%m/%Y") if departure > wedding else "A definir"
+    cards = [
+        ("Casamento", wedding.strftime("%d/%m/%Y"), "Data fixa do casal"),
+        ("Partida em estudo", departure_label, "Hipótese, sem bilhete emitido"),
+        ("Permanência proposta", f"{data['duration_min_days']}–{data['duration_max_days']} dias", "Para dois viajantes"),
+        ("Orçamento completo", "R$ 60–70 mil", "Tetos de planejamento, não cotações"),
+    ]
+    for col, (label, value, detail) in zip(st.columns(4, gap="small"), cards):
+        with col:
+            st.markdown(f"<div class='home-kpi'><div class='home-kpi__label'>{escape(label)}</div>"
+                        f"<div class='home-kpi__value'>{escape(value)}</div>"
+                        f"<div class='home-kpi__detail'>{escape(detail)}</div></div>", unsafe_allow_html=True)
+
+    st.markdown("<div class='home-section-label'>VISÃO DA VIAGEM</div>", unsafe_allow_html=True)
+    st.markdown("<div class='home-section-title'>O que estamos construindo</div>", unsafe_allow_html=True)
+    st.markdown("<div class='home-section-sub'>Destinos, orçamento e escolhas do casal em um só lugar. "
+                "Os pontos no mapa são referências, não reservas.</div>", unsafe_allow_html=True)
+    col1, col2 = st.columns([1.65, 1], gap="large")
     with col1:
         section("Nosso mapa")
-        map_view([p for p in data["places"] if p["id"] in {"roma","maiori","napoles","mulhouse","strasbourg","interlaken","luxemburgo","freiburg"}],390)
-        st.caption("Mapa de cidades de referência: mudanças de status refletem apenas decisões aprovadas no Drive; atrações e viagens não são reservas.")
+        map_view([p for p in data["places"] if p["id"] in {"roma","maiori","napoles","mulhouse","strasbourg","interlaken","luxemburgo","freiburg"}], 390)
+        st.caption("Destinos propostos, alternativas e passeios opcionais; o mapa será aprimorado na Fase 2.")
     with col2:
         section("Orçamento em uma olhada")
         mini_budget()
-        section("Próximas decisões")
-        for d in data["decisions"]:
-            if d["status"].casefold() in {"aberta", "não decidida", "nao decidida"}: st.markdown(f"**{d['title']}** — {d['note']}")
-        st.caption("Ver as demais pendências na área de pesquisas.")
-    section("Etapas da viagem")
-    a,b,c=st.columns(3)
-    for col,title,duration,details in [(a,"01 · Itália","~10 dias","Roma, praia e Costa Amalfitana"),
-                                       (b,"02 · Instalação","3–5 dias","Chegada à base francesa"),
-                                       (c,"03 · França","55–65 dias ao todo","Férias restantes + trabalho remoto")]:
+        section("Decisões em aberto")
+        outstanding = [d for d in data["decisions"] if d["status"].casefold() in {"aberta","não decidida","nao decidida"}]
+        for decision in outstanding[:3]:
+            st.markdown(f"**{escape(decision['title'])}**")
+            st.caption(decision["note"])
+        if not outstanding:
+            st.caption("Acompanhe as decisões na página Pesquisas & decisões.")
+
+    st.markdown("<div class='home-section-label'>TRÊS MOMENTOS</div>", unsafe_allow_html=True)
+    st.markdown("<div class='home-section-title'>Da lua de mel à vida francesa</div>", unsafe_allow_html=True)
+    stages = [
+        ("01 · NOSSA CHEGADA", "Itália",
+         f"Cerca de {data['italy_days_approx']} dias entre Roma e uma base a escolher na Costa Amalfitana."),
+        ("02 · NOSSA BASE", "Instalação",
+         "Cerca de 3–5 dias para organizar moradia, internet e rotina na França."),
+        ("03 · NOSSO COTIDIANO", "França",
+         f"{data['france_days_estimate']} no total, incluindo férias e trabalho remoto."),
+    ]
+    for col, (number, title, description) in zip(st.columns(3, gap="medium"), stages):
         with col:
-            with st.container(border=True):
-                st.caption(title)
-                st.markdown(f"### {duration}")
-                st.write(details)
-    note("As datas exatas, cidades, voos e apartamentos ainda serão definidos. As estimativas financeiras são históricas e têm folgas insuficientes para aprovar reservas.")
+            st.markdown(f"<div class='home-stage'><div class='home-stage__no'>{escape(number)}</div>"
+                        f"<div class='home-stage__name'>{escape(title)}</div>"
+                        f"<div class='home-stage__desc'>{escape(description)}</div></div>", unsafe_allow_html=True)
+    st.markdown("<div class='home-disclaimer'>Nenhum voo, imóvel ou passeio foi reservado. "
+                "Datas, cidades e custos permanecem em estudo. As simulações históricas não substituem cotações reais.</div>",
+                unsafe_allow_html=True)
 
 elif page == "Mapa & destinos":
     overline("Explorar nossa geografia")
