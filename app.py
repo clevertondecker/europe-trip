@@ -20,10 +20,28 @@ from unified_budget import resolve_french_budget, scenario_total
 from calendar_model import calendar_plan
 from route_preview import route_endpoints
 from attractions_ui import render_explorer
-from travel_advisor_ui import render_advisor
+from travel_advisor_ui import render_advisor, _recover_saved_plan, _secure_save, _owner_signed_in
+from planning_session import bootstrap as bootstrap_trip, active_plan, update_fields
 from attractions_model import load_attractions, load_base_routes, places_for_base, excursions_overage_brl
 
 st.set_page_config(page_title="Nossa Europa 2027", page_icon="🌍", layout="wide", initial_sidebar_state="expanded")
+
+# Initialize the single plan before any page-specific widgets.
+# Authenticated new sessions recover the latest saved GitHub plan.
+_recover_saved_plan()
+bootstrap_trip()
+if st.session_state.pop("advisor_autosave_pending",False):
+    if (st.session_state.get("advisor_autosave_optin")
+            and st.session_state.get("advisor_public_repo_ack")
+            and _owner_signed_in()):
+        try:
+            _secure_save(active_plan())
+            st.session_state["advisor_autosave_notice"]="Planejamento salvo automaticamente."
+        except Exception:
+            # Do not retry writes silently, and never claim success.
+            st.session_state["advisor_autosave_error"]=(
+                "Não foi possível salvar automaticamente. Suas escolhas continuam nesta sessão. "
+                "Use Salvar planejamento para tentar novamente.")
 data = load_data()
 
 @st.cache_data(ttl=300, show_spinner=False)
@@ -161,6 +179,10 @@ def simulate_city_in_budget(city_name: str) -> None:
 
 
 with st.sidebar:
+    if "advisor_autosave_notice" in st.session_state:
+        st.success(st.session_state.pop("advisor_autosave_notice"))
+    if "advisor_autosave_error" in st.session_state:
+        st.warning(st.session_state.pop("advisor_autosave_error"))
     st.markdown("""<div class='sidebar-brand'>
       <small>TRAVEL JOURNAL · 2027</small>
       <strong>✧ Nossa Europa</strong>
@@ -1035,8 +1057,13 @@ elif page == "Roteiro":
         italy_days=st.slider("Etapa italiana (dias)",8,12,int(data["italy_days_approx"]),
                              key="itinerary_italy_days")
         setup_days=st.slider("Instalação na França (dias)",3,5,4,key="itinerary_setup_days")
+        fields={"departure_date":depart.isoformat(),"total_days":total_days,
+                "italy_days":italy_days,"vacation_days":vacation_days,
+                "setup_days":setup_days}
+        if any(active_plan()[k]!=v for k,v in fields.items()):
+            update_fields(**fields)
         schedule=calendar_plan(depart,total_days,italy_days,vacation_days,setup_days)
-        explore_calendar=st.session_state.get("explore_calendar",{})
+        explore_calendar=active_plan()["assignments"]
         st.dataframe(pd.DataFrame([
             {"Dia":r["day"],"Data":r["date"],"Região":r["stage"],
              "Atividade sugerida":r["activity"],
@@ -1087,10 +1114,14 @@ elif page == "Orçamento":
         st.warning("Financeiro em snapshot histórico. Verifique o Drive antes de decidir uma reserva.")
     else:
         st.caption("Valores das subcategorias são recalculados a partir da planilha sincronizada.")
+    if "unified_scenario" not in st.session_state:
+        st.session_state["unified_scenario"]=active_plan()["budget_scenario"]
     scenario_id = st.segmented_control(
         "Cenário completo para o casal", ["60k","70k"], default="70k",
         format_func=lambda x:f"R$ {x[:-1]} mil", key="unified_scenario",selection_mode="single")
     scenario_id = scenario_id or "70k"
+    if scenario_id!=active_plan()["budget_scenario"]:
+        update_fields(budget_scenario=scenario_id)
     scenario = get_scenario(data,scenario_id)
     baseline = calculate_scenario(scenario)
     french = resolve_french_budget(scenario,live_finance)
