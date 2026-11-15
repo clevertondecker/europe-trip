@@ -1,0 +1,551 @@
+{
+  "schema_version": 1,
+  "checked_at": "2026-11-15",
+  "note": "Exploração separada do TripPlan v1. Nenhum horário/tarifa 2027 confirmado. Sem informação significa desconhecido, nunca grátis. Aluguéis €/m² do mercado residencial comum NÃO são cotações mobiliadas de 2 meses.",
+  "bases": [
+    {
+      "id": "mulhouse",
+      "name": "Mulhouse",
+      "country": "França",
+      "lat": 47.75,
+      "lon": 7.3359,
+      "corridor": "Alsácia e Suíça",
+      "official_base": true,
+      "rent_market_eur_m2": 13.74,
+      "rent_source_url": "https://www.seloger.com/prix-de-l-immo/location/grand-est/mulhouse-68100/ad08fr28526/",
+      "rent_status": "ordinary_long_term_market_2026_not_furnished_short_stay"
+    },
+    {
+      "id": "strasbourg",
+      "name": "Strasbourg",
+      "country": "França",
+      "lat": 48.5734,
+      "lon": 7.7521,
+      "corridor": "Alsácia e Alemanha",
+      "official_base": true,
+      "rent_market_eur_m2": 15.59,
+      "rent_source_url": "https://www.seloger.com/prix-de-l-immo/location/grand-est/strasbourg-67000/ad08fr28224/",
+      "rent_status": "ordinary_long_term_market_2026_not_furnished_short_stay"
+    },
+    {
+      "id": "metz",
+      "name": "Metz",
+      "country": "França",
+      "lat": 49.1193,
+      "lon": 6.1757,
+      "corridor": "Luxemburgo e Mosela",
+      "official_base": true,
+      "rent_market_eur_m2": 14.18,
+      "rent_source_url": "https://www.seloger.com/prix-de-l-immo/location/grand-est/metz-57000/ad08fr22673",
+      "rent_status": "ordinary_long_term_market_2026_not_furnished_short_stay"
+    },
+    {
+      "id": "nancy",
+      "name": "Nancy",
+      "country": "França",
+      "lat": 48.6921,
+      "lon": 6.1844,
+      "corridor": "Grand Est e Luxemburgo",
+      "official_base": true,
+      "rent_market_eur_m2": null,
+      "rent_source_url": null,
+      "rent_status": "unknown"
+    },
+    {
+      "id": "lille",
+      "name": "Lille",
+      "country": "França",
+      "lat": 50.6292,
+      "lon": 3.0573,
+      "corridor": "Bélgica, Holanda e norte da Alemanha",
+      "official_base": false,
+      "rent_market_eur_m2": 16.58,
+      "rent_source_url": "https://www.seloger.com/prix-de-l-immo/location/hauts-de-france/lille-59000/ad08fr23619/",
+      "rent_status": "ordinary_long_term_market_2026_not_furnished_short_stay"
+    },
+    {
+      "id": "arras",
+      "name": "Arras",
+      "country": "França",
+      "lat": 50.291,
+      "lon": 2.7775,
+      "corridor": "Cidade menor, acesso por Lille",
+      "official_base": false,
+      "rent_market_eur_m2": null,
+      "rent_source_url": "https://www.seloger.com/prix-de-l-immo/location/hauts-de-france/arras-62000/ad08fr25192",
+      "rent_status": "unknown"
+    },
+    {
+      "id": "dijon",
+      "name": "Dijon",
+      "country": "França",
+      "lat": 47.322,
+      "lon": 5.0415,
+      "corridor": "Borgonha, Lyon e Suíça",
+      "official_base": false,
+      "rent_market_eur_m2": 13.81,
+      "rent_source_url": "https://www.seloger.com/prix-de-l-immo/location/bourgogne-franche-comte/dijon-21000/ad08fr7230/",
+      "rent_status": "ordinary_long_term_market_2026_not_furnished_short_stay"
+    },
+    {
+      "id": "reims",
+      "name": "Reims",
+      "country": "França",
+      "lat": 49.2583,
+      "lon": 4.0317,
+      "corridor": "Champagne e Paris",
+      "official_base": false,
+      "rent_market_eur_m2": 13.76,
+      "rent_source_url": "https://www.seloger.com/prix-de-l-immo/location/grand-est/reims-51100/ad08fr19969",
+      "rent_status": "ordinary_long_term_market_2026_not_furnished_short_stay"
+    }
+  ],
+  "destinations": [
+    {
+      "id": "brussels",
+      "name": "Bruxelas",
+      "country": "Bélgica",
+      "lat": 50.8503,
+      "lon": 4.3517
+    },
+    {
+      "id": "ghent",
+      "name": "Gand",
+      "country": "Bélgica",
+      "lat": 51.0543,
+      "lon": 3.7174
+    },
+    {
+      "id": "bruges_be",
+      "name": "Bruges",
+      "country": "Bélgica",
+      "lat": 51.2093,
+      "lon": 3.2247
+    },
+    {
+      "id": "rotterdam",
+      "name": "Rotterdam",
+      "country": "Países Baixos",
+      "lat": 51.9244,
+      "lon": 4.4777
+    },
+    {
+      "id": "amsterdam",
+      "name": "Amsterdam",
+      "country": "Países Baixos",
+      "lat": 52.3676,
+      "lon": 4.9041
+    },
+    {
+      "id": "cologne",
+      "name": "Colônia",
+      "country": "Alemanha",
+      "lat": 50.9375,
+      "lon": 6.9603
+    },
+    {
+      "id": "paris",
+      "name": "Paris",
+      "country": "França",
+      "lat": 48.8566,
+      "lon": 2.3522
+    },
+    {
+      "id": "baden_baden",
+      "name": "Baden-Baden",
+      "country": "Alemanha",
+      "lat": 48.7606,
+      "lon": 8.2398
+    },
+    {
+      "id": "stuttgart",
+      "name": "Stuttgart",
+      "country": "Alemanha",
+      "lat": 48.7758,
+      "lon": 9.1829
+    },
+    {
+      "id": "freiburg",
+      "name": "Freiburg",
+      "country": "Alemanha",
+      "lat": 47.999,
+      "lon": 7.8421
+    },
+    {
+      "id": "colmar",
+      "name": "Colmar",
+      "country": "França",
+      "lat": 48.0794,
+      "lon": 7.3585
+    },
+    {
+      "id": "basel",
+      "name": "Basel",
+      "country": "Suíça",
+      "lat": 47.5596,
+      "lon": 7.5886
+    },
+    {
+      "id": "luxembourg",
+      "name": "Luxemburgo",
+      "country": "Luxemburgo",
+      "lat": 49.6116,
+      "lon": 6.1319
+    },
+    {
+      "id": "beaune",
+      "name": "Beaune",
+      "country": "França",
+      "lat": 47.0249,
+      "lon": 4.8381
+    },
+    {
+      "id": "lausanne",
+      "name": "Lausanne",
+      "country": "Suíça",
+      "lat": 46.5197,
+      "lon": 6.6323
+    },
+    {
+      "id": "lyon",
+      "name": "Lyon",
+      "country": "França",
+      "lat": 45.764,
+      "lon": 4.8357
+    },
+    {
+      "id": "epernay",
+      "name": "Épernay",
+      "country": "França",
+      "lat": 49.0434,
+      "lon": 3.9564
+    },
+    {
+      "id": "lille",
+      "name": "Lille",
+      "country": "França",
+      "lat": 50.6292,
+      "lon": 3.0573
+    },
+    {
+      "id": "nancy",
+      "name": "Nancy",
+      "country": "França",
+      "lat": 48.6921,
+      "lon": 6.1844
+    },
+    {
+      "id": "strasbourg",
+      "name": "Strasbourg",
+      "country": "França",
+      "lat": 48.5734,
+      "lon": 7.7521
+    },
+    {
+      "id": "metz",
+      "name": "Metz",
+      "country": "França",
+      "lat": 49.1193,
+      "lon": 6.1757
+    }
+  ],
+  "routes": [
+    {
+      "base_id": "lille",
+      "destination_id": "brussels",
+      "train_minutes_oneway_min": 34,
+      "fare_from_eur_person_oneway": 17,
+      "reference_status": "operator_reference_2026",
+      "source_url": "https://www.sncf-connect.com/en-en/train/route/lille/brussels",
+      "retrieved_at": "2026-11-15",
+      "return_verified_2027": false,
+      "notes": "Tempo mais rápido publicado, apenas estação a estação. Tarifa 'desde' depende de data/estoque e pode não existir no retorno."
+    },
+    {
+      "base_id": "lille",
+      "destination_id": "amsterdam",
+      "train_minutes_oneway_min": 169,
+      "fare_from_eur_person_oneway": 69,
+      "reference_status": "operator_reference_2026",
+      "source_url": "https://www.sncf-connect.com/en-en/train/route/lille/amsterdam",
+      "retrieved_at": "2026-11-15",
+      "return_verified_2027": false,
+      "notes": "Tempo mais rápido publicado, apenas estação a estação. Tarifa 'desde' depende de data/estoque e pode não existir no retorno."
+    },
+    {
+      "base_id": "lille",
+      "destination_id": "rotterdam",
+      "train_minutes_oneway_min": 121,
+      "fare_from_eur_person_oneway": null,
+      "reference_status": "operator_reference_2026",
+      "source_url": "https://www.sncf-connect.com/en-en/train/route/lille/rotterdam",
+      "retrieved_at": "2026-11-15",
+      "return_verified_2027": false,
+      "notes": "Tempo mais rápido publicado, apenas estação a estação. Tarifa 'desde' depende de data/estoque e pode não existir no retorno."
+    },
+    {
+      "base_id": "lille",
+      "destination_id": "ghent",
+      "train_minutes_oneway_min": 75,
+      "fare_from_eur_person_oneway": 13.5,
+      "reference_status": "mixed_operator_and_reseller_2026",
+      "source_url": "https://www.belgiantrain.be/en/products/crossborder/lille",
+      "retrieved_at": "2026-11-15",
+      "return_verified_2027": false,
+      "notes": "Tempo mínimo aproximado e tarifa 'desde' de revendedor; confirmar bilhete oficial SNCB."
+    },
+    {
+      "base_id": "lille",
+      "destination_id": "bruges_be",
+      "train_minutes_oneway_min": 106,
+      "fare_from_eur_person_oneway": null,
+      "reference_status": "historical_approx_2026",
+      "source_url": "https://www.belgiantrain.be/en/products/crossborder/lille",
+      "retrieved_at": "2026-11-15",
+      "return_verified_2027": false,
+      "notes": "Via Kortrijk; referência aproximada, tarifa oficial ainda não cotada. Bruges na Bélgica."
+    },
+    {
+      "base_id": "lille",
+      "destination_id": "cologne",
+      "train_minutes_oneway_min": 164,
+      "fare_from_eur_person_oneway": null,
+      "reference_status": "operator_reference_2026",
+      "source_url": "https://www.sncf-connect.com/en-en/train/timetables/lille/cologne",
+      "retrieved_at": "2026-11-15",
+      "return_verified_2027": false,
+      "notes": "Tempo mais rápido publicado, apenas estação a estação. Tarifa 'desde' depende de data/estoque e pode não existir no retorno."
+    },
+    {
+      "base_id": "lille",
+      "destination_id": "paris",
+      "train_minutes_oneway_min": 63,
+      "fare_from_eur_person_oneway": null,
+      "reference_status": "operator_reference_2026",
+      "source_url": "https://www.sncf-connect.com/en-en/train/route/lille/paris",
+      "retrieved_at": "2026-11-15",
+      "return_verified_2027": false,
+      "notes": "Tempo mais rápido publicado, apenas estação a estação. Tarifa 'desde' depende de data/estoque e pode não existir no retorno."
+    },
+    {
+      "base_id": "arras",
+      "destination_id": "lille",
+      "train_minutes_oneway_min": 19,
+      "fare_from_eur_person_oneway": null,
+      "reference_status": "operator_reference_2026",
+      "source_url": "https://www.sncf-connect.com/en-en/train/timetables/arras/lille",
+      "retrieved_at": "2026-11-15",
+      "return_verified_2027": false,
+      "notes": "Tempo mais rápido publicado, apenas estação a estação. Tarifa 'desde' depende de data/estoque e pode não existir no retorno."
+    },
+    {
+      "base_id": "arras",
+      "destination_id": "brussels",
+      "train_minutes_oneway_min": null,
+      "fare_from_eur_person_oneway": null,
+      "reference_status": "route_to_research",
+      "source_url": "https://www.sncf-connect.com/en-en/train/timetables/arras/brussels",
+      "retrieved_at": "2026-11-15",
+      "return_verified_2027": false,
+      "notes": "Conexão via Lille possível, tempo total não confirmado; não somar automaticamente apenas Arras→Lille."
+    },
+    {
+      "base_id": "arras",
+      "destination_id": "amsterdam",
+      "train_minutes_oneway_min": null,
+      "fare_from_eur_person_oneway": null,
+      "reference_status": "route_to_research",
+      "source_url": "https://www.sncf-connect.com/en-en/train/timetables/arras/amsterdam",
+      "retrieved_at": "2026-11-15",
+      "return_verified_2027": false,
+      "notes": "Tempo e preço completos via Lille ainda não verificados."
+    },
+    {
+      "base_id": "dijon",
+      "destination_id": "beaune",
+      "train_minutes_oneway_min": 18,
+      "fare_from_eur_person_oneway": null,
+      "reference_status": "operator_reference_2026",
+      "source_url": "https://www.sncf-connect.com/en-en/train/timetables/dijon/beaune",
+      "retrieved_at": "2026-11-15",
+      "return_verified_2027": false,
+      "notes": "Tempo mais rápido publicado, apenas estação a estação. Tarifa 'desde' depende de data/estoque e pode não existir no retorno."
+    },
+    {
+      "base_id": "dijon",
+      "destination_id": "lausanne",
+      "train_minutes_oneway_min": 125,
+      "fare_from_eur_person_oneway": 29,
+      "reference_status": "operator_from_offer_2026",
+      "source_url": "https://www.sncf-connect.com/en-en/tgv-lyria/route/dijon/lausanne",
+      "retrieved_at": "2026-11-15",
+      "return_verified_2027": false,
+      "notes": "Oferta promocional TGV Lyria, sujeita a disponibilidade e regras."
+    },
+    {
+      "base_id": "dijon",
+      "destination_id": "lyon",
+      "train_minutes_oneway_min": 97,
+      "fare_from_eur_person_oneway": null,
+      "reference_status": "operator_reference_2026",
+      "source_url": "https://www.sncf-connect.com/en-en/train/route/dijon/lyon",
+      "retrieved_at": "2026-11-15",
+      "return_verified_2027": false,
+      "notes": "Tempo mais rápido publicado, apenas estação a estação. Tarifa 'desde' depende de data/estoque e pode não existir no retorno."
+    },
+    {
+      "base_id": "dijon",
+      "destination_id": "paris",
+      "train_minutes_oneway_min": null,
+      "fare_from_eur_person_oneway": null,
+      "reference_status": "route_to_research",
+      "source_url": "https://www.sncf-connect.com/en-en/train/route/dijon/paris",
+      "retrieved_at": "2026-11-15",
+      "return_verified_2027": false,
+      "notes": "Tempo mais rápido publicado, apenas estação a estação. Tarifa 'desde' depende de data/estoque e pode não existir no retorno."
+    },
+    {
+      "base_id": "reims",
+      "destination_id": "amsterdam",
+      "train_minutes_oneway_min": 291,
+      "fare_from_eur_person_oneway": null,
+      "reference_status": "historical_route_2026",
+      "source_url": "https://www.sncf-connect.com/en-en/train/timetables/reims/amsterdam",
+      "retrieved_at": "2026-11-15",
+      "return_verified_2027": false,
+      "notes": "Via Paris; confirmar mudança entre estações e conexão"
+    },
+    {
+      "base_id": "reims",
+      "destination_id": "paris",
+      "train_minutes_oneway_min": null,
+      "fare_from_eur_person_oneway": null,
+      "reference_status": "route_to_research",
+      "source_url": "https://www.sncf-connect.com/en-en/train/route/reims/paris",
+      "retrieved_at": "2026-11-15",
+      "return_verified_2027": false,
+      "notes": "Tempo mais rápido publicado, apenas estação a estação. Tarifa 'desde' depende de data/estoque e pode não existir no retorno."
+    },
+    {
+      "base_id": "reims",
+      "destination_id": "epernay",
+      "train_minutes_oneway_min": null,
+      "fare_from_eur_person_oneway": null,
+      "reference_status": "route_to_research",
+      "source_url": "https://www.sncf-connect.com/en-en/train/timetables/reims/epernay",
+      "retrieved_at": "2026-11-15",
+      "return_verified_2027": false,
+      "notes": "Tempo mais rápido publicado, apenas estação a estação. Tarifa 'desde' depende de data/estoque e pode não existir no retorno."
+    },
+    {
+      "base_id": "strasbourg",
+      "destination_id": "baden_baden",
+      "train_minutes_oneway_min": 35,
+      "fare_from_eur_person_oneway": null,
+      "reference_status": "operator_reference_2026",
+      "source_url": "https://www.sncf-connect.com/en-en/train/timetables/strasbourg/baden-baden",
+      "retrieved_at": "2026-11-15",
+      "return_verified_2027": false,
+      "notes": "Tempo mais rápido publicado, apenas estação a estação. Tarifa 'desde' depende de data/estoque e pode não existir no retorno."
+    },
+    {
+      "base_id": "strasbourg",
+      "destination_id": "freiburg",
+      "train_minutes_oneway_min": 68,
+      "fare_from_eur_person_oneway": null,
+      "reference_status": "operator_reference_2026",
+      "source_url": "https://www.sncf-connect.com/en-en/train/timetables/strasbourg/freiburg",
+      "retrieved_at": "2026-11-15",
+      "return_verified_2027": false,
+      "notes": "Tempo mais rápido publicado, apenas estação a estação. Tarifa 'desde' depende de data/estoque e pode não existir no retorno."
+    },
+    {
+      "base_id": "strasbourg",
+      "destination_id": "stuttgart",
+      "train_minutes_oneway_min": 87,
+      "fare_from_eur_person_oneway": 29,
+      "reference_status": "operator_reference_2026",
+      "source_url": "https://www.sncf-connect.com/en-en/train/route/strasbourg/stuttgart",
+      "retrieved_at": "2026-11-15",
+      "return_verified_2027": false,
+      "notes": "Tempo mais rápido publicado, apenas estação a estação. Tarifa 'desde' depende de data/estoque e pode não existir no retorno."
+    },
+    {
+      "base_id": "strasbourg",
+      "destination_id": "amsterdam",
+      "train_minutes_oneway_min": 358,
+      "fare_from_eur_person_oneway": null,
+      "reference_status": "operator_reference_2026",
+      "source_url": "https://www.sncf-connect.com/en-en/train/timetables/strasbourg/amsterdam",
+      "retrieved_at": "2026-11-15",
+      "return_verified_2027": false,
+      "notes": "Tempo mais rápido publicado, apenas estação a estação. Tarifa 'desde' depende de data/estoque e pode não existir no retorno."
+    },
+    {
+      "base_id": "metz",
+      "destination_id": "luxembourg",
+      "train_minutes_oneway_min": 42,
+      "fare_from_eur_person_oneway": null,
+      "reference_status": "operator_reference_2026",
+      "source_url": "https://www.sncf-connect.com/en-en/train/timetables/metz/luxembourg",
+      "retrieved_at": "2026-11-15",
+      "return_verified_2027": false,
+      "notes": "Tempo mais rápido publicado, apenas estação a estação. Tarifa 'desde' depende de data/estoque e pode não existir no retorno."
+    },
+    {
+      "base_id": "metz",
+      "destination_id": "nancy",
+      "train_minutes_oneway_min": 37,
+      "fare_from_eur_person_oneway": null,
+      "reference_status": "operator_reference_2026",
+      "source_url": "https://www.sncf-connect.com/en-en/train/timetables/metz/nancy",
+      "retrieved_at": "2026-11-15",
+      "return_verified_2027": false,
+      "notes": "Tempo mais rápido publicado, apenas estação a estação. Tarifa 'desde' depende de data/estoque e pode não existir no retorno."
+    },
+    {
+      "base_id": "metz",
+      "destination_id": "amsterdam",
+      "train_minutes_oneway_min": 322,
+      "fare_from_eur_person_oneway": null,
+      "reference_status": "operator_reference_2026",
+      "source_url": "https://www.sncf-connect.com/en-en/train/timetables/metz/amsterdam",
+      "retrieved_at": "2026-11-15",
+      "return_verified_2027": false,
+      "notes": "Tempo mais rápido publicado, apenas estação a estação. Tarifa 'desde' depende de data/estoque e pode não existir no retorno."
+    },
+    {
+      "base_id": "mulhouse",
+      "destination_id": "colmar",
+      "train_minutes_oneway_min": 18,
+      "fare_from_eur_person_oneway": 5.4,
+      "reference_status": "discount_conditional_2026",
+      "source_url": "https://www.ter.sncf.com/grand-est/trajet-mulhouse-colmar",
+      "retrieved_at": "2026-11-15",
+      "return_verified_2027": false,
+      "notes": "Carte Fluo €30/ano; acompanhante sujeito a dia elegível, valor não é tarifa normal"
+    },
+    {
+      "base_id": "mulhouse",
+      "destination_id": "basel",
+      "train_minutes_oneway_min": 22,
+      "fare_from_eur_person_oneway": 4.7,
+      "reference_status": "discount_conditional_2026",
+      "source_url": "https://www.ter.sncf.com/grand-est/trajet-mulhouse-bale",
+      "retrieved_at": "2026-11-15",
+      "return_verified_2027": false,
+      "notes": "Trecho transfronteiriço; confirmar elegibilidade Carte Fluo."
+    },
+    {
+      "base_id": "nancy",
+      "destination_id": "metz",
+      "train_minutes_oneway_min": null,
+      "fare_from_eur_person_oneway": null,
+      "reference_status": "route_to_research",
+      "source_url": "https://www.sncf-connect.com/en-en/train/timetables/nancy/metz",
+      "retrieved_at": "2026-11-15",
+      "return_verified_2027": false,
+      "notes": "Trajeto reverso não inferido de Metz→Nancy."
+    }
+  ]
+}

@@ -154,8 +154,13 @@ def render_trip_dashboard(plan: dict, trip_data: dict, finance_live: bool,
 
     st.markdown("### Roteiro inicial do perfil selecionado")
     render_active_preset_summary(suggested,catalog,"overview")
-    st.button("Ver e adotar roteiro pré-definido →",key="dashboard_go_preset",
-              on_click=_navigate,args=("Meus passeios",))
+    left_nav,right_nav=st.columns(2,gap="small")
+    with left_nav:
+        st.button("Ver e adotar roteiro pré-definido →",key="dashboard_go_preset",
+                  on_click=_navigate,args=("Meus passeios",))
+    with right_nav:
+        st.button("Explorar novas cidades-base →",key="dashboard_go_bases",
+                  on_click=_navigate,args=("Explorar bases",))
     st.caption("No mapa: passeios confirmados e sugestões ainda não aprovadas "
                "têm cores diferentes. Nenhuma proposta é salva automaticamente.")
 
