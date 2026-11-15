@@ -11,6 +11,7 @@ import streamlit as st
 from base_explorer_model import (base_opportunities,compare_bases,
                                  load_exploration,route_detail,stay_projection)
 from destination_labels import place_label
+from base_research_expanded_ui import render_expanded_research
 from planning_session import update_fields
 
 EXISTING_BASES=frozenset({"mulhouse","strasbourg","metz","nancy"})
@@ -276,7 +277,7 @@ def render_base_explorer(plan:dict,trip_data:dict,finance_live:bool,
                " · **Novas candidatas:** Lille, Arras, Dijon e Reims. "
                "A exploração não altera suas escolhas.")
     mode=st.segmented_control("Modo de exploração",
-            ["Destinos próximos","Comparar mesmas viagens","Uma ou duas bases"],
+            ["Destinos próximos","Comparar mesmas viagens","Uma ou duas bases","Pesquisa ampliada"],
             default="Destinos próximos",key="base_explorer_mode")
     if mode=="Destinos próximos" or mode is None:
         selected=st.selectbox("Cidade-base a explorar",list(names),
@@ -286,8 +287,10 @@ def render_base_explorer(plan:dict,trip_data:dict,finance_live:bool,
         _choose_base(data,plan,selected)
     elif mode=="Comparar mesmas viagens":
         _comparison(data)
-    else:
+    elif mode=="Uma ou duas bases":
         _split_stay(data,plan,trip_data,finance_live,eurfx)
+    else:
+        render_expanded_research()
     st.caption("Dados de origem: pesquisa documentada em 15/11/2026. "
                "Pernoites, horários reais de retorno, tarifas normais e aluguel de "
                "curta duração ainda são pendências. Zero nunca significa preço desconhecido.")
