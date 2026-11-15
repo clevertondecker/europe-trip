@@ -42,7 +42,7 @@ class UX3NavigationModelTests(unittest.TestCase):
                "itinerary_section":"Itália"}
         bootstrap(state)
         self.assertEqual((state["ux_area"],state["ux_section"]),
-                         ("Meu roteiro","Itália"))
+                         ("Meu roteiro","Melhorar meu roteiro"))
         set_area(state,"Explorar")
         set_task(state,"Explorar","Cidades-base")
         self.assertEqual(state["main_navigation"],"Roteiro")
@@ -50,14 +50,15 @@ class UX3NavigationModelTests(unittest.TestCase):
         self.assertEqual(state["advisor_plan"],old_plan)
         set_from_legacy(state,"Roteiro","Calendário")
         self.assertEqual((state["ux_area"],state["ux_section"]),
-                         ("Meu roteiro","Calendário"))
+                         ("Meu roteiro","Organizar viagem"))
 
     def test_comparisons_research_and_suggestions_are_reachable(self):
         self.assertEqual(route("Explorar","Comparar cidades")[0],"Comparar cidades")
         self.assertEqual(route("Explorar","Cidades-base")[3],"Destinos próximos")
-        self.assertEqual(route("Meu roteiro","França",
-                               france="Transportes e custos")[2],"Transportes e custos")
-        self.assertEqual(route("Meu roteiro","Sugestões",
+        self.assertEqual(route("Meu roteiro","Melhorar meu roteiro",
+                               suggestion="Guias especializados",
+                               guide_view="Transportes e custos")[2],"Transportes e custos")
+        self.assertEqual(route("Meu roteiro","Melhorar meu roteiro",
                                suggestion="Simular roteiros")[1],"Simular roteiros")
 
 
@@ -120,7 +121,8 @@ class UX3StreamlitNavigationSmokeTests(unittest.TestCase):
     def test_budget_and_italy_access_through_guided_menu(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=90).run()
         app.radio(key="ux_area").set_value("Meu roteiro").run()
-        app.segmented_control(key="ux_section").set_value("Itália").run()
+        app.segmented_control(key="ux_section").set_value("Melhorar meu roteiro").run()
+        app.selectbox(key="ux_improve_view").set_value("Itália").run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
         self.assertEqual(app.session_state["main_navigation"],"Roteiro")
         self.assertEqual(app.session_state["itinerary_section"],"Itália")
