@@ -80,6 +80,28 @@ class UX3StreamlitNavigationSmokeTests(unittest.TestCase):
                                          official["base_city"])
         self.assertIn(app.session_state["main_navigation"], LEGACY_PAGES)
 
+    def test_shared_city_and_duration_between_explore_and_budget(self):
+        app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=90).run()
+        official=deepcopy(app.session_state["advisor_plan"])
+        app.radio(key="ux_area").set_value("Explorar").run()
+        app.segmented_control(key="ux_section").set_value("Cidades-base").run()
+        app.selectbox(key="base_explorer_city").set_value("offenburg").run()
+        self.assertFalse(app.exception,[x.message for x in app.exception])
+        self.assertEqual(app.session_state["scenario_base_selected"],"offenburg")
+        self.assertEqual(app.session_state["scenario_sidebar"],"offenburg")
+        self.assertEqual(app.session_state["advisor_plan"],official)
+        app.number_input(key="ux_days").set_value(65).run()
+        self.assertEqual(app.session_state["unified_stay"],65)
+        app.radio(key="ux_area").set_value("Orçamento").run()
+        self.assertFalse(app.exception,[x.message for x in app.exception])
+        self.assertEqual(app.session_state["scenario_base_selected"],"offenburg")
+        self.assertEqual(app.session_state["unified_stay"],65)
+        app.slider(key="unified_stay").set_value(60).run()
+        self.assertFalse(app.exception,[x.message for x in app.exception])
+        self.assertEqual(app.session_state["ux_days"],60)
+        self.assertEqual(app.session_state["advisor_plan"]["base_city"],
+                         official["base_city"])
+
     def test_budget_and_italy_access_through_guided_menu(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=90).run()
         app.radio(key="ux_area").set_value("Meu roteiro").run()
