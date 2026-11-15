@@ -234,7 +234,9 @@ def _choose_base(data:dict,plan:dict,base_id:str)->None:
 def _split_stay(data:dict,plan:dict,trip_data:dict,finance_live:bool,
                 eurfx:float)->None:
     names={b["id"]:_base_name(data,b["id"]) for b in base_options(data)}
-    days=plan["total_days"]-plan["italy_days"]
+    days=(st.session_state.get("ux_days",plan["total_days"]-plan["italy_days"])
+          if st.session_state.get("ux_mode")=="Simulação"
+          else plan["total_days"]-plan["italy_days"])
     st.markdown("### Uma base ou duas?")
     st.caption("Compare o mesmo período francês e as mesmas verbas restantes, "
                "mudando apenas o aluguel **hipotético** e a despesa de transferência. "
@@ -281,7 +283,8 @@ def _split_stay(data:dict,plan:dict,trip_data:dict,finance_live:bool,
                 "Sem esses valores, nenhum total será mostrado como estimativa de hospedagem. "
                 "Não usamos o aluguel residencial médio como cotação de curta estadia.")
         return
-    projection=stay_projection(plan,trip_data,finance_live,eurfx,
+    preview_plan={**plan,"total_days":plan["italy_days"]+days}
+    projection=stay_projection(preview_plan,trip_data,finance_live,eurfx,
                                first,second,split,rent1,rent2,moving,dep1,dep2)
     table=[
         {"Cenário":"Somente "+names[first],"Dias":days,
@@ -335,7 +338,8 @@ def _scenario_backups(plan:dict,options:list[dict])->None:
                             value="Estudar "+names[chosen],key="scenario_save_name")
         days=st.number_input("Dias nesta base hipotética",min_value=7,
                             max_value=100,
-                            value=max(7,min(100,plan["total_days"]-plan["italy_days"])),
+                            value=max(7,min(100,st.session_state.get("ux_days",
+                                plan["total_days"]-plan["italy_days"]))),
                             key="scenario_save_days")
         notes=st.text_area("Anotações (opcional)",key="scenario_save_notes",
                            max_chars=2000)
@@ -356,6 +360,9 @@ def _scenario_backups(plan:dict,options:list[dict])->None:
                 if st.button("Reabrir cenário",key="scenario_drafts_restore"):
                     restored=drafts[selected]
                     st.session_state["scenario_base_selected"]=restored["city_id"]
+                    st.session_state["ux_last_candidate"]=restored["city_id"]
+                    st.session_state["ux_mode"]="Simulação"
+                    st.session_state["ux_pending_days"]=restored["days"]
                     st.success("Cenário selecionado, sem mudar roteiro oficial.")
                     st.rerun()
             with b:
@@ -369,6 +376,9 @@ def _scenario_backups(plan:dict,options:list[dict])->None:
                 restored=scenario_import(upload.getvalue())
                 st.session_state.setdefault("scenario_saved_drafts",{})[restored["name"]]=restored
                 st.session_state["scenario_base_selected"]=restored["city_id"]
+                st.session_state["ux_last_candidate"]=restored["city_id"]
+                st.session_state["ux_mode"]="Simulação"
+                st.session_state["ux_pending_days"]=restored["days"]
                 st.success("Cenário importado e selecionado; roteiro oficial inalterado.")
                 st.rerun()
             except (ValueError,UnicodeError,TypeError) as exc:
