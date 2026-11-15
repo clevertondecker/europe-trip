@@ -52,6 +52,12 @@ def validate_plan(plan:dict,known_attractions:set[str]|None=None)->None:
     if len(chosen)!=len(set(chosen)):raise ValueError("Atrações duplicadas")
     if known_attractions is not None and not set(chosen)<=known_attractions:
         raise ValueError("Atração desconhecida")
+    for key in ("mandatory_destinations","excluded_destinations"):
+        names=plan.get(key,[])
+        if (not isinstance(names,list) or len(names)>50 or
+            any(not isinstance(d,str) or not d or len(d)>100 for d in names) or
+            len(set(names))!=len(names)):
+            raise ValueError("Preferências de destinos inválidas")
     if set(plan.get("mandatory_destinations",[])) & set(plan.get("excluded_destinations",[])):
         raise ValueError("Destino obrigatório e excluído")
     if not isinstance(plan.get("assignments"),dict):raise ValueError("Datas inválidas")
