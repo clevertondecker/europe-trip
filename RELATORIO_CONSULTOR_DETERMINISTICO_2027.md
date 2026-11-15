@@ -10,7 +10,7 @@ Esta função adiciona regras e otimização determinísticas aos componentes j�
 - Importa a seleção de atrações em `st.session_state["explore_packages"]`, permite escolher outra base e gera diagnósticos com fontes e sugestões.
 - Diferencia preços historicamente publicados, tarifas condicionais e custos desconhecidos; EUR e CHF só são agregados em BRL após câmbio hipotético informado.
 - Analisa logística: retorno não verificado, Carte Fluo, trechos longos, Alpes/pernoite e falta de preços.
-- Otimizador heurístico de até três propostas de calendário. **Não planeja trajetos com duração desconhecida, pernoites sem logística completa nem combinações impossíveis**. Só agenda na França em férias/finais de semana e não substitui atividades já agendadas. Tempo de visita é estimativa editorial.
+- Otimizador heurístico de até três propostas de calendário, com classificação relativa por perfil e justificativa das informações faltantes. **Não planeja trajetos com duração desconhecida, pernoites sem logística completa nem combinações impossíveis**. Só agenda na França em férias/finais de semana e não substitui atividades já agendadas. Tempo de visita é estimativa editorial.
 - Propostas são **simulações**. Para alterar a agenda da versão em sessão é obrigatório clicar **Aprovar esta proposta**. Rejeitar mantém o plano intacto; versões obsoletas são bloqueadas.
 - Exporta e importa JSON versionado. A lista de passeios existente é importada por ação explícita e nunca altera a decisão oficial D-004 do Drive.
 - O orçamento estimado não considera valores desconhecidos como zero disponível; apenas o excedente conhecido sobre a verba de passeios já provisionada é adicionado como delta.
@@ -36,7 +36,7 @@ Para habilitar gravação, é necessário configurar no **Streamlit Secrets** um
 
 Sem os dois Secrets, nenhum usuário da interface consegue chamar o método de gravação. A gravação exige senha do proprietário, segue confirmação explícita por botão e valida o SHA antes de sobrescrever. Em conflito, falha sem perda silenciosa.
 
-O GitHub tem histórico de alterações do arquivo como rastreabilidade; **UI de listagem/restauração de versões passadas ainda não está implementada**. Exportação JSON e conteúdo dos commits permitem recuperação manual.
+O GitHub tem histórico de alterações do arquivo como rastreabilidade; A UI autenticada permite listar planos JSON, consultar histórico de commits e pré-visualizar um snapshot; restaurar gera **uma nova revisão local**, que só será gravada mediante novo clique explícito. O histórico no GitHub permanece acessível independentemente da sessão.
 
 **Visibilidade:** a versão salva em um repositório público pode ser lida por qualquer pessoa! Não armazenar dados pessoais, reservas com nomes, número de documento, endereços privados ou outras informações sensíveis nele. Verifique se o repositório é privado antes de armazenar itinerários pessoais.
 
