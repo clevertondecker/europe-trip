@@ -60,17 +60,34 @@ def render_explorer(trip_data: dict, sync_sources: dict, map_view) -> None:
     st.caption("Atrações consultadas em fontes de turismo. Duração de visita é sugestão editorial; "
                "tarifas de trem e de ingressos são exemplos publicados em 2026, não bilhetes de 2027. "
                "Trocar a cidade-base não aprova a decisão D-004.")
-    if "explore_base" not in st.session_state:
-        suggested=st.session_state.get("unified_city")
-        st.session_state["explore_base"]=(
-            suggested.casefold() if isinstance(suggested,str) and
-            suggested.casefold() in {"mulhouse","strasbourg","metz","nancy"} else "mulhouse")
-    base=st.selectbox("Nossa cidade-base francesa (simulação)",
-                      ["mulhouse","strasbourg","metz","nancy"],
-                      format_func=lambda code: by_id[code]["name"],
-                      key="explore_base")
-    if base!=active_plan()["base_city"]:
-        update_fields(base_city=base)
+    # The exploratory city is shared with the comparison and finance pages.
+    # The attractions route matrix currently supports four official bases only.
+    from base_scenario_model import base_options, hypothetical_city_name
+    options=base_options()
+    ids=[entry["id"] for entry in options]
+    candidate=st.session_state.get("scenario_base_selected",active_plan()["base_city"])
+    if candidate not in ids:
+        candidate=active_plan()["base_city"]
+    base=st.selectbox("Cidade-base da pesquisa exploratória",ids,
+        index=ids.index(candidate),
+        format_func=lambda code:hypothetical_city_name(code,options),
+        key="attractions_scenario_base")
+    st.session_state["scenario_base_selected"]=base
+    official_base=active_plan()["base_city"]
+    editable=base==official_base
+    if not editable:
+        st.info("Simulação independente: o roteiro oficial permanece em "+
+                by_id[official_base]["name"]+
+                ". As seleções de passeios oficiais não podem ser alteradas "
+                "por engano ao avaliar outra cidade.")
+    if base not in {"mulhouse","strasbourg","metz","nancy"}:
+        st.warning("A matriz detalhada de atrações ainda não possui rotas "
+                   "verificadas desde esta base. Não é correto reutilizar as "
+                   "tarifas de outra cidade nem considerar viagem gratuita.")
+        st.caption("Para analisar hospedagem, localização e pesquisas disponíveis, "
+                   "abra Roteiro → Explorar bases → Pesquisa ampliada. "
+                   "A lista e o calendário oficiais permanecem preservados.")
+        return
     available=places_for_base(attractions,routes,base)
     country_options=sorted({p["destination"]["country"] for p in available})
     category_options=sorted(_attraction_filters(attractions))
@@ -222,7 +239,7 @@ def render_explorer(trip_data: dict, sync_sources: dict, map_view) -> None:
                     marked=st.selectbox("Interesse",["Quero visitar","Opcional","Descartar"],
                                         index=["Quero visitar","Opcional","Descartar"].index(current),
                                         key=f"explore_mark_{a['id']}")
-                    if marked!=marks.get(a["id"],"Opcional"):
+                    if editable and marked!=marks.get(a["id"],"Opcional"):
                         update_interest(a["id"],marked)
                         marks=active_plan().get("preferences",{})
         st.markdown("#### Montar passeio nessa cidade")
@@ -316,7 +333,7 @@ def render_explorer(trip_data: dict, sync_sources: dict, map_view) -> None:
                     one,two=st.columns([5,1],gap="small")
                     with one:st.markdown(f"**{day}:** {by_id.get(destid,{}).get('name',destid)}")
                     with two:
-                        if st.button("Remover",key=f"explore_calendar_remove_{day}"):
+                        if st.button("Remover",key=f"explore_calendar_remove_{day}",disabled=not editable):
                             unschedule_package(day)
                             st.rerun()
 
