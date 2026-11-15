@@ -156,4 +156,6 @@ A interface contém perfis Econômico, Equilibrado (padrão) e Aproveitar ao má
 
 **Documentação completa, limitações e configuração segura:** [RELATORIO_CONSULTOR_DETERMINISTICO_2027.md](RELATORIO_CONSULTOR_DETERMINISTICO_2027.md).
 
-A credencial GitHub **não está incluída** no repositório nem foi configurada pela implementação. Enquanto não for configurada, o fluxo de persistência funciona por exportação/importação JSON. O Drive e a decisão D-004 continuam somente leitura.
+**Segurança da gravação (atualizado):** o fluxo utiliza login Google OIDC, verifica o e-mail do proprietário e sessão válida, e só grava com token restrito guardado nos Streamlit Secrets. O hash de senha usado anteriormente não é mais aceito. Consulte o [guia de ativação segura](GUIA_ATIVAR_SALVAMENTO_GITHUB_SEGURO.md).
+
+O repositório foi confirmado **público** em 15/11/2026; roteiros gravados em JSON ficarão públicos. As credenciais ainda **não foram configuradas**; até que o proprietário complete o setup Google Cloud/GitHub/Streamlit, a exportação e importação JSON continuam disponíveis. O Drive e a decisão D-004 permanecem somente leitura.
