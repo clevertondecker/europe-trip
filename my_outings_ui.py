@@ -9,6 +9,7 @@ import streamlit as st
 from planning_session import select_package, delete_package
 from attractions_model import package_cost
 from advisor_finance import advisor_projection
+from active_preset_ui import render_active_preset
 
 
 def _go_budget_presets()->None:
@@ -81,7 +82,8 @@ def _edit_card(dest_id: str, plan: dict, attractions: dict) -> None:
 def render_my_outings(plan: dict, catalog: dict, *, routes: dict | None = None,
                       trip_data: dict | None = None, finance_live: bool = False,
                       eurfx: float = 6.3, chffx: float = 7.1,
-                      use_city_rent: bool = True) -> None:
+                      use_city_rent: bool = True,
+                      preset:dict | None = None) -> None:
     """Add, edit and remove directly from the canonical itinerary in-session.
 
     Remote persistence remains the owner's explicit action in save panel.
@@ -89,8 +91,11 @@ def render_my_outings(plan: dict, catalog: dict, *, routes: dict | None = None,
     destinations, attractions = catalog_options(catalog, plan)
     cards = selected_cards(plan, catalog)
     st.markdown("### Meus passeios")
-    st.caption("Aqui aparecem **somente os passeios que você escolheu**. "
-               "As sugestões do consultor ficam na aba Simular roteiros.")
+    st.caption("O roteiro pré-definido do perfil aparece abaixo. "
+               "Depois de confirmá-lo, seus passeios ficam na lista oficial para editar ou remover.")
+    if preset is not None:
+        render_active_preset(plan,preset,catalog)
+    st.markdown("#### Passeios confirmados — meu planejamento")
     a, b = st.columns(2, gap="small")
     a.metric("Passeios escolhidos", len(cards))
     b.metric("Atrações escolhidas", sum(len(p) for p in plan["packages"].values()))
@@ -158,8 +163,9 @@ def render_my_outings(plan: dict, catalog: dict, *, routes: dict | None = None,
                 st.rerun()
 
     if not cards:
-        st.info("Você ainda não adotou um roteiro. A verba para excursões já está "
-                "prevista no orçamento, mas ainda não representa passeios escolhidos.")
+        st.info("Ainda não há passeios confirmados. O roteiro sugerido acima já contém "
+                "destinos e atrações para seu perfil. Clique em **Usar este roteiro** "
+                "e confirme para incluí-los aqui.")
         st.button("Ver roteiros prontos por estilo →",key="outing_go_budget_presets",
                   on_click=_go_budget_presets)
         return
