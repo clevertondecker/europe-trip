@@ -254,6 +254,15 @@ def _ux_legacy_guide_changed() -> None:
                   st.session_state["guide_section"])
 
 
+def _ux_days_changed() -> None:
+    # Shared duration is a what-if input, never a mutation of TripPlan.
+    st.session_state["unified_stay"]=st.session_state["ux_days"]
+
+
+def _ux_budget_days_changed() -> None:
+    st.session_state["ux_days"]=st.session_state["unified_stay"]
+
+
 def _ux_mode_changed() -> None:
     official=active_plan()["base_city"]
     if st.session_state["ux_mode"]=="Oficial":
@@ -325,7 +334,11 @@ with st.sidebar:
 if "ux_mode" not in st.session_state:
     st.session_state["ux_mode"]="Simulação"
 if "ux_days" not in st.session_state:
-    st.session_state["ux_days"]=active_plan()["total_days"]-active_plan()["italy_days"]
+    french_days=st.session_state.get(
+        "unified_stay",active_plan()["total_days"]-active_plan()["italy_days"])
+    st.session_state["ux_days"]=max(40,min(80,int(french_days)))
+if "unified_stay" not in st.session_state:
+    st.session_state["unified_stay"]=st.session_state["ux_days"]
 official_id=active_plan()["base_city"]
 if st.session_state.get("ux_mode")=="Oficial" and (
         st.session_state.get("scenario_base_selected")!=official_id):
@@ -345,8 +358,8 @@ with st.container(border=True):
                      format_func=lambda city:_base_details[city]["name"]+
                                             " · "+_base_details[city]["country"])
     with days_col:
-        st.number_input("Dias na base",min_value=7,max_value=100,
-                        key="ux_days",
+        st.number_input("Dias na França (simulação)",min_value=40,max_value=80,
+                        key="ux_days",on_change=_ux_days_changed,
                         disabled=st.session_state["ux_mode"]=="Oficial")
     state_label=("Plano oficial" if st.session_state["ux_mode"]=="Oficial"
                  else "Simulação independente")
@@ -1409,7 +1422,8 @@ elif page == "Orçamento":
     col1,col2,col3 = st.columns(3,gap="medium")
     with col1:
         stay = st.slider("Dias na França",min_value=40,max_value=80,
-                         value=french["french_days"],step=1,key="unified_stay")
+                         value=french["french_days"],step=1,key="unified_stay",
+                         on_change=_ux_budget_days_changed)
     with col2:
         outings = st.slider("Saídas por semana",0,7,value=2,key="unified_outings")
     with col3:
