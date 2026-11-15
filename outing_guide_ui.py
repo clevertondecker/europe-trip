@@ -23,28 +23,25 @@ def _add_optional(destination_id:str,selected_ids:list[str],optional_id:str)->No
 
 
 def _render_map(guide:dict)->None:
-    base=guide["base_name"]
+    base=guide["base"]
     destination=guide["destination"]
-    # Only the destination's city coordinates are documented; these pins
-    # deliberately do not suggest a pedestrian or railway route.
     points=[{"name":destination["name"],"role":"Cidade do passeio",
              "lat":destination["lat"],"lon":destination["lon"],"color":[198,132,58]}]
-    if guide["local"]:
-        st.caption("A origem e o destino são a mesma cidade. "
-                   "Locais exatos das atrações ainda não possuem coordenadas verificadas.")
-    else:
-        # No second pin: base coords must come from the catalog model, not inference.
-        st.caption("Ponto aproximado do centro da cidade de destino; "
-                   "não representa rota de trem nem percurso a pé.")
+    if not guide["local"]:
+        points.append({"name":base["name"],"role":"Cidade-base",
+                       "lat":base["lat"],"lon":base["lon"],"color":[42,117,108]})
+    st.caption("Marcadores aproximados dos centros das cidades. O mapa não desenha "
+               "uma rota de trem ou caminho entre atrações; coordenadas das atrações "
+               "ainda não foram verificadas.")
     layer=pdk.Layer("ScatterplotLayer",data=points,get_position="[lon,lat]",
                     get_fill_color="color",get_radius=9000,radius_min_pixels=10,
                     radius_max_pixels=14,pickable=True)
     deck=pdk.Deck(map_style="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
-                  initial_view_state=pdk.ViewState(latitude=destination["lat"],
-                                                   longitude=destination["lon"],zoom=10),
+                  initial_view_state=pdk.ViewState(latitude=(base["lat"]+destination["lat"])/2,
+                                                   longitude=(base["lon"]+destination["lon"])/2,
+                                                   zoom=9 if not guide["local"] else 10),
                   layers=[layer],tooltip={"html":"<b>{name}</b><br>{role}"})
     st.pydeck_chart(deck,height=260,width="stretch")
-
 
 def render_outing_guide(guide:dict,*,key_prefix:str,
                         eurfx:float=6.3,chffx:float=7.1,
@@ -86,6 +83,8 @@ def render_outing_guide(guide:dict,*,key_prefix:str,
                            "valor do cartão não incluídos. Não equivale à tarifa cheia.")
         elif not guide["local"]:
             st.caption("Tarifa da conexão entre a base e o destino ainda não cotada.")
+        st.caption("Distância em linha reta (não a rota): "+
+                   str(guide["distance_straight_km"])+" km. ")
         st.caption("Distância ferroviária/rodoviária: "+
                    (f"{guide['distance_km_documented']} km documentados" if
                     guide["distance_km_documented"] is not None else "não verificada")+
