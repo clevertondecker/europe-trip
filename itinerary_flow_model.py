@@ -8,6 +8,7 @@ represent a reservation or incur an additional transport fare.
 from __future__ import annotations
 
 from copy import deepcopy
+from datetime import date,timedelta
 from planning_store import change_plan
 from catalog_plan_validation import allowed_attractions
 from italy_honeymoon_model import load_honeymoon, italy_itinerary_places, proposal_snapshot
@@ -73,7 +74,9 @@ def selected_rows(plan:dict,catalog:dict)->list[dict]:
                      else item["attractions"])
         rows[key]={"id":key,"name":lookup[key]["name"],"stage":item["stage"],
                    "attractions":attractions,"period":item["period"],
-                   "exact_dates":rows.get(key,{}).get("exact_dates",[])}
+                   "exact_dates":([item["exact_date"]]
+                                  if item.get("exact_date") else
+                                  rows.get(key,{}).get("exact_dates",[]))}
     return sorted(rows.values(),key=lambda x:(x["stage"]!=ITALY_STAGE,x["name"]))
 
 
@@ -107,6 +110,9 @@ def upsert_choice(plan:dict,catalog:dict,dest_id:str,
     """One atomic canonical revision, including France `packages` when needed."""
     item=_validated_choice(catalog,dest_id,attractions,period)
     visits=deepcopy(plan.get("flexible_visits",[]))
+    old=next((v for v in visits if v["destination_id"]==dest_id),None)
+    if old and old.get("exact_date") and item["stage"]==ITALY_STAGE:
+        item["exact_date"]=old["exact_date"]
     visits=[v for v in visits if v["destination_id"]!=dest_id]+[item]
     updates={"flexible_visits":visits}
     if item["stage"]==FRANCE_STAGE:
@@ -130,6 +136,29 @@ def remove_choice(plan:dict,catalog:dict,dest_id:str)->dict:
         changes["assignments"]={day:dest for day,dest in plan.get("assignments",{}).items()
                                  if dest!=dest_id}
     return change_plan(plan,changes)
+
+
+def schedule_italy_day(plan:dict,catalog:dict,dest_id:str,
+                       chosen_day:str|None)->dict:
+    """Organize an Italian visit by day without changing French assignments."""
+    item=get_choice(catalog,dest_id)
+    if item["stage"]!=ITALY_STAGE:
+        raise ValueError("Datas francesas pertencem ao calendário do roteiro")
+    visits=deepcopy(plan.get("flexible_visits",[]))
+    target=next((v for v in visits if v["destination_id"]==dest_id),None)
+    if target is None:
+        raise ValueError("Inclua o lugar no roteiro antes de organizar o dia")
+    if chosen_day is not None:
+        try: picked=date.fromisoformat(chosen_day)
+        except (TypeError,ValueError) as exc:
+            raise ValueError("Dia inválido") from exc
+        departure=date.fromisoformat(plan["departure_date"])
+        if not departure<=picked<departure+timedelta(days=plan["italy_days"]):
+            raise ValueError("Dia fora da etapa italiana")
+        target["exact_date"]=chosen_day
+    else:
+        target.pop("exact_date",None)
+    return change_plan(plan,{"flexible_visits":visits})
 
 
 def italy_starter_preview(plan:dict,catalog:dict,variant:str)->dict:
@@ -184,7 +213,7 @@ def validate_flow_backup(plan:dict,catalog:dict)->None:
     for row in plan.get("flexible_visits",[]):
         clean=_validated_choice(catalog,row["destination_id"],
                                 row["attractions"],row["period"])
-        if clean!=row:
+        if {k:row[k] for k in clean}!=clean:
             raise ValueError("Etapa ou atração divergente do catálogo")
         if row["stage"]==FRANCE_STAGE and plan["packages"].get(
                 row["destination_id"])!=row["attractions"]:
