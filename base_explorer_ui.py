@@ -215,7 +215,7 @@ def _choose_base(data:dict,plan:dict,base_id:str)->None:
 
 def _split_stay(data:dict,plan:dict,trip_data:dict,finance_live:bool,
                 eurfx:float)->None:
-    names={b["id"]:_base_name(data,b["id"]) for b in data["bases"]}
+    names={b["id"]:_base_name(data,b["id"]) for b in base_options(data)}
     days=plan["total_days"]-plan["italy_days"]
     st.markdown("### Uma base ou duas?")
     st.caption("Compare o mesmo período francês e as mesmas verbas restantes, "
