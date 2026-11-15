@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "checked_at": "2026-11-14",
+  "checked_at": "2026-11-15",
   "bases": [
     "mulhouse",
     "strasbourg",
@@ -68,19 +68,19 @@
       "fare_eur_person_oneway": 11.7,
       "fare_type": "discount_carte_fluo",
       "normal_fare_eur_person_oneway": null,
-      "fluo_card_cost_eur": null,
+      "fluo_card_cost_eur": 30,
       "source_url": "https://www.ter.sncf.com/grand-est/trajet-mulhouse-strasbourg",
-      "retrieved_at": "2026-11-14",
+      "retrieved_at": "2026-11-15",
       "eligible_2027": false,
       "status": "operator_published_2026",
       "missing": [
         "last_mile",
         "return_last_train",
         "normal_fare",
-        "carte_fluo_cost",
-        "date_specific_schedule"
+        "date_specific_schedule",
+        "carte_fluo_eligibility"
       ],
-      "notes": "Tarifa com Carte Fluo publicada para 2026; preço normal e cartão ausentes"
+      "notes": "Referência oficial consultada 15/11/2026; Carte Fluo €30/ano não incluída nos bilhetes. Desconto para acompanhante apenas fim de semana/feriado. Retorno/data de 2027 a verificar."
     },
     {
       "id": "mulhouse__metz",
@@ -165,20 +165,20 @@
       "weekend_return_verified": false,
       "fare_eur_person_oneway": 5.4,
       "fare_type": "discount_carte_fluo",
-      "normal_fare_eur_person_oneway": null,
-      "fluo_card_cost_eur": null,
+      "normal_fare_eur_person_oneway": 10.8,
+      "fluo_card_cost_eur": 30,
       "source_url": "https://www.ter.sncf.com/grand-est/trajet-mulhouse-colmar",
-      "retrieved_at": "2026-11-14",
+      "retrieved_at": "2026-11-15",
       "eligible_2027": false,
       "status": "operator_published_2026",
       "missing": [
         "last_mile",
         "return_last_train",
         "normal_fare",
-        "carte_fluo_cost",
-        "date_specific_schedule"
+        "date_specific_schedule",
+        "carte_fluo_eligibility"
       ],
-      "notes": "Tarifa com Carte Fluo publicada para 2026; preço normal e cartão ausentes"
+      "notes": "Referência oficial consultada 15/11/2026; Carte Fluo €30/ano não incluída nos bilhetes. Desconto para acompanhante apenas fim de semana/feriado. Retorno/data de 2027 a verificar."
     },
     {
       "id": "mulhouse__freiburg",
@@ -231,19 +231,19 @@
       "fare_eur_person_oneway": 4.7,
       "fare_type": "discount_carte_fluo",
       "normal_fare_eur_person_oneway": null,
-      "fluo_card_cost_eur": null,
+      "fluo_card_cost_eur": 30,
       "source_url": "https://www.ter.sncf.com/grand-est/trajet-mulhouse-bale",
-      "retrieved_at": "2026-11-14",
+      "retrieved_at": "2026-11-15",
       "eligible_2027": false,
       "status": "operator_published_2026",
       "missing": [
         "last_mile",
         "return_last_train",
         "normal_fare",
-        "carte_fluo_cost",
-        "date_specific_schedule"
+        "date_specific_schedule",
+        "carte_fluo_eligibility"
       ],
-      "notes": "Tarifa com Carte Fluo publicada para 2026; preço normal e cartão ausentes"
+      "notes": "Referência oficial consultada 15/11/2026; Carte Fluo €30/ano não incluída nos bilhetes. Desconto para acompanhante apenas fim de semana/feriado. Retorno/data de 2027 a verificar."
     },
     {
       "id": "mulhouse__luxembourg",
@@ -384,31 +384,30 @@
       "mode": "rail_candidate",
       "departure_point": "Strasbourg estação",
       "arrival_point": "Mulhouse estação/centro a verificar",
-      "train_minutes_one_way": null,
-      "minutes_scope": "unknown",
+      "train_minutes_one_way": 53,
+      "minutes_scope": "station_to_station",
       "distance_km": null,
       "distance_kind": "unknown",
       "transfers": null,
       "first_last_mile_minutes": null,
       "roundtrip_last_train": null,
       "weekend_return_verified": false,
-      "fare_eur_person_oneway": null,
-      "fare_type": "unknown",
+      "fare_eur_person_oneway": 11.7,
+      "fare_type": "discount_carte_fluo",
       "normal_fare_eur_person_oneway": null,
-      "fluo_card_cost_eur": null,
-      "source_url": "https://www.ter.sncf.com/grand-est/se-deplacer/lignes",
-      "retrieved_at": "2026-11-14",
+      "fluo_card_cost_eur": 30,
+      "source_url": "https://www.ter.sncf.com/grand-est/trajet-strasbourg-mulhouse",
+      "retrieved_at": "2026-11-15",
       "eligible_2027": false,
-      "status": "route_to_research",
+      "status": "operator_published_2026",
       "missing": [
-        "route",
-        "travel_time",
-        "roundtrip_fare",
-        "transfers",
         "last_mile",
-        "weekend_return"
+        "return_last_train",
+        "normal_fare",
+        "carte_fluo_eligibility",
+        "date_specific_schedule"
       ],
-      "notes": "Não foi confirmada rota adequada para a base e destino. Avaliar necessidade de conexões/pernoite."
+      "notes": "Referência oficial consultada 15/11/2026; Carte Fluo €30/ano não incluída nos bilhetes. Desconto para acompanhante apenas fim de semana/feriado. Retorno/data de 2027 a verificar."
     },
     {
       "id": "strasbourg__strasbourg",
@@ -521,19 +520,19 @@
       "fare_eur_person_oneway": 7.9,
       "fare_type": "discount_carte_fluo",
       "normal_fare_eur_person_oneway": null,
-      "fluo_card_cost_eur": null,
+      "fluo_card_cost_eur": 30,
       "source_url": "https://www.ter.sncf.com/grand-est/trajet-strasbourg-colmar",
-      "retrieved_at": "2026-11-14",
+      "retrieved_at": "2026-11-15",
       "eligible_2027": false,
       "status": "operator_published_2026",
       "missing": [
         "last_mile",
         "return_last_train",
         "normal_fare",
-        "carte_fluo_cost",
-        "date_specific_schedule"
+        "date_specific_schedule",
+        "carte_fluo_eligibility"
       ],
-      "notes": "Tarifa com Carte Fluo publicada para 2026; preço normal e cartão ausentes"
+      "notes": "Referência oficial consultada 15/11/2026; Carte Fluo €30/ano não incluída nos bilhetes. Desconto para acompanhante apenas fim de semana/feriado. Retorno/data de 2027 a verificar."
     },
     {
       "id": "strasbourg__freiburg",
@@ -1448,5 +1447,5 @@
       "notes": "Não foi confirmada rota adequada para a base e destino. Avaliar necessidade de conexões/pernoite."
     }
   ],
-  "warning": "Distância geodésica, se calculada na interface, será rotulada linha reta; nunca distância ferroviária. Rotas sem tarifa/tempo não são preenchidas com valores inferidos."
+  "warning": "Tarifas públicas consultadas em novembro/2026, não cotação 2027. Carte Fluo exige elegibilidade e cartão €30; acompanhante em fim de semana/feriado. Valores sem cotações ficam desconhecidos; distâncias em linha reta não são ferroviárias."
 }
