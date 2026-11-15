@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import streamlit as st
+from five_base_comparison_ui import render_five_base_study
 
 from base_research_expanded_model import (
     COUNTRY_FLAGS,PRESETS,load_research,load_rail,
@@ -30,6 +31,9 @@ def render_expanded_research()->None:
                "confirmadas para 56–60 noites em setembro–novembro de 2027. "
                "Por isso, não atribuí pontuações definitivas de 0 a 100 nem "
                "declarei uma cidade vencedora. Anúncios de 2026 são só amostras.")
+    with st.expander("Aprofundamento · Offenburg, Trier, Mulhouse, Strasbourg e Lille",
+                     expanded=True):
+        render_five_base_study()
 
     country=st.selectbox("Filtrar país",["Todos"]+
                          sorted(summary["country_counts"]),
