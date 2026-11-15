@@ -220,12 +220,12 @@
       "amount": 1.9,
       "currency": "EUR",
       "unit": "person_trip",
-      "source_url": "https://www.cts-strasbourg.eu/export/sites/default/pdf/04SeDeplacer/CTS_ANG_GUIDE_VOYAGEUR_Janvier-2026_web.pdf",
+      "source_url": "https://www.cts-strasbourg.eu/en/buy/our-tickets/occasional-tickets/",
       "source_type": "official_transit",
       "status": "published_reference",
       "checked_at": "2026-11-15",
       "validity": "2026",
-      "notes": "Tarifa do guia oficial janeiro de 2026; canal de compra específico."
+      "notes": "Tarifa do guia oficial janeiro de 2026; canal de compra específico. Preço oficial online consultado 15/11/2026; primeira compra de cartão sem contato pode exigir €0,20."
     },
     {
       "city": "strasbourg",
@@ -233,12 +233,12 @@
       "amount": 4.6,
       "currency": "EUR",
       "unit": "person_day",
-      "source_url": "https://www.cts-strasbourg.eu/export/sites/default/pdf/04SeDeplacer/CTS_ANG_GUIDE_VOYAGEUR_Janvier-2026_web.pdf",
+      "source_url": "https://www.cts-strasbourg.eu/en/buy/our-tickets/occasional-tickets/",
       "source_type": "official_transit",
       "status": "published_reference",
       "checked_at": "2026-11-15",
       "validity": "2026",
-      "notes": "Para uma pessoa; zonas e linhas incluídas segundo o guia CTS."
+      "notes": "Para uma pessoa; zonas e linhas incluídas segundo o guia CTS. Preço oficial online consultado 15/11/2026; primeira compra de cartão sem contato pode exigir €0,20."
     },
     {
       "city": "basel",
