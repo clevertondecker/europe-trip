@@ -4,6 +4,7 @@ import json
 from copy import deepcopy
 from datetime import date
 from decimal import Decimal
+from urllib.error import HTTPError
 from html import escape
 import streamlit as st
 from attractions_model import load_attractions,load_base_routes,package_cost,excursions_overage_brl
@@ -63,6 +64,21 @@ def _secure_save(plan):
     sha=st.session_state.get("advisor_github_sha")
     next_sha=GitHubPlanRepository(cfg["token"]).save(plan,sha)
     st.session_state["advisor_github_sha"]=next_sha
+
+def _github_read_error(exc:Exception)->str:
+    if isinstance(exc,HTTPError):
+        if exc.code==404:
+            return ("Este plano ainda não existe no GitHub. Primeiro clique em "
+                    "'Gravar versão aprovada no GitHub'. Se já salvou outro, "
+                    "abra 'Outros planos e histórico de revisões' para localizar o ID.")
+        if exc.code in (401,403):
+            return ("GitHub recusou o acesso (HTTP "+str(exc.code)+"). "
+                    "Verifique a validade do token e sua permissão Contents.")
+        return ("Erro do GitHub (HTTP "+str(exc.code)+"). "
+                "Tente novamente e consulte os logs do Streamlit.")
+    return ("Não foi possível carregar o plano ("+type(exc).__name__+
+            "). Confira o ID, a conexão e os dados salvos.")
+
 
 def render_advisor(trip_data:dict,sync_sources:dict)->None:
     catalog=load_attractions();routes=load_base_routes()
@@ -263,8 +279,12 @@ def render_advisor(trip_data:dict,sync_sources:dict)->None:
                         _secure_save(p)
                         st.success("Plano salvo com revisão verificada no GitHub.")
                     except Exception as exc:
-                        st.error("GitHub não confirmou a gravação: "+type(exc).__name__+
-                                 ". Verifique permissões, conflito de SHA e autenticação.")
+                        if isinstance(exc,HTTPError) and exc.code in (401,403):
+                            st.error("GitHub recusou a gravação. Confira validade do token e permissão Contents: Read and write.")
+                        elif isinstance(exc,ValueError):
+                            st.error("Não foi possível salvar: "+str(exc))
+                        else:
+                            st.error("GitHub não confirmou a gravação ("+type(exc).__name__+"). Consulte os logs do Streamlit.")
             with col2:
                 if st.button("Carregar plano versionado do GitHub",key="advisor_load",use_container_width=True):
                     try:
@@ -274,7 +294,7 @@ def render_advisor(trip_data:dict,sync_sources:dict)->None:
                         st.session_state.pop("advisor_proposals",None)
                         st.rerun()
                     except Exception as exc:
-                        st.error("GitHub não retornou o plano: "+type(exc).__name__)
+                        st.error(_github_read_error(exc))
             with st.expander("Outros planos e histórico de revisões"):
                 plan_id=st.text_input("ID do plano salvo (trip-...)",key="advisor_plan_lookup",
                                       value=p["plan_id"])
@@ -293,7 +313,7 @@ def render_advisor(trip_data:dict,sync_sources:dict)->None:
                         st.session_state.pop("advisor_proposals",None)
                         st.rerun()
                     except Exception as exc:
-                        st.error("Plano indisponível: "+type(exc).__name__)
+                        st.error(_github_read_error(exc))
                 if st.button("Exibir revisões",key="advisor_history"):
                     try:
                         st.session_state["advisor_history"]=GitHubPlanRepository(cfg["token"]).history(plan_id)
