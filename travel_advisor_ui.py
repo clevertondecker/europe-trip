@@ -2,7 +2,7 @@
 from __future__ import annotations
 import json
 from copy import deepcopy
-from datetime import date
+from datetime import date,datetime,timezone
 from decimal import Decimal
 from urllib.error import HTTPError
 from html import escape
@@ -117,6 +117,7 @@ def _secure_save(plan):
     next_sha=GitHubPlanRepository(cfg["token"]).save(plan,sha)
     st.session_state["advisor_github_sha"]=next_sha
     st.session_state["advisor_saved_snapshot"]=deepcopy(plan)
+    st.session_state["advisor_last_saved_at"]=datetime.now(timezone.utc).isoformat()
 
 def _github_read_error(exc:Exception)->str:
     if isinstance(exc,HTTPError):
@@ -179,6 +180,9 @@ def render_advisor(trip_data:dict,sync_sources:dict)->None:
         p,st.session_state.get("advisor_saved_snapshot"),
         _owner_signed_in())
     st.caption(f"**{saved_label}** · {saved_hint}")
+    if st.session_state.get("advisor_last_saved_at"):
+        st.caption("Último salvamento: "+
+                   friendly_timestamp(st.session_state["advisor_last_saved_at"]))
 
     # Financial baseline: the excursion budget is already included in the total.
     selected=[x for group in p["packages"].values() for x in group]
@@ -472,7 +476,8 @@ def render_advisor(trip_data:dict,sync_sources:dict)->None:
                                 st.info("Versão anterior recuperada nesta sessão. Clique em Salvar planejamento para confirmar.")
                                 st.rerun()
                             except ValueError as exc:st.warning(str(exc))
-    st.caption("A gravação GitHub requer OAuth Google com email verificado, "
-               "token de escrita server-side e confirmação explícita. "
-               "Nenhuma credencial é adicionada aos arquivos do repositório. "
-               "O app continua somente leitura quando essa configuração está ausente.")
+    with st.expander("Privacidade e detalhes do salvamento"):
+        st.caption("O planejamento fica versionado no GitHub. O repositório atual é público; "
+                   "não inclua dados pessoais ou confidenciais.")
+        st.caption("A gravação online exige autorização Google, token protegido no servidor "
+                   "e confirmação do proprietário. Sem autenticação, somente backup local.")
