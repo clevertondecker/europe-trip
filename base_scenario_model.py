@@ -6,6 +6,7 @@ Never treat missing quotations as zero or market rent as a furnished short stay.
 from __future__ import annotations
 
 from base_explorer_model import load_exploration
+from base_research_expanded_model import load_research
 
 
 def base_options(data: dict | None = None) -> list[dict]:
@@ -26,6 +27,16 @@ def base_options(data: dict | None = None) -> list[dict]:
             "research_status": ("Rotas pesquisadas" if rows and
                                 with_time == len(rows) and with_fare == len(rows)
                                 else "Pesquisa parcial" if rows else "Sem rotas pesquisadas"),
+        })
+    seen={row["id"] for row in output}
+    for item in load_research()["cities"]:
+        if item["id"] in seen:
+            continue
+        output.append({
+            "id":item["id"],"name":item["name"],"country":item["country"],
+            "official_supported":False,
+            "routes":0,"time_coverage":0,"fare_coverage":0,
+            "research_status":"Pesquisa ampliada · rotas não catalogadas",
         })
     return output
 
