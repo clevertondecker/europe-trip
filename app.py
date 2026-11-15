@@ -69,6 +69,11 @@ _candidate=st.session_state.get("scenario_base_selected",active_plan()["base_cit
 if _candidate not in _base_details:
     _candidate=active_plan()["base_city"]
 st.session_state["scenario_base_selected"]=_candidate
+st.session_state.setdefault("ux_mode","Oficial")
+st.session_state.setdefault("ux_mode_value",st.session_state["ux_mode"])
+st.session_state.setdefault("ux_days",active_plan()["total_days"]-active_plan()["italy_days"])
+st.session_state.setdefault("ux_days_value",st.session_state["ux_days"])
+st.session_state.setdefault("unified_stay",st.session_state["ux_days"])
 if st.session_state.get("scenario_sidebar")!=_candidate:
     st.session_state["scenario_sidebar"]=_candidate
 if st.session_state.pop("advisor_autosave_pending",False):
@@ -368,6 +373,23 @@ official_id=active_plan()["base_city"]
 ux_area=st.session_state["ux_area"]
 ux_section=st.session_state["ux_section"]
 render_context(active_plan(),area=ux_area)
+# Legacy exploratory inputs are only shown on demand; they never change the
+# official TripPlan. Keeping them accessible preserves advanced comparisons.
+if ux_area=="Explorar":
+    with st.expander("Ajustes avançados da simulação",expanded=False):
+        st.segmented_control("Visualizar",["Oficial","Simulação"],
+                             key="ux_mode",on_change=_ux_mode_changed)
+        st.selectbox("Cidade-base da simulação",list(_base_details),
+                     key="scenario_sidebar",on_change=_select_scenario_sidebar,
+                     disabled=st.session_state["ux_mode_value"]=="Oficial",
+                     format_func=lambda key:_base_details[key]["name"]+
+                                          " · "+_base_details[key]["country"])
+        st.number_input("Dias na França (simulação)",
+                        min_value=40,max_value=80,
+                        key="ux_days",on_change=_ux_days_changed,
+                        disabled=st.session_state["ux_mode_value"]=="Oficial")
+        st.caption("Entradas hipotéticas, não alteram o roteiro aprovado. "
+                   "Para alterar o plano oficial, use Configurar minha viagem.")
 if (ux_area in ("Explorar","Orçamento") and
     st.session_state.get("flow_return_stage")):
     render_breadcrumb(stage=st.session_state.get("flow_return_stage"),
