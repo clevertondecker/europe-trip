@@ -6,7 +6,7 @@ Never treat missing quotations as zero or market rent as a furnished short stay.
 from __future__ import annotations
 
 from base_explorer_model import load_exploration
-from base_research_expanded_model import load_research
+from base_research_expanded_model import load_research,load_rail
 
 
 def base_options(data: dict | None = None) -> list[dict]:
@@ -29,14 +29,19 @@ def base_options(data: dict | None = None) -> list[dict]:
                                 else "Pesquisa parcial" if rows else "Sem rotas pesquisadas"),
         })
     seen={row["id"] for row in output}
+    rail=load_rail()
     for item in load_research()["cities"]:
         if item["id"] in seen:
             continue
+        segments=[line for line in rail["segments"] if line["from"]==item["id"]]
         output.append({
             "id":item["id"],"name":item["name"],"country":item["country"],
             "official_supported":False,
-            "routes":0,"time_coverage":0,"fare_coverage":0,
-            "research_status":"Pesquisa ampliada · rotas não catalogadas",
+            "routes":len(segments),
+            "time_coverage":sum(x.get("fastest_minutes") is not None for x in segments),
+            "fare_coverage":sum(x.get("advertised_fare_from_eur_person_oneway") is not None for x in segments),
+            "research_status":("Amostra ferroviária parcial" if segments
+                               else "Pesquisa ampliada · rotas não catalogadas"),
         })
     return output
 
@@ -50,3 +55,21 @@ def choose_exploratory_base(candidate: str, options: list[dict]) -> str:
 
 def hypothetical_city_name(base_id: str, options: list[dict]) -> str:
     return next(item["name"] for item in options if item["id"] == choose_exploratory_base(base_id, options))
+
+def expanded_rail_routes(city_id:str)->list[dict]:
+    """Verified source excerpts only; never infer a connection or a return fare."""
+    choose_exploratory_base(city_id,base_options())
+    return [
+        {
+            "destination_id":x["to"],
+            "destination_name":x["destination"],
+            "oneway_minutes":x["fastest_minutes"],
+            "fare_eur_person_oneway":x["advertised_fare_from_eur_person_oneway"],
+            "source_url":x["source_url"],
+            "fare_source_url":x.get("fare_source_url"),
+            "basis_date":load_rail()["basis_date"],
+            "return_verified_2027":False,
+            "notes":x["notes"],
+        }
+        for x in load_rail()["segments"] if x["from"]==city_id
+    ]
