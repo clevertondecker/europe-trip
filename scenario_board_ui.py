@@ -105,7 +105,7 @@ def _render_destination(profile:str,board:dict,row:dict,catalog:dict):
 
 def render_scenario_boards(plan:dict,scenarios:list[dict],catalog:dict,routes:dict,
                            trip_data:dict,source_live:bool,eurfx:float,chffx:float,
-                           use_city_rent:bool=True)->None:
+                           use_city_rent:bool=True,finance_only:bool=False)->None:
     st.markdown("### Passeios incluídos nos estilos de viagem")
     st.caption("Edite os cards sem alterar seu roteiro oficial. Valores e margens "
                "são recalculados imediatamente para o casal.")
