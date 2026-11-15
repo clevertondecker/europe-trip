@@ -5,26 +5,8 @@ from base_scenario_model import base_options
 from base_scenario_impact import scenario_impact
 
 
-def sync_city_widget(widget_key:str,choices:list[str])->None:
-    """Reflect the global candidate without overwriting real widget changes.
-
-    Call before creating the local widget. An on_change handler updates the
-    canonical selection at callback time, prior to the next script rerun.
-    """
-    selected=st.session_state.get("scenario_base_selected")
-    if selected in choices and st.session_state.get(widget_key)!=selected:
-        st.session_state[widget_key]=selected
-
-
-def set_city_from_widget(widget_key:str)->None:
-    """Propagate local city selections to the shared global context."""
-    from base_scenario_model import choose_exploratory_base
-    options=base_options()
-    selected=choose_exploratory_base(st.session_state[widget_key],options)
-    st.session_state["scenario_base_selected"]=selected
-    st.session_state["scenario_sidebar"]=selected
-    st.session_state["ux_last_candidate"]=selected
-    st.session_state["ux_mode"]="Simulação"
+# Keep old API re-exports for imports that predate the UX 3.0 rollout.
+from exploratory_selection import sync_city_widget, set_city_from_widget
 
 
 def render_scenario_impact(plan:dict,trip_data:dict,finance_live:bool)->None:

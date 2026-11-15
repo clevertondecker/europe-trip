@@ -26,7 +26,8 @@ from travel_dashboard_ui import render_trip_dashboard
 from base_explorer_ui import render_base_explorer
 from base_scenario_model import base_options, choose_exploratory_base, hypothetical_city_name, expanded_rail_routes
 from base_research_expanded_model import load_research, find_city, observed_housing
-from base_scenario_ui import render_scenario_impact, sync_city_widget, set_city_from_widget
+from base_scenario_ui import render_scenario_impact
+from exploratory_selection import sync_city_widget, set_city_from_widget
 from ux_navigation import (AREAS as UX_AREAS, SECTIONS as UX_SECTIONS, DESCRIPTIONS as UX_DESCRIPTIONS,
                            LEGACY_PAGES, LEGACY_ITINERARY, RESEARCH_OPTIONS, SUGGESTION_OPTIONS,
                            bootstrap as bootstrap_ux, apply as apply_ux,

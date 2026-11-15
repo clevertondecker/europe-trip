@@ -16,7 +16,7 @@ from planning_session import update_fields
 from base_scenario_model import base_options, choose_exploratory_base, expanded_rail_routes
 from base_research_expanded_model import load_research, find_city, observed_housing
 from base_scenario_store import make_scenario, scenario_export, scenario_import
-from base_scenario_ui import sync_city_widget, set_city_from_widget
+from exploratory_selection import sync_city_widget, set_city_from_widget
 
 EXISTING_BASES=frozenset({"mulhouse","strasbourg","metz","nancy"})
 
