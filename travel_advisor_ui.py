@@ -21,6 +21,7 @@ from discovery_ui import render_discovery
 from my_outings_ui import render_my_outings
 from active_preset import active_preset
 from active_preset_ui import render_active_preset_summary
+from outing_guide_model import build_outing_guide
 from destination_labels import place_label
 from advisor_presentation import present_risks,proposal_comparison,simple_next_step
 from data_model import get_scenario
@@ -489,6 +490,19 @@ def render_advisor(trip_data:dict,sync_sources:dict,workspace_area:str='Meus pas
         st.caption("Depois de adicionar, veja o destino em Meus passeios para editar ou remover diretamente.")
     if workspace_area == "Calendário":
         st.markdown("### Organizar meus passeios")
+        if p["packages"]:
+            with st.expander("Ver deslocamentos e pendências dos passeios escolhidos"):
+                for destination,ids in p["packages"].items():
+                    guide=build_outing_guide(p,catalog,routes,destination,ids)
+                    minutes=guide["train_minutes_one_way"]
+                    st.markdown("**"+bydest[destination]["name"]+"** · saindo de "+
+                                guide["base_name"])
+                    st.caption((str(minutes)+" min de trem por trecho" if minutes is not None
+                                else "Passeio local" if guide["local"]
+                                else "Duração ferroviária não verificada")+
+                               " · "+guide["feasibility"]+
+                               " · "+str(len(guide["missing"]))+" verificações pendentes")
+                st.caption("Horários e disponibilidade para 2027 ainda precisam de checagem.")
         st.caption("O otimizador só aloca passeios de duração compatível e com tempo de trem "
                    "conhecido ou locais. Alpes e conexões não pesquisadas ficam pendentes, "
                    "não são colocados arbitrariamente em um dia.")
