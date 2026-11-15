@@ -82,6 +82,10 @@ class ActivePresetConsistency(unittest.TestCase):
         self.assertTrue(any("Roteiro Econômico sugerido" in x.value for x in app.info))
         app.segmented_control(key="itinerary_section").set_value("Visão geral").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
+        self.assertIn("flow_add_open_button",{b.key for b in app.button})
+        # Old read-only advisor is still available by an explicit toggle.
+        app.toggle(key="flow_show_legacy_dashboard").set_value(True).run()
+        self.assertFalse(app.exception,[e.message for e in app.exception])
         self.assertTrue(any("Roteiro Econômico sugerido" in x.value for x in app.info))
         self.assertIn("dashboard_go_preset",{b.key for b in app.button})
 
