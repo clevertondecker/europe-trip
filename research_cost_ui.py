@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import streamlit as st
-from research_cost_model import outing_research_snapshot,selected_trip_research
+from research_cost_model import outing_research_snapshot,selected_trip_research,compare_city_bases
 
 
 def money(v:float)->str:
@@ -146,3 +146,29 @@ def render_research_profiles(plan:dict,scenarios:list[dict],catalog:dict,
                    "é o mais barato quando há trajetos e refeições sem cotação.")
         st.caption("Refeições em casa já estão contempladas em rubricas do "
                    "orçamento geral: não somar refeições turísticas duas vezes.")
+
+
+def render_city_base_research(plan:dict,catalog:dict,routes:dict,
+                              eurfx:float,chffx:float)->None:
+    with st.expander("Comparar cidade-base: mesmo roteiro, custos e horas pesquisados"):
+        if not plan["packages"]:
+            st.caption("Confirme ao menos um passeio para comparar as quatro bases.")
+            return
+        names={d["id"]:d["name"] for d in catalog["destinations"]}
+        rows=compare_city_bases(plan,catalog,routes,eurfx,chffx)
+        display=[]
+        for r in rows:
+            display.append({
+                "Cidade-base":names.get(r["base"],r["base"]),
+                "Tempo ferroviário conhecido ida+volta (min)":r["known_train_roundtrip_minutes"],
+                "Trajetos sem tempo":len(r["unknown_duration_destinations"]),
+                "Passeios com referência de preço":str(r["priced_outings"])+"/"+str(r["total_outings"]),
+                "Soma pesquisada parcial (R$)":r["researched_partial_brl"]
+            })
+        st.dataframe(display,hide_index=True,width="stretch")
+        st.warning("Bases com mais trajetos sem horário/tarifa podem parecer "
+                   "mais baratas. Comparação NÃO é uma classificação de melhor base; "
+                   "as somas têm cobertura diferente.")
+        st.caption("Minutos de trem são estação a estação (ida+volta), sem deslocamento "
+                   "ao alojamento, conexões, espera ou atrações. Alimentação representa "
+                   "um almoço observado, não alimentação completa. Câmbio hipotético.")
