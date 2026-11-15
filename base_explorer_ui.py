@@ -16,6 +16,7 @@ from planning_session import update_fields
 from base_scenario_model import base_options, choose_exploratory_base, expanded_rail_routes
 from base_research_expanded_model import load_research, find_city, observed_housing
 from base_scenario_store import make_scenario, scenario_export, scenario_import
+from base_scenario_ui import sync_city_widget, set_city_from_widget
 
 EXISTING_BASES=frozenset({"mulhouse","strasbourg","metz","nancy"})
 
@@ -406,9 +407,11 @@ def render_base_explorer(plan:dict,trip_data:dict,finance_live:bool,
         candidate=st.session_state.get("scenario_base_selected",active)
         if candidate not in names:
             candidate=active
+        sync_city_widget("base_explorer_city",list(names))
         selected=st.selectbox("Cidade-base a explorar",list(names),
                 index=list(names).index(candidate),format_func=lambda x:names[x],
-                key="base_explorer_city")
+                key="base_explorer_city",on_change=set_city_from_widget,
+                args=("base_explorer_city",))
         st.session_state["scenario_base_selected"]=choose_exploratory_base(selected,options)
         status=next(row["research_status"] for row in options if row["id"]==selected)
         st.caption("Cenário exploratório · "+status+
