@@ -98,7 +98,7 @@ def optional_comparison(payload:dict)->list[dict]:
 
 
 def manual_italy_cost(payload:dict,scenario_id:str,values:dict,
-                      eurfx:float)->dict:
+                      eurfx:float,extra_night:bool=False)->dict:
     """Only for a user-supplied Italian-period sensitivity; not global total."""
     try:
         rate=Decimal(str(eurfx))
@@ -128,9 +128,9 @@ def manual_italy_cost(payload:dict,scenario_id:str,values:dict,
         user[key]=amt
     # Explicitly entered zero is a real value; None means unknown.
     weights={"rome_hotel_night":scenario["rome_nights"],
-             "coast_hotel_night":scenario["coast_nights"],
+             "coast_hotel_night":scenario["coast_nights"]+int(extra_night),
              "naples_hotel_night":scenario["naples_nights"],
-             "food_couple_per_day":scenario["days"],
+             "food_couple_per_day":scenario["days"]+int(extra_night),
              "extra_local_transport":1,"additional_admissions":1}
     other=sum((amount*weights[key] for key,amount in user.items()
                if amount is not None),Decimal(0))
@@ -144,4 +144,5 @@ def manual_italy_cost(payload:dict,scenario_id:str,values:dict,
             "global_budget_unchanged":True,
             "flight_double_count_prevented":True,
             "complete_2027_quote":False,
+            "extra_night_included":bool(extra_night),
             "other_missing":sample["missing"]}
