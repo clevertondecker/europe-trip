@@ -1105,14 +1105,17 @@ elif page == "Roteiro":
             update_fields(**fields)
         schedule=calendar_plan(depart,total_days,italy_days,vacation_days,setup_days)
         explore_calendar=active_plan()["assignments"]
+        destination_names={dest["id"]:dest["name"] for dest in load_attractions()["destinations"]}
         st.dataframe(pd.DataFrame([
             {"Dia":r["day"],"Data":r["date"],"Região":r["stage"],
              "Atividade sugerida":r["activity"],
-             "Passeio da lista":explore_calendar.get(r["date"],"")} for r in schedule]),
+             "Passeio escolhido":destination_names.get(
+                 explore_calendar.get(r["date"],""),
+                 explore_calendar.get(r["date"],""))} for r in schedule]),
             hide_index=True,use_container_width=True,height=450)
         if explore_calendar:
-            st.caption("Passeios escolhidos em Explorar atrações aparecem aqui como IDs "
-                       "provisórios; sem horário ou reserva e apenas durante esta sessão.")
+            st.caption("Passeios escolhidos aparecem pelo nome. As datas são sugestões de planejamento, "
+                       "não reservas, nem confirmação dos horários de 2027.")
         breakdown={}
         for row in schedule:
             breakdown[row["activity"]]=breakdown.get(row["activity"],0)+1
