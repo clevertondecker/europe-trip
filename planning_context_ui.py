@@ -286,8 +286,35 @@ def _form_alternative(plan:dict)->None:
             st.rerun()
 
 
+def return_official_context()->None:
+    state=st.session_state
+    plan=active_plan()
+    selected=state.get("scenario_base_selected",plan["base_city"])
+    if selected!=plan["base_city"]:
+        state["ux_last_candidate"]=selected
+    state["scenario_base_selected"]=plan["base_city"]
+    state["scenario_sidebar"]=plan["base_city"]
+    state["ux_mode"]="Oficial"
+    state["ux_mode_value"]="Oficial"
+
+
 def render_context(plan:dict,*,area:str)->None:
     """Compact entrypoint, and the *only* comprehensive configuration UI."""
+    names={x["id"]:x["name"] for x in base_options()}
+    viewing_simulation=st.session_state.get("ux_mode_value")=="Simulação"
+    selected=st.session_state.get("scenario_base_selected",plan["base_city"])
+    if viewing_simulation:
+        st.caption("**Simulação ativa** · "+names.get(selected,selected)+
+                   " · "+str(st.session_state.get("ux_days_value",
+                   plan["total_days"]-plan["italy_days"]))+
+                   " dias de temporada europeia · Plano atual preservado")
+        if area=="Minha viagem":
+            st.button("Voltar ao oficial",key="ux_return_official",
+                      on_click=return_official_context)
+    else:
+        st.caption("**Roteiro oficial** · "+names.get(plan["base_city"],plan["base_city"])+
+                   " · "+str(plan["total_days"]-plan["italy_days"])+
+                   " dias de temporada europeia · Reservas não confirmadas")
     display="Meu plano · "+str(plan["total_days"])+" dias · Itália "+str(
         plan["italy_days"])+" dias · "+BUDGET_LABELS[plan["budget_scenario"]]
     if st.session_state.get("workflow_compare_open"):
