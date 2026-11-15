@@ -43,6 +43,11 @@ st.set_page_config(page_title="Nossa Europa 2027", page_icon="🌍", layout="wid
 # Authenticated new sessions recover the latest saved GitHub plan.
 _recover_saved_plan()
 bootstrap_trip()
+# Restore saved exploratory durations before any Streamlit widget is rendered.
+restored_days=st.session_state.pop("ux_pending_days",None)
+if restored_days is not None:
+    st.session_state["ux_days"]=max(40,min(80,int(restored_days)))
+    st.session_state["unified_stay"]=st.session_state["ux_days"]
 bootstrap_ux(st.session_state)
 # One global exploratory base, separate from the approved TripPlan.
 _all_bases=base_options()
