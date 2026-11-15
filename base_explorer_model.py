@@ -106,9 +106,9 @@ def compare_bases(data:dict,base_ids:list[str],destinations:list[str],
                      if r["all_legs_at_from_fare_eur"] is not None]
         output.append({
             "base_id":base,"routes":rows,
-            "known_time_minutes":sum(known_times),
+            "known_time_minutes":sum(known_times) if known_times else None,
             "time_coverage":len(known_times),
-            "illustrative_fare_if_all_min_eur":round(sum(known_fares),2),
+            "illustrative_fare_if_all_min_eur":round(sum(known_fares),2) if known_fares else None,
             "fare_coverage":len(known_fares),
             "destination_count":len(destinations),
             "fully_priced":len(known_fares)==len(destinations),
