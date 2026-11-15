@@ -159,3 +159,12 @@ A interface contém perfis Econômico, Equilibrado (padrão) e Aproveitar ao má
 **Segurança da gravação (atualizado):** o fluxo utiliza login Google OIDC, verifica o e-mail do proprietário e sessão válida, e só grava com token restrito guardado nos Streamlit Secrets. O hash de senha usado anteriormente não é mais aceito. Consulte o [guia de ativação segura](GUIA_ATIVAR_SALVAMENTO_GITHUB_SEGURO.md).
 
 O repositório foi confirmado **público** em 15/11/2026; roteiros gravados em JSON ficarão públicos. As credenciais ainda **não foram configuradas**; até que o proprietário complete o setup Google Cloud/GitHub/Streamlit, a exportação e importação JSON continuam disponíveis. O Drive e a decisão D-004 permanecem somente leitura.
+
+
+### Recuperação após atualizar a página (corrigido em 15/11/2026)
+
+Quando o proprietário autenticado abre **Roteiro → Consultor inteligente** numa sessão nova, o aplicativo procura os planos já gravados em `data/user_plans/` e carrega o mais recentemente salvo. O comportamento antigo criava um ID aleatório a cada atualização e fazia o botão **Carregar** tentar abrir um arquivo inexistente.
+
+A seção **Outros planos e histórico de revisões** agora permite selecionar outros roteiros versionados, ordenados pela última gravação registrada no GitHub. Carregar um plano restaura também a seleção de atrações e o calendário na sessão. Alterações que ainda não foram salvas não são sobrescritas automaticamente.
+
+Os arquivos existentes não são modificados pela recuperação; a escrita continua exigindo aprovação explícita e autenticação Google.
