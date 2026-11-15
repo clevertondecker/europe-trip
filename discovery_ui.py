@@ -6,6 +6,7 @@ from destination_recommender import recommend_destinations
 from travel_profile_scenarios import build_profile_scenarios
 from recommended_itineraries import approve_destination,reject_destination,approve_profile_scenario
 from planning_session import accept_approved_plan
+from scenario_board_ui import render_scenario_boards
 
 def money(value):
     return "R$ "+f"{value:,.0f}".replace(",",".")
@@ -78,43 +79,10 @@ def render_discovery(plan,catalog,routes,trip_data,sync_sources,eurfx,chffx,use_
             with st.expander("Ver mais destinos recomendados"):
                 for rec in places[6:]:_render_suggestion(rec,plan)
     st.divider()
-    st.markdown("### Comparar estilos de viagem")
-    st.caption("Os perfis selecionam **passeios concretos** do catálogo; valores históricos "
-               "não são preços garantidos para 2027. Nenhuma proposta é salva sem sua aprovação.")
     scenarios=build_profile_scenarios(
         plan,catalog,routes,trip_data,sync_sources["finance"]["status"]=="live",
         eurfx,chffx,use_city_rent=use_city_rent,allow_overnight=overnight)
-    for scenario in scenarios:
-        with st.container(border=True):
-            st.markdown("#### "+scenario["label"])
-            st.caption(str(len(scenario["new_destinations"]))+" destinos sugeridos além dos já escolhidos")
-            known=scenario["known_cost_by_currency"]
-            total=scenario["financial"]["result"]
-            a,b,c=st.columns(3)
-            with a:st.metric("Projeção do cenário",money(total["total"]))
-            with b:st.metric("Margem até o teto",money(total["margin"]))
-            with c:st.metric("Dias no calendário",str(scenario["scheduled_count"]))
-            if scenario["new_recommendations"]:
-                st.write("**Destinos sugeridos:** "+", ".join(r["name"] for r in scenario["new_recommendations"]))
-            else:st.info("Sem novos destinos que caibam nos critérios deste perfil.")
-            st.caption(f"Passagens e ingressos historicamente conhecidos: € {known['EUR']:.2f} "
-                       f"+ CHF {known['CHF']:.2f} para duas pessoas.")
-            if scenario["missing_costs"]:
-                st.warning(str(len(scenario["missing_costs"]))+
-                           " custos sem valor completo. A projeção não é preço final.")
-            if scenario["unresolved"]:
-                st.caption(str(len(scenario["unresolved"]))+
-                           " passeios ainda sem data devido a lacunas ou restrições.")
-            st.caption("Não removemos atrações escolhidas nem comprometemos a reserva financeira.")
-            with st.expander("Ver detalhes da proposta e logística"):
-                for r in scenario["new_recommendations"]:
-                    st.write("• "+r["name"]+" — "+r["trip_type"])
-                for issue in scenario["unresolved"]:
-                    st.caption(issue["destination"]+": "+issue["reason"])
-                st.caption(scenario["assumptions"])
-            if st.button("Aceitar este roteiro sugerido",key="advisor_scenario_accept_"+scenario["profile"],
-                         use_container_width=True,disabled=not scenario["new_destinations"]):
-                updated=approve_profile_scenario(plan,scenario,approved=True)
-                accept_approved_plan(updated)
-                st.success("Proposta aprovada no planejamento. Salve para manter as escolhas.")
-                st.rerun()
+    render_scenario_boards(
+        plan,scenarios,catalog,routes,trip_data,
+        sync_sources["finance"]["status"]=="live",
+        eurfx,chffx,use_city_rent=use_city_rent)
