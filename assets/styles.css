@@ -414,3 +414,19 @@ padding:17px 20px;margin:0 0 10px;}
  .trip-dash-metric {min-height:102px;padding:12px;}
  .trip-dash-metric strong {font-size:1.35rem;}
 }
+
+
+/* Scenario comparison: compact travel-editorial cards; retain native focus states. */
+.scenario-style-card{
+ background:linear-gradient(145deg,#fff,#F1F6F3);
+ border:1px solid #DCE8E5;border-radius:16px;padding:18px;
+ min-height:198px;box-shadow:0 4px 14px rgba(20,62,69,.035);
+ margin-bottom:11px;
+}
+.scenario-style-card__eyebrow{color:#367567;font-size:.69rem;font-weight:800;
+ letter-spacing:.14em;}
+.scenario-style-card h3{margin:10px 0 4px;font-family:'Playfair Display',Georgia,serif;
+ font-size:1.42rem;color:#163A4D;}
+.scenario-style-card__count{font-weight:800;color:#255D61;font-size:1.1rem;}
+.scenario-style-card p{font-size:.82rem;color:#61757D;line-height:1.5;margin-top:10px;}
+@media(max-width:780px){.scenario-style-card{min-height:0;margin-top:4px;padding:14px;}}
