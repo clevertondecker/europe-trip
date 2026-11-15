@@ -18,7 +18,7 @@ FRANCE_STAGE="França"  # compatibility ID for preexisting plans
 EUROPE_STAGE_LABEL="Temporada europeia"
 UNASSIGNED="Ainda não definido"
 ITALY_PERIODS=(UNASSIGNED,"Durante Roma","Durante a Costa Amalfitana",
-               "Férias na Itália")
+               "Última noite em Nápoles","Férias na Itália")
 FRANCE_PERIODS=(UNASSIGNED,"Instalação na França","Férias restantes",
                 "Primeiro fim de semana na França",
                 "Fim de semana a definir","Durante a estadia na França")
@@ -174,6 +174,7 @@ def italy_starter_preview(plan:dict,catalog:dict,variant:str)->dict:
         count=3 if dest_id=="italy_rome" else 2 if dest_id=="italy_amalfi" else 1
         chosen=[a["id"] for a in available[:count]]
         period=("Durante Roma" if dest_id=="italy_rome"
+                else "Última noite em Nápoles" if dest_id=="italy_naples"
                 else "Durante a Costa Amalfitana")
         starter.append((dest_id,chosen,period))
     added=[x for x in starter if not is_selected(plan,x[0])]
