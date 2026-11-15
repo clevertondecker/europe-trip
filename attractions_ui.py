@@ -241,7 +241,7 @@ def render_explorer(trip_data: dict, sync_sources: dict, map_view) -> None:
         if st.button("Salvar passeio na minha lista",key=f"explore_save_{chosen}",
                      use_container_width=True,disabled=not chosen_ids):
             select_package(chosen,chosen_ids)
-            st.success("Passeio adicionado ao seu planejamento. Salve as alterações quando desejar.")
+            st.rerun()
         if chosen in packages:
             if st.button("Remover passeio da lista",key=f"explore_remove_{chosen}",
                          use_container_width=True):
@@ -307,7 +307,7 @@ def render_explorer(trip_data: dict, sync_sources: dict, map_view) -> None:
                 try:
                     schedule_visit(days,active_plan()["assignments"],picked,destid)
                     schedule_package(picked,destid)
-                    st.success("Passeio adicionado ao calendário do planejamento.")
+                    st.rerun()
                 except ValueError as e:
                     st.warning(str(e))
             assignments=st.session_state.get("explore_calendar",{})
