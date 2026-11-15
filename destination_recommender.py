@@ -11,7 +11,8 @@ from travel_advisor import objective_weights
 CATEGORY_INTEREST={"natureza","foto/paisagem","história","arquitetura","museu","gastronomia"}
 def recommend_destinations(plan:dict,catalog:dict,routes:dict,profile:str|None=None,
                            max_travel_minutes:int=180,allow_overnight:bool=False,
-                           limit:int=11)->list[dict]:
+                           limit:int=11,
+                           include_unverified_routes:bool=True)->list[dict]:
     profile=profile or plan["profile"]
     weights=objective_weights(profile)
     base=plan["base_city"]
@@ -33,6 +34,10 @@ def recommend_destinations(plan:dict,catalog:dict,routes:dict,profile:str|None=N
         if overnight and not allow_overnight:
             continue
         if mins is not None and mins>max_travel_minutes:
+            continue
+        # An unknown duration cannot pass a numeric maximum by assumption.
+        # Retain historical behavior for other callers unless explicitly filtered.
+        if mins is None and dest!=base and not include_unverified_routes:
             continue
         ordered=sorted(by_destination[dest],
             key=lambda a:(0 if prefs.get(a["id"])=="Quero visitar" else 1,
@@ -69,6 +74,10 @@ def recommend_destinations(plan:dict,catalog:dict,routes:dict,profile:str|None=N
           "missing":sorted(set(evidence_missing)),
           "conditional":cost["conditional"],"complete":not evidence_missing,
           "route_source":route["source_url"],
+          "base_city":base,
+          "fare_type":route["fare_type"],
+          "fare_eur_person_oneway":route["fare_eur_person_oneway"],
+          "route_verified_minutes":mins is not None or dest==base,
           "reasons":[
               f"{len(ordered)} atrações cadastradas para conhecer",
               "Algumas atrações combinam com seus interesses" if preferred else
