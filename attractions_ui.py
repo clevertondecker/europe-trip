@@ -78,8 +78,6 @@ def render_explorer(trip_data: dict, sync_sources: dict, map_view) -> None:
                                                default=category_options,key="explore_categories")
         with c:
             transport_filter=st.selectbox(
-                "Acesso","Todos os destinos","",
-            ) if False else st.selectbox(
                 "Acesso",["Todos","Apenas trem documentado / local","Pernoite em estudo"],
                 key="explore_route_filter")
         max_minutes=st.slider("Tempo máximo de trem conhecido por trecho (minutos)",
