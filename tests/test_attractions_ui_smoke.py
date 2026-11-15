@@ -11,13 +11,14 @@ class ExplorerSmokeTests(unittest.TestCase):
         app.radio(key="main_navigation").set_value("Roteiro").run()
         app.segmented_control(key="itinerary_section").set_value("Guias e pesquisas").run()
         self.assertEqual(len(app.exception),0,[e.message for e in app.exception])
-        app.selectbox(key="explore_base").set_value("strasbourg").run()
+        app.selectbox(key="attractions_scenario_base").set_value("strasbourg").run()
+        self.assertEqual(app.session_state["advisor_plan"]["base_city"],"mulhouse")
         self.assertEqual(len(app.exception),0,[e.message for e in app.exception])
-        app.selectbox(key="explore_base").set_value("metz").run()
+        app.selectbox(key="attractions_scenario_base").set_value("metz").run()
         self.assertEqual(len(app.exception),0,[e.message for e in app.exception])
-        app.selectbox(key="explore_base").set_value("nancy").run()
+        app.selectbox(key="attractions_scenario_base").set_value("nancy").run()
         self.assertEqual(len(app.exception),0,[e.message for e in app.exception])
-        app.selectbox(key="explore_base").set_value("mulhouse").run()
+        app.selectbox(key="attractions_scenario_base").set_value("mulhouse").run()
         self.assertEqual(len(app.exception),0,[e.message for e in app.exception])
 
     def test_choose_and_save_destination(self):
