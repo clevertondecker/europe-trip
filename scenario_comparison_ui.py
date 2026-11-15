@@ -6,6 +6,7 @@ from html import escape
 import pydeck as pdk
 import streamlit as st
 
+from destination_labels import place_label, destination_names as labeled_destinations
 from scenario_comparison_model import (scenario_comparison,comparison_table,
                                         PROFILE_WEIGHTS)
 
@@ -37,7 +38,7 @@ def _inline_profile_details(row:dict,option:dict,catalog:dict,plan:dict)->None:
         for dest_id,ids in option["proposal_packages"].items():
             dest=destinations.get(dest_id,{"name":dest_id,"country":""})
             official=dest_id in plan["packages"]
-            st.markdown("**"+dest["name"]+" · "+dest["country"]+"**")
+            st.markdown("**"+place_label(dest["name"],dest["country"],show_country=True)+"**")
             st.caption("✓ Já está em Meus passeios" if official else
                        "＋ Pré-selecionado somente nesta simulação")
             for attraction_id in ids:
@@ -67,7 +68,7 @@ def _inline_profile_details(row:dict,option:dict,catalog:dict,plan:dict)->None:
 
 def _cards(model:dict,scenarios:list[dict],catalog:dict,plan:dict)->None:
     st.markdown("#### Escolha o estilo para comparar")
-    destination_names={d["id"]:d["name"] for d in catalog["destinations"]}
+    destination_names=labeled_destinations(catalog)
     attraction_names={a["id"]:a["name"] for a in catalog["attractions"]}
     proposals={option["profile"]:option["proposal_packages"] for option in scenarios}
     cols=st.columns(3,gap="medium")
@@ -171,7 +172,7 @@ def _scenario_map(model:dict,catalog:dict,plan:dict)->None:
 
 def render_scenario_comparison(plan:dict,scenarios:list[dict],catalog:dict,
                                eurfx:float,chffx:float)->dict:
-    names={d["id"]:d["name"] for d in catalog["destinations"]}
+    names=labeled_destinations(catalog)
     model=scenario_comparison(plan,scenarios,eurfx,chffx,names)
     st.markdown("### Encontre o estilo ideal da nossa viagem")
     st.caption("Compare passeios, experiências e custos. Nenhum cenário modifica "
