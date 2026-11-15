@@ -13,12 +13,15 @@ from travel_optimizer import propose_schedule
 from trip_plan_model import new_plan,validate_plan,with_revision,apply_proposal
 from trip_plan_repository import GitHubPlanRepository
 from advisor_auth import is_verified_owner
+from planning_store import create_from_legacy,change_plan,sync_legacy_view
+from planning_status import save_label,explain_storage_error,friendly_timestamp
 from data_model import get_scenario
 from unified_budget import resolve_french_budget,scenario_total
 
 def _activate_loaded_plan(plan:dict,sha:str)->None:
     """Restore one saved plan into all related pages before widgets are drawn."""
     st.session_state["advisor_plan"]=deepcopy(plan)
+    st.session_state["advisor_saved_snapshot"]=deepcopy(plan)
     st.session_state["advisor_github_sha"]=sha
     st.session_state["explore_packages"]=deepcopy(plan["packages"])
     st.session_state["explore_calendar"]=deepcopy(plan["assignments"])
@@ -63,16 +66,8 @@ def _stage_plan_restore(plan:dict,sha:str)->None:
 
 def _prepare_plan():
     if "advisor_plan" not in st.session_state:
-        p=new_plan()
-        p["packages"]=deepcopy(st.session_state.get("explore_packages",{}))
-        p["assignments"]=deepcopy(st.session_state.get("explore_calendar",{}))
-        p["base_city"]=st.session_state.get("explore_base","mulhouse")
-        p["departure_date"]=str(st.session_state.get("itinerary_departure",date(2027,9,9)))
-        p["total_days"]=st.session_state.get("itinerary_total_days",70)
-        p["italy_days"]=st.session_state.get("itinerary_italy_days",10)
-        p["vacation_days"]=st.session_state.get("itinerary_vacation_days",25)
-        p["setup_days"]=st.session_state.get("itinerary_setup_days",4)
-        try:validate_plan(p)
+        try:
+            p=create_from_legacy(st.session_state)
         except (ValueError,TypeError,KeyError):
             p=new_plan()
         st.session_state["advisor_plan"]=p
@@ -109,6 +104,7 @@ def _secure_save(plan):
     sha=st.session_state.get("advisor_github_sha")
     next_sha=GitHubPlanRepository(cfg["token"]).save(plan,sha)
     st.session_state["advisor_github_sha"]=next_sha
+    st.session_state["advisor_saved_snapshot"]=deepcopy(plan)
 
 def _github_read_error(exc:Exception)->str:
     if isinstance(exc,HTTPError):
@@ -156,7 +152,7 @@ def render_advisor(trip_data:dict,sync_sources:dict)->None:
             index=["60k","70k"].index(p["budget_scenario"]),key="advisor_ceiling",
             format_func=lambda x:"R$ "+x[:-1]+" mil")
     if base!=p["base_city"] or profile!=p["profile"] or ceiling!=p["budget_scenario"]:
-        p=with_revision(p,{"base_city":base,"profile":profile,"budget_scenario":ceiling})
+        p=change_plan(p,{"base_city":base,"profile":profile,"budget_scenario":ceiling})
         st.session_state["advisor_plan"]=p
         st.session_state.pop("advisor_proposals",None)
     st.caption("Pesos atuais (interesse / custo / conforto / agenda): "+
@@ -165,15 +161,17 @@ def render_advisor(trip_data:dict,sync_sources:dict)->None:
     if sync_packages!=p["packages"]:
         st.warning("Sua lista de atrações da aba Explorar atrações está diferente da versão do consultor.")
         if st.button("Importar seleção atual para o consultor",key="advisor_import_selection"):
-            p=with_revision(p,{"packages":deepcopy(sync_packages),
-                                "assignments":{}})
+            p=change_plan(p,{"packages":deepcopy(sync_packages),
+                               "assignments":{}})
             st.session_state["advisor_plan"]=p
             st.session_state.pop("advisor_proposals",None)
             st.rerun()
     names=[bydest[d]["name"] for d in p["packages"] if d in bydest]
     st.markdown("**Passeios selecionados:** "+(", ".join(names) if names else "Nenhum — adicione atrações na aba Explorar atrações"))
-    st.caption(f"Plano {p['plan_id']} · revisão {p['revision']} · "
-               "alterações ainda não gravadas no GitHub")
+    saved_label,saved_hint=save_label(
+        p,st.session_state.get("advisor_saved_snapshot"),
+        _owner_signed_in())
+    st.caption(f"**{saved_label}** · {saved_hint}")
 
     # Financial baseline: the excursion budget is already included in the total.
     selected=[x for group in p["packages"].values() for x in group]
@@ -265,30 +263,37 @@ def render_advisor(trip_data:dict,sync_sources:dict)->None:
                     st.rerun()
 
     st.divider()
-    st.markdown("### Versão e salvamento")
+    st.markdown("### Meu planejamento")
+    st.caption("Suas escolhas ficam disponíveis ao voltar aqui após salvar.")
     if p["assignments"]:
-        st.caption("Datas aprovadas na versão local: "+
-                   ", ".join(day+" "+bydest.get(dest,{"name":dest})["name"]
+        st.caption("Passeios no calendário: "+
+                   ", ".join(day+" · "+bydest.get(dest,{"name":dest})["name"]
                              for day,dest in sorted(p["assignments"].items())))
-    st.download_button("Exportar plano JSON",
-                       data=json.dumps(p,ensure_ascii=False,indent=2),
-                       file_name=p["plan_id"]+".json",mime="application/json",
-                       use_container_width=True)
-    uploaded=st.file_uploader("Restaurar um plano exportado",type=["json"],key="advisor_import_json")
-    if uploaded is not None:
-        if st.button("Validar e importar arquivo",key="advisor_import_confirm"):
-            try:
-                new=json.load(uploaded)
-                validate_plan(new,set(byattr))
-                if any(x not in bydest for x in new["packages"]):
-                    raise ValueError("Destino inexistente")
-                st.session_state["advisor_plan"]=new
-                st.session_state["advisor_github_sha"]=None
-                st.session_state.pop("advisor_proposals",None)
-                st.success("Plano importado apenas nesta sessão.")
-                st.rerun()
-            except (ValueError,KeyError,TypeError) as exc:
-                st.error("Arquivo de plano inválido: "+str(exc))
+    with st.expander("Backup e importação de arquivo (opções avançadas)",expanded=False):
+        st.caption("Use o backup somente se quiser guardar uma cópia no seu computador "
+                   "ou importar um arquivo de uma versão anterior.")
+        st.download_button("Baixar backup",
+                           data=json.dumps(p,ensure_ascii=False,indent=2),
+                           file_name=p["plan_id"]+".json",mime="application/json",
+                           use_container_width=True,key="advisor_export_backup")
+        uploaded=st.file_uploader("Importar backup salvo no computador",
+                                  type=["json"],key="advisor_import_json")
+        if uploaded is not None:
+            if st.button("Conferir e importar backup",key="advisor_import_confirm"):
+                try:
+                    new=json.load(uploaded)
+                    validate_plan(new,set(byattr))
+                    if any(x not in bydest for x in new["packages"]):
+                        raise ValueError("Destino inexistente")
+                    st.session_state["advisor_plan"]=new
+                    st.session_state["advisor_saved_snapshot"]=None
+                    st.session_state["advisor_github_sha"]=None
+                    sync_legacy_view(new,st.session_state)
+                    st.session_state.pop("advisor_proposals",None)
+                    st.success("Backup importado nesta sessão. Salve para guardar online.")
+                    st.rerun()
+                except (ValueError,KeyError,TypeError) as exc:
+                    st.error("Este arquivo não parece ser um planejamento válido: "+str(exc))
     cfg=_owner_config()
     ready=bool(cfg["token"] and cfg["owner_email"] and cfg["google_configured"])
     if not ready:
@@ -325,21 +330,22 @@ def render_advisor(trip_data:dict,sync_sources:dict)->None:
         else:
             col1,col2=st.columns(2)
             with col1:
-                if st.button("Gravar versão aprovada no GitHub",key="advisor_save",use_container_width=True):
+                if st.button("Salvar planejamento",key="advisor_save",use_container_width=True,
+                             disabled=not (st.session_state.get("advisor_saved_snapshot") is None
+                                           or st.session_state["advisor_saved_snapshot"]!=p)):
                     try:
                         _secure_save(p)
                         st.session_state.pop("advisor_saved_plans",None)
-                        st.success("Plano salvo com revisão verificada no GitHub. "
-                                   "Ele poderá ser recuperado após atualizar a página.")
+                        st.success("Planejamento salvo! Você poderá continuar de onde parou.")
                     except Exception as exc:
                         if isinstance(exc,HTTPError) and exc.code in (401,403):
-                            st.error("GitHub recusou a gravação. Confira validade do token e permissão Contents: Read and write.")
+                            st.error(explain_storage_error(exc))
                         elif isinstance(exc,ValueError):
-                            st.error("Não foi possível salvar: "+str(exc))
+                            st.error(explain_storage_error(exc))
                         else:
-                            st.error("GitHub não confirmou a gravação ("+type(exc).__name__+"). Consulte os logs do Streamlit.")
+                            st.error(explain_storage_error(exc))
             with col2:
-                if st.button("Carregar plano versionado do GitHub",key="advisor_load",use_container_width=True):
+                if st.button("Reabrir planejamento salvo",key="advisor_load",use_container_width=True):
                     try:
                         repository=GitHubPlanRepository(cfg["token"])
                         available=repository.recent_plans()
@@ -354,7 +360,7 @@ def render_advisor(trip_data:dict,sync_sources:dict)->None:
                             _stage_plan_restore(loaded,sha)
                     except Exception as exc:
                         st.error(_github_read_error(exc))
-            with st.expander("Outros planos e histórico de revisões"):
+            with st.expander("Histórico e outros planejamentos (avançado)"):
                 if st.button("Atualizar lista de planos salvos",key="advisor_refresh_saved"):
                     try:
                         st.session_state["advisor_saved_plans"]=GitHubPlanRepository(
@@ -370,7 +376,7 @@ def render_advisor(trip_data:dict,sync_sources:dict)->None:
                 recent=st.session_state.get("advisor_saved_plans",[])
                 if recent:
                     selected_plan=st.selectbox(
-                        "Planos existentes no GitHub (mais recente primeiro)",
+                        "Planejamentos salvos (mais recente primeiro)",
                         recent,key="advisor_saved_plan_choice",
                         format_func=lambda entry:
                            (entry["plan_id"]+" · "+
@@ -378,7 +384,7 @@ def render_advisor(trip_data:dict,sync_sources:dict)->None:
                              if entry["saved_at"] else "data não disponível")+
                             (" · revisão "+str(entry["revision"])
                              if entry["revision"] is not None else "")))
-                    if st.button("Carregar plano selecionado",key="advisor_load_selected",
+                    if st.button("Abrir planejamento selecionado",key="advisor_load_selected",
                                  use_container_width=True):
                         try:
                             loaded,sha=GitHubPlanRepository(cfg["token"]).load(
@@ -410,10 +416,10 @@ def render_advisor(trip_data:dict,sync_sources:dict)->None:
                         st.error("Histórico indisponível: "+type(exc).__name__)
                 history=st.session_state.get("advisor_history",[])
                 if history:
-                    selected=st.selectbox("Snapshot no GitHub",history,
+                    selected=st.selectbox("Versão do planejamento",history,
                         format_func=lambda x:x["date"][:10]+" · "+x["message"],
                         key="advisor_snapshot_choice")
-                    if st.button("Pré-visualizar snapshot histórico",key="advisor_snapshot"):
+                    if st.button("Pré-visualizar versão anterior",key="advisor_snapshot"):
                         try:
                             historical=GitHubPlanRepository(cfg["token"]).load_at_commit(plan_id,selected["sha"])
                             st.session_state["advisor_snapshot_preview"]=historical
@@ -421,9 +427,9 @@ def render_advisor(trip_data:dict,sync_sources:dict)->None:
                             st.error("Snapshot não acessível: "+type(exc).__name__)
                     preview=st.session_state.get("advisor_snapshot_preview")
                     if preview:
-                        st.caption("Snapshot: revisão "+str(preview["revision"])+
-                            " · "+str(len(preview["assignments"]))+" dias agendados")
-                        if st.button("Restaurar snapshot como nova revisão local",key="advisor_restore"):
+                        st.caption("Essa versão possui "+str(len(preview["assignments"]))+
+                                   " dias planejados. Confira antes de recuperá-la.")
+                        if st.button("Recuperar esta versão (sem salvar ainda)",key="advisor_restore"):
                             try:
                                 if preview["plan_id"]!=p["plan_id"]:
                                     raise ValueError("Carregue o plano correspondente primeiro")
@@ -432,7 +438,7 @@ def render_advisor(trip_data:dict,sync_sources:dict)->None:
                                     "assignments":deepcopy(preview["assignments"])})
                                 st.session_state["advisor_plan"]=restored
                                 st.session_state.pop("advisor_proposals",None)
-                                st.info("Restaurado na sessão. Grave a nova revisão separadamente.")
+                                st.info("Versão anterior recuperada nesta sessão. Clique em Salvar planejamento para confirmar.")
                                 st.rerun()
                             except ValueError as exc:st.warning(str(exc))
     st.caption("A gravação GitHub requer OAuth Google com email verificado, "
