@@ -22,6 +22,7 @@ from route_preview import route_endpoints
 from attractions_ui import render_explorer
 from travel_advisor_ui import render_advisor, _recover_saved_plan, _secure_save, _owner_signed_in
 from travel_dashboard_ui import render_trip_dashboard
+from base_explorer_ui import render_base_explorer
 from planning_session import bootstrap as bootstrap_trip, active_plan, update_fields
 from planning_store import summary as planning_summary
 from planning_status import save_label
@@ -905,7 +906,7 @@ elif page == "Roteiro":
                 "Férias iniciais de 20–30 dias; depois trabalho remoto, sujeito a validação de regras.</div>",
                 unsafe_allow_html=True)
 
-    sections=["Visão geral","Meus passeios","Descobrir","Orçamento","Calendário","Simular roteiros","Guias e pesquisas"]
+    sections=["Visão geral","Meus passeios","Explorar bases","Descobrir","Orçamento","Calendário","Simular roteiros","Guias e pesquisas"]
     itinerary_section=st.segmented_control("Área do roteiro",sections,default="Meus passeios",
                                            selection_mode="single",key="itinerary_section",
                                            label_visibility="collapsed")
@@ -966,6 +967,10 @@ elif page == "Roteiro":
 
     elif itinerary_section == "Explorar atrações":
         render_explorer(data,sync_sources,map_view)
+
+    elif itinerary_section == "Explorar bases":
+        render_base_explorer(active_plan(),data,sync_sources["finance"]["status"]=="live",
+                             st.session_state.get("advisor_eurfx",6.3))
 
     elif itinerary_section in ("Meus passeios","Descobrir","Orçamento","Calendário","Simular roteiros"):
         render_advisor(data,sync_sources,workspace_area=itinerary_section)
