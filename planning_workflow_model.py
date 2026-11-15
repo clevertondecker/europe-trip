@@ -11,7 +11,8 @@ from trip_plan_model import BASES, PROFILES,validate_plan
 from planning_store import change_plan
 
 EDITABLE=("total_days","italy_days","vacation_days","setup_days",
-          "base_city","profile","budget_scenario","preferences")
+          "base_city","profile","budget_scenario","preferences",
+          "mandatory_destinations","excluded_destinations")
 TRIP_STYLES={"balanced":"Equilibrado","economy":"Econômico",
              "experience":"Lua de mel e experiências"}
 BUDGET_LABELS={"60k":"R$ 60 mil","70k":"R$ 70 mil"}
