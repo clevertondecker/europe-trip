@@ -205,3 +205,18 @@ Em **Roteiro → Consultor inteligente → Passeios incluídos nos estilos de vi
 Depois de personalizar, use **Revisar e aplicar este roteiro → Confirmar aplicação**; somente então o plano canônico é atualizado, com persistência GitHub conforme consentimento/autenticação existente. Passeios previamente aprovados só podem ser alterados em **Explorar atrações**.
 
 [Relatório de implementação e limites](RELATORIO_GERENCIADOR_PASSEIOS_2027.md).
+
+
+## Entregas integradas em três frentes: financeiro, evidências, rascunhos e calendário
+
+As issues [#2](https://github.com/clevertondecker/europe-trip/issues/2), [#3](https://github.com/clevertondecker/europe-trip/issues/3) e [#4](https://github.com/clevertondecker/europe-trip/issues/4) foram implementadas em branches independentes, testadas por PRs [#5](https://github.com/clevertondecker/europe-trip/pull/5), [#6](https://github.com/clevertondecker/europe-trip/pull/6), [#7](https://github.com/clevertondecker/europe-trip/pull/7) e integradas pelo coordenador na `main`.
+
+**Em Roteiro → Consultor inteligente → Passeios incluídos nos estilos de viagem:**
+
+- **Financeiro:** a margem geral não é o saldo da provisão para excursões. O quadro exibe separadamente margem do orçamento, despesas de passeios conhecidas, provisão nominal restante, consumo percentual e quantidade de gastos pendentes.
+- **Custos adicionais:** despesas de transporte urbano, alimentação, possível pernoite e retorno aparecem como **sem cotação** em cada destino. Há 44 pendências catalogadas nos 11 destinos. Isto **não** significa 44 preços pesquisados: nenhum valor inexistente foi inventado.
+- **Rascunhos:** área de backup permite baixar e restaurar um arquivo JSON da simulação após validação. Ainda não há armazenamento automático privado entre sessões/dispositivos; por segurança, rascunhos não são gravados automaticamente no repositório público.
+- **Calendário:** um novo modelo puro `calendar_visit_model.py` consegue representar duas visitas explícitas ao mesmo destino e cobrar o trem uma vez por visita. O calendário oficial existente ainda usa a representação legada `assignments`; a migração de múltiplas visitas para a interface exige uma etapa própria e não foi realizada.
+
+**Segurança:** edição e pré-visualização não alteram planos salvos. Aprovação explícita continua obrigatória. Nenhuma credencial, permissão, conteúdo do Drive ou arquivo de plano existente foi modificado por este trabalho. Detalhes de coordenação: [AGENTS_COORDINATION.md](AGENTS_COORDINATION.md).
+
