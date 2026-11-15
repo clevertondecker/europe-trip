@@ -156,7 +156,7 @@ def render_explorer(trip_data: dict, sync_sources: dict, map_view) -> None:
                     st.markdown(f"### {escape(d['name'])} · {escape(d['country'])}")
                     st.caption(f"{len(item['filtered_attractions'])} atrações catalogadas · "
                                f"{km:.1f} km em linha reta (NÃO é distância de trem)")
-                    st.markdown(f"**{escape(travel_label)}**  \\n{escape(fare)}")
+                    st.markdown(f"**{escape(travel_label)}**  \n{escape(fare)}")
                     st.caption(" · ".join(a["name"] for a in item["filtered_attractions"][:3]))
                     st.caption(approximate_feasibility(d,r))
                     if not partial["complete"]:
@@ -306,8 +306,9 @@ def render_explorer(trip_data: dict, sync_sources: dict, map_view) -> None:
         with right:
             franc_fx=st.number_input("Câmbio hipotético R$/CHF",min_value=4.0,max_value=12.0,
                                      value=7.1,step=.05,key="explore_chf_fx")
-        if st.button("Comparar no orçamento sem dupla contagem →",
-                     key="explore_to_budget",use_container_width=True):
+        def _send_budget_reference() -> None:
+            # on_click runs at the start of the next rerun, before navigation radio
+            # is instantiated; otherwise Streamlit would reject key mutation.
             st.session_state["explore_budget_reference"]={
                 "eur":current_cost["known_by_currency"]["EUR"],
                 "chf":current_cost["known_by_currency"]["CHF"],
@@ -316,7 +317,9 @@ def render_explorer(trip_data: dict, sync_sources: dict, map_view) -> None:
                 "destinations":list(packages)}
             st.session_state["unified_city"]=by_id[base]["name"]
             st.session_state["main_navigation"]="Orçamento"
-            st.rerun()
+        st.button("Comparar no orçamento sem dupla contagem →",
+                  key="explore_to_budget",use_container_width=True,
+                  on_click=_send_budget_reference)
         export={
             "saved_at":"2026-11-14","base":base,
             "preferences":marks,"packages":packages,
