@@ -9,9 +9,13 @@ class EvidenceTests(unittest.TestCase):
  def test_all_destinations_have_pending_cost_categories(self):
   for dest in self.catalog["destinations"]:
    rows=evidence_for_outing(dest["id"],[],self.data)
-   self.assertEqual(len(rows["pending"]),4)
+   expected=3 if dest["id"]=="luxembourg" else 4
+   self.assertEqual(len(rows["pending"]),expected)
    self.assertEqual(sum(rows["known_by_currency"].values()),0)
    self.assertTrue(all(x["amount"] is None for x in rows["pending"]))
+   if dest["id"]=="luxembourg":
+    self.assertTrue(any(x["category"]=="local_transport" and x["amount"]==0
+                        for x in rows["items"]))
  def test_unverified_fake_price_rejected(self):
   data=deepcopy(self.data)
   data["items"][0]["amount"]=42
