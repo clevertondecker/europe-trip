@@ -362,7 +362,7 @@ def _scenario_backups(plan:dict,options:list[dict])->None:
                     restored=drafts[selected]
                     st.session_state["scenario_base_selected"]=restored["city_id"]
                     st.session_state["ux_last_candidate"]=restored["city_id"]
-                    st.session_state["ux_mode"]="Simulação"
+                    st.session_state["ux_pending_mode"]="Simulação"
                     st.session_state["ux_pending_days"]=restored["days"]
                     st.success("Cenário selecionado, sem mudar roteiro oficial.")
                     st.rerun()
@@ -378,7 +378,7 @@ def _scenario_backups(plan:dict,options:list[dict])->None:
                 st.session_state.setdefault("scenario_saved_drafts",{})[restored["name"]]=restored
                 st.session_state["scenario_base_selected"]=restored["city_id"]
                 st.session_state["ux_last_candidate"]=restored["city_id"]
-                st.session_state["ux_mode"]="Simulação"
+                st.session_state["ux_pending_mode"]="Simulação"
                 st.session_state["ux_pending_days"]=restored["days"]
                 st.success("Cenário importado e selecionado; roteiro oficial inalterado.")
                 st.rerun()
