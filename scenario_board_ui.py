@@ -65,6 +65,14 @@ def _render_destination(profile:str,board:dict,row:dict,catalog:dict):
             for missing in row["missing"]:st.caption("Pendente: "+str(missing))
             evidence=evidence_for_outing(
                 key,[a["id"] for a in row["attractions"]],st.session_state.get("outing_evidence_data"))
+            verified=[x for x in evidence["items"] if x.get("amount") is not None]
+            if verified:
+                st.caption("Informações oficiais ou históricas adicionais:")
+                for item in verified:
+                    st.caption("• "+item["category"].replace("_"," ")+": "+
+                               f"{item['amount']} {item['currency']} — "+item["notes"])
+                    if item.get("source_url"):
+                        st.markdown("[Fonte oficial]("+item["source_url"]+")")
             if evidence["pending"]:
                 st.caption("Outras despesas que ainda precisam de pesquisa:")
                 for item in evidence["pending"]:
@@ -102,6 +110,23 @@ def render_scenario_boards(plan:dict,scenarios:list[dict],catalog:dict,routes:di
     st.caption("Edite os cards sem alterar seu roteiro oficial. Valores e margens "
                "são recalculados imediatamente para o casal.")
     profiles={s["profile"]:s for s in scenarios}
+    st.markdown("#### Comparação rápida dos três estilos")
+    comparisons=[]
+    for option in scenarios:
+        cost=option["known_cost_by_currency"]
+        projection=option["financial"]
+        metrics=calculate_excursion_margin(
+            projection,cost,eurfx,chffx,option["missing_costs"])
+        comparisons.append({
+            "Estilo":option["label"],
+            "Destinos":len(option["proposal_packages"]),
+            "Gastos conhecidos (R$)":metrics["known_spend_brl"],
+            "Saldo nominal da provisão (R$)":metrics["known_allowance_remaining_brl"],
+            "Margem geral (R$)":metrics["budget_margin_brl"],
+            "Custos sem valor":metrics["pending_count"]})
+    st.dataframe(comparisons,hide_index=True,use_container_width=True)
+    st.caption("A margem geral pode ser igual entre estilos mesmo com gastos conhecidos "
+               "diferentes, porque a verba de excursões já está provisionada.")
     profile=st.segmented_control("Estilo para personalizar",list(profiles),
          default=plan["profile"],format_func=lambda p:profiles[p]["label"],
          key="scenario_board_profile")
