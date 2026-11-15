@@ -24,7 +24,8 @@ from attractions_ui import render_explorer
 from travel_advisor_ui import render_advisor, _recover_saved_plan, _secure_save, _owner_signed_in
 from travel_dashboard_ui import render_trip_dashboard
 from base_explorer_ui import render_base_explorer
-from base_scenario_model import base_options, choose_exploratory_base, hypothetical_city_name
+from base_scenario_model import base_options, choose_exploratory_base, hypothetical_city_name, expanded_rail_routes
+from base_research_expanded_model import load_research, find_city, observed_housing
 from base_scenario_ui import render_scenario_impact
 from planning_session import bootstrap as bootstrap_trip, active_plan, update_fields
 from planning_store import summary as planning_summary
@@ -534,6 +535,35 @@ elif page == "Comparar cidades":
                "mais detalhadas; outras cidades podem não ter cotações equivalentes.")
     st.button("Abrir passeios e rotas desta base",
               key="compare_open_base",on_click=navigate_to_base_explorer)
+    if selected_candidate not in {"mulhouse","strasbourg","metz","nancy"}:
+        research=find_city(load_research(),selected_candidate)
+        observed=observed_housing(research)
+        rails=expanded_rail_routes(selected_candidate)
+        with st.expander("Pesquisa da candidata · "+
+                         compare_names[selected_candidate],expanded=True):
+            st.caption("Região: "+research["corridor"]+
+                       " · "+str(observed["count"])+" anúncios observados em 2026"
+                       " · 0 cotações completas de 2027.")
+            if observed["minimum_eur_month"] is not None:
+                st.caption("Menor anúncio histórico: € "+
+                           f'{observed["minimum_eur_month"]:,.0f}'+
+                           "/mês. Sem contrato e taxas verificados; NÃO é "
+                           "preço para 56–60 noites.")
+            if rails:
+                st.dataframe([{
+                    "Destino":line["destination_name"],
+                    "Trem mais rápido (min)":line["oneway_minutes"],
+                    "Tarifa publicada desde (€ / pessoa / trecho)":
+                        line["fare_eur_person_oneway"] if line["fare_eur_person_oneway"]
+                        is not None else "Não cotada",
+                    "Retorno 2027":"Não verificado",
+                } for line in rails],hide_index=True,width="stretch")
+            else:
+                st.caption("Rotas base → destino ainda não pesquisadas no "
+                           "mesmo padrão do comparador histórico.")
+            st.warning("Esta cidade não possui dados suficientes para o ranking "
+                       "histórico das quatro bases. Não comparar totais parciais "
+                       "como economias garantidas.")
     city_audit = load_audit()
     market = load_market()
     round2 = load_round2()
