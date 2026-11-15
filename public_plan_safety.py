@@ -13,7 +13,7 @@ PUBLIC_SCHEMA_V1_FIELDS=frozenset({
     "total_days","italy_days","vacation_days","setup_days","budget_scenario",
     "profile","mandatory_destinations","excluded_destinations","packages",
     "assignments","preferences","accepted_recommendations",
-    "rejected_recommendations","source_versions","flexible_visits",
+    "rejected_recommendations","source_versions","flexible_visits","italy_proposal",
 })
 EMAIL_PATTERN=re.compile(r"(?i)[\w.+%-]+@[\w.-]+\.[a-z]{2,}")
 
