@@ -333,194 +333,194 @@ def render_advisor(trip_data:dict,sync_sources:dict,workspace_area:str='Meus pas
     
     if workspace_area == "Meus passeios":
         with st.expander("Salvar planejamento, backups e histórico",expanded=False):
-        st.divider()
-        st.markdown("### Meu planejamento")
-        st.caption("Suas escolhas ficam disponíveis ao voltar aqui após salvar.")
-        if p["assignments"]:
-            st.caption("Passeios no calendário: "+
-                       ", ".join(day+" · "+bydest.get(dest,{"name":dest})["name"]
-                                 for day,dest in sorted(p["assignments"].items())))
-        with st.expander("Backup e importação de arquivo (opções avançadas)",expanded=False):
-            st.caption("Use o backup somente se quiser guardar uma cópia no seu computador "
-                       "ou importar um arquivo de uma versão anterior.")
-            st.download_button("Baixar backup",
-                               data=json.dumps(p,ensure_ascii=False,indent=2),
-                               file_name=p["plan_id"]+".json",mime="application/json",
-                               use_container_width=True,key="advisor_export_backup")
-            uploaded=st.file_uploader("Importar backup salvo no computador",
-                                      type=["json"],key="advisor_import_json")
-            if uploaded is not None:
-                if st.button("Conferir e importar backup",key="advisor_import_confirm"):
-                    try:
-                        new=json.load(uploaded)
-                        validate_plan(new,set(byattr))
-                        if any(x not in bydest for x in new["packages"]):
-                            raise ValueError("Destino inexistente")
-                        st.session_state["advisor_plan"]=new
-                        st.session_state["advisor_saved_snapshot"]=None
-                        st.session_state["advisor_github_sha"]=None
-                        sync_legacy_view(new,st.session_state)
-                        st.session_state.pop("advisor_proposals",None)
-                        st.success("Backup importado nesta sessão. Salve para guardar online.")
-                        st.rerun()
-                    except (ValueError,KeyError,TypeError) as exc:
-                        st.error("Este arquivo não parece ser um planejamento válido: "+str(exc))
-        cfg=_owner_config()
-        ready=bool(cfg["token"] and cfg["owner_email"] and cfg["google_configured"])
-        if not ready:
-            st.info("Gravação no GitHub desativada: configure o OAuth Google e "
-                    "advisor_github.token / advisor_github.owner_email nos "
-                    "Streamlit Secrets. A exportação JSON funciona sem credenciais.")
-        elif not _owner_signed_in(cfg):
-            st.info("Para salvar o plano no GitHub, entre com a conta Google "
-                    "autorizada. A visualização e a exportação continuam livres.")
-            try:
-                logged_in=bool(st.user.get("is_logged_in",False))
-            except (AttributeError,TypeError):
-                logged_in=False
-            if logged_in:
-                st.warning("Esta conta Google não corresponde ao proprietário autorizado "
-                           "ou a sessão de identidade expirou. Nenhum acesso de escrita concedido.")
-                st.button("Sair do Google",key="advisor_google_logout",on_click=st.logout)
+            st.divider()
+            st.markdown("### Meu planejamento")
+            st.caption("Suas escolhas ficam disponíveis ao voltar aqui após salvar.")
+            if p["assignments"]:
+                st.caption("Passeios no calendário: "+
+                           ", ".join(day+" · "+bydest.get(dest,{"name":dest})["name"]
+                                     for day,dest in sorted(p["assignments"].items())))
+            with st.expander("Backup e importação de arquivo (opções avançadas)",expanded=False):
+                st.caption("Use o backup somente se quiser guardar uma cópia no seu computador "
+                           "ou importar um arquivo de uma versão anterior.")
+                st.download_button("Baixar backup",
+                                   data=json.dumps(p,ensure_ascii=False,indent=2),
+                                   file_name=p["plan_id"]+".json",mime="application/json",
+                                   use_container_width=True,key="advisor_export_backup")
+                uploaded=st.file_uploader("Importar backup salvo no computador",
+                                          type=["json"],key="advisor_import_json")
+                if uploaded is not None:
+                    if st.button("Conferir e importar backup",key="advisor_import_confirm"):
+                        try:
+                            new=json.load(uploaded)
+                            validate_plan(new,set(byattr))
+                            if any(x not in bydest for x in new["packages"]):
+                                raise ValueError("Destino inexistente")
+                            st.session_state["advisor_plan"]=new
+                            st.session_state["advisor_saved_snapshot"]=None
+                            st.session_state["advisor_github_sha"]=None
+                            sync_legacy_view(new,st.session_state)
+                            st.session_state.pop("advisor_proposals",None)
+                            st.success("Backup importado nesta sessão. Salve para guardar online.")
+                            st.rerun()
+                        except (ValueError,KeyError,TypeError) as exc:
+                            st.error("Este arquivo não parece ser um planejamento válido: "+str(exc))
+            cfg=_owner_config()
+            ready=bool(cfg["token"] and cfg["owner_email"] and cfg["google_configured"])
+            if not ready:
+                st.info("Gravação no GitHub desativada: configure o OAuth Google e "
+                        "advisor_github.token / advisor_github.owner_email nos "
+                        "Streamlit Secrets. A exportação JSON funciona sem credenciais.")
+            elif not _owner_signed_in(cfg):
+                st.info("Para salvar o plano no GitHub, entre com a conta Google "
+                        "autorizada. A visualização e a exportação continuam livres.")
+                try:
+                    logged_in=bool(st.user.get("is_logged_in",False))
+                except (AttributeError,TypeError):
+                    logged_in=False
+                if logged_in:
+                    st.warning("Esta conta Google não corresponde ao proprietário autorizado "
+                               "ou a sessão de identidade expirou. Nenhum acesso de escrita concedido.")
+                    st.button("Sair do Google",key="advisor_google_logout",on_click=st.logout)
+                else:
+                    st.button("Entrar com Google (proprietário)",
+                              key="advisor_google_login",on_click=st.login,args=["google"])
             else:
-                st.button("Entrar com Google (proprietário)",
-                          key="advisor_google_login",on_click=st.login,args=["google"])
-        else:
-            st.success("Proprietário autenticado pelo Google. "
-                       "As gravações exigem confirmação explícita.")
-            st.button("Encerrar sessão Google",key="advisor_google_signout",
-                      on_click=st.logout)
-            st.checkbox("Entendo que o repositório GitHub atual é PÚBLICO e que "
-                        "planos salvos nele poderão ser vistos por outras pessoas. "
-                        "Não incluí informações pessoais ou confidenciais.",
-                        value=False,key="advisor_public_repo_ack")
-            if st.session_state.get("advisor_public_repo_ack"):
-                st.checkbox("Salvar minhas alterações aprovadas automaticamente",
-                            value=False,key="advisor_autosave_optin",
-                            help="As escolhas serão gravadas após sua confirmação. "
-                                 "Não salva propostas ainda em análise. "
-                                 "O repositório atual é público.")
-            if not st.session_state["advisor_public_repo_ack"]:
-                st.warning("A gravação só será habilitada após reconhecer a "
-                           "visibilidade pública do repositório. "
-                           "É mais seguro armazenar roteiros pessoais em repositório privado.")
-            else:
-                col1,col2=st.columns(2)
-                with col1:
-                    if st.button("Salvar planejamento",key="advisor_save",use_container_width=True,
-                                 disabled=not (st.session_state.get("advisor_saved_snapshot") is None
-                                               or st.session_state["advisor_saved_snapshot"]!=p)):
-                        try:
-                            _secure_save(p)
-                            st.session_state.pop("advisor_saved_plans",None)
-                            st.success("Planejamento salvo! Você poderá continuar de onde parou.")
-                        except Exception as exc:
-                            if isinstance(exc,HTTPError) and exc.code in (401,403):
-                                st.error(explain_storage_error(exc))
-                            elif isinstance(exc,ValueError):
-                                st.error(explain_storage_error(exc))
-                            else:
-                                st.error(explain_storage_error(exc))
-                with col2:
-                    if st.button("Reabrir planejamento salvo",key="advisor_load",use_container_width=True):
-                        try:
-                            repository=GitHubPlanRepository(cfg["token"])
-                            available=repository.recent_plans()
-                            if not available:
-                                st.info("Ainda não existem roteiros gravados no GitHub. "
-                                        "Salve o primeiro com o botão da esquerda.")
-                            else:
-                                ids={entry["plan_id"] for entry in available}
-                                target=(p["plan_id"] if p["plan_id"] in ids
-                                        else available[0]["plan_id"])
-                                loaded,sha=repository.load(target)
-                                _stage_plan_restore(loaded,sha)
-                        except Exception as exc:
-                            st.error(_github_read_error(exc))
-                with st.expander("Histórico e outros planejamentos (avançado)"):
-                    if st.button("Atualizar lista de planos salvos",key="advisor_refresh_saved"):
-                        try:
-                            st.session_state["advisor_saved_plans"]=GitHubPlanRepository(
-                                cfg["token"]).recent_plans()
-                        except Exception as exc:
-                            st.error("Falha ao consultar lista: "+_github_read_error(exc))
-                    if "advisor_saved_plans" not in st.session_state:
-                        try:
-                            st.session_state["advisor_saved_plans"]=GitHubPlanRepository(
-                                cfg["token"]).recent_plans()
-                        except Exception as exc:
-                            st.warning("Lista indisponível: "+_github_read_error(exc))
-                    recent=st.session_state.get("advisor_saved_plans",[])
-                    if recent:
-                        selected_plan=st.selectbox(
-                            "Planejamentos salvos (mais recente primeiro)",
-                            recent,key="advisor_saved_plan_choice",
-                            format_func=lambda entry:
-                               (entry["plan_id"]+" · "+
-                                (entry["saved_at"][:16].replace("T"," ")+" UTC"
-                                 if entry["saved_at"] else "data não disponível")+
-                                (" · revisão "+str(entry["revision"])
-                                 if entry["revision"] is not None else "")))
-                        if st.button("Abrir planejamento selecionado",key="advisor_load_selected",
-                                     use_container_width=True):
+                st.success("Proprietário autenticado pelo Google. "
+                           "As gravações exigem confirmação explícita.")
+                st.button("Encerrar sessão Google",key="advisor_google_signout",
+                          on_click=st.logout)
+                st.checkbox("Entendo que o repositório GitHub atual é PÚBLICO e que "
+                            "planos salvos nele poderão ser vistos por outras pessoas. "
+                            "Não incluí informações pessoais ou confidenciais.",
+                            value=False,key="advisor_public_repo_ack")
+                if st.session_state.get("advisor_public_repo_ack"):
+                    st.checkbox("Salvar minhas alterações aprovadas automaticamente",
+                                value=False,key="advisor_autosave_optin",
+                                help="As escolhas serão gravadas após sua confirmação. "
+                                     "Não salva propostas ainda em análise. "
+                                     "O repositório atual é público.")
+                if not st.session_state["advisor_public_repo_ack"]:
+                    st.warning("A gravação só será habilitada após reconhecer a "
+                               "visibilidade pública do repositório. "
+                               "É mais seguro armazenar roteiros pessoais em repositório privado.")
+                else:
+                    col1,col2=st.columns(2)
+                    with col1:
+                        if st.button("Salvar planejamento",key="advisor_save",use_container_width=True,
+                                     disabled=not (st.session_state.get("advisor_saved_snapshot") is None
+                                                   or st.session_state["advisor_saved_snapshot"]!=p)):
                             try:
-                                loaded,sha=GitHubPlanRepository(cfg["token"]).load(
-                                    selected_plan["plan_id"])
+                                _secure_save(p)
+                                st.session_state.pop("advisor_saved_plans",None)
+                                st.success("Planejamento salvo! Você poderá continuar de onde parou.")
+                            except Exception as exc:
+                                if isinstance(exc,HTTPError) and exc.code in (401,403):
+                                    st.error(explain_storage_error(exc))
+                                elif isinstance(exc,ValueError):
+                                    st.error(explain_storage_error(exc))
+                                else:
+                                    st.error(explain_storage_error(exc))
+                    with col2:
+                        if st.button("Reabrir planejamento salvo",key="advisor_load",use_container_width=True):
+                            try:
+                                repository=GitHubPlanRepository(cfg["token"])
+                                available=repository.recent_plans()
+                                if not available:
+                                    st.info("Ainda não existem roteiros gravados no GitHub. "
+                                            "Salve o primeiro com o botão da esquerda.")
+                                else:
+                                    ids={entry["plan_id"] for entry in available}
+                                    target=(p["plan_id"] if p["plan_id"] in ids
+                                            else available[0]["plan_id"])
+                                    loaded,sha=repository.load(target)
+                                    _stage_plan_restore(loaded,sha)
+                            except Exception as exc:
+                                st.error(_github_read_error(exc))
+                    with st.expander("Histórico e outros planejamentos (avançado)"):
+                        if st.button("Atualizar lista de planos salvos",key="advisor_refresh_saved"):
+                            try:
+                                st.session_state["advisor_saved_plans"]=GitHubPlanRepository(
+                                    cfg["token"]).recent_plans()
+                            except Exception as exc:
+                                st.error("Falha ao consultar lista: "+_github_read_error(exc))
+                        if "advisor_saved_plans" not in st.session_state:
+                            try:
+                                st.session_state["advisor_saved_plans"]=GitHubPlanRepository(
+                                    cfg["token"]).recent_plans()
+                            except Exception as exc:
+                                st.warning("Lista indisponível: "+_github_read_error(exc))
+                        recent=st.session_state.get("advisor_saved_plans",[])
+                        if recent:
+                            selected_plan=st.selectbox(
+                                "Planejamentos salvos (mais recente primeiro)",
+                                recent,key="advisor_saved_plan_choice",
+                                format_func=lambda entry:
+                                   (entry["plan_id"]+" · "+
+                                    (entry["saved_at"][:16].replace("T"," ")+" UTC"
+                                     if entry["saved_at"] else "data não disponível")+
+                                    (" · revisão "+str(entry["revision"])
+                                     if entry["revision"] is not None else "")))
+                            if st.button("Abrir planejamento selecionado",key="advisor_load_selected",
+                                         use_container_width=True):
+                                try:
+                                    loaded,sha=GitHubPlanRepository(cfg["token"]).load(
+                                        selected_plan["plan_id"])
+                                    _stage_plan_restore(loaded,sha)
+                                except Exception as exc:
+                                    st.error(_github_read_error(exc))
+                        else:
+                            st.info("Nenhum plano salvo foi localizado. Grave uma versão primeiro.")
+                        plan_id=st.text_input("Ou informe o ID de um plano específico",
+                            key="advisor_plan_lookup",value=p["plan_id"])
+                        if st.button("Pesquisar planos no GitHub",key="advisor_list"):
+                            try:
+                                st.session_state["advisor_plan_ids"]=GitHubPlanRepository(cfg["token"]).list_plans()
+                            except Exception as exc:
+                                st.error("Falha ao listar: "+type(exc).__name__)
+                        if st.session_state.get("advisor_plan_ids"):
+                            st.caption("Planos: "+", ".join(st.session_state["advisor_plan_ids"][:20]))
+                        if st.button("Carregar este ID",key="advisor_load_id"):
+                            try:
+                                loaded,sha=GitHubPlanRepository(cfg["token"]).load(plan_id)
                                 _stage_plan_restore(loaded,sha)
                             except Exception as exc:
                                 st.error(_github_read_error(exc))
-                    else:
-                        st.info("Nenhum plano salvo foi localizado. Grave uma versão primeiro.")
-                    plan_id=st.text_input("Ou informe o ID de um plano específico",
-                        key="advisor_plan_lookup",value=p["plan_id"])
-                    if st.button("Pesquisar planos no GitHub",key="advisor_list"):
-                        try:
-                            st.session_state["advisor_plan_ids"]=GitHubPlanRepository(cfg["token"]).list_plans()
-                        except Exception as exc:
-                            st.error("Falha ao listar: "+type(exc).__name__)
-                    if st.session_state.get("advisor_plan_ids"):
-                        st.caption("Planos: "+", ".join(st.session_state["advisor_plan_ids"][:20]))
-                    if st.button("Carregar este ID",key="advisor_load_id"):
-                        try:
-                            loaded,sha=GitHubPlanRepository(cfg["token"]).load(plan_id)
-                            _stage_plan_restore(loaded,sha)
-                        except Exception as exc:
-                            st.error(_github_read_error(exc))
-                    if st.button("Exibir revisões",key="advisor_history"):
-                        try:
-                            st.session_state["advisor_history"]=GitHubPlanRepository(cfg["token"]).history(plan_id)
-                        except Exception as exc:
-                            st.error("Histórico indisponível: "+type(exc).__name__)
-                    history=st.session_state.get("advisor_history",[])
-                    if history:
-                        selected=st.selectbox("Versão do planejamento",history,
-                            format_func=lambda x:x["date"][:10]+" · "+x["message"],
-                            key="advisor_snapshot_choice")
-                        if st.button("Pré-visualizar versão anterior",key="advisor_snapshot"):
+                        if st.button("Exibir revisões",key="advisor_history"):
                             try:
-                                historical=GitHubPlanRepository(cfg["token"]).load_at_commit(plan_id,selected["sha"])
-                                st.session_state["advisor_snapshot_preview"]=historical
+                                st.session_state["advisor_history"]=GitHubPlanRepository(cfg["token"]).history(plan_id)
                             except Exception as exc:
-                                st.error("Snapshot não acessível: "+type(exc).__name__)
-                        preview=st.session_state.get("advisor_snapshot_preview")
-                        if preview:
-                            st.caption("Essa versão possui "+str(len(preview["assignments"]))+
-                                       " dias planejados. Confira antes de recuperá-la.")
-                            if st.button("Recuperar esta versão (sem salvar ainda)",key="advisor_restore"):
+                                st.error("Histórico indisponível: "+type(exc).__name__)
+                        history=st.session_state.get("advisor_history",[])
+                        if history:
+                            selected=st.selectbox("Versão do planejamento",history,
+                                format_func=lambda x:x["date"][:10]+" · "+x["message"],
+                                key="advisor_snapshot_choice")
+                            if st.button("Pré-visualizar versão anterior",key="advisor_snapshot"):
                                 try:
-                                    if preview["plan_id"]!=p["plan_id"]:
-                                        raise ValueError("Carregue o plano correspondente primeiro")
-                                    restored=with_revision(p,{
-                                        "packages":deepcopy(preview["packages"]),
-                                        "assignments":deepcopy(preview["assignments"])})
-                                    st.session_state["advisor_plan"]=restored
-                                    st.session_state.pop("advisor_proposals",None)
-                                    st.info("Versão anterior recuperada nesta sessão. Clique em Salvar planejamento para confirmar.")
-                                    st.rerun()
-                                except ValueError as exc:st.warning(str(exc))
-        with st.expander("Privacidade e detalhes do salvamento"):
-            st.caption("O planejamento fica versionado no GitHub. O repositório atual é público; "
-                       "não inclua dados pessoais ou confidenciais.")
-            st.caption("A gravação online exige autorização Google, token protegido no servidor "
-                       "e confirmação do proprietário. Sem autenticação, somente backup local.")
+                                    historical=GitHubPlanRepository(cfg["token"]).load_at_commit(plan_id,selected["sha"])
+                                    st.session_state["advisor_snapshot_preview"]=historical
+                                except Exception as exc:
+                                    st.error("Snapshot não acessível: "+type(exc).__name__)
+                            preview=st.session_state.get("advisor_snapshot_preview")
+                            if preview:
+                                st.caption("Essa versão possui "+str(len(preview["assignments"]))+
+                                           " dias planejados. Confira antes de recuperá-la.")
+                                if st.button("Recuperar esta versão (sem salvar ainda)",key="advisor_restore"):
+                                    try:
+                                        if preview["plan_id"]!=p["plan_id"]:
+                                            raise ValueError("Carregue o plano correspondente primeiro")
+                                        restored=with_revision(p,{
+                                            "packages":deepcopy(preview["packages"]),
+                                            "assignments":deepcopy(preview["assignments"])})
+                                        st.session_state["advisor_plan"]=restored
+                                        st.session_state.pop("advisor_proposals",None)
+                                        st.info("Versão anterior recuperada nesta sessão. Clique em Salvar planejamento para confirmar.")
+                                        st.rerun()
+                                    except ValueError as exc:st.warning(str(exc))
+            with st.expander("Privacidade e detalhes do salvamento"):
+                st.caption("O planejamento fica versionado no GitHub. O repositório atual é público; "
+                           "não inclua dados pessoais ou confidenciais.")
+                st.caption("A gravação online exige autorização Google, token protegido no servidor "
+                           "e confirmação do proprietário. Sem autenticação, somente backup local.")
     
