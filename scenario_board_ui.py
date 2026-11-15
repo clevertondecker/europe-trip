@@ -1,0 +1,204 @@
+"""Jira-like destination cards, edit actions and reactive scenario comparison.
+
+All draft edits reside in Streamlit session state; only a confirmed review
+changes the canonical itinerary.
+"""
+from __future__ import annotations
+from copy import deepcopy
+import streamlit as st
+from scenario_editor_model import (new_board,is_stale,change_board,undo_board,
+                                  reprice_board,board_to_approval)
+from recommended_itineraries import approve_profile_scenario
+from planning_session import accept_approved_plan
+
+def _currency(eur:float,chf:float)->str:
+    return f"€ {eur:,.2f}  ·  CHF {chf:,.2f}"
+
+def _photo(dest:dict):
+    photo=dest.get("photo")
+    if photo and photo.get("url"):
+        st.image(photo["url"],use_container_width=True)
+        st.caption(f"Foto: {photo['author']} · {photo['license']}")
+    else:
+        st.caption("Sem fotografia licenciada disponível")
+
+def _update(profile:str,board:dict):
+    st.session_state["scenario_edit_"+profile]=board
+    st.rerun()
+
+def _render_destination(profile:str,board:dict,row:dict,catalog:dict):
+    dest=row["destination"]
+    key=dest["id"]
+    title=dest["name"]+" · "+dest["country"]
+    with st.container(border=True):
+        photo_col,details=st.columns([1,2],gap="small")
+        with photo_col:_photo(dest)
+        with details:
+            st.markdown("#### "+title)
+            st.caption("Incluído no plano atual · não removível nesta simulação" if row["locked"]
+                       else "Incluído nesta proposta · editável")
+            for a in row["attractions"][:3]:
+                st.write("• **"+a["name"]+"** — "+a["summary"])
+            if len(row["attractions"])>3:
+                st.caption(f"+ {len(row['attractions'])-3} atrações")
+            minutes=row["route"]["train_minutes_one_way"]
+            st.caption(("Trem de ida: "+str(minutes)+" minutos (estação a estação), volta a conferir"
+                        if minutes is not None else "Tempo ferroviário não confirmado"))
+            st.caption("Custos conhecidos para duas pessoas: "+_currency(
+                row["known"]["EUR"],row["known"]["CHF"]))
+            if row["missing"]:
+                st.caption(f"⚠ {len(row['missing'])} despesas ainda sem cotação completa")
+        with st.expander("Ver despesas, ingressos e fontes"):
+            if row["components"]:
+                for item in row["components"]:
+                    symbol="€" if item["currency"]=="EUR" else "CHF "
+                    st.write(f"• {item['name']}: {symbol}{item['value']:.2f} "
+                             f"({item['condition']}, referência histórica)")
+            else:
+                st.write("Nenhuma tarifa ou entrada paga confirmada neste subtotal.")
+            for missing in row["missing"]:st.caption("Pendente: "+str(missing))
+            for conditional in row["conditional"]:st.caption("Condição: "+str(conditional))
+            st.caption("Alimentação, transporte urbano e hospedagem extra: somente "
+                       "quando houver valor específico pesquisado; não assumir zero.")
+            st.markdown("[Fonte turística]("+dest["source_url"]+")")
+            st.markdown("[Fonte do transporte]("+row["route"]["source_url"]+")")
+        with st.expander("Editar atrações deste passeio",expanded=False):
+            options=[a for a in catalog["attractions"] if a["destination_id"]==key]
+            labels={a["id"]:a["name"] for a in options}
+            picked=st.multiselect("Atrações incluídas",options=list(labels),
+                                  default=[a["id"] for a in row["attractions"]],
+                                  format_func=lambda x:labels[x],
+                                  key="scenario_attractions_"+profile+"_"+key,
+                                  disabled=row["locked"])
+            if st.button("Atualizar atrações",key="scenario_update_"+profile+"_"+key,
+                         disabled=row["locked"] or len(picked)>5,):
+                try:_update(profile,change_board(board,catalog,key,picked))
+                except ValueError as exc:st.warning(str(exc))
+            if not row["locked"]:
+                if st.button("Remover passeio",key="scenario_remove_"+profile+"_"+key):
+                    _update(profile,change_board(board,catalog,key,[]))
+
+def render_scenario_boards(plan:dict,scenarios:list[dict],catalog:dict,routes:dict,
+                           trip_data:dict,source_live:bool,eurfx:float,chffx:float,
+                           use_city_rent:bool=True)->None:
+    st.markdown("### Passeios incluídos nos estilos de viagem")
+    st.caption("Edite os cards sem alterar seu roteiro oficial. Valores e margens "
+               "são recalculados imediatamente para o casal.")
+    profiles={s["profile"]:s for s in scenarios}
+    profile=st.segmented_control("Estilo para personalizar",list(profiles),
+         default=plan["profile"],format_func=lambda p:profiles[p]["label"],
+         key="scenario_board_profile")
+    profile=profile or plan["profile"]
+    scenario=profiles[profile]
+    state_key="scenario_edit_"+profile
+    if state_key not in st.session_state:
+        st.session_state[state_key]=new_board(plan,scenario)
+    board=st.session_state[state_key]
+    if is_stale(board,plan):
+        st.warning("O planejamento oficial mudou. Atualize esta proposta "
+                   "antes de continuar editando ou aplicá-la.")
+        if st.button("Recriar proposta com o planejamento atual",
+                     key="scenario_reset_stale_"+profile):
+            _update(profile,new_board(plan,scenario))
+        return
+    sim=reprice_board(board,plan,catalog,routes,trip_data,source_live,
+                      eurfx,chffx,use_city_rent)
+    totals=sim["finance"]["result"]
+    details=sim["detail"]
+    a,b,c,d=st.columns(4)
+    a.metric("Destinos",len(board["packages"]))
+    b.metric("Atrações",sim["attractions_count"])
+    c.metric("Custos conhecidos",_currency(
+        details["total"]["known_by_currency"]["EUR"],
+        details["total"]["known_by_currency"]["CHF"]))
+    d.metric("Margem até o teto",f"R$ {totals['margin']:,.0f}")
+    allowance=sim["finance"]["budget_excursions_allowance_brl"]
+    exceeded=sim["finance"]["known_excursions_overage_brl"]
+    st.caption(f"Provisão original para passeios: R$ {allowance:,.0f}. "
+               f"Excedente conhecido acima dessa provisão: R$ {exceeded:,.0f}. "
+               "A projeção pode não mudar ao remover um passeio que já cabia na provisão.")
+    st.caption(f"Projeção geral com rubricas provisionadas: R$ {totals['total']:,.0f}. "
+               "Valores históricos: não são preço final para 2027.")
+    if details["total"]["missing"]:
+        st.warning(f"{len(details['total']['missing'])} componentes ainda sem preço completo. "
+                   "Não interpretar o subtotal como custo total.")
+    for row in details["rows"]:
+        _render_destination(profile,board,row,catalog)
+    remaining=[d for d in catalog["destinations"]
+               if d["id"] not in board["packages"]
+               and d["id"] not in plan.get("excluded_destinations",[])]
+    with st.expander("Adicionar outro passeio",expanded=False):
+        if remaining:
+            lookup={d["id"]:d for d in remaining}
+            chosen=st.selectbox("Destino",list(lookup),key="scenario_add_destination_"+profile,
+                                format_func=lambda id:lookup[id]["name"]+" · "+lookup[id]["country"])
+            dest=lookup[chosen]
+            _photo(dest)
+            available=[a for a in catalog["attractions"] if a["destination_id"]==chosen
+                       and plan.get("preferences",{}).get(a["id"])!="Descartar"]
+            labels={a["id"]:a["name"] for a in available}
+            defaults=list(labels)[:2]
+            selected=st.multiselect("Atrações deste destino",list(labels),
+                                    default=defaults,key="scenario_add_attractions_"+profile+"_"+chosen,
+                                    format_func=lambda key:labels[key])
+            st.caption("Até cinco atrações por visita; passagens contabilizadas apenas uma vez.")
+            if st.button("Adicionar ao cenário",key="scenario_add_confirm_"+profile,
+                         disabled=not selected or len(selected)>5):
+                try:_update(profile,change_board(board,catalog,chosen,selected))
+                except ValueError as exc:st.warning(str(exc))
+        else:
+            st.info("Todas as opções permitidas já estão incluídas no cenário.")
+    b1,b2=st.columns(2)
+    with b1:
+        if st.button("Desfazer última edição",key="scenario_undo_"+profile,
+                     disabled=not board["undo"],use_container_width=True):
+            _update(profile,undo_board(board))
+    with b2:
+        if st.button("Restaurar sugestão original",key="scenario_reset_"+profile,
+                     use_container_width=True):
+            _update(profile,new_board(plan,scenario))
+    st.markdown("#### O que mudou nesta simulação?")
+    changed=sim["known_delta"]
+    st.write("Diferença no subtotal de passagens e ingressos conhecidos: "+
+             _currency(changed["EUR"],changed["CHF"])+
+             f" · aproximadamente R$ {sim['known_delta_brl']:,.0f} no câmbio escolhido.")
+    if sim["known_delta_brl"]<0:
+        st.caption("A redução no subtotal histórico não é economia garantida no orçamento geral.")
+    if sim["unresolved"]:
+        st.caption(f"{len(sim['unresolved'])} destino(s) ainda sem data segura no calendário.")
+    with st.expander("Comparar composição original e personalizada"):
+        original=board["original_packages"]
+        for dest in sorted(set(original)|set(board["packages"])):
+            current=board["packages"].get(dest,[])
+            previous=original.get(dest,[])
+            if previous!=current:
+                st.write(f"• {dest}: {len(previous)} atração(ões) → {len(current)}")
+        if original==board["packages"]:
+            st.info("Nenhuma edição nesta simulação.")
+    st.caption("Os passeios já aprovados no planejamento oficial ficam bloqueados "
+               "para remoção neste editor. Altere-os em Explorar atrações.")
+    approval_key="scenario_review_"+profile
+    if st.button("Revisar e aplicar este roteiro",key="scenario_review_button_"+profile,
+                 use_container_width=True):
+        st.session_state[approval_key]=True
+    if st.session_state.get(approval_key):
+        st.warning("Ao confirmar, os passeios sugeridos entrarão no planejamento. "
+                   "Nenhuma passagem, hospedagem ou ingresso será reservado.")
+        yes,no=st.columns(2)
+        with yes:
+            if st.button("Confirmar aplicação",key="scenario_approve_"+profile,
+                         use_container_width=True):
+                try:
+                    candidate=board_to_approval(board,plan,sim)
+                    updated=approve_profile_scenario(plan,candidate,approved=True)
+                    accept_approved_plan(updated)
+                    for key in list(st.session_state):
+                        if key.startswith("scenario_edit_") or key.startswith("scenario_review_"):
+                            del st.session_state[key]
+                    st.rerun()
+                except ValueError as exc:st.error(str(exc))
+        with no:
+            if st.button("Cancelar",key="scenario_cancel_"+profile,
+                         use_container_width=True):
+                st.session_state[approval_key]=False
+                st.rerun()
