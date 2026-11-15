@@ -382,3 +382,35 @@ padding:17px 20px;margin:0 0 10px;}
   }
   .page-title { overflow-wrap: anywhere; }
 }
+
+
+/* Travel dashboard — editorial travel app on top of native Streamlit widgets. */
+.trip-dash-hero {
+  border-radius:22px;
+  min-height:245px;
+  padding:clamp(25px,4vw,47px);
+  background:linear-gradient(90deg,rgba(13,47,62,.97),rgba(13,47,62,.72) 55%,rgba(13,47,62,.16)),
+    url('https://upload.wikimedia.org/wikipedia/commons/4/4d/Maiori_Amalfi_coast.jpg') center / cover;
+  color:#fff;
+  margin:7px 0 23px;
+  box-shadow:0 12px 30px rgba(20,55,70,.11);
+}
+.trip-dash-hero>span {font-size:.73rem;font-weight:800;letter-spacing:.15em;color:#D0E8DC;}
+.trip-dash-hero h2 {font-family:'Playfair Display',Georgia,serif;color:#fff !important;
+  font-size:clamp(1.9rem,3vw,2.85rem);margin:13px 0 10px;line-height:1.18;}
+.trip-dash-hero p {color:#EEF5F2;font-size:.95rem;max-width:590px;line-height:1.55;}
+.trip-dash-hero__chips {display:flex;flex-wrap:wrap;gap:7px;margin-top:17px;}
+.trip-dash-hero__chips span {border:1px solid rgba(240,247,243,.36);
+  border-radius:28px;padding:5px 10px;color:#F5F9F6;background:rgba(10,44,57,.33);font-size:.78rem;}
+.trip-dash-metric {background:#fff;border:1px solid #E1E9E8;border-radius:15px;
+  padding:16px;min-height:115px;display:flex;flex-direction:column;gap:8px;margin-bottom:5px;
+  box-shadow:0 5px 15px rgba(26,55,64,.035);}
+.trip-dash-metric>span {font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;
+  color:#527079;font-weight:750;}
+.trip-dash-metric strong {font-size:clamp(1.35rem,2vw,1.75rem);line-height:1.2;color:#173E4B;}
+.trip-dash-metric small {font-size:.77rem;color:#657E84;}
+@media(max-width:750px) {
+ .trip-dash-hero {min-height:220px;padding:23px 20px;margin-bottom:14px;}
+ .trip-dash-metric {min-height:102px;padding:12px;}
+ .trip-dash-metric strong {font-size:1.35rem;}
+}
