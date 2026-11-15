@@ -40,7 +40,7 @@ class DirectOutingsTests(unittest.TestCase):
         colmar=[a["id"] for a in catalog["attractions"]
                 if a["destination_id"]=="colmar"]
         app.multiselect(key="outing_new_attractions").set_value(colmar[:2]).run()
-        app.button(key="FormSubmitter:outing_add_form-Adicionar ao meu roteiro").click().run()
+        app.button(key="outing_add_save").click().run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
         self.assertEqual(app.session_state["advisor_plan"]["packages"]["colmar"],colmar[:2])
         self.assertEqual(app.session_state["advisor_plan"]["packages"],
@@ -48,7 +48,7 @@ class DirectOutingsTests(unittest.TestCase):
         app.button(key="outing_edit_colmar").click().run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
         app.multiselect(key="outing_edit_attractions_colmar").set_value(colmar[:1]).run()
-        app.button(key="FormSubmitter:outing_edit_form_colmar-Salvar alterações").click().run()
+        app.button(key="outing_edit_save_colmar").click().run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
         self.assertEqual(app.session_state["advisor_plan"]["packages"]["colmar"],colmar[:1])
         app.button(key="outing_remove_colmar").click().run()
