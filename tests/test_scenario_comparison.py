@@ -64,6 +64,30 @@ class ScenarioComparisonModelTests(unittest.TestCase):
 
 
 class ScenarioComparisonUITests(unittest.TestCase):
+    def test_profile_button_expands_visible_details_and_toggles(self):
+        app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=100).run()
+        app.radio(key="main_navigation").set_value("Roteiro").run()
+        app.segmented_control(key="itinerary_section").set_value("Simular roteiros").run()
+        self.assertFalse(app.exception,[e.message for e in app.exception])
+        before=deepcopy(app.session_state["advisor_plan"])
+        self.assertFalse(any("Detalhes do Econômico" in m.value for m in app.markdown))
+        app.button(key="scenario_style_choose_economy").click().run()
+        self.assertFalse(app.exception,[e.message for e in app.exception])
+        self.assertEqual(app.session_state["scenario_open_profile"],"economy")
+        self.assertTrue(any("Detalhes do Econômico" in m.value for m in app.markdown))
+        self.assertTrue(any("Pré-selecionado somente nesta simulação" in x.value
+                            for x in app.caption))
+        self.assertEqual(app.session_state["advisor_plan"],before)
+        app.button(key="scenario_style_choose_balanced").click().run()
+        self.assertFalse(app.exception,[e.message for e in app.exception])
+        self.assertEqual(app.session_state["scenario_open_profile"],"balanced")
+        self.assertTrue(any("Detalhes do Equilibrado" in m.value for m in app.markdown))
+        self.assertFalse(any("Detalhes do Econômico" in m.value for m in app.markdown))
+        app.button(key="scenario_style_choose_balanced").click().run()
+        self.assertIsNone(app.session_state["scenario_open_profile"])
+        self.assertFalse(any("Detalhes do Equilibrado" in m.value for m in app.markdown))
+        self.assertEqual(app.session_state["advisor_plan"],before)
+
     def test_single_suggestion_adds_to_real_plan_and_reprices(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=100).run()
         app.radio(key="main_navigation").set_value("Roteiro").run()
