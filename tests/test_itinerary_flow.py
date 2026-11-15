@@ -70,17 +70,63 @@ class FlexibleVisitModelTests(unittest.TestCase):
     def test_italy_proposal_is_preview_only_until_approved(self):
         start=new_plan()
         preview=italy_starter_preview(start,self.catalog,"economy")
-        self.assertEqual(len(preview["to_add"]),2)
+        self.assertEqual(len(preview["to_add"]),4)
+        self.assertEqual(preview["snapshot"]["coast_base_proposed"],"salerno")
+        self.assertEqual((preview["snapshot"]["rome_nights"],
+                          preview["snapshot"]["coast_nights"],
+                          preview["snapshot"]["naples_nights"]),(4,4,1))
         self.assertEqual(adopt_italy_starter(start,self.catalog,"economy"),start)
         applied=adopt_italy_starter(start,self.catalog,"economy",confirmed=True)
         self.assertEqual({x["destination_id"] for x in applied["flexible_visits"]},
-                         {"italy_rome","italy_amalfi"})
+                         {"italy_rome","italy_amalfi","italy_salerno","italy_naples"})
+        self.assertEqual(len(applied["italy_proposal"]["days_detail"]),10)
+        self.assertEqual(applied["italy_proposal"]["coast_base_proposed"],"salerno")
         self.assertEqual(applied["revision"],start["revision"]+1)
         self.assertEqual(applied["assignments"],{})
         self.assertEqual(applied["packages"],{})
         self.assertFalse(preview["reservations"])
-        repeated=adopt_italy_starter(applied,self.catalog,"experience",confirmed=True)
+        repeated=adopt_italy_starter(applied,self.catalog,"economy",confirmed=True)
         self.assertEqual(repeated["revision"],applied["revision"])
+        switched=adopt_italy_starter(applied,self.catalog,"experience",confirmed=True)
+        self.assertEqual(switched["italy_proposal"]["coast_base_proposed"],"minori")
+        self.assertEqual(switched["italy_proposal"]["coast_nights"],5)
+        self.assertEqual(switched["revision"],applied["revision"]+1)
+        self.assertTrue({x["destination_id"] for x in applied["flexible_visits"]} <=
+                        {x["destination_id"] for x in switched["flexible_visits"]})
+
+    def test_exact_italy_day_is_independent_of_french_calendar(self):
+        from itinerary_flow_model import schedule_italy_day,selected_rows
+        plan=upsert_choice(new_plan(),self.catalog,"italy_amalfi",
+                           ["italy_amalfi__1"],"Durante a Costa Amalfitana")
+        scheduled=schedule_italy_day(plan,self.catalog,"italy_amalfi","2027-09-11")
+        self.assertEqual(scheduled["assignments"],{})
+        self.assertEqual(scheduled["flexible_visits"][0]["exact_date"],"2027-09-11")
+        self.assertEqual(selected_rows(scheduled,self.catalog)[0]["exact_dates"],
+                         ["2027-09-11"])
+        with self.assertRaises(ValueError):
+            schedule_italy_day(plan,self.catalog,"italy_amalfi","2027-10-12")
+        unchanged=upsert_choice(scheduled,self.catalog,"italy_amalfi",
+                                ["italy_amalfi__2"],"Durante a Costa Amalfitana")
+        self.assertEqual(unchanged["flexible_visits"][0]["exact_date"],"2027-09-11")
+        removed=schedule_italy_day(unchanged,self.catalog,"italy_amalfi",None)
+        self.assertNotIn("exact_date",removed["flexible_visits"][0])
+
+    def test_scenarios_reuse_same_italian_research_catalog(self):
+        from italy_honeymoon_model import load_honeymoon,italy_itinerary_places
+        from itinerary_flow_model import italian_catalog
+        reference=load_honeymoon()
+        self.assertEqual(italian_catalog(),italy_itinerary_places(reference))
+        self.assertEqual(len(italian_catalog()),10)
+        self.assertEqual({r["id"] for r in italian_catalog()},
+                         {r["id"] for r in destinations(self.catalog)
+                          if r["stage"]==ITALY_STAGE})
+        snapshots={variant:italy_starter_preview(new_plan(),self.catalog,variant)
+                   for variant in ("balanced","economy","experience")}
+        self.assertEqual({x["snapshot"]["coast_base_proposed"]
+                          for x in snapshots.values()},{"maiori","salerno","minori"})
+        self.assertNotEqual(
+            {x[0] for x in snapshots["balanced"]["to_add"]},
+            {x[0] for x in snapshots["economy"]["to_add"]})
 
     def test_invalid_dates_duplicate_italy_and_other_stage_are_rejected(self):
         base=new_plan()
