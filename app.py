@@ -905,7 +905,7 @@ elif page == "Roteiro":
                 "Férias iniciais de 20–30 dias; depois trabalho remoto, sujeito a validação de regras.</div>",
                 unsafe_allow_html=True)
 
-    sections=["Visão geral","Meus passeios","Descobrir","Orçamento","Calendário","Guias e pesquisas"]
+    sections=["Visão geral","Meus passeios","Descobrir","Orçamento","Calendário","Simular roteiros","Guias e pesquisas"]
     itinerary_section=st.segmented_control("Área do roteiro",sections,default="Meus passeios",
                                            selection_mode="single",key="itinerary_section",
                                            label_visibility="collapsed")
@@ -967,7 +967,7 @@ elif page == "Roteiro":
     elif itinerary_section == "Explorar atrações":
         render_explorer(data,sync_sources,map_view)
 
-    elif itinerary_section in ("Meus passeios","Descobrir","Orçamento","Calendário"):
+    elif itinerary_section in ("Meus passeios","Descobrir","Orçamento","Calendário","Simular roteiros"):
         render_advisor(data,sync_sources,workspace_area=itinerary_section)
 
     elif itinerary_section == "Itália e Costa Amalfitana":
