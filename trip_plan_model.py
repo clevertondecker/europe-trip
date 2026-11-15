@@ -17,7 +17,7 @@ def new_plan(base="mulhouse",departure="2027-09-09",profile="balanced")->dict:
           "total_days":70,"italy_days":10,"vacation_days":25,"setup_days":4,
           "budget_scenario":"70k","profile":profile,"mandatory_destinations":[],
           "excluded_destinations":[],"packages":{},"assignments":{},
-          "preferences":{},"flexible_visits":[],
+          "preferences":{},"flexible_visits":[],"italy_proposal":None,
           "accepted_recommendations":[],"rejected_recommendations":[],
           "source_versions":{"attractions":"2026-11-14","routes":"2026-11-14"}}
     validate_plan(plan)
@@ -84,6 +84,43 @@ def validate_plan(plan:dict,known_attractions:set[str]|None=None)->None:
         if stage=="França" and destination.startswith("italy_"):
             raise ValueError("Passeio não pertence à França")
         seen.add(destination)
+    proposal=plan.get("italy_proposal")
+    if proposal is not None:
+        keys={"variant","label","status","source_retrieved_at","days","nights",
+              "rome_nights","coast_nights","naples_nights",
+              "coast_base_proposed","itinerary_place_ids","days_detail",
+              "reserved","hotel_confirmed"}
+        if not isinstance(proposal,dict) or set(proposal)!=keys:
+            raise ValueError("Formato da proposta italiana inválido")
+        if (proposal["variant"] not in PROFILES or
+            proposal["status"]!="proposta exploratória" or
+            proposal["reserved"] is not False or
+            proposal["hotel_confirmed"] is not False or
+            type(proposal["days"]) is not int or proposal["days"]!=10 or
+            type(proposal["nights"]) is not int or proposal["nights"]!=9 or
+            any(type(proposal[key]) is not int or proposal[key]<0 or proposal[key]>9
+                for key in ("rome_nights","coast_nights","naples_nights")) or
+            sum(proposal[key] for key in
+                ("rome_nights","coast_nights","naples_nights"))!=9 or
+            not isinstance(proposal["label"],str) or
+            len(proposal["label"])>100 or
+            not isinstance(proposal["source_retrieved_at"],str) or
+            len(proposal["source_retrieved_at"])>40 or
+            not isinstance(proposal["coast_base_proposed"],str) or
+            len(proposal["coast_base_proposed"])>45):
+            raise ValueError("Noites/status da proposta italiana inválidos")
+        ids=proposal["itinerary_place_ids"]
+        if (not isinstance(ids,list) or not 2<=len(ids)<=15 or
+            len(set(ids))!=len(ids) or
+            any(not isinstance(x,str) or not x.startswith("italy_") or
+                len(x)>80 for x in ids)):
+            raise ValueError("Destinos da proposta inválidos")
+        days=proposal["days_detail"]
+        if (not isinstance(days,list) or len(days)!=10 or
+            any(not isinstance(day,list) or len(day)!=6 or
+                any(not isinstance(v,str) or len(v)>550 for v in day)
+                for day in days)):
+            raise ValueError("Dias da proposta italiana inválidos")
 
 def with_revision(plan:dict,updates:dict)->dict:
     result=deepcopy(plan)
