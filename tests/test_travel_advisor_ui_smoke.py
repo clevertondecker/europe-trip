@@ -12,8 +12,9 @@ class AdvisorUISmoke(unittest.TestCase):
         self.assertEqual(len(app.exception),0,[x.message for x in app.exception])
         original=app.session_state["advisor_plan"]["revision"]
         # A plan without selected attractions must show discovery, not fake options.
-        self.assertIsNone(app.button(key="advisor_generate"))
-        self.assertIsNotNone(app.button(key="advisor_discover_add_colmar"))
+        keys={element.key for element in app.button}
+        self.assertNotIn("advisor_generate",keys)
+        self.assertIn("advisor_discover_add_colmar",keys)
         self.assertEqual(app.session_state["advisor_plan"]["revision"],original)
         app.selectbox(key="advisor_base").set_value("strasbourg").run()
         self.assertEqual(len(app.exception),0,[x.message for x in app.exception])
