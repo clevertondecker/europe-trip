@@ -329,3 +329,33 @@ padding:17px 20px;margin:0 0 10px;}
   outline-offset:2px;
 }
 
+
+
+/* Adaptive attractions explorer — editorial travel cards and accessible imagery */
+.attraction-photo {
+  display:block;
+  width:100%;
+  height:188px;
+  object-fit:cover;
+  object-position:center;
+  background:#E7F0F5;
+  border-radius:13px;
+  border:1px solid #DCE7EF;
+  margin:0 0 8px;
+}
+.attraction-no-photo {
+  min-height:188px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  color:#476F80;
+  background:linear-gradient(135deg,#E0EFF5,#F1EEE4);
+  font-size:1.25rem;
+  font-family:'Playfair Display',serif;
+  border:1px solid #DCE7EF;
+  border-radius:13px;
+  margin-bottom:10px;
+}
+@media (max-width:820px) {
+ .attraction-photo,.attraction-no-photo {height:175px;min-height:175px;}
+}
