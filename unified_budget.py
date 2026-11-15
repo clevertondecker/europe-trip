@@ -57,6 +57,8 @@ def scenario_total(scenario: dict, budget: dict, *,
     signed=(flight_delta_brl,excursions_delta_brl,
             local_transport_delta_brl,rent_delta_brl)
     for adjustment in signed:
+        if not isinstance(adjustment,(int,float)) or not isfinite(adjustment):
+            raise ValueError("O ajuste deve ser numérico e finito")
         money_delta(adjustment)
     if outings_weekly>7 or fx_brl_per_eur<=0:
         raise ValueError("Frequência ou câmbio inválidos")
