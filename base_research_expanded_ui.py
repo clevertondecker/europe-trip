@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import streamlit as st
 from five_base_comparison_ui import render_five_base_study
-from base_scenario_ui import sync_city_widget, set_city_from_widget
+from exploratory_selection import sync_city_widget, set_city_from_widget
 
 from base_research_expanded_model import (
     COUNTRY_FLAGS,PRESETS,load_research,load_rail,
