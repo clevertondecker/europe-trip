@@ -81,9 +81,8 @@ def validate_plan(plan:dict,known_attractions:set[str]|None=None)->None:
             raise ValueError("Visita flexível inválida ou duplicada")
         if stage=="Itália" and not destination.startswith("italy_"):
             raise ValueError("Destino não pertence à Itália")
-        if stage=="França" and (destination.startswith("italy_") or
-                               plan["packages"].get(destination)!=choices):
-            raise ValueError("Passeio francês divergente do roteiro")
+        if stage=="França" and destination.startswith("italy_"):
+            raise ValueError("Passeio não pertence à França")
         seen.add(destination)
 
 def with_revision(plan:dict,updates:dict)->dict:
