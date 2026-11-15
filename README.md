@@ -194,3 +194,14 @@ Com zero passeios, não aparecem mais três alternativas vazias de calendário: 
 As projeções são **parciais e históricas**, não cotações 2027. Trocar estilo não cria automaticamente um gasto percentual; os três estilos geram conjuntos diferentes de passeios concretos. O orçamento já contém verba de excursões: um subtotal conhecido não é somado novamente se couber na verba. Assim, dois estilos podem mostrar o mesmo total projetado enquanto diferem em passagens/ingressos conhecidos e custos ainda não cotados.
 
 **Documentação e limitações:** [RELATORIO_CONSULTOR_DESTINOS_2027.md](RELATORIO_CONSULTOR_DESTINOS_2027.md).
+
+
+## Quadro editável de passeios — categorias de gastos reativas
+
+Em **Roteiro → Consultor inteligente → Passeios incluídos nos estilos de viagem**, selecione Econômico, Equilibrado ou Aproveitar ao máximo. Cada destino aparece num card com foto licenciada, descrição resumida, atrações, ligação ferroviária histórica, custos conhecidos por pessoa/casal, links oficiais e pendências. É possível **Adicionar outro passeio**, **Remover passeio**, **Editar atrações**, **Desfazer** e comparar custos anteriores e atuais sem modificar o plano oficial. A aplicação calcula novamente em cada edição.
+
+**Por que o valor total pode ficar igual após remover um passeio?** O orçamento-base já reserva dinheiro para excursões. O subtotal de passagens/ingressos muda, mas o orçamento projetado só muda quando há um excedente conhecido sobre essa provisão. Não anunciar economia garantida sem gastos completos.
+
+Depois de personalizar, use **Revisar e aplicar este roteiro → Confirmar aplicação**; somente então o plano canônico é atualizado, com persistência GitHub conforme consentimento/autenticação existente. Passeios previamente aprovados só podem ser alterados em **Explorar atrações**.
+
+[Relatório de implementação e limites](RELATORIO_GERENCIADOR_PASSEIOS_2027.md).
