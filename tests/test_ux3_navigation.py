@@ -65,6 +65,8 @@ class UX3StreamlitNavigationSmokeTests(unittest.TestCase):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=90).run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
         official=deepcopy(app.session_state["advisor_plan"])
+        app.radio(key="ux_area").set_value("Explorar").run()
+        app.segmented_control(key="ux_mode").set_value("Simulação").run()
         app.selectbox(key="scenario_sidebar").set_value("offenburg").run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
         self.assertEqual(app.session_state["advisor_plan"],official)
@@ -72,6 +74,14 @@ class UX3StreamlitNavigationSmokeTests(unittest.TestCase):
             with self.subTest(area=area):
                 app.radio(key="ux_area").set_value(area).run()
                 self.assertFalse(app.exception,[x.message for x in app.exception])
+                if area=="Minha viagem":
+                    self.assertNotIn("ux_section",{v.key for v in app.segmented_control})
+                    app.button(key="home_next_tasks").click().run()
+                    self.assertEqual(app.session_state["ux_section"],"Pendências e fontes")
+                    self.assertFalse(app.exception,[x.message for x in app.exception])
+                    app.button(key="ux_home_return_summary").click().run()
+                    self.assertEqual(app.session_state["ux_section"],"Resumo")
+                    continue
                 for section in sections:
                     with self.subTest(section=section):
                         app.segmented_control(key="ux_section").set_value(section).run()

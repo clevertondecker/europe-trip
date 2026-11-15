@@ -47,6 +47,7 @@ bootstrap_trip()
 restored_mode=st.session_state.pop("ux_pending_mode",None)
 if restored_mode in ("Oficial","Simulação"):
     st.session_state["ux_mode"]=restored_mode
+    st.session_state["ux_mode_value"]=restored_mode
 # Restore saved exploratory durations before any Streamlit widget is rendered.
 restored_days=st.session_state.pop("ux_pending_days",None)
 if restored_days is not None:
@@ -231,6 +232,7 @@ def _select_scenario_sidebar() -> None:
     st.session_state["scenario_base_selected"]=chosen
     st.session_state["ux_last_candidate"]=chosen
     st.session_state["ux_mode"]="Simulação"
+    st.session_state["ux_mode_value"]="Simulação"
 
 
 def _ux_area_changed() -> None:
@@ -265,11 +267,13 @@ def _ux_legacy_guide_changed() -> None:
 
 def _ux_days_changed() -> None:
     # Shared duration is a what-if input, never a mutation of TripPlan.
+    st.session_state["ux_days_value"]=st.session_state["ux_days"]
     st.session_state["unified_stay"]=st.session_state["ux_days"]
 
 
 def _ux_budget_days_changed() -> None:
     st.session_state["ux_days"]=st.session_state["unified_stay"]
+    st.session_state["ux_days_value"]=st.session_state["unified_stay"]
 
 
 def _ux_next_task(area:str,task:str) -> None:
@@ -277,6 +281,7 @@ def _ux_next_task(area:str,task:str) -> None:
 
 
 def _ux_mode_changed() -> None:
+    st.session_state["ux_mode_value"]=st.session_state["ux_mode"]
     official=active_plan()["base_city"]
     if st.session_state["ux_mode"]=="Oficial":
         previous=st.session_state.get("scenario_base_selected",official)
@@ -290,6 +295,12 @@ def _ux_mode_changed() -> None:
             candidate=official
         st.session_state["scenario_base_selected"]=candidate
         st.session_state["scenario_sidebar"]=candidate
+
+
+def _ux_return_to_official() -> None:
+    """Compact home action: return to approved context, not a TripPlan update."""
+    st.session_state["ux_mode"]="Oficial"
+    _ux_mode_changed()
 
 
 with st.sidebar:
@@ -343,49 +354,87 @@ with st.sidebar:
     st.link_button("Abrir pasta no Drive", data["sources"]["project_folder"], use_container_width=True)
     st.info("Painel em desenvolvimento. Nenhum voo, imóvel ou passeio foi reservado.")
 
-# One compact context bar, shared by all four user-facing areas.
-if "ux_mode" not in st.session_state:
-    st.session_state["ux_mode"]="Simulação"
-if "ux_days" not in st.session_state:
-    french_days=st.session_state.get(
-        "unified_stay",active_plan()["total_days"]-active_plan()["italy_days"])
-    st.session_state["ux_days"]=max(40,min(80,int(french_days)))
-if "unified_stay" not in st.session_state:
-    st.session_state["unified_stay"]=st.session_state["ux_days"]
+# Keep simulation context in non-widget keys so the dashboard and itinerary
+# can hide configuration controls without losing the user's exploration.
 official_id=active_plan()["base_city"]
-if st.session_state.get("ux_mode")=="Oficial" and (
+if "ux_mode_value" not in st.session_state:
+    st.session_state["ux_mode_value"]=st.session_state.get("ux_mode","Oficial")
+if "ux_mode" not in st.session_state:
+    st.session_state["ux_mode"]=st.session_state["ux_mode_value"]
+if "ux_days_value" not in st.session_state:
+    initial_days=st.session_state.get(
+        "ux_days",st.session_state.get("unified_stay",
+        active_plan()["total_days"]-active_plan()["italy_days"]))
+    st.session_state["ux_days_value"]=max(40,min(80,int(initial_days)))
+if "ux_days" not in st.session_state:
+    st.session_state["ux_days"]=st.session_state["ux_days_value"]
+if "unified_stay" not in st.session_state:
+    st.session_state["unified_stay"]=st.session_state["ux_days_value"]
+if st.session_state["ux_mode_value"]=="Oficial" and (
         st.session_state.get("scenario_base_selected")!=official_id):
-    # An explicit city selection in an explorer wins over a stale official-mode label.
+    # An exploratory city change elsewhere is stronger than stale display mode.
+    st.session_state["ux_mode_value"]="Simulação"
     st.session_state["ux_mode"]="Simulação"
-with st.container(border=True):
-    st.markdown("**Contexto do planejamento**")
-    mode_col,base_col,days_col=st.columns([1.2,1.5,.75],gap="small")
-    with mode_col:
-        st.segmented_control("Visualizar",["Oficial","Simulação"],
-                             key="ux_mode",on_change=_ux_mode_changed,
-                             selection_mode="single")
-    with base_col:
-        st.selectbox("Cidade-base",list(_base_details),
-                     key="scenario_sidebar",on_change=_select_scenario_sidebar,
-                     disabled=st.session_state["ux_mode"]=="Oficial",
-                     format_func=lambda city:_base_details[city]["name"]+
-                                            " · "+_base_details[city]["country"])
-    with days_col:
-        st.number_input("Dias na França (simulação)",min_value=40,max_value=80,
-                        key="ux_days",on_change=_ux_days_changed,
-                        disabled=st.session_state["ux_mode"]=="Oficial")
-    state_label=("Plano oficial" if st.session_state["ux_mode"]=="Oficial"
-                 else "Simulação independente")
-    st.caption(state_label+" · Base aprovada no plano: "+
-               _base_details[official_id]["name"]+
-               " · Nenhuma reserva confirmada. Alterações exploratórias não "
-               "mudam o TripPlan sem aprovação explícita.")
 
 ux_area=st.session_state["ux_area"]
-st.segmented_control("O que deseja fazer?",list(UX_SECTIONS[ux_area]),
-                     key="ux_section",on_change=_ux_section_changed,
-                     selection_mode="single")
 ux_section=st.session_state["ux_section"]
+if ux_area in ("Explorar","Orçamento"):
+    # Full configuration is relevant only when evaluating alternatives or costs.
+    with st.container(border=True):
+        st.markdown("**Configurar simulação**")
+        mode_col,base_col,days_col=st.columns([1.2,1.5,.85],gap="small")
+        with mode_col:
+            st.segmented_control("Visualizar",["Oficial","Simulação"],
+                                 key="ux_mode",on_change=_ux_mode_changed,
+                                 selection_mode="single")
+        with base_col:
+            st.selectbox("Cidade-base",list(_base_details),
+                         key="scenario_sidebar",on_change=_select_scenario_sidebar,
+                         disabled=st.session_state["ux_mode_value"]=="Oficial",
+                         format_func=lambda city:_base_details[city]["name"]+
+                                                " · "+_base_details[city]["country"])
+        with days_col:
+            st.number_input("Dias na França",min_value=40,max_value=80,
+                            key="ux_days",on_change=_ux_days_changed,
+                            disabled=st.session_state["ux_mode_value"]=="Oficial")
+        state_label=("Roteiro oficial" if st.session_state["ux_mode_value"]=="Oficial"
+                     else "Simulação independente")
+        st.caption(state_label+" · Base do roteiro aprovado: "+
+                   _base_details[official_id]["name"]+
+                   " · Nenhuma escolha exploratória modifica o TripPlan automaticamente.")
+else:
+    # Home and itinerary are views of the journey, not a configuration screen.
+    simulation_active=st.session_state["ux_mode_value"]=="Simulação"
+    context_city=(st.session_state["scenario_base_selected"]
+                  if simulation_active else official_id)
+    with st.container():
+        summary_col,action_col=st.columns([4.5,1.2],gap="small",
+                                          vertical_alignment="center")
+        with summary_col:
+            if simulation_active:
+                st.caption("**Simulação ativa** · "+
+                           _base_details[context_city]["name"]+
+                           " · "+str(st.session_state["ux_days_value"])+
+                           " dias na França · Roteiro oficial preservado")
+            else:
+                st.caption("**Roteiro oficial** · Base em estudo: "+
+                           _base_details[official_id]["name"]+
+                           " · "+str(active_plan()["total_days"]-active_plan()["italy_days"])+
+                           " dias na França · Sem reservas confirmadas")
+        with action_col:
+            if simulation_active:
+                st.button("Voltar ao oficial",key="ux_return_official",
+                          on_click=_ux_return_to_official,use_container_width=True)
+
+# On the home page, avoid the extra tab row and the giant next-step control.
+# Pending research remains reachable through dashboard buttons and legacy links.
+if ux_area!="Minha viagem":
+    st.segmented_control("O que deseja fazer?",list(UX_SECTIONS[ux_area]),
+                         key="ux_section",on_change=_ux_section_changed,
+                         selection_mode="single")
+elif ux_section=="Pendências e fontes":
+    st.button("← Voltar ao resumo",key="ux_home_return_summary",
+              on_click=_ux_next_task,args=("Minha viagem","Resumo"))
 if ux_area=="Explorar" and ux_section=="Mais pesquisas":
     st.selectbox("Qual pesquisa deseja consultar?",list(RESEARCH_OPTIONS),
                  key="ux_research",on_change=_ux_aux_changed)
@@ -393,16 +442,14 @@ elif ux_area=="Meu roteiro" and ux_section=="Sugestões":
     st.segmented_control("Como deseja avançar?",list(SUGGESTION_OPTIONS),
                          key="ux_suggestion",on_change=_ux_aux_changed,
                          selection_mode="single")
-# Legacy routing is a presentation adapter; no model or persisted plan is changed.
 page,itinerary_target,guide_target,base_target=ux_route(
     ux_area,ux_section,
     research=st.session_state.get("ux_research","Pesquisa ampliada"),
     suggestion=st.session_state.get("ux_suggestion","Descobrir"))
-st.caption(UX_DESCRIPTIONS.get((ux_area,ux_section),"Continue o planejamento."))
-# Contextual action makes the connection between tasks explicit without
-# adding more permanent tabs to the navigation bar.
+if ux_area!="Minha viagem":
+    st.caption(UX_DESCRIPTIONS.get((ux_area,ux_section),"Continue o planejamento."))
+# Navigation between tasks stays contextual, rather than a wall of controls.
 next_steps={
-    ("Minha viagem","Resumo"):("Escolher cidades-base","Explorar","Cidades-base"),
     ("Explorar","Cidades-base"):("Comparar cidades","Explorar","Comparar cidades"),
     ("Explorar","Comparar cidades"):("Simular o orçamento","Orçamento","Visão financeira"),
     ("Explorar","Passeios e destinos"):("Organizar passeios","Meu roteiro","Meus passeios"),
@@ -417,7 +464,7 @@ suggestion=next_steps.get((ux_area,ux_section))
 if suggestion:
     st.button("Próximo passo: "+suggestion[0]+" →",key="ux_next_step",
               on_click=_ux_next_task,args=(suggestion[1],suggestion[2]))
-if st.session_state.get("scenario_base_selected")!=official_id:
+if ux_area!="Minha viagem" and st.session_state.get("scenario_base_selected")!=official_id:
     st.caption("Cidade hipotética em análise: "+
                _base_details[st.session_state["scenario_base_selected"]]["name"]+
                ". Passeios, calendário e decisões oficiais permanecem separados.")
@@ -432,6 +479,9 @@ if page == "Visão geral":
       </div></div>""", unsafe_allow_html=True)
 
     current_plan=active_plan()
+    # Main call to action sits inside the home dashboard, after the hero.
+    st.button("Explorar cidades-base →",key="home_continue_bases",
+              on_click=_ux_next_task,args=("Explorar","Cidades-base"))
     status_label,status_hint=save_label(
         current_plan,st.session_state.get("advisor_saved_snapshot"),
         _owner_signed_in())

@@ -16,6 +16,8 @@ class FullItineraryNavigationTests(unittest.TestCase):
     def test_all_itinerary_areas_preserve_official_base(self):
         at=AppTest.from_file(str(ROOT/"app.py"),default_timeout=90).run()
         official=at.session_state["advisor_plan"]["base_city"]
+        at.radio(key="ux_area").set_value("Explorar").run()
+        at.segmented_control(key="ux_mode").set_value("Simulação").run()
         at.selectbox(key="scenario_sidebar").set_value("offenburg").run()
         at.radio(key="main_navigation").set_value("Roteiro").run()
         for area in AREAS:
