@@ -15,6 +15,7 @@ from trip_plan_repository import GitHubPlanRepository
 from advisor_auth import is_verified_owner
 from planning_store import create_from_legacy,change_plan,sync_legacy_view
 from planning_status import save_label,explain_storage_error,friendly_timestamp
+from advisor_presentation import present_risks,proposal_comparison,simple_next_step
 from data_model import get_scenario
 from unified_budget import resolve_french_budget,scenario_total
 
@@ -155,8 +156,10 @@ def render_advisor(trip_data:dict,sync_sources:dict)->None:
         p=change_plan(p,{"base_city":base,"profile":profile,"budget_scenario":ceiling})
         st.session_state["advisor_plan"]=p
         st.session_state.pop("advisor_proposals",None)
-    st.caption("Pesos atuais (interesse / custo / conforto / agenda): "+
-               " / ".join(str(x)+"%" for x in objective_weights(profile).values()))
+    with st.expander("Como o consultor toma decisões"):
+        st.caption("Prioridades (interesse / custo / conforto / agenda): "+
+                   " / ".join(str(x)+"%" for x in objective_weights(profile).values())+
+                   ". As sugestões são geradas por regras Python, sem LLM.")
     sync_packages=st.session_state.get("explore_packages",{})
     if sync_packages!=p["packages"]:
         st.warning("Sua lista de atrações da aba Explorar atrações está diferente da versão do consultor.")
@@ -202,28 +205,43 @@ def render_advisor(trip_data:dict,sync_sources:dict)->None:
     context={"margin":Decimal(str(result["margin"])),"cap":Decimal(str(scenario["cap_brl"]))}
     risks=assess_plan(p,catalog,routes,context)
     advice=recommendations(p,catalog,routes,risks)
-    st.markdown("### Diagnóstico")
-    if not risks:st.success("Nenhum alerta nas regras atuais; ainda exige conferência de dados 2027.")
+    advice_cards=present_risks(risks,{k:v["name"] for k,v in bydest.items()})
+    st.markdown("### Sugestões para sua viagem")
+    st.caption(simple_next_step(p,advice_cards))
+    if not advice_cards:
+        st.success("Nenhum alerta nas regras atuais. Confirme horários e preços de 2027 antes de reservar.")
     else:
-        st.caption(f"{len(risks)} alertas fundamentados nos dados disponíveis")
-        for index,r in enumerate(risks):
-            with st.expander(f"{r['severity']} · {r['message']} — {r['affected']}",
-                             expanded=index<2):
-                st.write("**Ação sugerida:** "+r["resolution"])
-                if r["source"]:st.markdown("[Ver evidência]("+r["source"]+")")
-    if advice:
-        st.markdown("### Recomendações para avaliar")
-        for item in advice:
+        important=advice_cards[:4]
+        for item in important:
             with st.container(border=True):
-                st.markdown("**"+item["title"]+"**")
-                st.caption(item["reason"])
-                st.caption("Sugestão explicativa — não remove passeios automaticamente")
+                icon_text={"Orçamento":"💰","Transporte":"🚆",
+                           "Conforto":"🧳","Bilhetes":"🎟️"}.get(item["category"],"💡")
+                st.markdown(f"**{icon_text} {item['title']}**")
+                st.caption(item["destination"]+" · "+item["category"])
+                st.write(item["summary"])
+                st.markdown("**Sugestão:** "+item["suggestion"])
+                if item["confidence"]=="parcial":
+                    st.caption("Análise parcial · preços ou horários ainda não confirmados")
+                with st.expander("Entenda os dados desta recomendação"):
+                    st.write("Motivo registrado: "+next(
+                        (r["message"] for r in risks
+                         if item["id"]==r["code"]+":"+r["affected"]),item["summary"]))
+                    if item["source"]:
+                        st.markdown("[Consultar fonte]("+item["source"]+")")
+                    st.caption("Não altera o roteiro sem sua aprovação.")
+        if len(advice_cards)>len(important):
+            with st.expander(f"Ver mais {len(advice_cards)-len(important)} recomendações"):
+                for item in advice_cards[len(important):]:
+                    st.markdown(f"**{item['title']}** · {item['destination']}")
+                    st.write(item["summary"]+" "+item["suggestion"])
+                    if item["source"]:
+                        st.markdown("[Fonte]("+item["source"]+")")
     st.divider()
-    st.markdown("### Otimizar calendário")
+    st.markdown("### Organizar meus passeios")
     st.caption("O otimizador só aloca passeios de duração compatível e com tempo de trem "
                "conhecido ou locais. Alpes e conexões não pesquisadas ficam pendentes, "
                "não são colocados arbitrariamente em um dia.")
-    if st.button("Gerar propostas (sem alterar o roteiro)",key="advisor_generate",use_container_width=True):
+    if st.button("Encontrar uma organização melhor",key="advisor_generate",use_container_width=True):
         st.session_state["advisor_proposals"]=propose_schedule(p,catalog,routes,profile)
     props=st.session_state.get("advisor_proposals",[])
     for index,proposal in enumerate(props):
@@ -231,22 +249,27 @@ def render_advisor(trip_data:dict,sync_sources:dict)->None:
             st.warning("Proposta desatualizada após mudança no planejamento. Gere novamente.")
             break
         with st.container(border=True):
-            st.markdown(f"**Proposta {index+1}: {len(proposal['placed'])} passeios distribuídos**")
-            score=proposal["score"]
-            st.caption(f"Ranking relativo: {score['relative_score']:.1f} pontos · "
-                       f"{score['known_roundtrip_train_minutes']} min de trem ida/volta conhecidos · "
-                       f"{score['unscheduled']} excursões sem encaixe ou dados suficientes. "
-                       "Pontuação heurística, não custo ou tempo porta a porta.")
-            diff=[(day,dest) for day,dest in sorted(proposal["assignments"].items())
-                  if p["assignments"].get(day)!=dest]
+            comparison=proposal_comparison(p,proposal,cost)
+            st.markdown(f"**Opção {index+1} · organizar {len(proposal['placed'])} passeios**")
+            left,right=st.columns(2,gap="small")
+            with left:st.metric("Dias já planejados",comparison["existing_count"])
+            with right:st.metric("Dias com a sugestão",comparison["proposed_count"])
+            st.caption(comparison["claim"])
+            diff=[(item["date"],item["destination"]) for item in comparison["added"]]
             if diff:
+                st.markdown("**O que mudaria:**")
                 st.dataframe([{"Data":day,"Passeio":bydest[dest]["name"]}
                               for day,dest in diff],hide_index=True,use_container_width=True)
-            else:st.caption("Sem dias novos compatíveis.")
-            if proposal["unresolved"]:
-                st.warning(str(len(proposal["unresolved"]))+" pendências não agendadas: "+
+            else:st.caption("Esta opção não muda o calendário atual.")
+            if comparison["unresolved"]:
+                st.warning(str(comparison["unresolved_count"])+" passeio(s) ainda precisam de pesquisa: "+
                            "; ".join(x["destination"]+" — "+x["reason"]
-                                     for x in proposal["unresolved"]))
+                                     for x in comparison["unresolved"]))
+            with st.expander("Como comparamos esta opção"):
+                score=proposal["score"]
+                st.caption(f"Pontuação relativa: {score['relative_score']:.1f}. "
+                           f"Trem ida/volta conhecido: {score['known_roundtrip_train_minutes']} min. "
+                           "Não inclui deslocamento porta a porta ou tarifa 2027.")
             c1,c2=st.columns(2)
             with c1:
                 if st.button("Aprovar esta proposta",key=f"advisor_accept_{index}",
@@ -255,7 +278,7 @@ def render_advisor(trip_data:dict,sync_sources:dict)->None:
                     st.session_state["advisor_plan"]=updated
                     st.session_state["explore_calendar"]=deepcopy(updated["assignments"])
                     st.session_state.pop("advisor_proposals",None)
-                    st.success("Roteiro atualizado localmente. Grave no GitHub separadamente.")
+                    st.success("Sugestão aprovada! Seu planejamento tem alterações para salvar.")
                     st.rerun()
             with c2:
                 if st.button("Rejeitar",key=f"advisor_reject_{index}",use_container_width=True):
