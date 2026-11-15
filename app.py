@@ -25,6 +25,7 @@ from travel_advisor_ui import render_advisor, _recover_saved_plan, _secure_save,
 from travel_dashboard_ui import render_trip_dashboard
 from base_explorer_ui import render_base_explorer
 from base_scenario_model import base_options, choose_exploratory_base, hypothetical_city_name
+from base_scenario_ui import render_scenario_impact
 from planning_session import bootstrap as bootstrap_trip, active_plan, update_fields
 from planning_store import summary as planning_summary
 from planning_status import save_label
@@ -943,6 +944,8 @@ elif page == "Roteiro":
                 "Férias iniciais de 20–30 dias; depois trabalho remoto, sujeito a validação de regras.</div>",
                 unsafe_allow_html=True)
 
+    render_scenario_impact(active_plan(),data,
+                           sync_sources["finance"]["status"]=="live")
     sections=["Visão geral","Itália","Meus passeios","Explorar bases","Descobrir","Orçamento","Calendário","Simular roteiros","Guias e pesquisas"]
     itinerary_section=st.segmented_control("Área do roteiro",sections,default="Meus passeios",
                                            selection_mode="single",key="itinerary_section",
