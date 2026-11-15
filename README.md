@@ -168,3 +168,18 @@ Quando o proprietário autenticado abre **Roteiro → Consultor inteligente** nu
 A seção **Outros planos e histórico de revisões** agora permite selecionar outros roteiros versionados, ordenados pela última gravação registrada no GitHub. Carregar um plano restaura também a seleção de atrações e o calendário na sessão. Alterações que ainda não foram salvas não são sobrescritas automaticamente.
 
 Os arquivos existentes não são modificados pela recuperação; a escrita continua exigindo aprovação explícita e autenticação Google.
+
+
+## Nossa Europa UX 2.0 — Planejamento simples e consultor integrado
+
+A nova página **Minha viagem** mostra o status de salvamento, quantas atrações foram selecionadas e quantos dias do roteiro estão organizados. Use as ações **Escolher atrações**, **Melhorar meu roteiro** e **Ver orçamento** para continuar.
+
+**O plano é único:** `advisor_plan` é a fonte de verdade versionada; as páginas de atrações, calendário, consultor e orçamento lêem o mesmo conjunto de escolhas. O antigo processo de importar manualmente atrações no consultor foi eliminado. O orçamento usa bilhetes conhecidos como custos **parciais**, com proteção contra dupla contagem da rubrica de excursões.
+
+**Consultor:** apresenta recomendações prioritárias em cards, explica sua origem e compara as mudanças de data antes de permitir a aprovação. As alternativas são heurísticas Python, sem LLM e sem horários de transporte em tempo real.
+
+**Salvamento:** o botão **Salvar planejamento** usa a conta Google autorizada e a API GitHub server-side. Exportação/importação JSON e histórico ficam em opções avançadas. O plano não é alterado por simplesmente navegar ou visualizar recomendações. Salvamento automático é opcional, desativado por padrão e exige reconhecimento explícito da publicidade do repositório; recomenda-se não incluir dados pessoais no GitHub público.
+
+**Migração:** planos JSON antigos seguem válidos; seleção de atrações, datas e preferências são preservadas. O Drive continua fonte documental somente leitura.
+
+Documentação de arquitetura e UX: [UX_REDESIGN_2027.md](UX_REDESIGN_2027.md) · [Relatório completo dos 11 steps](RELATORIO_UX_NOSSA_EUROPA_2_0.md).
