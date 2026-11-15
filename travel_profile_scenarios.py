@@ -20,7 +20,8 @@ def build_profile_scenarios(plan:dict,catalog:dict,routes:dict,
     options=[]
     for profile in ("economy","balanced","experience"):
         suggestions=recommend_destinations(plan,catalog,routes,profile=profile,
-                                           allow_overnight=allow_overnight,limit=11)
+                                           allow_overnight=allow_overnight,limit=11,
+                                           eur_fx=eur_fx,chf_fx=chf_fx)
         # Existing chosen excursions cannot be silently removed.
         proposal=deepcopy(plan)
         proposal["profile"]=profile
