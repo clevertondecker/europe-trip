@@ -387,8 +387,34 @@ def _scenario_backups(plan:dict,options:list[dict])->None:
 
 
 def render_base_explorer(plan:dict,trip_data:dict,finance_live:bool,
-                         eurfx:float=6.3)->None:
+                         eurfx:float=6.3,focused:bool=False)->None:
     data=load_exploration()
+    if focused:
+        # One primary task per tab: research a candidate here, compare changes
+        # in Explorar → Comparar. Keep the old four study modes accessible
+        # from historical/advanced routes rather than stacking them here.
+        options=base_options(data)
+        names={item["id"]:_base_name(data,item["id"]) for item in options}
+        official=plan["base_city"]
+        candidate=st.session_state.get("scenario_base_selected",official)
+        if candidate not in names:
+            candidate=official
+        evidence=next(item for item in options if item["id"]==candidate)
+        st.markdown("### "+names[candidate])
+        st.caption("Base do planejamento: "+names[official]+
+                   " · Situação da pesquisa: "+evidence["research_status"]+
+                   " · Nenhuma seleção nesta tela altera o roteiro oficial.")
+        a,b,c=st.columns(3)
+        a.metric("Trechos pesquisados",evidence["routes"])
+        b.metric("Com tempo de trem",evidence["time_coverage"])
+        c.metric("Com tarifa histórica",evidence["fare_coverage"])
+        st.info("Para descobrir se essa cidade facilita seus passeios e como "
+                "afeta o orçamento, use **Explorar → Comparar**.")
+        with st.expander("Passeios e evidências ferroviárias",expanded=False):
+            _nearby(data,candidate)
+        _choose_base(data,plan,candidate)
+        _scenario_backups(plan,options)
+        return
     st.markdown("## Explorar cidades-base")
     st.caption("Compare corredores de viagem e cidades francesas antes de decidir. "
                "Todas as tarifas/tempos são referências de 2026; nenhuma passagem "
