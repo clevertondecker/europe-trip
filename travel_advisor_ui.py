@@ -308,6 +308,10 @@ def render_advisor(trip_data:dict,sync_sources:dict,workspace_area:str='Meus pas
                             validate_plan(new,set(byattr))
                             if any(x not in bydest for x in new["packages"]):
                                 raise ValueError("Destino inexistente")
+                            if any(byattr[attraction]["destination_id"]!=destination
+                                   for destination,ids in new["packages"].items()
+                                   for attraction in ids):
+                                raise ValueError("O backup contém uma atração em outra cidade")
                             st.session_state["advisor_plan"]=new
                             st.session_state["advisor_saved_snapshot"]=None
                             st.session_state["advisor_github_sha"]=None
