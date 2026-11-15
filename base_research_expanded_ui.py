@@ -66,9 +66,15 @@ def render_expanded_research()->None:
     if not candidates:
         st.info("Não há cidade nesta seleção.")
         return
-    selected=st.selectbox("Examinar evidências de uma cidade",list(candidates),
+    selected_ids=list(candidates)
+    suggested=st.session_state.get("scenario_base_selected")
+    selected=st.selectbox("Examinar evidências de uma cidade",selected_ids,
+                          index=selected_ids.index(suggested) if suggested in candidates else 0,
                           format_func=lambda id:candidates[id],
                           key="expanded_bases_detail_city")
+    st.session_state["scenario_base_selected"]=selected
+    st.caption("Cidade-base hipotética compartilhada com Comparar cidades e Orçamento. "
+               "Examinar uma candidata não muda o roteiro oficial.")
     c=find_city(study,selected)
     h=observed_housing(c)
     st.markdown("#### "+candidates[selected]+" · "+c["corridor"])
