@@ -228,3 +228,18 @@ As issues [#2](https://github.com/clevertondecker/europe-trip/issues/2), [#3](ht
 
 **Segurança:** edição e pré-visualização não alteram planos salvos. Aprovação explícita continua obrigatória. Nenhuma credencial, permissão, conteúdo do Drive ou arquivo de plano existente foi modificado por este trabalho. Detalhes de coordenação: [AGENTS_COORDINATION.md](AGENTS_COORDINATION.md).
 
+
+
+## Catálogo unificado de cidades-base (15/11/2026 · PR #29)
+
+A aplicação apresenta um **seletor exploratório global** independente da cidade-base aprovada em `TripPlan`. O catálogo utiliza as cidades da pesquisa ampliada (30 candidatas) e as fontes de rotas já documentadas. As páginas **Comparar cidades**, **Roteiro → Explorar bases**, **Pesquisa ampliada**, **Roteiro → Explorar atrações** e **Orçamento** recebem a seleção hipotética; todas as áreas do roteiro preservam os dados oficiais até uma aprovação explícita.
+
+- Em **Explorar bases** é possível comparar trajetos e a hipótese de uma ou duas cidades. Também é possível guardar rascunhos na sessão, exportar/importar JSON validado e consultar evidências históricas. **Isso não cria persistência privada automática entre dispositivos.**
+- **Offenburg → Strasbourg:** a amostra ferroviária documenta um trem mais rápido de 25 minutos e tarifa anunciada desde €13 por pessoa/trecho em 2026. Outras conexões, retorno e disponibilidade de 2027 não foram inferidos.
+- **Orçamento** permite introduzir aluguel mensal hipotético por cidade, substituindo a provisão correspondente sem duplicar custo. Dados faltantes continuam pendentes; um subtotal parcial não representa custo final.
+- **Atrações e consultor:** somente as quatro bases originais possuem matriz detalhada de atrações. Novas candidatas exibem limitações, não são promovidas automaticamente. Trocas no roteiro oficial requerem confirmação explícita; a seleção de base exploratória por si só nunca altera `TripPlan`.
+- O calendário e a etapa italiana continuam vinculados ao roteiro oficial. Os cenários são análises, **não cotações nem reservas confirmadas**.
+
+**Validação:** o GitHub Actions `Validate Streamlit app` concluiu com sucesso no commit do PR #29 (f7bc9ed56e9bbf4ca4eca961eedac4db37a62319), incluindo navegação pelo roteiro e testes de regressão. A visualização em navegador, os Secrets da instalação e o estado efetivo do deployment do Streamlit Community Cloud exigem verificação separada.
+
+**Pendências técnicas:** persistência remota privada com controle de acesso; cotações completas de 2027; novas rotas e tarifas comparáveis; interface de pré-aprovação de cidades fora das quatro bases originais; validação manual do site publicado. Não publicar rascunhos privados no repositório público.
