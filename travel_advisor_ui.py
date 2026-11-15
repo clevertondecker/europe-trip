@@ -14,6 +14,7 @@ from trip_plan_model import new_plan,validate_plan,with_revision,apply_proposal
 from trip_plan_repository import GitHubPlanRepository
 from advisor_auth import is_verified_owner
 from planning_store import create_from_legacy,change_plan,sync_legacy_view
+from catalog_plan_validation import validate_catalog_packages
 from planning_session import active_plan,update_fields,accept_approved_plan
 from planning_status import save_label,explain_storage_error,friendly_timestamp
 from advisor_finance import advisor_projection
@@ -306,12 +307,7 @@ def render_advisor(trip_data:dict,sync_sources:dict,workspace_area:str='Meus pas
                         try:
                             new=json.load(uploaded)
                             validate_plan(new,set(byattr))
-                            if any(x not in bydest for x in new["packages"]):
-                                raise ValueError("Destino inexistente")
-                            if any(byattr[attraction]["destination_id"]!=destination
-                                   for destination,ids in new["packages"].items()
-                                   for attraction in ids):
-                                raise ValueError("O backup contém uma atração em outra cidade")
+                            validate_catalog_packages(new,catalog)
                             st.session_state["advisor_plan"]=new
                             st.session_state["advisor_saved_snapshot"]=None
                             st.session_state["advisor_github_sha"]=None
