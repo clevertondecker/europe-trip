@@ -26,7 +26,7 @@ from travel_dashboard_ui import render_trip_dashboard
 from base_explorer_ui import render_base_explorer
 from base_scenario_model import base_options, choose_exploratory_base, hypothetical_city_name, expanded_rail_routes
 from base_research_expanded_model import load_research, find_city, observed_housing
-from base_scenario_ui import render_scenario_impact
+from base_scenario_ui import render_scenario_impact, sync_city_widget, set_city_from_widget
 from ux_navigation import (AREAS as UX_AREAS, SECTIONS as UX_SECTIONS, DESCRIPTIONS as UX_DESCRIPTIONS,
                            LEGACY_PAGES, LEGACY_ITINERARY, RESEARCH_OPTIONS, SUGGESTION_OPTIONS,
                            bootstrap as bootstrap_ux, apply as apply_ux,
@@ -648,12 +648,12 @@ elif page == "Comparar cidades":
     current_candidate=st.session_state.get("scenario_base_selected",active_plan()["base_city"])
     if current_candidate not in compare_names:
         current_candidate=active_plan()["base_city"]
+    sync_city_widget("compare_exploratory_base",list(compare_names))
     selected_candidate=st.selectbox(
         "Cidade-base hipotética compartilhada", list(compare_names),
         index=list(compare_names).index(current_candidate),
-        format_func=lambda k:compare_names[k],key="compare_exploratory_base")
-    st.session_state["scenario_base_selected"]=choose_exploratory_base(
-        selected_candidate,all_exploratory_bases)
+        format_func=lambda k:compare_names[k],key="compare_exploratory_base",
+        on_change=set_city_from_widget,args=("compare_exploratory_base",))
     st.caption("Seleção exploratória compartilhada com Explorar bases e Orçamento. "
                "As quatro cidades do comparador histórico continuam com métricas "
                "mais detalhadas; outras cidades podem não ter cotações equivalentes.")
@@ -1424,7 +1424,13 @@ elif page == "Orçamento":
         format_func=lambda x:f"R$ {x[:-1]} mil", key="unified_scenario",selection_mode="single")
     scenario_id = scenario_id or "70k"
     if scenario_id!=active_plan()["budget_scenario"]:
-        update_fields(budget_scenario=scenario_id)
+        st.info("Teto selecionado apenas para esta simulação. "
+                "O teto do planejamento oficial permanece em R$ "+
+                active_plan()["budget_scenario"][:-1]+" mil.")
+        if st.session_state.get("ux_mode")=="Oficial":
+            if st.button("Confirmar alteração do teto oficial",key="budget_cap_confirm"):
+                update_fields(budget_scenario=scenario_id)
+                st.rerun()
     scenario = get_scenario(data,scenario_id)
     baseline = calculate_scenario(scenario)
     french = resolve_french_budget(scenario,live_finance)
@@ -1455,13 +1461,10 @@ elif page == "Orçamento":
         candidate=st.session_state.get("scenario_base_selected",active_plan()["base_city"])
         if candidate not in city_ids:
             candidate=active_plan()["base_city"]
-        selected_base_id=st.selectbox(
-            "Cidade-base hipotética",city_ids,index=city_ids.index(candidate),
-            format_func=lambda k:hypothetical_city_name(k,exploratory_options),
-            key="budget_exploratory_base")
-        st.session_state["scenario_base_selected"]=choose_exploratory_base(
-            selected_base_id,exploratory_options)
+        selected_base_id=candidate
         selected_city=hypothetical_city_name(selected_base_id,exploratory_options)
+        st.markdown("**Cidade-base nesta análise:** "+selected_city)
+        st.caption("Use o seletor de cidade no cabeçalho para comparar outra base.")
     st.caption("Esta cidade é uma simulação independente. "
                "O roteiro oficial permanece em "+active_plan()["base_city"].capitalize()+
                ". A ausência de aluguel pesquisado não significa custo zero.")
