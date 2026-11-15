@@ -17,6 +17,7 @@ def new_plan(base="mulhouse",departure="2027-09-09",profile="balanced")->dict:
           "total_days":70,"italy_days":10,"vacation_days":25,"setup_days":4,
           "budget_scenario":"70k","profile":profile,"mandatory_destinations":[],
           "excluded_destinations":[],"packages":{},"assignments":{},
+          "preferences":{},
           "accepted_recommendations":[],"rejected_recommendations":[],
           "source_versions":{"attractions":"2026-11-14","routes":"2026-11-14"}}
     validate_plan(plan)
@@ -39,6 +40,11 @@ def validate_plan(plan:dict,known_attractions:set[str]|None=None)->None:
         raise ValueError("Férias/instalação inválidas")
     if plan["vacation_days"]<=plan["italy_days"]+plan["setup_days"]:
         raise ValueError("Férias insuficientes")
+    preferences=plan.get("preferences",{})
+    if not isinstance(preferences,dict) or any(
+        not isinstance(k,str) or v not in {"Quero visitar","Opcional","Descartar"}
+        for k,v in preferences.items()):
+        raise ValueError("Preferências de atrações inválidas")
     packages=plan.get("packages")
     if not isinstance(packages,dict) or not all(isinstance(v,list) for v in packages.values()):
         raise ValueError("Passeios inválidos")
