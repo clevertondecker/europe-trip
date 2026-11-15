@@ -15,14 +15,14 @@ class FullItineraryNavigationTests(unittest.TestCase):
         at.segmented_control(key="ux_mode").set_value("Simulação").run()
         at.selectbox(key="scenario_sidebar").set_value("offenburg").run()
         at.radio(key="ux_area").set_value("Meu roteiro").run()
-        for area in ("Visão geral","Itália","França","Calendário","Sugestões"):
+        for area in ("Meu planejamento","Organizar viagem","Melhorar meu roteiro"):
             with self.subTest(area=area):
                 at.segmented_control(key="ux_section").set_value(area).run()
                 self.assertFalse(at.exception,[e.message for e in at.exception])
                 self.assertEqual(at.session_state["advisor_plan"]["base_city"],official)
                 self.assertEqual(at.session_state["scenario_base_selected"],"offenburg")
-        at.segmented_control(key="ux_section").set_value("Sugestões").run()
-        at.segmented_control(key="ux_suggestion").set_value("Guias especializados").run()
+        at.segmented_control(key="ux_section").set_value("Melhorar meu roteiro").run()
+        at.selectbox(key="ux_improve_view").set_value("Guias especializados").run()
         for guide in GUIDES:
             with self.subTest(guide=guide):
                 at.selectbox(key="ux_guide_view").set_value(guide).run()
