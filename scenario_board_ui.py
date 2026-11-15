@@ -10,6 +10,10 @@ from scenario_editor_model import (new_board,is_stale,change_board,undo_board,
                                   reprice_board,board_to_approval)
 from recommended_itineraries import approve_profile_scenario
 from planning_session import accept_approved_plan
+from finance_margin_metrics import calculate_excursion_margin
+from finance_margin_ui import render_finance_margin_summary
+from outing_cost_evidence import load_outing_evidence,evidence_for_outing
+from draft_controls_ui import render_draft_controls
 
 def _currency(eur:float,chf:float)->str:
     return f"€ {eur:,.2f}  ·  CHF {chf:,.2f}"
@@ -59,6 +63,17 @@ def _render_destination(profile:str,board:dict,row:dict,catalog:dict):
             else:
                 st.write("Nenhuma tarifa ou entrada paga confirmada neste subtotal.")
             for missing in row["missing"]:st.caption("Pendente: "+str(missing))
+            evidence=evidence_for_outing(
+                key,[a["id"] for a in row["attractions"]],st.session_state.get("outing_evidence_data"))
+            if evidence["pending"]:
+                st.caption("Outras despesas que ainda precisam de pesquisa:")
+                for item in evidence["pending"]:
+                    category={"local_transport":"Transporte urbano",
+                              "dining":"Refeições durante o passeio",
+                              "extra_hotel":"Hospedagem adicional",
+                              "intercity_return":"Confirmação de volta",
+                              "ticket":"Ingresso","other":"Outros custos"}.get(item["category"],item["category"])
+                    st.caption("• "+category+": não cotado para 2027")
             for conditional in row["conditional"]:st.caption("Condição: "+str(conditional))
             st.caption("Alimentação, transporte urbano e hospedagem extra: somente "
                        "quando houver valor específico pesquisado; não assumir zero.")
@@ -103,6 +118,11 @@ def render_scenario_boards(plan:dict,scenarios:list[dict],catalog:dict,routes:di
                      key="scenario_reset_stale_"+profile):
             _update(profile,new_board(plan,scenario))
         return
+    # Loading supplemental evidence does not alter the official plan or prices.
+    st.session_state["outing_evidence_data"]=load_outing_evidence(catalog=catalog)
+    restored=render_draft_controls(board,plan,catalog,profile=profile)
+    if restored is not None:
+        _update(profile,restored)
     sim=reprice_board(board,plan,catalog,routes,trip_data,source_live,
                       eurfx,chffx,use_city_rent)
     totals=sim["finance"]["result"]
@@ -121,6 +141,10 @@ def render_scenario_boards(plan:dict,scenarios:list[dict],catalog:dict,routes:di
                "A projeção pode não mudar ao remover um passeio que já cabia na provisão.")
     st.caption(f"Projeção geral com rubricas provisionadas: R$ {totals['total']:,.0f}. "
                "Valores históricos: não são preço final para 2027.")
+    margin_metrics=calculate_excursion_margin(
+        sim["finance"],details["total"]["known_by_currency"],eurfx,chffx,
+        details["total"]["missing"])
+    render_finance_margin_summary(margin_metrics,profile=profiles[profile]["label"])
     if details["total"]["missing"]:
         st.warning(f"{len(details['total']['missing'])} componentes ainda sem preço completo. "
                    "Não interpretar o subtotal como custo total.")
