@@ -29,7 +29,14 @@ def _financial_snapshot(plan,catalog,routes,trip_data,live,eurfx,chffx,use_city_
 
 
 def _go_to_my_outings():
-    st.session_state["itinerary_section"]="Meus passeios"
+    from ux_navigation import set_task
+    state=st.session_state
+    destination=state.get("discovery_last_destination")
+    state["flow_active_stage"]="França"
+    state["flow_stage"]="França"
+    if destination:
+        state["flow_active_destination"]=destination
+    set_task(state,"Meu roteiro","Meu planejamento")
 
 
 def _render_suggestion(rec,plan,catalog,routes,trip_data,live,eurfx,chffx,use_city_rent):
@@ -94,6 +101,7 @@ def _render_suggestion(rec,plan,catalog,routes,trip_data,live,eurfx,chffx,use_ci
                         st.session_state["discovery_last_added"]={
                             "name":rec["name"],"destination_id":rec["destination_id"],
                             "before":before,"after":after}
+                        st.session_state["discovery_last_destination"]=rec["destination_id"]
                         st.rerun()
                     except ValueError as exc:
                         st.error("Não foi possível adicionar o passeio: "+str(exc))
