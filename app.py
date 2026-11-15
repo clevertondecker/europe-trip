@@ -1305,14 +1305,22 @@ elif page == "Orçamento":
         st.info("Aluguel mobiliado desta cidade: não cotado. "
                 "O orçamento abaixo mantém a provisão oficial de hospedagem "
                 "e não a apresenta como preço desta cidade.")
-    use_city_rent = st.checkbox("Simular aluguel pela referência histórica da cidade",
-                                value=False,key="unified_override_rent",
-                                disabled=selected_rent is None)
+    use_city_rent = st.checkbox("Informar aluguel mensal hipotético para esta cidade",
+                                value=False,key="unified_override_rent")
     quoted_rent = None
-    if use_city_rent and selected_rent is not None:
-        quoted_rent = st.number_input("Aluguel hipotético (€ por mês, sem taxas)",
-                                      min_value=0.,max_value=6000.,value=selected_rent,step=50.,
-                                      key="unified_rent_month")
+    if use_city_rent:
+        input_rent=st.number_input(
+            "Aluguel hipotético (€ por mês, sem taxas)",
+            min_value=0.,max_value=6000.,
+            value=selected_rent if selected_rent is not None else 0.,
+            step=50.,key="unified_rent_month_"+selected_base_id)
+        if input_rent>0:
+            quoted_rent=float(input_rent)
+            st.caption("Provisão inserida manualmente. Não é uma cotação "
+                       "confirmada para setembro–novembro de 2027.")
+        else:
+            st.warning("Informe um aluguel maior que €0 para substituição. "
+                       "Até lá, a verba geral do orçamento permanece como provisão.")
     with st.expander("Alterações adicionais às outras verbas"):
         st.caption("Ajustes negativos representam economia. Nenhuma despesa final "
                    "pode ficar abaixo de zero; os valores continuam hipóteses.")
