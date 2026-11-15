@@ -82,8 +82,8 @@ class GitHubPlanRepository:
             old,actual_sha=existing
             if expected_sha!=actual_sha:
                 raise ValueError("Repository changed: load latest before saving")
-            if plan["revision"]!=old["revision"]+1:
-                raise ValueError("Revision must advance exactly once")
+            if plan["revision"]<=old["revision"]:
+                raise ValueError("Revision must be greater than the stored plan revision")
         encoded=base64.b64encode(
             (json.dumps(plan,ensure_ascii=False,indent=2)+"\n").encode("utf-8")).decode("ascii")
         payload={"message":"Update travel plan "+plan["plan_id"]+" r"+str(plan["revision"]),
