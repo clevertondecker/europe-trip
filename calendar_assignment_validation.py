@@ -10,13 +10,17 @@ from datetime import date
 from calendar_model import calendar_plan
 
 
-def validate_new_assignments(plan:dict, assignments:dict)->None:
+def validate_new_assignments(plan:dict, assignments:dict, *,
+                             previously_approved:dict|None=None)->None:
     if not isinstance(assignments,dict):
         raise ValueError("Datas de passeios inválidas")
     schedule={row["date"]:row for row in calendar_plan(
         date.fromisoformat(plan["departure_date"]),plan["total_days"],
         plan["italy_days"],plan["vacation_days"],plan["setup_days"])}
+    approved=previously_approved or {}
     for day,dest in assignments.items():
+        if approved.get(day)==dest:
+            continue  # Preserve load/edit compatibility with older saved plans.
         if not isinstance(day,str) or day not in schedule:
             raise ValueError("Passeio fora das datas da viagem")
         if dest not in plan["packages"] or not plan["packages"][dest]:
