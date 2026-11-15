@@ -11,12 +11,10 @@ class AdvisorUISmoke(unittest.TestCase):
         app.segmented_control(key="itinerary_section").set_value("Consultor inteligente").run()
         self.assertEqual(len(app.exception),0,[x.message for x in app.exception])
         original=app.session_state["advisor_plan"]["revision"]
-        app.button(key="advisor_generate").click().run()
-        self.assertEqual(len(app.exception),0,[x.message for x in app.exception])
+        # A plan without selected attractions must show discovery, not fake options.
+        self.assertIsNone(app.button(key="advisor_generate"))
+        self.assertIsNotNone(app.button(key="advisor_discover_add_colmar"))
         self.assertEqual(app.session_state["advisor_plan"]["revision"],original)
-        if app.button(key="advisor_reject_0"):
-            app.button(key="advisor_reject_0").click().run()
-            self.assertEqual(app.session_state["advisor_plan"]["revision"],original)
         app.selectbox(key="advisor_base").set_value("strasbourg").run()
         self.assertEqual(len(app.exception),0,[x.message for x in app.exception])
         self.assertEqual(app.session_state["advisor_plan"]["base_city"],"strasbourg")
