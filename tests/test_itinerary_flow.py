@@ -104,6 +104,7 @@ class FlexibleVisitModelTests(unittest.TestCase):
         self.assertEqual(scheduled["flexible_visits"][0]["exact_date"],"2027-09-11")
         self.assertEqual(selected_rows(scheduled,self.catalog)[0]["exact_dates"],
                          ["2027-09-11"])
+        self.assertEqual(choice_counts(scheduled,self.catalog)["organized"],1)
         with self.assertRaises(ValueError):
             schedule_italy_day(plan,self.catalog,"italy_amalfi","2027-10-12")
         unchanged=upsert_choice(scheduled,self.catalog,"italy_amalfi",
