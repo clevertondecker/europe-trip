@@ -183,7 +183,9 @@ def render_advisor(trip_data:dict,sync_sources:dict,workspace_area:str='Meus pas
         p,st.session_state.get("advisor_saved_snapshot"),
         _owner_signed_in())
     st.caption(f"**{saved_label}** · {saved_hint}")
-    st.caption(f"**{bydest[p['base_city']]['name']} · {{'economy':'Econômico','balanced':'Equilibrado','experience':'Aproveitar ao máximo'}[p['profile']]} · R$ {p['budget_scenario'][:-1]} mil · {len(p['packages'])} destinos · {saved_label}**")
+    profile_name={"economy":"Econômico","balanced":"Equilibrado",
+                  "experience":"Aproveitar ao máximo"}[p["profile"]]
+    st.caption(f"**{bydest[p['base_city']]['name']} · {profile_name} · R$ {p['budget_scenario'][:-1]} mil · {len(p['packages'])} destinos · {saved_label}**")
     if st.session_state.get("advisor_last_saved_at"):
         st.caption("Último salvamento: "+
                    friendly_timestamp(st.session_state["advisor_last_saved_at"]))
