@@ -141,9 +141,15 @@ def render_scenario_boards(plan:dict,scenarios:list[dict],catalog:dict,routes:di
                "A projeção pode não mudar ao remover um passeio que já cabia na provisão.")
     st.caption(f"Projeção geral com rubricas provisionadas: R$ {totals['total']:,.0f}. "
                "Valores históricos: não são preço final para 2027.")
+    supplemental_pending=[
+        item["category"]+" · "+row["destination"]["name"]
+        for row in details["rows"]
+        for item in evidence_for_outing(
+            row["destination_id"],[a["id"] for a in row["attractions"]],
+            st.session_state["outing_evidence_data"])["pending"]]
     margin_metrics=calculate_excursion_margin(
         sim["finance"],details["total"]["known_by_currency"],eurfx,chffx,
-        details["total"]["missing"])
+        details["total"]["missing"]+supplemental_pending)
     render_finance_margin_summary(margin_metrics,profile=profiles[profile]["label"])
     if details["total"]["missing"]:
         st.warning(f"{len(details['total']['missing'])} componentes ainda sem preço completo. "
