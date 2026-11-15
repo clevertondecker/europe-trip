@@ -170,3 +170,32 @@ def selected_trip_research(plan:dict,catalog:dict,routes:dict,
             "priced_subtotal_brl":round(float(subtotal),2),
             "full_coverage":bool(parts) and not unpriced,
             "not_comparable_to_global_budget_directly":True}
+
+
+def compare_city_bases(plan:dict,catalog:dict,routes:dict,
+                       eur_fx:float,chf_fx:float,
+                       data:dict|None=None)->list[dict]:
+    """Compare unchanged official outings across four bases, preserving unknowns."""
+    from attractions_model import route_for
+    source=data if data is not None else load_research()
+    result=[]
+    for base in ("mulhouse","strasbourg","metz","nancy"):
+        draft={**plan,"base_city":base}
+        budget=selected_trip_research(draft,catalog,routes,eur_fx,chf_fx,source)
+        minutes=0;missing_routes=[]
+        for destination in draft["packages"]:
+            if destination==base:continue
+            travel=route_for(routes,base,destination)
+            one_way=travel["train_minutes_one_way"]
+            if one_way is None:missing_routes.append(destination)
+            else:minutes+=one_way*2
+        result.append({
+            "base":base,"known_train_roundtrip_minutes":minutes,
+            "unknown_duration_destinations":missing_routes,
+            "researched_partial_brl":budget["priced_subtotal_brl"],
+            "priced_outings":budget["priced_count"],
+            "total_outings":budget["total_count"],
+            "unpriced_outings":budget["unpriced_destinations"],
+            "not_full_cost":True
+        })
+    return result
