@@ -95,6 +95,11 @@ def _map(model: dict) -> None:
     st.pydeck_chart(deck, height=340, width="stretch")
 
 
+def _navigate(section: str) -> None:
+    """Widget callbacks run before Streamlit re-instantiates segmented navigation."""
+    st.session_state["itinerary_section"] = section
+
+
 def render_trip_dashboard(plan: dict, trip_data: dict, finance_live: bool,
                           saved_snapshot: dict | None, signed_in: bool,
                           eurfx: float = 6.3, chffx: float = 7.1,
@@ -159,18 +164,15 @@ def render_trip_dashboard(plan: dict, trip_data: dict, finance_live: bool,
                    ". Aluguel e bilhetes usam referências históricas.")
         if margin < 0:
             st.error("A projeção atual está acima do teto escolhido.")
-        if st.button("Ajustar orçamento →", key="dashboard_go_budget",
-                     use_container_width=True):
-            st.session_state["itinerary_section"] = "Orçamento"
-            st.rerun()
+        st.button("Ajustar orçamento →", key="dashboard_go_budget",
+                  use_container_width=True,on_click=_navigate,args=("Orçamento",))
 
     st.markdown("### Lugares que escolhemos")
     if not model["destinations"]:
         st.info("Ainda não há passeios aprovados. Explore destinos e adicione "
                 "os que fazem sentido para sua viagem.")
-        if st.button("Descobrir destinos →",key="dashboard_go_discover"):
-            st.session_state["itinerary_section"] = "Descobrir"
-            st.rerun()
+        st.button("Descobrir destinos →",key="dashboard_go_discover",
+                  on_click=_navigate,args=("Descobrir",))
     else:
         cards = model["destinations"][:6]
         for index in range(0, len(cards), 3):
@@ -190,9 +192,7 @@ def render_trip_dashboard(plan: dict, trip_data: dict, finance_live: bool,
                             st.write(" · ".join(item["attractions"][:2]))
         if len(model["destinations"]) > len(cards):
             st.caption(f"+ {len(model['destinations'])-len(cards)} destinos no planejamento")
-        if st.button("Editar meus passeios →",key="dashboard_go_outings",
-                     use_container_width=True):
-            st.session_state["itinerary_section"] = "Meus passeios"
-            st.rerun()
+        st.button("Editar meus passeios →",key="dashboard_go_outings",
+                  use_container_width=True,on_click=_navigate,args=("Meus passeios",))
     st.caption("Informações do catálogo pesquisado em 2026. Disponibilidade, "
                "tarifas e condições de 2027 precisam de confirmação.")
