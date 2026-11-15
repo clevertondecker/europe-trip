@@ -25,6 +25,7 @@ from travel_advisor_ui import render_advisor, _recover_saved_plan, _secure_save,
 from travel_dashboard_ui import render_trip_dashboard
 from base_explorer_ui import render_base_explorer, _comparison as render_route_comparison, _split_stay as render_split_stay
 from base_change_ui import render_base_change
+from base_weight_coverage_ui import render_weight_coverage
 from budget_sections_ui import render_budget_summary, render_budget_details
 from base_scenario_model import base_options, choose_exploratory_base, hypothetical_city_name, expanded_rail_routes
 from base_research_expanded_model import load_research, find_city, observed_housing
@@ -724,13 +725,15 @@ elif page == "Comparar cidades":
     st.markdown("## Comparar cidades-base")
     st.caption("Primeiro compare o impacto da troca, depois consulte as pesquisas históricas.")
     compare_mode=st.segmented_control(
-        "Tipo de análise",["Impacto da troca","Comparar mesmas viagens",
-        "Uma ou duas bases","Estudo histórico"],
+        "Tipo de análise",["Impacto da troca","Pesos das 30 cidades",
+        "Comparar mesmas viagens","Uma ou duas bases","Estudo histórico"],
         key="ux_compare_mode",selection_mode="single")
     if compare_mode in ("Impacto da troca",None):
         render_base_change(active_plan(),data,
                            sync_sources["finance"]["status"]=="live",
                            int(st.session_state.get("ux_days_value",60)))
+    elif compare_mode=="Pesos das 30 cidades":
+        render_weight_coverage()
     elif compare_mode=="Comparar mesmas viagens":
         render_route_comparison(load_exploration())
     elif compare_mode=="Uma ou duas bases":
