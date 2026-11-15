@@ -45,8 +45,10 @@ class HomeContextTests(unittest.TestCase):
         self.assertEqual(at.session_state["advisor_plan"]["base_city"],initial)
         at.radio(key="ux_area").set_value("Orçamento").run()
         self.assertFalse(at.exception,[x.message for x in at.exception])
-        self.assertIn("ux_mode",{x.key for x in at.segmented_control})
-        self.assertIn("ux_days",{x.key for x in at.number_input})
+        # The budget reuses scenario context instead of duplicating controls.
+        self.assertNotIn("ux_mode",{x.key for x in at.segmented_control})
+        self.assertNotIn("ux_days",{x.key for x in at.number_input})
+        self.assertEqual(at.session_state["ux_mode_value"],"Oficial")
 
 
 if __name__=="__main__":
