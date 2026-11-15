@@ -6,6 +6,7 @@ from destination_recommender import recommend_destinations
 from travel_profile_scenarios import build_profile_scenarios
 from recommended_itineraries import approve_destination,reject_destination,approve_profile_scenario
 from planning_session import accept_approved_plan
+from destination_labels import place_label, country_flag
 from attractions_model import package_cost
 from advisor_finance import advisor_projection
 from scenario_board_ui import render_scenario_boards
@@ -38,7 +39,7 @@ def _render_suggestion(rec,plan,catalog,routes,trip_data,live,eurfx,chffx,use_ci
                 st.image(photo["url"],use_container_width=True)
                 st.caption("Imagem: "+photo.get("author","")+" · "+photo.get("license",""))
         with detail:
-            st.markdown("#### "+rec["name"]+" · "+rec["country"])
+            st.markdown("#### "+place_label(rec["name"],rec["country"],show_country=True))
             minutes=rec["train_minutes_one_way"]
             st.caption("Partida: "+str(rec["base_city"]).capitalize()+" · "+
                        rec["trip_type"]+" · "+(
