@@ -63,7 +63,7 @@ def render_explorer(trip_data: dict, sync_sources: dict, map_view) -> None:
     # The exploratory city is shared with the comparison and finance pages.
     # The attractions route matrix currently supports four official bases only.
     from base_scenario_model import base_options, hypothetical_city_name
-    from base_scenario_ui import sync_city_widget, set_city_from_widget
+    from exploratory_selection import sync_city_widget, set_city_from_widget
     options=base_options()
     ids=[entry["id"] for entry in options]
     candidate=st.session_state.get("scenario_base_selected",active_plan()["base_city"])
