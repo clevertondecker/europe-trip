@@ -49,6 +49,7 @@ class RouteBaseDiscoveryTests(unittest.TestCase):
         app.radio(key="main_navigation").set_value("Roteiro").run()
         app.segmented_control(key="itinerary_section").set_value("Descobrir").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
+        app.text_input(key="workspace_destination_search").set_value("Colmar").run()
         text=" ".join(x.value for x in list(app.caption)+list(app.info))
         self.assertIn("Cidade-base",text)
         self.assertIn("Mulhouse",text)
