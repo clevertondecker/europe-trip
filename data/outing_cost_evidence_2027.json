@@ -66,11 +66,11 @@
       "currency": "EUR",
       "unit": "couple",
       "status": "unknown",
-      "source_url": null,
-      "verified_at": null,
+      "source_url": "https://www.cts-strasbourg.eu/en/buy/our-tickets/occasional-tickets/single-ticket/",
+      "verified_at": "2026-11-15",
       "validity_period": null,
       "confidence": "unknown",
-      "notes": "Não há preço completo verificável para o casal no período de 2027; não considerar gratuito."
+      "notes": "A CTS publica bilhete avulso e opções de passe, mas a quantidade de deslocamentos do casal ainda não foi definida; valor total para o passeio permanece desconhecido."
     },
     {
       "destination_id": "strasbourg",
@@ -398,15 +398,15 @@
       "destination_id": "luxembourg",
       "attraction_id": null,
       "category": "local_transport",
-      "amount": null,
+      "amount": 0,
       "currency": "EUR",
       "unit": "couple",
-      "status": "unknown",
-      "source_url": null,
-      "verified_at": null,
-      "validity_period": null,
-      "confidence": "unknown",
-      "notes": "Não há preço completo verificável para o casal no período de 2027; não considerar gratuito."
+      "status": "official_published",
+      "source_url": "https://www.vdl.lu/en/getting-around/bus/routes-and-maps/free-public-transport-and-exceptions",
+      "verified_at": "2026-11-15",
+      "validity_period": "Public transport within Luxembourg; 2nd class, as checked 2026-11-15. Recheck for 2027.",
+      "confidence": "official",
+      "notes": "Gratuito para ônibus, tram e trem de 2ª classe no território luxemburguês. Não inclui trem internacional, primeira classe ou transporte por táxi."
     },
     {
       "destination_id": "luxembourg",
