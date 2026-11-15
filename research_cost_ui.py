@@ -11,7 +11,9 @@ def money(v:float)->str:
 
 def render_researched_outing(guide:dict,eurfx:float,chffx:float,
                             *,prefix:str)->None:
-    data=outing_research_snapshot(guide,eurfx,chffx)
+    band={"economy":"low","balanced":"median","experience":"high"}.get(
+        guide.get("profile","balanced"),"median")
+    data=outing_research_snapshot(guide,eurfx,chffx,meal_band=band)
     with st.expander("Pesquisa de preços: refeições, transporte e cenários (nov/2026)"):
         st.caption("Dados publicados consultados em "+data["checked_at"]+
                    ". Amostra pequena de restaurantes, não média da cidade. "
@@ -83,6 +85,11 @@ def render_researched_outing(guide:dict,eurfx:float,chffx:float,
             st.caption("Não há tarifa de transporte urbano pesquisada para este destino.")
 
         st.markdown("**Quanto daria um passeio com um almoço?**")
+        st.caption("Referência escolhida do cardápio observado: "+
+                   {"low":"menor preço (Econômico)",
+                    "median":"mediana da amostra (Equilibrado)",
+                    "high":"maior preço (Aproveitar ao máximo)"}[band]+
+                   ". O perfil define qual exemplo usar, não um multiplicador.")
         example=data["lunch_plus_rail_and_known_tickets_brl"]
         if example is None:
             st.warning("Sem subtotal combinável confiável: falta a tarifa normal "
@@ -133,9 +140,12 @@ def render_research_profiles(plan:dict,scenarios:list[dict],catalog:dict,
                    "quando pesquisado. NÃO incorpora automaticamente à projeção.")
         table=[]
         for option in scenarios:
-            pseudo={**plan,"packages":option["proposal_packages"]}
+            pseudo={**plan,"profile":option["profile"],
+                    "packages":option["proposal_packages"]}
             result=selected_trip_research(pseudo,catalog,routes,eurfx,chffx)
             table.append({"Estilo":option["label"],
+                          "Almoço observado usado":{"economy":"menor",
+                            "balanced":"mediana","experience":"maior"}[option["profile"]],
                           "Passeios":result["total_count"],
                           "Com referências combináveis":result["priced_count"],
                           "Soma parcial em R$":result["priced_subtotal_brl"],
