@@ -104,16 +104,17 @@ class BaseExplorerModelTests(unittest.TestCase):
 class BaseExplorerUITests(unittest.TestCase):
     def open_explorer(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=100).run()
-        app.radio(key="main_navigation").set_value("Roteiro").run()
-        app.segmented_control(key="itinerary_section").set_value("Explorar bases").run()
+        app.radio(key="ux_area").set_value("Explorar").run()
+        app.segmented_control(key="ux_mode").set_value("Simulação").run()
+        app.segmented_control(key="ux_section").set_value("Cidades-base").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
         return app
 
     def test_exploring_new_city_does_not_modify_official_plan(self):
         app=self.open_explorer()
         original=deepcopy(app.session_state["advisor_plan"])
-        self.assertIn("base_explorer_city",{x.key for x in app.selectbox})
-        app.selectbox(key="base_explorer_city").set_value("lille").run()
+        self.assertIn("scenario_sidebar",{x.key for x in app.selectbox})
+        app.selectbox(key="scenario_sidebar").set_value("lille").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
         self.assertEqual(app.session_state["advisor_plan"],original)
         self.assertNotIn("base_explore_apply",{x.key for x in app.button})
@@ -125,7 +126,7 @@ class BaseExplorerUITests(unittest.TestCase):
     def test_existing_base_must_be_explicitly_approved(self):
         app=self.open_explorer()
         original=deepcopy(app.session_state["advisor_plan"])
-        app.selectbox(key="base_explorer_city").set_value("strasbourg").run()
+        app.selectbox(key="scenario_sidebar").set_value("strasbourg").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
         self.assertTrue(app.button(key="base_explore_apply").disabled)
         self.assertEqual(app.session_state["advisor_plan"],original)
@@ -140,12 +141,13 @@ class BaseExplorerUITests(unittest.TestCase):
     def test_comparison_and_split_modes_leave_plan_untouched(self):
         app=self.open_explorer()
         old=deepcopy(app.session_state["advisor_plan"])
-        app.segmented_control(key="base_explorer_mode").set_value(
+        app.segmented_control(key="ux_section").set_value("Comparar").run()
+        app.segmented_control(key="ux_compare_mode").set_value(
             "Comparar mesmas viagens").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
         self.assertIn("base_compare_destinations",{x.key for x in app.multiselect})
         self.assertEqual(app.session_state["advisor_plan"],old)
-        app.segmented_control(key="base_explorer_mode").set_value(
+        app.segmented_control(key="ux_compare_mode").set_value(
             "Uma ou duas bases").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
         self.assertIn("base_stay_rent_first",{x.key for x in app.number_input})
