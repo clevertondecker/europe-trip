@@ -58,7 +58,9 @@ DESCRIPTIONS = {
 
 
 def route(area: str, section: str, *, research: str = "Pesquisa ampliada",
-          suggestion: str = "Descobrir", france: str = "Meus passeios"
+          suggestion: str = "Descobrir", france: str = "Meus passeios",
+          city_view: str = "Visão da cidade",
+          budget_view: str = "Simulação geral"
           ) -> tuple[str, str | None, str | None, str | None]:
     """Map the 15 task tabs into existing page modules."""
     section = TASK_ALIASES.get((area, section), section)
@@ -74,8 +76,12 @@ def route(area: str, section: str, *, research: str = "Pesquisa ampliada",
             return "Mapa & destinos", None, None, None
         if section == "Passeios":
             return "Roteiro", "Guias e pesquisas", "Explorar atrações", None
-        return "Roteiro", "Explorar bases", None, "Destinos próximos"
+        return ("Roteiro","Explorar bases",None,
+                "Pesquisa ampliada" if city_view=="Pesquisa ampliada"
+                else "Destinos próximos")
     if area == "Orçamento":
+        if section == "Simulações" and budget_view == "Consultor de passeios":
+            return "Roteiro", "Orçamento", None, None
         return "Orçamento", None, None, None
     if section == "Visão geral":
         return "Roteiro", "Visão geral", None, None
@@ -140,8 +146,10 @@ def apply(state) -> tuple[str, str | None, str | None, str | None]:
     research = state.get("ux_research", RESEARCH_OPTIONS[0])
     suggestion = state.get("ux_suggestion", SUGGESTION_OPTIONS[0])
     france = state.get("ux_france_view", "Meus passeios")
+    city_view = state.get("ux_city_view","Visão da cidade")
+    budget_view = state.get("ux_budget_view","Simulação geral")
     target = route(area, section, research=research, suggestion=suggestion,
-                   france=france)
+                   france=france,city_view=city_view,budget_view=budget_view)
     page, itinerary, guide, base_mode = target
     state["main_navigation"] = page
     if itinerary is not None:
@@ -216,6 +224,12 @@ def set_from_legacy(state, page: str,
         state["ux_france_view"] = guide
     if itinerary == "Meus passeios":
         state["ux_france_view"] = "Meus passeios"
+    if itinerary == "Explorar bases":
+        state["ux_city_view"]=("Pesquisa ampliada" if
+            state.get("base_explorer_mode")=="Pesquisa ampliada"
+            else "Visão da cidade")
+    if itinerary == "Orçamento":
+        state["ux_budget_view"]="Consultor de passeios"
     if itinerary == "Explorar bases" and state.get("base_explorer_mode") == "Pesquisa ampliada":
         state["ux_research"] = "Pesquisa ampliada"
         state["ux_section"] = "Cidades-base"
