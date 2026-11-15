@@ -19,7 +19,50 @@ def _name(key:str,names:dict)->str:
 
 
 def _go_profile(profile:str)->None:
-    st.session_state["scenario_board_profile"]=profile
+    """Open the selected details immediately, not only an editor far below."""
+    opened=st.session_state.get("scenario_open_profile")
+    st.session_state["scenario_open_profile"]=None if opened==profile else profile
+    if opened!=profile:
+        st.session_state["scenario_board_profile"]=profile
+
+
+def _inline_profile_details(row:dict,option:dict,catalog:dict,plan:dict)->None:
+    """Show an actual per-style breakdown directly below its button."""
+    destinations={d["id"]:d for d in catalog["destinations"]}
+    attractions={a["id"]:a for a in catalog["attractions"]}
+    recommendations={r["destination_id"]:r for r in option["new_recommendations"]}
+    with st.container(border=True):
+        st.markdown("#### Detalhes do "+row["label"])
+        st.caption("Esta é uma proposta, não são reservas ou passeios já confirmados.")
+        for dest_id,ids in option["proposal_packages"].items():
+            dest=destinations.get(dest_id,{"name":dest_id,"country":""})
+            official=dest_id in plan["packages"]
+            st.markdown("**"+dest["name"]+" · "+dest["country"]+"**")
+            st.caption("✓ Já está em Meus passeios" if official else
+                       "＋ Pré-selecionado somente nesta simulação")
+            for attraction_id in ids:
+                attraction=attractions.get(attraction_id)
+                if attraction:
+                    st.write("• "+attraction["name"])
+            rec=recommendations.get(dest_id)
+            if rec:
+                known=rec["known_costs"]
+                st.caption("Bilhetes e transportes históricos conhecidos (casal): "
+                           f"€ {known['EUR']:.2f} · CHF {known['CHF']:.2f}")
+                if rec["missing"]:
+                    st.caption(f"⚠ {len(rec['missing'])} custo(s)/condição(ões) ainda por verificar")
+                reasons=rec.get("reasons",[])
+                if reasons:
+                    st.caption("Motivo: "+reasons[0])
+        st.markdown("**Resumo financeiro do estilo**")
+        st.write("Custos conhecidos: "+money(row["known_brl"])+
+                 " · Projeção global: "+money(row["total_brl"]))
+        st.caption("Margem: "+money(row["margin_brl"])+
+                   f" · {row['pending_count']} componente(s) sem preço completo")
+        st.info("A projeção inclui uma provisão para passeios. A ausência de "
+                "custos cotados não significa que um passeio é gratuito.")
+        st.caption("Para editar atrações e aplicar este estilo, use a seção "
+                   "Personalize uma proposta, logo abaixo do comparador.")
 
 
 def _cards(model:dict,scenarios:list[dict],catalog:dict,plan:dict)->None:
@@ -58,8 +101,14 @@ def _cards(model:dict,scenarios:list[dict],catalog:dict,plan:dict)->None:
                                  else " · Sugestão nova"))
                     st.caption("Atrações: "+(", ".join(attraction_names.get(a,a)
                               for a in attractions) if attractions else "A definir"))
-            st.button("Ver e editar este roteiro",key="scenario_style_choose_"+row["profile"],
+            opened=st.session_state.get("scenario_open_profile")==row["profile"]
+            st.button("Fechar detalhes" if opened else "Ver detalhes deste estilo",
+                      key="scenario_style_choose_"+row["profile"],
                       on_click=_go_profile,args=(row["profile"],),width="stretch")
+            if opened:
+                _inline_profile_details(row,next(s for s in scenarios
+                                                 if s["profile"]==row["profile"]),
+                                        catalog,plan)
 
 
 def _destinations(model:dict)->None:
