@@ -16,6 +16,51 @@ from advisor_auth import is_verified_owner
 from data_model import get_scenario
 from unified_budget import resolve_french_budget,scenario_total
 
+def _activate_loaded_plan(plan:dict,sha:str)->None:
+    """Restore one saved plan into all related pages before widgets are drawn."""
+    st.session_state["advisor_plan"]=deepcopy(plan)
+    st.session_state["advisor_github_sha"]=sha
+    st.session_state["explore_packages"]=deepcopy(plan["packages"])
+    st.session_state["explore_calendar"]=deepcopy(plan["assignments"])
+    st.session_state["explore_base"]=plan["base_city"]
+    # Prevent Streamlit's old widget values from overwriting loaded fields.
+    for key in ("advisor_base","advisor_profile","advisor_ceiling",
+                "advisor_proposals","advisor_snapshot_preview"):
+        st.session_state.pop(key,None)
+    st.session_state["advisor_restore_notice"]=(
+        f"Plano {plan['plan_id']} carregado do GitHub (revisão {plan['revision']})."
+    )
+
+
+def _recover_saved_plan()->None:
+    """Only bootstrap an authenticated fresh session; never overwrite edits."""
+    pending=st.session_state.pop("advisor_pending_restore",None)
+    if pending is not None:
+        _activate_loaded_plan(pending["plan"],pending["sha"])
+        return
+    if "advisor_plan" in st.session_state:
+        return
+    cfg=_owner_config()
+    if not cfg["token"] or not _owner_signed_in(cfg):
+        return
+    try:
+        repository=GitHubPlanRepository(cfg["token"])
+        candidates=repository.recent_plans()
+        st.session_state["advisor_saved_plans"]=candidates
+        if candidates:
+            plan,sha=repository.load(candidates[0]["plan_id"])
+            _activate_loaded_plan(plan,sha)
+    except (HTTPError,ValueError,TypeError,KeyError) as exc:
+        # An API failure must never silently replace an already loaded plan.
+        st.session_state["advisor_restore_error"]=_github_read_error(exc)
+
+
+def _stage_plan_restore(plan:dict,sha:str)->None:
+    """Call from a button; activation runs before controls on the next rerun."""
+    st.session_state["advisor_pending_restore"]={"plan":plan,"sha":sha}
+    st.rerun()
+
+
 def _prepare_plan():
     if "advisor_plan" not in st.session_state:
         p=new_plan()
@@ -84,7 +129,13 @@ def render_advisor(trip_data:dict,sync_sources:dict)->None:
     catalog=load_attractions();routes=load_base_routes()
     bydest={d["id"]:d for d in catalog["destinations"]}
     byattr={a["id"]:a for a in catalog["attractions"]}
+    _recover_saved_plan()
     p=_prepare_plan()
+    if "advisor_restore_notice" in st.session_state:
+        st.success(st.session_state.pop("advisor_restore_notice"))
+    if "advisor_restore_error" in st.session_state:
+        st.warning("Não foi possível recuperar automaticamente o planejamento: "+
+                   st.session_state.pop("advisor_restore_error"))
     st.markdown("<div class='page-section'>Consultor automático · sem LLM</div>",unsafe_allow_html=True)
     st.caption("Análise determinística dos dados pesquisados. Sugestões não alteram reservas "
                "nem decisões do Drive. Tarifas históricas e retornos não verificados são sinalizados.")
@@ -277,7 +328,9 @@ def render_advisor(trip_data:dict,sync_sources:dict)->None:
                 if st.button("Gravar versão aprovada no GitHub",key="advisor_save",use_container_width=True):
                     try:
                         _secure_save(p)
-                        st.success("Plano salvo com revisão verificada no GitHub.")
+                        st.session_state.pop("advisor_saved_plans",None)
+                        st.success("Plano salvo com revisão verificada no GitHub. "
+                                   "Ele poderá ser recuperado após atualizar a página.")
                     except Exception as exc:
                         if isinstance(exc,HTTPError) and exc.code in (401,403):
                             st.error("GitHub recusou a gravação. Confira validade do token e permissão Contents: Read and write.")
@@ -288,16 +341,56 @@ def render_advisor(trip_data:dict,sync_sources:dict)->None:
             with col2:
                 if st.button("Carregar plano versionado do GitHub",key="advisor_load",use_container_width=True):
                     try:
-                        loaded,sha=GitHubPlanRepository(cfg["token"]).load(p["plan_id"])
-                        st.session_state["advisor_plan"]=loaded
-                        st.session_state["advisor_github_sha"]=sha
-                        st.session_state.pop("advisor_proposals",None)
-                        st.rerun()
+                        repository=GitHubPlanRepository(cfg["token"])
+                        available=repository.recent_plans()
+                        if not available:
+                            st.info("Ainda não existem roteiros gravados no GitHub. "
+                                    "Salve o primeiro com o botão da esquerda.")
+                        else:
+                            ids={entry["plan_id"] for entry in available}
+                            target=(p["plan_id"] if p["plan_id"] in ids
+                                    else available[0]["plan_id"])
+                            loaded,sha=repository.load(target)
+                            _stage_plan_restore(loaded,sha)
                     except Exception as exc:
                         st.error(_github_read_error(exc))
             with st.expander("Outros planos e histórico de revisões"):
-                plan_id=st.text_input("ID do plano salvo (trip-...)",key="advisor_plan_lookup",
-                                      value=p["plan_id"])
+                if st.button("Atualizar lista de planos salvos",key="advisor_refresh_saved"):
+                    try:
+                        st.session_state["advisor_saved_plans"]=GitHubPlanRepository(
+                            cfg["token"]).recent_plans()
+                    except Exception as exc:
+                        st.error("Falha ao consultar lista: "+_github_read_error(exc))
+                if "advisor_saved_plans" not in st.session_state:
+                    try:
+                        st.session_state["advisor_saved_plans"]=GitHubPlanRepository(
+                            cfg["token"]).recent_plans()
+                    except Exception as exc:
+                        st.warning("Lista indisponível: "+_github_read_error(exc))
+                recent=st.session_state.get("advisor_saved_plans",[])
+                if recent:
+                    selected_plan=st.selectbox(
+                        "Planos existentes no GitHub (mais recente primeiro)",
+                        recent,key="advisor_saved_plan_choice",
+                        format_func=lambda entry:
+                           (entry["plan_id"]+" · "+
+                            (entry["saved_at"][:16].replace("T"," ")+" UTC"
+                             if entry["saved_at"] else "data não disponível")+
+                            (" · revisão "+str(entry["revision"])
+                             if entry["revision"] is not None else "")))
+                    )
+                    if st.button("Carregar plano selecionado",key="advisor_load_selected",
+                                 use_container_width=True):
+                        try:
+                            loaded,sha=GitHubPlanRepository(cfg["token"]).load(
+                                selected_plan["plan_id"])
+                            _stage_plan_restore(loaded,sha)
+                        except Exception as exc:
+                            st.error(_github_read_error(exc))
+                else:
+                    st.info("Nenhum plano salvo foi localizado. Grave uma versão primeiro.")
+                plan_id=st.text_input("Ou informe o ID de um plano específico",
+                    key="advisor_plan_lookup",value=p["plan_id"])
                 if st.button("Pesquisar planos no GitHub",key="advisor_list"):
                     try:
                         st.session_state["advisor_plan_ids"]=GitHubPlanRepository(cfg["token"]).list_plans()
@@ -308,10 +401,7 @@ def render_advisor(trip_data:dict,sync_sources:dict)->None:
                 if st.button("Carregar este ID",key="advisor_load_id"):
                     try:
                         loaded,sha=GitHubPlanRepository(cfg["token"]).load(plan_id)
-                        st.session_state["advisor_plan"]=loaded
-                        st.session_state["advisor_github_sha"]=sha
-                        st.session_state.pop("advisor_proposals",None)
-                        st.rerun()
+                        _stage_plan_restore(loaded,sha)
                     except Exception as exc:
                         st.error(_github_read_error(exc))
                 if st.button("Exibir revisões",key="advisor_history"):
