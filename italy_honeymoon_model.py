@@ -38,6 +38,26 @@ def load_honeymoon(path:Path=FILE)->dict:
         raise ValueError("Bases duplicadas")
     if any(b["hotel_five_nights_eur"] is not None for b in payload["coast_bases"]):
         raise ValueError("Não cotar hotel sem preço válido para a data")
+    places=payload.get("itinerary_places",[])
+    ids={p["id"] for p in places}
+    if len(places)!=10 or len(ids)!=len(places):
+        raise ValueError("Catálogo italiano incompleto ou duplicado")
+    activity_ids=set()
+    for place in places:
+        if not isinstance(place["name"],str) or not place["id"].startswith("italy_"):
+            raise ValueError("Destino italiano inválido")
+        if not place.get("attractions"):
+            raise ValueError("Destino sem atrações")
+        for a in place["attractions"]:
+            if not a["id"].startswith(place["id"]+"__") or a["id"] in activity_ids:
+                raise ValueError("Atração italiana duplicada ou incompatível")
+            activity_ids.add(a["id"])
+    for scenario in scenarios:
+        chosen=scenario.get("itinerary_place_ids",[])
+        if not chosen or len(set(chosen))!=len(chosen) or not set(chosen)<=ids:
+            raise ValueError("Proposta italiana com destinos não catalogados")
+        if "italy_rome" not in chosen or "italy_amalfi" not in chosen:
+            raise ValueError("Proposta sem Roma ou Amalfi")
     return payload
 
 
@@ -146,3 +166,28 @@ def manual_italy_cost(payload:dict,scenario_id:str,values:dict,
             "complete_2027_quote":False,
             "extra_night_included":bool(extra_night),
             "other_missing":sample["missing"]}
+
+
+def italy_itinerary_places(payload:dict|None=None)->list[dict]:
+    """One reference catalog in the same file as the honeymoon scenarios."""
+    from copy import deepcopy
+    data=payload if payload is not None else load_honeymoon()
+    return deepcopy(data["itinerary_places"])
+
+
+def proposal_snapshot(payload:dict,scenario_id:str)->dict:
+    """Freeze the complete *proposal*, not a booking, for a traveler's review."""
+    from copy import deepcopy
+    sc=next((x for x in payload["scenarios"] if x["id"]==scenario_id),None)
+    if sc is None:
+        raise ValueError("Proposta italiana desconhecida")
+    return {
+        "variant":sc["id"],"label":sc["label"],
+        "status":"proposta exploratória","source_retrieved_at":payload["retrieved_at"],
+        "days":sc["days"],"nights":sc["nights"],
+        "rome_nights":sc["rome_nights"],"coast_nights":sc["coast_nights"],
+        "naples_nights":sc["naples_nights"],"coast_base_proposed":sc["coast_base"],
+        "itinerary_place_ids":deepcopy(sc["itinerary_place_ids"]),
+        "days_detail":deepcopy(sc["days_detail"]),
+        "reserved":False,"hotel_confirmed":False,
+    }

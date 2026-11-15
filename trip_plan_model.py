@@ -4,7 +4,7 @@ No UI state, network or LLM dependencies; all operations are pure.
 """
 from __future__ import annotations
 from copy import deepcopy
-from datetime import date
+from datetime import date,timedelta
 from uuid import uuid4
 
 BASES={"mulhouse","strasbourg","metz","nancy"}
@@ -17,7 +17,7 @@ def new_plan(base="mulhouse",departure="2027-09-09",profile="balanced")->dict:
           "total_days":70,"italy_days":10,"vacation_days":25,"setup_days":4,
           "budget_scenario":"70k","profile":profile,"mandatory_destinations":[],
           "excluded_destinations":[],"packages":{},"assignments":{},
-          "preferences":{},
+          "preferences":{},"flexible_visits":[],"italy_proposal":None,
           "accepted_recommendations":[],"rejected_recommendations":[],
           "source_versions":{"attractions":"2026-11-14","routes":"2026-11-14"}}
     validate_plan(plan)
@@ -58,6 +58,82 @@ def validate_plan(plan:dict,known_attractions:set[str]|None=None)->None:
     for k,v in plan["assignments"].items():
         date.fromisoformat(k)
         if not isinstance(v,str):raise ValueError("Destino inválido no calendário")
+    # Optional v1 extension: older saved plans remain readable unchanged.
+    flexible=plan.get("flexible_visits",[])
+    if not isinstance(flexible,list) or len(flexible)>80:
+        raise ValueError("Visitas flexíveis inválidas")
+    seen=set()
+    for visit in flexible:
+        if not isinstance(visit,dict) or not (
+                set(visit)=={"destination_id","stage","attractions","period"}
+                or (visit.get("stage")=="Itália" and
+                    set(visit)=={"destination_id","stage","attractions","period","exact_date"})
+        ):
+            raise ValueError("Formato de visita flexível inválido")
+        destination=visit["destination_id"]
+        stage=visit["stage"]
+        choices=visit["attractions"]
+        period=visit["period"]
+        if (not isinstance(destination,str) or len(destination)>80 or
+            not destination.replace("_","").replace("-","").isalnum() or
+            destination in seen or stage not in ("Itália","França") or
+            not isinstance(choices,list) or not 1<=len(choices)<=5 or
+            not all(isinstance(a,str) and 0<len(a)<=100 for a in choices) or
+            len(set(choices))!=len(choices) or
+            not isinstance(period,str) or len(period)>80):
+            raise ValueError("Visita flexível inválida ou duplicada")
+        if stage=="Itália" and not destination.startswith("italy_"):
+            raise ValueError("Destino não pertence à Itália")
+        if stage=="França" and destination.startswith("italy_"):
+            raise ValueError("Passeio não pertence à França")
+        exact=visit.get("exact_date")
+        allowed_keys={"destination_id","stage","attractions","period"}
+        if exact is not None:
+            if stage!="Itália" or set(visit)!=allowed_keys|{"exact_date"}:
+                raise ValueError("Data flexível incompatível com a etapa")
+            try: chosen_date=date.fromisoformat(exact)
+            except (TypeError,ValueError) as exc:
+                raise ValueError("Data da visita italiana inválida") from exc
+            departure=date.fromisoformat(plan["departure_date"])
+            if not departure<=chosen_date<departure+timedelta(days=plan["italy_days"]):
+                raise ValueError("Data fora da etapa italiana")
+        seen.add(destination)
+    proposal=plan.get("italy_proposal")
+    if proposal is not None:
+        keys={"variant","label","status","source_retrieved_at","days","nights",
+              "rome_nights","coast_nights","naples_nights",
+              "coast_base_proposed","itinerary_place_ids","days_detail",
+              "reserved","hotel_confirmed"}
+        if not isinstance(proposal,dict) or set(proposal)!=keys:
+            raise ValueError("Formato da proposta italiana inválido")
+        if (proposal["variant"] not in PROFILES or
+            proposal["status"]!="proposta exploratória" or
+            proposal["reserved"] is not False or
+            proposal["hotel_confirmed"] is not False or
+            type(proposal["days"]) is not int or proposal["days"]!=10 or
+            type(proposal["nights"]) is not int or proposal["nights"]!=9 or
+            any(type(proposal[key]) is not int or proposal[key]<0 or proposal[key]>9
+                for key in ("rome_nights","coast_nights","naples_nights")) or
+            sum(proposal[key] for key in
+                ("rome_nights","coast_nights","naples_nights"))!=9 or
+            not isinstance(proposal["label"],str) or
+            len(proposal["label"])>100 or
+            not isinstance(proposal["source_retrieved_at"],str) or
+            len(proposal["source_retrieved_at"])>40 or
+            not isinstance(proposal["coast_base_proposed"],str) or
+            len(proposal["coast_base_proposed"])>45):
+            raise ValueError("Noites/status da proposta italiana inválidos")
+        ids=proposal["itinerary_place_ids"]
+        if (not isinstance(ids,list) or not 2<=len(ids)<=15 or
+            any(not isinstance(x,str) or not x.startswith("italy_") or
+                len(x)>80 for x in ids) or len(set(ids))!=len(ids)):
+            raise ValueError("Destinos da proposta inválidos")
+        days=proposal["days_detail"]
+        if (not isinstance(days,list) or len(days)!=10 or
+            any(not isinstance(day,list) or len(day)!=6 or
+                any(not isinstance(v,str) or len(v)>550 for v in day)
+                for day in days)):
+            raise ValueError("Dias da proposta italiana inválidos")
 
 def with_revision(plan:dict,updates:dict)->dict:
     result=deepcopy(plan)

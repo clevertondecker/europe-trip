@@ -33,7 +33,7 @@ def change_plan(plan:dict,changes:dict)->dict:
     """One canonical mutation, no redundant revision for an identical value."""
     permitted={"packages","assignments","base_city","profile","budget_scenario",
                "departure_date","total_days","italy_days","vacation_days","setup_days",
-               "preferences","excluded_destinations"}
+               "preferences","excluded_destinations","flexible_visits","italy_proposal"}
     if not changes or not set(changes)<=permitted:
         raise ValueError("Unsupported plan change")
     delta={k:deepcopy(v) for k,v in changes.items() if plan.get(k)!=v}
@@ -54,14 +54,24 @@ def set_package(plan:dict,destination:str,attractions:list[str],
         raise ValueError("Atração desconhecida")
     packages=deepcopy(plan["packages"])
     packages[destination]=list(attractions)
-    return change_plan(plan,{"packages":packages})
+    updates={"packages":packages}
+    if any(v["destination_id"]==destination for v in plan.get("flexible_visits",[])):
+        visits=deepcopy(plan["flexible_visits"])
+        for item in visits:
+            if item["destination_id"]==destination:
+                item["attractions"]=list(attractions)
+        updates["flexible_visits"]=visits
+    return change_plan(plan,updates)
 
 def remove_package(plan:dict,destination:str)->dict:
     packages=deepcopy(plan["packages"])
     if destination not in packages:return deepcopy(plan)
     del packages[destination]
     dates={day:dest for day,dest in plan["assignments"].items() if dest!=destination}
-    return change_plan(plan,{"packages":packages,"assignments":dates})
+    visits=[v for v in plan.get("flexible_visits",[])
+            if v["destination_id"]!=destination]
+    return change_plan(plan,{"packages":packages,"assignments":dates,
+                              "flexible_visits":visits})
 
 def add_assignment(plan:dict,day:str,destination:str)->dict:
     if destination not in plan["packages"]:
