@@ -80,6 +80,22 @@ class ResearchPriceTests(unittest.TestCase):
         self.assertTrue(by["metz"]["not_full_cost"])
         self.assertEqual(old,self.plan)
 
+    def test_profiles_use_observed_meal_prices_not_fabricated_multipliers(self):
+        guide=build_outing_guide(self.plan,self.catalog,self.routes,"colmar",
+                                 self.colmar_ids)
+        economy=outing_research_snapshot(guide,6.3,7.1,self.evidence,
+                                         meal_band="low")
+        balanced=outing_research_snapshot(guide,6.3,7.1,self.evidence,
+                                          meal_band="median")
+        experience=outing_research_snapshot(guide,6.3,7.1,self.evidence,
+                                            meal_band="high")
+        self.assertAlmostEqual(economy["lunch_plus_rail_and_known_tickets_brl"],461.16)
+        self.assertAlmostEqual(balanced["lunch_plus_rail_and_known_tickets_brl"],480.06)
+        self.assertAlmostEqual(experience["lunch_plus_rail_and_known_tickets_brl"],498.96)
+        self.assertEqual(economy["meal_band"],"low")
+        with self.assertRaises(ValueError):
+            outing_research_snapshot(guide,6.3,7.1,self.evidence,meal_band="invalid")
+
     def test_selected_itineraries_report_partial_coverage(self):
         self.plan["packages"]={"colmar":self.colmar_ids}
         baseline=deepcopy(self.plan)
