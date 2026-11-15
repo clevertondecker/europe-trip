@@ -73,6 +73,14 @@ def apply_proposal(plan:dict,proposal:dict,approved:bool=False)->dict:
         raise ValueError("Proposta obsoleta; recalcular")
     if proposal.get("base_city")!=plan["base_city"]:
         raise ValueError("Cidade-base foi alterada")
+    if proposal.get("plan_id") not in (None,plan["plan_id"]):
+        raise ValueError("A proposta pertence a outro plano")
+    if any(proposal.get("assignments",{}).get(day)!=dest
+           for day,dest in plan["assignments"].items()):
+        raise ValueError("A proposta altera visitas anteriormente confirmadas")
+    from calendar_assignment_validation import validate_new_assignments
+    validate_new_assignments(plan,proposal["assignments"],
+                             previously_approved=plan["assignments"])
     result=with_revision(plan,{"assignments":proposal["assignments"],
                                 "accepted_recommendations":plan["accepted_recommendations"]+
                                     [proposal["proposal_id"]]})

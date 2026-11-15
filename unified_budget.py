@@ -5,6 +5,7 @@ No quotes are inferred. Drive components win when live; snapshot fallback is exp
 from __future__ import annotations
 from math import isfinite
 from finance_lifestyle import FRENCH_BUDGET
+from money_units import money_delta
 
 PARTS = ("rent", "groceries", "dining", "transport", "excursions")
 LIVE_MATCH = {
@@ -46,13 +47,20 @@ def scenario_total(scenario: dict, budget: dict, *,
     """Replace already budgeted subcategories, then add only other true deltas."""
     if not 30 <= french_days <= 100:
         raise ValueError("Estadia na França fora do intervalo de simulação")
-    inputs = [outings_weekly, outing_couple_eur, fx_brl_per_eur,
-              flight_delta_brl, excursions_delta_brl, local_transport_delta_brl, rent_delta_brl]
+    required_nonnegative=[outings_weekly,outing_couple_eur,fx_brl_per_eur]
     if rent_override_eur_month is not None:
-        inputs.append(rent_override_eur_month)
-    if any(not isinstance(v, (int, float)) or not isfinite(v) or v < 0 for v in inputs):
-        raise ValueError("Valores devem ser números finitos não negativos")
-    if outings_weekly > 7 or fx_brl_per_eur == 0:
+        required_nonnegative.append(rent_override_eur_month)
+    if any(not isinstance(v,(int,float)) or not isfinite(v) or v<0
+           for v in required_nonnegative):
+        raise ValueError("Parâmetros de consumo e câmbio devem ser não negativos e finitos")
+    # Deltas describe signed changes: a cheaper flight or lower rent is a saving.
+    signed=(flight_delta_brl,excursions_delta_brl,
+            local_transport_delta_brl,rent_delta_brl)
+    for adjustment in signed:
+        if not isinstance(adjustment,(int,float)) or not isfinite(adjustment):
+            raise ValueError("O ajuste deve ser numérico e finito")
+        money_delta(adjustment)
+    if outings_weekly>7 or fx_brl_per_eur<=0:
         raise ValueError("Frequência ou câmbio inválidos")
     original = budget["amounts"]
     ratio = french_days / budget["french_days"]
@@ -65,8 +73,13 @@ def scenario_total(scenario: dict, budget: dict, *,
                  rent_override_eur_month * (french_days/30) * fx_brl_per_eur),
     }
     new_items["rent"] += rent_delta_brl
+    # A negative delta is valid only if the *resulting* expense remains valid.
+    if any(not isfinite(float(v)) or float(v)<0 for v in new_items.values()):
+        raise ValueError("A economia excede a despesa desta categoria")
     changed = sum(new_items.values()) - sum(original.values())
     projected = round(scenario["reported_total_brl"] + changed + flight_delta_brl, 2)
+    if not isfinite(projected) or projected<0:
+        raise ValueError("O total da viagem não pode ser negativo")
     margin = round(scenario["cap_brl"] - projected, 2)
     reserve = scenario["emergency_reserve_brl"]
     if margin < 0: status = "acima_do_teto"

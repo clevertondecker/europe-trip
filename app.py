@@ -1228,18 +1228,28 @@ elif page == "Orçamento":
                                       min_value=0.,max_value=6000.,value=selected_rent,step=50.,
                                       key="unified_rent_month")
     with st.expander("Alterações adicionais às outras verbas"):
+        st.caption("Ajustes negativos representam economia. Nenhuma despesa final "
+                   "pode ficar abaixo de zero; os valores continuam hipóteses.")
+        flight_budget=next((row["amount"] for row in scenario["components"]
+                            if row["name"].startswith("Passagens e deslocamentos aéreos")),0)
+        ratio=stay/french["french_days"]
+        minimum_rent=(quoted_rent*(stay/30)*fx if quoted_rent is not None
+                      else french["amounts"]["rent"]*ratio)
         extra1,extra2,extra3,extra4=st.columns(4,gap="small")
         with extra1:
-            flight_delta=st.number_input("Voos a mais (R$)",min_value=0,max_value=25000,
-                                        value=0,step=250,key="unified_flight_extra")
+            flight_delta=st.number_input("Variação em voos (R$)",min_value=-int(flight_budget),
+                                         max_value=25000,value=0,step=250,key="unified_flight_extra")
         with extra2:
-            excursions_delta=st.number_input("Passeios a mais (R$)",min_value=0,max_value=20000,
-                                             value=0,step=250,key="unified_tour_extra")
+            excursions_delta=st.number_input("Variação em passeios (R$)",
+                                             min_value=-int(french["amounts"]["excursions"]*ratio),
+                                             max_value=20000,value=0,step=250,key="unified_tour_extra")
         with extra3:
-            transit_delta=st.number_input("Transporte a mais (R$)",min_value=0,max_value=10000,
-                                          value=0,step=250,key="unified_transit_extra")
+            transit_delta=st.number_input("Variação em transporte (R$)",
+                                          min_value=-int(french["amounts"]["transport"]*ratio),
+                                          max_value=10000,value=0,step=250,key="unified_transit_extra")
         with extra4:
-            rent_delta=st.number_input("Taxas adicionais da moradia (R$)",min_value=0,max_value=10000,
+            rent_delta=st.number_input("Variação em taxas/moradia (R$)",
+                                       min_value=-int(minimum_rent),max_value=10000,
                                        value=0,step=250,key="unified_rent_extra")
     # Reference is intentionally only a known ticket subtotal. It must never
     # replace the entire tour allowance nor create a discount for missing quotes.

@@ -7,15 +7,19 @@ from __future__ import annotations
 from collections import defaultdict
 from attractions_model import route_for,package_cost
 from travel_advisor import objective_weights
+from money_units import known_eur_equivalent
 
 CATEGORY_INTEREST={"natureza","foto/paisagem","história","arquitetura","museu","gastronomia"}
 def recommend_destinations(plan:dict,catalog:dict,routes:dict,profile:str|None=None,
                            max_travel_minutes:int=180,allow_overnight:bool=False,
                            limit:int=11,
-                           include_unverified_routes:bool=True)->list[dict]:
+                           include_unverified_routes:bool=True,
+                           eur_fx:float=6.3,chf_fx:float=7.1)->list[dict]:
     profile=profile or plan["profile"]
     weights=objective_weights(profile)
     base=plan["base_city"]
+    # Always validate FX, including when a destination has no known fare.
+    known_eur_equivalent({"EUR":0,"CHF":0},eur_fx,chf_fx)
     selected=set(plan["packages"])
     excluded=set(plan.get("excluded_destinations",[]))
     prefs=plan.get("preferences",{})
@@ -49,7 +53,7 @@ def recommend_destinations(plan:dict,catalog:dict,routes:dict,profile:str|None=N
         interest=min(100,45+preferred*22+len(ordered)*3)
         comfort=(100 if dest==base else max(10,100-(mins or 125)*.42)) if mins is not None or dest==base else 20
         schedule=95 if dest==base else (max(10,95-(mins or 140)*.3) if not overnight else 15)
-        known=sum(cost["known_by_currency"].values())
+        known=known_eur_equivalent(cost["known_by_currency"],eur_fx,chf_fx)
         # The absence of a fare cannot improve cost benefit.
         cost_score=max(10,100-known*.25) if cost["complete"] else 35
         score=round((interest*weights["interest"]+cost_score*weights["cost"]+
@@ -71,6 +75,8 @@ def recommend_destinations(plan:dict,catalog:dict,routes:dict,profile:str|None=N
           "trip_type":trip_type,"selected_attractions":[a["id"] for a in picks],
           "attraction_names":[a["name"] for a in picks],"attractions_available":len(ordered),
           "known_costs":cost["known_by_currency"],
+          "cost_score_eur_equivalent":round(known,2),
+          "score_exchange_rates":{"EUR_BRL":eur_fx,"CHF_BRL":chf_fx},
           "missing":sorted(set(evidence_missing)),
           "conditional":cost["conditional"],"complete":not evidence_missing,
           "route_source":route["source_url"],

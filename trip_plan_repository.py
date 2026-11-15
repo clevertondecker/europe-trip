@@ -10,6 +10,7 @@ import re
 from urllib.error import HTTPError
 from urllib.request import Request,urlopen
 from trip_plan_model import validate_plan
+from public_plan_safety import ensure_public_plan_is_minimal
 
 REPO="clevertondecker/europe-trip"
 ID_PATTERN=re.compile(r"^trip-[a-f0-9]{12}$")
@@ -113,6 +114,7 @@ class GitHubPlanRepository:
 
     def save(self,plan:dict,expected_sha:str|None)->str:
         validate_plan(plan)
+        ensure_public_plan_is_minimal(plan)
         path=safe_path(plan["plan_id"])
         try:
             existing=self.load(plan["plan_id"])

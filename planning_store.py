@@ -7,6 +7,7 @@ from __future__ import annotations
 from copy import deepcopy
 from datetime import date
 from trip_plan_model import new_plan,validate_plan,with_revision,BASES
+from calendar_assignment_validation import validate_new_assignments
 
 def create_from_legacy(values:dict)->dict:
     """Create *one* plan from older session keys, without mutating the source."""
@@ -36,6 +37,10 @@ def change_plan(plan:dict,changes:dict)->dict:
     if not changes or not set(changes)<=permitted:
         raise ValueError("Unsupported plan change")
     delta={k:deepcopy(v) for k,v in changes.items() if plan.get(k)!=v}
+    if "assignments" in delta:
+        candidate={**plan,**delta}
+        validate_new_assignments(candidate,candidate["assignments"],
+                                 previously_approved=plan["assignments"])
     return with_revision(plan,delta) if delta else deepcopy(plan)
 
 def set_package(plan:dict,destination:str,attractions:list[str],

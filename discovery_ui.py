@@ -164,7 +164,8 @@ def render_discovery(plan,catalog,routes,trip_data,sync_sources,eurfx,chffx,use_
              "confirmar conexões e horários antes de escolhê-los.")
     places=recommend_destinations(plan,catalog,routes,profile=plan["profile"],
                                  max_travel_minutes=max_minutes,allow_overnight=overnight,
-                                 include_unverified_routes=include_unknown)
+                                 include_unverified_routes=include_unknown,
+                                 eur_fx=eurfx,chf_fx=chffx)
     categories_by_dest={}
     for attraction in catalog["attractions"]:
         categories_by_dest.setdefault(attraction["destination_id"],set()).add(attraction["category"])
