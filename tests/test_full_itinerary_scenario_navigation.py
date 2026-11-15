@@ -19,7 +19,7 @@ class FullItineraryNavigationTests(unittest.TestCase):
         at.radio(key="ux_area").set_value("Explorar").run()
         at.segmented_control(key="ux_mode").set_value("Simulação").run()
         at.selectbox(key="scenario_sidebar").set_value("offenburg").run()
-        at.radio(key="main_navigation").set_value("Roteiro").run()
+        at.radio(key="ux_area").set_value("Meu roteiro").run()
         for area in AREAS:
             with self.subTest(area=area):
                 at.segmented_control(key="itinerary_section").set_value(area).run()
