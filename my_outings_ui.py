@@ -7,6 +7,8 @@ from html import escape
 import streamlit as st
 
 from planning_session import select_package, delete_package
+from attractions_model import package_cost
+from advisor_finance import advisor_projection
 
 
 def catalog_options(catalog: dict, plan: dict) -> tuple[dict, dict]:
@@ -72,7 +74,10 @@ def _edit_card(dest_id: str, plan: dict, attractions: dict) -> None:
             st.error(str(exc))
 
 
-def render_my_outings(plan: dict, catalog: dict) -> None:
+def render_my_outings(plan: dict, catalog: dict, *, routes: dict | None = None,
+                      trip_data: dict | None = None, finance_live: bool = False,
+                      eurfx: float = 6.3, chffx: float = 7.1,
+                      use_city_rent: bool = True) -> None:
     """Add, edit and remove directly from the canonical itinerary in-session.
 
     Remote persistence remains the owner's explicit action in save panel.
@@ -85,6 +90,30 @@ def render_my_outings(plan: dict, catalog: dict) -> None:
     a, b = st.columns(2, gap="small")
     a.metric("Passeios escolhidos", len(cards))
     b.metric("Atrações escolhidas", sum(len(p) for p in plan["packages"].values()))
+    if routes is not None and trip_data is not None:
+        chosen=[a for ids in plan["packages"].values() for a in ids]
+        prices=package_cost(catalog,routes,plan["base_city"],chosen)
+        financial=advisor_projection(trip_data,finance_live,plan,prices,
+                                     eurfx,chffx,use_city_rent)
+        allowance=float(financial["budget_excursions_allowance_brl"])
+        known=float(financial["known_billets_brl"])
+        st.markdown("#### Quanto dos passeios já está previsto no orçamento?")
+        c1,c2,c3=st.columns(3)
+        money=lambda value:"R$ "+f"{value:,.0f}".replace(",",".")
+        c1.metric("Verba reservada",money(allowance))
+        c2.metric("Custos conhecidos dos escolhidos",money(known))
+        c3.metric("Saldo nominal da provisão",money(max(0,allowance-known)))
+        if allowance>0:
+            st.progress(min(1.,known/allowance))
+        st.caption("Projeção global do casal: "+money(financial["result"]["total"])+
+                   " · margem até o teto: "+money(financial["result"]["margin"])+".")
+        if prices["missing"]:
+            st.warning(f"{len(prices['missing'])} componente(s) sem preço completo. "
+                       "O saldo nominal não significa dinheiro disponível.")
+        st.caption("A verba já existia mesmo antes de escolher destinos; acrescentar um "
+                   "passeio só aumenta a projeção quando os custos conhecidos excedem "
+                   "a provisão. Alimentação, transporte urbano e outros valores "
+                   "pendentes não são tratados como gratuitos.")
 
     if st.button("＋ Adicionar passeio", type="primary",
                  key="outing_add_open", width="stretch"):
@@ -125,8 +154,11 @@ def render_my_outings(plan: dict, catalog: dict) -> None:
                 st.rerun()
 
     if not cards:
-        st.info("Você ainda não adicionou passeios ao planejamento. "
-                "Clique em **Adicionar passeio** para começar.")
+        st.info("Você ainda não adotou um roteiro. A verba para excursões já está "
+                "prevista no orçamento, mas ainda não representa passeios escolhidos.")
+        if st.button("Ver roteiros prontos por estilo →",key="outing_go_budget_presets"):
+            st.session_state["itinerary_section"]="Orçamento"
+            st.rerun()
         return
 
     for card in cards:
@@ -141,6 +173,14 @@ def render_my_outings(plan: dict, catalog: dict) -> None:
                            " atração(ões) · " +
                            (", ".join(card["dates"]) if card["dates"] else "Sem data definida"))
                 st.write(" · ".join(card["attractions"]))
+                if routes is not None:
+                    one=package_cost(catalog,routes,plan["base_city"],plan["packages"][dest_id])
+                    euro=one["known_by_currency"]["EUR"]
+                    chf=one["known_by_currency"]["CHF"]
+                    st.caption(f"Bilhetes e transporte históricos conhecidos (casal): "
+                               f"€ {euro:.2f} · CHF {chf:.2f}")
+                    if one["missing"]:
+                        st.caption(f"⚠ {len(one['missing'])} componente(s) sem cotação completa")
                 edit_col, remove_col = st.columns(2, gap="small")
                 with edit_col:
                     if st.button("✎ Editar", key="outing_edit_" + dest_id,
