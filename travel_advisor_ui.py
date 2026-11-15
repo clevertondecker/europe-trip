@@ -153,24 +153,24 @@ def render_advisor(trip_data:dict,sync_sources:dict,workspace_area:str='Meus pas
     st.markdown("<div class='page-section'>Workspace de planejamento</div>",unsafe_allow_html=True)
     st.caption("Meus passeios mostra seu roteiro atual. Simular roteiros é apenas uma proposta; nenhuma sugestão entra no plano sem aprovação.")
     st.caption("Valores e trajetos são referências históricas; não há reservas ou cotações confirmadas para 2027.")
-    with st.expander("Configurações do planejamento",expanded=False):
+    with st.expander("Configurações do planejamento",expanded=True):
         a,b,c=st.columns(3,gap="medium")
         with a:
             base=st.selectbox("Base hipotética",["mulhouse","strasbourg","metz","nancy"],
                               index=["mulhouse","strasbourg","metz","nancy"].index(p["base_city"]),
                               key="advisor_base",format_func=lambda x:bydest[x]["name"])
         with b:
-            profile=st.selectbox("Otimização",["balanced","economy","experience"],
+            profile=st.selectbox("Estilo de viagem",["balanced","economy","experience"],
                 index=["balanced","economy","experience"].index(p["profile"]),
                 key="advisor_profile",format_func=lambda x:{
-                  "balanced":"Equilibrado","economy":"Economizar","experience":"Aproveitar ao máximo"}[x])
+                  "balanced":"Equilibrado","economy":"Econômico","experience":"Aproveitar ao máximo"}[x])
         with c:
             ceiling=st.selectbox("Teto total do casal",["60k","70k"],
                 index=["60k","70k"].index(p["budget_scenario"]),key="advisor_ceiling",
                 format_func=lambda x:"R$ "+x[:-1]+" mil")
         if base!=p["base_city"] or profile!=p["profile"] or ceiling!=p["budget_scenario"]:
             p=update_fields(base_city=base,profile=profile,budget_scenario=ceiling)
-        with st.expander("Como o consultor toma decisões"):
+        with st.expander("Como o consultor toma decisões",expanded=False):
             st.caption("Prioridades (interesse / custo / conforto / agenda): "+
                        " / ".join(str(x)+"%" for x in objective_weights(profile).values())+
                        ". As sugestões são geradas por regras Python, sem LLM.")
