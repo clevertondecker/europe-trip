@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import streamlit as st
 from five_base_comparison_ui import render_five_base_study
+from base_scenario_ui import sync_city_widget, set_city_from_widget
 
 from base_research_expanded_model import (
     COUNTRY_FLAGS,PRESETS,load_research,load_rail,
@@ -68,11 +69,16 @@ def render_expanded_research()->None:
         return
     selected_ids=list(candidates)
     suggested=st.session_state.get("scenario_base_selected")
+    if suggested in candidates:
+        sync_city_widget("expanded_bases_detail_city",selected_ids)
     selected=st.selectbox("Examinar evidências de uma cidade",selected_ids,
                           index=selected_ids.index(suggested) if suggested in candidates else 0,
                           format_func=lambda id:candidates[id],
-                          key="expanded_bases_detail_city")
-    st.session_state["scenario_base_selected"]=selected
+                          key="expanded_bases_detail_city",
+                          on_change=set_city_from_widget,
+                          args=("expanded_bases_detail_city",))
+    if suggested in candidates:
+        st.session_state["scenario_base_selected"]=selected
     st.caption("Cidade-base hipotética compartilhada com Comparar cidades e Orçamento. "
                "Examinar uma candidata não muda o roteiro oficial.")
     c=find_city(study,selected)

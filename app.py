@@ -26,7 +26,12 @@ from travel_dashboard_ui import render_trip_dashboard
 from base_explorer_ui import render_base_explorer
 from base_scenario_model import base_options, choose_exploratory_base, hypothetical_city_name, expanded_rail_routes
 from base_research_expanded_model import load_research, find_city, observed_housing
-from base_scenario_ui import render_scenario_impact
+from base_scenario_ui import render_scenario_impact, sync_city_widget, set_city_from_widget
+from ux_navigation import (AREAS as UX_AREAS, SECTIONS as UX_SECTIONS, DESCRIPTIONS as UX_DESCRIPTIONS,
+                           LEGACY_PAGES, LEGACY_ITINERARY, RESEARCH_OPTIONS, SUGGESTION_OPTIONS,
+                           bootstrap as bootstrap_ux, apply as apply_ux,
+                           set_task as set_ux_task, set_area as set_ux_area,
+                           set_from_legacy as set_ux_legacy, route as ux_route)
 from planning_session import bootstrap as bootstrap_trip, active_plan, update_fields
 from planning_store import summary as planning_summary
 from planning_status import save_label
@@ -38,6 +43,15 @@ st.set_page_config(page_title="Nossa Europa 2027", page_icon="🌍", layout="wid
 # Authenticated new sessions recover the latest saved GitHub plan.
 _recover_saved_plan()
 bootstrap_trip()
+restored_mode=st.session_state.pop("ux_pending_mode",None)
+if restored_mode in ("Oficial","Simulação"):
+    st.session_state["ux_mode"]=restored_mode
+# Restore saved exploratory durations before any Streamlit widget is rendered.
+restored_days=st.session_state.pop("ux_pending_days",None)
+if restored_days is not None:
+    st.session_state["ux_days"]=max(40,min(80,int(restored_days)))
+    st.session_state["unified_stay"]=st.session_state["ux_days"]
+bootstrap_ux(st.session_state)
 # One global exploratory base, separate from the approved TripPlan.
 _all_bases=base_options()
 _base_details={item["id"]:item for item in _all_bases}
@@ -212,8 +226,69 @@ def simulate_city_in_budget(city_name: str) -> None:
 
 
 def _select_scenario_sidebar() -> None:
-    st.session_state["scenario_base_selected"]=choose_exploratory_base(
-        st.session_state["scenario_sidebar"],_all_bases)
+    chosen=choose_exploratory_base(st.session_state["scenario_sidebar"],_all_bases)
+    st.session_state["scenario_base_selected"]=chosen
+    st.session_state["ux_last_candidate"]=chosen
+    st.session_state["ux_mode"]="Simulação"
+
+
+def _ux_area_changed() -> None:
+    set_ux_area(st.session_state,st.session_state["ux_area"])
+
+
+def _ux_section_changed() -> None:
+    set_ux_task(st.session_state,st.session_state["ux_area"],
+                st.session_state["ux_section"])
+
+
+def _ux_aux_changed() -> None:
+    apply_ux(st.session_state)
+
+
+def _ux_legacy_page_changed() -> None:
+    set_ux_legacy(st.session_state,st.session_state["main_navigation"],
+                  st.session_state.get("itinerary_section"),
+                  st.session_state.get("guide_section"))
+
+
+def _ux_legacy_itinerary_changed() -> None:
+    set_ux_legacy(st.session_state,"Roteiro",
+                  st.session_state["itinerary_section"],
+                  st.session_state.get("guide_section"))
+
+
+def _ux_legacy_guide_changed() -> None:
+    set_ux_legacy(st.session_state,"Roteiro","Guias e pesquisas",
+                  st.session_state["guide_section"])
+
+
+def _ux_days_changed() -> None:
+    # Shared duration is a what-if input, never a mutation of TripPlan.
+    st.session_state["unified_stay"]=st.session_state["ux_days"]
+
+
+def _ux_budget_days_changed() -> None:
+    st.session_state["ux_days"]=st.session_state["unified_stay"]
+
+
+def _ux_next_task(area:str,task:str) -> None:
+    set_ux_task(st.session_state,area,task)
+
+
+def _ux_mode_changed() -> None:
+    official=active_plan()["base_city"]
+    if st.session_state["ux_mode"]=="Oficial":
+        previous=st.session_state.get("scenario_base_selected",official)
+        if previous!=official:
+            st.session_state["ux_last_candidate"]=previous
+        st.session_state["scenario_base_selected"]=official
+        st.session_state["scenario_sidebar"]=official
+    else:
+        candidate=st.session_state.get("ux_last_candidate",official)
+        if candidate not in _base_details:
+            candidate=official
+        st.session_state["scenario_base_selected"]=candidate
+        st.session_state["scenario_sidebar"]=candidate
 
 
 with st.sidebar:
@@ -225,17 +300,21 @@ with st.sidebar:
       <small>TRAVEL JOURNAL · 2027</small>
       <strong>✧ Nossa Europa</strong>
       <span>Lua de mel & temporada na França</span></div>""", unsafe_allow_html=True)
-    page = st.radio("Explorar", ["Visão geral", "Mapa & destinos", "Comparar cidades", "Roteiro", "Orçamento", "Pesquisas & decisões"], label_visibility="collapsed", key="main_navigation", format_func=lambda name: {"Visão geral": "⌂  Minha viagem", "Mapa & destinos": "▣  Explorar destinos", "Comparar cidades": "▤  Comparar cidades", "Roteiro": "▦  Meu roteiro e consultor", "Orçamento": "◉  Orçamento", "Pesquisas & decisões": "☑  Decisões e pesquisas"}[name])
-    st.divider()
-    st.caption("**CIDADE-BASE PARA SIMULAÇÃO**")
-    st.selectbox("Cidade-base exploratória",list(_base_details),
-                 key="scenario_sidebar",on_change=_select_scenario_sidebar,
-                 format_func=lambda city:(
-                     _base_details[city]["name"]+" · "+_base_details[city]["country"]))
-    st.caption("Roteiro oficial: "+_base_details[active_plan()["base_city"]]["name"]+
-               ". Selecionar aqui não altera o plano aprovado.")
-    st.divider()
-    st.caption("**ORIGEM DOS DADOS**")
+    st.caption("**ONDE VOCÊ QUER IR?**")
+    st.radio("Menu principal",list(UX_AREAS),label_visibility="collapsed",
+             key="ux_area",on_change=_ux_area_changed,
+             format_func=lambda name:{
+                 "Minha viagem":"⌂  Minha viagem",
+                 "Explorar":"⌕  Explorar destinos",
+                 "Meu roteiro":"▦  Meu roteiro",
+                 "Orçamento":"◉  Orçamento"}[name])
+    st.caption("Escolha uma tarefa dentro de cada área. Seu plano continua salvo separadamente.")
+    with st.expander("Fontes e ferramentas avançadas",expanded=False):
+        st.radio("Acesso à navegação anterior",list(LEGACY_PAGES),
+                 key="main_navigation",on_change=_ux_legacy_page_changed)
+        st.caption("Compatibilidade com atalhos e pesquisas antigas. "
+                   "Use as quatro áreas acima para o planejamento habitual.")
+        st.caption("**ORIGEM DOS DADOS**")
     st.caption("Drive sincronizado" if sync_status == "live" else ("Drive parcialmente sincronizado" if sync_status == "partial" else "Snapshot de 14/11/2026"))
     for source_name, source_label in (("decisions", "Decisões"), ("tasks", "Pendências"), ("finance", "Financeiro e roteiro")):
         state = sync_sources[source_name]
@@ -263,14 +342,84 @@ with st.sidebar:
     st.link_button("Abrir pasta no Drive", data["sources"]["project_folder"], use_container_width=True)
     st.info("Painel em desenvolvimento. Nenhum voo, imóvel ou passeio foi reservado.")
 
-# Cross-page visibility: exploration never changes approved calendar or outings.
-hypothetical_id=st.session_state.get("scenario_base_selected")
-if hypothetical_id and hypothetical_id!=active_plan()["base_city"]:
-    if page in ("Visão geral","Mapa & destinos","Roteiro","Pesquisas & decisões"):
-        st.info("Cidade-base em simulação: "+hypothetical_id.replace("_"," ").title()+
-                ". O mapa, o calendário, os passeios e as decisões oficiais "
-                "permanecem ligados ao roteiro aprovado. Compare rotas em "
-                "Roteiro → Explorar bases e custos em Orçamento.")
+# One compact context bar, shared by all four user-facing areas.
+if "ux_mode" not in st.session_state:
+    st.session_state["ux_mode"]="Simulação"
+if "ux_days" not in st.session_state:
+    french_days=st.session_state.get(
+        "unified_stay",active_plan()["total_days"]-active_plan()["italy_days"])
+    st.session_state["ux_days"]=max(40,min(80,int(french_days)))
+if "unified_stay" not in st.session_state:
+    st.session_state["unified_stay"]=st.session_state["ux_days"]
+official_id=active_plan()["base_city"]
+if st.session_state.get("ux_mode")=="Oficial" and (
+        st.session_state.get("scenario_base_selected")!=official_id):
+    # An explicit city selection in an explorer wins over a stale official-mode label.
+    st.session_state["ux_mode"]="Simulação"
+with st.container(border=True):
+    st.markdown("**Contexto do planejamento**")
+    mode_col,base_col,days_col=st.columns([1.2,1.5,.75],gap="small")
+    with mode_col:
+        st.segmented_control("Visualizar",["Oficial","Simulação"],
+                             key="ux_mode",on_change=_ux_mode_changed,
+                             selection_mode="single")
+    with base_col:
+        st.selectbox("Cidade-base",list(_base_details),
+                     key="scenario_sidebar",on_change=_select_scenario_sidebar,
+                     disabled=st.session_state["ux_mode"]=="Oficial",
+                     format_func=lambda city:_base_details[city]["name"]+
+                                            " · "+_base_details[city]["country"])
+    with days_col:
+        st.number_input("Dias na França (simulação)",min_value=40,max_value=80,
+                        key="ux_days",on_change=_ux_days_changed,
+                        disabled=st.session_state["ux_mode"]=="Oficial")
+    state_label=("Plano oficial" if st.session_state["ux_mode"]=="Oficial"
+                 else "Simulação independente")
+    st.caption(state_label+" · Base aprovada no plano: "+
+               _base_details[official_id]["name"]+
+               " · Nenhuma reserva confirmada. Alterações exploratórias não "
+               "mudam o TripPlan sem aprovação explícita.")
+
+ux_area=st.session_state["ux_area"]
+st.segmented_control("O que deseja fazer?",list(UX_SECTIONS[ux_area]),
+                     key="ux_section",on_change=_ux_section_changed,
+                     selection_mode="single")
+ux_section=st.session_state["ux_section"]
+if ux_area=="Explorar" and ux_section=="Mais pesquisas":
+    st.selectbox("Qual pesquisa deseja consultar?",list(RESEARCH_OPTIONS),
+                 key="ux_research",on_change=_ux_aux_changed)
+elif ux_area=="Meu roteiro" and ux_section=="Sugestões":
+    st.segmented_control("Como deseja avançar?",list(SUGGESTION_OPTIONS),
+                         key="ux_suggestion",on_change=_ux_aux_changed,
+                         selection_mode="single")
+# Legacy routing is a presentation adapter; no model or persisted plan is changed.
+page,itinerary_target,guide_target,base_target=ux_route(
+    ux_area,ux_section,
+    research=st.session_state.get("ux_research","Pesquisa ampliada"),
+    suggestion=st.session_state.get("ux_suggestion","Descobrir"))
+st.caption(UX_DESCRIPTIONS.get((ux_area,ux_section),"Continue o planejamento."))
+# Contextual action makes the connection between tasks explicit without
+# adding more permanent tabs to the navigation bar.
+next_steps={
+    ("Minha viagem","Resumo"):("Escolher cidades-base","Explorar","Cidades-base"),
+    ("Explorar","Cidades-base"):("Comparar cidades","Explorar","Comparar cidades"),
+    ("Explorar","Comparar cidades"):("Simular o orçamento","Orçamento","Visão financeira"),
+    ("Explorar","Passeios e destinos"):("Organizar passeios","Meu roteiro","Meus passeios"),
+    ("Explorar","Mapa"):("Explorar cidades-base","Explorar","Cidades-base"),
+    ("Meu roteiro","Itália"):("Ver meus passeios","Meu roteiro","Meus passeios"),
+    ("Meu roteiro","Meus passeios"):("Organizar calendário","Meu roteiro","Calendário"),
+    ("Meu roteiro","Calendário"):("Revisar custos","Orçamento","Visão financeira"),
+    ("Meu roteiro","Sugestões"):("Revisar meus passeios","Meu roteiro","Meus passeios"),
+    ("Orçamento","Visão financeira"):("Comparar cidades-base","Explorar","Comparar cidades"),
+}
+suggestion=next_steps.get((ux_area,ux_section))
+if suggestion:
+    st.button("Próximo passo: "+suggestion[0]+" →",key="ux_next_step",
+              on_click=_ux_next_task,args=(suggestion[1],suggestion[2]))
+if st.session_state.get("scenario_base_selected")!=official_id:
+    st.caption("Cidade hipotética em análise: "+
+               _base_details[st.session_state["scenario_base_selected"]]["name"]+
+               ". Passeios, calendário e decisões oficiais permanecem separados.")
 
 if page == "Visão geral":
     st.markdown("""<div class="home-hero" role="region" aria-label="Apresentação da viagem">
@@ -524,12 +673,12 @@ elif page == "Comparar cidades":
     current_candidate=st.session_state.get("scenario_base_selected",active_plan()["base_city"])
     if current_candidate not in compare_names:
         current_candidate=active_plan()["base_city"]
+    sync_city_widget("compare_exploratory_base",list(compare_names))
     selected_candidate=st.selectbox(
         "Cidade-base hipotética compartilhada", list(compare_names),
         index=list(compare_names).index(current_candidate),
-        format_func=lambda k:compare_names[k],key="compare_exploratory_base")
-    st.session_state["scenario_base_selected"]=choose_exploratory_base(
-        selected_candidate,all_exploratory_bases)
+        format_func=lambda k:compare_names[k],key="compare_exploratory_base",
+        on_change=set_city_from_widget,args=("compare_exploratory_base",))
     st.caption("Seleção exploratória compartilhada com Explorar bases e Orçamento. "
                "As quatro cidades do comparador histórico continuam com métricas "
                "mais detalhadas; outras cidades podem não ter cotações equivalentes.")
@@ -970,47 +1119,63 @@ elif page == "Comparar cidades":
 
 elif page == "Roteiro":
     itinerary = load_itinerary()
-    st.markdown(
-        "<div class='page-eyebrow'>NOSSA EUROPA · ITÁLIA → FRANÇA</div>"
-        "<div class='page-title'>Roteiro, destinos & deslocamentos</div>"
-        "<div class='page-subtitle'>Veja o que fazer em cada etapa, compare passeios e explore "
-        "o mapa. Valores de bilhetes são referências publicadas, não reservas para 2027.</div>",
-        unsafe_allow_html=True)
-    c1,c2,c3,c4=st.columns(4,gap="small")
-    trip_metrics=[
-        ("Casamento","04/09/2027","Data fixa"),
-        ("Viagem completa","65–75 dias","Duração em estudo"),
-        ("Itália","~10 dias","Roma + Costa Amalfitana"),
-        ("França","~55–65 dias","Base ainda em avaliação")
-    ]
-    for col,(label,val,hint) in zip((c1,c2,c3,c4),trip_metrics):
-        with col:
-            st.markdown("<div class='page-stat page-stat--blue'>"
-                        f"<div class='page-stat__label'>{escape(label)}</div>"
-                        f"<div class='page-stat__value'>{escape(val)}</div>"
-                        f"<div class='page-stat__hint'>{escape(hint)}</div></div>",
-                        unsafe_allow_html=True)
-    st.markdown("<div class='page-alert page-alert--neutral'>"
-                "Plano em estudo: a ordem Itália → França está definida como direção de planejamento, "
-                "mas datas, cidade-base, hotéis e deslocamento Itália → França não foram reservados. "
-                "Férias iniciais de 20–30 dias; depois trabalho remoto, sujeito a validação de regras.</div>",
-                unsafe_allow_html=True)
+    # The page title follows the current task, rather than showing a giant
+    # generic trip dashboard above every single tool.
+    task_title={
+        "Cidades-base":"Onde vale a pena ficar?",
+        "Passeios e destinos":"O que podemos conhecer?",
+        "Mais pesquisas":"Detalhes das pesquisas",
+        "Visão do roteiro":"Nossa viagem, etapa por etapa",
+        "Itália":"Nossa lua de mel na Itália",
+        "Meus passeios":"Passeios escolhidos",
+        "Calendário":"Organizar os dias da viagem",
+        "Sugestões":"Ideias para melhorar o roteiro",
+        "Passeios e custos":"Custos dos passeios",
+    }.get(ux_section,"Meu roteiro")
+    st.markdown("<div class='page-eyebrow'>NOSSA EUROPA · "+escape(ux_area.upper())+"</div>"
+                "<div class='page-title'>"+escape(task_title)+"</div>"
+                "<div class='page-subtitle'>"+escape(
+                    UX_DESCRIPTIONS.get((ux_area,ux_section),"Planeje sua viagem."))+
+                "</div>",unsafe_allow_html=True)
+    if ux_section=="Visão do roteiro":
+        c1,c2,c3,c4=st.columns(4,gap="small")
+        trip_metrics=[
+            ("Casamento","04/09/2027","Data fixa"),
+            ("Viagem completa","65–75 dias","Duração em estudo"),
+            ("Itália","~10 dias","Roma + Costa Amalfitana"),
+            ("França","~55–65 dias","Base ainda em avaliação")
+        ]
+        for col,(label,val,hint) in zip((c1,c2,c3,c4),trip_metrics):
+            with col:
+                st.markdown("<div class='page-stat page-stat--blue'>"
+                            f"<div class='page-stat__label'>{escape(label)}</div>"
+                            f"<div class='page-stat__value'>{escape(val)}</div>"
+                            f"<div class='page-stat__hint'>{escape(hint)}</div></div>",
+                            unsafe_allow_html=True)
+        st.markdown("<div class='page-alert page-alert--neutral'>"
+                    "Plano em estudo: Itália → França, sem reservas confirmadas. "
+                    "Férias iniciais de 20–30 dias; depois trabalho remoto sujeito "
+                    "à validação de regras locais.</div>",unsafe_allow_html=True)
 
     render_scenario_impact(active_plan(),data,
                            sync_sources["finance"]["status"]=="live")
-    sections=["Visão geral","Itália","Meus passeios","Explorar bases","Descobrir","Orçamento","Calendário","Simular roteiros","Guias e pesquisas"]
-    itinerary_section=st.segmented_control("Área do roteiro",sections,default="Meus passeios",
-                                           selection_mode="single",key="itinerary_section",
-                                           label_visibility="collapsed")
-    if itinerary_section is None:
-        itinerary_section="Meus passeios"
-    if itinerary_section == "Guias e pesquisas":
-        itinerary_section=st.selectbox("Guia ou pesquisa",[
-            "Explorar atrações","Itália e Costa Amalfitana","França e escapadas",
-            "Transportes e custos","Calendário de pesquisa","Cronograma oficial"],
-            key="guide_section")
-        if itinerary_section == "Calendário de pesquisa":
-            itinerary_section="Calendário legado"
+    # The old nine-tab navigation remains available only as a collapsed
+    # compatibility control; UX 3.0 exposes the current task above.
+    with st.expander("Acesso a ferramentas antigas deste roteiro",expanded=False):
+        st.segmented_control("Navegação anterior do roteiro",
+                             list(LEGACY_ITINERARY),key="itinerary_section",
+                             on_change=_ux_legacy_itinerary_changed,
+                             selection_mode="single")
+        if st.session_state.get("itinerary_section")=="Guias e pesquisas":
+            st.selectbox("Guia ou pesquisa",[
+                "Explorar atrações","Itália e Costa Amalfitana","França e escapadas",
+                "Transportes e custos","Calendário de pesquisa","Cronograma oficial"],
+                key="guide_section",on_change=_ux_legacy_guide_changed)
+    itinerary_section=itinerary_target or st.session_state.get("itinerary_section","Meus passeios")
+    if itinerary_section=="Guias e pesquisas":
+        itinerary_section=guide_target or st.session_state.get("guide_section","Explorar atrações")
+    if itinerary_section=="Calendário de pesquisa":
+        itinerary_section="Calendário legado"
 
     def itinerary_map(phase: str, zoom: float, center: tuple[float,float], height: int=400) -> None:
         # Convert research-place roles into existing project status colors; no fake route lines.
@@ -1284,7 +1449,13 @@ elif page == "Orçamento":
         format_func=lambda x:f"R$ {x[:-1]} mil", key="unified_scenario",selection_mode="single")
     scenario_id = scenario_id or "70k"
     if scenario_id!=active_plan()["budget_scenario"]:
-        update_fields(budget_scenario=scenario_id)
+        st.info("Teto selecionado apenas para esta simulação. "
+                "O teto do planejamento oficial permanece em R$ "+
+                active_plan()["budget_scenario"][:-1]+" mil.")
+        if st.session_state.get("ux_mode")=="Oficial":
+            if st.button("Confirmar alteração do teto oficial",key="budget_cap_confirm"):
+                update_fields(budget_scenario=scenario_id)
+                st.rerun()
     scenario = get_scenario(data,scenario_id)
     baseline = calculate_scenario(scenario)
     french = resolve_french_budget(scenario,live_finance)
@@ -1299,7 +1470,8 @@ elif page == "Orçamento":
     col1,col2,col3 = st.columns(3,gap="medium")
     with col1:
         stay = st.slider("Dias na França",min_value=40,max_value=80,
-                         value=french["french_days"],step=1,key="unified_stay")
+                         value=french["french_days"],step=1,key="unified_stay",
+                         on_change=_ux_budget_days_changed)
     with col2:
         outings = st.slider("Saídas por semana",0,7,value=2,key="unified_outings")
     with col3:
@@ -1314,13 +1486,10 @@ elif page == "Orçamento":
         candidate=st.session_state.get("scenario_base_selected",active_plan()["base_city"])
         if candidate not in city_ids:
             candidate=active_plan()["base_city"]
-        selected_base_id=st.selectbox(
-            "Cidade-base hipotética",city_ids,index=city_ids.index(candidate),
-            format_func=lambda k:hypothetical_city_name(k,exploratory_options),
-            key="budget_exploratory_base")
-        st.session_state["scenario_base_selected"]=choose_exploratory_base(
-            selected_base_id,exploratory_options)
+        selected_base_id=candidate
         selected_city=hypothetical_city_name(selected_base_id,exploratory_options)
+        st.markdown("**Cidade-base nesta análise:** "+selected_city)
+        st.caption("Use o seletor de cidade no cabeçalho para comparar outra base.")
     st.caption("Esta cidade é uma simulação independente. "
                "O roteiro oficial permanece em "+active_plan()["base_city"].capitalize()+
                ". A ausência de aluguel pesquisado não significa custo zero.")

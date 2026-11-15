@@ -5,6 +5,28 @@ from base_scenario_model import base_options
 from base_scenario_impact import scenario_impact
 
 
+def sync_city_widget(widget_key:str,choices:list[str])->None:
+    """Reflect the global candidate without overwriting real widget changes.
+
+    Call before creating the local widget. An on_change handler updates the
+    canonical selection at callback time, prior to the next script rerun.
+    """
+    selected=st.session_state.get("scenario_base_selected")
+    if selected in choices and st.session_state.get(widget_key)!=selected:
+        st.session_state[widget_key]=selected
+
+
+def set_city_from_widget(widget_key:str)->None:
+    """Propagate local city selections to the shared global context."""
+    from base_scenario_model import choose_exploratory_base
+    options=base_options()
+    selected=choose_exploratory_base(st.session_state[widget_key],options)
+    st.session_state["scenario_base_selected"]=selected
+    st.session_state["scenario_sidebar"]=selected
+    st.session_state["ux_last_candidate"]=selected
+    st.session_state["ux_mode"]="Simulação"
+
+
 def render_scenario_impact(plan:dict,trip_data:dict,finance_live:bool)->None:
     selected=st.session_state.get("scenario_base_selected")
     if not selected or selected==plan["base_city"]:
@@ -13,7 +35,9 @@ def render_scenario_impact(plan:dict,trip_data:dict,finance_live:bool)->None:
     with st.expander("Impacto hipotético · "+labels.get(selected,selected),expanded=False):
         result=scenario_impact(plan,trip_data,finance_live,selected,
              st.session_state.get("advisor_eurfx",6.3),
-             st.session_state.get("advisor_chffx",7.1))
+             st.session_state.get("advisor_chffx",7.1),
+             french_days=st.session_state.get("ux_days") if
+             st.session_state.get("ux_mode")=="Simulação" else None)
         st.caption("Roteiro oficial: "+labels.get(plan["base_city"],plan["base_city"])+
                    ". Esta simulação não altera datas, atrações, calendário ou reservas.")
         if result["total_brl"] is None:
