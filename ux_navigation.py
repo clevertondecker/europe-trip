@@ -131,7 +131,9 @@ def apply(state) -> tuple[str, str | None, str | None, str | None]:
         state["itinerary_section"] = itinerary
     if guide is not None:
         state["guide_section"] = guide
-    if base_mode is not None:
+    if base_mode == "Pesquisa ampliada":
+        state["base_explorer_mode"] = "Pesquisa ampliada"
+    elif base_mode is not None and "base_explorer_mode" not in state:
         state["base_explorer_mode"] = base_mode
     state["_ux_legacy_page"] = page
     state["_ux_legacy_itinerary"] = itinerary
@@ -178,6 +180,8 @@ def set_task(state, area: str, section: str) -> None:
         raise ValueError("Tarefa de navegação inválida")
     state["ux_area"] = area
     state["ux_section"] = section
+    if (area, section)==("Explorar", "Cidades-base"):
+        state["base_explorer_mode"]="Destinos próximos"
     apply(state)
 
 
