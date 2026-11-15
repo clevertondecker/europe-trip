@@ -173,6 +173,13 @@ def navigate_page(destination: str) -> None:
     """Navigation from homepage controls, applied before the radio on rerun."""
     st.session_state["main_navigation"] = destination
 
+def navigate_to_base_explorer() -> None:
+    """Change navigation in a widget callback, before the sidebar is rendered."""
+    st.session_state["main_navigation"] = "Roteiro"
+    st.session_state["itinerary_section"] = "Explorar bases"
+    st.session_state["base_explorer_mode"] = "Destinos próximos"
+
+
 def navigate_to_attractions() -> None:
     st.session_state["main_navigation"] = "Roteiro"
     st.session_state["itinerary_section"] = "Guias e pesquisas"
@@ -502,11 +509,8 @@ elif page == "Comparar cidades":
     st.caption("Seleção exploratória compartilhada com Explorar bases e Orçamento. "
                "As quatro cidades do comparador histórico continuam com métricas "
                "mais detalhadas; outras cidades podem não ter cotações equivalentes.")
-    if st.button("Abrir passeios e rotas desta base",key="compare_open_base"):
-        st.session_state["main_navigation"]="Roteiro"
-        st.session_state["itinerary_section"]="Explorar bases"
-        st.session_state["base_explorer_mode"]="Destinos próximos"
-        st.rerun()
+    st.button("Abrir passeios e rotas desta base",
+              key="compare_open_base",on_click=navigate_to_base_explorer)
     city_audit = load_audit()
     market = load_market()
     round2 = load_round2()
