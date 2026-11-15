@@ -10,7 +10,7 @@ AREAS = ("Minha viagem", "Explorar", "Meu roteiro", "Orçamento")
 SECTIONS = {
     "Minha viagem": ("Resumo", "Pendências", "Decisões"),
     "Explorar": ("Cidades-base", "Comparar", "Passeios", "Mapa"),
-    "Meu roteiro": ("Visão geral", "Itália", "França", "Calendário", "Sugestões"),
+    "Meu roteiro": ("Meu planejamento", "Organizar viagem", "Melhorar meu roteiro"),
     "Orçamento": ("Resumo financeiro", "Simulações", "Detalhamento"),
 }
 # Migration for bookmarks and callbacks from UX 3.0. Public task names stay stable.
@@ -19,8 +19,13 @@ TASK_ALIASES = {
     ("Explorar", "Comparar cidades"): "Comparar",
     ("Explorar", "Passeios e destinos"): "Passeios",
     ("Explorar", "Mais pesquisas"): "Cidades-base",
-    ("Meu roteiro", "Visão do roteiro"): "Visão geral",
-    ("Meu roteiro", "Meus passeios"): "França",
+    ("Meu roteiro", "Visão do roteiro"): "Meu planejamento",
+    ("Meu roteiro", "Visão geral"): "Meu planejamento",
+    ("Meu roteiro", "Meus passeios"): "Meu planejamento",
+    ("Meu roteiro", "Itália"): "Melhorar meu roteiro",
+    ("Meu roteiro", "França"): "Melhorar meu roteiro",
+    ("Meu roteiro", "Calendário"): "Organizar viagem",
+    ("Meu roteiro", "Sugestões"): "Melhorar meu roteiro",
     ("Orçamento", "Visão financeira"): "Resumo financeiro",
     ("Orçamento", "Passeios e custos"): "Detalhamento",
 }
@@ -46,11 +51,9 @@ DESCRIPTIONS = {
     ("Explorar", "Comparar"): "Veja o custo e os destinos afetados ao trocar de base.",
     ("Explorar", "Passeios"): "Explore atrações e viagens próximas.",
     ("Explorar", "Mapa"): "Localize cidades e referências geográficas.",
-    ("Meu roteiro", "Visão geral"): "Confira as etapas da viagem.",
-    ("Meu roteiro", "Itália"): "Roma, Costa Amalfitana e lua de mel.",
-    ("Meu roteiro", "França"): "Passeios escolhidos, França e deslocamentos.",
-    ("Meu roteiro", "Calendário"): "Distribua atividades pelos dias.",
-    ("Meu roteiro", "Sugestões"): "Descubra destinos ou simule melhorias.",
+    ("Meu roteiro", "Meu planejamento"): "Escolha atrações e continue do ponto atual.",
+    ("Meu roteiro", "Organizar viagem"): "Organize os passeios por período ou data.",
+    ("Meu roteiro", "Melhorar meu roteiro"): "Pesquise e melhore o roteiro sem perder sua edição.",
     ("Orçamento", "Resumo financeiro"): "Confira o teto e as principais categorias.",
     ("Orçamento", "Simulações"): "Teste hospedagem, duração, passeios e câmbio.",
     ("Orçamento", "Detalhamento"): "Consulte rubricas, limites e fontes.",
@@ -83,55 +86,45 @@ def route(area: str, section: str, *, research: str = "Pesquisa ampliada",
         if section == "Simulações" and budget_view == "Consultor de passeios":
             return "Roteiro", "Orçamento", None, None
         return "Orçamento", None, None, None
-    if section == "Visão geral":
+    if section == "Meu planejamento":
         return "Roteiro", "Visão geral", None, None
-    if section == "Itália":
-        return "Roteiro", "Itália", None, None
-    if section == "França":
-        if france in ("França e escapadas", "Transportes e custos"):
-            return "Roteiro", "Guias e pesquisas", france, None
-        return "Roteiro", "Meus passeios", None, None
-    if section == "Calendário":
-        return "Roteiro", "Calendário", None, None
+    if section == "Organizar viagem":
+        return ("Roteiro", "Calendário" if
+                research=="Calendário completo" else "Visão geral",None,None)
+    # Specialist resources are secondary choices, not separate main tabs.
+    if suggestion=="Itália":
+        return "Roteiro","Itália",None,None
+    if suggestion=="Temporada europeia":
+        return "Roteiro","Meus passeios",None,None
+    if suggestion=="Calendário completo":
+        return "Roteiro","Calendário",None,None
     if suggestion=="Guias especializados":
-        return "Roteiro", "Guias e pesquisas", (guide_view if guide_view in GUIDES
-                                                 else GUIDES[0]), None
-    return "Roteiro", (suggestion if suggestion in SUGGESTION_OPTIONS[:2]
-                       else SUGGESTION_OPTIONS[0]), None, None
+        return "Roteiro","Guias e pesquisas",(guide_view if guide_view in GUIDES
+                                               else GUIDES[0]),None
+    return "Roteiro",(suggestion if suggestion in SUGGESTION_OPTIONS[:2]
+                     else "Descobrir"),None,None
 
 
 def from_legacy(page: str, itinerary: str | None = None,
                 guide: str | None = None) -> tuple[str, str]:
-    """Map old deep-links back into a visible UX 3.1 tab."""
-    if page == "Visão geral":
-        return "Minha viagem", "Resumo"
-    if page == "Pesquisas & decisões":
-        return "Minha viagem", "Pendências"
-    if page == "Orçamento":
-        return "Orçamento", "Resumo financeiro"
-    if page == "Mapa & destinos":
-        return "Explorar", "Mapa"
-    if page == "Comparar cidades":
-        return "Explorar", "Comparar"
-    if itinerary == "Visão geral":
-        return "Meu roteiro", "Visão geral"
-    if itinerary == "Itália":
-        return "Meu roteiro", "Itália"
-    if itinerary == "Explorar bases":
-        return "Explorar", "Cidades-base"
-    if itinerary in ("Descobrir", "Simular roteiros"):
-        return "Meu roteiro", "Sugestões"
-    if itinerary == "Calendário":
-        return "Meu roteiro", "Calendário"
-    if itinerary == "Orçamento":
-        return "Orçamento", "Detalhamento"
-    if itinerary == "Guias e pesquisas":
-        if guide in ("França e escapadas", "Transportes e custos"):
-            return "Meu roteiro", "França"
-        if guide == "Explorar atrações" or guide is None:
-            return "Explorar", "Passeios"
-        return "Meu roteiro", "Sugestões"
-    return "Meu roteiro", "França"
+    """Keep every old deep-link reachable after reducing itinerary tabs."""
+    if page=="Visão geral":return "Minha viagem","Resumo"
+    if page=="Pesquisas & decisões":return "Minha viagem","Pendências"
+    if page=="Orçamento":return "Orçamento","Resumo financeiro"
+    if page=="Mapa & destinos":return "Explorar","Mapa"
+    if page=="Comparar cidades":return "Explorar","Comparar"
+    if itinerary in ("Visão geral","Meus passeios"):
+        return "Meu roteiro","Meu planejamento"
+    if itinerary=="Calendário":return "Meu roteiro","Organizar viagem"
+    if itinerary in ("Itália","Descobrir","Simular roteiros"):
+        return "Meu roteiro","Melhorar meu roteiro"
+    if itinerary=="Explorar bases":return "Explorar","Cidades-base"
+    if itinerary=="Orçamento":return "Orçamento","Simulações"
+    if itinerary=="Guias e pesquisas":
+        if guide=="Explorar atrações" or guide is None:
+            return "Explorar","Passeios"
+        return "Meu roteiro","Melhorar meu roteiro"
+    return "Meu roteiro","Meu planejamento"
 
 
 def apply(state) -> tuple[str, str | None, str | None, str | None]:
@@ -146,8 +139,12 @@ def apply(state) -> tuple[str, str | None, str | None, str | None]:
     if section not in SECTIONS[area]:
         section = DEFAULT_SECTION[area]
         state["ux_section"] = section
-    research = state.get("ux_research", RESEARCH_OPTIONS[0])
-    suggestion = state.get("ux_suggestion", SUGGESTION_OPTIONS[0])
+    research = ("Calendário completo" if state.get("ux_organize_view")=="Calendário completo"
+                and (area,section)==("Meu roteiro","Organizar viagem")
+                else state.get("ux_research",RESEARCH_OPTIONS[0]))
+    suggestion = (state.get("ux_improve_view",SUGGESTION_OPTIONS[0])
+                  if (area,section)==("Meu roteiro","Melhorar meu roteiro")
+                  else state.get("ux_suggestion",SUGGESTION_OPTIONS[0]))
     france = state.get("ux_france_view", "Meus passeios")
     city_view = state.get("ux_city_view","Visão da cidade")
     budget_view = state.get("ux_budget_view","Simulação geral")
@@ -206,6 +203,7 @@ def set_area(state, area: str) -> None:
 
 
 def set_task(state, area: str, section: str) -> None:
+    section = TASK_ALIASES.get((area,section),section)
     if section not in SECTIONS[area]:
         raise ValueError("Tarefa de navegação inválida")
     state["ux_area"] = area
@@ -238,6 +236,18 @@ def set_from_legacy(state, page: str,
             else "Visão da cidade")
     if itinerary == "Orçamento":
         state["ux_budget_view"]="Consultor de passeios"
+    if itinerary=="Itália":
+        state["ux_improve_view"]="Itália"
+    elif itinerary=="Meus passeios":
+        state["ux_improve_view"]="Temporada europeia"
+    elif itinerary=="Descobrir":
+        state["ux_improve_view"]="Descobrir"
+    elif itinerary=="Simular roteiros":
+        state["ux_improve_view"]="Simular roteiros"
+    elif itinerary=="Calendário":
+        state["ux_organize_view"]="Calendário completo"
+    if itinerary=="Guias e pesquisas" and guide not in ("Explorar atrações",None):
+        state["ux_improve_view"]="Guias especializados"
     if itinerary == "Explorar bases" and state.get("base_explorer_mode") == "Pesquisa ampliada":
         state["ux_research"] = "Pesquisa ampliada"
         state["ux_section"] = "Cidades-base"
