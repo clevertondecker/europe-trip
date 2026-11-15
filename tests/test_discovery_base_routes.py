@@ -56,6 +56,8 @@ class RouteBaseDiscoveryTests(unittest.TestCase):
         self.assertIn("€ 5.40",text)
         app.selectbox(key="advisor_base").set_value("strasbourg").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
+        self.assertEqual(app.session_state["advisor_plan"]["base_city"],"mulhouse")
+        app.button(key="advisor_confirm_base").click().run()
         self.assertEqual(app.session_state["advisor_plan"]["base_city"],"strasbourg")
         text=" ".join(x.value for x in list(app.caption)+list(app.info))
         self.assertIn("Strasbourg",text)
