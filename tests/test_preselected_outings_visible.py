@@ -17,7 +17,7 @@ class PreselectedOutingsVisibleTests(unittest.TestCase):
         catalog=load_attractions()
         names={d["id"]:d["name"] for d in catalog["destinations"]}
         attractions={a["id"]:a["name"] for a in catalog["attractions"]}
-        text="\n".join(item.value for item in app.markdown)
+        text="\n".join(item.value for item in list(app.markdown)+list(app.caption))
         self.assertIn("Passeios pré-selecionados neste estilo",text)
         for key in ("economy","balanced","experience"):
             scenario=app.session_state.get("scenario_edit_"+key)
