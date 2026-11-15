@@ -51,6 +51,21 @@ def _chosen_destination_changed()->None:
     st.session_state["flow_active_destination"]=st.session_state["flow_add_destination"]
 
 
+def _search_changed()->None:
+    st.session_state["flow_search_saved"]=st.session_state["flow_search"]
+
+
+def _picks_changed(destination:str)->None:
+    st.session_state.setdefault("flow_pending_attractions",{})[destination]=list(
+        st.session_state["flow_pick_"+destination])
+
+
+def _period_changed(destination:str)->None:
+    st.session_state.setdefault("flow_pending_periods",{})[destination]=(
+        st.session_state["flow_period_"+destination])
+
+
+
 def _active_stage_changed()->None:
     state=st.session_state
     state["flow_stage"]=state["flow_active_stage"]
@@ -103,7 +118,11 @@ def _render_add(plan:dict,catalog:dict)->None:
             "Em qual etapa?",[ITALY_STAGE,FRANCE_STAGE],default=ITALY_STAGE,
             key="flow_stage",selection_mode="single",
             format_func=_stage_label,on_change=_stage_changed)
+        if "flow_search" not in st.session_state:
+            st.session_state["flow_search"]=st.session_state.get(
+                "flow_search_saved","")
         term=st.text_input("Buscar cidade ou atração",key="flow_search",
+                           on_change=_search_changed,
                            placeholder="Ex.: Amalfi, Ravello, Colmar, Vaticano")
         all_choices=[d for d in destinations(catalog) if d["stage"]==stage]
         if term.strip():
@@ -115,6 +134,9 @@ def _render_add(plan:dict,catalog:dict)->None:
             st.info("Nenhum lugar encontrado. Tente outra busca ou etapa.")
         else:
             lookup={d["id"]:d for d in all_choices}
+            previous=st.session_state.get("flow_active_destination")
+            if previous in lookup and st.session_state.get("flow_add_destination")!=previous:
+                st.session_state["flow_add_destination"]=previous
             dest_id=st.selectbox("Lugar",list(lookup),
                                  format_func=lambda key:lookup[key]["name"],
                                  key="flow_add_destination",
@@ -129,16 +151,25 @@ def _render_add(plan:dict,catalog:dict)->None:
                         "Você pode editar suas atrações abaixo.")
             labels={a["id"]:a["name"] for a in dest["attractions"]}
             defaults=(current["attractions"] if current else [])
+            draft=st.session_state.get("flow_pending_attractions",{}).get(
+                dest_id,defaults)
+            pick_key="flow_pick_"+dest_id
+            if pick_key not in st.session_state:
+                st.session_state[pick_key]=[x for x in draft if x in labels]
             picked=st.multiselect("Atrações desejadas (1 a 5)",list(labels),
-                                  default=[x for x in defaults if x in labels],
                                   format_func=lambda key:labels[key],
-                                  key="flow_pick_"+dest_id,max_selections=5)
+                                  key=pick_key,max_selections=5,
+                                  on_change=_picks_changed,args=(dest_id,))
             periods=period_options(stage)
+            period_key="flow_period_"+dest_id
+            selected_period=st.session_state.get(
+                "flow_pending_periods",{}).get(
+                    dest_id,current["period"] if current else UNASSIGNED)
+            if period_key not in st.session_state and selected_period in periods:
+                st.session_state[period_key]=selected_period
             period=st.selectbox("Quando? (opcional)",periods,
-                                index=periods.index(current["period"])
-                                if current and current["period"] in periods else 0,
-                                key="flow_period_"+dest_id,
-                                format_func=_period_label)
+                                key=period_key,on_change=_period_changed,
+                                args=(dest_id,),format_func=_period_label)
             st.caption("Sem data obrigatória · Não adiciona reservas nem "
                        "altera o roteiro de outra cidade-base.")
             if not already:
