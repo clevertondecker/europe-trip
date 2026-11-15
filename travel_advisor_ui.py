@@ -19,6 +19,8 @@ from planning_status import save_label,explain_storage_error,friendly_timestamp
 from advisor_finance import advisor_projection
 from discovery_ui import render_discovery
 from my_outings_ui import render_my_outings
+from active_preset import active_preset
+from active_preset_ui import render_active_preset_summary
 from advisor_presentation import present_risks,proposal_comparison,simple_next_step
 from data_model import get_scenario
 from unified_budget import resolve_french_budget,scenario_total
@@ -221,7 +223,14 @@ def render_advisor(trip_data:dict,sync_sources:dict,workspace_area:str='Meus pas
     st.caption("Estilo de otimização: altera como o consultor prioriza sugestões, "
                "mas não inventa despesas ou economias. Para ver impacto financeiro real, "
                "escolha passeios ou ajuste as hipóteses do orçamento.")
+    preset=(active_preset(p,catalog,routes,trip_data,
+                          sync_sources["finance"]["status"]=="live",
+                          eurfx,chffx,use_city_rent,
+                          allow_overnight=st.session_state.get("advisor_discovery_overnight",False))
+            if workspace_area in ("Meus passeios","Descobrir","Calendário") else None)
     if workspace_area == "Orçamento":
+        st.caption("Os indicadores iniciais abaixo representam apenas seus passeios "
+                   "confirmados. Os três roteiros prontos aparecem mais abaixo.")
         metrics=[("Bilhetes conhecidos",f"R$ {known_brl:,.0f}","Subtotal incompleto; duas pessoas"),
                  ("Custos faltantes",str(len(cost["missing"])),"Sem preço ou tarifa normal"),
                  ("Projeção do cenário",f"R$ {result['total']:,.0f}","Orçamento integrado"),
@@ -241,6 +250,8 @@ def render_advisor(trip_data:dict,sync_sources:dict,workspace_area:str='Meus pas
     advice_cards=present_risks(risks,{k:v["name"] for k,v in bydest.items()})
     if workspace_area == "Calendário":
         st.markdown("### Sugestões para sua viagem")
+        if preset is not None:
+            render_active_preset_summary(preset,catalog,"calendar")
         st.caption(simple_next_step(p,advice_cards))
         if not advice_cards:
             st.success("Nenhum alerta nas regras atuais. Confirme horários e preços de 2027 antes de reservar.")
@@ -466,7 +477,10 @@ def render_advisor(trip_data:dict,sync_sources:dict,workspace_area:str='Meus pas
                        "Salve o planejamento para mantê-los em outros dispositivos.")
         render_my_outings(p,catalog,routes=routes,trip_data=trip_data,
                           finance_live=sync_sources["finance"]["status"]=="live",
-                          eurfx=eurfx,chffx=chffx,use_city_rent=use_city_rent)
+                          eurfx=eurfx,chffx=chffx,use_city_rent=use_city_rent,
+                          preset=preset)
+    if workspace_area == "Descobrir" and preset is not None:
+        render_active_preset_summary(preset,catalog,"discover")
     if workspace_area in ("Descobrir","Simular roteiros","Orçamento"):
         render_discovery(p,catalog,routes,trip_data,sync_sources,eurfx,chffx,use_city_rent,
                          view={"Descobrir":"discover","Simular roteiros":"board","Orçamento":"budget"}[workspace_area])
