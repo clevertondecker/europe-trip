@@ -46,8 +46,8 @@ class GitHubPlanRepository:
             if exc.code!=404:raise
             existing=None
         if existing is None:
-            if expected_sha is not None or plan["revision"]!=0:
-                raise ValueError("New plan requires first revision, no SHA")
+            if expected_sha is not None:
+                raise ValueError("New plan must not supply a previous SHA")
         else:
             old,actual_sha=existing
             if expected_sha!=actual_sha:
