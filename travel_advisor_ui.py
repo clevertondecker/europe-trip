@@ -378,7 +378,6 @@ def render_advisor(trip_data:dict,sync_sources:dict)->None:
                              if entry["saved_at"] else "data não disponível")+
                             (" · revisão "+str(entry["revision"])
                              if entry["revision"] is not None else "")))
-                    )
                     if st.button("Carregar plano selecionado",key="advisor_load_selected",
                                  use_container_width=True):
                         try:
