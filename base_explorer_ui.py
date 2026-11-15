@@ -5,8 +5,6 @@ separate explicit confirmation; new bases stay as session-only shortlists.
 """
 from __future__ import annotations
 
-from html import escape
-
 import pydeck as pdk
 import streamlit as st
 
@@ -116,9 +114,11 @@ def _comparison(data:dict)->None:
         table.append({
             "Base":names[result["base_id"]],
             "Rotas com tempo":str(result["time_coverage"])+"/"+str(result["destination_count"]),
-            "Trem ida+volta conhecido (min)":result["known_time_minutes"],
+            "Trem ida+volta conhecido (min)":(result["known_time_minutes"]
+                if result["known_time_minutes"] is not None else "Não pesquisado"),
             "Rotas com tarifa":str(result["fare_coverage"])+"/"+str(result["destination_count"]),
-            "Somatório condicional 'desde' (€)":result["illustrative_fare_if_all_min_eur"],
+            "Somatório condicional 'desde' (€)":(result["illustrative_fare_if_all_min_eur"]
+                if result["illustrative_fare_if_all_min_eur"] is not None else "Não cotado"),
             "Todos os trechos com tarifas":("Sim" if result["fully_priced"] else "Não"),
         })
     st.dataframe(table,hide_index=True,width="stretch")
@@ -164,7 +164,7 @@ def _choose_base(data:dict,plan:dict,base_id:str)->None:
         else:
             approved=st.checkbox("Confirmo que quero trocar a cidade-base "
                                 "do meu roteiro oficial para "+name,
-                                value=False,key="base_explore_apply_confirmation")
+                                value=False,key="base_explore_apply_confirmation_"+base_id)
             if st.button("Aplicar base suportada ao roteiro oficial",
                          key="base_explore_apply",disabled=not approved):
                 update_fields(base_city=base_id)
@@ -216,8 +216,10 @@ def _split_stay(data:dict,plan:dict,trip_data:dict,finance_live:bool,
     if first==second:
         st.warning("Para comparar uma ou duas bases, escolha duas cidades distintas.")
         return
-    if rent1<=0 or rent2<=0 or moving<=0:
-        st.info("Informe **os dois aluguéis mobiliados** e um custo de mudança. "
+    move_without_cost=st.checkbox("Mudança sem custo financeiro confirmado",
+                                  value=False,key="base_stay_move_free") if moving==0 else False
+    if rent1<=0 or rent2<=0 or (moving==0 and not move_without_cost):
+        st.info("Informe **os dois aluguéis mobiliados** e o custo de mudança. "
                 "Sem esses valores, nenhum total será mostrado como estimativa de hospedagem. "
                 "Não usamos o aluguel residencial médio como cotação de curta estadia.")
         return
