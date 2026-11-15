@@ -6,6 +6,7 @@ import pydeck as pdk
 
 from destination_labels import place_label
 from outing_guide_model import additional_estimate
+from research_cost_ui import render_researched_outing
 from planning_session import select_package
 
 
@@ -176,3 +177,5 @@ def render_outing_guide(guide:dict,*,key_prefix:str,
             _render_map(guide)
         st.caption("Catálogo consultado: "+str(guide["catalog_checked_at"])+
                    ". Consulte horários e condições para a data real de 2027.")
+    render_researched_outing(guide,eurfx,chffx,prefix=key_prefix)
+
