@@ -54,23 +54,22 @@ def _photo(dest: dict) -> None:
 def _edit_card(dest_id: str, plan: dict, attractions: dict) -> None:
     available = attractions.get(dest_id, [])
     labels = {item["id"]: item["name"] for item in available}
-    with st.form("outing_edit_form_" + dest_id):
-        picked = st.multiselect(
-            "Atrações deste passeio (1 a 5)",
-            options=list(labels),
-            default=[a for a in plan["packages"][dest_id] if a in labels],
-            format_func=lambda key: labels[key],
-            key="outing_edit_attractions_" + dest_id,
-        )
-        submitted = st.form_submit_button("Salvar alterações", width="stretch")
-        if submitted:
-            try:
-                _commit_selection(dest_id, picked, set(labels))
-                st.session_state["outing_edit_open"] = None
-                st.success("Passeio atualizado no planejamento. Salve online para manter a alteração.")
-                st.rerun()
-            except ValueError as exc:
-                st.error(str(exc))
+    picked = st.multiselect(
+        "Atrações deste passeio (1 a 5)",
+        options=list(labels),
+        default=[a for a in plan["packages"][dest_id] if a in labels],
+        format_func=lambda key: labels[key],
+        key="outing_edit_attractions_" + dest_id,
+    )
+    if st.button("Salvar alterações", key="outing_edit_save_" + dest_id,
+                 width="stretch"):
+        try:
+            _commit_selection(dest_id, picked, set(labels))
+            st.session_state["outing_edit_open"] = None
+            st.success("Passeio atualizado no planejamento. Salve online para manter a alteração.")
+            st.rerun()
+        except ValueError as exc:
+            st.error(str(exc))
 
 
 def render_my_outings(plan: dict, catalog: dict) -> None:
@@ -108,21 +107,19 @@ def render_my_outings(plan: dict, catalog: dict) -> None:
                     format_func=lambda key: lookup[key]["name"] + " · " + lookup[key]["country"])
                 labels = {a["id"]: a["name"] for a in attractions[destination]
                           if plan.get("preferences", {}).get(a["id"]) != "Descartar"}
-                with st.form("outing_add_form"):
-                    picked = st.multiselect(
-                        "Atrações (selecione de 1 a 5)",
-                        options=list(labels), key="outing_new_attractions",
-                        format_func=lambda key: labels[key])
-                    confirm = st.form_submit_button("Adicionar ao meu roteiro", type="primary",
-                                                    width="stretch")
-                    if confirm:
-                        try:
-                            _commit_selection(destination, picked, set(labels))
-                            st.session_state["outing_adding"] = False
-                            st.success("Passeio adicionado ao seu roteiro. Salve online para manter a alteração.")
-                            st.rerun()
-                        except ValueError as exc:
-                            st.error(str(exc))
+                picked = st.multiselect(
+                    "Atrações (selecione de 1 a 5)",
+                    options=list(labels), key="outing_new_attractions",
+                    format_func=lambda key: labels[key])
+                if st.button("Adicionar ao meu roteiro", type="primary",
+                             key="outing_add_save", width="stretch"):
+                    try:
+                        _commit_selection(destination, picked, set(labels))
+                        st.session_state["outing_adding"] = False
+                        st.success("Passeio adicionado ao seu roteiro. Salve online para manter a alteração.")
+                        st.rerun()
+                    except ValueError as exc:
+                        st.error(str(exc))
             if st.button("Cancelar", key="outing_add_cancel"):
                 st.session_state["outing_adding"] = False
                 st.rerun()
