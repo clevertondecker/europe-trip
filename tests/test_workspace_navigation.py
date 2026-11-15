@@ -10,7 +10,7 @@ class WorkspaceNavigationTests(unittest.TestCase):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=90).run()
         app.radio(key="main_navigation").set_value("Roteiro").run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
-        options=["Meus passeios","Descobrir","Orçamento","Calendário"]
+        options=["Meus passeios","Descobrir","Orçamento","Calendário","Simular roteiros"]
         original=app.session_state["advisor_plan"]["plan_id"]
         for area in options:
             app.segmented_control(key="itinerary_section").set_value(area).run()
@@ -26,6 +26,9 @@ class WorkspaceNavigationTests(unittest.TestCase):
         self.assertFalse(app.exception,[x.message for x in app.exception])
         self.assertNotIn("scenario_review_button_balanced",{b.key for b in app.button})
         app.segmented_control(key="itinerary_section").set_value("Meus passeios").run()
+        self.assertIn("outing_add_open",{b.key for b in app.button})
+        self.assertNotIn("scenario_review_button_balanced",{b.key for b in app.button})
+        app.segmented_control(key="itinerary_section").set_value("Simular roteiros").run()
         self.assertIn("scenario_review_button_balanced",{b.key for b in app.button})
         app.segmented_control(key="itinerary_section").set_value("Guias e pesquisas").run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
