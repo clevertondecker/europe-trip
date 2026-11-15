@@ -16,6 +16,7 @@ from advisor_auth import is_verified_owner
 from planning_store import create_from_legacy,change_plan,sync_legacy_view
 from planning_session import active_plan,update_fields,accept_approved_plan
 from planning_status import save_label,explain_storage_error,friendly_timestamp
+from advisor_finance import advisor_projection
 from advisor_presentation import present_risks,proposal_comparison,simple_next_step
 from data_model import get_scenario
 from unified_budget import resolve_french_budget,scenario_total
@@ -190,17 +191,30 @@ def render_advisor(trip_data:dict,sync_sources:dict)->None:
     fxcol1,fxcol2=st.columns(2)
     with fxcol1: eurfx=st.number_input("R$/€ hipotético",4.,10.,6.3,.05,key="advisor_eurfx")
     with fxcol2: chffx=st.number_input("R$/CHF hipotético",4.,12.,7.1,.05,key="advisor_chffx")
-    scenario=get_scenario(trip_data,p["budget_scenario"])
-    french=resolve_french_budget(scenario,sync_sources["finance"]["status"]=="live")
-    days= p["total_days"]-p["italy_days"]
-    allocation=float(french["amounts"]["excursions"])*days/french["french_days"]
-    overage=excursions_overage_brl(cost["known_by_currency"]["EUR"],
-        cost["known_by_currency"]["CHF"],eurfx,chffx,allocation)
-    result=scenario_total(scenario,french,french_days=days,
-        outings_weekly=2,outing_couple_eur=60,fx_brl_per_eur=eurfx,
-        excursions_delta_brl=overage)
-    known_brl=float(Decimal(str(cost["known_by_currency"]["EUR"]))*Decimal(str(eurfx))+
-                    Decimal(str(cost["known_by_currency"]["CHF"]))*Decimal(str(chffx)))
+    st.caption("Ao alterar cidade-base, teto ou câmbio, a projeção abaixo é recalculada "
+               "na hora. Os valores de aluguel são referências históricas de 2026.")
+    use_city_rent=st.checkbox(
+        "Usar aluguel de referência da cidade escolhida (2026)",
+        value=True,key="advisor_use_city_rent",
+        help="Usa a referência mensal publicada em 2026 e substitui a verba de aluguel "
+             "já incluída na projeção; não é uma cotação para 2027. "
+             "Desmarque para usar a verba fixa do cenário.")
+    financial=advisor_projection(
+        trip_data,sync_sources["finance"]["status"]=="live",p,cost,
+        eurfx,chffx,use_city_rent)
+    scenario=financial["scenario"]
+    result=financial["result"]
+    known_brl=financial["known_billets_brl"]
+    if financial["rent_eur_month"] is not None:
+        st.caption(f"Referência de moradia em {bydest[p['base_city']]['name']}: "
+                   f"€ {financial['rent_eur_month']:,.0f}/mês (pesquisa de 2026). "
+                   "No orçamento, substitui a verba original de aluguel, sem duplicar.")
+    else:
+        st.caption("Moradia: verba geral do orçamento, sem ajuste por cidade-base. "
+                   "Nesse modo a troca de cidade só altera custos dos passeios selecionados.")
+    st.caption("Estilo de otimização: altera como o consultor prioriza sugestões, "
+               "mas não inventa despesas ou economias. Para ver impacto financeiro real, "
+               "escolha passeios ou ajuste as hipóteses do orçamento.")
     metrics=[("Bilhetes conhecidos",f"R$ {known_brl:,.0f}","Subtotal incompleto; duas pessoas"),
              ("Custos faltantes",str(len(cost["missing"])),"Sem preço ou tarifa normal"),
              ("Projeção do cenário",f"R$ {result['total']:,.0f}","Orçamento integrado"),
@@ -210,6 +224,10 @@ def render_advisor(trip_data:dict,sync_sources:dict)->None:
             st.metric(title,val,help=detail)
     if cost["missing"]:
         st.warning("Há gastos desconhecidos: não se pode afirmar que o roteiro está dentro do orçamento.")
+    if result["margin"]<0:
+        st.error(f"A projeção ultrapassa o teto em R$ {abs(result['margin']):,.0f}. "
+                 "Isso considera o orçamento atual e não significa que os passeios "
+                 "ainda não cotados estejam incluídos.")
     context={"margin":Decimal(str(result["margin"])),"cap":Decimal(str(scenario["cap_brl"]))}
     risks=assess_plan(p,catalog,routes,context)
     advice=recommendations(p,catalog,routes,risks)
