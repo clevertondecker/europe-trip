@@ -1094,31 +1094,43 @@ elif page == "Comparar cidades":
 
 elif page == "Roteiro":
     itinerary = load_itinerary()
-    st.markdown(
-        "<div class='page-eyebrow'>NOSSA EUROPA · ITÁLIA → FRANÇA</div>"
-        "<div class='page-title'>Roteiro, destinos & deslocamentos</div>"
-        "<div class='page-subtitle'>Veja o que fazer em cada etapa, compare passeios e explore "
-        "o mapa. Valores de bilhetes são referências publicadas, não reservas para 2027.</div>",
-        unsafe_allow_html=True)
-    c1,c2,c3,c4=st.columns(4,gap="small")
-    trip_metrics=[
-        ("Casamento","04/09/2027","Data fixa"),
-        ("Viagem completa","65–75 dias","Duração em estudo"),
-        ("Itália","~10 dias","Roma + Costa Amalfitana"),
-        ("França","~55–65 dias","Base ainda em avaliação")
-    ]
-    for col,(label,val,hint) in zip((c1,c2,c3,c4),trip_metrics):
-        with col:
-            st.markdown("<div class='page-stat page-stat--blue'>"
-                        f"<div class='page-stat__label'>{escape(label)}</div>"
-                        f"<div class='page-stat__value'>{escape(val)}</div>"
-                        f"<div class='page-stat__hint'>{escape(hint)}</div></div>",
-                        unsafe_allow_html=True)
-    st.markdown("<div class='page-alert page-alert--neutral'>"
-                "Plano em estudo: a ordem Itália → França está definida como direção de planejamento, "
-                "mas datas, cidade-base, hotéis e deslocamento Itália → França não foram reservados. "
-                "Férias iniciais de 20–30 dias; depois trabalho remoto, sujeito a validação de regras.</div>",
-                unsafe_allow_html=True)
+    # The page title follows the current task, rather than showing a giant
+    # generic trip dashboard above every single tool.
+    task_title={
+        "Cidades-base":"Onde vale a pena ficar?",
+        "Passeios e destinos":"O que podemos conhecer?",
+        "Mais pesquisas":"Detalhes das pesquisas",
+        "Visão do roteiro":"Nossa viagem, etapa por etapa",
+        "Itália":"Nossa lua de mel na Itália",
+        "Meus passeios":"Passeios escolhidos",
+        "Calendário":"Organizar os dias da viagem",
+        "Sugestões":"Ideias para melhorar o roteiro",
+        "Passeios e custos":"Custos dos passeios",
+    }.get(ux_section,"Meu roteiro")
+    st.markdown("<div class='page-eyebrow'>NOSSA EUROPA · "+escape(ux_area.upper())+"</div>"
+                "<div class='page-title'>"+escape(task_title)+"</div>"
+                "<div class='page-subtitle'>"+escape(
+                    UX_DESCRIPTIONS.get((ux_area,ux_section),"Planeje sua viagem."))+
+                "</div>",unsafe_allow_html=True)
+    if ux_section=="Visão do roteiro":
+        c1,c2,c3,c4=st.columns(4,gap="small")
+        trip_metrics=[
+            ("Casamento","04/09/2027","Data fixa"),
+            ("Viagem completa","65–75 dias","Duração em estudo"),
+            ("Itália","~10 dias","Roma + Costa Amalfitana"),
+            ("França","~55–65 dias","Base ainda em avaliação")
+        ]
+        for col,(label,val,hint) in zip((c1,c2,c3,c4),trip_metrics):
+            with col:
+                st.markdown("<div class='page-stat page-stat--blue'>"
+                            f"<div class='page-stat__label'>{escape(label)}</div>"
+                            f"<div class='page-stat__value'>{escape(val)}</div>"
+                            f"<div class='page-stat__hint'>{escape(hint)}</div></div>",
+                            unsafe_allow_html=True)
+        st.markdown("<div class='page-alert page-alert--neutral'>"
+                    "Plano em estudo: Itália → França, sem reservas confirmadas. "
+                    "Férias iniciais de 20–30 dias; depois trabalho remoto sujeito "
+                    "à validação de regras locais.</div>",unsafe_allow_html=True)
 
     render_scenario_impact(active_plan(),data,
                            sync_sources["finance"]["status"]=="live")
