@@ -17,7 +17,9 @@ class CityBaseDecisionTests(unittest.TestCase):
         self.assertEqual(SECTIONS["Meu roteiro"],(
             "Meu planejamento","Organizar viagem","Melhorar meu roteiro"))
         self.assertEqual(route("Explorar","Comparar")[0],"Comparar cidades")
-        self.assertEqual(route("Meu roteiro","França",france="Transportes e custos")[2],
+        self.assertEqual(route("Meu roteiro","Melhorar meu roteiro",
+                                suggestion="Guias especializados",
+                                guide_view="Transportes e custos")[2],
                          "Transportes e custos")
         self.assertEqual(route("Orçamento","Simulações")[0],"Orçamento")
 
