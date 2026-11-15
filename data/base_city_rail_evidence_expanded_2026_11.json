@@ -1,0 +1,119 @@
+{
+  "schema_version": 1,
+  "retrieved_at": "2026-11-15",
+  "basis_date": "2026-11-16",
+  "basis_day": "Monday",
+  "note": "Referências em horários divulgados para segunda 16/11/2026 (não sábado e não datas 2027). Minutos mínimos podem ser de TGV e não representam tempo normal de TER. Primeiro/último da origem não significa possibilidade de retorno. Sem dados de porta a porta.",
+  "segments": [
+    {
+      "from": "offenburg",
+      "to": "strasbourg",
+      "origin": "Offenburg",
+      "destination": "Strasbourg",
+      "fastest_minutes": 25,
+      "representative_regional_minutes": 29,
+      "average_minutes": 34,
+      "services_on_sample_day": 27,
+      "first_origin_departure": "06:35",
+      "last_origin_departure": "23:28",
+      "advertised_fare_from_eur_person_oneway": 13,
+      "source_url": "https://www.sncf-connect.com/en-en/train/timetables/offenburg/strasbourg",
+      "fare_source_url": "https://www.sncf-connect.com/en-en/train/route/offenburg/strasbourg",
+      "notes": "Trem mínimo de 25 min é TGV; diversos TER diretos de 29 min."
+    },
+    {
+      "from": "strasbourg",
+      "to": "colmar",
+      "origin": "Strasbourg",
+      "destination": "Colmar",
+      "fastest_minutes": 25,
+      "representative_regional_minutes": 30,
+      "average_minutes": 31,
+      "services_on_sample_day": 42,
+      "first_origin_departure": "05:19",
+      "last_origin_departure": "23:20",
+      "advertised_fare_from_eur_person_oneway": null,
+      "source_url": "https://www.sncf-connect.com/en-en/train/timetables/strasbourg/colmar",
+      "notes": "25 min mais rápido TGV; TER direto ~30 min."
+    },
+    {
+      "from": "mulhouse",
+      "to": "basel",
+      "origin": "Mulhouse",
+      "destination": "Basel SBB",
+      "fastest_minutes": 20,
+      "representative_regional_minutes": 22,
+      "average_minutes": 27,
+      "services_on_sample_day": 49,
+      "first_origin_departure": "04:49",
+      "last_origin_departure": "22:30",
+      "advertised_fare_from_eur_person_oneway": null,
+      "source_url": "https://www.sncf-connect.com/en-en/train/timetables/mulhouse/basel",
+      "notes": "20 min no mais rápido TGV; desconto TER Fluo condicionado às regras."
+    },
+    {
+      "from": "metz",
+      "to": "luxembourg_city",
+      "origin": "Metz",
+      "destination": "Luxembourg",
+      "fastest_minutes": 42,
+      "representative_regional_minutes": 54,
+      "average_minutes": 54,
+      "services_on_sample_day": 54,
+      "first_origin_departure": "04:54",
+      "last_origin_departure": "23:07",
+      "advertised_fare_from_eur_person_oneway": null,
+      "source_url": "https://www.sncf-connect.com/en-en/train/timetables/metz/luxembourg",
+      "notes": "Transporte interno luxemburguês gratuito em 2ª classe; trecho internacional Metz-Lux não gratuito."
+    },
+    {
+      "from": "lille",
+      "to": "brussels",
+      "origin": "Lille Europe",
+      "destination": "Bruxelles Midi",
+      "fastest_minutes": 34,
+      "representative_regional_minutes": null,
+      "average_minutes": 35,
+      "services_on_sample_day": 17,
+      "first_origin_departure": "07:18",
+      "last_origin_departure": "22:09",
+      "advertised_fare_from_eur_person_oneway": null,
+      "source_url": "https://www.sncf-connect.com/en-en/train/timetables/lille/brussels",
+      "notes": "Cenário com TGV e Eurostar, tarifas variam conforme data e estoque."
+    },
+    {
+      "from": "besancon",
+      "to": "dijon",
+      "origin": "Besançon Viotte",
+      "destination": "Dijon Ville",
+      "fastest_minutes": 46,
+      "representative_regional_minutes": 55,
+      "average_minutes": 58,
+      "services_on_sample_day": 29,
+      "first_origin_departure": "04:55",
+      "last_origin_departure": "21:56",
+      "advertised_fare_from_eur_person_oneway": null,
+      "source_url": "https://www.sncf-connect.com/en-en/train/timetables/besancon/dijon",
+      "notes": "Rota rápida TGV; diversos TER diretos entre ~55 e 65 min."
+    }
+  ],
+  "passes": [
+    {
+      "name": "Deutschland-Ticket",
+      "country": "Alemanha",
+      "monthly_cost_eur_2027": 66.8,
+      "valid_from": "2027-01-01",
+      "source_url": "https://www.bahn.de/angebot/regio/deutschland-ticket",
+      "status": "operator_announced_2027",
+      "conditions": "Assinatura mensal cancelável conforme regras; válida no transporte local e regional elegível, não cobre IC/ICE regulares nem necessariamente transporte transfronteiriço."
+    },
+    {
+      "name": "Transporte nacional gratuito",
+      "country": "Luxemburgo",
+      "monthly_cost_eur_2027": 0,
+      "source_url": "https://www.vdl.lu/en/getting-around/bus/routes-and-maps/free-public-transport-and-exceptions",
+      "status": "official_national_policy",
+      "conditions": "2ª classe de ônibus, bonde e trem em território luxemburguês; serviços internacionais e 1ª classe excluídos."
+    }
+  ]
+}
