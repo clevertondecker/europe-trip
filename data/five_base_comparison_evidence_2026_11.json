@@ -54,8 +54,8 @@
       "country": "Luxemburgo"
     },
     {
-      "id": "trier",
-      "name": "Trier",
+      "id": "cologne",
+      "name": "Colônia",
       "country": "Alemanha"
     },
     {
@@ -854,6 +854,24 @@
       "first_last_mile_confirmed": false,
       "fare_is_normal_verified": false,
       "notes": "63 min até Paris Nord; não confundir com OUIGO a CDG."
+    },
+    {
+      "base_id": "lille",
+      "destination_id": "cologne",
+      "fastest_train_oneway_min": 168,
+      "regional_example_min": null,
+      "advertised_from_eur_person_oneway": null,
+      "source_url": "https://www.sncf-connect.com/en-en/train/timetables/lille/cologne",
+      "fare_source_url": null,
+      "operator": "SNCF/Eurostar via Bruxelas",
+      "source_status": "official_operator_2026",
+      "checked_at": "2026-11-15",
+      "train_source_date": "2026-11-16",
+      "weekend_return_confirmed": false,
+      "overnight_required": null,
+      "first_last_mile_confirmed": false,
+      "fare_is_normal_verified": false,
+      "notes": "2h48 na ligação mais rápida publicada; pode exigir conexão em Bruxelas e bilhetes caros, volta de fim de semana 2027 pendente."
     }
   ],
   "note": "Matriz 5×15: 15 destinos idênticos, com a maioria das combinações sem horário/volta verificados. ZERO preço significa apenas deslocamento local, não cotação. Ausência de tarifa é null. Nenhuma oferta de imóvel confirmada para a janela.",
