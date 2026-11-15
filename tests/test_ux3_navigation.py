@@ -66,6 +66,7 @@ class UX3StreamlitNavigationSmokeTests(unittest.TestCase):
         self.assertFalse(app.exception,[x.message for x in app.exception])
         official=deepcopy(app.session_state["advisor_plan"])
         app.radio(key="ux_area").set_value("Explorar").run()
+        app.segmented_control(key="ux_mode").set_value("Simulação").run()
         app.selectbox(key="scenario_sidebar").set_value("offenburg").run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
         self.assertEqual(app.session_state["advisor_plan"],official)
