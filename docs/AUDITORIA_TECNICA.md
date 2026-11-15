@@ -91,7 +91,15 @@ Não ocorreu alteração silenciosa de backups v1.
 verificava se a proposta alterava datas aprovadas. Agora rejeita alterações
 e propostas de outro `plan_id` (quando presente), e valida novos dias.
 
-### P1-03 — Duas representações de estado (risco parcialmente controlado)
+### P1-03 — Atrações de destino diferente em backup (risco confirmado; corrigido)
+A importação validava IDs de atrações existentes e IDs de destinos,
+mas não necessariamente se cada atração pertencia **ao destino escolhido**.
+A validação pure `catalog_plan_validation` agora é usada na importação
+e no seletor canônico `planning_session.select_package`.
+Isso preserva schema v1 e rejeita backups/sugestões com dados deslocados,
+sem alterar planos já salvos automaticamente.
+
+### P1-04 — Duas representações de estado (risco parcialmente controlado)
 `TripPlan` fica em `advisor_plan` na sessão; `explore_packages`,
 `explore_calendar`, `unified_city` e chaves antigas são projeções.
 `planning_session._commit` já sincroniza as representações e invalida
