@@ -1,5 +1,6 @@
 """Regression suite for continuous itinerary creation and old plan files."""
 from copy import deepcopy
+from datetime import date
 from pathlib import Path
 import unittest
 from streamlit.testing.v1 import AppTest
@@ -165,6 +166,37 @@ class ItineraryFlowAppTests(unittest.TestCase):
         at.segmented_control(key="ux_section").set_value("Visão geral").run()
         self.assertEqual(at.session_state["advisor_plan"]["flexible_visits"][0]["period"],
                          "Durante a Costa Amalfitana")
+
+    def test_inline_organizer_supports_period_and_exact_date(self):
+        at=AppTest.from_file(str(ROOT/"app.py"),default_timeout=110).run()
+        at.radio(key="ux_area").set_value("Meu roteiro").run()
+        at.segmented_control(key="ux_section").set_value("Visão geral").run()
+        at.button(key="flow_add_open_button").click().run()
+        at.selectbox(key="flow_add_destination").set_value("italy_amalfi").run()
+        at.multiselect(key="flow_pick_italy_amalfi").set_value(
+            ["italy_amalfi__1"]).run()
+        at.button(key="flow_add_confirm").click().run()
+        at.button(key="flow_go_calendar").click().run()
+        self.assertFalse(at.exception,[e.message for e in at.exception])
+        self.assertIn("flow_organize_save_period",{x.key for x in at.button})
+        at.selectbox(key="flow_organize_period").set_value(
+            "Durante a Costa Amalfitana").run()
+        at.button(key="flow_organize_save_period").click().run()
+        self.assertEqual(at.session_state["advisor_plan"]["flexible_visits"][0]["period"],
+                         "Durante a Costa Amalfitana")
+        at.segmented_control(key="flow_organize_mode").set_value("Definir data").run()
+        self.assertFalse(at.exception,[e.message for e in at.exception])
+        at.date_input(key="flow_organize_date_Itália").set_value(
+            date(2027,9,12)).run()
+        at.button(key="flow_organize_save_date").click().run()
+        self.assertFalse(at.exception,[e.message for e in at.exception])
+        plan=at.session_state["advisor_plan"]
+        self.assertEqual(plan["flexible_visits"][0]["exact_date"],"2027-09-12")
+        self.assertEqual(plan["assignments"],{})
+        at.button(key="flow_organize_remove_date").click().run()
+        self.assertFalse(at.exception,[e.message for e in at.exception])
+        self.assertNotIn("exact_date",
+                         at.session_state["advisor_plan"]["flexible_visits"][0])
 
     def test_italy_proposal_requires_two_separate_user_clicks(self):
         at=AppTest.from_file(str(ROOT/"app.py"),default_timeout=100).run()
