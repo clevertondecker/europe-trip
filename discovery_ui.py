@@ -6,12 +6,30 @@ from destination_recommender import recommend_destinations
 from travel_profile_scenarios import build_profile_scenarios
 from recommended_itineraries import approve_destination,reject_destination,approve_profile_scenario
 from planning_session import accept_approved_plan
+from attractions_model import package_cost
+from advisor_finance import advisor_projection
 from scenario_board_ui import render_scenario_boards
 
 def money(value):
     return "R$ "+f"{value:,.0f}".replace(",",".")
 
-def _render_suggestion(rec,plan):
+def _financial_snapshot(plan,catalog,routes,trip_data,live,eurfx,chffx,use_city_rent):
+    """Use the exact same projection settings as the workspace's budget tab."""
+    ids=[a for group in plan["packages"].values() for a in group]
+    costs=package_cost(catalog,routes,plan["base_city"],ids)
+    projection=advisor_projection(
+        trip_data,live,plan,costs,eurfx,chffx,use_city_rent)
+    return {"total":float(projection["result"]["total"]),
+            "margin":float(projection["result"]["margin"]),
+            "known":float(projection["known_billets_brl"]),
+            "pending":len(costs["missing"])}
+
+
+def _go_to_my_outings():
+    st.session_state["itinerary_section"]="Meus passeios"
+
+
+def _render_suggestion(rec,plan,catalog,routes,trip_data,live,eurfx,chffx,use_city_rent):
     with st.container(border=True):
         header,detail=st.columns([1,2],gap="medium")
         with header:
@@ -48,10 +66,19 @@ def _render_suggestion(rec,plan):
             with a:
                 if st.button("Quero visitar",key="advisor_discover_add_"+rec["destination_id"],
                              use_container_width=True):
-                    updated=approve_destination(plan,rec,approved=True)
-                    accept_approved_plan(updated)
-                    st.success("Adicionado ao planejamento. Nenhuma reserva foi feita.")
-                    st.rerun()
+                    try:
+                        updated=approve_destination(plan,rec,approved=True)
+                        before=_financial_snapshot(plan,catalog,routes,trip_data,
+                                                   live,eurfx,chffx,use_city_rent)
+                        after=_financial_snapshot(updated,catalog,routes,trip_data,
+                                                  live,eurfx,chffx,use_city_rent)
+                        accept_approved_plan(updated)
+                        st.session_state["discovery_last_added"]={
+                            "name":rec["name"],"destination_id":rec["destination_id"],
+                            "before":before,"after":after}
+                        st.rerun()
+                    except ValueError as exc:
+                        st.error("Não foi possível adicionar o passeio: "+str(exc))
             with b:
                 if st.button("Descartar",key="advisor_discover_dismiss_"+rec["destination_id"],
                              use_container_width=True):
@@ -73,8 +100,32 @@ def render_discovery(plan,catalog,routes,trip_data,sync_sources,eurfx,chffx,use_
             eurfx,chffx,use_city_rent=use_city_rent,finance_only=view=="budget")
         return
     st.markdown("### Descobrir lugares para conhecer")
-    st.caption("Sugestões do catálogo pesquisado — fotos, atrações, deslocamentos e valores "
-               "de referência. Só entram no roteiro quando você escolhe.")
+    st.caption("Clique em **Quero visitar** para incluir imediatamente o destino em **Meus passeios**. "
+               "O orçamento da sessão é recalculado automaticamente; a gravação online depende do salvamento.")
+    live=sync_sources["finance"]["status"]=="live"
+    current=_financial_snapshot(plan,catalog,routes,trip_data,live,eurfx,chffx,use_city_rent)
+    notice=st.session_state.pop("discovery_last_added",None)
+    if notice:
+        st.success("✓ "+notice["name"]+" foi adicionado a Meus passeios.")
+        before,after=notice["before"],notice["after"]
+        delta=after["total"]-before["total"]
+        st.caption("Projeção recalculada: "+money(before["total"])+" → "+
+                   money(after["total"])+" · alteração "+money(delta)+
+                   ". Margem atual: "+money(after["margin"])+".")
+        if abs(delta)<0.005:
+            st.caption("O total não mudou porque os gastos conhecidos ainda cabem na "
+                       "verba de passeios já prevista, ou não há valores novos cotados.")
+        st.button("Ver em Meus passeios →",key="discovery_go_my_outings",
+                  on_click=_go_to_my_outings,width="stretch")
+    a,b,c=st.columns(3)
+    a.metric("Passeios no meu roteiro",len(plan["packages"]))
+    b.metric("Projeção do casal",money(current["total"]))
+    c.metric("Margem até o teto",money(current["margin"]))
+    if current["pending"]:
+        st.caption(f"⚠ {current['pending']} componente(s) sem preço completo: "
+                   "os valores são parciais, não cotações para 2027.")
+    st.caption("Os gastos conhecidos dos passeios já estão considerados na provisão "
+               "de excursões; não são somados duas vezes.")
     col1,col2=st.columns(2)
     with col1:
         max_minutes=st.selectbox("Tempo máximo de trem por trecho", [70,120,180,300],
@@ -129,7 +180,9 @@ def render_discovery(plan,catalog,routes,trip_data,sync_sources,eurfx,chffx,use_
                 "Aumente o tempo de deslocamento ou habilite pernoites.")
     else:
         st.caption(f"{len(places)} destinos candidatos, ordenados por adequação ao perfil escolhido.")
-        for rec in places[:count]:_render_suggestion(rec,plan)
+        for rec in places[:count]:
+            _render_suggestion(rec,plan,catalog,routes,trip_data,live,
+                               eurfx,chffx,use_city_rent)
         if len(places)>count and st.button("Ver mais destinos",key="workspace_discovery_more"):
             st.session_state["workspace_discovery_count"]=count+page_size
             st.rerun()
