@@ -20,6 +20,7 @@ from unified_budget import resolve_french_budget, scenario_total
 from calendar_model import calendar_plan
 from route_preview import route_endpoints
 from attractions_ui import render_explorer
+from travel_advisor_ui import render_advisor
 from attractions_model import load_attractions, load_base_routes, places_for_base, excursions_overage_brl
 
 st.set_page_config(page_title="Nossa Europa 2027", page_icon="🌍", layout="wide", initial_sidebar_state="expanded")
@@ -839,7 +840,7 @@ elif page == "Roteiro":
                 "Férias iniciais de 20–30 dias; depois trabalho remoto, sujeito a validação de regras.</div>",
                 unsafe_allow_html=True)
 
-    sections=["Visão geral","Explorar atrações","Itália e Costa Amalfitana","França e escapadas","Transportes e custos","Calendário","Cronograma oficial"]
+    sections=["Visão geral","Explorar atrações","Consultor inteligente","Itália e Costa Amalfitana","França e escapadas","Transportes e custos","Calendário","Cronograma oficial"]
     itinerary_section=st.segmented_control("Seção do roteiro",sections,default="Visão geral",
                                            selection_mode="single",key="itinerary_section",
                                            label_visibility="collapsed")
@@ -885,6 +886,9 @@ elif page == "Roteiro":
 
     elif itinerary_section == "Explorar atrações":
         render_explorer(data,sync_sources,map_view)
+
+    elif itinerary_section == "Consultor inteligente":
+        render_advisor(data,sync_sources)
 
     elif itinerary_section == "Itália e Costa Amalfitana":
         st.markdown("<div class='page-section'>Roma e Costa Amalfitana</div>",unsafe_allow_html=True)
