@@ -234,6 +234,32 @@
       "retrieved_at": "2026-11-15",
       "valid_for_2027": false,
       "notes": "€5/pessoa; 15 min aeroporto–estação indicados pela ANM, trânsito pode variar."
+    },
+    {
+      "id": "salerno_minori",
+      "name": "Salerno → Minori por ferry",
+      "eur_per_person": 10,
+      "unit": "person_oneway",
+      "category": "ferry",
+      "operator_minutes": null,
+      "status": "operator_published_2026",
+      "source_url": "https://www.travelmar.it/_download/tariffe-2026.pdf",
+      "retrieved_at": "2026-11-15",
+      "valid_for_2027": false,
+      "notes": "Ferry €10 por trecho/pessoa em 2026. Tempo navegação completo e frequência da data pendentes."
+    },
+    {
+      "id": "minori_amalfi_rt",
+      "name": "Minori ↔ Amalfi ferry",
+      "eur_per_person": 5,
+      "unit": "person_each_way",
+      "category": "ferry",
+      "operator_minutes": null,
+      "status": "operator_published_2026",
+      "source_url": "https://www.travelmar.it/_download/tariffe-2026.pdf",
+      "retrieved_at": "2026-11-15",
+      "valid_for_2027": false,
+      "notes": "Tarifa 2026 de Minori–Amalfi €5/pessoa/trecho; horários e volta não verificados."
     }
   ],
   "scenarios": [
@@ -485,8 +511,8 @@
         "vatican_online",
         "pantheon",
         "rome_salerno",
-        "salerno_maiori",
-        "maiori_amalfi_rt"
+        "salerno_minori",
+        "minori_amalfi_rt"
       ],
       "days_detail": [
         [
