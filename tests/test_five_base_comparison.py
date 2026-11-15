@@ -107,10 +107,11 @@ class FiveBaseComparisonModelTests(unittest.TestCase):
 class FiveBaseComparisonAppTests(unittest.TestCase):
     def test_five_base_panel_is_read_only(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=100).run()
-        app.radio(key="main_navigation").set_value("Roteiro").run()
-        app.segmented_control(key="itinerary_section").set_value("Explorar bases").run()
+        app.radio(key="ux_area").set_value("Explorar").run()
+        app.segmented_control(key="ux_section").set_value("Cidades-base").run()
+        app.segmented_control(key="ux_city_view").set_value("Pesquisa ampliada").run()
         original=deepcopy(app.session_state["advisor_plan"])
-        app.segmented_control(key="base_explorer_mode").set_value("Pesquisa ampliada").run()
+        self.assertEqual(app.session_state["ux_city_view"],"Pesquisa ampliada")
         self.assertFalse(app.exception,[e.message for e in app.exception])
         self.assertIn("five_base_detail",{x.key for x in app.selectbox})
         self.assertIn("five_base_destinations",{x.key for x in app.multiselect})
