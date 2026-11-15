@@ -9,6 +9,7 @@ import streamlit as st
 from planning_session import select_package, delete_package
 from attractions_model import package_cost
 from advisor_finance import advisor_projection
+from destination_labels import place_label
 from active_preset_ui import render_active_preset
 
 
@@ -142,7 +143,7 @@ def render_my_outings(plan: dict, catalog: dict, *, routes: dict | None = None,
                 lookup = {d["id"]: d for d in remaining}
                 destination = st.selectbox(
                     "Destino", list(lookup), key="outing_new_destination",
-                    format_func=lambda key: lookup[key]["name"] + " · " + lookup[key]["country"])
+                    format_func=lambda key: place_label(lookup[key]["name"],lookup[key]["country"],show_country=True))
                 labels = {a["id"]: a["name"] for a in attractions[destination]
                           if plan.get("preferences", {}).get(a["id"]) != "Descartar"}
                 picked = st.multiselect(
@@ -177,7 +178,7 @@ def render_my_outings(plan: dict, catalog: dict, *, routes: dict | None = None,
             with photo_col:
                 _photo(destinations[dest_id])
             with info_col:
-                st.markdown("#### " + escape(card["name"]) + " · " + escape(card["country"]))
+                st.markdown("#### " + escape(place_label(card["name"],card["country"],show_country=True)))
                 st.caption("✓ No meu roteiro · " + str(len(card["attractions"])) +
                            " atração(ões) · " +
                            (", ".join(card["dates"]) if card["dates"] else "Sem data definida"))

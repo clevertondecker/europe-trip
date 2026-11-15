@@ -17,6 +17,7 @@ from planning_store import summary
 from planning_status import save_label
 from active_preset import active_preset
 from active_preset_ui import render_active_preset_summary
+from destination_labels import place_label
 
 
 def dashboard_model(plan: dict, catalog: dict, routes: dict, trip_data: dict,
@@ -68,14 +69,14 @@ def _metric(label: str, value: str, note: str) -> None:
 def _map(model: dict, suggested:dict | None = None, catalog:dict | None = None) -> None:
     base = model["base"]
     points = [{
-        "name": base["name"] + " · base em estudo",
+        "name": place_label(base["name"],base["country"]) + " · base em estudo",
         "country": base["country"], "lat": base["lat"], "lon": base["lon"],
         "color": [42, 117, 108], "radius": 16,
     }]
     for item in model["destinations"]:
         if item["id"] != base["id"]:
             points.append({
-                "name": item["name"] + " · passeio selecionado",
+                "name": place_label(item["name"],item["country"]) + " · passeio selecionado",
                 "country": item["country"], "lat": item["lat"], "lon": item["lon"],
                 "color": [30, 78, 111], "radius": 11,
             })
@@ -86,7 +87,7 @@ def _map(model: dict, suggested:dict | None = None, catalog:dict | None = None) 
             if key in chosen_ids or key==base["id"] or key not in by_id:
                 continue
             item=by_id[key]
-            points.append({"name":item["name"]+" · sugestão do perfil",
+            points.append({"name":place_label(item["name"],item["country"])+" · sugestão do perfil",
                            "country":item["country"],"lat":item["lat"],"lon":item["lon"],
                            "color":[196,130,61],"radius":11})
     layer = pdk.Layer(
@@ -145,7 +146,7 @@ def render_trip_dashboard(plan: dict, trip_data: dict, finance_live: bool,
     for col, item in zip(st.columns(4, gap="small"), metrics):
         with col:
             _metric(*item)
-    st.caption("Base hipotética: " + model["base"]["name"] +
+    st.caption("Base hipotética: " + place_label(model["base"]["name"],model["base"]["country"]) +
                " · Saída candidata: " + model["departure"] +
                " · Retorno estimado: " + model["return_candidate"] +
                " · " + save_state)
@@ -204,7 +205,7 @@ def render_trip_dashboard(plan: dict, trip_data: dict, finance_live: bool,
                         if photo and photo.get("url"):
                             st.image(photo["url"], use_container_width=True)
                             st.caption("Foto: " + photo["author"] + " · " + photo["license"])
-                        st.markdown("**" + item["name"] + " · " + item["country"] + "**")
+                        st.markdown("**" + place_label(item["name"],item["country"],show_country=True) + "**")
                         count = len(item["attractions"])
                         st.caption(f"{count} atração(ões) · " +
                                    (", ".join(item["dates"]) if item["dates"]
