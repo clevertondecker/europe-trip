@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 import streamlit as st
+import pydeck as pdk
 
 from italy_honeymoon_model import (
     load_honeymoon,manual_italy_cost,optional_comparison,preview_nights,
@@ -47,6 +48,33 @@ def _logistics()->None:
                 st.markdown("[Operadora / fonte de referência]("+leg["source_url"]+")")
 
 
+def _map_places()->None:
+    """Pin map only. Travel time, ferry lines and transfers are not drawn."""
+    points=[
+        {"name":"Roma","lat":41.9028,"lon":12.4964,"color":[22,90,115]},
+        {"name":"Salerno","lat":40.6824,"lon":14.7681,"color":[42,117,108]},
+        {"name":"Maiori","lat":40.6485,"lon":14.6401,"color":[42,117,108]},
+        {"name":"Minori","lat":40.6490,"lon":14.6271,"color":[42,117,108]},
+        {"name":"Amalfi","lat":40.6340,"lon":14.6027,"color":[210,133,56]},
+        {"name":"Ravello","lat":40.6483,"lon":14.6128,"color":[210,133,56]},
+        {"name":"Positano","lat":40.6281,"lon":14.4843,"color":[210,133,56]},
+        {"name":"Capri","lat":40.5507,"lon":14.2426,"color":[210,133,56]},
+        {"name":"Pompeia","lat":40.7490,"lon":14.4988,"color":[210,133,56]},
+        {"name":"Nápoles","lat":40.8518,"lon":14.2681,"color":[22,90,115]},
+    ]
+    layer=pdk.Layer("ScatterplotLayer",data=points,
+                    get_position="[lon,lat]",get_fill_color="color",
+                    get_radius=7500,radius_min_pixels=7,radius_max_pixels=13,
+                    pickable=True)
+    chart=pdk.Deck(
+        map_style="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
+        initial_view_state=pdk.ViewState(latitude=41.09,longitude=13.75,zoom=6.3),
+        layers=[layer],tooltip={"text":"{name}"})
+    st.pydeck_chart(chart,height=345,width="stretch")
+    st.caption("Pinos de cidades e atrações, não traçado ferroviário/rodoviário/"
+               "marítimo real. Os preços e tempos estão nas referências abaixo.")
+
+
 def render_italy_honeymoon()->None:
     d=load_honeymoon()
     by_id={s["id"]:s for s in d["scenarios"]}
@@ -54,6 +82,8 @@ def render_italy_honeymoon()->None:
     st.info("Roma e Costa Amalfitana são destinos obrigatórios. O restante "
             "continua como **proposta exploratória**, não altera o roteiro oficial "
             "ou a planilha de orçamento do casal.")
+    with st.expander("Mapa: Roma, Costa Amalfitana e saída por Nápoles"):
+        _map_places()
     st.caption("4 noites Roma + 5 noites na costa = 9 noites / 10 dias de calendário. "
                "10 noites completas normalmente exigem 11 dias. Sem hora real "
                "do voo, a distribuição é editorial, não uma agenda reservada.")
