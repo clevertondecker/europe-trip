@@ -1340,6 +1340,21 @@ elif page == "Roteiro":
                                       == "Visão da cidade"))
 
     elif itinerary_section in ("Meus passeios","Descobrir","Orçamento","Calendário","Simular roteiros"):
+        if itinerary_section=="Calendário":
+            from itinerary_flow_model import selected_rows,ITALY_STAGE
+            italian=[
+                {"Data planejada":day,"Lugar":visit["name"],
+                 "Etapa":"Lua de mel na Itália"}
+                for visit in selected_rows(active_plan(),load_attractions())
+                if visit["stage"]==ITALY_STAGE
+                for day in visit["exact_dates"]
+            ]
+            if italian:
+                st.markdown("#### Dias definidos na Itália")
+                st.dataframe(italian,hide_index=True,width="stretch")
+                st.caption("Visitas italianas organizadas pelo novo roteiro, sem "
+                           "reserva confirmada. Edite datas em Meu roteiro → Visão geral "
+                           "→ Organizar dias.")
         render_advisor(data,sync_sources,workspace_area=itinerary_section)
 
     elif itinerary_section == "Itália e Costa Amalfitana":
