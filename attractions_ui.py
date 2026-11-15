@@ -63,15 +63,18 @@ def render_explorer(trip_data: dict, sync_sources: dict, map_view) -> None:
     # The exploratory city is shared with the comparison and finance pages.
     # The attractions route matrix currently supports four official bases only.
     from base_scenario_model import base_options, hypothetical_city_name
+    from base_scenario_ui import sync_city_widget, set_city_from_widget
     options=base_options()
     ids=[entry["id"] for entry in options]
     candidate=st.session_state.get("scenario_base_selected",active_plan()["base_city"])
     if candidate not in ids:
         candidate=active_plan()["base_city"]
+    sync_city_widget("attractions_scenario_base",ids)
     base=st.selectbox("Cidade-base da pesquisa exploratória",ids,
         index=ids.index(candidate),
         format_func=lambda code:hypothetical_city_name(code,options),
-        key="attractions_scenario_base")
+        key="attractions_scenario_base",on_change=set_city_from_widget,
+        args=("attractions_scenario_base",))
     st.session_state["scenario_base_selected"]=base
     official_base=active_plan()["base_city"]
     editable=base==official_base
