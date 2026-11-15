@@ -59,6 +59,7 @@ def build_outing_guide(plan:dict,catalog:dict,routes:dict,destination_id:str,
     distance_kind=route["distance_kind"]
     return {
         "base_id":base_id,"base_name":destinations[base_id]["name"],
+        "base":destinations[base_id],
         "destination_id":destination_id,"destination":destination,
         "route":route,"selected":selected,"optional":other,
         "visit_minutes_editorial":visit_mins,
