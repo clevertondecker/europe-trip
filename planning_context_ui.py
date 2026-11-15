@@ -98,11 +98,12 @@ def _form_settings(plan:dict)->None:
             italy=b.number_input("Dias na Itália",min_value=8,max_value=12,
                                  value=plan["italy_days"],step=1)
             c.metric("Temporada europeia",str(int(total)-int(italy))+" dias")
-            x,y=st.columns(2)
-            vacation=x.number_input("Férias iniciais (dias)",min_value=20,
-                                    max_value=30,value=plan["vacation_days"],step=1)
-            setup=y.number_input("Instalação (dias)",min_value=1,max_value=5,
-                                 value=plan["setup_days"],step=1)
+            with st.expander("Detalhes de férias e instalação"):
+                x,y=st.columns(2)
+                vacation=x.number_input("Férias iniciais (dias)",min_value=20,
+                                        max_value=30,value=plan["vacation_days"],step=1)
+                setup=y.number_input("Instalação (dias)",min_value=1,max_value=5,
+                                     value=plan["setup_days"],step=1)
             city=st.selectbox("Cidade-base atual (do plano oficial)",
                               sorted([x for x in names if x in
                                       {"mulhouse","strasbourg","metz","nancy"}]),
@@ -119,14 +120,29 @@ def _form_settings(plan:dict)->None:
             budget=b.selectbox("Cenário financeiro",list(BUDGET_LABELS),
                                index=list(BUDGET_LABELS).index(plan["budget_scenario"]),
                                format_func=lambda k:BUDGET_LABELS[k])
-            st.caption("Preferências de atrações já marcadas: "+
-                       str(len(plan.get("preferences",{})))+
-                       ". Você pode alterá-las ao escolher cada passeio.")
+            from attractions_model import load_attractions
+            catalog=load_attractions()
+            named={d["id"]:d["name"] for d in catalog["destinations"]}
+            for old in (plan.get("mandatory_destinations",[])+
+                        plan.get("excluded_destinations",[])):
+                named.setdefault(old,old+" (registrado anteriormente)")
+            with st.expander("Preferências principais"):
+                must=st.multiselect("Destinos que quero priorizar",list(named),
+                    default=plan.get("mandatory_destinations",[]),
+                    format_func=lambda key:named[key],key="workflow_priority_destinations")
+                avoid=st.multiselect("Destinos que quero evitar",list(named),
+                    default=plan.get("excluded_destinations",[]),
+                    format_func=lambda key:named[key],key="workflow_avoid_destinations")
+                st.caption(str(len(plan.get("preferences",{})))+
+                    " preferências de atrações já marcadas. "
+                    "Preferências específicas continuam editáveis ao escolher passeios.")
             submitted=st.form_submit_button("Revisar as mudanças",type="primary")
         if submitted:
             candidate=dict(total_days=int(total),italy_days=int(italy),
                            vacation_days=int(vacation),setup_days=int(setup),
-                           base_city=city,profile=profile,budget_scenario=budget)
+                           base_city=city,profile=profile,budget_scenario=budget,
+                           mandatory_destinations=list(must),
+                           excluded_destinations=list(avoid))
             try:
                 st.session_state["workflow_settings_preview"]=preview_settings(
                     active_plan(),candidate)
@@ -144,7 +160,9 @@ def _form_settings(plan:dict)->None:
                 st.markdown("**Antes de aplicar**")
                 labels={"total_days":"Duração total","italy_days":"Dias na Itália",
                         "vacation_days":"Férias iniciais","setup_days":"Instalação",
-                        "base_city":"Base","profile":"Estilo","budget_scenario":"Orçamento"}
+                        "base_city":"Base","profile":"Estilo","budget_scenario":"Orçamento",
+                        "mandatory_destinations":"Destinos prioritários",
+                        "excluded_destinations":"Destinos descartados"}
                 for key,change in review["changes"].items():
                     st.caption(labels.get(key,key)+": "+str(change["current"])+
                                " → "+str(change["proposed"]))
