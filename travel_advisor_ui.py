@@ -151,6 +151,11 @@ def render_advisor(trip_data:dict,sync_sources:dict)->None:
             break
         with st.container(border=True):
             st.markdown(f"**Proposta {index+1}: {len(proposal['placed'])} passeios distribuídos**")
+            score=proposal["score"]
+            st.caption(f"Ranking relativo: {score['relative_score']:.1f} pontos · "
+                       f"{score['known_roundtrip_train_minutes']} min de trem ida/volta conhecidos · "
+                       f"{score['unscheduled']} excursões sem encaixe ou dados suficientes. "
+                       "Pontuação heurística, não custo ou tempo porta a porta.")
             diff=[(day,dest) for day,dest in sorted(proposal["assignments"].items())
                   if p["assignments"].get(day)!=dest]
             if diff:
