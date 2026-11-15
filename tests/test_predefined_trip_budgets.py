@@ -49,7 +49,7 @@ class PredefinedBudgetTests(unittest.TestCase):
         app.button(key="budget_preset_confirm").click().run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
         self.assertGreater(len(app.session_state["advisor_plan"]["packages"]),0)
-        self.assertEqual(app.session_state["itinerary_section"],"Meus passeios")
+        self.assertEqual(app.session_state["ux_section"],"Meu planejamento")
         self.assertGreater(app.session_state["advisor_plan"]["revision"],original["revision"])
         self.assertEqual(app.session_state["advisor_plan"]["packages"],
                          app.session_state["explore_packages"])
@@ -57,7 +57,8 @@ class PredefinedBudgetTests(unittest.TestCase):
     def test_empty_my_outings_displays_reserved_budget_and_preset_link(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=95).run()
         app.radio(key="ux_area").set_value("Meu roteiro").run()
-        app.segmented_control(key="ux_section").set_value("França").run()
+        app.segmented_control(key="ux_section").set_value("Melhorar meu roteiro").run()
+        app.selectbox(key="ux_improve_view").set_value("Temporada europeia").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
         text=" ".join(x.value for x in list(app.markdown)+list(app.caption))
         self.assertIn("Quanto dos passeios já está previsto",text)
