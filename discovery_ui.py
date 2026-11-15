@@ -22,6 +22,10 @@ def _render_suggestion(rec,plan):
             st.markdown("#### "+rec["name"]+" · "+rec["country"])
             st.caption(rec["trip_type"])
             st.write("**O que conhecer:** "+", ".join(rec["attraction_names"]))
+            with st.expander("Ver atrações recomendadas"):
+                for attraction in rec["attraction_names"]:
+                    st.write("• "+attraction)
+                st.caption("Visitas sujeitas a horários e ingressos de 2027 ainda não verificados.")
             for reason in rec["reasons"][:2]:st.caption(reason)
             e=rec["known_costs"]["EUR"]
             ch=rec["known_costs"]["CHF"]
