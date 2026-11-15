@@ -15,6 +15,7 @@ from base_research_expanded_ui import render_expanded_research
 from planning_session import update_fields
 from base_scenario_model import base_options, choose_exploratory_base
 from base_research_expanded_model import load_research, find_city, observed_housing
+from base_scenario_store import make_scenario, scenario_export, scenario_import
 
 EXISTING_BASES=frozenset({"mulhouse","strasbourg","metz","nancy"})
 
@@ -302,6 +303,60 @@ def _split_stay(data:dict,plan:dict,trip_data:dict,finance_live:bool,
                    names.get(saved["second"],saved["second"]))
 
 
+def _scenario_backups(plan:dict,options:list[dict])->None:
+    """Save a portable scenario without writing to public GitHub or TripPlan."""
+    with st.expander("Meus cenários exploratórios · salvar e recuperar"):
+        st.caption("Cópias JSON permanecem com você. O Streamlit Community Cloud "
+                   "não garante armazenamento entre sessões; importar restaura "
+                   "somente a cidade e a duração do estudo, nunca o roteiro oficial.")
+        names={x["id"]:x["name"] for x in options}
+        chosen=st.session_state.get("scenario_base_selected",plan["base_city"])
+        if chosen not in names:
+            chosen=plan["base_city"]
+        label=st.text_input("Nome deste cenário",
+                            value="Estudar "+names[chosen],key="scenario_save_name")
+        days=st.number_input("Dias nesta base hipotética",min_value=7,
+                            max_value=100,
+                            value=max(7,min(100,plan["total_days"]-plan["italy_days"])),
+                            key="scenario_save_days")
+        notes=st.text_area("Anotações (opcional)",key="scenario_save_notes",
+                           max_chars=2000)
+        if st.button("Guardar cenário nesta sessão",key="scenario_store_session"):
+            try:
+                saved=make_scenario(label,chosen,int(days),notes)
+                st.session_state.setdefault("scenario_saved_drafts",{})[saved["name"]]=saved
+                st.success("Cenário guardado nesta sessão. Para manter após "
+                           "fechar o navegador, baixe o arquivo JSON.")
+            except ValueError as exc:
+                st.error(str(exc))
+        drafts=st.session_state.get("scenario_saved_drafts",{})
+        if drafts:
+            selected=st.selectbox("Cenários desta sessão",list(drafts),
+                                   key="scenario_drafts_choice")
+            a,b=st.columns(2)
+            with a:
+                if st.button("Reabrir cenário",key="scenario_drafts_restore"):
+                    restored=drafts[selected]
+                    st.session_state["scenario_base_selected"]=restored["city_id"]
+                    st.success("Cenário selecionado, sem mudar roteiro oficial.")
+                    st.rerun()
+            with b:
+                st.download_button("Baixar JSON",scenario_export(drafts[selected]),
+                                   file_name="nossa_europa_cenario.json",
+                                   mime="application/json",key="scenario_export_json")
+        upload=st.file_uploader("Importar cenário JSON",type=["json"],
+                                key="scenario_import_file")
+        if upload is not None and st.button("Validar e importar",key="scenario_import_apply"):
+            try:
+                restored=scenario_import(upload.getvalue())
+                st.session_state.setdefault("scenario_saved_drafts",{})[restored["name"]]=restored
+                st.session_state["scenario_base_selected"]=restored["city_id"]
+                st.success("Cenário importado e selecionado; roteiro oficial inalterado.")
+                st.rerun()
+            except (ValueError,UnicodeError,TypeError) as exc:
+                st.error("Arquivo recusado: "+str(exc))
+
+
 def render_base_explorer(plan:dict,trip_data:dict,finance_live:bool,
                          eurfx:float=6.3)->None:
     data=load_exploration()
@@ -311,6 +366,7 @@ def render_base_explorer(plan:dict,trip_data:dict,finance_live:bool,
                "ou aluguel mobiliado foi confirmado para setembro–novembro de 2027.")
     options=base_options(data)
     names={b["id"]:_base_name(data,b["id"]) for b in options}
+    _scenario_backups(plan,options)
     active=plan["base_city"]
     st.caption("**Base oficial atual:** "+names[active]+
                " · **Candidatas no catálogo:** "+str(len(names))+". "
