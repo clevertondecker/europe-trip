@@ -31,7 +31,7 @@ GUIDES = ("Explorar atrações", "Itália e Costa Amalfitana",
 RESEARCH_OPTIONS = ("Pesquisa ampliada", "França e escapadas",
                     "Transportes e custos", "Itália e Costa Amalfitana",
                     "Calendário de pesquisa", "Cronograma oficial")
-SUGGESTION_OPTIONS = ("Descobrir", "Simular roteiros")
+SUGGESTION_OPTIONS = ("Descobrir", "Simular roteiros", "Guias especializados")
 LEGACY_PAGES = ("Visão geral", "Mapa & destinos", "Comparar cidades",
                 "Roteiro", "Orçamento", "Pesquisas & decisões")
 LEGACY_ITINERARY = ("Visão geral", "Itália", "Meus passeios", "Explorar bases",
@@ -60,7 +60,7 @@ DESCRIPTIONS = {
 def route(area: str, section: str, *, research: str = "Pesquisa ampliada",
           suggestion: str = "Descobrir", france: str = "Meus passeios",
           city_view: str = "Visão da cidade",
-          budget_view: str = "Simulação geral"
+          budget_view: str = "Simulação geral", guide_view: str = "Itália e Costa Amalfitana"
           ) -> tuple[str, str | None, str | None, str | None]:
     """Map the 15 task tabs into existing page modules."""
     section = TASK_ALIASES.get((area, section), section)
@@ -93,7 +93,10 @@ def route(area: str, section: str, *, research: str = "Pesquisa ampliada",
         return "Roteiro", "Meus passeios", None, None
     if section == "Calendário":
         return "Roteiro", "Calendário", None, None
-    return "Roteiro", (suggestion if suggestion in SUGGESTION_OPTIONS
+    if suggestion=="Guias especializados":
+        return "Roteiro", "Guias e pesquisas", (guide_view if guide_view in GUIDES
+                                                 else GUIDES[0]), None
+    return "Roteiro", (suggestion if suggestion in SUGGESTION_OPTIONS[:2]
                        else SUGGESTION_OPTIONS[0]), None, None
 
 
@@ -127,7 +130,7 @@ def from_legacy(page: str, itinerary: str | None = None,
             return "Meu roteiro", "França"
         if guide == "Explorar atrações" or guide is None:
             return "Explorar", "Passeios"
-        return "Explorar", "Cidades-base"
+        return "Meu roteiro", "Sugestões"
     return "Meu roteiro", "França"
 
 
@@ -148,8 +151,10 @@ def apply(state) -> tuple[str, str | None, str | None, str | None]:
     france = state.get("ux_france_view", "Meus passeios")
     city_view = state.get("ux_city_view","Visão da cidade")
     budget_view = state.get("ux_budget_view","Simulação geral")
+    guide_view = state.get("ux_guide_view",GUIDES[0])
     target = route(area, section, research=research, suggestion=suggestion,
-                   france=france,city_view=city_view,budget_view=budget_view)
+                   france=france,city_view=city_view,budget_view=budget_view,
+                   guide_view=guide_view)
     page, itinerary, guide, base_mode = target
     state["main_navigation"] = page
     if itinerary is not None:
@@ -220,6 +225,9 @@ def set_from_legacy(state, page: str,
         state["ux_suggestion"] = itinerary
     if itinerary == "Guias e pesquisas" and guide in RESEARCH_OPTIONS:
         state["ux_research"] = guide
+    if itinerary == "Guias e pesquisas" and guide in GUIDES and guide not in ("Explorar atrações","França e escapadas","Transportes e custos"):
+        state["ux_suggestion"]="Guias especializados"
+        state["ux_guide_view"]=guide
     if itinerary == "Guias e pesquisas" and guide in ("França e escapadas", "Transportes e custos"):
         state["ux_france_view"] = guide
     if itinerary == "Meus passeios":
