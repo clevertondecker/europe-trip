@@ -56,8 +56,8 @@ class PredefinedBudgetTests(unittest.TestCase):
 
     def test_empty_my_outings_displays_reserved_budget_and_preset_link(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=95).run()
-        app.radio(key="main_navigation").set_value("Roteiro").run()
-        app.segmented_control(key="itinerary_section").set_value("Meus passeios").run()
+        app.radio(key="ux_area").set_value("Meu roteiro").run()
+        app.segmented_control(key="ux_section").set_value("França").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
         text=" ".join(x.value for x in list(app.markdown)+list(app.caption))
         self.assertIn("Quanto dos passeios já está previsto",text)
