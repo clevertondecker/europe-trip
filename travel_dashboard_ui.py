@@ -77,7 +77,7 @@ def _map(model: dict, suggested:dict | None = None, catalog:dict | None = None) 
             points.append({
                 "name": item["name"] + " · passeio selecionado",
                 "country": item["country"], "lat": item["lat"], "lon": item["lon"],
-                "color": [203, 139, 61], "radius": 11,
+                "color": [30, 78, 111], "radius": 11,
             })
     if suggested is not None and catalog is not None:
         by_id={d["id"]:d for d in catalog["destinations"]}
