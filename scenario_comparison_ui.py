@@ -22,8 +22,11 @@ def _go_profile(profile:str)->None:
     st.session_state["scenario_board_profile"]=profile
 
 
-def _cards(model:dict)->None:
+def _cards(model:dict,scenarios:list[dict],catalog:dict,plan:dict)->None:
     st.markdown("#### Escolha o estilo para comparar")
+    destination_names={d["id"]:d["name"] for d in catalog["destinations"]}
+    attraction_names={a["id"]:a["name"] for a in catalog["attractions"]}
+    proposals={option["profile"]:option["proposal_packages"] for option in scenarios}
     cols=st.columns(3,gap="medium")
     for col,row in zip(cols,model["rows"]):
         with col:
@@ -42,7 +45,20 @@ def _cards(model:dict)->None:
                        f" · {row['pending_count']} componente(s) sem custo completo")
             if row["unresolved"]:
                 st.caption(f"⚠ {row['unresolved']} passeio(s) sem agenda segura")
-            st.button("Ver detalhes deste estilo",key="scenario_style_choose_"+row["profile"],
+            st.markdown("**Passeios pré-selecionados neste estilo**")
+            picks=proposals[row["profile"]]
+            if not picks:
+                st.info("Nenhum passeio sugerido com os filtros atuais.")
+            else:
+                for destination,attractions in picks.items():
+                    official=destination in plan["packages"]
+                    st.markdown(("✓ **" if official else "＋ **")+
+                                destination_names.get(destination,destination)+"**"+
+                                (" · Já está em Meus passeios" if official
+                                 else " · Sugestão nova"))
+                    st.caption("Atrações: "+(", ".join(attraction_names.get(a,a)
+                              for a in attractions) if attractions else "A definir"))
+            st.button("Ver e editar este roteiro",key="scenario_style_choose_"+row["profile"],
                       on_click=_go_profile,args=(row["profile"],),width="stretch")
 
 
@@ -115,7 +131,7 @@ def render_scenario_comparison(plan:dict,scenarios:list[dict],catalog:dict,
     st.caption("Base em estudo: "+base+
                f" · {len(plan['packages'])} passeios escolhidos · teto R$ "+
                plan["budget_scenario"][:-1]+" mil · referências históricas de 2026")
-    _cards(model)
+    _cards(model,scenarios,catalog,plan)
     st.markdown("#### O que muda entre os estilos?")
     st.dataframe(comparison_table(model),hide_index=True,width="stretch")
     _destinations(model)
