@@ -165,7 +165,9 @@ def adopt_italy_starter(plan:dict,catalog:dict,variant:str,
                         *,confirmed:bool=False)->dict:
     if not confirmed:return deepcopy(plan)
     preview=italy_starter_preview(plan,catalog,variant)
-    result=plan
+    if not preview["to_add"]:
+        return deepcopy(plan)
+    visits=deepcopy(plan.get("flexible_visits",[]))
     for dest_id,ids,period in preview["to_add"]:
-        result=upsert_choice(result,catalog,dest_id,ids,period)
-    return result
+        visits.append(_validated_choice(catalog,dest_id,ids,period))
+    return change_plan(plan,{"flexible_visits":visits})
