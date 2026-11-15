@@ -10,6 +10,7 @@ from planning_store import (create_from_legacy,change_plan,set_package,
                             remove_package,add_assignment,remove_assignment,
                             sync_legacy_view,summary)
 from trip_plan_model import new_plan
+from attractions_model import load_attractions
 
 def bootstrap()->dict:
     """Initialize early, before navigation/widgets are rendered."""
@@ -68,7 +69,14 @@ def update_fields(**changes)->dict:
     return _commit(change_plan(bootstrap(),changes))
 
 def select_package(destination:str,items:list[str])->dict:
-    return _commit(set_package(bootstrap(),destination,items))
+    # Enforce catalog membership at the canonical UI mutation boundary.
+    catalog=load_attractions()
+    destinations={d["id"] for d in catalog["destinations"]}
+    valid={a["id"] for a in catalog["attractions"]
+           if a["destination_id"]==destination}
+    return _commit(set_package(bootstrap(),destination,items,
+                               valid_destinations=destinations,
+                               valid_attractions=valid))
 
 def delete_package(destination:str)->dict:
     return _commit(remove_package(bootstrap(),destination))
