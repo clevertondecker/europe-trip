@@ -18,6 +18,7 @@ from planning_session import active_plan,update_fields,accept_approved_plan
 from planning_status import save_label,explain_storage_error,friendly_timestamp
 from advisor_finance import advisor_projection
 from discovery_ui import render_discovery
+from my_outings_ui import render_my_outings
 from advisor_presentation import present_risks,proposal_comparison,simple_next_step
 from data_model import get_scenario
 from unified_budget import resolve_french_budget,scenario_total
@@ -148,10 +149,8 @@ def render_advisor(trip_data:dict,sync_sources:dict,workspace_area:str='Meus pas
         st.warning("Não foi possível recuperar automaticamente o planejamento: "+
                    st.session_state.pop("advisor_restore_error"))
     st.markdown("<div class='page-section'>Workspace de planejamento</div>",unsafe_allow_html=True)
-    st.caption("Selecione Meus passeios, Descobrir, Orçamento ou Calendário no topo. As edições permanecem em rascunho até aprovação.")
-    st.info("Preços e trajetos são pesquisas históricas, não reservas confirmadas para 2027.")
-    st.info("O consultor é uma ferramenta de apoio. Ele não consulta rotas em tempo real nem "
-            "pode garantir disponibilidade ou preços de 2027.")
+    st.caption("Meus passeios mostra seu roteiro atual. Simular roteiros é apenas uma proposta; nenhuma sugestão entra no plano sem aprovação.")
+    st.caption("Valores e trajetos são referências históricas; não há reservas ou cotações confirmadas para 2027.")
     with st.expander("Configurações do planejamento",expanded=False):
         a,b,c=st.columns(3,gap="medium")
         with a:
@@ -178,7 +177,8 @@ def render_advisor(trip_data:dict,sync_sources:dict,workspace_area:str='Meus pas
     st.session_state["explore_packages"]=deepcopy(p["packages"])
     st.session_state["explore_calendar"]=deepcopy(p["assignments"])
     names=[bydest[d]["name"] for d in p["packages"] if d in bydest]
-    st.markdown("**Passeios selecionados:** "+(", ".join(names) if names else "Nenhum — adicione atrações na aba Explorar atrações"))
+    if workspace_area != "Meus passeios":
+        st.caption("Passeios escolhidos: "+(", ".join(names) if names else "Nenhum ainda"))
     saved_label,saved_hint=save_label(
         p,st.session_state.get("advisor_saved_snapshot"),
         _owner_signed_in())
@@ -459,11 +459,13 @@ def render_advisor(trip_data:dict,sync_sources:dict,workspace_area:str='Meus pas
                 st.caption("A gravação online exige autorização Google, token protegido no servidor "
                            "e confirmação do proprietário. Sem autenticação, somente backup local.")
     
-    if workspace_area in ("Descobrir","Meus passeios","Orçamento"):
+    if workspace_area == "Meus passeios":
+        render_my_outings(p,catalog)
+    if workspace_area in ("Descobrir","Simular roteiros","Orçamento"):
         render_discovery(p,catalog,routes,trip_data,sync_sources,eurfx,chffx,use_city_rent,
-                         view={"Descobrir":"discover","Meus passeios":"board","Orçamento":"budget"}[workspace_area])
+                         view={"Descobrir":"discover","Simular roteiros":"board","Orçamento":"budget"}[workspace_area])
     if workspace_area == "Descobrir":
-        st.caption("Ao adicionar um destino, abra Meus passeios no topo para ajustar o roteiro.")
+        st.caption("Depois de adicionar, veja o destino em Meus passeios para editar ou remover diretamente.")
     if workspace_area == "Calendário":
         st.markdown("### Organizar meus passeios")
         st.caption("O otimizador só aloca passeios de duração compatível e com tempo de trem "
