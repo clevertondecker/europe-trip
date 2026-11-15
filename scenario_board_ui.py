@@ -17,6 +17,7 @@ from finance_margin_metrics import calculate_excursion_margin
 from finance_margin_ui import render_finance_margin_summary
 from outing_cost_evidence import load_outing_evidence,evidence_for_outing
 from draft_controls_ui import render_draft_controls
+from predefined_budget_ui import render_predefined_budget_adoption
 
 def _currency(eur:float,chf:float)->str:
     return f"€ {eur:,.2f}  ·  CHF {chf:,.2f}"
@@ -129,8 +130,10 @@ def render_scenario_boards(plan:dict,scenarios:list[dict],catalog:dict,routes:di
     profiles={s["profile"]:s for s in scenarios}
     if finance_only:
         st.markdown("### Orçamento por estilo")
+        st.info("Cada estilo abaixo contém um **roteiro pré-selecionado** de passeios e atrações. "
+                "Os números são provisões e custos históricos, não preços finais de 2027.")
         render_scenario_comparison(plan,scenarios,catalog,eurfx,chffx)
-        st.caption("Para editar propostas, abra Simular roteiros.")
+        render_predefined_budget_adoption(plan,scenarios,catalog,eurfx,chffx)
         return
     notice=st.session_state.pop("scenario_new_official_notice",None)
     if notice:
