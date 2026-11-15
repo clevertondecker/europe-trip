@@ -125,9 +125,8 @@ def validate_plan(plan:dict,known_attractions:set[str]|None=None)->None:
             raise ValueError("Noites/status da proposta italiana inválidos")
         ids=proposal["itinerary_place_ids"]
         if (not isinstance(ids,list) or not 2<=len(ids)<=15 or
-            len(set(ids))!=len(ids) or
             any(not isinstance(x,str) or not x.startswith("italy_") or
-                len(x)>80 for x in ids)):
+                len(x)>80 for x in ids) or len(set(ids))!=len(ids)):
             raise ValueError("Destinos da proposta inválidos")
         days=proposal["days_detail"]
         if (not isinstance(days,list) or len(days)!=10 or
