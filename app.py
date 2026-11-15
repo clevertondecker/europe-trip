@@ -43,6 +43,9 @@ st.set_page_config(page_title="Nossa Europa 2027", page_icon="🌍", layout="wid
 # Authenticated new sessions recover the latest saved GitHub plan.
 _recover_saved_plan()
 bootstrap_trip()
+restored_mode=st.session_state.pop("ux_pending_mode",None)
+if restored_mode in ("Oficial","Simulação"):
+    st.session_state["ux_mode"]=restored_mode
 # Restore saved exploratory durations before any Streamlit widget is rendered.
 restored_days=st.session_state.pop("ux_pending_days",None)
 if restored_days is not None:
