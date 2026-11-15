@@ -91,6 +91,13 @@ def remove_flexible_choice(destination:str)->dict:
     return _commit(remove_choice(bootstrap(),load_attractions(),destination))
 
 
+def schedule_italy_visit(destination:str,day:str|None)->dict:
+    """Precise Italian day, optional and independent from French assignments."""
+    from itinerary_flow_model import schedule_italy_day
+    return _commit(schedule_italy_day(bootstrap(),load_attractions(),
+                                      destination,day))
+
+
 def accept_italy_starter(variant:str,*,confirmed:bool=False)->dict:
     from itinerary_flow_model import adopt_italy_starter
     return _commit(adopt_italy_starter(bootstrap(),load_attractions(),
