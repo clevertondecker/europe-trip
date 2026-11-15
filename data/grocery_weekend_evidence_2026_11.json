@@ -1,0 +1,154 @@
+{
+  "schema_version": 1,
+  "checked_at": "2026-11-15",
+  "scope": "Pequena cesta não representa alimentação diária/mensal. Preços Carrefour podem variar por loja, modalidade de entrega e data; nunca estimar refeição completa só a partir destes itens.",
+  "groceries": [
+    {
+      "item": "Leite semidesnatado Carrefour Classic",
+      "category": "laticínios",
+      "quantity": "1 L",
+      "amount_eur": 1.05,
+      "source_url": "https://www.carrefour.fr/r/cremerie/laits/lait-demi-ecreme",
+      "source_type": "retailer_category_live",
+      "status": "observed_retail_example",
+      "notes": "Preço exibido no catálogo online, pode mudar conforme loja/retirada."
+    },
+    {
+      "item": "Espaguete Carrefour Classic",
+      "category": "massas",
+      "quantity": "500 g",
+      "amount_eur": 0.7,
+      "source_url": "https://www.carrefour.fr/r/epicerie-salee/pates",
+      "source_type": "retailer_category_live",
+      "status": "observed_retail_example",
+      "notes": "Preço e produto consultados na listagem Carrefour."
+    },
+    {
+      "item": "Arroz longo Carrefour Classic",
+      "category": "grãos",
+      "quantity": "1 kg",
+      "amount_eur": 1.75,
+      "source_url": "https://www.carrefour.fr/r/epicerie-salee/pates-riz-feculents/riz",
+      "source_type": "retailer_category_live",
+      "status": "observed_retail_example",
+      "notes": "Não representa consumo mensal individual."
+    },
+    {
+      "item": "Ovos Carrefour Classic",
+      "category": "ovos",
+      "quantity": "12 unidades",
+      "amount_eur": 2.99,
+      "source_url": "https://www.carrefour.fr/r/cremerie/oeufs",
+      "source_type": "retailer_category_live",
+      "status": "observed_retail_example",
+      "notes": "Embalagem com 12 ovos."
+    }
+  ],
+  "weekend_restaurants": [
+    {
+      "city": "colmar",
+      "venue": "Savanna",
+      "menu": "Assiette vegetariana/vegana, prato principal",
+      "price_per_person": 17,
+      "currency": "EUR",
+      "days": [
+        "sat",
+        "sun"
+      ],
+      "source_url": "https://savanna-colmar.fr/",
+      "status": "operator_menu_2026",
+      "notes": "Restaurante publica funcionamento sábado e domingo; confirmar cardápio/disponibilidade para 2027."
+    },
+    {
+      "city": "colmar",
+      "venue": "Le Zinc",
+      "menu": "Choucroute garnie, prato principal",
+      "price_per_person": 21,
+      "currency": "EUR",
+      "days": [
+        "sat"
+      ],
+      "source_url": "https://lezinc-colmar.com/",
+      "status": "operator_menu_2026",
+      "notes": "Aberto segunda a sábado; FECHADO domingo, não sugerir para passeio de domingo."
+    },
+    {
+      "city": "colmar",
+      "venue": "Savanna",
+      "menu": "Salmão grelhado, prato principal",
+      "price_per_person": 25,
+      "currency": "EUR",
+      "days": [
+        "sat",
+        "sun"
+      ],
+      "source_url": "https://savanna-colmar.fr/",
+      "status": "operator_menu_2026",
+      "notes": "Não inclui bebidas/sobremesa."
+    },
+    {
+      "city": "strasbourg",
+      "venue": "Brasserie des Haras",
+      "menu": "Plat du jour sábado/domingo",
+      "price_per_person": 27,
+      "currency": "EUR",
+      "days": [
+        "sat",
+        "sun"
+      ],
+      "source_url": "https://les-haras-brasserie.com/",
+      "status": "operator_menu_2026",
+      "notes": "Cardápio de almoço fim de semana; exclui feriados/eventos especiais."
+    },
+    {
+      "city": "strasbourg",
+      "venue": "Brasserie des Haras",
+      "menu": "Menu completo de fim de semana",
+      "price_per_person": 49,
+      "currency": "EUR",
+      "days": [
+        "sat",
+        "sun"
+      ],
+      "source_url": "https://les-haras-brasserie.com/",
+      "status": "operator_menu_2026",
+      "notes": "Mais completo que prato do dia; não combinar em amostra homogênea de preços de prato."
+    },
+    {
+      "city": "mulhouse",
+      "venue": "Restaurant Hug",
+      "menu": "Salada campagnarde, porção principal",
+      "price_per_person": 14.5,
+      "currency": "EUR",
+      "days": [
+        "sat"
+      ],
+      "source_url": "https://www.restaurant-hug.fr/carte-menu/",
+      "status": "operator_menu_2026",
+      "notes": "Restaurante aberto sábado; não abre domingo. Verificar se prato está disponível no dia."
+    }
+  ],
+  "fare_options": [
+    {
+      "name": "Pass Groupe Week-End TER Fluo Grand Est",
+      "amount_eur": 40,
+      "unit": "grupo de 2–5 pessoas/dia",
+      "days": [
+        "sat",
+        "sun",
+        "holiday"
+      ],
+      "coverage": "trens e ônibus TER Fluo elegíveis na rede regional",
+      "source_url": "https://www.ter.sncf.com/grand-est/tarifs-cartes/tarifs-regionaux/pass-groupe-week-end",
+      "status": "operator_published_2026",
+      "conditions": "Não afirmar que cobre percurso transfronteiriço até Basel, TGV ou trens fora da rede. Verificar condições exatas."
+    }
+  ],
+  "gaps": [
+    "Preços de carnes, legumes, frutas, pão e refeições prontas locais ainda sem amostragem comparável.",
+    "Preços podem depender do Carrefour Drive escolhido e não representam exatamente Mulhouse/Strasbourg/Metz/Nancy.",
+    "Domingos em Mulhouse sem cardápio com valor e disponibilidade simultaneamente verificados.",
+    "Falta tarifa normal de trem em quase todas as rotas, e retorno na data de 2027.",
+    "Alimentação diária inclui consumo variável, café, bebidas, snacks e jantar ainda sem amostra."
+  ]
+}
