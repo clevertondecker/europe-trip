@@ -10,9 +10,11 @@ from __future__ import annotations
 from copy import deepcopy
 from planning_store import change_plan
 from catalog_plan_validation import allowed_attractions
+from italy_honeymoon_model import load_honeymoon, italy_itinerary_places, proposal_snapshot
 
 ITALY_STAGE="Itália"
-FRANCE_STAGE="França"
+FRANCE_STAGE="França"  # compatibility ID for preexisting plans
+EUROPE_STAGE_LABEL="Temporada europeia"
 UNASSIGNED="Ainda não definido"
 ITALY_PERIODS=(UNASSIGNED,"Durante Roma","Durante a Costa Amalfitana",
                "Férias na Itália")
@@ -20,26 +22,11 @@ FRANCE_PERIODS=(UNASSIGNED,"Instalação na França","Férias restantes",
                 "Primeiro fim de semana na França",
                 "Fim de semana a definir","Durante a estadia na França")
 
-# These are planning choices derived from the documented Italy honeymoon
-# research, NOT confirmed tickets, packages or travel bookings.
-ITALIAN_PLACES={
-    "italy_rome":("Roma",("Coliseu e Fórum Romano","Vaticano e São Pedro",
-                          "Centro histórico, Panteão e Trevi","Trastevere")),
-    "italy_amalfi":("Amalfi",("Centro histórico e Duomo","Litoral e passeios a pé",
-                             "Vista da costa")),
-    "italy_ravello":("Ravello",("Mirantes e jardins","Centro histórico")),
-    "italy_positano":("Positano",("Centro e mirantes","Praia e passeio costeiro")),
-    "italy_capri":("Capri",("Passeio pela ilha","Vistas da costa")),
-    "italy_pompeii":("Pompeia",("Sítio arqueológico")),
-    "italy_maiori":("Maiori",("Passeio à beira-mar","Praia")),
-    "italy_minori":("Minori",("Centro e orla","Praia")),
-    "italy_salerno":("Salerno",("Centro histórico","Orla")),
-    "italy_naples":("Nápoles",("Centro histórico","Passeios urbanos")),
-}
-ITALY_ATTRACTIONS={
-    city:[{"id":city+"__"+str(i),"name":a} for i,a in enumerate(details[1],1)]
-    for city,details in ITALIAN_PLACES.items()
-}
+# The only authoritative Italian catalog is embedded with the honeymoon
+# proposals in data/italy_honeymoon_research_2027.json. Do not copy it here.
+def italian_catalog()->list[dict]:
+    return italy_itinerary_places()
+
 
 
 def period_options(stage:str)->tuple[str,...]:
@@ -49,9 +36,10 @@ def period_options(stage:str)->tuple[str,...]:
 
 
 def destinations(catalog:dict)->list[dict]:
-    italy=[{"id":cid,"name":details[0],"stage":ITALY_STAGE,
-            "attractions":deepcopy(ITALY_ATTRACTIONS[cid]),"research":"Proposta Itália"}
-           for cid,details in ITALIAN_PLACES.items()]
+    italy=[{"id":d["id"],"name":d["name"],"stage":ITALY_STAGE,
+            "attractions":deepcopy(d["attractions"]),
+            "research":"Pesquisa Itália e propostas de lua de mel"}
+           for d in italian_catalog()]
     france=[{"id":d["id"],"name":d["name"],"stage":FRANCE_STAGE,
              "attractions":[{"id":a["id"],"name":a["name"]}
                             for a in catalog["attractions"]
@@ -145,32 +133,40 @@ def remove_choice(plan:dict,catalog:dict,dest_id:str)->dict:
 
 
 def italy_starter_preview(plan:dict,catalog:dict,variant:str)->dict:
-    if variant not in ("balanced","economy","experience"):
-        raise ValueError("Proposta italiana desconhecida")
-    # The three published scenarios all require Rome and the Amalfi coast,
-    # but disagree on the overnight base. Overnight base is NOT adopted here.
-    starter=[
-        ("italy_rome",["italy_rome__1","italy_rome__2","italy_rome__3"],"Durante Roma"),
-        ("italy_amalfi",["italy_amalfi__1","italy_amalfi__2"],
-         "Durante a Costa Amalfitana"),
-    ]
+    """Preview a *complete, distinct* proposal before a single atomic adoption."""
+    data=load_honeymoon()
+    snapshot=proposal_snapshot(data,variant)
+    lookup={d["id"]:d for d in destinations(catalog)}
+    starter=[]
+    for dest_id in snapshot["itinerary_place_ids"]:
+        available=lookup[dest_id]["attractions"]
+        # Rome's three major research clusters and Amalfi's first two,
+        # plus at least one attraction per other research-backed stop.
+        count=3 if dest_id=="italy_rome" else 2 if dest_id=="italy_amalfi" else 1
+        chosen=[a["id"] for a in available[:count]]
+        period=("Durante Roma" if dest_id=="italy_rome"
+                else "Durante a Costa Amalfitana")
+        starter.append((dest_id,chosen,period))
     added=[x for x in starter if not is_selected(plan,x[0])]
     unchanged=[x[0] for x in starter if is_selected(plan,x[0])]
-    return {"variant":variant,"to_add":added,"unchanged":unchanged,
-            "requires_confirmation":True,"does_not_set_dates":True,
-            "hotel_base_approved":False,"reservations":False}
+    return {"variant":variant,"snapshot":snapshot,"to_add":added,
+            "unchanged":unchanged,"requires_confirmation":True,
+            "does_not_set_dates":True,"hotel_base_approved":False,
+            "reservations":False}
 
 
 def adopt_italy_starter(plan:dict,catalog:dict,variant:str,
                         *,confirmed:bool=False)->dict:
     if not confirmed:return deepcopy(plan)
     preview=italy_starter_preview(plan,catalog,variant)
-    if not preview["to_add"]:
-        return deepcopy(plan)
     visits=deepcopy(plan.get("flexible_visits",[]))
     for dest_id,ids,period in preview["to_add"]:
         visits.append(_validated_choice(catalog,dest_id,ids,period))
-    return change_plan(plan,{"flexible_visits":visits})
+    # A single revision contains the full proposal (day by day, coast base,
+    # and 4/4/1 vs. 4/5/0 nights), preserving existing individual selections.
+    return change_plan(plan,{"flexible_visits":visits,
+                             "italy_proposal":preview["snapshot"]})
+
 
 def validate_flow_backup(plan:dict,catalog:dict)->None:
     """Review every imported flexible choice before it can enter this session."""
@@ -178,6 +174,13 @@ def validate_flow_backup(plan:dict,catalog:dict)->None:
     from catalog_plan_validation import validate_catalog_packages
     validate_plan(plan)
     validate_catalog_packages(plan,catalog)
+    if plan.get("italy_proposal") is not None:
+        stored=plan["italy_proposal"]
+        original=proposal_snapshot(load_honeymoon(),stored["variant"])
+        if set(stored)!=set(original):
+            raise ValueError("Formato da proposta italiana não reconhecido")
+        if stored["status"]!="proposta exploratória" or stored["reserved"] or stored["hotel_confirmed"]:
+            raise ValueError("Backup não pode afirmar reserva italiana")
     for row in plan.get("flexible_visits",[]):
         clean=_validated_choice(catalog,row["destination_id"],
                                 row["attractions"],row["period"])
