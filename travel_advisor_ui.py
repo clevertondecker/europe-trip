@@ -460,7 +460,13 @@ def render_advisor(trip_data:dict,sync_sources:dict,workspace_area:str='Meus pas
                            "e confirmação do proprietário. Sem autenticação, somente backup local.")
     
     if workspace_area == "Meus passeios":
-        render_my_outings(p,catalog)
+        applied=st.session_state.pop("budget_preset_applied",None)
+        if applied:
+            st.success("Roteiro "+applied+" adotado! Os passeios já aparecem abaixo. "
+                       "Salve o planejamento para mantê-los em outros dispositivos.")
+        render_my_outings(p,catalog,routes=routes,trip_data=trip_data,
+                          finance_live=sync_sources["finance"]["status"]=="live",
+                          eurfx=eurfx,chffx=chffx,use_city_rent=use_city_rent)
     if workspace_area in ("Descobrir","Simular roteiros","Orçamento"):
         render_discovery(p,catalog,routes,trip_data,sync_sources,eurfx,chffx,use_city_rent,
                          view={"Descobrir":"discover","Simular roteiros":"board","Orçamento":"budget"}[workspace_area])
