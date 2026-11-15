@@ -37,6 +37,36 @@ class GitHubPlanRepository:
         validate_plan(plan)
         if plan["plan_id"]!=plan_id:raise ValueError("Persisted ID mismatch")
         return plan,obj["sha"]
+    def list_plans(self)->list[str]:
+        try:
+            items=self._request("data/user_plans")
+        except HTTPError as exc:
+            if exc.code==404:return []
+            raise
+        return sorted(x["name"][:-5] for x in items
+            if x["name"].endswith(".json") and ID_PATTERN.fullmatch(x["name"][:-5]))
+
+    def history(self,plan_id:str)->list[dict]:
+        """Read Git revisions without exposing the underlying token."""
+        path=safe_path(plan_id)
+        req=Request(f"https://api.github.com/repos/{REPO}/commits?path={path}&per_page=30",
+             headers={"Authorization":"Bearer "+self.token,
+                      "Accept":"application/vnd.github+json",
+                      "User-Agent":"nossa-europa-2027-advisor"})
+        with urlopen(req,timeout=12) as response:
+            results=json.loads(response.read())
+        return [{"sha":x["sha"],"date":x["commit"]["committer"]["date"],
+                 "message":x["commit"]["message"].splitlines()[0]} for x in results]
+
+    def load_at_commit(self,plan_id:str,commit_sha:str)->dict:
+        if not re.fullmatch(r"[a-f0-9]{40}",commit_sha):
+            raise ValueError("Invalid commit SHA")
+        obj=self._request(safe_path(plan_id)+"?ref="+commit_sha)
+        data=json.loads(base64.b64decode(obj["content"]).decode("utf-8"))
+        validate_plan(data)
+        if data["plan_id"]!=plan_id:raise ValueError("Mismatched plan")
+        return data
+
     def save(self,plan:dict,expected_sha:str|None)->str:
         validate_plan(plan)
         path=safe_path(plan["plan_id"])
