@@ -122,6 +122,20 @@ def render_scenario_boards(plan:dict,scenarios:list[dict],catalog:dict,routes:di
     if details["total"]["missing"]:
         st.warning(f"{len(details['total']['missing'])} componentes ainda sem preço completo. "
                    "Não interpretar o subtotal como custo total.")
+    with st.expander("Despesas por categoria — o que está incluído?"):
+        expenses={"Trens intermunicipais":{"EUR":0.0,"CHF":0.0},
+                  "Ingressos e atrações":{"EUR":0.0,"CHF":0.0}}
+        for row in details["rows"]:
+            for part in row["components"]:
+                category=("Trens intermunicipais" if part["name"].startswith("Transporte ")
+                          else "Ingressos e atrações")
+                expenses[category][part["currency"]]+=float(part["value"])
+        for category,amount in expenses.items():
+            st.write("**"+category+":** "+_currency(amount["EUR"],amount["CHF"]))
+        st.caption("Transporte urbano, refeições e pernoites extras: não cotados "
+                   "individualmente. Valores desconhecidos não são tratados como gratuitos.")
+        st.caption("Parte das excursões já está contemplada na verba-base de R$ "+
+                   f"{allowance:,.0f}; só o excedente conhecido altera a projeção geral.")
     for row in details["rows"]:
         _render_destination(profile,board,row,catalog)
     remaining=[d for d in catalog["destinations"]
