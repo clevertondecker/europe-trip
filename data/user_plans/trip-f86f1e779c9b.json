@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "plan_id": "trip-f86f1e779c9b",
+  "revision": 2,
+  "base_city": "strasbourg",
+  "departure_date": "2027-09-09",
+  "total_days": 70,
+  "italy_days": 10,
+  "vacation_days": 25,
+  "setup_days": 4,
+  "budget_scenario": "70k",
+  "profile": "balanced",
+  "mandatory_destinations": [],
+  "excluded_destinations": [],
+  "packages": {},
+  "assignments": {},
+  "accepted_recommendations": [],
+  "rejected_recommendations": [],
+  "source_versions": {
+    "attractions": "2026-11-14",
+    "routes": "2026-11-14"
+  }
+}
