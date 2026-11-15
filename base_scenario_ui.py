@@ -35,7 +35,9 @@ def render_scenario_impact(plan:dict,trip_data:dict,finance_live:bool)->None:
     with st.expander("Impacto hipotético · "+labels.get(selected,selected),expanded=False):
         result=scenario_impact(plan,trip_data,finance_live,selected,
              st.session_state.get("advisor_eurfx",6.3),
-             st.session_state.get("advisor_chffx",7.1))
+             st.session_state.get("advisor_chffx",7.1),
+             french_days=st.session_state.get("ux_days") if
+             st.session_state.get("ux_mode")=="Simulação" else None)
         st.caption("Roteiro oficial: "+labels.get(plan["base_city"],plan["base_city"])+
                    ". Esta simulação não altera datas, atrações, calendário ou reservas.")
         if result["total_brl"] is None:
