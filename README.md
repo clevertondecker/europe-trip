@@ -125,3 +125,20 @@ A inclusão futura de uma cidade deve seguir o template de auditoria e coletar o
 1. Editar decisões, pendências e premissas financeiras no Drive; depois clicar **Atualizar dados do Drive** no aplicativo.
 2. Registrar novas pesquisas verificadas com fonte, URL, validade, moeda e distinção entre preço observado/cotação em arquivos versionados no GitHub.
 3. Explorar cenários no Streamlit sem aprovar reservas automaticamente; quando tiver orçamento comparável e cotação real, registrar a decisão oficial D-004 no documento do Drive.
+
+
+## Roteiro → Explorar atrações (implementação 14/11/2026)
+
+A nova experiência de turismo usa a cidade-base francesa hipotética para **recalcular tarifas e tempos ferroviários publicados** dos destinos em estudo e permitir a escolha de atrações. O usuário não altera a decisão D-004 nem compra bilhetes pelo painel.
+
+- [Prompt de especificação](PROMPT_CATALOGO_ATRACOES_ROTEIRO_ADAPTATIVO_2027.md) e [relatório de implementação e fontes](RELATORIO_IMPLEMENTACAO_ATRACOES_2027.md).
+- [50 atrações catalogadas em 11 destinos](data/attractions_2027.json), agrupadas em países, com fontes oficiais, fotos licenciadas de vários destinos e ingressos apenas quando documentados.
+- [44 combinações de rotas base × destino](data/base_destination_routes_2027.json), incluindo tempos e tarifas históricas com desconto quando comprovados, e valores ausentes como `null`.
+- [Validação, cálculo e calendário](attractions_model.py), [UI separada](attractions_ui.py), [testes de domínio](tests/test_attractions_model.py) e [testes interativos](tests/test_attractions_ui_smoke.py).
+- **Roteiro → Explorar atrações:** filtros por base, país, categoria, tipo de preço, preferência pessoal e tipo de acesso; cards, mapas de destinos, detalhes, interesse, pacotes de até cinco atrações, custo parcial por casal, calendário provisório e exportação JSON.
+- **Mapa & destinos:** destinos do catálogo partilhado e atalho para Explorar atrações.
+- **Roteiro → Calendário:** mostra escolhas provisórias da sessão, sem bloqueio real de agenda/reservas.
+- **Orçamento:** o subconjunto de valores conhecidos só acrescenta o excedente **sobre** a verba de excursões prevista, evitando dupla contagem ou economias fictícias.
+- **Ressalvas:** distâncias exibidas são geodésicas em linha reta, não quilômetros de trem. Os tempos oficiais são de estação a estação, não porta a porta. Carte Fluo requer regras de elegibilidade e eventual custo do cartão. Mapas não traçam trilhos verdadeiros; passeios alpinos podem exigir pernoite. Fotografias individuais das 50 atrações, tarifas normais e rotas específicas de 2027 continuam em pesquisa.
+
+A lista pessoal permanece em `st.session_state`; exporte-a antes de fechar a sessão. Nenhuma pesquisa de atrações sincroniza automaticamente do Drive.
