@@ -21,6 +21,7 @@ from discovery_ui import render_discovery
 from my_outings_ui import render_my_outings
 from active_preset import active_preset
 from active_preset_ui import render_active_preset_summary
+from destination_labels import place_label
 from advisor_presentation import present_risks,proposal_comparison,simple_next_step
 from data_model import get_scenario
 from unified_budget import resolve_french_budget,scenario_total
@@ -158,7 +159,7 @@ def render_advisor(trip_data:dict,sync_sources:dict,workspace_area:str='Meus pas
         with a:
             base=st.selectbox("Base hipotética",["mulhouse","strasbourg","metz","nancy"],
                               index=["mulhouse","strasbourg","metz","nancy"].index(p["base_city"]),
-                              key="advisor_base",format_func=lambda x:bydest[x]["name"])
+                              key="advisor_base",format_func=lambda x:place_label(bydest[x]["name"],bydest[x]["country"]))
         with b:
             profile=st.selectbox("Estilo de viagem",["balanced","economy","experience"],
                 index=["balanced","economy","experience"].index(p["profile"]),
@@ -178,7 +179,7 @@ def render_advisor(trip_data:dict,sync_sources:dict,workspace_area:str='Meus pas
     # This replaces the former manual "Importar seleção" step.
     st.session_state["explore_packages"]=deepcopy(p["packages"])
     st.session_state["explore_calendar"]=deepcopy(p["assignments"])
-    names=[bydest[d]["name"] for d in p["packages"] if d in bydest]
+    names=[place_label(bydest[d]["name"],bydest[d]["country"]) for d in p["packages"] if d in bydest]
     if workspace_area != "Meus passeios":
         st.caption("Passeios escolhidos: "+(", ".join(names) if names else "Nenhum ainda"))
     saved_label,saved_hint=save_label(
@@ -187,7 +188,7 @@ def render_advisor(trip_data:dict,sync_sources:dict,workspace_area:str='Meus pas
     st.caption(f"**{saved_label}** · {saved_hint}")
     profile_name={"economy":"Econômico","balanced":"Equilibrado",
                   "experience":"Aproveitar ao máximo"}[p["profile"]]
-    st.caption(f"**{bydest[p['base_city']]['name']} · {profile_name} · R$ {p['budget_scenario'][:-1]} mil · {len(p['packages'])} destinos · {saved_label}**")
+    st.caption(f"**{place_label(bydest[p['base_city']]['name'],bydest[p['base_city']]['country'])} · {profile_name} · R$ {p['budget_scenario'][:-1]} mil · {len(p['packages'])} destinos · {saved_label}**")
     if st.session_state.get("advisor_last_saved_at"):
         st.caption("Último salvamento: "+
                    friendly_timestamp(st.session_state["advisor_last_saved_at"]))
