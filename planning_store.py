@@ -31,7 +31,8 @@ def create_from_legacy(values:dict)->dict:
 def change_plan(plan:dict,changes:dict)->dict:
     """One canonical mutation, no redundant revision for an identical value."""
     permitted={"packages","assignments","base_city","profile","budget_scenario",
-               "departure_date","total_days","italy_days","vacation_days","setup_days"}
+               "departure_date","total_days","italy_days","vacation_days","setup_days",
+               "preferences"}
     if not changes or not set(changes)<=permitted:
         raise ValueError("Unsupported plan change")
     delta={k:deepcopy(v) for k,v in changes.items() if plan.get(k)!=v}
