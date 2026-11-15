@@ -12,7 +12,8 @@ SUPPORTED_ROUTE_BASES=frozenset({"mulhouse","strasbourg","metz","nancy"})
 
 
 def scenario_impact(plan:dict,trip_data:dict,finance_live:bool,base_id:str,
-                    eurfx:float=6.3,chffx:float=7.1)->dict:
+                    eurfx:float=6.3,chffx:float=7.1,
+                    french_days:int|None=None)->dict:
     choose_exploratory_base(base_id,base_options())
     if base_id not in SUPPORTED_ROUTE_BASES:
         return {"city_id":base_id,"ready":False,"total_brl":None,
@@ -23,6 +24,10 @@ def scenario_impact(plan:dict,trip_data:dict,finance_live:bool,base_id:str,
                 "reason":"Apenas pesquisa exploratória disponível"}
     preview=deepcopy(plan)
     preview["base_city"]=base_id
+    if french_days is not None:
+        if type(french_days) is not int or not 40<=french_days<=80:
+            raise ValueError("Duração exploratória deve ser de 40 a 80 dias")
+        preview["total_days"]=preview["italy_days"]+french_days
     ids=[key for picks in preview["packages"].values() for key in picks]
     costs=package_cost(load_attractions(),load_base_routes(),base_id,ids)
     finance=advisor_projection(trip_data,finance_live,preview,costs,
