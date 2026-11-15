@@ -271,6 +271,10 @@ def _ux_budget_days_changed() -> None:
     st.session_state["ux_days"]=st.session_state["unified_stay"]
 
 
+def _ux_next_task(area:str,task:str) -> None:
+    set_ux_task(st.session_state,area,task)
+
+
 def _ux_mode_changed() -> None:
     official=active_plan()["base_city"]
     if st.session_state["ux_mode"]=="Oficial":
@@ -394,6 +398,24 @@ page,itinerary_target,guide_target,base_target=ux_route(
     research=st.session_state.get("ux_research","Pesquisa ampliada"),
     suggestion=st.session_state.get("ux_suggestion","Descobrir"))
 st.caption(UX_DESCRIPTIONS.get((ux_area,ux_section),"Continue o planejamento."))
+# Contextual action makes the connection between tasks explicit without
+# adding more permanent tabs to the navigation bar.
+next_steps={
+    ("Minha viagem","Resumo"):("Escolher cidades-base","Explorar","Cidades-base"),
+    ("Explorar","Cidades-base"):("Comparar cidades","Explorar","Comparar cidades"),
+    ("Explorar","Comparar cidades"):("Simular o orçamento","Orçamento","Visão financeira"),
+    ("Explorar","Passeios e destinos"):("Organizar passeios","Meu roteiro","Meus passeios"),
+    ("Explorar","Mapa"):("Explorar cidades-base","Explorar","Cidades-base"),
+    ("Meu roteiro","Itália"):("Ver meus passeios","Meu roteiro","Meus passeios"),
+    ("Meu roteiro","Meus passeios"):("Organizar calendário","Meu roteiro","Calendário"),
+    ("Meu roteiro","Calendário"):("Revisar custos","Orçamento","Visão financeira"),
+    ("Meu roteiro","Sugestões"):("Revisar meus passeios","Meu roteiro","Meus passeios"),
+    ("Orçamento","Visão financeira"):("Comparar cidades-base","Explorar","Comparar cidades"),
+}
+suggestion=next_steps.get((ux_area,ux_section))
+if suggestion:
+    st.button("Próximo passo: "+suggestion[0]+" →",key="ux_next_step",
+              on_click=_ux_next_task,args=(suggestion[1],suggestion[2]))
 if st.session_state.get("scenario_base_selected")!=official_id:
     st.caption("Cidade hipotética em análise: "+
                _base_details[st.session_state["scenario_base_selected"]]["name"]+
