@@ -68,7 +68,7 @@ def load_rail(path:Path=RAIL)->dict:
         if (r["fastest_minutes"]<=0 or
                 r["average_minutes"]<r["fastest_minutes"] or
                 r["services_on_sample_day"]<1 or
-                r["return_verified_2027"] if "return_verified_2027" in r else False):
+                r.get("return_verified_2027",False) is not False):
             raise ValueError("Dado ferroviário inválido")
         if not r["source_url"].startswith("https://"):
             raise ValueError("Fonte ferroviária ausente")
