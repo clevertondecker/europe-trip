@@ -17,7 +17,7 @@ def new_plan(base="mulhouse",departure="2027-09-09",profile="balanced")->dict:
           "total_days":70,"italy_days":10,"vacation_days":25,"setup_days":4,
           "budget_scenario":"70k","profile":profile,"mandatory_destinations":[],
           "excluded_destinations":[],"packages":{},"assignments":{},
-          "preferences":{},
+          "preferences":{},"flexible_visits":[],
           "accepted_recommendations":[],"rejected_recommendations":[],
           "source_versions":{"attractions":"2026-11-14","routes":"2026-11-14"}}
     validate_plan(plan)
@@ -58,6 +58,33 @@ def validate_plan(plan:dict,known_attractions:set[str]|None=None)->None:
     for k,v in plan["assignments"].items():
         date.fromisoformat(k)
         if not isinstance(v,str):raise ValueError("Destino inválido no calendário")
+    # Optional v1 extension: older saved plans remain readable unchanged.
+    flexible=plan.get("flexible_visits",[])
+    if not isinstance(flexible,list) or len(flexible)>80:
+        raise ValueError("Visitas flexíveis inválidas")
+    seen=set()
+    for visit in flexible:
+        if not isinstance(visit,dict) or set(visit)!={
+                "destination_id","stage","attractions","period"}:
+            raise ValueError("Formato de visita flexível inválido")
+        destination=visit["destination_id"]
+        stage=visit["stage"]
+        choices=visit["attractions"]
+        period=visit["period"]
+        if (not isinstance(destination,str) or len(destination)>80 or
+            not destination.replace("_","").replace("-","").isalnum() or
+            destination in seen or stage not in ("Itália","França") or
+            not isinstance(choices,list) or not 1<=len(choices)<=5 or
+            not all(isinstance(a,str) and 0<len(a)<=100 for a in choices) or
+            len(set(choices))!=len(choices) or
+            not isinstance(period,str) or len(period)>80):
+            raise ValueError("Visita flexível inválida ou duplicada")
+        if stage=="Itália" and not destination.startswith("italy_"):
+            raise ValueError("Destino não pertence à Itália")
+        if stage=="França" and (destination.startswith("italy_") or
+                               plan["packages"].get(destination)!=choices):
+            raise ValueError("Passeio francês divergente do roteiro")
+        seen.add(destination)
 
 def with_revision(plan:dict,updates:dict)->dict:
     result=deepcopy(plan)
