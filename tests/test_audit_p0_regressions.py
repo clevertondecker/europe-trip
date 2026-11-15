@@ -64,6 +64,10 @@ class MoneyRegression(unittest.TestCase):
             scenario_total(base,french,**kwargs,excursions_delta_brl=-5000)
         with self.assertRaises(ValueError):
             scenario_total(base,french,**kwargs,flight_delta_brl=-100000)
+        with self.assertRaises(ValueError):
+            scenario_total(base,french,**kwargs,flight_delta_brl="100")
+        with self.assertRaises(ValueError):
+            scenario_total(base,french,**kwargs,flight_delta_brl=float("nan"))
 
 
 class CalendarIntegrity(unittest.TestCase):
