@@ -142,3 +142,18 @@ A nova experiência de turismo usa a cidade-base francesa hipotética para **rec
 - **Ressalvas:** distâncias exibidas são geodésicas em linha reta, não quilômetros de trem. Os tempos oficiais são de estação a estação, não porta a porta. Carte Fluo requer regras de elegibilidade e eventual custo do cartão. Mapas não traçam trilhos verdadeiros; passeios alpinos podem exigir pernoite. Fotografias individuais das 50 atrações, tarifas normais e rotas específicas de 2027 continuam em pesquisa.
 
 A lista pessoal permanece em `st.session_state`; exporte-a antes de fechar a sessão. Nenhuma pesquisa de atrações sincroniza automaticamente do Drive.
+
+
+## Consultor inteligente determinístico (15/11/2026)
+
+**Onde:** Roteiro → Consultor inteligente.
+
+A partir do catálogo de 50 atrações e da matriz de 44 rotas pesquisadas, o consultor identifica lacunas de preço e retorno, tempo de viagem longo, tarifas Fluo condicionais e pernoites possíveis. Em Python, sem LLM, propõe até três redistribuições conservadoras de passeios nos fins de semana e dias livres. O ranking é relativo aos candidatos e **não** é uma previsão de custo, horários ou trajetos porta a porta.
+
+A interface contém perfis Econômico, Equilibrado (padrão) e Aproveitar ao máximo, alertas rastreáveis, custo conhecido para duas pessoas, comparação de alternativas, botão de aprovação/rejeição, exportação e importação JSON. Nenhum plano proposto muda calendário sem aprovação explícita. A escrita versionada no GitHub é desabilitada por padrão; pode ser configurada pelo proprietário nos Streamlit Secrets, com token e autenticação separados. É necessário evitar armazenamento de roteiros pessoais em repositórios públicos.
+
+**Arquivos:** `trip_plan_model.py`, `trip_plan_repository.py`, `travel_advisor.py`, `travel_optimizer.py`, `travel_advisor_ui.py`, `tests/test_travel_advisor.py`, `tests/test_travel_advisor_ui_smoke.py`, `tests/test_travel_advisor_approval_smoke.py`.
+
+**Documentação completa, limitações e configuração segura:** [RELATORIO_CONSULTOR_DETERMINISTICO_2027.md](RELATORIO_CONSULTOR_DETERMINISTICO_2027.md).
+
+A credencial GitHub **não está incluída** no repositório nem foi configurada pela implementação. Enquanto não for configurada, o fluxo de persistência funciona por exportação/importação JSON. O Drive e a decisão D-004 continuam somente leitura.
