@@ -19,6 +19,8 @@ def propose_schedule(plan,attractions,routes,profile="balanced",max_variants=3):
     """
     validate_plan(plan)
     if profile not in {"balanced","economy","experience"}:raise ValueError("profile")
+    if not plan["packages"]:
+        return []
     by_dest={d["id"]:d for d in attractions["destinations"]}
     days=available_days(plan)
     taken=set(plan.get("assignments",{}))
@@ -77,7 +79,17 @@ def propose_schedule(plan,attractions,routes,profile="balanced",max_variants=3):
     for candidate in proposals:
         candidate["score"]=score_proposal(candidate,plan,routes,profile)
     proposals.sort(key=lambda x:(-x["score"]["relative_score"],x["proposal_id"]))
-    return proposals
+    distinct=[]
+    seen=set()
+    for candidate in proposals:
+        if candidate["assignments"]==plan["assignments"]:
+            continue
+        signature=tuple(sorted(candidate["assignments"].items()))
+        if signature in seen:
+            continue
+        seen.add(signature)
+        distinct.append(candidate)
+    return distinct
 
 def score_proposal(proposal,plan,routes,profile):
     """Relative ranking within considered verifiable candidates, never a truth metric."""
