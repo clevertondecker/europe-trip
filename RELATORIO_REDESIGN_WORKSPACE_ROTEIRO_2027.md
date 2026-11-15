@@ -28,21 +28,20 @@ Branch: `feature/roteiro-workspace-compacto-2027`
 
 Nenhum motor financeiro, schema JSON, biblioteca de persistência ou configuração de autenticação foi alterado. Não foram geradas reservas, cotações ou rotas fictícias. Os cálculos continuam delegados a `advisor_finance.py`, `finance_margin_metrics.py` e `scenario_editor_model.py`.
 
-## Validação pendente
+## Validação automatizada
 
-Executar em ambiente com as dependências do projeto:
+GitHub Actions `Validate Streamlit app` — execução [209](https://github.com/clevertondecker/europe-trip/actions/runs/43682862697): **aprovada**. Inclui compilação Python e suíte de testes unitários / Streamlit AppTest. Os testes de navegação foram ampliados para verificar os filtros e que Orçamento não renderiza os controles pesados do editor.
 
-```bash
-python -m compileall -q .
-python -m unittest discover -s tests -v
-```
+## Refinamentos adicionais deste PR
 
-Validar AppTest e conferir desktop/mobile em um ambiente Streamlit. Esta entrega não afirma inspeção visual nem testes locais executados. Confirmar CI antes de fazer merge.
+- Cards de destinos com resumo mais curto e paginação de seis itens.
+- Busca e filtros por país e categoria real de atração, ordenação por relevância, nome e tempo ferroviário conhecido. Alterar filtros reinicia a paginação.
+- O orçamento retorna após renderizar a comparação, sem criar estado de rascunho nem executar editor de atrações.
+- O painel de salvamento fica antes da grade de passeios e o histórico GitHub não é consultado sem solicitação explícita do usuário.
+- CSS responsivo para navegação com controles de toque em telas estreitas.
 
-## Próximas melhorias propostas
+## Verificação visual e acompanhamento
 
-- Cards ainda mais compactos e paginados no editor (sem alterar seu modelo).
-- Filtros adicionais por categoria, ordenação e tempo disponível, usando somente campos verificáveis do catálogo.
-- Consolidar controles de salvamento para eliminar renderizações GitHub não necessárias.
-- Testes end-to-end de autorização, histórico e importação de backup.
-- Revisar responsividade real em dispositivos móveis.
+Inspeção visual real em navegadores desktop e mobile **não foi executada**. Os ajustes CSS são preliminares e devem ser conferidos na versão publicada. Testes de integração externa com Google OAuth e persistência de planos privados também dependem de credenciais/configuração do proprietário.
+
+A execução automatizada não altera planos JSON nem valida configuração de segredos do Streamlit. Não afirmar que o app publicado foi inspecionado visualmente até realizar essa verificação.
