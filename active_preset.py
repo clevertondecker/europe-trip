@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from travel_profile_scenarios import build_profile_scenarios
 from predefined_budget_model import preset_budget_summary
+from destination_labels import destination_names
 
 
 def active_preset(plan:dict,catalog:dict,routes:dict,trip_data:dict,
@@ -22,5 +23,5 @@ def active_preset(plan:dict,catalog:dict,routes:dict,trip_data:dict,
 
 
 def preset_destination_names(summary:dict,catalog:dict)->list[str]:
-    names={d["id"]:d["name"] for d in catalog["destinations"]}
+    names=destination_names(catalog)
     return [names.get(key,key) for key in summary["packages"]]
