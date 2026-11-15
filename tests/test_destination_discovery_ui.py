@@ -17,6 +17,13 @@ class DiscoveryUISmoke(unittest.TestCase):
         self.assertEqual(len(app.exception),0,[e.message for e in app.exception])
         self.assertIn("colmar",app.session_state["advisor_plan"]["packages"])
         self.assertIn("colmar",app.session_state["explore_packages"])
+        self.assertIn("discovery_go_my_outings",{b.key for b in app.button})
+        self.assertTrue(any("Colmar" in item.value and "Meus passeios" in item.value
+                            for item in app.success))
+        self.assertTrue(any("Projeção recalculada" in item.value for item in app.caption))
+        app.button(key="discovery_go_my_outings").click().run()
+        self.assertEqual(app.session_state["itinerary_section"],"Meus passeios")
+        self.assertIn("outing_edit_colmar",{b.key for b in app.button})
         self.assertIsNone(app.session_state.get("advisor_github_sha"))
         self.assertFalse(app.session_state.get("advisor_autosave_pending",False))
         app.segmented_control(key="itinerary_section").set_value("Calendário").run()
