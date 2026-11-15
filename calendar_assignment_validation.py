@@ -1,0 +1,27 @@
+"""Validate *new* full-day France outings without rejecting legacy saved drafts.
+
+The TripPlan schema v1 is kept unchanged. Existing persisted plans are readable;
+invalid new proposals/assignments fail rather than silently changing them.
+"""
+from __future__ import annotations
+
+from datetime import date
+
+from calendar_model import calendar_plan
+
+
+def validate_new_assignments(plan:dict, assignments:dict)->None:
+    if not isinstance(assignments,dict):
+        raise ValueError("Datas de passeios inválidas")
+    schedule={row["date"]:row for row in calendar_plan(
+        date.fromisoformat(plan["departure_date"]),plan["total_days"],
+        plan["italy_days"],plan["vacation_days"],plan["setup_days"])}
+    for day,dest in assignments.items():
+        if not isinstance(day,str) or day not in schedule:
+            raise ValueError("Passeio fora das datas da viagem")
+        if dest not in plan["packages"] or not plan["packages"][dest]:
+            raise ValueError("Passeio agendado sem atrações selecionadas")
+        row=schedule[day]
+        if (row["stage"]!="França" or row["activity"]=="Instalação" or
+                "Trabalho remoto" in row["activity"]):
+            raise ValueError("Passeio de dia inteiro conflita com trabalho, Itália ou instalação")
