@@ -13,7 +13,7 @@ from base_explorer_model import (base_opportunities,compare_bases,
 from destination_labels import place_label
 from base_research_expanded_ui import render_expanded_research
 from planning_session import update_fields
-from base_scenario_model import base_options, choose_exploratory_base
+from base_scenario_model import base_options, choose_exploratory_base, expanded_rail_routes
 from base_research_expanded_model import load_research, find_city, observed_housing
 from base_scenario_store import make_scenario, scenario_export, scenario_import
 
@@ -61,9 +61,27 @@ def _nearby(data:dict,base_id:str)->None:
         research=find_city(load_research(),base_id)
         housing=observed_housing(research)
         st.markdown("### "+place_label(research["name"],research["country"]))
-        st.info("Cidade do catálogo ampliado. Ainda não existem rotas "
-                "base → destino cadastradas na matriz deste explorador. "
-                "Não considere as viagens gratuitas nem indisponíveis.")
+        trains=expanded_rail_routes(base_id)
+        st.info("Cidade da pesquisa ampliada. A matriz principal de atrações "
+                "ainda não possui tarifas e trajetos completos para esta base.")
+        if trains:
+            st.markdown("#### Trechos pontuais pesquisados")
+            for segment in trains:
+                with st.container(border=True):
+                    st.markdown("**"+segment["destination_name"]+"**")
+                    st.caption("Trem mais rápido só ida: "+
+                               str(segment["oneway_minutes"])+" min; tarifa publicada por "
+                               "pessoa/trecho: "+
+                               (_format_eur(segment["fare_eur_person_oneway"])
+                                if segment["fare_eur_person_oneway"] is not None
+                                else "Não cotada"))
+                    st.caption("Data da amostra: "+segment["basis_date"]+
+                               " · Volta e horário de 2027 não verificados. "+
+                               segment["notes"])
+                    st.markdown("[Ver fonte ferroviária]("+segment["source_url"]+")")
+        else:
+            st.caption("Nenhum trajeto ferroviário catalogado desta cidade. "
+                       "Não significa custo zero nem impossibilidade de viagem.")
         st.caption("Corredor: "+research["corridor"]+
                    " · Anúncios históricos observados: "+str(housing["count"])+
                    " · Hospedagem mobiliada para 2027: não cotada.")
