@@ -73,6 +73,8 @@ class FlexibleVisitModelTests(unittest.TestCase):
         preview=italy_starter_preview(start,self.catalog,"economy")
         self.assertEqual(len(preview["to_add"]),4)
         self.assertEqual(preview["snapshot"]["coast_base_proposed"],"salerno")
+        self.assertIn(("italy_naples",["italy_naples__1"],
+                       "Última noite em Nápoles"),preview["to_add"])
         self.assertEqual((preview["snapshot"]["rome_nights"],
                           preview["snapshot"]["coast_nights"],
                           preview["snapshot"]["naples_nights"]),(4,4,1))
