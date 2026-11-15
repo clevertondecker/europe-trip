@@ -15,6 +15,6 @@ jobs:
       - name: Install dependencies
         run: python -m pip install -r requirements.txt
       - name: Syntax checks
-        run: python -m compileall -q app.py drive_sync.py data_model.py catalog.py unified_budget.py calendar_model.py route_preview.py attractions_model.py attractions_ui.py city_compare.py city_research.py city_market.py city_research_round2.py itinerary_planner.py finance_lifestyle.py
+        run: python -m compileall -q app.py drive_sync.py data_model.py catalog.py unified_budget.py calendar_model.py route_preview.py attractions_model.py attractions_ui.py travel_advisor.py travel_optimizer.py travel_advisor_ui.py trip_plan_model.py trip_plan_repository.py city_compare.py city_research.py city_market.py city_research_round2.py itinerary_planner.py finance_lifestyle.py
       - name: Unit tests
         run: python -m unittest discover -s tests -v
