@@ -79,8 +79,12 @@ def selected_rows(plan:dict,catalog:dict)->list[dict]:
     for item in plan.get("flexible_visits",[]):
         key=item["destination_id"]
         if key not in lookup:continue
+        if item["stage"]==FRANCE_STAGE and key not in plan.get("packages",{}):
+            continue  # The existing canonical outing editor removed this destination.
+        attractions=(plan["packages"][key] if item["stage"]==FRANCE_STAGE
+                     else item["attractions"])
         rows[key]={"id":key,"name":lookup[key]["name"],"stage":item["stage"],
-                   "attractions":item["attractions"],"period":item["period"],
+                   "attractions":attractions,"period":item["period"],
                    "exact_dates":rows.get(key,{}).get("exact_dates",[])}
     return sorted(rows.values(),key=lambda x:(x["stage"]!=ITALY_STAGE,x["name"]))
 
