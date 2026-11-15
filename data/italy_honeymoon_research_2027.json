@@ -373,6 +373,14 @@
           "road_or_bus",
           "flight"
         ]
+      ],
+      "itinerary_place_ids": [
+        "italy_rome",
+        "italy_maiori",
+        "italy_minori",
+        "italy_amalfi",
+        "italy_ravello",
+        "italy_positano"
       ]
     },
     {
@@ -484,6 +492,12 @@
           "alibus",
           "flight"
         ]
+      ],
+      "itinerary_place_ids": [
+        "italy_rome",
+        "italy_salerno",
+        "italy_amalfi",
+        "italy_naples"
       ]
     },
     {
@@ -595,6 +609,14 @@
           "road_or_bus",
           "flight"
         ]
+      ],
+      "itinerary_place_ids": [
+        "italy_rome",
+        "italy_minori",
+        "italy_maiori",
+        "italy_amalfi",
+        "italy_ravello",
+        "italy_positano"
       ]
     }
   ],
@@ -653,5 +675,165 @@
     "Rome_restaurants_and_city_taxes",
     "Capri_Pompeii_transport_and_guides"
   ],
-  "note": "4 noites Roma + 5 noites costa = 9 noites, 10 dias de calendário quando chegada e saída caem em dias diferentes. 10 noites significa pelo menos 11 dias de calendário em regra."
+  "note": "4 noites Roma + 5 noites costa = 9 noites, 10 dias de calendário quando chegada e saída caem em dias diferentes. 10 noites significa pelo menos 11 dias de calendário em regra.",
+  "itinerary_places": [
+    {
+      "id": "italy_rome",
+      "name": "Roma",
+      "attractions": [
+        {
+          "id": "italy_rome__1",
+          "name": "Coliseu e Fórum Romano"
+        },
+        {
+          "id": "italy_rome__2",
+          "name": "Vaticano e São Pedro"
+        },
+        {
+          "id": "italy_rome__3",
+          "name": "Centro histórico, Panteão e Trevi"
+        },
+        {
+          "id": "italy_rome__4",
+          "name": "Trastevere"
+        }
+      ],
+      "source": "Pesquisa Itália 2027 — cenários e logística; atividades editoriais a confirmar"
+    },
+    {
+      "id": "italy_amalfi",
+      "name": "Amalfi",
+      "attractions": [
+        {
+          "id": "italy_amalfi__1",
+          "name": "Centro histórico e Duomo"
+        },
+        {
+          "id": "italy_amalfi__2",
+          "name": "Litoral e passeios a pé"
+        },
+        {
+          "id": "italy_amalfi__3",
+          "name": "Vista da costa"
+        }
+      ],
+      "source": "Pesquisa Itália 2027 — cenários e logística; atividades editoriais a confirmar"
+    },
+    {
+      "id": "italy_ravello",
+      "name": "Ravello",
+      "attractions": [
+        {
+          "id": "italy_ravello__1",
+          "name": "Mirantes e jardins"
+        },
+        {
+          "id": "italy_ravello__2",
+          "name": "Centro histórico"
+        }
+      ],
+      "source": "Pesquisa Itália 2027 — cenários e logística; atividades editoriais a confirmar"
+    },
+    {
+      "id": "italy_positano",
+      "name": "Positano",
+      "attractions": [
+        {
+          "id": "italy_positano__1",
+          "name": "Centro e mirantes"
+        },
+        {
+          "id": "italy_positano__2",
+          "name": "Praia e passeio costeiro"
+        }
+      ],
+      "source": "Pesquisa Itália 2027 — cenários e logística; atividades editoriais a confirmar"
+    },
+    {
+      "id": "italy_capri",
+      "name": "Capri",
+      "attractions": [
+        {
+          "id": "italy_capri__1",
+          "name": "Passeio pela ilha"
+        },
+        {
+          "id": "italy_capri__2",
+          "name": "Vistas da costa"
+        }
+      ],
+      "source": "Pesquisa Itália 2027 — cenários e logística; atividades editoriais a confirmar"
+    },
+    {
+      "id": "italy_pompeii",
+      "name": "Pompeia",
+      "attractions": [
+        {
+          "id": "italy_pompeii__1",
+          "name": "Sítio arqueológico"
+        }
+      ],
+      "source": "Pesquisa Itália 2027 — cenários e logística; atividades editoriais a confirmar"
+    },
+    {
+      "id": "italy_maiori",
+      "name": "Maiori",
+      "attractions": [
+        {
+          "id": "italy_maiori__1",
+          "name": "Passeio à beira-mar"
+        },
+        {
+          "id": "italy_maiori__2",
+          "name": "Praia"
+        }
+      ],
+      "source": "Pesquisa Itália 2027 — cenários e logística; atividades editoriais a confirmar"
+    },
+    {
+      "id": "italy_minori",
+      "name": "Minori",
+      "attractions": [
+        {
+          "id": "italy_minori__1",
+          "name": "Centro e orla"
+        },
+        {
+          "id": "italy_minori__2",
+          "name": "Praia"
+        }
+      ],
+      "source": "Pesquisa Itália 2027 — cenários e logística; atividades editoriais a confirmar"
+    },
+    {
+      "id": "italy_salerno",
+      "name": "Salerno",
+      "attractions": [
+        {
+          "id": "italy_salerno__1",
+          "name": "Centro histórico"
+        },
+        {
+          "id": "italy_salerno__2",
+          "name": "Orla"
+        }
+      ],
+      "source": "Pesquisa Itália 2027 — cenários e logística; atividades editoriais a confirmar"
+    },
+    {
+      "id": "italy_naples",
+      "name": "Nápoles",
+      "attractions": [
+        {
+          "id": "italy_naples__1",
+          "name": "Centro histórico"
+        },
+        {
+          "id": "italy_naples__2",
+          "name": "Passeios urbanos"
+        }
+      ],
+      "source": "Pesquisa Itália 2027 — cenários e logística; atividades editoriais a confirmar"
+    }
+  ]
 }
