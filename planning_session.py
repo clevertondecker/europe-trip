@@ -37,6 +37,18 @@ def _commit(next_plan:dict)->dict:
     if next_plan==before:return before
     st.session_state["advisor_plan"]=next_plan
     sync_legacy_view(next_plan,st.session_state)
+    if before["base_city"]!=next_plan["base_city"]:
+        new_base=next_plan["base_city"]
+        # Do not mutate an instantiated widget; only set a different value
+        # when changed in another page or before the control is rendered.
+        if st.session_state.get("explore_base")!=new_base:
+            st.session_state["explore_base"]=new_base
+        city_name=new_base.capitalize()
+        if st.session_state.get("unified_city")!=city_name:
+            st.session_state["unified_city"]=city_name
+    if before["budget_scenario"]!=next_plan["budget_scenario"]:
+        if st.session_state.get("unified_scenario")!=next_plan["budget_scenario"]:
+            st.session_state["unified_scenario"]=next_plan["budget_scenario"]
     st.session_state.pop("advisor_proposals",None)
     st.session_state["advisor_local_changed"]=True
     if st.session_state.get("advisor_autosave_optin") and st.session_state.get(
