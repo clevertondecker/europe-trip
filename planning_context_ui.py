@@ -28,6 +28,28 @@ def show_alternative()->None:
     st.session_state["ux_pending_mode"]="Simulação"
 
 
+def open_detailed_impact()->None:
+    """Reuse researched route/finance comparison; never edit the official plan."""
+    from ux_navigation import set_task
+    state=st.session_state
+    plan=active_plan()
+    base=state.get("workflow_alt_base",plan["base_city"])
+    state["scenario_base_selected"]=base
+    state["ux_last_candidate"]=base
+    state["ux_mode"]="Simulação"
+    state["ux_mode_value"]="Simulação"
+    state["ux_days_value"]=(
+        int(state.get("workflow_alt_total_days",plan["total_days"]))-
+        int(state.get("workflow_alt_italy_days",plan["italy_days"])))
+    state["ux_days"]=state["ux_days_value"]
+    state["unified_stay"]=state["ux_days_value"]
+    state["flow_return_stage"]=state.get("flow_active_stage","Itália")
+    state["flow_return_destination"]=state.get("flow_active_destination")
+    state["flow_return_add_open"]=bool(state.get("flow_add_open",False))
+    state["workflow_compare_open"]=False
+    set_task(state,"Explorar","Comparar")
+
+
 def close_overlays()->None:
     st.session_state["workflow_settings_open"]=False
     st.session_state["workflow_compare_open"]=False
@@ -208,6 +230,10 @@ def _form_alternative(plan:dict)->None:
             st.warning("**Não cotado/comparável:** "+
                        "; ".join(comparison["not_quoted"])+
                        ". Uma alternativa não significa economia garantida.")
+            if "base_city" in comparison["differences"]:
+                st.button("Ver impactos em passeios, rotas e custos",
+                          key="workflow_alt_detailed_impact",
+                          on_click=open_detailed_impact)
             if not comparison["can_apply_official"]:
                 st.info("A candidata tem pesquisa exploratória, mas ainda não integra "
                         "as quatro bases validadas no modelo oficial. Não pode ser "
