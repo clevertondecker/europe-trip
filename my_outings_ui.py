@@ -11,6 +11,10 @@ from attractions_model import package_cost
 from advisor_finance import advisor_projection
 
 
+def _go_budget_presets()->None:
+    st.session_state["itinerary_section"]="Orçamento"
+
+
 def catalog_options(catalog: dict, plan: dict) -> tuple[dict, dict]:
     destinations = {d["id"]: d for d in catalog["destinations"]}
     attractions = defaultdict(list)
@@ -156,9 +160,8 @@ def render_my_outings(plan: dict, catalog: dict, *, routes: dict | None = None,
     if not cards:
         st.info("Você ainda não adotou um roteiro. A verba para excursões já está "
                 "prevista no orçamento, mas ainda não representa passeios escolhidos.")
-        if st.button("Ver roteiros prontos por estilo →",key="outing_go_budget_presets"):
-            st.session_state["itinerary_section"]="Orçamento"
-            st.rerun()
+        st.button("Ver roteiros prontos por estilo →",key="outing_go_budget_presets",
+                  on_click=_go_budget_presets)
         return
 
     for card in cards:
