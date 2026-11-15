@@ -101,9 +101,6 @@ def render_base_change(plan:dict,trip_data:dict,finance_live:bool,
                        "Não inclui novos trajetos, diferenças de alimentação ou reservas.")
             st.warning("Não é economia final calculada: "+
                        "; ".join(result["missing"])+".")
-    with st.expander("Revisar a possível mudança do roteiro"):
-        st.warning("Calendário, transporte Itália → França, hospedagem, trabalho remoto "
-                   "e passeio com retorno ainda exigem revisão antes de aprovar.")
-        st.caption("As bases novas continuam indisponíveis para promoção oficial "
-                   "enquanto não tiverem modelos e pesquisas completas.")
-        _choose_base(load_exploration(),plan,candidate)
+    st.caption("**Decisão oficial:** calendário, transporte Itália → França, hospedagem "
+               "e retornos exigem revisão independente dos indicadores acima.")
+    _choose_base(load_exploration(),plan,candidate)
