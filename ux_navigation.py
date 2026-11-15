@@ -175,6 +175,15 @@ def bootstrap(state) -> tuple[str, str | None, str | None, str | None]:
             state.get("main_navigation", "Visão geral"),
             state.get("itinerary_section"), state.get("guide_section"))
         state["ux_area"], state["ux_section"] = area, section
+        itinerary=state.get("itinerary_section")
+        if itinerary=="Itália":
+            state["ux_improve_view"]="Itália"
+        elif itinerary=="Meus passeios":
+            state["ux_improve_view"]="Temporada europeia"
+        elif itinerary in ("Descobrir","Simular roteiros"):
+            state["ux_improve_view"]=itinerary
+        elif itinerary=="Calendário":
+            state["ux_organize_view"]="Calendário completo"
     else:
         previous = state.get("_ux_legacy_page")
         request = state.get("main_navigation")
