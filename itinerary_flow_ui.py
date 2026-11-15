@@ -194,6 +194,10 @@ def _selected_stage(rows:list[dict],stage:str,catalog:dict)->None:
                        str(proposal["naples_nights"])+" noites · Base costeira proposta: "+
                        proposal["coast_base_proposed"].title()+
                        ". Nenhuma hospedagem ou reserva confirmada.")
+            if proposal["days"]!=active_plan()["italy_days"]:
+                st.warning("O período italiano do plano foi alterado depois "
+                           "da escolha desta proposta. Revise a distribuição "
+                           "de noites antes de marcar dias.")
     if not stage_rows:
         if stage==ITALY_STAGE:
             st.caption("**Proposta de ponto de partida:** Roma (~4 noites) e "
