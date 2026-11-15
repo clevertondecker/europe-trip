@@ -27,6 +27,10 @@ def bootstrap()->dict:
         st.session_state["explore_calendar"]=deepcopy(plan["assignments"])
     if "explore_base" not in st.session_state:
         st.session_state["explore_base"]=plan["base_city"]
+    if "unified_city" not in st.session_state:
+        st.session_state["unified_city"]=plan["base_city"].capitalize()
+    if "unified_scenario" not in st.session_state:
+        st.session_state["unified_scenario"]=plan["budget_scenario"]
     return plan
 
 def active_plan()->dict:
