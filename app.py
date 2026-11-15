@@ -1504,222 +1504,229 @@ elif page == "Roteiro":
             st.link_button("Planilha do cronograma no Drive",data["sources"]["spreadsheet"],use_container_width=True)
 
 elif page == "Orçamento":
-    import pandas as pd
-    st.markdown("<div class='page-eyebrow'>PLANEJAMENTO FINANCEIRO · DOIS VIAJANTES</div>"
-                "<div class='page-title'>Orçamento integrado</div>"
-                "<div class='page-subtitle'>Uma única simulação para moradia, duração, restaurantes, "
-                "transporte e passeios. Cada escolha substitui a verba prevista ou adiciona somente a diferença.</div>",
-                unsafe_allow_html=True)
-    live_finance = sync_sources["finance"]["status"] == "live"
-    if not live_finance:
-        st.warning("Financeiro em snapshot histórico. Verifique o Drive antes de decidir uma reserva.")
+    live_finance=sync_sources["finance"]["status"]=="live"
+    if ux_area=="Orçamento" and ux_section=="Resumo financeiro":
+        render_budget_summary(data,active_plan(),live_finance)
+    elif ux_area=="Orçamento" and ux_section=="Detalhamento":
+        render_budget_details(data,active_plan(),live_finance)
     else:
-        st.caption("Valores das subcategorias são recalculados a partir da planilha sincronizada.")
-    if "unified_scenario" not in st.session_state:
-        st.session_state["unified_scenario"]=active_plan()["budget_scenario"]
-    scenario_id = st.segmented_control(
-        "Cenário completo para o casal", ["60k","70k"], default="70k",
-        format_func=lambda x:f"R$ {x[:-1]} mil", key="unified_scenario",selection_mode="single")
-    scenario_id = scenario_id or "70k"
-    if scenario_id!=active_plan()["budget_scenario"]:
-        st.info("Teto selecionado apenas para esta simulação. "
-                "O teto do planejamento oficial permanece em R$ "+
-                active_plan()["budget_scenario"][:-1]+" mil.")
-        if st.session_state.get("ux_mode")=="Oficial":
-            if st.button("Confirmar alteração do teto oficial",key="budget_cap_confirm"):
-                update_fields(budget_scenario=scenario_id)
-                st.rerun()
-    scenario = get_scenario(data,scenario_id)
-    baseline = calculate_scenario(scenario)
-    french = resolve_french_budget(scenario,live_finance)
-    st.markdown("<div class='page-section'>Escolha o estilo de viagem</div>",unsafe_allow_html=True)
-    preset = st.segmented_control("Estilo",["Econômico","Equilibrado","Mais ativo","Personalizado"],
-        default="Equilibrado",key="unified_style",selection_mode="single")
-    profiles={"Econômico":(1,35),"Equilibrado":(2,60),"Mais ativo":(4,75)}
-    if preset in profiles and st.session_state.get("_unified_previous_style") != preset:
-        st.session_state["unified_outings"] = profiles[preset][0]
-        st.session_state["unified_outing_cost"] = profiles[preset][1]
-    st.session_state["_unified_previous_style"] = preset
-    col1,col2,col3 = st.columns(3,gap="medium")
-    with col1:
-        stay = st.slider("Dias na França",min_value=40,max_value=80,
-                         value=french["french_days"],step=1,key="unified_stay",
-                         on_change=_ux_budget_days_changed)
-    with col2:
-        outings = st.slider("Saídas por semana",0,7,value=2,key="unified_outings")
-    with col3:
-        spend = st.slider("Gasto por saída (€ para o casal)",15,150,value=60,step=5,
-                          key="unified_outing_cost")
-    col4,col5 = st.columns(2,gap="medium")
-    with col4:
-        fx = st.number_input("Câmbio simulado (R$/€)",4.0,10.0,6.3,0.05,key="unified_fx")
-    with col5:
-        exploratory_options=base_options()
-        city_ids=[item["id"] for item in exploratory_options]
-        candidate=st.session_state.get("scenario_base_selected",active_plan()["base_city"])
-        if candidate not in city_ids:
-            candidate=active_plan()["base_city"]
-        selected_base_id=candidate
-        selected_city=hypothetical_city_name(selected_base_id,exploratory_options)
-        st.markdown("**Cidade-base nesta análise:** "+selected_city)
-        st.caption("Use o seletor de cidade no cabeçalho para comparar outra base.")
-    st.caption("Esta cidade é uma simulação independente. "
-               "O roteiro oficial permanece em "+active_plan()["base_city"].capitalize()+
-               ". A ausência de aluguel pesquisado não significa custo zero.")
-    st.markdown("<div class='page-section'>Moradia e custos adicionais</div>",unsafe_allow_html=True)
-    st.caption("O aluguel da cidade é um valor de referência editorial de 2026, NÃO uma oferta para 2027. "
-               "Ao preenchê-lo, ele **substitui** a verba de moradia — não é somado novamente.")
-    city_data_budget = load_cities()
-    selected_rent = next((float(c["reference_rent_eur"]) for c in
-                          city_data_budget["cities"] if c["name"] == selected_city
-                          and c.get("reference_rent_eur") is not None),None)
-    if selected_rent is None:
-        st.info("Aluguel mobiliado desta cidade: não cotado. "
-                "O orçamento abaixo mantém a provisão oficial de hospedagem "
-                "e não a apresenta como preço desta cidade.")
-    use_city_rent = st.checkbox("Informar aluguel mensal hipotético para esta cidade",
-                                value=False,key="unified_override_rent")
-    quoted_rent = None
-    if use_city_rent:
-        input_rent=st.number_input(
-            "Aluguel hipotético (€ por mês, sem taxas)",
-            min_value=0.,max_value=6000.,
-            value=selected_rent if selected_rent is not None else 0.,
-            step=50.,key="unified_rent_month_"+selected_base_id)
-        if input_rent>0:
-            quoted_rent=float(input_rent)
-            st.caption("Provisão inserida manualmente. Não é uma cotação "
-                       "confirmada para setembro–novembro de 2027.")
-        else:
-            st.warning("Informe um aluguel maior que €0 para substituição. "
-                       "Até lá, a verba geral do orçamento permanece como provisão.")
-    with st.expander("Alterações adicionais às outras verbas"):
-        st.caption("Ajustes negativos representam economia. Nenhuma despesa final "
-                   "pode ficar abaixo de zero; os valores continuam hipóteses.")
-        flight_budget=next((row["amount"] for row in scenario["components"]
-                            if row["name"].startswith("Passagens e deslocamentos aéreos")),0)
-        ratio=stay/french["french_days"]
-        minimum_rent=(quoted_rent*(stay/30)*fx if quoted_rent is not None
-                      else french["amounts"]["rent"]*ratio)
-        extra1,extra2,extra3,extra4=st.columns(4,gap="small")
-        with extra1:
-            flight_delta=st.number_input("Variação em voos (R$)",min_value=-int(flight_budget),
-                                         max_value=25000,value=0,step=250,key="unified_flight_extra")
-        with extra2:
-            excursions_delta=st.number_input("Variação em passeios (R$)",
-                                             min_value=-int(french["amounts"]["excursions"]*ratio),
-                                             max_value=20000,value=0,step=250,key="unified_tour_extra")
-        with extra3:
-            transit_delta=st.number_input("Variação em transporte (R$)",
-                                          min_value=-int(french["amounts"]["transport"]*ratio),
-                                          max_value=10000,value=0,step=250,key="unified_transit_extra")
-        with extra4:
-            rent_delta=st.number_input("Variação em taxas/moradia (R$)",
-                                       min_value=-int(minimum_rent),max_value=10000,
-                                       value=0,step=250,key="unified_rent_extra")
-    # Reference is intentionally only a known ticket subtotal. It must never
-    # replace the entire tour allowance nor create a discount for missing quotes.
-    catalog_extra=0.0
-    attraction_ref=None
-    current_plan=active_plan()
-    if current_plan["packages"]:
-        known_cost=package_cost(
-            load_attractions(),load_base_routes(),current_plan["base_city"],
-            [id for items in current_plan["packages"].values() for id in items])
-        attraction_ref={
-            "eur":known_cost["known_by_currency"]["EUR"],
-            "chf":known_cost["known_by_currency"]["CHF"],
-            "fx_eur":fx,
-            "fx_chf":st.session_state.get("explore_chf_fx",7.1),
-            "base":current_plan["base_city"],
-            "incomplete":not known_cost["complete"],
-            "destinations":list(current_plan["packages"])}
-        st.caption("Passeios importados do roteiro oficial. Os custos destas "
-                   "atrações ainda não foram recalculados para a base hipotética "
-                   "selecionada; compare as rotas em Roteiro → Explorar bases.")
 
-    if attraction_ref:
-        st.markdown("<div class='page-section'>Passeios escolhidos no roteiro</div>",
+        import pandas as pd
+        st.markdown("<div class='page-eyebrow'>PLANEJAMENTO FINANCEIRO · DOIS VIAJANTES</div>"
+                    "<div class='page-title'>Orçamento integrado</div>"
+                    "<div class='page-subtitle'>Uma única simulação para moradia, duração, restaurantes, "
+                    "transporte e passeios. Cada escolha substitui a verba prevista ou adiciona somente a diferença.</div>",
                     unsafe_allow_html=True)
-        st.info(
-            f"Da base {escape(attraction_ref['base'].capitalize())}: bilhetes conhecidos "
-            f"€{attraction_ref['eur']:.2f} + CHF{attraction_ref['chf']:.2f} para dois. "
-            "A verba de passeios já está incluída no orçamento base; tarifas "
-            "reduzidas e ingressos desconhecidos não estão garantidos para 2027.")
-        use_catalog=st.checkbox(
-            "Considerar apenas eventual excedente dos bilhetes conhecidos sobre a verba de passeios",
-            value=True,key="budget_use_attraction_cost")
-        if use_catalog:
-            allocated_tours=french["amounts"]["excursions"]*stay/french["french_days"]
-            catalog_extra=excursions_overage_brl(
-                attraction_ref["eur"],attraction_ref["chf"],
-                attraction_ref["fx_eur"],attraction_ref["fx_chf"],allocated_tours)
-            if attraction_ref["incomplete"]:
-                st.warning("A cesta de passeios tem preços faltantes. A ausência de excedente NÃO "
-                           "significa que todos os passeios caibam na verba disponível.")
-            st.caption(f"Verba original proporcional de passeios: "
-                       f"{money_brl(allocated_tours)}. "
-                       f"Excedente conhecido somado uma vez: {money_brl(catalog_extra)}.")
-    result=scenario_total(
-        scenario,french,french_days=stay,outings_weekly=outings,
-        outing_couple_eur=spend,fx_brl_per_eur=fx,
-        rent_override_eur_month=quoted_rent,flight_delta_brl=flight_delta,
-        excursions_delta_brl=excursions_delta+catalog_extra,local_transport_delta_brl=transit_delta,
-        rent_delta_brl=rent_delta)
-    stats=[
-        ("Total projetado",money_brl(result["total"]),"Viagem completa · estimativa"),
-        ("Margem até o teto",money_brl(result["margin"]),"Reserva de emergência já incluída"),
-        ("Reserva protegida",money_brl(result["reserve_already_in_total"]),
-         "Não utilizar para lazer"),
-        ("Uso do teto",f"{result['budget_fraction']*100:.1f}%","Sem preços contratados")
-    ]
-    for col,(label,value,hint) in zip(st.columns(4,gap="small"),stats):
-        with col:
-            st.markdown(f"<div class='page-stat page-stat--blue'>"
-                        f"<div class='page-stat__label'>{escape(label)}</div>"
-                        f"<div class='page-stat__value'>{escape(value)}</div>"
-                        f"<div class='page-stat__hint'>{escape(hint)}</div></div>",
+        live_finance = sync_sources["finance"]["status"] == "live"
+        if not live_finance:
+            st.warning("Financeiro em snapshot histórico. Verifique o Drive antes de decidir uma reserva.")
+        else:
+            st.caption("Valores das subcategorias são recalculados a partir da planilha sincronizada.")
+        if "unified_scenario" not in st.session_state:
+            st.session_state["unified_scenario"]=active_plan()["budget_scenario"]
+        scenario_id = st.segmented_control(
+            "Cenário completo para o casal", ["60k","70k"], default="70k",
+            format_func=lambda x:f"R$ {x[:-1]} mil", key="unified_scenario",selection_mode="single")
+        scenario_id = scenario_id or "70k"
+        if scenario_id!=active_plan()["budget_scenario"]:
+            st.info("Teto selecionado apenas para esta simulação. "
+                    "O teto do planejamento oficial permanece em R$ "+
+                    active_plan()["budget_scenario"][:-1]+" mil.")
+            if st.session_state.get("ux_mode")=="Oficial":
+                if st.button("Confirmar alteração do teto oficial",key="budget_cap_confirm"):
+                    update_fields(budget_scenario=scenario_id)
+                    st.rerun()
+        scenario = get_scenario(data,scenario_id)
+        baseline = calculate_scenario(scenario)
+        french = resolve_french_budget(scenario,live_finance)
+        st.markdown("<div class='page-section'>Escolha o estilo de viagem</div>",unsafe_allow_html=True)
+        preset = st.segmented_control("Estilo",["Econômico","Equilibrado","Mais ativo","Personalizado"],
+            default="Equilibrado",key="unified_style",selection_mode="single")
+        profiles={"Econômico":(1,35),"Equilibrado":(2,60),"Mais ativo":(4,75)}
+        if preset in profiles and st.session_state.get("_unified_previous_style") != preset:
+            st.session_state["unified_outings"] = profiles[preset][0]
+            st.session_state["unified_outing_cost"] = profiles[preset][1]
+        st.session_state["_unified_previous_style"] = preset
+        col1,col2,col3 = st.columns(3,gap="medium")
+        with col1:
+            stay = st.slider("Dias na França",min_value=40,max_value=80,
+                             value=french["french_days"],step=1,key="unified_stay",
+                             on_change=_ux_budget_days_changed)
+        with col2:
+            outings = st.slider("Saídas por semana",0,7,value=2,key="unified_outings")
+        with col3:
+            spend = st.slider("Gasto por saída (€ para o casal)",15,150,value=60,step=5,
+                              key="unified_outing_cost")
+        col4,col5 = st.columns(2,gap="medium")
+        with col4:
+            fx = st.number_input("Câmbio simulado (R$/€)",4.0,10.0,6.3,0.05,key="unified_fx")
+        with col5:
+            exploratory_options=base_options()
+            city_ids=[item["id"] for item in exploratory_options]
+            candidate=st.session_state.get("scenario_base_selected",active_plan()["base_city"])
+            if candidate not in city_ids:
+                candidate=active_plan()["base_city"]
+            selected_base_id=candidate
+            selected_city=hypothetical_city_name(selected_base_id,exploratory_options)
+            st.markdown("**Cidade-base nesta análise:** "+selected_city)
+            st.caption("Use o seletor de cidade no cabeçalho para comparar outra base.")
+        st.caption("Esta cidade é uma simulação independente. "
+                   "O roteiro oficial permanece em "+active_plan()["base_city"].capitalize()+
+                   ". A ausência de aluguel pesquisado não significa custo zero.")
+        st.markdown("<div class='page-section'>Moradia e custos adicionais</div>",unsafe_allow_html=True)
+        st.caption("O aluguel da cidade é um valor de referência editorial de 2026, NÃO uma oferta para 2027. "
+                   "Ao preenchê-lo, ele **substitui** a verba de moradia — não é somado novamente.")
+        city_data_budget = load_cities()
+        selected_rent = next((float(c["reference_rent_eur"]) for c in
+                              city_data_budget["cities"] if c["name"] == selected_city
+                              and c.get("reference_rent_eur") is not None),None)
+        if selected_rent is None:
+            st.info("Aluguel mobiliado desta cidade: não cotado. "
+                    "O orçamento abaixo mantém a provisão oficial de hospedagem "
+                    "e não a apresenta como preço desta cidade.")
+        use_city_rent = st.checkbox("Informar aluguel mensal hipotético para esta cidade",
+                                    value=False,key="unified_override_rent")
+        quoted_rent = None
+        if use_city_rent:
+            input_rent=st.number_input(
+                "Aluguel hipotético (€ por mês, sem taxas)",
+                min_value=0.,max_value=6000.,
+                value=selected_rent if selected_rent is not None else 0.,
+                step=50.,key="unified_rent_month_"+selected_base_id)
+            if input_rent>0:
+                quoted_rent=float(input_rent)
+                st.caption("Provisão inserida manualmente. Não é uma cotação "
+                           "confirmada para setembro–novembro de 2027.")
+            else:
+                st.warning("Informe um aluguel maior que €0 para substituição. "
+                           "Até lá, a verba geral do orçamento permanece como provisão.")
+        with st.expander("Alterações adicionais às outras verbas"):
+            st.caption("Ajustes negativos representam economia. Nenhuma despesa final "
+                       "pode ficar abaixo de zero; os valores continuam hipóteses.")
+            flight_budget=next((row["amount"] for row in scenario["components"]
+                                if row["name"].startswith("Passagens e deslocamentos aéreos")),0)
+            ratio=stay/french["french_days"]
+            minimum_rent=(quoted_rent*(stay/30)*fx if quoted_rent is not None
+                          else french["amounts"]["rent"]*ratio)
+            extra1,extra2,extra3,extra4=st.columns(4,gap="small")
+            with extra1:
+                flight_delta=st.number_input("Variação em voos (R$)",min_value=-int(flight_budget),
+                                             max_value=25000,value=0,step=250,key="unified_flight_extra")
+            with extra2:
+                excursions_delta=st.number_input("Variação em passeios (R$)",
+                                                 min_value=-int(french["amounts"]["excursions"]*ratio),
+                                                 max_value=20000,value=0,step=250,key="unified_tour_extra")
+            with extra3:
+                transit_delta=st.number_input("Variação em transporte (R$)",
+                                              min_value=-int(french["amounts"]["transport"]*ratio),
+                                              max_value=10000,value=0,step=250,key="unified_transit_extra")
+            with extra4:
+                rent_delta=st.number_input("Variação em taxas/moradia (R$)",
+                                           min_value=-int(minimum_rent),max_value=10000,
+                                           value=0,step=250,key="unified_rent_extra")
+        # Reference is intentionally only a known ticket subtotal. It must never
+        # replace the entire tour allowance nor create a discount for missing quotes.
+        catalog_extra=0.0
+        attraction_ref=None
+        current_plan=active_plan()
+        if current_plan["packages"]:
+            known_cost=package_cost(
+                load_attractions(),load_base_routes(),current_plan["base_city"],
+                [id for items in current_plan["packages"].values() for id in items])
+            attraction_ref={
+                "eur":known_cost["known_by_currency"]["EUR"],
+                "chf":known_cost["known_by_currency"]["CHF"],
+                "fx_eur":fx,
+                "fx_chf":st.session_state.get("explore_chf_fx",7.1),
+                "base":current_plan["base_city"],
+                "incomplete":not known_cost["complete"],
+                "destinations":list(current_plan["packages"])}
+            st.caption("Passeios importados do roteiro oficial. Os custos destas "
+                       "atrações ainda não foram recalculados para a base hipotética "
+                       "selecionada; compare as rotas em Roteiro → Explorar bases.")
+
+        if attraction_ref:
+            st.markdown("<div class='page-section'>Passeios escolhidos no roteiro</div>",
                         unsafe_allow_html=True)
-    if result["status"]=="acima_do_teto":
-        st.error("O cenário ultrapassa o teto. Reduza gastos ou reveja a meta.")
-    elif result["status"]=="apertado":
-        st.warning("Orçamento apertado: menos de 5% de margem adicional ao valor já reservado "
-                   "para emergências. Os preços de 2027 ainda são incertos.")
-    else:
-        st.success("Há pelo menos 5% de margem adicional à reserva contabilizada, "
-                   "mas isso ainda depende de cotações reais.")
-    st.markdown("<div class='page-section'>Como as escolhas alteram o orçamento</div>",unsafe_allow_html=True)
-    translate={"rent":"Aluguel","groceries":"Supermercado","dining":"Restaurantes e bares",
-               "transport":"Transporte local","excursions":"Passeios"}
-    rows=[{"Categoria":translate[k],"Verba original (R$)":round(french["amounts"][k],2),
-           "Simulado (R$)":result["new_components"][k],
-           "Variação (R$)":result["deltas"][k]} for k in
-          ("rent","groceries","dining","transport","excursions")]
-    st.dataframe(pd.DataFrame(rows),use_container_width=True,hide_index=True,
-                 column_config={k:st.column_config.NumberColumn(format="R$ %.2f")
-                    for k in ("Verba original (R$)","Simulado (R$)","Variação (R$)")})
-    st.caption("Moradia, compras e transporte ajustados proporcionalmente aos dias; "
-               "passeios ajustados proporcionalmente apenas como hipótese; "
-               "bares/restaurantes substituídos pelo seu padrão de saídas. "
-               "Despesas não incluídas ou de preço desconhecido continuam fora da simulação. "
-               "O câmbio aqui só converte valores inseridos em euros — "
-               "não reprecifica os valores da planilha em reais.")
-    st.markdown("<div class='page-section'>Orçamento total de referência</div>",unsafe_allow_html=True)
-    st.bar_chart([{"Categoria":part["name"],"Valor (R$)":part["amount"]}
-                  for part in scenario["components"]],x="Categoria",y="Valor (R$)",
-                 horizontal=True,height=385)
-    with st.expander("Conciliação, origem e limitações"):
-        st.caption(f"Origem das subcategorias: {'Drive sincronizado' if live_finance else 'snapshot histórico do GitHub'}. "
-                   "A reserva emergencial já está dentro do total da planilha. "
-                   "Nenhum valor exibido é uma cotação fechada para setembro–novembro/2027.")
-        st.write(f"Total de referência: {money_brl(baseline['total'])} · "
-                 f"teto: {money_brl(scenario['cap_brl'])} · "
-                 f"saldo de referência: {money_brl(baseline['balance'])}")
-        if abs(baseline["rounding_difference"]) > .1:
-            st.warning("Há divergência entre o subtotal de componentes e o total do modelo. "
-                       "Validar a planilha antes de compras.")
-        st.link_button("Planilha financeira oficial",data["sources"]["spreadsheet"],
-                       use_container_width=True)
+            st.info(
+                f"Da base {escape(attraction_ref['base'].capitalize())}: bilhetes conhecidos "
+                f"€{attraction_ref['eur']:.2f} + CHF{attraction_ref['chf']:.2f} para dois. "
+                "A verba de passeios já está incluída no orçamento base; tarifas "
+                "reduzidas e ingressos desconhecidos não estão garantidos para 2027.")
+            use_catalog=st.checkbox(
+                "Considerar apenas eventual excedente dos bilhetes conhecidos sobre a verba de passeios",
+                value=True,key="budget_use_attraction_cost")
+            if use_catalog:
+                allocated_tours=french["amounts"]["excursions"]*stay/french["french_days"]
+                catalog_extra=excursions_overage_brl(
+                    attraction_ref["eur"],attraction_ref["chf"],
+                    attraction_ref["fx_eur"],attraction_ref["fx_chf"],allocated_tours)
+                if attraction_ref["incomplete"]:
+                    st.warning("A cesta de passeios tem preços faltantes. A ausência de excedente NÃO "
+                               "significa que todos os passeios caibam na verba disponível.")
+                st.caption(f"Verba original proporcional de passeios: "
+                           f"{money_brl(allocated_tours)}. "
+                           f"Excedente conhecido somado uma vez: {money_brl(catalog_extra)}.")
+        result=scenario_total(
+            scenario,french,french_days=stay,outings_weekly=outings,
+            outing_couple_eur=spend,fx_brl_per_eur=fx,
+            rent_override_eur_month=quoted_rent,flight_delta_brl=flight_delta,
+            excursions_delta_brl=excursions_delta+catalog_extra,local_transport_delta_brl=transit_delta,
+            rent_delta_brl=rent_delta)
+        stats=[
+            ("Total projetado",money_brl(result["total"]),"Viagem completa · estimativa"),
+            ("Margem até o teto",money_brl(result["margin"]),"Reserva de emergência já incluída"),
+            ("Reserva protegida",money_brl(result["reserve_already_in_total"]),
+             "Não utilizar para lazer"),
+            ("Uso do teto",f"{result['budget_fraction']*100:.1f}%","Sem preços contratados")
+        ]
+        for col,(label,value,hint) in zip(st.columns(4,gap="small"),stats):
+            with col:
+                st.markdown(f"<div class='page-stat page-stat--blue'>"
+                            f"<div class='page-stat__label'>{escape(label)}</div>"
+                            f"<div class='page-stat__value'>{escape(value)}</div>"
+                            f"<div class='page-stat__hint'>{escape(hint)}</div></div>",
+                            unsafe_allow_html=True)
+        if result["status"]=="acima_do_teto":
+            st.error("O cenário ultrapassa o teto. Reduza gastos ou reveja a meta.")
+        elif result["status"]=="apertado":
+            st.warning("Orçamento apertado: menos de 5% de margem adicional ao valor já reservado "
+                       "para emergências. Os preços de 2027 ainda são incertos.")
+        else:
+            st.success("Há pelo menos 5% de margem adicional à reserva contabilizada, "
+                       "mas isso ainda depende de cotações reais.")
+        st.markdown("<div class='page-section'>Como as escolhas alteram o orçamento</div>",unsafe_allow_html=True)
+        translate={"rent":"Aluguel","groceries":"Supermercado","dining":"Restaurantes e bares",
+                   "transport":"Transporte local","excursions":"Passeios"}
+        rows=[{"Categoria":translate[k],"Verba original (R$)":round(french["amounts"][k],2),
+               "Simulado (R$)":result["new_components"][k],
+               "Variação (R$)":result["deltas"][k]} for k in
+              ("rent","groceries","dining","transport","excursions")]
+        st.dataframe(pd.DataFrame(rows),use_container_width=True,hide_index=True,
+                     column_config={k:st.column_config.NumberColumn(format="R$ %.2f")
+                        for k in ("Verba original (R$)","Simulado (R$)","Variação (R$)")})
+        st.caption("Moradia, compras e transporte ajustados proporcionalmente aos dias; "
+                   "passeios ajustados proporcionalmente apenas como hipótese; "
+                   "bares/restaurantes substituídos pelo seu padrão de saídas. "
+                   "Despesas não incluídas ou de preço desconhecido continuam fora da simulação. "
+                   "O câmbio aqui só converte valores inseridos em euros — "
+                   "não reprecifica os valores da planilha em reais.")
+        st.markdown("<div class='page-section'>Orçamento total de referência</div>",unsafe_allow_html=True)
+        st.bar_chart([{"Categoria":part["name"],"Valor (R$)":part["amount"]}
+                      for part in scenario["components"]],x="Categoria",y="Valor (R$)",
+                     horizontal=True,height=385)
+        with st.expander("Conciliação, origem e limitações"):
+            st.caption(f"Origem das subcategorias: {'Drive sincronizado' if live_finance else 'snapshot histórico do GitHub'}. "
+                       "A reserva emergencial já está dentro do total da planilha. "
+                       "Nenhum valor exibido é uma cotação fechada para setembro–novembro/2027.")
+            st.write(f"Total de referência: {money_brl(baseline['total'])} · "
+                     f"teto: {money_brl(scenario['cap_brl'])} · "
+                     f"saldo de referência: {money_brl(baseline['balance'])}")
+            if abs(baseline["rounding_difference"]) > .1:
+                st.warning("Há divergência entre o subtotal de componentes e o total do modelo. "
+                           "Validar a planilha antes de compras.")
+            st.link_button("Planilha financeira oficial",data["sources"]["spreadsheet"],
+                           use_container_width=True)
 
 elif page == "Pesquisas & decisões":
     st.markdown("<div class='page-eyebrow'>CENTRAL DE PLANEJAMENTO · FONTES DO DRIVE</div>"
