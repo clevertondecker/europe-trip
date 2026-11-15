@@ -7,15 +7,17 @@ proposals are not hotel, ticket or timing reservations.
 from __future__ import annotations
 from html import escape
 import json
+from datetime import date,timedelta
 import streamlit as st
 
 from itinerary_flow_model import (
     destinations,get_choice,selected_rows,choice_counts,is_selected,
-    period_options,UNASSIGNED,ITALY_STAGE,FRANCE_STAGE,
+    period_options,UNASSIGNED,ITALY_STAGE,FRANCE_STAGE,EUROPE_STAGE_LABEL,
     validate_flow_backup
 )
 from planning_session import (active_plan,upsert_flexible_choice,
-                              remove_flexible_choice)
+                              remove_flexible_choice,schedule_italy_visit,
+                              schedule_package,unschedule_package)
 from planning_status import save_label,explain_storage_error
 from planning_store import sync_legacy_view
 from travel_advisor_ui import _owner_signed_in,_secure_save
@@ -31,11 +33,29 @@ def _navigate(area:str,task:str)->None:
 def _show_add()->None:
     st.session_state["flow_add_open"]=True
     st.session_state["flow_save_open"]=False
+    st.session_state["flow_organize_open"]=False
+
+
+def _show_organize()->None:
+    st.session_state["flow_organize_open"]=True
+    st.session_state["flow_add_open"]=False
+    st.session_state["flow_save_open"]=False
+
+
+def _stage_label(stage:str)->str:
+    return EUROPE_STAGE_LABEL if stage==FRANCE_STAGE else stage
+
+
+def _period_label(value:str)->str:
+    return {"Durante a estadia na França":"Durante a temporada europeia",
+            "Primeiro fim de semana na França":
+                "Primeiro fim de semana da temporada europeia"}.get(value,value)
 
 
 def _show_save()->None:
     st.session_state["flow_save_open"]=True
     st.session_state["flow_add_open"]=False
+    st.session_state["flow_organize_open"]=False
 
 
 def _money(n:float)->str:
@@ -51,7 +71,8 @@ def _render_add(plan:dict,catalog:dict)->None:
                    "ser definidas posteriormente.")
         stage=st.segmented_control(
             "Em qual etapa?",[ITALY_STAGE,FRANCE_STAGE],default=ITALY_STAGE,
-            key="flow_stage",selection_mode="single")
+            key="flow_stage",selection_mode="single",
+            format_func=_stage_label)
         term=st.text_input("Buscar cidade ou atração",key="flow_search",
                            placeholder="Ex.: Amalfi, Ravello, Colmar, Vaticano")
         all_choices=[d for d in destinations(catalog) if d["stage"]==stage]
@@ -84,7 +105,8 @@ def _render_add(plan:dict,catalog:dict)->None:
             period=st.selectbox("Quando? (opcional)",periods,
                                 index=periods.index(current["period"])
                                 if current and current["period"] in periods else 0,
-                                key="flow_period_"+dest_id)
+                                key="flow_period_"+dest_id,
+                                format_func=_period_label)
             st.caption("Sem data obrigatória · Não adiciona reservas nem "
                        "altera o roteiro de outra cidade-base.")
             if not already:
@@ -125,7 +147,7 @@ def _edit_destination(row:dict,catalog:dict)->None:
         periods=period_options(row["stage"])
         chosen=st.selectbox("Período flexível",list(periods),
             index=periods.index(row["period"]) if row["period"] in periods else 0,
-            key="flow_edit_period_"+row["id"])
+            key="flow_edit_period_"+row["id"],format_func=_period_label)
         a,b=st.columns(2)
         with a:
             if st.button("Salvar alterações",key="flow_edit_save_"+row["id"],
@@ -162,7 +184,16 @@ def _edit_destination(row:dict,catalog:dict)->None:
 def _selected_stage(rows:list[dict],stage:str,catalog:dict)->None:
     stage_rows=[r for r in rows if r["stage"]==stage]
     st.markdown("#### Etapa "+("1 · Lua de mel na Itália" if stage==ITALY_STAGE
-                              else "2 · Temporada na França"))
+                              else "2 · Temporada europeia"))
+    if stage==ITALY_STAGE:
+        proposal=active_plan().get("italy_proposal")
+        if proposal:
+            st.caption("**Proposta adotada para estudo:** "+proposal["label"]+
+                       " · Roma "+str(proposal["rome_nights"])+" noites · Costa "+
+                       str(proposal["coast_nights"])+" noites · Nápoles "+
+                       str(proposal["naples_nights"])+" noites · Base costeira proposta: "+
+                       proposal["coast_base_proposed"].title()+
+                       ". Nenhuma hospedagem ou reserva confirmada.")
     if not stage_rows:
         if stage==ITALY_STAGE:
             st.caption("**Proposta de ponto de partida:** Roma (~4 noites) e "
@@ -187,7 +218,7 @@ def _selected_stage(rows:list[dict],stage:str,catalog:dict)->None:
                 if row["exact_dates"]:
                     st.caption("Organizado em "+", ".join(row["exact_dates"]))
                 else:
-                    st.caption(period if period!=UNASSIGNED
+                    st.caption(_period_label(period) if period!=UNASSIGNED
                                else "Sem período definido — pode organizar depois")
             with status_col:
                 st.caption("Organizado" if row["period"]!=UNASSIGNED
@@ -226,6 +257,78 @@ def _compact_budget(plan:dict,catalog:dict,trip_data:dict,
                "Valores faltantes não são €0; a margem não é dinheiro livre.")
     st.button("Ver orçamento detalhado",key="flow_go_budget",
               on_click=_navigate,args=("Orçamento","Detalhamento"))
+
+
+def _render_organize(plan:dict,catalog:dict)->None:
+    """Organize by flexible period or precise day without leaving this editor."""
+    if not st.session_state.get("flow_organize_open",False):
+        return
+    with st.container(border=True):
+        st.markdown("#### Organizar os passeios")
+        st.caption("Escolha primeiro um período flexível ou, se já souber, "
+                   "uma data. Nenhuma das opções cria reservas.")
+        rows=selected_rows(plan,catalog)
+        if not rows:
+            st.info("Adicione um lugar antes de organizar.")
+        else:
+            by_id={r["id"]:r for r in rows}
+            dest_id=st.selectbox("Lugar do meu roteiro",list(by_id),
+                                 format_func=lambda key:by_id[key]["name"],
+                                 key="flow_organize_destination")
+            row=by_id[dest_id]
+            mode=st.segmented_control(
+                "Como organizar?",["Por período","Definir data"],
+                default="Por período",key="flow_organize_mode",
+                selection_mode="single")
+            if mode!="Definir data":
+                options=period_options(row["stage"])
+                value=st.selectbox("Período sugerido",options,
+                    index=options.index(row["period"]) if row["period"] in options else 0,
+                    key="flow_organize_period",format_func=_period_label)
+                if st.button("Guardar período",key="flow_organize_save_period",
+                             type="primary"):
+                    upsert_flexible_choice(dest_id,row["attractions"],value)
+                    st.session_state["flow_notice"]="Período de "+row["name"]+" atualizado."
+                    st.rerun()
+            else:
+                start=date.fromisoformat(plan["departure_date"])
+                if row["stage"]==FRANCE_STAGE:
+                    start+=timedelta(days=plan["italy_days"])
+                    end=date.fromisoformat(plan["departure_date"])+timedelta(
+                        days=plan["total_days"]-1)
+                else:
+                    end=start+timedelta(days=plan["italy_days"]-1)
+                previous=next((date.fromisoformat(d) for d in row["exact_dates"]
+                               if start<=date.fromisoformat(d)<=end),start)
+                chosen=st.date_input("Data proposta",value=previous,
+                    min_value=start,max_value=end,
+                    key="flow_organize_date_"+row["stage"])
+                st.caption("Datas baseadas na partida planejada; sujeitas a alterações. "
+                           "A data deve permanecer dentro da etapa selecionada.")
+                if st.button("Definir data",key="flow_organize_save_date",
+                             type="primary"):
+                    try:
+                        if row["stage"]==ITALY_STAGE:
+                            schedule_italy_visit(dest_id,chosen.isoformat())
+                        else:
+                            schedule_package(chosen.isoformat(),dest_id)
+                        st.session_state["flow_notice"]="Data proposta registrada para "+row["name"]+"."
+                        st.rerun()
+                    except (ValueError,KeyError) as exc:
+                        st.error(str(exc))
+                if row["exact_dates"]:
+                    if st.button("Retirar data definida",key="flow_organize_remove_date"):
+                        if row["stage"]==ITALY_STAGE:
+                            schedule_italy_visit(dest_id,None)
+                        else:
+                            unschedule_package(row["exact_dates"][0])
+                        st.session_state["flow_notice"]="Data removida; o lugar permanece escolhido."
+                        st.rerun()
+        st.button("Abrir calendário completo",key="flow_organize_full_calendar",
+                  on_click=_navigate,args=("Meu roteiro","Calendário"))
+        if st.button("Concluir organização",key="flow_organize_close"):
+            st.session_state["flow_organize_open"]=False
+            st.rerun()
 
 
 def _save_panel(plan:dict,catalog:dict)->None:
@@ -305,7 +408,7 @@ def render_itinerary_workbench(plan:dict,catalog:dict,
     st.caption("Organize a viagem sem precisar decidir datas e reservas agora.")
     metrics=st.columns(3)
     metrics[0].metric("Itália",str(plan["italy_days"])+" dias")
-    metrics[1].metric("França",str(plan["total_days"]-plan["italy_days"])+" dias")
+    metrics[1].metric("Temporada europeia",str(plan["total_days"]-plan["italy_days"])+" dias")
     metrics[2].metric("Lugares escolhidos",stats["destinations"])
     st.caption(label+" · "+hint+" · "+
                str(stats["organized"])+" lugar(es) organizado(s) por período ou data")
@@ -313,12 +416,13 @@ def render_itinerary_workbench(plan:dict,catalog:dict,
     a.button("＋ Adicionar passeio",key="flow_add_open_button",
              on_click=_show_add,type="primary",width="stretch")
     b.button("Organizar dias",key="flow_go_calendar",
-             on_click=_navigate,args=("Meu roteiro","Calendário"),width="stretch")
+             on_click=_show_organize,width="stretch")
     c.button("Salvar planejamento",key="flow_open_save",
              on_click=_show_save,width="stretch")
     if st.session_state.get("flow_notice"):
         st.success(st.session_state.pop("flow_notice"))
     _render_add(active_plan(),catalog)
+    _render_organize(active_plan(),catalog)
     _save_panel(active_plan(),catalog)
     rows=selected_rows(active_plan(),catalog)
     _selected_stage(rows,ITALY_STAGE,catalog)
