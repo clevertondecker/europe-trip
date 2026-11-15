@@ -13,6 +13,7 @@ from attractions_model import (
     load_attractions, load_base_routes, places_for_base, route_for,
     package_cost, approximate_feasibility, schedule_visit)
 from calendar_model import calendar_plan
+from planning_session import active_plan,update_fields,select_package,delete_package,schedule_package,unschedule_package,update_interest
 
 
 def _destination_photo(destination: dict) -> None:
@@ -44,7 +45,7 @@ def _attraction_filters(cat: dict) -> set[str]:
 
 
 def _selected_packages() -> dict[str,list[str]]:
-    return st.session_state.setdefault("explore_packages",{})
+    return active_plan()["packages"]
 
 
 def render_explorer(trip_data: dict, sync_sources: dict, map_view) -> None:
@@ -68,6 +69,8 @@ def render_explorer(trip_data: dict, sync_sources: dict, map_view) -> None:
                       ["mulhouse","strasbourg","metz","nancy"],
                       format_func=lambda code: by_id[code]["name"],
                       key="explore_base")
+    if base!=active_plan()["base_city"]:
+        update_fields(base_city=base)
     available=places_for_base(attractions,routes,base)
     country_options=sorted({p["destination"]["country"] for p in available})
     category_options=sorted(_attraction_filters(attractions))
@@ -199,7 +202,7 @@ def render_explorer(trip_data: dict, sync_sources: dict, map_view) -> None:
                    f"trem: {str(r['train_minutes_one_way'])+' min/trecho' if r['train_minutes_one_way'] is not None else 'não verificado'} "
                    "· duração porta a porta ainda não pesquisada")
         attractions_here=[a for a in attractions["attractions"] if a["destination_id"]==chosen]
-        marks=st.session_state.setdefault("explore_marks",{})
+        marks=active_plan().get("preferences",{})
         for a in attractions_here:
             with st.container(border=True):
                 left,right=st.columns([3,1],gap="medium")
@@ -219,7 +222,9 @@ def render_explorer(trip_data: dict, sync_sources: dict, map_view) -> None:
                     marked=st.selectbox("Interesse",["Quero visitar","Opcional","Descartar"],
                                         index=["Quero visitar","Opcional","Descartar"].index(current),
                                         key=f"explore_mark_{a['id']}")
-                    marks[a["id"]]=marked
+                    if marked!=marks.get(a["id"],"Opcional"):
+                        update_interest(a["id"],marked)
+                        marks=active_plan().get("preferences",{})
         st.markdown("#### Montar passeio nessa cidade")
         previous=packages.get(chosen,[])
         if not previous:
@@ -235,14 +240,12 @@ def render_explorer(trip_data: dict, sync_sources: dict, map_view) -> None:
                    "Não inclui caminhada, refeições, espera ou viagem desde a base.")
         if st.button("Salvar passeio na minha lista",key=f"explore_save_{chosen}",
                      use_container_width=True,disabled=not chosen_ids):
-            packages[chosen]=chosen_ids
-            st.session_state["explore_packages"]=packages
-            st.success("Passeio incluído na lista desta sessão. O custo será calculado pela base selecionada.")
+            select_package(chosen,chosen_ids)
+            st.success("Passeio adicionado ao seu planejamento. Salve as alterações quando desejar.")
         if chosen in packages:
             if st.button("Remover passeio da lista",key=f"explore_remove_{chosen}",
                          use_container_width=True):
-                packages.pop(chosen,None)
-                st.session_state["explore_packages"]=packages
+                delete_package(chosen)
                 st.rerun()
 
     st.markdown("<div class='page-section'>Minha lista de passeios e custos conhecidos</div>",
@@ -302,9 +305,9 @@ def render_explorer(trip_data: dict, sync_sources: dict, map_view) -> None:
             if st.button("Adicionar passeio ao calendário",key="explore_schedule_add",
                          use_container_width=True):
                 try:
-                    st.session_state["explore_calendar"]=schedule_visit(
-                        days,st.session_state.get("explore_calendar",{}),picked,destid)
-                    st.success("Dia adicionado ao calendário provisório desta sessão.")
+                    schedule_visit(days,active_plan()["assignments"],picked,destid)
+                    schedule_package(picked,destid)
+                    st.success("Passeio adicionado ao calendário do planejamento.")
                 except ValueError as e:
                     st.warning(str(e))
             assignments=st.session_state.get("explore_calendar",{})
@@ -314,7 +317,7 @@ def render_explorer(trip_data: dict, sync_sources: dict, map_view) -> None:
                     with one:st.markdown(f"**{day}:** {by_id.get(destid,{}).get('name',destid)}")
                     with two:
                         if st.button("Remover",key=f"explore_calendar_remove_{day}"):
-                            st.session_state["explore_calendar"]={k:v for k,v in assignments.items() if k!=day}
+                            unschedule_package(day)
                             st.rerun()
 
         st.markdown("#### Levar o custo conhecido ao orçamento")
@@ -339,17 +342,18 @@ def render_explorer(trip_data: dict, sync_sources: dict, map_view) -> None:
         st.button("Comparar no orçamento sem dupla contagem →",
                   key="explore_to_budget",use_container_width=True,
                   on_click=_send_budget_reference)
-        export={
-            "saved_at":"2026-11-14","base":base,
-            "preferences":marks,"packages":packages,
-            "calendar":st.session_state.get("explore_calendar",{}),
-            "cost_known":current_cost,
-            "note":"Exportação da sessão, não sincronizada com Drive. Valores históricos/parciais."
-        }
-        st.download_button("Exportar plano desta sessão (JSON)",
-                           data=json.dumps(export,ensure_ascii=False,indent=2),
-                           file_name="nossa_europa_2027_atracoes.json",
-                           mime="application/json",use_container_width=True)
+        with st.expander("Backup técnico das atrações (opcional)"):
+            st.caption("A seleção completa está no planejamento. "
+                       "Este arquivo separado serve apenas como cópia de segurança.")
+            export={"base":base,"preferences":active_plan().get("preferences",{}),
+                    "packages":active_plan()["packages"],
+                    "calendar":active_plan()["assignments"],
+                    "cost_known":current_cost,
+                    "note":"Custo parcial com referências históricas, não cotação de 2027."}
+            st.download_button("Baixar arquivo de backup",
+                               data=json.dumps(export,ensure_ascii=False,indent=2),
+                               file_name="nossa_europa_2027_atracoes.json",
+                               mime="application/json",use_container_width=True)
     st.caption("Fotos: Wikimedia Commons com atribuição e licença em cada card. "
                "Fontes de turismo e operadores consultadas em novembro/2026; "
                "rever todas as datas e condições antes de viajar.")
