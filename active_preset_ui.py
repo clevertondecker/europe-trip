@@ -5,6 +5,7 @@ import streamlit as st
 
 from predefined_budget_ui import _confirm_preset
 from active_preset import preset_destination_names
+from destination_labels import destination_names
 
 
 def money(value:float)->str:
@@ -13,7 +14,7 @@ def money(value:float)->str:
 
 def render_active_preset(plan:dict,preset:dict,catalog:dict)->None:
     option,summary=preset["option"],preset["summary"]
-    names={d["id"]:d["name"] for d in catalog["destinations"]}
+    names=destination_names(catalog)
     attractions={a["id"]:a["name"] for a in catalog["attractions"]}
     st.markdown("### Roteiro pré-definido · "+summary["label"])
     st.caption("Sugestão calculada para sua base **"+names.get(plan["base_city"],plan["base_city"])+
@@ -87,7 +88,7 @@ def render_active_preset_summary(preset:dict,catalog:dict,context:str)->None:
             ". "+str(len(summary["new"]))+
             " ainda não confirmado(s). É uma proposta, não seu roteiro salvo.")
     if context=="calendar":
-        names={d["id"]:d["name"] for d in catalog["destinations"]}
+        names=destination_names(catalog)
         if summary["assignments"]:
             with st.expander("Ver datas sugeridas deste perfil"):
                 for day,destination in sorted(summary["assignments"].items()):
