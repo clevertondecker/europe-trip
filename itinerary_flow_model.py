@@ -83,7 +83,7 @@ def selected_rows(plan:dict,catalog:dict)->list[dict]:
 def choice_counts(plan:dict,catalog:dict)->dict:
     rows=selected_rows(plan,catalog)
     return {"destinations":len(rows),
-            "organized":sum(x["period"]!=UNASSIGNED or x["exact_dates"] for x in rows),
+            "organized":sum(bool(x["period"]!=UNASSIGNED or x["exact_dates"]) for x in rows),
             "italy":sum(x["stage"]==ITALY_STAGE for x in rows),
             "france":sum(x["stage"]==FRANCE_STAGE for x in rows)}
 
