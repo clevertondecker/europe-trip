@@ -33,6 +33,7 @@ from base_scenario_ui import render_scenario_impact
 from exploratory_selection import sync_city_widget, set_city_from_widget
 from ux_navigation import (AREAS as UX_AREAS, SECTIONS as UX_SECTIONS, DESCRIPTIONS as UX_DESCRIPTIONS,
                            LEGACY_PAGES, LEGACY_ITINERARY, RESEARCH_OPTIONS, SUGGESTION_OPTIONS,
+                           GUIDES as UX_GUIDES,
                            bootstrap as bootstrap_ux, apply as apply_ux,
                            set_task as set_ux_task, set_area as set_ux_area,
                            set_from_legacy as set_ux_legacy, route as ux_route)
@@ -454,13 +455,17 @@ elif ux_area=="Meu roteiro" and ux_section=="Sugestões":
     st.segmented_control("Como deseja avançar?",list(SUGGESTION_OPTIONS),
                          key="ux_suggestion",on_change=_ux_aux_changed,
                          selection_mode="single")
+    if st.session_state.get("ux_suggestion")=="Guias especializados":
+        st.selectbox("Qual guia deseja consultar?",list(UX_GUIDES),
+                     key="ux_guide_view",on_change=_ux_aux_changed)
 page,itinerary_target,guide_target,base_target=ux_route(
     ux_area,ux_section,
     research=st.session_state.get("ux_research","Pesquisa ampliada"),
     suggestion=st.session_state.get("ux_suggestion","Descobrir"),
     france=st.session_state.get("ux_france_view","Meus passeios"),
     city_view=st.session_state.get("ux_city_view","Visão da cidade"),
-    budget_view=st.session_state.get("ux_budget_view","Simulação geral"))
+    budget_view=st.session_state.get("ux_budget_view","Simulação geral"),
+    guide_view=st.session_state.get("ux_guide_view","Itália e Costa Amalfitana"))
 if ux_area!="Minha viagem":
     st.caption(UX_DESCRIPTIONS.get((ux_area,ux_section),"Continue o planejamento."))
 # Navigation between tasks stays contextual, rather than a wall of controls.
