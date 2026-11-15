@@ -18,6 +18,7 @@ from planning_status import save_label
 from active_preset import active_preset
 from active_preset_ui import render_active_preset_summary
 from destination_labels import place_label
+from outing_guide_model import build_outing_guide
 
 
 def dashboard_model(plan: dict, catalog: dict, routes: dict, trip_data: dict,
@@ -212,6 +213,16 @@ def render_trip_dashboard(plan: dict, trip_data: dict, finance_live: bool,
                                     else "Data ainda não definida"))
                         if item["attractions"]:
                             st.write(" · ".join(item["attractions"][:2]))
+                        guide=build_outing_guide(plan,catalog,routes,item["id"],
+                                                 plan["packages"][item["id"]])
+                        mins=guide["train_minutes_one_way"]
+                        st.caption("De "+guide["base_name"]+" · "+
+                                   (f"{mins} min de trem por trecho" if mins is not None
+                                    else "Visita local" if guide["local"]
+                                    else "Tempo de transporte pendente")+
+                                   " · custo histórico parcial do casal: "+
+                                   f"€ {guide['known_cost']['EUR']:.2f} / "+
+                                   f"CHF {guide['known_cost']['CHF']:.2f}")
         if len(model["destinations"]) > len(cards):
             st.caption(f"+ {len(model['destinations'])-len(cards)} destinos no planejamento")
         st.button("Editar meus passeios →",key="dashboard_go_outings",
