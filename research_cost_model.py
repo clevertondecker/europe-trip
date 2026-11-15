@@ -99,9 +99,11 @@ def rail_cost_options(base:str,destination:str,travelers:int=2,
 
 
 def outing_research_snapshot(guide:dict,eur_fx:float=6.3,chf_fx:float=7.1,
-                             data:dict|None=None)->dict:
+                             data:dict|None=None,meal_band:str="median")->dict:
     """Reference for one documented lunch; not an additional charge to global budget."""
     if min(eur_fx,chf_fx)<=0:raise ValueError("Invalid FX")
+    if meal_band not in {"low","median","high"}:
+        raise ValueError("Invalid observed meal option")
     source=data if data is not None else load_research()
     city=guide["destination_id"]
     meals=menu_examples(city,source)
@@ -124,7 +126,7 @@ def outing_research_snapshot(guide:dict,eur_fx:float=6.3,chf_fx:float=7.1,
     sample_total=None
     if fare_eur is not None and meals["median"] is not None:
         price=guide["known_admission"]["EUR"]*eur_fx+guide["known_admission"]["CHF"]*chf_fx
-        price+=fare_eur*eur_fx+meal_bands_brl["median"]
+        price+=fare_eur*eur_fx+meal_bands_brl[meal_band]
         sample_total=round(price,2)
     warnings=[
         "Amostra não aleatória: preços de restaurantes específicos, não média do destino.",
@@ -141,6 +143,7 @@ def outing_research_snapshot(guide:dict,eur_fx:float=6.3,chf_fx:float=7.1,
             "transit":transit,"meal_bands_brl":meal_bands_brl,
             "regular_fare_eur_couple":fare_eur,
             "lunch_plus_rail_and_known_tickets_brl":sample_total,
+            "meal_band":meal_band,
             "scenario_status":"illustrative_partial" if sample_total is not None
                               else "insufficient_data",
             "warnings":warnings,"checked_at":source["checked_at"],
@@ -157,15 +160,19 @@ def selected_trip_research(plan:dict,catalog:dict,routes:dict,
     """
     from outing_guide_model import build_outing_guide
     source=data if data is not None else load_research()
+    band={"economy":"low","balanced":"median","experience":"high"}.get(
+        plan.get("profile","balanced"),"median")
     parts=[];subtotal=Decimal("0");unpriced=[]
     for destination,ids in plan["packages"].items():
         guide=build_outing_guide(plan,catalog,routes,destination,ids)
-        snapshot=outing_research_snapshot(guide,eur_fx,chf_fx,source)
+        snapshot=outing_research_snapshot(guide,eur_fx,chf_fx,source,
+                                          meal_band=band)
         parts.append(snapshot)
         number=snapshot["lunch_plus_rail_and_known_tickets_brl"]
         if number is None:unpriced.append(destination)
         else:subtotal+=Decimal(str(number))
-    return {"parts":parts,"priced_count":len(parts)-len(unpriced),
+    return {"parts":parts,"meal_band":band,
+            "priced_count":len(parts)-len(unpriced),
             "total_count":len(parts),"unpriced_destinations":unpriced,
             "priced_subtotal_brl":round(float(subtotal),2),
             "full_coverage":bool(parts) and not unpriced,
