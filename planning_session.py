@@ -44,6 +44,10 @@ def _commit(next_plan:dict)->dict:
         st.session_state["advisor_autosave_pending"]=True
     return next_plan
 
+def accept_approved_plan(next_plan:dict)->dict:
+    """Adopt a reviewed optimizer proposal; may queue opt-in persistence."""
+    return _commit(next_plan)
+
 def update_fields(**changes)->dict:
     return _commit(change_plan(bootstrap(),changes))
 
