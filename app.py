@@ -19,6 +19,8 @@ from catalog import build_catalog, filter_catalog
 from unified_budget import resolve_french_budget, scenario_total
 from calendar_model import calendar_plan
 from route_preview import route_endpoints
+from attractions_ui import render_explorer
+from attractions_model import load_attractions, load_base_routes, places_for_base, excursions_overage_brl
 
 st.set_page_config(page_title="Nossa Europa 2027", page_icon="🌍", layout="wide", initial_sidebar_state="expanded")
 data = load_data()
@@ -829,7 +831,7 @@ elif page == "Roteiro":
                 "Férias iniciais de 20–30 dias; depois trabalho remoto, sujeito a validação de regras.</div>",
                 unsafe_allow_html=True)
 
-    sections=["Visão geral","Itália e Costa Amalfitana","França e escapadas","Transportes e custos","Calendário","Cronograma oficial"]
+    sections=["Visão geral","Explorar atrações","Itália e Costa Amalfitana","França e escapadas","Transportes e custos","Calendário","Cronograma oficial"]
     itinerary_section=st.segmented_control("Seção do roteiro",sections,default="Visão geral",
                                            selection_mode="single",key="itinerary_section",
                                            label_visibility="collapsed")
@@ -872,6 +874,9 @@ elif page == "Roteiro":
             st.markdown("**França e países próximos**")
             itinerary_map("france",5.6,(48.05,7.1),320)
         st.caption("Mapas de pontos de interesse, NÃO trajetos contratados nem duração porta a porta.")
+
+    elif itinerary_section == "Explorar atrações":
+        render_explorer(data,sync_sources,map_view)
 
     elif itinerary_section == "Itália e Costa Amalfitana":
         st.markdown("<div class='page-section'>Roma e Costa Amalfitana</div>",unsafe_allow_html=True)
@@ -1019,10 +1024,15 @@ elif page == "Roteiro":
                              key="itinerary_italy_days")
         setup_days=st.slider("Instalação na França (dias)",3,5,4,key="itinerary_setup_days")
         schedule=calendar_plan(depart,total_days,italy_days,vacation_days,setup_days)
+        explore_calendar=st.session_state.get("explore_calendar",{})
         st.dataframe(pd.DataFrame([
             {"Dia":r["day"],"Data":r["date"],"Região":r["stage"],
-             "Atividade sugerida":r["activity"]} for r in schedule]),
+             "Atividade sugerida":r["activity"],
+             "Passeio da lista":explore_calendar.get(r["date"],"")} for r in schedule]),
             hide_index=True,use_container_width=True,height=450)
+        if explore_calendar:
+            st.caption("Passeios escolhidos em Explorar atrações aparecem aqui como IDs "
+                       "provisórios; sem horário ou reserva e apenas durante esta sessão.")
         breakdown={}
         for row in schedule:
             breakdown[row["activity"]]=breakdown.get(row["activity"],0)+1
@@ -1123,11 +1133,37 @@ elif page == "Orçamento":
         with extra4:
             rent_delta=st.number_input("Taxas adicionais da moradia (R$)",min_value=0,max_value=10000,
                                        value=0,step=250,key="unified_rent_extra")
+    # Reference is intentionally only a known ticket subtotal. It must never
+    # replace the entire tour allowance nor create a discount for missing quotes.
+    catalog_extra=0.0
+    attraction_ref=st.session_state.get("explore_budget_reference")
+    if attraction_ref:
+        st.markdown("<div class='page-section'>Passeios escolhidos no roteiro</div>",
+                    unsafe_allow_html=True)
+        st.info(
+            f"Da base {escape(attraction_ref['base'].capitalize())}: bilhetes conhecidos "
+            f"€{attraction_ref['eur']:.2f} + CHF{attraction_ref['chf']:.2f} para dois. "
+            "A verba de passeios já está incluída no orçamento base; tarifas "
+            "reduzidas e ingressos desconhecidos não estão garantidos para 2027.")
+        use_catalog=st.checkbox(
+            "Considerar apenas eventual excedente dos bilhetes conhecidos sobre a verba de passeios",
+            value=True,key="budget_use_attraction_cost")
+        if use_catalog:
+            allocated_tours=french["amounts"]["excursions"]*stay/french["french_days"]
+            catalog_extra=excursions_overage_brl(
+                attraction_ref["eur"],attraction_ref["chf"],
+                attraction_ref["fx_eur"],attraction_ref["fx_chf"],allocated_tours)
+            if attraction_ref["incomplete"]:
+                st.warning("A cesta de passeios tem preços faltantes. A ausência de excedente NÃO "
+                           "significa que todos os passeios caibam na verba disponível.")
+            st.caption(f"Verba original proporcional de passeios: "
+                       f"{money_brl(allocated_tours)}. "
+                       f"Excedente conhecido somado uma vez: {money_brl(catalog_extra)}.")
     result=scenario_total(
         scenario,french,french_days=stay,outings_weekly=outings,
         outing_couple_eur=spend,fx_brl_per_eur=fx,
         rent_override_eur_month=quoted_rent,flight_delta_brl=flight_delta,
-        excursions_delta_brl=excursions_delta,local_transport_delta_brl=transit_delta,
+        excursions_delta_brl=excursions_delta+catalog_extra,local_transport_delta_brl=transit_delta,
         rent_delta_brl=rent_delta)
     stats=[
         ("Total projetado",money_brl(result["total"]),"Viagem completa · estimativa"),
