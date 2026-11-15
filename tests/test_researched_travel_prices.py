@@ -9,7 +9,7 @@ from trip_plan_model import new_plan
 from outing_guide_model import build_outing_guide
 from research_cost_model import (load_research,menu_examples,transit_examples,
                                  rail_cost_options,outing_research_snapshot,
-                                 selected_trip_research)
+                                 selected_trip_research,compare_city_bases)
 
 ROOT=Path(__file__).resolve().parents[1]
 
@@ -66,6 +66,20 @@ class ResearchPriceTests(unittest.TestCase):
         self.assertEqual(other["scenario_status"],"insufficient_data")
         self.assertEqual(original["packages"],self.plan["packages"])
 
+    def test_four_base_comparison_does_not_treat_unknown_routes_as_fast_or_free(self):
+        self.plan["packages"]={"colmar":self.colmar_ids}
+        old=deepcopy(self.plan)
+        rows=compare_city_bases(self.plan,self.catalog,self.routes,6.3,7.1,
+                                self.evidence)
+        self.assertEqual(len(rows),4)
+        by={row["base"]:row for row in rows}
+        self.assertEqual(by["mulhouse"]["known_train_roundtrip_minutes"],36)
+        self.assertEqual(by["strasbourg"]["known_train_roundtrip_minutes"],64)
+        self.assertIn("colmar",by["metz"]["unknown_duration_destinations"])
+        self.assertEqual(by["metz"]["priced_outings"],0)
+        self.assertTrue(by["metz"]["not_full_cost"])
+        self.assertEqual(old,self.plan)
+
     def test_selected_itineraries_report_partial_coverage(self):
         self.plan["packages"]={"colmar":self.colmar_ids}
         baseline=deepcopy(self.plan)
@@ -108,6 +122,7 @@ class ResearchPriceUITests(unittest.TestCase):
         self.assertTrue(any("custos pesquisados de alimentação" in x.label.lower()
                             for x in app.expander))
         self.assertTrue(any("Câmbio" in x.label for x in app.expander))
+        self.assertTrue(any("Comparar cidade-base" in x.label for x in app.expander))
 
 
 if __name__=="__main__":
