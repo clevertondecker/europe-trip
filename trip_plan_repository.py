@@ -17,6 +17,32 @@ def safe_path(plan_id:str)->str:
     if not ID_PATTERN.fullmatch(plan_id):raise ValueError("Invalid plan ID")
     return "data/user_plans/"+plan_id+".json"
 
+def order_saved_plans(plan_ids:list[str], commits:list[dict])->list[dict]:
+    """Order repository-backed IDs by most recent saved commit, newest first.
+
+    Never fabricate a stored plan from commit metadata; only accept IDs from
+    a successful contents listing. A file can be listed even if its last commit
+    is outside the 100 newest entries.
+    """
+    known={x for x in plan_ids if ID_PATTERN.fullmatch(x)}
+    result=[]
+    for entry in commits:
+        message=entry.get("commit",{}).get("message","")
+        found=re.match(r"^Update travel plan (trip-[a-f0-9]{12}) r([0-9]+)(?:\\n|$)",message)
+        if not found:
+            continue
+        pid=found.group(1)
+        if pid not in known:
+            continue
+        known.remove(pid)
+        result.append({"plan_id":pid,
+                       "saved_at":entry.get("commit",{}).get("committer",{}).get("date"),
+                       "revision":int(found.group(2))})
+    result.extend({"plan_id":pid,"saved_at":None,"revision":None}
+                  for pid in sorted(known))
+    return result
+
+
 class GitHubPlanRepository:
     def __init__(self, token:str,repo:str=REPO):
         if not token or repo!=REPO: raise ValueError("Configured GitHub repository and token required")
@@ -45,6 +71,24 @@ class GitHubPlanRepository:
             raise
         return sorted(x["name"][:-5] for x in items
             if x["name"].endswith(".json") and ID_PATTERN.fullmatch(x["name"][:-5]))
+
+    def recent_plans(self)->list[dict]:
+        """Look up saved plans without knowing their random session IDs."""
+        ids=self.list_plans()
+        if not ids:
+            return []
+        req=Request(f"https://api.github.com/repos/{REPO}/commits?path=data/user_plans&per_page=100",
+             headers={"Authorization":"Bearer "+self.token,
+                      "Accept":"application/vnd.github+json",
+                      "User-Agent":"nossa-europa-2027-advisor"})
+        try:
+            with urlopen(req,timeout=12) as response:
+                commits=json.loads(response.read())
+        except HTTPError as exc:
+            if exc.code not in (403,404):
+                raise
+            commits=[]
+        return order_saved_plans(ids,commits)
 
     def history(self,plan_id:str)->list[dict]:
         """Read Git revisions without exposing the underlying token."""
