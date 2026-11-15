@@ -2,6 +2,14 @@
 
 App de lua de mel Itália → França, com mapa, orçamento, cronograma e pesquisas. Repositório de código: `clevertondecker/europe-trip`. Os arquivos oficiais da viagem continuam no **Google Drive**.
 
+## Workspace compacto do Roteiro (branch de redesign — 15/11/2026)
+
+Em **Roteiro**, selecione uma das quatro áreas: **Meus passeios** (edite e aprove propostas, faça backup e salve), **Descobrir** (catálogo com busca, filtro e mais resultados), **Orçamento** (comparação dos três estilos e indicadores financeiros) e **Calendário** (recomendações e organização de passeios). As pesquisas anteriores continuam disponíveis em **Guias e pesquisas**.
+
+Configurações de cidade-base, perfil, teto, câmbio e aluguel estão em painéis recolhíveis. A troca de áreas mantém o plano ativo e os rascunhos, mas não cria reservas nem salva remotamente sem autenticação e confirmação. **Os valores continuam históricos e incompletos, não cotações para 2027.**
+
+Consulte [o relatório de redesign](RELATORIO_REDESIGN_WORKSPACE_ROTEIRO_2027.md). Para validar antes do merge execute `python -m compileall -q .`, `python -m unittest discover -s tests -v` e confira Streamlit AppTest e desktop/mobile.
+
 ## O que sincroniza
 
 | Tela | Fonte | Tipo |

@@ -171,11 +171,12 @@ def navigate_page(destination: str) -> None:
 
 def navigate_to_attractions() -> None:
     st.session_state["main_navigation"] = "Roteiro"
-    st.session_state["itinerary_section"] = "Explorar atrações"
+    st.session_state["itinerary_section"] = "Guias e pesquisas"
+    st.session_state["guide_section"] = "Explorar atrações"
 
 def navigate_to_consultor() -> None:
     st.session_state["main_navigation"] = "Roteiro"
-    st.session_state["itinerary_section"] = "Consultor inteligente"
+    st.session_state["itinerary_section"] = "Meus passeios"
 
 
 def simulate_city_in_budget(city_name: str) -> None:
@@ -903,12 +904,19 @@ elif page == "Roteiro":
                 "Férias iniciais de 20–30 dias; depois trabalho remoto, sujeito a validação de regras.</div>",
                 unsafe_allow_html=True)
 
-    sections=["Visão geral","Explorar atrações","Consultor inteligente","Itália e Costa Amalfitana","França e escapadas","Transportes e custos","Calendário","Cronograma oficial"]
-    itinerary_section=st.segmented_control("Seção do roteiro",sections,default="Visão geral",
+    sections=["Visão geral","Meus passeios","Descobrir","Orçamento","Calendário","Guias e pesquisas"]
+    itinerary_section=st.segmented_control("Área do roteiro",sections,default="Meus passeios",
                                            selection_mode="single",key="itinerary_section",
                                            label_visibility="collapsed")
     if itinerary_section is None:
-        itinerary_section="Visão geral"
+        itinerary_section="Meus passeios"
+    if itinerary_section == "Guias e pesquisas":
+        itinerary_section=st.selectbox("Guia ou pesquisa",[
+            "Explorar atrações","Itália e Costa Amalfitana","França e escapadas",
+            "Transportes e custos","Calendário de pesquisa","Cronograma oficial"],
+            key="guide_section")
+        if itinerary_section == "Calendário de pesquisa":
+            itinerary_section="Calendário legado"
 
     def itinerary_map(phase: str, zoom: float, center: tuple[float,float], height: int=400) -> None:
         # Convert research-place roles into existing project status colors; no fake route lines.
@@ -950,8 +958,8 @@ elif page == "Roteiro":
     elif itinerary_section == "Explorar atrações":
         render_explorer(data,sync_sources,map_view)
 
-    elif itinerary_section == "Consultor inteligente":
-        render_advisor(data,sync_sources)
+    elif itinerary_section in ("Meus passeios","Descobrir","Orçamento","Calendário"):
+        render_advisor(data,sync_sources,workspace_area=itinerary_section)
 
     elif itinerary_section == "Itália e Costa Amalfitana":
         st.markdown("<div class='page-section'>Roma e Costa Amalfitana</div>",unsafe_allow_html=True)
@@ -1080,7 +1088,7 @@ elif page == "Roteiro":
                 st.caption(entry["season"]+" · "+entry["notes"])
                 st.link_button("Abrir fonte",entry["source_url"])
 
-    elif itinerary_section == "Calendário":
+    elif itinerary_section == "Calendário legado":
         from datetime import date
         import pandas as pd
         st.markdown("<div class='page-section'>Calendário ilustrativo da viagem</div>",

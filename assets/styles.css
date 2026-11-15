@@ -359,3 +359,26 @@ padding:17px 20px;margin:0 0 10px;}
 @media (max-width:820px) {
  .attraction-photo,.attraction-no-photo {height:175px;min-height:175px;}
 }
+
+/* Roteiro workspace: compact task navigation and mobile-friendly controls.
+   Native Streamlit primitives remain keyboard-accessible. */
+@media (max-width: 680px) {
+  [data-testid="stSegmentedControl"] {
+    padding: 5px !important;
+    margin: 7px 0 13px !important;
+    border-radius: 12px !important;
+  }
+  [data-testid="stSegmentedControl"] [role="radiogroup"] {
+    gap: 5px !important;
+  }
+  [data-testid="stSegmentedControl"] button {
+    min-height: 42px !important;
+    padding: 8px 10px !important;
+    font-size: .81rem !important;
+    white-space: normal;
+  }
+  [data-testid="stVerticalBlock"] [data-testid="stMetric"] {
+    min-width: 0;
+  }
+  .page-title { overflow-wrap: anywhere; }
+}

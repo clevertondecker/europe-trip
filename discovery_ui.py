@@ -21,19 +21,23 @@ def _render_suggestion(rec,plan):
                 st.caption("Imagem: "+photo.get("author","")+" · "+photo.get("license",""))
         with detail:
             st.markdown("#### "+rec["name"]+" · "+rec["country"])
-            st.caption(rec["trip_type"])
+            minutes=rec["train_minutes_one_way"]
+            st.caption(rec["trip_type"]+" · "+(
+                f"Trem {minutes} min por trecho (histórico)" if minutes is not None
+                else "Tempo de trem não verificado"))
             st.write("**O que conhecer:** "+", ".join(rec["attraction_names"]))
             with st.expander("Ver atrações recomendadas"):
                 for attraction in rec["attraction_names"]:
                     st.write("• "+attraction)
                 st.caption("Visitas sujeitas a horários e ingressos de 2027 ainda não verificados.")
-            for reason in rec["reasons"][:2]:st.caption(reason)
+            with st.expander("Por que foi sugerido?"):
+                for reason in rec["reasons"][:2]:st.caption(reason)
             e=rec["known_costs"]["EUR"]
             ch=rec["known_costs"]["CHF"]
             st.write(f"**Bilhetes históricos conhecidos (casal):** € {e:.2f} + CHF {ch:.2f}")
             if rec["missing"]:
-                st.warning(str(len(rec["missing"]))+" informação(ões) de custo/logística pendente(s). "
-                           "O subtotal não equivale a uma cotação completa.")
+                st.caption("⚠ "+str(len(rec["missing"]))+
+                           " pendência(s) de custo/logística. Subtotal incompleto.")
             if rec["conditional"]:
                 st.caption("Tarifas com condições: "+", ".join(rec["conditional"]))
             with st.expander("Fontes e dados a confirmar"):
@@ -55,7 +59,19 @@ def _render_suggestion(rec,plan):
                     accept_approved_plan(updated)
                     st.rerun()
 
-def render_discovery(plan,catalog,routes,trip_data,sync_sources,eurfx,chffx,use_city_rent):
+def render_discovery(plan,catalog,routes,trip_data,sync_sources,eurfx,chffx,use_city_rent,
+                     *,view="discover"):
+    """Show only the active task. Never render both catalog and heavy boards."""
+    if view in ("board", "budget"):
+        scenarios=build_profile_scenarios(
+            plan,catalog,routes,trip_data,sync_sources["finance"]["status"]=="live",
+            eurfx,chffx,use_city_rent=use_city_rent,
+            allow_overnight=st.session_state.get("advisor_discovery_overnight",False))
+        render_scenario_boards(
+            plan,scenarios,catalog,routes,trip_data,
+            sync_sources["finance"]["status"]=="live",
+            eurfx,chffx,use_city_rent=use_city_rent,finance_only=view=="budget")
+        return
     st.markdown("### Descobrir lugares para conhecer")
     st.caption("Sugestões do catálogo pesquisado — fotos, atrações, deslocamentos e valores "
                "de referência. Só entram no roteiro quando você escolhe.")
@@ -69,20 +85,53 @@ def render_discovery(plan,catalog,routes,trip_data,sync_sources,eurfx,chffx,use_
                               value=False,key="advisor_discovery_overnight")
     places=recommend_destinations(plan,catalog,routes,profile=plan["profile"],
                                  max_travel_minutes=max_minutes,allow_overnight=overnight)
+    categories_by_dest={}
+    for attraction in catalog["attractions"]:
+        categories_by_dest.setdefault(attraction["destination_id"],set()).add(attraction["category"])
+    search_col,country_col,category_col=st.columns([2,1,1])
+    with search_col:
+        query=st.text_input("Buscar destino",key="workspace_destination_search",
+                            placeholder="Cidade ou atração")
+    with country_col:
+        countries=sorted({x["country"] for x in places})
+        selected_country=st.selectbox("País",["Todos"]+countries,
+                                      key="workspace_destination_country")
+    with category_col:
+        categories=sorted({cat for x in places
+                          for cat in categories_by_dest.get(x["destination_id"],set())})
+        category=st.selectbox("Categoria",["Todas"]+categories,
+                              key="workspace_destination_category")
+    sort=st.selectbox("Ordenar por",["Relevância","Nome (A–Z)","Trem mais curto conhecido"],
+                      key="workspace_discovery_sort")
+    if query:
+        term=query.casefold().strip()
+        places=[x for x in places if term in x["name"].casefold()
+                or any(term in a.casefold() for a in x["attraction_names"])]
+    if selected_country!="Todos":
+        places=[x for x in places if x["country"]==selected_country]
+    if category!="Todas":
+        places=[x for x in places
+                if category in categories_by_dest.get(x["destination_id"],set())]
+    if sort=="Nome (A–Z)":
+        places.sort(key=lambda x:x["name"].casefold())
+    elif sort=="Trem mais curto conhecido":
+        places.sort(key=lambda x:(x["train_minutes_one_way"] is None,
+                    x["train_minutes_one_way"] if x["train_minutes_one_way"] is not None else 0,
+                    x["name"]))
+    page_size=6
+    filter_signature=(query,selected_country,category,sort,max_minutes,overnight)
+    if st.session_state.get("workspace_discovery_filters")!=filter_signature:
+        st.session_state["workspace_discovery_filters"]=filter_signature
+        st.session_state["workspace_discovery_count"]=page_size
+    count=st.session_state.get("workspace_discovery_count",page_size)
     if not places:
         st.info("Nenhum destino novo encontrado com esses critérios. "
                 "Aumente o tempo de deslocamento ou habilite pernoites.")
     else:
         st.caption(f"{len(places)} destinos candidatos, ordenados por adequação ao perfil escolhido.")
-        for rec in places[:6]:_render_suggestion(rec,plan)
-        if len(places)>6:
-            with st.expander("Ver mais destinos recomendados"):
-                for rec in places[6:]:_render_suggestion(rec,plan)
-    st.divider()
-    scenarios=build_profile_scenarios(
-        plan,catalog,routes,trip_data,sync_sources["finance"]["status"]=="live",
-        eurfx,chffx,use_city_rent=use_city_rent,allow_overnight=overnight)
-    render_scenario_boards(
-        plan,scenarios,catalog,routes,trip_data,
-        sync_sources["finance"]["status"]=="live",
-        eurfx,chffx,use_city_rent=use_city_rent)
+        for rec in places[:count]:_render_suggestion(rec,plan)
+        if len(places)>count and st.button("Ver mais destinos",key="workspace_discovery_more"):
+            st.session_state["workspace_discovery_count"]=count+page_size
+            st.rerun()
+
+    st.caption("Resultados do catálogo existente; destinos descartados não reaparecem.")
