@@ -40,9 +40,18 @@ def _render_suggestion(rec,plan,catalog,routes,trip_data,live,eurfx,chffx,use_ci
         with detail:
             st.markdown("#### "+rec["name"]+" · "+rec["country"])
             minutes=rec["train_minutes_one_way"]
-            st.caption(rec["trip_type"]+" · "+(
+            st.caption("Partida: "+str(rec["base_city"]).capitalize()+" · "+
+                       rec["trip_type"]+" · "+(
                 f"Trem {minutes} min por trecho (histórico)" if minutes is not None
-                else "Tempo de trem não verificado"))
+                else "Tempo de trem não verificado — limite escolhido não verificável"))
+            fare=rec.get("fare_eur_person_oneway")
+            if fare is not None:
+                conditional=(" · desconto Carte Fluo condicionado" if
+                             rec.get("fare_type")=="discount_carte_fluo" else "")
+                st.caption(f"Tarifa histórica € {fare:.2f} por pessoa/trecho"+
+                           conditional+"; não é cotação para 2027.")
+            elif rec["destination_id"]!=rec["base_city"]:
+                st.caption("Tarifa entre a base e este destino: não pesquisada/confirmada.")
             st.write("**O que conhecer:** "+", ".join(rec["attraction_names"]))
             with st.expander("Ver atrações recomendadas"):
                 for attraction in rec["attraction_names"]:
@@ -100,6 +109,11 @@ def render_discovery(plan,catalog,routes,trip_data,sync_sources,eurfx,chffx,use_
             eurfx,chffx,use_city_rent=use_city_rent,finance_only=view=="budget")
         return
     st.markdown("### Descobrir lugares para conhecer")
+    cities={d["id"]:d["name"] for d in catalog["destinations"]}
+    base_name=cities.get(plan["base_city"],plan["base_city"])
+    st.info("Cidade-base: **"+base_name+"** · A pesquisa usa tarifas e tempos "
+            "da matriz específica dessa base (revisão "+str(routes.get("checked_at","não informada"))+
+            "). Não são preços ao vivo nem horários confirmados de 2027.")
     st.caption("Clique em **Quero visitar** para incluir imediatamente o destino em **Meus passeios**. "
                "O orçamento da sessão é recalculado automaticamente; a gravação online depende do salvamento.")
     live=sync_sources["finance"]["status"]=="live"
@@ -134,8 +148,14 @@ def render_discovery(plan,catalog,routes,trip_data,sync_sources,eurfx,chffx,use_
     with col2:
         overnight=st.checkbox("Incluir destinos com possível pernoite",
                               value=False,key="advisor_discovery_overnight")
+    include_unknown=st.checkbox(
+        "Mostrar também destinos sem tempo ferroviário verificado",
+        value=False,key="advisor_discovery_unverified",
+        help="Esses destinos não passaram no filtro de duração: é preciso "
+             "confirmar conexões e horários antes de escolhê-los.")
     places=recommend_destinations(plan,catalog,routes,profile=plan["profile"],
-                                 max_travel_minutes=max_minutes,allow_overnight=overnight)
+                                 max_travel_minutes=max_minutes,allow_overnight=overnight,
+                                 include_unverified_routes=include_unknown)
     categories_by_dest={}
     for attraction in catalog["attractions"]:
         categories_by_dest.setdefault(attraction["destination_id"],set()).add(attraction["category"])
@@ -170,7 +190,8 @@ def render_discovery(plan,catalog,routes,trip_data,sync_sources,eurfx,chffx,use_
                     x["train_minutes_one_way"] if x["train_minutes_one_way"] is not None else 0,
                     x["name"]))
     page_size=6
-    filter_signature=(query,selected_country,category,sort,max_minutes,overnight)
+    filter_signature=(plan["base_city"],plan["profile"],query,selected_country,
+                      category,sort,max_minutes,overnight,include_unknown)
     if st.session_state.get("workspace_discovery_filters")!=filter_signature:
         st.session_state["workspace_discovery_filters"]=filter_signature
         st.session_state["workspace_discovery_count"]=page_size
