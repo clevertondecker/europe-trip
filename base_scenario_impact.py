@@ -28,7 +28,7 @@ def scenario_impact(plan:dict,trip_data:dict,finance_live:bool,base_id:str,
     finance=advisor_projection(trip_data,finance_live,preview,costs,
                                eurfx,chffx,use_city_rent=True)
     return {
-        "city_id":base_id,"ready":not finance["has_unknown_costs"],
+        "city_id":base_id,"ready":False, # no eligible 2027 furnished rental quote
         "total_brl":finance["result"]["total"],
         "known_tickets_brl":finance["known_billets_brl"],
         "missing":list(costs.get("missing",[]))+
