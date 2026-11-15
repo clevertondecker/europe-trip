@@ -52,6 +52,18 @@ em trecho internacional. [Carte Fluo](https://www.ter.sncf.com/grand-est/tarifs-
 - Preços de bebidas, transporte urbano, ingressos pendentes e horários reais
   continuam fora dos cálculos acima.
 
+## Como o app aplica as observações por perfil
+
+O cenário **Econômico** utiliza o **menor preço observado** de almoço,
+**Equilibrado** a **mediana da amostra** e **Aproveitar ao máximo** o
+**maior preço observado** da cidade. Isso não transforma as observações
+em médias, percentis probabilísticos ou custos garantidos. Quando faltam
+amostras suficientes ou a tarifa normal, o subtotal aparece incompleto.
+
+A diferença é aplicada **somente aos exemplos de almoço de um dia** e não
+altera automaticamente as rubricas gerais de alimentação/excursões:
+é necessário primeiro identificar o que substitui refeições já planejadas.
+
 ## Alimentação — amostra de preços publicados em 2026
 
 | Cidade | Observações independentes de almoço | Intervalo observado por pessoa | Mediana **da amostra**, não da cidade |
