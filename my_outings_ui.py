@@ -13,7 +13,7 @@ from destination_labels import place_label
 from active_preset_ui import render_active_preset
 from outing_guide_model import build_outing_guide
 from outing_guide_ui import render_outing_guide
-from research_cost_ui import render_research_summary
+from research_cost_ui import render_research_summary,render_city_base_research
 
 
 def _go_budget_presets()->None:
@@ -128,6 +128,7 @@ def render_my_outings(plan: dict, catalog: dict, *, routes: dict | None = None,
                    "a provisão. Alimentação, transporte urbano e outros valores "
                    "pendentes não são tratados como gratuitos.")
         render_research_summary(plan,catalog,routes,eurfx,chffx)
+        render_city_base_research(plan,catalog,routes,eurfx,chffx)
 
     if st.button("＋ Adicionar passeio", type="primary",
                  key="outing_add_open", width="stretch"):
