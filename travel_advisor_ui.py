@@ -239,6 +239,57 @@ def render_advisor(trip_data:dict,sync_sources:dict)->None:
                         st.rerun()
                     except Exception as exc:
                         st.error("GitHub não retornou o plano: "+type(exc).__name__)
+            with st.expander("Outros planos e histórico de revisões"):
+                plan_id=st.text_input("ID do plano salvo (trip-...)",key="advisor_plan_lookup",
+                                      value=p["plan_id"])
+                if st.button("Pesquisar planos no GitHub",key="advisor_list"):
+                    try:
+                        st.session_state["advisor_plan_ids"]=GitHubPlanRepository(cfg["token"]).list_plans()
+                    except Exception as exc:
+                        st.error("Falha ao listar: "+type(exc).__name__)
+                if st.session_state.get("advisor_plan_ids"):
+                    st.caption("Planos: "+", ".join(st.session_state["advisor_plan_ids"][:20]))
+                if st.button("Carregar este ID",key="advisor_load_id"):
+                    try:
+                        loaded,sha=GitHubPlanRepository(cfg["token"]).load(plan_id)
+                        st.session_state["advisor_plan"]=loaded
+                        st.session_state["advisor_github_sha"]=sha
+                        st.session_state.pop("advisor_proposals",None)
+                        st.rerun()
+                    except Exception as exc:
+                        st.error("Plano indisponível: "+type(exc).__name__)
+                if st.button("Exibir revisões",key="advisor_history"):
+                    try:
+                        st.session_state["advisor_history"]=GitHubPlanRepository(cfg["token"]).history(plan_id)
+                    except Exception as exc:
+                        st.error("Histórico indisponível: "+type(exc).__name__)
+                history=st.session_state.get("advisor_history",[])
+                if history:
+                    selected=st.selectbox("Snapshot no GitHub",history,
+                        format_func=lambda x:x["date"][:10]+" · "+x["message"],
+                        key="advisor_snapshot_choice")
+                    if st.button("Pré-visualizar snapshot histórico",key="advisor_snapshot"):
+                        try:
+                            historical=GitHubPlanRepository(cfg["token"]).load_at_commit(plan_id,selected["sha"])
+                            st.session_state["advisor_snapshot_preview"]=historical
+                        except Exception as exc:
+                            st.error("Snapshot não acessível: "+type(exc).__name__)
+                    preview=st.session_state.get("advisor_snapshot_preview")
+                    if preview:
+                        st.caption("Snapshot: revisão "+str(preview["revision"])+
+                            " · "+str(len(preview["assignments"]))+" dias agendados")
+                        if st.button("Restaurar snapshot como nova revisão local",key="advisor_restore"):
+                            try:
+                                if preview["plan_id"]!=p["plan_id"]:
+                                    raise ValueError("Carregue o plano correspondente primeiro")
+                                restored=with_revision(p,{
+                                    "packages":deepcopy(preview["packages"]),
+                                    "assignments":deepcopy(preview["assignments"])})
+                                st.session_state["advisor_plan"]=restored
+                                st.session_state.pop("advisor_proposals",None)
+                                st.info("Restaurado na sessão. Grave a nova revisão separadamente.")
+                                st.rerun()
+                            except ValueError as exc:st.warning(str(exc))
     st.caption("Gravação no GitHub é opcional e exige configuração prévia. "
                "Para produção pública, preferir login OAuth/GitHub App e restrição por usuário. "
                "Sem autenticação, este painel não escreve em repositórios.")
