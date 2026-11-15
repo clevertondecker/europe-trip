@@ -103,12 +103,12 @@ def render_my_outings(plan: dict, catalog: dict) -> None:
                 st.info("Todos os destinos disponíveis já estão incluídos ou descartados.")
             else:
                 lookup = {d["id"]: d for d in remaining}
+                destination = st.selectbox(
+                    "Destino", list(lookup), key="outing_new_destination",
+                    format_func=lambda key: lookup[key]["name"] + " · " + lookup[key]["country"])
+                labels = {a["id"]: a["name"] for a in attractions[destination]
+                          if plan.get("preferences", {}).get(a["id"]) != "Descartar"}
                 with st.form("outing_add_form"):
-                    destination = st.selectbox(
-                        "Destino", list(lookup), key="outing_new_destination",
-                        format_func=lambda key: lookup[key]["name"] + " · " + lookup[key]["country"])
-                    labels = {a["id"]: a["name"] for a in attractions[destination]
-                              if plan.get("preferences", {}).get(a["id"]) != "Descartar"}
                     picked = st.multiselect(
                         "Atrações (selecione de 1 a 5)",
                         options=list(labels), key="outing_new_attractions",
