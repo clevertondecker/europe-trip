@@ -9,7 +9,10 @@ import streamlit as st
 from scenario_editor_model import (new_board,is_stale,change_board,undo_board,
                                   reprice_board,board_to_approval)
 from recommended_itineraries import approve_profile_scenario
-from planning_session import accept_approved_plan
+from planning_session import accept_approved_plan, select_package
+from scenario_comparison_model import approval_diff
+from scenario_comparison_ui import (render_scenario_comparison,render_financial_breakdown,
+                                    render_approval_diff)
 from finance_margin_metrics import calculate_excursion_margin
 from finance_margin_ui import render_finance_margin_summary
 from outing_cost_evidence import load_outing_evidence,evidence_for_outing
@@ -32,7 +35,11 @@ def _update(profile:str,board:dict):
     st.session_state["scenario_review_"+profile]=False
     st.rerun()
 
-def _render_destination(profile:str,board:dict,row:dict,catalog:dict):
+def _navigate_to_my_outings():
+    st.session_state["itinerary_section"]="Meus passeios"
+
+
+def _render_destination(profile:str,board:dict,row:dict,catalog:dict,plan:dict):
     dest=row["destination"]
     key=dest["id"]
     title=dest["name"]+" · "+dest["country"]
@@ -55,6 +62,18 @@ def _render_destination(profile:str,board:dict,row:dict,catalog:dict):
                 row["known"]["EUR"],row["known"]["CHF"]))
             if row["missing"]:
                 st.caption(f"⚠ {len(row['missing'])} despesas ainda sem cotação completa")
+        if row["locked"]:
+            st.button("Ver em Meus passeios",key="scenario_go_official_"+profile+"_"+key,
+                      on_click=_navigate_to_my_outings,width="stretch")
+        else:
+            if st.button("Adicionar aos meus passeios",key="scenario_add_official_"+profile+"_"+key,
+                         width="stretch"):
+                try:
+                    select_package(key,[a["id"] for a in row["attractions"]])
+                    st.session_state["scenario_new_official_notice"]=dest["name"]
+                    st.rerun()
+                except ValueError as exc:
+                    st.error("Não foi possível adicionar: "+str(exc))
         with st.expander("Ver despesas, ingressos e fontes"):
             if row["components"]:
                 for item in row["components"]:
@@ -107,31 +126,19 @@ def _render_destination(profile:str,board:dict,row:dict,catalog:dict):
 def render_scenario_boards(plan:dict,scenarios:list[dict],catalog:dict,routes:dict,
                            trip_data:dict,source_live:bool,eurfx:float,chffx:float,
                            use_city_rent:bool=True,finance_only:bool=False)->None:
-    st.markdown("### Orçamento por estilo" if finance_only else "### Meus passeios")
-    if not finance_only:
-        st.caption("Edite os cards sem alterar seu roteiro oficial. Valores e margens "
-                   "são recalculados imediatamente para o casal.")
     profiles={s["profile"]:s for s in scenarios}
-    st.markdown("#### Comparação rápida dos três estilos")
-    comparisons=[]
-    for option in scenarios:
-        cost=option["known_cost_by_currency"]
-        projection=option["financial"]
-        metrics=calculate_excursion_margin(
-            projection,cost,eurfx,chffx,option["missing_costs"])
-        comparisons.append({
-            "Estilo":option["label"],
-            "Destinos":len(option["proposal_packages"]),
-            "Gastos conhecidos (R$)":metrics["known_spend_brl"],
-            "Saldo nominal da provisão (R$)":metrics["known_allowance_remaining_brl"],
-            "Margem geral (R$)":metrics["budget_margin_brl"],
-            "Custos sem valor":metrics["pending_count"]})
-    st.dataframe(comparisons,hide_index=True,use_container_width=True)
-    st.caption("A margem geral pode ser igual entre estilos mesmo com gastos conhecidos "
-               "diferentes, porque a verba de excursões já está provisionada.")
     if finance_only:
-        st.caption("Compare os perfis acima; para modificar os passeios, abra Meus passeios.")
+        st.markdown("### Orçamento por estilo")
+        render_scenario_comparison(plan,scenarios,catalog,eurfx,chffx)
+        st.caption("Para editar propostas, abra Simular roteiros.")
         return
+    notice=st.session_state.pop("scenario_new_official_notice",None)
+    if notice:
+        st.success(notice+" foi adicionado ao seu roteiro. Veja em Meus passeios.")
+    render_scenario_comparison(plan,scenarios,catalog,eurfx,chffx)
+    st.markdown("### Personalize uma proposta")
+    st.caption("As edições aqui são rascunhos. Seu roteiro atual só muda ao "
+               "adicionar um passeio individual ou aprovar uma proposta.")
     profile=st.segmented_control("Estilo para personalizar",list(profiles),
          default=plan["profile"],format_func=lambda p:profiles[p]["label"],
          key="scenario_board_profile")
@@ -166,11 +173,7 @@ def render_scenario_boards(plan:dict,scenarios:list[dict],catalog:dict,routes:di
     d.metric("Margem até o teto",f"R$ {totals['margin']:,.0f}")
     allowance=sim["finance"]["budget_excursions_allowance_brl"]
     exceeded=sim["finance"]["known_excursions_overage_brl"]
-    st.caption(f"Provisão original para passeios: R$ {allowance:,.0f}. "
-               f"Excedente conhecido acima dessa provisão: R$ {exceeded:,.0f}. "
-               "A projeção pode não mudar ao remover um passeio que já cabia na provisão.")
-    st.caption(f"Projeção geral com rubricas provisionadas: R$ {totals['total']:,.0f}. "
-               "Valores históricos: não são preço final para 2027.")
+    render_financial_breakdown(sim,eurfx,chffx)
     supplemental_pending=[
         item["category"]+" · "+row["destination"]["name"]
         for row in details["rows"]
@@ -198,13 +201,15 @@ def render_scenario_boards(plan:dict,scenarios:list[dict],catalog:dict,routes:di
                    "individualmente. Valores desconhecidos não são tratados como gratuitos.")
         st.caption("Parte das excursões já está contemplada na verba-base de R$ "+
                    f"{allowance:,.0f}; só o excedente conhecido altera a projeção geral.")
-    st.markdown("#### Destinos da simulação")
+    st.markdown("#### Passeios nesta proposta")
+    st.caption("Os passeios atuais são preservados. Sugestões podem ser adicionadas "
+               "individualmente sem aplicar todo o cenário.")
     shown_key="workspace_board_visible_"+profile
     visible=st.session_state.get(shown_key,6)
     total_rows=len(details["rows"])
     st.caption(f"{total_rows} destinos · exibindo {min(total_rows,visible)}")
     for row in details["rows"][:visible]:
-        _render_destination(profile,board,row,catalog)
+        _render_destination(profile,board,row,catalog,plan)
     if total_rows>visible and st.button("Ver mais passeios",key="workspace_board_more_"+profile):
         st.session_state[shown_key]=visible+6
         st.rerun()
@@ -259,15 +264,33 @@ def render_scenario_boards(plan:dict,scenarios:list[dict],catalog:dict,routes:di
                 st.write(f"• {dest}: {len(previous)} atração(ões) → {len(current)}")
         if original==board["packages"]:
             st.info("Nenhuma edição nesta simulação.")
-    st.caption("Os passeios já aprovados no planejamento oficial ficam bloqueados "
-               "para remoção neste editor. Altere-os em Explorar atrações.")
+    st.caption("Para editar ou remover passeios atuais, use Meus passeios.")
+    names={d["id"]:d["name"] for d in catalog["destinations"]}
+    diff=approval_diff(plan,board,sim,eurfx,chffx,catalog,routes)
+    render_approval_diff(diff,names)
     approval_key="scenario_review_"+profile
     if st.button("Revisar e aplicar este roteiro",key="scenario_review_button_"+profile,
                  use_container_width=True):
         st.session_state[approval_key]=True
     if st.session_state.get(approval_key):
-        st.warning("Ao confirmar, os passeios sugeridos entrarão no planejamento. "
-                   "Nenhuma passagem, hospedagem ou ingresso será reservado.")
+        st.warning("Revise destinos, atrações e datas. Nenhuma reserva será realizada.")
+        if diff["new"]:
+            st.markdown("**Novos passeios e atrações:**")
+            attraction_names={a["id"]:a["name"] for a in catalog["attractions"]}
+            for destination in diff["new"]:
+                st.write("• "+names.get(destination,destination)+": "+
+                         ", ".join(attraction_names.get(a,a)
+                                   for a in board["packages"][destination]))
+        else:
+            st.caption("Nenhum destino novo.")
+        dates={day:dest for day,dest in sim["calendar"].items()
+               if plan["assignments"].get(day)!=dest}
+        if dates:
+            st.markdown("**Novas datas propostas:**")
+            for day,dest in sorted(dates.items()):
+                st.write("• "+day+" · "+names.get(dest,dest))
+        else:
+            st.caption("Nenhuma nova data atribuída.")
         yes,no=st.columns(2)
         with yes:
             if st.button("Confirmar aplicação",key="scenario_approve_"+profile,
