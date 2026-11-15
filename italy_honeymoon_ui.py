@@ -6,6 +6,9 @@ from pathlib import Path
 import streamlit as st
 import pydeck as pdk
 
+from itinerary_flow_model import italy_starter_preview
+from planning_session import active_plan,accept_italy_starter
+from attractions_model import load_attractions
 from italy_honeymoon_model import (
     load_honeymoon,manual_italy_cost,optional_comparison,preview_nights,
     ticket_sample,
@@ -104,6 +107,38 @@ def render_italy_honeymoon()->None:
     col3.metric("Nápoles",str(nights["naples"])+" noites")
     st.caption(str(nights["nights"])+" noites e "+
                str(nights["calendar_days"])+" dias de calendário.")
+    # A proposal is read-only until the user explicitly previews and confirms.
+    preview=italy_starter_preview(active_plan(),load_attractions(),chosen)
+    st.caption("A proposta pode iniciar o seu roteiro sem definir datas, "
+               "hotéis, cidade de hospedagem na costa nem reservas.")
+    if st.button("Usar esta proposta como ponto de partida",
+                 key="italy_starter_open"):
+        st.session_state["italy_starter_pending"]=chosen
+    if st.session_state.get("italy_starter_pending")==chosen:
+        with st.container(border=True):
+            st.markdown("**Revisar antes de incluir no meu roteiro**")
+            for dest_id,_,period in preview["to_add"]:
+                st.write("Adicionar "+("Roma" if dest_id=="italy_rome" else
+                                       "Amalfi")+" · "+period)
+            if preview["unchanged"]:
+                st.caption("Já escolhidos (serão preservados): "+
+                           ", ".join("Roma" if key=="italy_rome" else "Amalfi"
+                                     for key in preview["unchanged"]))
+            st.warning("Não define hospedagem em Maiori, Minori ou Salerno; "
+                       "não cria reservas ou datas. Escolhas existentes serão mantidas.")
+            a,b=st.columns(2)
+            with a:
+                if st.button("Confirmar inclusão",key="italy_starter_confirm",
+                             type="primary"):
+                    accept_italy_starter(chosen,confirmed=True)
+                    st.session_state.pop("italy_starter_pending",None)
+                    st.session_state["flow_notice"]=(
+                        "Proposta da Itália incluída. Edite os períodos em Meu roteiro.")
+                    st.rerun()
+            with b:
+                if st.button("Cancelar",key="italy_starter_cancel"):
+                    st.session_state.pop("italy_starter_pending",None)
+                    st.rerun()
     if extra:
         st.warning("A noite adicional é somente uma comparação de experiência. "
                    "Ela **não cabe** automaticamente nos 10 dias da etapa italiana "
