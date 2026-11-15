@@ -15,6 +15,8 @@ from advisor_finance import advisor_projection
 from attractions_model import load_attractions, load_base_routes, package_cost
 from planning_store import summary
 from planning_status import save_label
+from active_preset import active_preset
+from active_preset_ui import render_active_preset_summary
 
 
 def dashboard_model(plan: dict, catalog: dict, routes: dict, trip_data: dict,
@@ -63,7 +65,7 @@ def _metric(label: str, value: str, note: str) -> None:
         unsafe_allow_html=True)
 
 
-def _map(model: dict) -> None:
+def _map(model: dict, suggested:dict | None = None, catalog:dict | None = None) -> None:
     base = model["base"]
     points = [{
         "name": base["name"] + " · base em estudo",
@@ -77,6 +79,16 @@ def _map(model: dict) -> None:
                 "country": item["country"], "lat": item["lat"], "lon": item["lon"],
                 "color": [203, 139, 61], "radius": 11,
             })
+    if suggested is not None and catalog is not None:
+        by_id={d["id"]:d for d in catalog["destinations"]}
+        chosen_ids={item["id"] for item in model["destinations"]}
+        for key in suggested["summary"]["packages"]:
+            if key in chosen_ids or key==base["id"] or key not in by_id:
+                continue
+            item=by_id[key]
+            points.append({"name":item["name"]+" · sugestão do perfil",
+                           "country":item["country"],"lat":item["lat"],"lon":item["lon"],
+                           "color":[196,130,61],"radius":11})
     layer = pdk.Layer(
         "ScatterplotLayer", data=points,
         get_position="[lon, lat]", get_fill_color="color",
@@ -109,6 +121,8 @@ def render_trip_dashboard(plan: dict, trip_data: dict, finance_live: bool,
     routes = load_base_routes()
     model = dashboard_model(plan, catalog, routes, trip_data, finance_live,
                             eurfx, chffx, use_city_rent)
+    suggested=active_preset(plan,catalog,routes,trip_data,finance_live,
+                            eurfx,chffx,use_city_rent)
     stats = model["stats"]
     save_state, _ = save_label(plan, saved_snapshot, signed_in)
     st.markdown(
@@ -136,10 +150,17 @@ def render_trip_dashboard(plan: dict, trip_data: dict, finance_live: bool,
                " · Retorno estimado: " + model["return_candidate"] +
                " · " + save_state)
 
+    st.markdown("### Roteiro inicial do perfil selecionado")
+    render_active_preset_summary(suggested,catalog,"overview")
+    st.button("Ver e adotar roteiro pré-definido →",key="dashboard_go_preset",
+              on_click=_navigate,args=("Meus passeios",))
+    st.caption("No mapa: passeios confirmados e sugestões ainda não aprovadas "
+               "têm cores diferentes. Nenhuma proposta é salva automaticamente.")
+
     left, right = st.columns([1.25, 1], gap="large")
     with left:
         st.markdown("### Nosso mapa")
-        _map(model)
+        _map(model,suggested,catalog)
         st.caption("Pontos geográficos aproximados do catálogo; nenhuma rota, "
                    "passagem ou hospedagem foi reservada.")
     with right:
@@ -169,8 +190,8 @@ def render_trip_dashboard(plan: dict, trip_data: dict, finance_live: bool,
 
     st.markdown("### Lugares que escolhemos")
     if not model["destinations"]:
-        st.info("Ainda não há passeios aprovados. Explore destinos e adicione "
-                "os que fazem sentido para sua viagem.")
+        st.info("Nenhum passeio confirmado. O roteiro pré-definido do perfil "
+                "já aparece acima e pode ser adotado em Meus passeios.")
         st.button("Descobrir destinos →",key="dashboard_go_discover",
                   on_click=_navigate,args=("Descobrir",))
     else:
