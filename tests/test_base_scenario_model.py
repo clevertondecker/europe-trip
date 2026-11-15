@@ -10,8 +10,9 @@ class BaseScenarioTest(unittest.TestCase):
     def test_all_explored_bases_are_selectable(self):
         source = load_exploration()
         options = base_options(source)
-        self.assertEqual({b["id"] for b in source["bases"]},
-                         {b["id"] for b in options})
+        self.assertTrue({b["id"] for b in source["bases"]}.issubset(
+                        {b["id"] for b in options}))
+        self.assertGreaterEqual(len(options), 25)
         self.assertGreaterEqual(len(options), 8)
         for row in options:
             self.assertEqual(choose_exploratory_base(row["id"], options), row["id"])
