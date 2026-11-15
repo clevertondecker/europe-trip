@@ -183,3 +183,14 @@ A nova página **Minha viagem** mostra o status de salvamento, quantas atraçõe
 **Migração:** planos JSON antigos seguem válidos; seleção de atrações, datas e preferências são preservadas. O Drive continua fonte documental somente leitura.
 
 Documentação de arquitetura e UX: [UX_REDESIGN_2027.md](UX_REDESIGN_2027.md) · [Relatório completo dos 11 steps](RELATORIO_UX_NOSSA_EUROPA_2_0.md).
+
+
+## Consultor de destinos e estilos (15/11/2026)
+
+**Roteiro → Consultor inteligente** agora permite descobrir lugares ainda não selecionados e calcular três propostas financeiras por perfil (**Econômico, Equilibrado e Aproveitar ao máximo**). As propostas usam atrações reais do catálogo, tempos ferroviários disponíveis e rubricas financeiras do orçamento, preservando a reserva de emergência. **O consultor não precisa de passeios previamente escolhidos para recomendar destinos.**
+
+Com zero passeios, não aparecem mais três alternativas vazias de calendário: a interface apresenta lugares para conhecer, imagens licenciadas, destaques, fontes e lacunas de custo/retorno. O usuário pode clicar **Quero visitar** ou **Descartar**. A seleção e os roteiros de perfil só são aplicados após aprovação; o salvamento online continua exigindo proprietário autenticado e respeita a configuração de opt-in.
+
+As projeções são **parciais e históricas**, não cotações 2027. Trocar estilo não cria automaticamente um gasto percentual; os três estilos geram conjuntos diferentes de passeios concretos. O orçamento já contém verba de excursões: um subtotal conhecido não é somado novamente se couber na verba. Assim, dois estilos podem mostrar o mesmo total projetado enquanto diferem em passagens/ingressos conhecidos e custos ainda não cotados.
+
+**Documentação e limitações:** [RELATORIO_CONSULTOR_DESTINOS_2027.md](RELATORIO_CONSULTOR_DESTINOS_2027.md).
