@@ -145,8 +145,6 @@ def render_scenario_boards(plan:dict,scenarios:list[dict],catalog:dict,routes:di
                 "Os números são provisões e custos históricos, não preços finais de 2027.")
         render_scenario_comparison(plan,scenarios,catalog,eurfx,chffx)
         render_research_profiles(plan,scenarios,catalog,routes,eurfx,chffx)
-    render_reconciled_profiles(plan,scenarios,catalog,routes,trip_data,
-                               source_live,eurfx,chffx,use_city_rent)
         render_reconciled_profiles(plan,scenarios,catalog,routes,trip_data,
                                    source_live,eurfx,chffx,use_city_rent)
         render_grocery_and_weekend_examples()
@@ -157,6 +155,8 @@ def render_scenario_boards(plan:dict,scenarios:list[dict],catalog:dict,routes:di
         st.success(notice+" foi adicionado ao seu roteiro. Veja em Meus passeios.")
     render_scenario_comparison(plan,scenarios,catalog,eurfx,chffx)
     render_research_profiles(plan,scenarios,catalog,routes,eurfx,chffx)
+    render_reconciled_profiles(plan,scenarios,catalog,routes,trip_data,
+                               source_live,eurfx,chffx,use_city_rent)
     st.markdown("### Personalize uma proposta")
     st.caption("As edições aqui são rascunhos. Seu roteiro atual só muda ao "
                "adicionar um passeio individual ou aprovar uma proposta.")
