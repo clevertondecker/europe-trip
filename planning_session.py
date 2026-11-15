@@ -39,6 +39,9 @@ def _commit(next_plan:dict)->dict:
     sync_legacy_view(next_plan,st.session_state)
     st.session_state.pop("advisor_proposals",None)
     st.session_state["advisor_local_changed"]=True
+    if st.session_state.get("advisor_autosave_optin") and st.session_state.get(
+        "advisor_public_repo_ack"):
+        st.session_state["advisor_autosave_pending"]=True
     return next_plan
 
 def update_fields(**changes)->dict:
