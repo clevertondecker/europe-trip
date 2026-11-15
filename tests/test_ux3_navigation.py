@@ -54,8 +54,9 @@ class UX3NavigationModelTests(unittest.TestCase):
 
     def test_comparisons_research_and_suggestions_are_reachable(self):
         self.assertEqual(route("Explorar","Comparar cidades")[0],"Comparar cidades")
-        self.assertEqual(route("Explorar","Mais pesquisas",
-                               research="Pesquisa ampliada")[3],"Pesquisa ampliada")
+        self.assertEqual(route("Explorar","Cidades-base")[3],"Destinos próximos")
+        self.assertEqual(route("Meu roteiro","França",
+                               france="Transportes e custos")[2],"Transportes e custos")
         self.assertEqual(route("Meu roteiro","Sugestões",
                                suggestion="Simular roteiros")[1],"Simular roteiros")
 
@@ -77,9 +78,11 @@ class UX3StreamlitNavigationSmokeTests(unittest.TestCase):
                 if area=="Minha viagem":
                     self.assertNotIn("ux_section",{v.key for v in app.segmented_control})
                     app.button(key="home_next_tasks").click().run()
-                    self.assertEqual(app.session_state["ux_section"],"Pendências e fontes")
+                    self.assertEqual(app.session_state["ux_section"],"Pendências")
                     self.assertFalse(app.exception,[x.message for x in app.exception])
-                    app.button(key="ux_home_return_summary").click().run()
+                    app.segmented_control(key="ux_section").set_value("Decisões").run()
+                    self.assertFalse(app.exception,[x.message for x in app.exception])
+                    app.segmented_control(key="ux_section").set_value("Resumo").run()
                     self.assertEqual(app.session_state["ux_section"],"Resumo")
                     continue
                 for section in sections:
@@ -95,7 +98,8 @@ class UX3StreamlitNavigationSmokeTests(unittest.TestCase):
         official=deepcopy(app.session_state["advisor_plan"])
         app.radio(key="ux_area").set_value("Explorar").run()
         app.segmented_control(key="ux_section").set_value("Cidades-base").run()
-        app.selectbox(key="base_explorer_city").set_value("offenburg").run()
+        app.segmented_control(key="ux_mode").set_value("Simulação").run()
+        app.selectbox(key="scenario_sidebar").set_value("offenburg").run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
         self.assertEqual(app.session_state["scenario_base_selected"],"offenburg")
         self.assertEqual(app.session_state["scenario_sidebar"],"offenburg")
@@ -106,6 +110,7 @@ class UX3StreamlitNavigationSmokeTests(unittest.TestCase):
         self.assertFalse(app.exception,[x.message for x in app.exception])
         self.assertEqual(app.session_state["scenario_base_selected"],"offenburg")
         self.assertEqual(app.session_state["unified_stay"],65)
+        app.segmented_control(key="ux_section").set_value("Simulações").run()
         app.slider(key="unified_stay").set_value(60).run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
         self.assertEqual(app.session_state["ux_days"],60)
