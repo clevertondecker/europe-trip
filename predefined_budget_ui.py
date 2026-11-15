@@ -12,6 +12,19 @@ def _money(value:float)->str:
     return "R$ "+f"{value:,.0f}".replace(",", ".")
 
 
+def _confirm_preset(plan:dict,option:dict)->None:
+    """Runs before widgets instantiate, so navigation is safe."""
+    try:
+        next_plan=approve_profile_scenario(plan,option,approved=True)
+        accept_approved_plan(next_plan)
+        st.session_state["budget_preset_review"]=False
+        st.session_state.pop("budget_preset_review_profile",None)
+        st.session_state["budget_preset_applied"]=option["label"]
+        st.session_state["itinerary_section"]="Meus passeios"
+    except ValueError as exc:
+        st.session_state["budget_preset_error"]=str(exc)
+
+
 def render_predefined_budget_adoption(plan:dict,scenarios:list[dict],catalog:dict,
                                       eurfx:float,chffx:float)->None:
     """Let an owner deliberately replace an empty proposal with a chosen preset.
@@ -63,6 +76,9 @@ def render_predefined_budget_adoption(plan:dict,scenarios:list[dict],catalog:dic
                    "garantido para 2027. Os gastos conhecidos não são somados "
                    "novamente à provisão.")
 
+    error=st.session_state.pop("budget_preset_error",None)
+    if error:
+        st.error("Roteiro desatualizado ou inválido: "+error)
     review_key="budget_preset_review"
     pending_key="budget_preset_review_profile"
     if st.button("Revisar e adotar roteiro "+summary["label"],
@@ -86,18 +102,9 @@ def render_predefined_budget_adoption(plan:dict,scenarios:list[dict],catalog:dic
                    "Não compra ingressos nem salva automaticamente online.")
         yes,no=st.columns(2)
         with yes:
-            if st.button("Confirmar e incluir nos Meus passeios",
-                         key="budget_preset_confirm",width="stretch"):
-                try:
-                    next_plan=approve_profile_scenario(plan,selected,approved=True)
-                    accept_approved_plan(next_plan)
-                    st.session_state[review_key]=False
-                    st.session_state.pop(pending_key,None)
-                    st.session_state["budget_preset_applied"]=selected["label"]
-                    st.session_state["itinerary_section"]="Meus passeios"
-                    st.rerun()
-                except ValueError as exc:
-                    st.error("Roteiro desatualizado ou inválido: "+str(exc))
+            st.button("Confirmar e incluir nos Meus passeios",
+                      key="budget_preset_confirm",width="stretch",
+                      on_click=_confirm_preset,args=(plan,selected))
         with no:
             if st.button("Cancelar",key="budget_preset_cancel",width="stretch"):
                 st.session_state[review_key]=False
