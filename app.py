@@ -37,6 +37,15 @@ st.set_page_config(page_title="Nossa Europa 2027", page_icon="🌍", layout="wid
 # Authenticated new sessions recover the latest saved GitHub plan.
 _recover_saved_plan()
 bootstrap_trip()
+# One global exploratory base, separate from the approved TripPlan.
+_all_bases=base_options()
+_base_details={item["id"]:item for item in _all_bases}
+_candidate=st.session_state.get("scenario_base_selected",active_plan()["base_city"])
+if _candidate not in _base_details:
+    _candidate=active_plan()["base_city"]
+st.session_state["scenario_base_selected"]=_candidate
+if st.session_state.get("scenario_sidebar")!=_candidate:
+    st.session_state["scenario_sidebar"]=_candidate
 if st.session_state.pop("advisor_autosave_pending",False):
     if (st.session_state.get("advisor_autosave_optin")
             and st.session_state.get("advisor_public_repo_ack")
@@ -201,6 +210,11 @@ def simulate_city_in_budget(city_name: str) -> None:
     st.session_state["main_navigation"] = "Orçamento"
 
 
+def _select_scenario_sidebar() -> None:
+    st.session_state["scenario_base_selected"]=choose_exploratory_base(
+        st.session_state["scenario_sidebar"],_all_bases)
+
+
 with st.sidebar:
     if "advisor_autosave_notice" in st.session_state:
         st.success(st.session_state.pop("advisor_autosave_notice"))
@@ -211,6 +225,14 @@ with st.sidebar:
       <strong>✧ Nossa Europa</strong>
       <span>Lua de mel & temporada na França</span></div>""", unsafe_allow_html=True)
     page = st.radio("Explorar", ["Visão geral", "Mapa & destinos", "Comparar cidades", "Roteiro", "Orçamento", "Pesquisas & decisões"], label_visibility="collapsed", key="main_navigation", format_func=lambda name: {"Visão geral": "⌂  Minha viagem", "Mapa & destinos": "▣  Explorar destinos", "Comparar cidades": "▤  Comparar cidades", "Roteiro": "▦  Meu roteiro e consultor", "Orçamento": "◉  Orçamento", "Pesquisas & decisões": "☑  Decisões e pesquisas"}[name])
+    st.divider()
+    st.caption("**CIDADE-BASE PARA SIMULAÇÃO**")
+    st.selectbox("Cidade-base exploratória",list(_base_details),
+                 key="scenario_sidebar",on_change=_select_scenario_sidebar,
+                 format_func=lambda city:(
+                     _base_details[city]["name"]+" · "+_base_details[city]["country"]))
+    st.caption("Roteiro oficial: "+_base_details[active_plan()["base_city"]]["name"]+
+               ". Selecionar aqui não altera o plano aprovado.")
     st.divider()
     st.caption("**ORIGEM DOS DADOS**")
     st.caption("Drive sincronizado" if sync_status == "live" else ("Drive parcialmente sincronizado" if sync_status == "partial" else "Snapshot de 14/11/2026"))
