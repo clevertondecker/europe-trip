@@ -6,6 +6,7 @@ performed here; only a confirmed action may enter the canonical session API.
 from __future__ import annotations
 
 from copy import deepcopy
+from datetime import date,timedelta
 from trip_plan_model import BASES, PROFILES,validate_plan
 from planning_store import change_plan
 
@@ -28,6 +29,18 @@ def preview_settings(plan:dict,changes:dict)->dict:
     proposed=deepcopy(plan)
     proposed.update(deepcopy(changes))
     validate_plan(proposed)
+    # Existing dated outings must remain inside their respective journey stages.
+    departure=date.fromisoformat(proposed["departure_date"])
+    italy_end=departure+timedelta(days=proposed["italy_days"])
+    trip_end=departure+timedelta(days=proposed["total_days"])
+    for day in proposed["assignments"]:
+        chosen=date.fromisoformat(day)
+        if not italy_end<=chosen<trip_end:
+            raise ValueError("A nova duração colocaria passeios fora da temporada europeia")
+    for item in proposed.get("flexible_visits",[]):
+        exact=item.get("exact_date")
+        if exact and not departure<=date.fromisoformat(exact)<italy_end:
+            raise ValueError("A nova duração colocaria visitas italianas fora da etapa")
     delta={key:{"current":deepcopy(plan[key]),"proposed":deepcopy(proposed[key])}
            for key in EDITABLE if proposed[key]!=plan[key]}
     return {"original_revision":plan["revision"],
