@@ -151,7 +151,7 @@ class ItineraryFlowAppTests(unittest.TestCase):
         self.assertFalse(at.exception,[e.message for e in at.exception])
         before=at.session_state["advisor_plan"]["revision"]
         at.radio(key="ux_area").set_value("Meu roteiro").run()
-        at.segmented_control(key="ux_section").set_value("Visão geral").run()
+        at.segmented_control(key="ux_section").set_value("Meu planejamento").run()
         at.button(key="flow_add_open_button").click().run()
         self.assertFalse(at.exception,[e.message for e in at.exception])
         at.selectbox(key="flow_add_destination").set_value("italy_amalfi").run()
@@ -164,16 +164,17 @@ class ItineraryFlowAppTests(unittest.TestCase):
         self.assertEqual(plan["revision"],before+1)
         self.assertEqual(plan["assignments"],{})
         self.assertEqual(plan["flexible_visits"][0]["destination_id"],"italy_amalfi")
-        at.segmented_control(key="ux_section").set_value("Itália").run()
+        at.segmented_control(key="ux_section").set_value("Melhorar meu roteiro").run()
+        at.selectbox(key="ux_improve_view").set_value("Itália").run()
         self.assertFalse(at.exception,[e.message for e in at.exception])
-        at.segmented_control(key="ux_section").set_value("Visão geral").run()
+        at.segmented_control(key="ux_section").set_value("Meu planejamento").run()
         self.assertEqual(at.session_state["advisor_plan"]["flexible_visits"][0]["period"],
                          "Durante a Costa Amalfitana")
 
     def test_inline_organizer_supports_period_and_exact_date(self):
         at=AppTest.from_file(str(ROOT/"app.py"),default_timeout=110).run()
         at.radio(key="ux_area").set_value("Meu roteiro").run()
-        at.segmented_control(key="ux_section").set_value("Visão geral").run()
+        at.segmented_control(key="ux_section").set_value("Meu planejamento").run()
         at.button(key="flow_add_open_button").click().run()
         at.selectbox(key="flow_add_destination").set_value("italy_amalfi").run()
         at.multiselect(key="flow_pick_italy_amalfi").set_value(
@@ -204,7 +205,8 @@ class ItineraryFlowAppTests(unittest.TestCase):
     def test_italy_proposal_requires_two_separate_user_clicks(self):
         at=AppTest.from_file(str(ROOT/"app.py"),default_timeout=100).run()
         at.radio(key="ux_area").set_value("Meu roteiro").run()
-        at.segmented_control(key="ux_section").set_value("Itália").run()
+        at.segmented_control(key="ux_section").set_value("Melhorar meu roteiro").run()
+        at.selectbox(key="ux_improve_view").set_value("Itália").run()
         before=deepcopy(at.session_state["advisor_plan"])
         at.button(key="italy_starter_open").click().run()
         self.assertEqual(at.session_state["advisor_plan"],before)
