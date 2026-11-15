@@ -27,6 +27,7 @@ class HomeContextTests(unittest.TestCase):
         self.assertEqual(at.session_state["ux_area"],"Explorar")
         self.assertIn("scenario_sidebar",{x.key for x in at.selectbox})
         self.assertIn("ux_days",{x.key for x in at.number_input})
+        at.segmented_control(key="ux_mode").set_value("Simulação").run()
         at.selectbox(key="scenario_sidebar").set_value("offenburg").run()
         at.number_input(key="ux_days").set_value(65).run()
         at.radio(key="ux_area").set_value("Minha viagem").run()
