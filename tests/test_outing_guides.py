@@ -86,7 +86,7 @@ class OutingGuideModelTests(unittest.TestCase):
 class OutingGuideUITests(unittest.TestCase):
     def test_changing_base_updates_confirmed_card_and_add_optional_is_explicit(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=100).run()
-        app.radio(key="main_navigation").set_value("Roteiro").run()
+        app.radio(key="ux_area").set_value("Meu roteiro").run()
         app.segmented_control(key="itinerary_section").set_value("Meus passeios").run()
         app.button(key="outing_add_open").click().run()
         app.selectbox(key="outing_new_destination").set_value("colmar").run()
