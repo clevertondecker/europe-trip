@@ -435,7 +435,17 @@ if ux_area!="Minha viagem" or ux_section!="Resumo":
     st.segmented_control("Área: "+ux_area,list(UX_SECTIONS[ux_area]),
                          key="ux_section",on_change=_ux_section_changed,
                          selection_mode="single")
-if ux_area=="Meu roteiro" and ux_section=="França":
+if ux_area=="Explorar" and ux_section=="Cidades-base":
+    st.segmented_control("Conteúdo da cidade-base",
+                         ["Visão da cidade","Pesquisa ampliada"],
+                         key="ux_city_view",on_change=_ux_aux_changed,
+                         selection_mode="single")
+elif ux_area=="Orçamento" and ux_section=="Simulações":
+    st.segmented_control("Ferramenta de simulação",
+                         ["Simulação geral","Consultor de passeios"],
+                         key="ux_budget_view",on_change=_ux_aux_changed,
+                         selection_mode="single")
+elif ux_area=="Meu roteiro" and ux_section=="França":
     st.segmented_control("França: o que planejar?",
                          ["Meus passeios","França e escapadas","Transportes e custos"],
                          key="ux_france_view",on_change=_ux_aux_changed,
@@ -448,7 +458,9 @@ page,itinerary_target,guide_target,base_target=ux_route(
     ux_area,ux_section,
     research=st.session_state.get("ux_research","Pesquisa ampliada"),
     suggestion=st.session_state.get("ux_suggestion","Descobrir"),
-    france=st.session_state.get("ux_france_view","Meus passeios"))
+    france=st.session_state.get("ux_france_view","Meus passeios"),
+    city_view=st.session_state.get("ux_city_view","Visão da cidade"),
+    budget_view=st.session_state.get("ux_budget_view","Simulação geral"))
 if ux_area!="Minha viagem":
     st.caption(UX_DESCRIPTIONS.get((ux_area,ux_section),"Continue o planejamento."))
 # Navigation between tasks stays contextual, rather than a wall of controls.
@@ -1304,9 +1316,14 @@ elif page == "Roteiro":
         render_explorer(data,sync_sources,map_view)
 
     elif itinerary_section == "Explorar bases":
+        if (ux_area=="Explorar" and ux_section=="Cidades-base" and
+            st.session_state.get("ux_city_view")=="Pesquisa ampliada"):
+            st.session_state["base_explorer_mode"]="Pesquisa ampliada"
         render_base_explorer(active_plan(),data,sync_sources["finance"]["status"]=="live",
                              st.session_state.get("advisor_eurfx",6.3),
-                             focused=(ux_area=="Explorar" and ux_section=="Cidades-base"))
+                             focused=(ux_area=="Explorar" and ux_section=="Cidades-base"
+                                      and st.session_state.get("ux_city_view","Visão da cidade")
+                                      == "Visão da cidade"))
 
     elif itinerary_section in ("Meus passeios","Descobrir","Orçamento","Calendário","Simular roteiros"):
         render_advisor(data,sync_sources,workspace_area=itinerary_section)
