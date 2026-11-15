@@ -28,7 +28,7 @@ def order_saved_plans(plan_ids:list[str], commits:list[dict])->list[dict]:
     result=[]
     for entry in commits:
         message=entry.get("commit",{}).get("message","")
-        found=re.match(r"^Update travel plan (trip-[a-f0-9]{12}) r([0-9]+)\\b",message)
+        found=re.match(r"^Update travel plan (trip-[a-f0-9]{12}) r([0-9]+)\b",message)
         if not found:
             continue
         pid=found.group(1)
