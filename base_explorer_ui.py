@@ -14,6 +14,7 @@ from destination_labels import place_label
 from base_research_expanded_ui import render_expanded_research
 from planning_session import update_fields
 from base_scenario_model import base_options, choose_exploratory_base
+from base_research_expanded_model import load_research, find_city, observed_housing
 
 EXISTING_BASES=frozenset({"mulhouse","strasbourg","metz","nancy"})
 
@@ -27,7 +28,7 @@ def _format_brl(value:float)->str:
 
 
 def _base_name(data:dict,base_id:str)->str:
-    b=next(x for x in data["bases"] if x["id"]==base_id)
+    b=next(x for x in base_options(data) if x["id"]==base_id)
     return place_label(b["name"],b["country"])
 
 
@@ -54,7 +55,28 @@ def _map_base(data:dict,base_id:str,dest_ids:list[str])->None:
 
 
 def _nearby(data:dict,base_id:str)->None:
-    base=next(b for b in data["bases"] if b["id"]==base_id)
+    base=next((b for b in data["bases"] if b["id"]==base_id),None)
+    if base is None:
+        research=find_city(load_research(),base_id)
+        housing=observed_housing(research)
+        st.markdown("### "+place_label(research["name"],research["country"]))
+        st.info("Cidade do catálogo ampliado. Ainda não existem rotas "
+                "base → destino cadastradas na matriz deste explorador. "
+                "Não considere as viagens gratuitas nem indisponíveis.")
+        st.caption("Corredor: "+research["corridor"]+
+                   " · Anúncios históricos observados: "+str(housing["count"])+
+                   " · Hospedagem mobiliada para 2027: não cotada.")
+        if research.get("screening_notes"):
+            st.write(research["screening_notes"])
+        for quote in research["housing_offers"]:
+            with st.expander(quote["observed_title_or_address"]):
+                st.caption("Amostra de 2026; preço de 56–60 noites e disponibilidade "
+                           "de 2027 não confirmados.")
+                if quote.get("listing_url") or quote.get("catalogue_url"):
+                    st.markdown("[Fonte da pesquisa]("+
+                                (quote.get("listing_url") or quote["catalogue_url"])+")")
+        st.caption("Use Pesquisa ampliada para a avaliação completa desta cidade.")
+        return
     st.markdown("### "+_base_name(data,base_id)+" · "+base["corridor"])
     if base["rent_market_eur_m2"] is None:
         st.caption("Aluguel do mercado residencial comum: sem referência comparável.")
@@ -97,7 +119,8 @@ def _nearby(data:dict,base_id:str)->None:
 
 
 def _comparison(data:dict)->None:
-    names={b["id"]:_base_name(data,b["id"]) for b in data["bases"]}
+    names={b["id"]:_base_name(data,b["id"]) for b in base_options(data)}
+    supported={b["id"] for b in data["bases"]}
     places={d["id"]:place_label(d["name"],d["country"]) for d in data["destinations"]}
     bases=st.multiselect("Quais bases comparar?",
                          list(names),default=["lille","strasbourg","metz","dijon"],
@@ -110,7 +133,21 @@ def _comparison(data:dict)->None:
         return
     st.caption("A mesma lista de destinos é avaliada para cada base. Uma combinação "
                "sem pesquisa não é gratuita nem deve ser classificada como mais rápida.")
-    outcomes=compare_bases(data,bases,dest)
+    outcomes=compare_bases(data,[key for key in bases if key in supported],dest) if any(
+        key in supported for key in bases) else []
+    for base_id in bases:
+        if base_id not in supported:
+            outcomes.append({
+                "base_id":base_id, "time_coverage":0, "fare_coverage":0,
+                "destination_count":len(dest),"known_time_minutes":None,
+                "illustrative_fare_if_all_min_eur":None,"fully_priced":False,
+                "routes":[{
+                    "destination_id":destination_id,"minutes":None,
+                    "all_legs_at_from_fare_eur":None,"classification":"Sem pesquisa",
+                    "notes":"Trajeto não catalogado para esta cidade-base.",
+                    "source_url":None} for destination_id in dest],
+            })
+    outcomes.sort(key=lambda row:bases.index(row["base_id"]))
     table=[]
     for result in outcomes:
         table.append({
@@ -272,11 +309,11 @@ def render_base_explorer(plan:dict,trip_data:dict,finance_live:bool,
     st.caption("Compare corredores de viagem e cidades francesas antes de decidir. "
                "Todas as tarifas/tempos são referências de 2026; nenhuma passagem "
                "ou aluguel mobiliado foi confirmado para setembro–novembro de 2027.")
-    names={b["id"]:_base_name(data,b["id"]) for b in data["bases"]}
     options=base_options(data)
+    names={b["id"]:_base_name(data,b["id"]) for b in options}
     active=plan["base_city"]
     st.caption("**Base oficial atual:** "+names[active]+
-               " · **Novas candidatas:** Lille, Arras, Dijon e Reims. "
+               " · **Candidatas no catálogo:** "+str(len(names))+". "
                "A exploração não altera suas escolhas.")
     mode=st.segmented_control("Modo de exploração",
             ["Destinos próximos","Comparar mesmas viagens","Uma ou duas bases","Pesquisa ampliada"],
