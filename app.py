@@ -22,7 +22,9 @@ from route_preview import route_endpoints
 from attractions_ui import render_explorer
 from travel_advisor_ui import render_advisor, _recover_saved_plan, _secure_save, _owner_signed_in
 from planning_session import bootstrap as bootstrap_trip, active_plan, update_fields
-from attractions_model import load_attractions, load_base_routes, places_for_base, excursions_overage_brl
+from planning_store import summary as planning_summary
+from planning_status import save_label
+from attractions_model import load_attractions, load_base_routes, places_for_base, excursions_overage_brl, package_cost
 
 st.set_page_config(page_title="Nossa Europa 2027", page_icon="🌍", layout="wide", initial_sidebar_state="expanded")
 
@@ -171,6 +173,11 @@ def navigate_to_attractions() -> None:
     st.session_state["main_navigation"] = "Roteiro"
     st.session_state["itinerary_section"] = "Explorar atrações"
 
+def navigate_to_consultor() -> None:
+    st.session_state["main_navigation"] = "Roteiro"
+    st.session_state["itinerary_section"] = "Consultor inteligente"
+
+
 def simulate_city_in_budget(city_name: str) -> None:
     """Carry a hypothetical base to the finance page, without approving D-004."""
     st.session_state["unified_city"] = city_name
@@ -187,7 +194,7 @@ with st.sidebar:
       <small>TRAVEL JOURNAL · 2027</small>
       <strong>✧ Nossa Europa</strong>
       <span>Lua de mel & temporada na França</span></div>""", unsafe_allow_html=True)
-    page = st.radio("Explorar", ["Visão geral", "Mapa & destinos", "Comparar cidades", "Roteiro", "Orçamento", "Pesquisas & decisões"], label_visibility="collapsed", key="main_navigation", format_func=lambda name: {"Visão geral": "⌂  Visão geral", "Mapa & destinos": "▣  Mapa & destinos", "Comparar cidades": "▤  Comparar cidades", "Roteiro": "▦  Roteiro", "Orçamento": "◉  Orçamento", "Pesquisas & decisões": "☑  Pesquisas & decisões"}[name])
+    page = st.radio("Explorar", ["Visão geral", "Mapa & destinos", "Comparar cidades", "Roteiro", "Orçamento", "Pesquisas & decisões"], label_visibility="collapsed", key="main_navigation", format_func=lambda name: {"Visão geral": "⌂  Minha viagem", "Mapa & destinos": "▣  Explorar destinos", "Comparar cidades": "▤  Comparar cidades", "Roteiro": "▦  Meu roteiro e consultor", "Orçamento": "◉  Orçamento", "Pesquisas & decisões": "☑  Decisões e pesquisas"}[name])
     st.divider()
     st.caption("**ORIGEM DOS DADOS**")
     st.caption("Drive sincronizado" if sync_status == "live" else ("Drive parcialmente sincronizado" if sync_status == "partial" else "Snapshot de 14/11/2026"))
@@ -225,6 +232,40 @@ if page == "Visão geral":
       <div class="home-hero__chips"><span>♡ Dois viajantes</span>
       <span>✧ Sem reservas confirmadas</span><span>◷ Longa temporada em estudo</span></div>
       </div></div>""", unsafe_allow_html=True)
+
+    current_plan=active_plan()
+    status_label,status_hint=save_label(
+        current_plan,st.session_state.get("advisor_saved_snapshot"),
+        _owner_signed_in())
+    trip_stats=planning_summary(current_plan)
+    st.markdown("<div class='page-section'>Continuar nosso planejamento</div>",
+                unsafe_allow_html=True)
+    for col,(label,value,hint) in zip(st.columns(3,gap="small"),[
+        ("Atrações escolhidas",str(trip_stats["attractions"]),
+         "Passeios desejados"),
+        ("Dias organizados",str(trip_stats["scheduled_days"]),
+         "Sem reservas confirmadas"),
+        ("Planejamento",status_label,status_hint)]):
+        with col:
+            st.markdown("<div class='page-stat page-stat--mint'>"
+                        f"<div class='page-stat__label'>{escape(label)}</div>"
+                        f"<div class='page-stat__value'>{escape(value)}</div>"
+                        f"<div class='page-stat__hint'>{escape(hint)}</div></div>",
+                        unsafe_allow_html=True)
+    if not trip_stats["attractions"]:
+        st.info("Você ainda não escolheu atrações. Explore os destinos para começar a montar o roteiro.")
+    else:
+        st.caption("O roteiro está em construção. Preços e horários para 2027 precisam de confirmação.")
+    b1,b2,b3=st.columns(3,gap="small")
+    with b1:
+        st.button("Escolher atrações",key="home_choose_attractions",
+                  on_click=navigate_to_attractions,use_container_width=True)
+    with b2:
+        st.button("Melhorar meu roteiro",key="home_open_consultor",
+                  on_click=navigate_to_consultor,use_container_width=True)
+    with b3:
+        st.button("Ver orçamento",key="home_open_budget",
+                  on_click=navigate_page,args=("Orçamento",),use_container_width=True)
 
     from datetime import date
     wedding = date.fromisoformat(data["wedding_date"])
@@ -1148,6 +1189,10 @@ elif page == "Orçamento":
     with col5:
         city_options = ["Sem cidade selecionada","Mulhouse","Strasbourg","Metz","Nancy"]
         selected_city = st.selectbox("Cidade-base hipotética",city_options,key="unified_city")
+    valid_bases={"Mulhouse":"mulhouse","Strasbourg":"strasbourg",
+                 "Metz":"metz","Nancy":"nancy"}
+    if selected_city in valid_bases and valid_bases[selected_city]!=active_plan()["base_city"]:
+        update_fields(base_city=valid_bases[selected_city])
     st.markdown("<div class='page-section'>Moradia e custos adicionais</div>",unsafe_allow_html=True)
     st.caption("O aluguel da cidade é um valor de referência editorial de 2026, NÃO uma oferta para 2027. "
                "Ao preenchê-lo, ele **substitui** a verba de moradia — não é somado novamente.")
@@ -1179,7 +1224,22 @@ elif page == "Orçamento":
     # Reference is intentionally only a known ticket subtotal. It must never
     # replace the entire tour allowance nor create a discount for missing quotes.
     catalog_extra=0.0
-    attraction_ref=st.session_state.get("explore_budget_reference")
+    attraction_ref=None
+    current_plan=active_plan()
+    if current_plan["packages"]:
+        known_cost=package_cost(
+            load_attractions(),load_base_routes(),current_plan["base_city"],
+            [id for items in current_plan["packages"].values() for id in items])
+        attraction_ref={
+            "eur":known_cost["known_by_currency"]["EUR"],
+            "chf":known_cost["known_by_currency"]["CHF"],
+            "fx_eur":fx,
+            "fx_chf":st.session_state.get("explore_chf_fx",7.1),
+            "base":current_plan["base_city"],
+            "incomplete":not known_cost["complete"],
+            "destinations":list(current_plan["packages"])}
+        st.caption("Passeios importados automaticamente do mesmo planejamento.")
+
     if attraction_ref:
         st.markdown("<div class='page-section'>Passeios escolhidos no roteiro</div>",
                     unsafe_allow_html=True)
