@@ -43,10 +43,11 @@ def _render_destination(profile:str,board:dict,row:dict,catalog:dict):
             st.markdown("#### "+title)
             st.caption("Incluído no plano atual · não removível nesta simulação" if row["locked"]
                        else "Incluído nesta proposta · editável")
-            for a in row["attractions"][:3]:
-                st.write("• **"+a["name"]+"** — "+a["summary"])
-            if len(row["attractions"])>3:
-                st.caption(f"+ {len(row['attractions'])-3} atrações")
+            st.caption(f"{len(row['attractions'])} atrações · "+
+                       ("Aprovado no roteiro" if row["locked"] else "Rascunho editável"))
+            if row["attractions"]:
+                st.write(" · ".join(a["name"] for a in row["attractions"][:2])+
+                         (" · ..." if len(row["attractions"])>2 else ""))
             minutes=row["route"]["train_minutes_one_way"]
             st.caption(("Trem de ida: "+str(minutes)+" minutos (estação a estação), volta a conferir"
                         if minutes is not None else "Tempo ferroviário não confirmado"))
@@ -106,9 +107,10 @@ def _render_destination(profile:str,board:dict,row:dict,catalog:dict):
 def render_scenario_boards(plan:dict,scenarios:list[dict],catalog:dict,routes:dict,
                            trip_data:dict,source_live:bool,eurfx:float,chffx:float,
                            use_city_rent:bool=True,finance_only:bool=False)->None:
-    st.markdown("### Passeios incluídos nos estilos de viagem")
-    st.caption("Edite os cards sem alterar seu roteiro oficial. Valores e margens "
-               "são recalculados imediatamente para o casal.")
+    st.markdown("### Orçamento por estilo" if finance_only else "### Meus passeios")
+    if not finance_only:
+        st.caption("Edite os cards sem alterar seu roteiro oficial. Valores e margens "
+                   "são recalculados imediatamente para o casal.")
     profiles={s["profile"]:s for s in scenarios}
     st.markdown("#### Comparação rápida dos três estilos")
     comparisons=[]
@@ -127,6 +129,9 @@ def render_scenario_boards(plan:dict,scenarios:list[dict],catalog:dict,routes:di
     st.dataframe(comparisons,hide_index=True,use_container_width=True)
     st.caption("A margem geral pode ser igual entre estilos mesmo com gastos conhecidos "
                "diferentes, porque a verba de excursões já está provisionada.")
+    if finance_only:
+        st.caption("Compare os perfis acima; para modificar os passeios, abra Meus passeios.")
+        return
     profile=st.segmented_control("Estilo para personalizar",list(profiles),
          default=plan["profile"],format_func=lambda p:profiles[p]["label"],
          key="scenario_board_profile")
@@ -193,8 +198,16 @@ def render_scenario_boards(plan:dict,scenarios:list[dict],catalog:dict,routes:di
                    "individualmente. Valores desconhecidos não são tratados como gratuitos.")
         st.caption("Parte das excursões já está contemplada na verba-base de R$ "+
                    f"{allowance:,.0f}; só o excedente conhecido altera a projeção geral.")
-    for row in details["rows"]:
+    st.markdown("#### Destinos da simulação")
+    shown_key="workspace_board_visible_"+profile
+    visible=st.session_state.get(shown_key,6)
+    total_rows=len(details["rows"])
+    st.caption(f"{total_rows} destinos · exibindo {min(total_rows,visible)}")
+    for row in details["rows"][:visible]:
         _render_destination(profile,board,row,catalog)
+    if total_rows>visible and st.button("Ver mais passeios",key="workspace_board_more_"+profile):
+        st.session_state[shown_key]=visible+6
+        st.rerun()
     remaining=[d for d in catalog["destinations"]
                if d["id"] not in board["packages"]
                and d["id"] not in plan.get("excluded_destinations",[])]
