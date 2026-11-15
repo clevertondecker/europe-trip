@@ -19,6 +19,11 @@ Revisão: 15/11/2026 · Branch de execução: `audit/p0-finance-calendar-safety-
   aprovadas sem exigir migração nem editar backups.
 - **Propostas:** otimização não pode alterar uma data já confirmada
   nem aplicar proposta de outro plano (quando `plan_id` consta).
+- **Catálogo e backup:** valida vínculo atração→destino antes de
+  incluir diretamente um passeio e antes de importar backup JSON.
+  O contrato é centralizado em `catalog_plan_validation.py`.
+- **CI:** compila todos os módulos Python em `.github/workflows/validate.yml`,
+  não apenas uma lista manual que esquecia arquivos novos.
 - **Proteção de salvamento público:** `public_plan_safety.py` recusa
   campos inesperados e endereços de e-mail antes do PUT no GitHub.
   Permanece necessário o aceite e login existentes; isso **não** torna
