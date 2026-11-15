@@ -243,3 +243,22 @@ A aplicação apresenta um **seletor exploratório global** independente da cida
 **Validação:** o GitHub Actions `Validate Streamlit app` concluiu com sucesso no commit do PR #29 (f7bc9ed56e9bbf4ca4eca961eedac4db37a62319), incluindo navegação pelo roteiro e testes de regressão. A visualização em navegador, os Secrets da instalação e o estado efetivo do deployment do Streamlit Community Cloud exigem verificação separada.
 
 **Pendências técnicas:** persistência remota privada com controle de acesso; cotações completas de 2027; novas rotas e tarifas comparáveis; interface de pré-aprovação de cidades fora das quatro bases originais; validação manual do site publicado. Não publicar rascunhos privados no repositório público.
+
+## UX 3.0 — navegação guiada em quatro áreas (15/11/2026)
+
+A navegação anterior com seis páginas principais e nove abas do roteiro foi reorganizada em **quatro áreas orientadas às tarefas**, sem excluir os módulos, os links antigos nem os dados do `TripPlan`:
+
+| Área | Tarefas disponíveis |
+| --- | --- |
+| **Minha viagem** | Resumo; Pendências e fontes |
+| **Explorar** | Cidades-base; Comparar cidades; Passeios e destinos; Mapa; Mais pesquisas |
+| **Meu roteiro** | Visão do roteiro; Itália; Meus passeios; Calendário; Sugestões (Descobrir / Simular roteiros) |
+| **Orçamento** | Visão financeira; Passeios e custos |
+
+A barra de contexto superior reúne **Oficial / Simulação**, **cidade-base** e **duração hipotética da estadia francesa**. O contexto de cidade é compartilhado com comparador, explorador de bases, atrações e pesquisa ampliada. A duração é sincronizada com o orçamento e as comparações de estadias. Alterações exploratórias não substituem o roteiro aprovado.
+
+As antigas páginas e áreas seguem acessíveis em opções avançadas. O módulo `ux_navigation.py` adapta os caminhos antigos, enquanto a interface apresenta títulos relacionados à tarefa e um botão contextual de próximo passo. A etapa italiana, os passeios, o calendário, as fontes e os backups existentes foram preservados.
+
+**Validação:** o PR [#32](https://github.com/clevertondecker/europe-trip/pull/32) passou no GitHub Actions com **253 testes executados (2 ignorados)** e foi integrado à `main` no commit `0e15ef901a3cd4a9c75cb6929b7582f593d6546b`. Testes headless não substituem inspeção visual do Streamlit Community Cloud. **Publicação, versão efetivamente carregada e layout em dispositivos móveis ainda precisam de verificação visual**. Se o site mostrar as nove abas antigas, verificar o commit implantado, logs e eventuais erros de deploy antes de considerar a atualização concluída.
+
+**Pendências independentes:** persistência privada entre dispositivos (issue #30), validação do deploy e ampliação das pesquisas ferroviárias/hospedagens (issue #31).
