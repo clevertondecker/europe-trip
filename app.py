@@ -232,6 +232,15 @@ with st.sidebar:
     st.link_button("Abrir pasta no Drive", data["sources"]["project_folder"], use_container_width=True)
     st.info("Painel em desenvolvimento. Nenhum voo, imóvel ou passeio foi reservado.")
 
+# Cross-page visibility: exploration never changes approved calendar or outings.
+hypothetical_id=st.session_state.get("scenario_base_selected")
+if hypothetical_id and hypothetical_id!=active_plan()["base_city"]:
+    if page in ("Visão geral","Mapa & destinos","Roteiro","Pesquisas & decisões"):
+        st.info("Cidade-base em simulação: "+hypothetical_id.replace("_"," ").title()+
+                ". O mapa, o calendário, os passeios e as decisões oficiais "
+                "permanecem ligados ao roteiro aprovado. Compare rotas em "
+                "Roteiro → Explorar bases e custos em Orçamento.")
+
 if page == "Visão geral":
     st.markdown("""<div class="home-hero" role="region" aria-label="Apresentação da viagem">
       <div class="home-hero__content"><div class="home-hero__eyebrow">ITÁLIA → FRANÇA · 2027</div>
