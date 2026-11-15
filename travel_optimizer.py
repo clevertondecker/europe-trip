@@ -1,0 +1,77 @@
+"""Bounded, deterministic draft calendar optimization; never commits a proposal."""
+from __future__ import annotations
+from datetime import date
+from itertools import permutations
+from calendar_model import calendar_plan
+from attractions_model import route_for
+from trip_plan_model import validate_plan
+
+def available_days(plan):
+    days=calendar_plan(date.fromisoformat(plan["departure_date"]),plan["total_days"],
+                       plan["italy_days"],plan["vacation_days"],plan["setup_days"])
+    return [d for d in days if d["stage"]=="França" and d["activity"]!="Instalação"
+            and "Trabalho remoto" not in d["activity"]]
+
+def propose_schedule(plan,attractions,routes,profile="balanced",max_variants=3):
+    """Heuristic: prioritize verified short rail, vacation for long/Alps.
+
+    Unknown connections remain unresolved rather than placed optimistically.
+    """
+    validate_plan(plan)
+    if profile not in {"balanced","economy","experience"}:raise ValueError("profile")
+    by_dest={d["id"]:d for d in attractions["destinations"]}
+    days=available_days(plan)
+    taken=set(plan.get("assignments",{}))
+    eligible=[x for x in days if x["date"] not in taken]
+    jobs=[]
+    unresolved=[]
+    for dest, ids in plan["packages"].items():
+        if dest in plan["assignments"].values():continue
+        route=route_for(routes,plan["base_city"],dest)
+        if dest not in by_dest:
+            unresolved.append({"destination":dest,"reason":"Destino desconhecido"})
+            continue
+        if by_dest[dest]["kind"]=="overnight":
+            unresolved.append({"destination":dest,"reason":"Pernoite e conexões não verificados"})
+            continue
+        if dest!=plan["base_city"] and route["train_minutes_one_way"] is None:
+            unresolved.append({"destination":dest,"reason":"Tempo de deslocamento não verificado"})
+            continue
+        length=sum(a["visit_minutes"] for a in attractions["attractions"] if a["id"] in ids)
+        if length>7*60:
+            unresolved.append({"destination":dest,"reason":"Tempo dentro das atrações superior a 7h"})
+            continue
+        jobs.append((dest,route["train_minutes_one_way"] or 0))
+    # Stable deterministic sort; optional priorities cannot remove mandatory selections.
+    if profile=="economy": jobs.sort(key=lambda x:(x[1],x[0]))
+    elif profile=="experience":jobs.sort(key=lambda x:(-x[1],x[0]))
+    else:jobs.sort(key=lambda x:(x[1]>70,x[1],x[0]))
+    proposals=[]
+    for variant in range(min(max_variants,3)):
+        mapping=dict(plan.get("assignments",{}))
+        reserved=set(mapping)
+        placed=[]
+        for dest,minutes in jobs:
+            # Early vacation for longer outings, weekend otherwise, never a workday.
+            options=sorted([d for d in eligible if d["date"] not in reserved],
+                key=lambda d: (0 if (minutes>70 and "Férias" in d["activity"]) or
+                         (minutes<=70 and "Fim de semana" in d["activity"]) else 1,
+                         d["date"]))
+            if variant==1:options=list(reversed(options))
+            if variant==2:options=sorted(options,key=lambda d:(abs(d["day"]-30),d["date"]))
+            if not options:
+                unresolved.append({"destination":dest,"reason":"Sem dia livre suficiente"})
+                continue
+            selected=options[0]
+            mapping[selected["date"]]=dest
+            reserved.add(selected["date"])
+            placed.append(dest)
+        proposals.append({
+           "proposal_id":f"{plan['plan_id']}:r{plan['revision']}:{profile}:{variant}",
+           "base_revision":plan["revision"],"base_city":plan["base_city"],
+           "assignments":mapping,"placed":placed,
+           "unresolved":list(unresolved),"profile":profile,
+           "status":"draft_unapproved",
+           "note":"Sugestão heurística, sem horários de abertura/retorno confirmados. Nenhuma reserva."
+        })
+    return proposals
