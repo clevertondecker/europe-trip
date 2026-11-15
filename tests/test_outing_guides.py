@@ -98,6 +98,8 @@ class OutingGuideUITests(unittest.TestCase):
         self.assertTrue(any(m.label=="Trem de ida" and m.value=="18 min" for m in app.metric))
         original=deepcopy(app.session_state["advisor_plan"])
         app.selectbox(key="advisor_base").set_value("strasbourg").run()
+        self.assertEqual(app.session_state["advisor_plan"]["base_city"],"mulhouse")
+        app.button(key="advisor_confirm_base").click().run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
         self.assertTrue(any(m.label=="Trem de ida" and m.value=="32 min" for m in app.metric))
         self.assertEqual(app.session_state["advisor_plan"]["packages"],original["packages"])

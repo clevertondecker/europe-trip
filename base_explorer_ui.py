@@ -13,6 +13,9 @@ from base_explorer_model import (base_opportunities,compare_bases,
 from destination_labels import place_label
 from base_research_expanded_ui import render_expanded_research
 from planning_session import update_fields
+from base_scenario_model import base_options, choose_exploratory_base, expanded_rail_routes
+from base_research_expanded_model import load_research, find_city, observed_housing
+from base_scenario_store import make_scenario, scenario_export, scenario_import
 
 EXISTING_BASES=frozenset({"mulhouse","strasbourg","metz","nancy"})
 
@@ -26,7 +29,7 @@ def _format_brl(value:float)->str:
 
 
 def _base_name(data:dict,base_id:str)->str:
-    b=next(x for x in data["bases"] if x["id"]==base_id)
+    b=next(x for x in base_options(data) if x["id"]==base_id)
     return place_label(b["name"],b["country"])
 
 
@@ -53,7 +56,46 @@ def _map_base(data:dict,base_id:str,dest_ids:list[str])->None:
 
 
 def _nearby(data:dict,base_id:str)->None:
-    base=next(b for b in data["bases"] if b["id"]==base_id)
+    base=next((b for b in data["bases"] if b["id"]==base_id),None)
+    if base is None:
+        research=find_city(load_research(),base_id)
+        housing=observed_housing(research)
+        st.markdown("### "+place_label(research["name"],research["country"]))
+        trains=expanded_rail_routes(base_id)
+        st.info("Cidade da pesquisa ampliada. A matriz principal de atrações "
+                "ainda não possui tarifas e trajetos completos para esta base.")
+        if trains:
+            st.markdown("#### Trechos pontuais pesquisados")
+            for segment in trains:
+                with st.container(border=True):
+                    st.markdown("**"+segment["destination_name"]+"**")
+                    st.caption("Trem mais rápido só ida: "+
+                               str(segment["oneway_minutes"])+" min; tarifa publicada por "
+                               "pessoa/trecho: "+
+                               (_format_eur(segment["fare_eur_person_oneway"])
+                                if segment["fare_eur_person_oneway"] is not None
+                                else "Não cotada"))
+                    st.caption("Data da amostra: "+segment["basis_date"]+
+                               " · Volta e horário de 2027 não verificados. "+
+                               segment["notes"])
+                    st.markdown("[Ver fonte ferroviária]("+segment["source_url"]+")")
+        else:
+            st.caption("Nenhum trajeto ferroviário catalogado desta cidade. "
+                       "Não significa custo zero nem impossibilidade de viagem.")
+        st.caption("Corredor: "+research["corridor"]+
+                   " · Anúncios históricos observados: "+str(housing["count"])+
+                   " · Hospedagem mobiliada para 2027: não cotada.")
+        if research.get("screening_notes"):
+            st.write(research["screening_notes"])
+        for quote in research["housing_offers"]:
+            with st.expander(quote["observed_title_or_address"]):
+                st.caption("Amostra de 2026; preço de 56–60 noites e disponibilidade "
+                           "de 2027 não confirmados.")
+                if quote.get("listing_url") or quote.get("catalogue_url"):
+                    st.markdown("[Fonte da pesquisa]("+
+                                (quote.get("listing_url") or quote["catalogue_url"])+")")
+        st.caption("Use Pesquisa ampliada para a avaliação completa desta cidade.")
+        return
     st.markdown("### "+_base_name(data,base_id)+" · "+base["corridor"])
     if base["rent_market_eur_m2"] is None:
         st.caption("Aluguel do mercado residencial comum: sem referência comparável.")
@@ -96,7 +138,8 @@ def _nearby(data:dict,base_id:str)->None:
 
 
 def _comparison(data:dict)->None:
-    names={b["id"]:_base_name(data,b["id"]) for b in data["bases"]}
+    names={b["id"]:_base_name(data,b["id"]) for b in base_options(data)}
+    supported={b["id"] for b in data["bases"]}
     places={d["id"]:place_label(d["name"],d["country"]) for d in data["destinations"]}
     bases=st.multiselect("Quais bases comparar?",
                          list(names),default=["lille","strasbourg","metz","dijon"],
@@ -109,7 +152,21 @@ def _comparison(data:dict)->None:
         return
     st.caption("A mesma lista de destinos é avaliada para cada base. Uma combinação "
                "sem pesquisa não é gratuita nem deve ser classificada como mais rápida.")
-    outcomes=compare_bases(data,bases,dest)
+    outcomes=compare_bases(data,[key for key in bases if key in supported],dest) if any(
+        key in supported for key in bases) else []
+    for base_id in bases:
+        if base_id not in supported:
+            outcomes.append({
+                "base_id":base_id, "time_coverage":0, "fare_coverage":0,
+                "destination_count":len(dest),"known_time_minutes":None,
+                "illustrative_fare_if_all_min_eur":None,"fully_priced":False,
+                "routes":[{
+                    "destination_id":destination_id,"minutes":None,
+                    "all_legs_at_from_fare_eur":None,"classification":"Sem pesquisa",
+                    "notes":"Trajeto não catalogado para esta cidade-base.",
+                    "source_url":None} for destination_id in dest],
+            })
+    outcomes.sort(key=lambda row:bases.index(row["base_id"]))
     table=[]
     for result in outcomes:
         table.append({
@@ -176,7 +233,7 @@ def _choose_base(data:dict,plan:dict,base_id:str)->None:
 
 def _split_stay(data:dict,plan:dict,trip_data:dict,finance_live:bool,
                 eurfx:float)->None:
-    names={b["id"]:_base_name(data,b["id"]) for b in data["bases"]}
+    names={b["id"]:_base_name(data,b["id"]) for b in base_options(data)}
     days=plan["total_days"]-plan["italy_days"]
     st.markdown("### Uma base ou duas?")
     st.caption("Compare o mesmo período francês e as mesmas verbas restantes, "
@@ -264,6 +321,60 @@ def _split_stay(data:dict,plan:dict,trip_data:dict,finance_live:bool,
                    names.get(saved["second"],saved["second"]))
 
 
+def _scenario_backups(plan:dict,options:list[dict])->None:
+    """Save a portable scenario without writing to public GitHub or TripPlan."""
+    with st.expander("Meus cenários exploratórios · salvar e recuperar"):
+        st.caption("Cópias JSON permanecem com você. O Streamlit Community Cloud "
+                   "não garante armazenamento entre sessões; importar restaura "
+                   "somente a cidade e a duração do estudo, nunca o roteiro oficial.")
+        names={x["id"]:x["name"] for x in options}
+        chosen=st.session_state.get("scenario_base_selected",plan["base_city"])
+        if chosen not in names:
+            chosen=plan["base_city"]
+        label=st.text_input("Nome deste cenário",
+                            value="Estudar "+names[chosen],key="scenario_save_name")
+        days=st.number_input("Dias nesta base hipotética",min_value=7,
+                            max_value=100,
+                            value=max(7,min(100,plan["total_days"]-plan["italy_days"])),
+                            key="scenario_save_days")
+        notes=st.text_area("Anotações (opcional)",key="scenario_save_notes",
+                           max_chars=2000)
+        if st.button("Guardar cenário nesta sessão",key="scenario_store_session"):
+            try:
+                saved=make_scenario(label,chosen,int(days),notes)
+                st.session_state.setdefault("scenario_saved_drafts",{})[saved["name"]]=saved
+                st.success("Cenário guardado nesta sessão. Para manter após "
+                           "fechar o navegador, baixe o arquivo JSON.")
+            except ValueError as exc:
+                st.error(str(exc))
+        drafts=st.session_state.get("scenario_saved_drafts",{})
+        if drafts:
+            selected=st.selectbox("Cenários desta sessão",list(drafts),
+                                   key="scenario_drafts_choice")
+            a,b=st.columns(2)
+            with a:
+                if st.button("Reabrir cenário",key="scenario_drafts_restore"):
+                    restored=drafts[selected]
+                    st.session_state["scenario_base_selected"]=restored["city_id"]
+                    st.success("Cenário selecionado, sem mudar roteiro oficial.")
+                    st.rerun()
+            with b:
+                st.download_button("Baixar JSON",scenario_export(drafts[selected]),
+                                   file_name="nossa_europa_cenario.json",
+                                   mime="application/json",key="scenario_export_json")
+        upload=st.file_uploader("Importar cenário JSON",type=["json"],
+                                key="scenario_import_file")
+        if upload is not None and st.button("Validar e importar",key="scenario_import_apply"):
+            try:
+                restored=scenario_import(upload.getvalue())
+                st.session_state.setdefault("scenario_saved_drafts",{})[restored["name"]]=restored
+                st.session_state["scenario_base_selected"]=restored["city_id"]
+                st.success("Cenário importado e selecionado; roteiro oficial inalterado.")
+                st.rerun()
+            except (ValueError,UnicodeError,TypeError) as exc:
+                st.error("Arquivo recusado: "+str(exc))
+
+
 def render_base_explorer(plan:dict,trip_data:dict,finance_live:bool,
                          eurfx:float=6.3)->None:
     data=load_exploration()
@@ -271,18 +382,27 @@ def render_base_explorer(plan:dict,trip_data:dict,finance_live:bool,
     st.caption("Compare corredores de viagem e cidades francesas antes de decidir. "
                "Todas as tarifas/tempos são referências de 2026; nenhuma passagem "
                "ou aluguel mobiliado foi confirmado para setembro–novembro de 2027.")
-    names={b["id"]:_base_name(data,b["id"]) for b in data["bases"]}
+    options=base_options(data)
+    names={b["id"]:_base_name(data,b["id"]) for b in options}
+    _scenario_backups(plan,options)
     active=plan["base_city"]
     st.caption("**Base oficial atual:** "+names[active]+
-               " · **Novas candidatas:** Lille, Arras, Dijon e Reims. "
+               " · **Candidatas no catálogo:** "+str(len(names))+". "
                "A exploração não altera suas escolhas.")
     mode=st.segmented_control("Modo de exploração",
             ["Destinos próximos","Comparar mesmas viagens","Uma ou duas bases","Pesquisa ampliada"],
             default="Destinos próximos",key="base_explorer_mode")
     if mode=="Destinos próximos" or mode is None:
+        candidate=st.session_state.get("scenario_base_selected",active)
+        if candidate not in names:
+            candidate=active
         selected=st.selectbox("Cidade-base a explorar",list(names),
-                index=list(names).index(active),format_func=lambda x:names[x],
+                index=list(names).index(candidate),format_func=lambda x:names[x],
                 key="base_explorer_city")
+        st.session_state["scenario_base_selected"]=choose_exploratory_base(selected,options)
+        status=next(row["research_status"] for row in options if row["id"]==selected)
+        st.caption("Cenário exploratório · "+status+
+                   " · não modifica a cidade-base aprovada.")
         _nearby(data,selected)
         _choose_base(data,plan,selected)
     elif mode=="Comparar mesmas viagens":

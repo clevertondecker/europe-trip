@@ -154,6 +154,13 @@ def render_advisor(trip_data:dict,sync_sources:dict,workspace_area:str='Meus pas
         st.warning("Não foi possível recuperar automaticamente o planejamento: "+
                    st.session_state.pop("advisor_restore_error"))
     st.markdown("<div class='page-section'>Workspace de planejamento</div>",unsafe_allow_html=True)
+    exploratory=st.session_state.get("scenario_base_selected")
+    if exploratory and exploratory!=p["base_city"]:
+        st.info("Existe uma base hipotética em estudo: "+
+                exploratory.replace("_"," ").title()+
+                ". Nesta aba, atrações, calendário, consultor e cálculos "
+                "continuam no roteiro oficial para não contaminar escolhas aprovadas. "
+                "Para comparar a candidata, abra Explorar bases ou Orçamento.")
     st.caption("Meus passeios mostra seu roteiro atual. Simular roteiros é apenas uma proposta; nenhuma sugestão entra no plano sem aprovação.")
     st.caption("Valores e trajetos são referências históricas; não há reservas ou cotações confirmadas para 2027.")
     with st.expander("Configurações do planejamento",expanded=True):
@@ -171,8 +178,16 @@ def render_advisor(trip_data:dict,sync_sources:dict,workspace_area:str='Meus pas
             ceiling=st.selectbox("Teto total do casal",["60k","70k"],
                 index=["60k","70k"].index(p["budget_scenario"]),key="advisor_ceiling",
                 format_func=lambda x:"R$ "+x[:-1]+" mil")
-        if base!=p["base_city"] or profile!=p["profile"] or ceiling!=p["budget_scenario"]:
-            p=update_fields(base_city=base,profile=profile,budget_scenario=ceiling)
+        # Changing the official base is an explicit planning action, never
+        # coupled to an exploratory base chosen on another page.
+        if base!=p["base_city"]:
+            st.warning("Trocar a base aqui altera o roteiro oficial desta sessão. "
+                       "Para apenas comparar uma cidade, use Explorar bases.")
+            if st.button("Confirmar mudança da base oficial",key="advisor_confirm_base"):
+                p=update_fields(base_city=base,profile=profile,budget_scenario=ceiling)
+                st.rerun()
+        elif profile!=p["profile"] or ceiling!=p["budget_scenario"]:
+            p=update_fields(profile=profile,budget_scenario=ceiling)
         with st.expander("Como o consultor toma decisões",expanded=False):
             st.caption("Prioridades (interesse / custo / conforto / agenda): "+
                        " / ".join(str(x)+"%" for x in objective_weights(profile).values())+

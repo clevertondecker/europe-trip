@@ -18,6 +18,8 @@ class AdvisorUISmoke(unittest.TestCase):
         self.assertEqual(app.session_state["advisor_plan"]["revision"],original)
         app.selectbox(key="advisor_base").set_value("strasbourg").run()
         self.assertEqual(len(app.exception),0,[x.message for x in app.exception])
+        self.assertEqual(app.session_state["advisor_plan"]["base_city"],"mulhouse")
+        app.button(key="advisor_confirm_base").click().run()
         self.assertEqual(app.session_state["advisor_plan"]["base_city"],"strasbourg")
 
 if __name__=="__main__":unittest.main()
