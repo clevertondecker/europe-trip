@@ -24,6 +24,7 @@ from attractions_ui import render_explorer
 from travel_advisor_ui import render_advisor, _recover_saved_plan, _secure_save, _owner_signed_in
 from travel_dashboard_ui import render_trip_dashboard
 from base_explorer_ui import render_base_explorer
+from base_scenario_model import base_options, choose_exploratory_base, hypothetical_city_name
 from planning_session import bootstrap as bootstrap_trip, active_plan, update_fields
 from planning_store import summary as planning_summary
 from planning_status import save_label
@@ -185,6 +186,9 @@ def navigate_to_consultor() -> None:
 def simulate_city_in_budget(city_name: str) -> None:
     """Carry a hypothetical base to the finance page, without approving D-004."""
     st.session_state["unified_city"] = city_name
+    candidates={x["name"]:x["id"] for x in base_options()}
+    if city_name in candidates:
+        st.session_state["scenario_base_selected"]=candidates[city_name]
     st.session_state["unified_override_rent"] = True
     st.session_state["main_navigation"] = "Orçamento"
 
@@ -475,6 +479,25 @@ elif page == "Mapa & destinos":
 elif page == "Comparar cidades":
     import pandas as pd
     city_data = load_cities()
+    all_exploratory_bases=base_options()
+    compare_names={item["id"]:item["name"] for item in all_exploratory_bases}
+    current_candidate=st.session_state.get("scenario_base_selected",active_plan()["base_city"])
+    if current_candidate not in compare_names:
+        current_candidate=active_plan()["base_city"]
+    selected_candidate=st.selectbox(
+        "Cidade-base hipotética compartilhada", list(compare_names),
+        index=list(compare_names).index(current_candidate),
+        format_func=lambda k:compare_names[k],key="compare_exploratory_base")
+    st.session_state["scenario_base_selected"]=choose_exploratory_base(
+        selected_candidate,all_exploratory_bases)
+    st.caption("Seleção exploratória compartilhada com Explorar bases e Orçamento. "
+               "As quatro cidades do comparador histórico continuam com métricas "
+               "mais detalhadas; outras cidades podem não ter cotações equivalentes.")
+    if st.button("Abrir passeios e rotas desta base",key="compare_open_base"):
+        st.session_state["main_navigation"]="Roteiro"
+        st.session_state["itinerary_section"]="Explorar bases"
+        st.session_state["base_explorer_mode"]="Destinos próximos"
+        st.rerun()
     city_audit = load_audit()
     market = load_market()
     round2 = load_round2()
@@ -1218,18 +1241,32 @@ elif page == "Orçamento":
     with col4:
         fx = st.number_input("Câmbio simulado (R$/€)",4.0,10.0,6.3,0.05,key="unified_fx")
     with col5:
-        city_options = ["Sem cidade selecionada","Mulhouse","Strasbourg","Metz","Nancy"]
-        selected_city = st.selectbox("Cidade-base hipotética",city_options,key="unified_city")
-    valid_bases={"Mulhouse":"mulhouse","Strasbourg":"strasbourg",
-                 "Metz":"metz","Nancy":"nancy"}
-    if selected_city in valid_bases and valid_bases[selected_city]!=active_plan()["base_city"]:
-        update_fields(base_city=valid_bases[selected_city])
+        exploratory_options=base_options()
+        city_ids=[item["id"] for item in exploratory_options]
+        candidate=st.session_state.get("scenario_base_selected",active_plan()["base_city"])
+        if candidate not in city_ids:
+            candidate=active_plan()["base_city"]
+        selected_base_id=st.selectbox(
+            "Cidade-base hipotética",city_ids,index=city_ids.index(candidate),
+            format_func=lambda k:hypothetical_city_name(k,exploratory_options),
+            key="budget_exploratory_base")
+        st.session_state["scenario_base_selected"]=choose_exploratory_base(
+            selected_base_id,exploratory_options)
+        selected_city=hypothetical_city_name(selected_base_id,exploratory_options)
+    st.caption("Esta cidade é uma simulação independente. "
+               "O roteiro oficial permanece em "+active_plan()["base_city"].capitalize()+
+               ". A ausência de aluguel pesquisado não significa custo zero.")
     st.markdown("<div class='page-section'>Moradia e custos adicionais</div>",unsafe_allow_html=True)
     st.caption("O aluguel da cidade é um valor de referência editorial de 2026, NÃO uma oferta para 2027. "
                "Ao preenchê-lo, ele **substitui** a verba de moradia — não é somado novamente.")
     city_data_budget = load_cities()
     selected_rent = next((float(c["reference_rent_eur"]) for c in
-                          city_data_budget["cities"] if c["name"] == selected_city),None)
+                          city_data_budget["cities"] if c["name"] == selected_city
+                          and c.get("reference_rent_eur") is not None),None)
+    if selected_rent is None:
+        st.info("Aluguel mobiliado desta cidade: não cotado. "
+                "O orçamento abaixo mantém a provisão oficial de hospedagem "
+                "e não a apresenta como preço desta cidade.")
     use_city_rent = st.checkbox("Simular aluguel pela referência histórica da cidade",
                                 value=False,key="unified_override_rent",
                                 disabled=selected_rent is None)
@@ -1279,7 +1316,9 @@ elif page == "Orçamento":
             "base":current_plan["base_city"],
             "incomplete":not known_cost["complete"],
             "destinations":list(current_plan["packages"])}
-        st.caption("Passeios importados automaticamente do mesmo planejamento.")
+        st.caption("Passeios importados do roteiro oficial. Os custos destas "
+                   "atrações ainda não foram recalculados para a base hipotética "
+                   "selecionada; compare as rotas em Roteiro → Explorar bases.")
 
     if attraction_ref:
         st.markdown("<div class='page-section'>Passeios escolhidos no roteiro</div>",
