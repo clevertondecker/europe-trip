@@ -97,7 +97,7 @@ def render_my_outings(plan: dict, catalog: dict, *, routes: dict | None = None,
     st.caption("O roteiro pré-definido do perfil aparece abaixo. "
                "Depois de confirmá-lo, seus passeios ficam na lista oficial para editar ou remover.")
     if preset is not None:
-        render_active_preset(plan,preset,catalog)
+        render_active_preset(plan,preset,catalog,routes=routes,eurfx=eurfx,chffx=chffx)
     st.markdown("#### Passeios confirmados — meu planejamento")
     a, b = st.columns(2, gap="small")
     a.metric("Passeios escolhidos", len(cards))
