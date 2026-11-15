@@ -148,7 +148,7 @@ def render_italy_honeymoon()->None:
         fx=st.number_input("Câmbio hipotético R$/€",min_value=0.01,
                            value=6.3,step=0.1,key="italy_budget_fx")
         try:
-            preview=manual_italy_cost(d,chosen,vals,fx)
+            preview=manual_italy_cost(d,chosen,vals,fx,extra_night=extra)
         except ValueError as e:
             st.error(str(e))
             return
