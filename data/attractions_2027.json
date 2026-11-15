@@ -31,7 +31,7 @@
       "kind": "local",
       "photo": {
         "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Cathedrale-strasbourg.jpg",
-        "author": "Wikimedia Commons photographer",
+        "author": "SPRAUEL",
         "license": "CC BY-SA 3.0",
         "license_url": "https://creativecommons.org/licenses/by-sa/3.0/",
         "source_page": "https://commons.wikimedia.org/wiki/File:Cathedrale-strasbourg.jpg"
@@ -67,7 +67,7 @@
       "kind": "local",
       "photo": {
         "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Nancy_Place_Stanislas_1.jpg",
-        "author": "Wikimedia Commons photographer",
+        "author": "Zairon",
         "license": "CC BY-SA 4.0",
         "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
         "source_page": "https://commons.wikimedia.org/wiki/File:Nancy_Place_Stanislas_1.jpg"
@@ -141,7 +141,7 @@
         "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Luxembourg_Grund.jpg",
         "author": "Jerome Herr",
         "license": "CC BY-SA 1.0",
-        "license_url": null,
+        "license_url": "https://creativecommons.org/licenses/by-sa/1.0/",
         "source_page": "https://commons.wikimedia.org/wiki/File:Luxembourg_Grund.jpg"
       },
       "source_url": "https://www.visitluxembourg.com/place/bock-casemates-luxembourg",
