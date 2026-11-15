@@ -1,4 +1,4 @@
-streamlit>=1.40,<2
+streamlit[auth]>=1.66,<2
 pandas>=2.0
 pydeck>=0.9
 google-api-python-client>=2.0
