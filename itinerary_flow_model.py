@@ -171,3 +171,18 @@ def adopt_italy_starter(plan:dict,catalog:dict,variant:str,
     for dest_id,ids,period in preview["to_add"]:
         visits.append(_validated_choice(catalog,dest_id,ids,period))
     return change_plan(plan,{"flexible_visits":visits})
+
+def validate_flow_backup(plan:dict,catalog:dict)->None:
+    """Review every imported flexible choice before it can enter this session."""
+    from trip_plan_model import validate_plan
+    from catalog_plan_validation import validate_catalog_packages
+    validate_plan(plan)
+    validate_catalog_packages(plan,catalog)
+    for row in plan.get("flexible_visits",[]):
+        clean=_validated_choice(catalog,row["destination_id"],
+                                row["attractions"],row["period"])
+        if clean!=row:
+            raise ValueError("Etapa ou atração divergente do catálogo")
+        if row["stage"]==FRANCE_STAGE and plan["packages"].get(
+                row["destination_id"])!=row["attractions"]:
+            raise ValueError("Passeio francês divergente entre calendário e roteiro")
