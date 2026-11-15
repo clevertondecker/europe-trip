@@ -40,8 +40,9 @@ class ActivePresetConsistency(unittest.TestCase):
 
     def test_my_outings_shows_preset_and_approval_requires_confirm(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=100).run()
-        app.radio(key="main_navigation").set_value("Roteiro").run()
-        app.segmented_control(key="itinerary_section").set_value("Meus passeios").run()
+        app.radio(key="ux_area").set_value("Meu roteiro").run()
+        app.segmented_control(key="ux_section").set_value("Melhorar meu roteiro").run()
+        app.selectbox(key="ux_improve_view").set_value("Temporada europeia").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
         initial=deepcopy(app.session_state["advisor_plan"])
         text="\n".join(x.value for x in list(app.markdown)+list(app.caption))
@@ -67,20 +68,21 @@ class ActivePresetConsistency(unittest.TestCase):
 
     def test_profile_switch_updates_preview_and_all_screens(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=100).run()
-        app.radio(key="main_navigation").set_value("Roteiro").run()
-        app.segmented_control(key="itinerary_section").set_value("Meus passeios").run()
+        app.radio(key="ux_area").set_value("Meu roteiro").run()
+        app.segmented_control(key="ux_section").set_value("Melhorar meu roteiro").run()
+        app.selectbox(key="ux_improve_view").set_value("Temporada europeia").run()
         app.selectbox(key="advisor_profile").set_value("economy").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
         self.assertEqual(app.session_state["advisor_plan"]["packages"],{})
         text="\n".join(x.value for x in app.markdown)
         self.assertIn("Roteiro pré-definido · Econômico",text)
-        app.segmented_control(key="itinerary_section").set_value("Descobrir").run()
+        app.selectbox(key="ux_improve_view").set_value("Descobrir").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
         self.assertTrue(any("Roteiro Econômico sugerido" in x.value for x in app.info))
-        app.segmented_control(key="itinerary_section").set_value("Calendário").run()
+        app.selectbox(key="ux_improve_view").set_value("Calendário completo").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
         self.assertTrue(any("Roteiro Econômico sugerido" in x.value for x in app.info))
-        app.segmented_control(key="itinerary_section").set_value("Visão geral").run()
+        app.segmented_control(key="ux_section").set_value("Meu planejamento").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
         self.assertIn("flow_add_open_button",{b.key for b in app.button})
         # Old read-only advisor is still available by an explicit toggle.
