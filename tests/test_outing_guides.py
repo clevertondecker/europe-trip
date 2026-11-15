@@ -104,10 +104,13 @@ class OutingGuideUITests(unittest.TestCase):
         app.checkbox(key="official_guide_colmar_extra_enabled").check().run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
         self.assertEqual(app.session_state["advisor_plan"]["packages"],original["packages"])
-        if len(ids)>2:
-            app.button(key="official_guide_colmar_add_"+ids[2]).click().run()
+        guide=build_outing_guide(app.session_state["advisor_plan"],catalog,
+                                 load_base_routes(),"colmar",ids[:2])
+        if guide["optional"]:
+            extra=guide["optional"][0]["id"]
+            app.button(key="official_guide_colmar_add_"+extra).click().run()
             self.assertFalse(app.exception,[e.message for e in app.exception])
-            self.assertIn(ids[2],app.session_state["advisor_plan"]["packages"]["colmar"])
+            self.assertIn(extra,app.session_state["advisor_plan"]["packages"]["colmar"])
             self.assertEqual(app.session_state["explore_packages"],
                              app.session_state["advisor_plan"]["packages"])
 
