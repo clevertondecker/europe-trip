@@ -4,7 +4,7 @@ No UI state, network or LLM dependencies; all operations are pure.
 """
 from __future__ import annotations
 from copy import deepcopy
-from datetime import date
+from datetime import date,timedelta
 from uuid import uuid4
 
 BASES={"mulhouse","strasbourg","metz","nancy"}
@@ -64,8 +64,11 @@ def validate_plan(plan:dict,known_attractions:set[str]|None=None)->None:
         raise ValueError("Visitas flexíveis inválidas")
     seen=set()
     for visit in flexible:
-        if not isinstance(visit,dict) or set(visit)!={
-                "destination_id","stage","attractions","period"}:
+        if not isinstance(visit,dict) or not (
+                set(visit)=={"destination_id","stage","attractions","period"}
+                or (visit.get("stage")=="Itália" and
+                    set(visit)=={"destination_id","stage","attractions","period","exact_date"})
+        ):
             raise ValueError("Formato de visita flexível inválido")
         destination=visit["destination_id"]
         stage=visit["stage"]
@@ -83,6 +86,17 @@ def validate_plan(plan:dict,known_attractions:set[str]|None=None)->None:
             raise ValueError("Destino não pertence à Itália")
         if stage=="França" and destination.startswith("italy_"):
             raise ValueError("Passeio não pertence à França")
+        exact=visit.get("exact_date")
+        allowed_keys={"destination_id","stage","attractions","period"}
+        if exact is not None:
+            if stage!="Itália" or set(visit)!=allowed_keys|{"exact_date"}:
+                raise ValueError("Data flexível incompatível com a etapa")
+            try: chosen_date=date.fromisoformat(exact)
+            except (TypeError,ValueError) as exc:
+                raise ValueError("Data da visita italiana inválida") from exc
+            departure=date.fromisoformat(plan["departure_date"])
+            if not departure<=chosen_date<departure+timedelta(days=plan["italy_days"]):
+                raise ValueError("Data fora da etapa italiana")
         seen.add(destination)
     proposal=plan.get("italy_proposal")
     if proposal is not None:
