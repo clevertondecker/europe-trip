@@ -6,7 +6,7 @@ from pathlib import Path
 import streamlit as st
 import pydeck as pdk
 
-from itinerary_flow_model import italy_starter_preview
+from itinerary_flow_model import italy_starter_preview,destinations as itinerary_destinations
 from planning_session import active_plan,accept_italy_starter
 from attractions_model import load_attractions
 from italy_honeymoon_model import (
@@ -107,25 +107,45 @@ def render_italy_honeymoon()->None:
     col3.metric("Nápoles",str(nights["naples"])+" noites")
     st.caption(str(nights["nights"])+" noites e "+
                str(nights["calendar_days"])+" dias de calendário.")
-    # A proposal is read-only until the user explicitly previews and confirms.
+    # Preview the full scenario, preserving its day-by-day research and
+    # different overnight distribution, without creating actual bookings.
     preview=italy_starter_preview(active_plan(),load_attractions(),chosen)
-    st.caption("A proposta pode iniciar o seu roteiro sem definir datas, "
-               "hotéis, cidade de hospedagem na costa nem reservas.")
+    snapshot=preview["snapshot"]
+    st.caption("Adotar salva o planejamento editorial completo: "+snapshot["label"]+
+               " · "+str(snapshot["nights"])+" noites em "+str(snapshot["days"])+
+               " dias · Base costeira proposta: "+snapshot["coast_base_proposed"].title()+
+               ". A aprovação de hotel, transporte e reservas continua separada.")
+    if extra:
+        st.info("A comparação com uma noite extra é apenas exploratória. "
+                "A adoção abaixo usa os 10 dias / 9 noites da proposta original.")
     if st.button("Usar esta proposta como ponto de partida",
                  key="italy_starter_open"):
         st.session_state["italy_starter_pending"]=chosen
     if st.session_state.get("italy_starter_pending")==chosen:
         with st.container(border=True):
-            st.markdown("**Revisar antes de incluir no meu roteiro**")
+            st.markdown("**Revisar a proposta antes de incluir**")
+            a,b,c=st.columns(3)
+            a.metric("Roma",str(snapshot["rome_nights"])+" noites")
+            b.metric("Costa",str(snapshot["coast_nights"])+" noites")
+            c.metric("Nápoles",str(snapshot["naples_nights"])+" noites")
+            st.caption("Base costeira apenas proposta: "+
+                       snapshot["coast_base_proposed"].title()+
+                       " · Fonte: pesquisa "+snapshot["source_retrieved_at"])
+            st.markdown("**Programa planejado por dia (sem datas reservadas)**")
+            for index,detail in enumerate(snapshot["days_detail"],1):
+                title,place,activities,*_=detail
+                st.caption("Dia "+str(index)+" · "+place+" — "+title+": "+activities)
+            by_id={x["id"]:x["name"] for x in
+                   itinerary_destinations(load_attractions())}
+            st.markdown("**Lugares que serão acrescentados**")
             for dest_id,_,period in preview["to_add"]:
-                st.write("Adicionar "+("Roma" if dest_id=="italy_rome" else
-                                       "Amalfi")+" · "+period)
+                st.caption("• "+by_id[dest_id]+" · "+period)
             if preview["unchanged"]:
-                st.caption("Já escolhidos (serão preservados): "+
-                           ", ".join("Roma" if key=="italy_rome" else "Amalfi"
-                                     for key in preview["unchanged"]))
-            st.warning("Não define hospedagem em Maiori, Minori ou Salerno; "
-                       "não cria reservas ou datas. Escolhas existentes serão mantidas.")
+                st.caption("Já escolhidos e mantidos: "+
+                           ", ".join(by_id[x] for x in preview["unchanged"]))
+            st.warning("Os dias e hotéis são **propostas**, não reservas. "
+                       "Você continuará podendo ajustar lugares e períodos. "
+                       "Nenhuma seleção anterior será apagada.")
             a,b=st.columns(2)
             with a:
                 if st.button("Confirmar inclusão",key="italy_starter_confirm",
@@ -133,7 +153,8 @@ def render_italy_honeymoon()->None:
                     accept_italy_starter(chosen,confirmed=True)
                     st.session_state.pop("italy_starter_pending",None)
                     st.session_state["flow_notice"]=(
-                        "Proposta da Itália incluída. Edite os períodos em Meu roteiro.")
+                        "Proposta "+snapshot["label"]+
+                        " incluída, com distribuição de noites e programa por dia.")
                     st.rerun()
             with b:
                 if st.button("Cancelar",key="italy_starter_cancel"):
