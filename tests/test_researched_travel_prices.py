@@ -118,7 +118,7 @@ class ResearchPriceTests(unittest.TestCase):
 class ResearchPriceUITests(unittest.TestCase):
     def test_guide_shows_researched_prices_without_applying_to_official_plan(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=100).run()
-        app.radio(key="main_navigation").set_value("Roteiro").run()
+        app.radio(key="ux_area").set_value("Meu roteiro").run()
         app.segmented_control(key="itinerary_section").set_value("Descobrir").run()
         app.checkbox(key="discovery_guide_toggle_colmar").check().run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
