@@ -24,6 +24,8 @@ from attractions_ui import render_explorer
 from travel_advisor_ui import render_advisor, _recover_saved_plan, _secure_save, _owner_signed_in
 from travel_dashboard_ui import render_trip_dashboard
 from itinerary_flow_ui import render_itinerary_workbench
+from planning_context_ui import (render_context,render_home_continue,
+                                 render_breadcrumb,return_to_edit,show_settings)
 from base_explorer_ui import render_base_explorer, _comparison as render_route_comparison, _split_stay as render_split_stay
 from base_explorer_model import load_exploration
 from base_change_ui import render_base_change
@@ -360,140 +362,66 @@ with st.sidebar:
     st.link_button("Abrir pasta no Drive", data["sources"]["project_folder"], use_container_width=True)
     st.info("Painel em desenvolvimento. Nenhum voo, imóvel ou passeio foi reservado.")
 
-# Keep simulation context in non-widget keys so the dashboard and itinerary
-# can hide configuration controls without losing the user's exploration.
+# One configuration/comparison entrypoint. The TripPlan is the only official
+# state; exploratory controls inside the shared panel are never official edits.
 official_id=active_plan()["base_city"]
-if "ux_mode_value" not in st.session_state:
-    st.session_state["ux_mode_value"]=st.session_state.get("ux_mode","Oficial")
-if "ux_mode" not in st.session_state:
-    st.session_state["ux_mode"]=st.session_state["ux_mode_value"]
-if "ux_days_value" not in st.session_state:
-    initial_days=st.session_state.get(
-        "ux_days",st.session_state.get("unified_stay",
-        active_plan()["total_days"]-active_plan()["italy_days"]))
-    st.session_state["ux_days_value"]=max(40,min(80,int(initial_days)))
-if "ux_days" not in st.session_state:
-    st.session_state["ux_days"]=st.session_state["ux_days_value"]
-if "unified_stay" not in st.session_state:
-    st.session_state["unified_stay"]=st.session_state["ux_days_value"]
-if st.session_state["ux_mode_value"]=="Oficial" and (
-        st.session_state.get("scenario_base_selected")!=official_id):
-    # An exploratory city change elsewhere is stronger than stale display mode.
-    st.session_state["ux_mode_value"]="Simulação"
-    st.session_state["ux_mode"]="Simulação"
-
 ux_area=st.session_state["ux_area"]
 ux_section=st.session_state["ux_section"]
-if ux_area in ("Explorar","Orçamento"):
-    # Full configuration is relevant only when evaluating alternatives or costs.
-    with st.container(border=True):
-        st.markdown("**Configurar simulação**")
-        mode_col,base_col,days_col=st.columns([1.2,1.5,.85],gap="small")
-        with mode_col:
-            st.segmented_control("Visualizar",["Oficial","Simulação"],
-                                 key="ux_mode",on_change=_ux_mode_changed,
-                                 selection_mode="single")
-        with base_col:
-            st.selectbox("Cidade-base",list(_base_details),
-                         key="scenario_sidebar",on_change=_select_scenario_sidebar,
-                         disabled=st.session_state["ux_mode_value"]=="Oficial",
-                         format_func=lambda city:_base_details[city]["name"]+
-                                                " · "+_base_details[city]["country"])
-        with days_col:
-            st.number_input("Dias na França",min_value=40,max_value=80,
-                            key="ux_days",on_change=_ux_days_changed,
-                            disabled=st.session_state["ux_mode_value"]=="Oficial")
-        state_label=("Roteiro oficial" if st.session_state["ux_mode_value"]=="Oficial"
-                     else "Simulação independente")
-        st.caption(state_label+" · Base do roteiro aprovado: "+
-                   _base_details[official_id]["name"]+
-                   " · Nenhuma escolha exploratória modifica o TripPlan automaticamente.")
-else:
-    # Home and itinerary are views of the journey, not a configuration screen.
-    simulation_active=st.session_state["ux_mode_value"]=="Simulação"
-    context_city=(st.session_state["scenario_base_selected"]
-                  if simulation_active else official_id)
-    with st.container():
-        summary_col,action_col=st.columns([4.5,1.2],gap="small",
-                                          vertical_alignment="center")
-        with summary_col:
-            if simulation_active:
-                st.caption("**Simulação ativa** · "+
-                           _base_details[context_city]["name"]+
-                           " · "+str(st.session_state["ux_days_value"])+
-                           " dias na França · Roteiro oficial preservado")
-            else:
-                st.caption("**Roteiro oficial** · Base em estudo: "+
-                           _base_details[official_id]["name"]+
-                           " · "+str(active_plan()["total_days"]-active_plan()["italy_days"])+
-                           " dias na França · Sem reservas confirmadas")
-        with action_col:
-            if simulation_active:
-                st.button("Voltar ao oficial",key="ux_return_official",
-                          on_click=_ux_return_to_official,use_container_width=True)
+render_context(active_plan(),area=ux_area)
+if (ux_area in ("Explorar","Orçamento") and
+    st.session_state.get("flow_return_stage")):
+    render_breadcrumb(stage=st.session_state.get("flow_return_stage"),
+                      city=st.session_state.get("flow_return_city"),
+                      show_return=True)
 
-# On the home page, avoid the extra tab row and the giant next-step control.
-# Pending research remains reachable through dashboard buttons and legacy links.
+# Three itinerary activities. Specialist tools stay available contextually.
 if ux_area!="Minha viagem" or ux_section!="Resumo":
-    st.segmented_control("Área: "+ux_area,list(UX_SECTIONS[ux_area]),
+    st.segmented_control("Atividade" if ux_area=="Meu roteiro" else "Área: "+ux_area,
+                         list(UX_SECTIONS[ux_area]),
                          key="ux_section",on_change=_ux_section_changed,
                          selection_mode="single")
-if ux_area=="Explorar" and ux_section=="Cidades-base":
+if ux_area=="Meu roteiro" and ux_section=="Organizar viagem":
+    st.segmented_control("Como organizar?",
+                         ["Por período ou data","Calendário completo"],
+                         key="ux_organize_view",on_change=_ux_aux_changed)
+elif ux_area=="Meu roteiro" and ux_section=="Melhorar meu roteiro":
+    st.selectbox("Escolha uma ferramenta de apoio",[
+        "Descobrir","Simular roteiros","Itália",
+        "Temporada europeia","Calendário completo","Guias especializados"],
+        key="ux_improve_view",on_change=_ux_aux_changed)
+    if st.session_state.get("ux_improve_view")=="Guias especializados":
+        st.selectbox("Qual guia?",list(UX_GUIDES),
+                     key="ux_guide_view",on_change=_ux_aux_changed)
+elif ux_area=="Explorar" and ux_section=="Cidades-base":
     st.segmented_control("Conteúdo da cidade-base",
                          ["Visão da cidade","Pesquisa ampliada"],
-                         key="ux_city_view",on_change=_ux_aux_changed,
-                         selection_mode="single")
+                         key="ux_city_view",on_change=_ux_aux_changed)
 elif ux_area=="Orçamento" and ux_section=="Simulações":
     st.segmented_control("Ferramenta de simulação",
                          ["Simulação geral","Consultor de passeios"],
-                         key="ux_budget_view",on_change=_ux_aux_changed,
-                         selection_mode="single")
-elif ux_area=="Meu roteiro" and ux_section=="França":
-    st.segmented_control("França: o que planejar?",
-                         ["Meus passeios","França e escapadas","Transportes e custos"],
-                         key="ux_france_view",on_change=_ux_aux_changed,
-                         selection_mode="single")
-elif ux_area=="Meu roteiro" and ux_section=="Sugestões":
-    st.segmented_control("Como deseja avançar?",list(SUGGESTION_OPTIONS),
-                         key="ux_suggestion",on_change=_ux_aux_changed,
-                         selection_mode="single")
-    if st.session_state.get("ux_suggestion")=="Guias especializados":
-        st.selectbox("Qual guia deseja consultar?",list(UX_GUIDES),
-                     key="ux_guide_view",on_change=_ux_aux_changed)
+                         key="ux_budget_view",on_change=_ux_aux_changed)
 page,itinerary_target,guide_target,base_target=ux_route(
     ux_area,ux_section,
-    research=st.session_state.get("ux_research","Pesquisa ampliada"),
-    suggestion=st.session_state.get("ux_suggestion","Descobrir"),
+    research=("Calendário completo" if
+              st.session_state.get("ux_organize_view")=="Calendário completo"
+              and (ux_area,ux_section)==("Meu roteiro","Organizar viagem")
+              else st.session_state.get("ux_research","Pesquisa ampliada")),
+    suggestion=(st.session_state.get("ux_improve_view","Descobrir") if
+                (ux_area,ux_section)==("Meu roteiro","Melhorar meu roteiro")
+                else st.session_state.get("ux_suggestion","Descobrir")),
     france=st.session_state.get("ux_france_view","Meus passeios"),
     city_view=st.session_state.get("ux_city_view","Visão da cidade"),
     budget_view=st.session_state.get("ux_budget_view","Simulação geral"),
     guide_view=st.session_state.get("ux_guide_view","Itália e Costa Amalfitana"))
 if ux_area!="Minha viagem":
     st.caption(UX_DESCRIPTIONS.get((ux_area,ux_section),"Continue o planejamento."))
-# Navigation between tasks stays contextual, rather than a wall of controls.
-next_steps={
-    ("Explorar","Cidades-base"):("Comparar impactos","Explorar","Comparar"),
-    ("Explorar","Comparar"):("Simular os custos","Orçamento","Simulações"),
-    ("Explorar","Passeios"):("Planejar passeios na França","Meu roteiro","França"),
-    ("Explorar","Mapa"):("Pesquisar cidades","Explorar","Cidades-base"),
-    ("Meu roteiro","Itália"):("Planejar a França","Meu roteiro","França"),
-    ("Meu roteiro","França"):("Organizar calendário","Meu roteiro","Calendário"),
-    ("Meu roteiro","Calendário"):("Revisar orçamento","Orçamento","Resumo financeiro"),
-    ("Meu roteiro","Sugestões"):("Ver passeios da França","Meu roteiro","França"),
-    ("Orçamento","Resumo financeiro"):("Criar simulação","Orçamento","Simulações"),
-    ("Orçamento","Simulações"):("Ver detalhamento","Orçamento","Detalhamento"),
-    ("Orçamento","Detalhamento"):("Comparar cidades","Explorar","Comparar"),
-}
-suggestion=next_steps.get((ux_area,ux_section))
-if suggestion:
-    st.button("Próximo passo: "+suggestion[0]+" →",key="ux_next_step",
-              on_click=_ux_next_task,args=(suggestion[1],suggestion[2]))
-if ux_area!="Minha viagem" and st.session_state.get("scenario_base_selected")!=official_id:
-    st.caption("Cidade hipotética em análise: "+
-               _base_details[st.session_state["scenario_base_selected"]]["name"]+
-               ". Passeios, calendário e decisões oficiais permanecem separados.")
-
+if (ux_area=="Meu roteiro" and ux_section=="Melhorar meu roteiro" and
+    st.session_state.get("flow_return_stage")):
+    render_breadcrumb(stage=st.session_state.get("flow_return_stage"),
+                      city=st.session_state.get("flow_return_city"),
+                      show_return=True)
 if page == "Visão geral":
+    render_home_continue(active_plan())
     st.markdown("""<div class="home-hero" role="region" aria-label="Apresentação da viagem">
       <div class="home-hero__content"><div class="home-hero__eyebrow">ITÁLIA → FRANÇA · 2027</div>
       <h1>Uma viagem para viver,<br>não só visitar.</h1>
@@ -1220,18 +1148,16 @@ elif page == "Roteiro":
         "Cidades-base":"Onde vale a pena ficar?",
         "Passeios e destinos":"O que podemos conhecer?",
         "Mais pesquisas":"Detalhes das pesquisas",
-        "Visão geral":"Nossa viagem, etapa por etapa",
-        "Itália":"Nossa lua de mel na Itália",
-        "França":"Nossa estadia na França",
-        "Calendário":"Organizar os dias da viagem",
-        "Sugestões":"Ideias para melhorar o roteiro",
+        "Meu planejamento":"Meu planejamento",
+        "Organizar viagem":"Organizar nossa viagem",
+        "Melhorar meu roteiro":"Melhorar nosso roteiro",
     }.get(ux_section,"Meu roteiro")
     st.markdown("<div class='page-eyebrow'>NOSSA EUROPA · "+escape(ux_area.upper())+"</div>"
                 "<div class='page-title'>"+escape(task_title)+"</div>"
                 "<div class='page-subtitle'>"+escape(
                     UX_DESCRIPTIONS.get((ux_area,ux_section),"Planeje sua viagem."))+
                 "</div>",unsafe_allow_html=True)
-    if ux_section=="Visão geral":
+    if ux_section=="Meu planejamento":
         c1,c2,c3,c4=st.columns(4,gap="small")
         trip_metrics=[
             ("Casamento","04/09/2027","Data fixa"),
@@ -1282,6 +1208,8 @@ elif page == "Roteiro":
         map_view(markers,height=height,show_labels=False,zoom=zoom,center=center)
 
     if itinerary_section == "Visão geral":
+        if ux_section=="Organizar viagem":
+            st.session_state["flow_organize_open"]=True
         render_itinerary_workbench(
             active_plan(),load_attractions(),data,
             sync_sources["finance"]["status"]=="live",
