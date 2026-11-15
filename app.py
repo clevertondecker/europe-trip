@@ -1753,10 +1753,14 @@ elif page == "Pesquisas & decisões":
     st.info("As pendências oficiais têm apenas status **pendente** ou **concluído**. "
             "Não inventei uma coluna 'Em andamento': será possível acrescentá-la "
             "quando a fonte registrar esse status.")
-    view=st.segmented_control("Navegar por",["Fila por prioridade","Decisões oficiais","Fontes & atualização"],
-                              default="Fila por prioridade",key="tasks_view",
-                              selection_mode="single",label_visibility="collapsed")
-    if view is None: view="Fila por prioridade"
+    if ux_area=="Minha viagem" and ux_section in ("Pendências","Decisões"):
+        view="Fila por prioridade" if ux_section=="Pendências" else "Decisões oficiais"
+    else:
+        view=st.segmented_control("Navegar por",
+            ["Fila por prioridade","Decisões oficiais","Fontes & atualização"],
+            default="Fila por prioridade",key="tasks_view",
+            selection_mode="single",label_visibility="collapsed")
+        if view is None: view="Fila por prioridade"
     if view=="Fila por prioridade":
         filters=st.columns([1,1],gap="medium")
         with filters[0]:
