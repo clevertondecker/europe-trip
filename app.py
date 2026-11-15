@@ -15,6 +15,7 @@ from city_market import load_market, observed_rent_summary, example_train_couple
 from city_research_round2 import load_round2
 from finance_lifestyle import FRENCH_BUDGET, audit_subtotals, lifestyle_outcome
 from itinerary_planner import load_itinerary, select_outings, basket_totals, visible_map_places
+from italy_honeymoon_ui import render_italy_honeymoon
 from catalog import build_catalog, filter_catalog
 from unified_budget import resolve_french_budget, scenario_total
 from calendar_model import calendar_plan
@@ -906,7 +907,7 @@ elif page == "Roteiro":
                 "Férias iniciais de 20–30 dias; depois trabalho remoto, sujeito a validação de regras.</div>",
                 unsafe_allow_html=True)
 
-    sections=["Visão geral","Meus passeios","Explorar bases","Descobrir","Orçamento","Calendário","Simular roteiros","Guias e pesquisas"]
+    sections=["Visão geral","Itália","Meus passeios","Explorar bases","Descobrir","Orçamento","Calendário","Simular roteiros","Guias e pesquisas"]
     itinerary_section=st.segmented_control("Área do roteiro",sections,default="Meus passeios",
                                            selection_mode="single",key="itinerary_section",
                                            label_visibility="collapsed")
@@ -965,6 +966,9 @@ elif page == "Roteiro":
                 itinerary_map("france",5.6,(48.05,7.1),290)
             st.caption("Mapas de pesquisa, não trajetos contratados.")
 
+    elif itinerary_section == "Itália":
+        render_italy_honeymoon()
+
     elif itinerary_section == "Explorar atrações":
         render_explorer(data,sync_sources,map_view)
 
@@ -1003,6 +1007,8 @@ elif page == "Roteiro":
                     "ela não inclui transporte até o ferry nem eventuais mudanças de rota.</p></div>",
                     unsafe_allow_html=True)
         st.link_button("Horários Travelmar 2026",itinerary["sources"]["travelmar_schedule"])
+        st.markdown("#### Revisão crítica e alternativas de 10 dias")
+        render_italy_honeymoon()
 
     elif itinerary_section == "França e escapadas":
         st.markdown("<div class='page-section'>Passeios a partir da nossa futura base</div>",

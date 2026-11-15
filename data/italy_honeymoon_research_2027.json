@@ -1,0 +1,657 @@
+{
+  "schema_version": 1,
+  "retrieved_at": "2026-11-15",
+  "scope": "research_only_no_canonical_tripplan_update",
+  "wedding_date": "2027-09-04",
+  "budget_previews_brl": {
+    "60k": 12545,
+    "70k": 14636
+  },
+  "budget_policy": "Valores originais da categoria Itália para casal, sem passagem aérea já provisionada no bloco Passagens. Não duplicar voos, seguro ou reserva emergência.",
+  "sources": {
+    "colosseum": "https://colosseo.it/en/tickets/colosseum-roman-forum-palatine/",
+    "colosseum_hours": "https://colosseo.it/en/opening-times-and-tickets/",
+    "vatican": "https://www.museivaticani.va/content/museivaticani/en/organizza-visita/tariffe-e-biglietti.html",
+    "vatican_hours": "https://www.museivaticani.va/content/museivaticani/en/info/orari-musei-vaticani.html",
+    "pantheon": "https://direzionemuseiroma.cultura.gov.it/en/pantheon/",
+    "leonardo": "https://www.trenitalia.com/en/services/leonardo-express.html",
+    "italo": "https://www.italotreno.com/en/destinations-timetable/rome-salerno-tickets",
+    "travelmar": "https://www.travelmar.it/_download/tariffe-2026.pdf",
+    "travelmar_status": "https://www.travelmar.it/en/timetable",
+    "sita": "https://sitasudtrasporti.it/campania/orari/5120-amalfi-maiori-salerno/",
+    "sita_nov": "https://sitasudtrasporti.it/campania/avvisi/orari-costiera-sita-dal-02-11-2026/",
+    "capri_amalfi": "https://www.nlg.it/en/routes/line-amalfi-capri/",
+    "capri_maiori": "https://www.nlg.it/tratte/capri-maiori/",
+    "pompeii": "https://pompeiisites.org/en/visiting-info/timetables-and-tickets/",
+    "alibus": "https://www.anm.it/s/alibus?language=it",
+    "shuttle": "https://shuttlebus.pintourbus.com/"
+  },
+  "prices": [
+    {
+      "id": "fco_termini",
+      "name": "Aeroporto Fiumicino → Roma Termini",
+      "eur_per_person": 14,
+      "unit": "person_oneway",
+      "category": "rail",
+      "operator_minutes": 32,
+      "status": "operator_published_2026",
+      "source_url": "https://www.trenitalia.com/en/services/leonardo-express.html",
+      "retrieved_at": "2026-11-15",
+      "valid_for_2027": false,
+      "notes": "Leonardo Express €14/pessoa; centro/hotel depois do trem não incluídos."
+    },
+    {
+      "id": "colosseum_forum",
+      "name": "Coliseu + Fórum + Palatino",
+      "eur_per_person": 18,
+      "unit": "person_ticket",
+      "category": "admission",
+      "operator_minutes": null,
+      "status": "operator_published_2026",
+      "source_url": "https://colosseo.it/en/tickets/colosseum-roman-forum-palatine/",
+      "retrieved_at": "2026-11-15",
+      "valid_for_2027": false,
+      "notes": "Entrada geral. Agendamento de horário para Coliseu; compra abre normalmente 30 dias antes."
+    },
+    {
+      "id": "vatican_online",
+      "name": "Museus Vaticanos + Capela Sistina (reserva online)",
+      "eur_per_person": 25,
+      "unit": "person_ticket",
+      "category": "admission",
+      "operator_minutes": null,
+      "status": "operator_published_2026",
+      "source_url": "https://www.museivaticani.va/content/museivaticani/en/organizza-visita/tariffe-e-biglietti.html",
+      "retrieved_at": "2026-11-15",
+      "valid_for_2027": false,
+      "notes": "€20 entrada + €5 reserva online; horário fechado muitos domingos; Basílica não incluída."
+    },
+    {
+      "id": "pantheon",
+      "name": "Panteão",
+      "eur_per_person": 7,
+      "unit": "person_ticket",
+      "category": "admission",
+      "operator_minutes": null,
+      "status": "operator_published_2026",
+      "source_url": "https://direzionemuseiroma.cultura.gov.it/en/pantheon/",
+      "retrieved_at": "2026-11-15",
+      "valid_for_2027": false,
+      "notes": "Tarifa €7 desde julho de 2026; confirmar 2027 e serviços religiosos."
+    },
+    {
+      "id": "rome_salerno",
+      "name": "Roma → Salerno, trem de alta velocidade",
+      "eur_per_person": 14.9,
+      "unit": "person_oneway",
+      "category": "rail",
+      "operator_minutes": 99,
+      "status": "advertised_from_2026",
+      "source_url": "https://www.italotreno.com/en/destinations-timetable/rome-salerno-tickets",
+      "retrieved_at": "2026-11-15",
+      "valid_for_2027": false,
+      "notes": "Preço desde €14,90 por pessoa, único trecho; duração Italo 1h39 em serviço publicado; não inclui hotel nem estação."
+    },
+    {
+      "id": "salerno_maiori",
+      "name": "Salerno → Maiori por ferry",
+      "eur_per_person": 10,
+      "unit": "person_oneway",
+      "category": "ferry",
+      "operator_minutes": 30,
+      "status": "operator_published_2026",
+      "source_url": "https://www.travelmar.it/_download/tariffe-2026.pdf",
+      "retrieved_at": "2026-11-15",
+      "valid_for_2027": false,
+      "notes": "Apenas navegação de 2026, não inclui espera/bagagem/porto; ferries podem ser cancelados."
+    },
+    {
+      "id": "salerno_amalfi_rt",
+      "name": "Salerno ↔ Amalfi ferry",
+      "eur_per_person": 12,
+      "unit": "person_each_way",
+      "category": "ferry",
+      "operator_minutes": 35,
+      "status": "operator_published_2026",
+      "source_url": "https://www.travelmar.it/_download/tariffe-2026.pdf",
+      "retrieved_at": "2026-11-15",
+      "valid_for_2027": false,
+      "notes": "Tarifa por trecho, modelo de ida+volta depende de ambas as viagens em 2027."
+    },
+    {
+      "id": "salerno_positano_rt",
+      "name": "Salerno ↔ Positano ferry",
+      "eur_per_person": 17,
+      "unit": "person_each_way",
+      "category": "ferry",
+      "operator_minutes": 70,
+      "status": "operator_published_2026",
+      "source_url": "https://www.travelmar.it/_download/tariffe-2026.pdf",
+      "retrieved_at": "2026-11-15",
+      "valid_for_2027": false,
+      "notes": "Tarifa por trecho; 70 min referem-se à navegação em serviço publicado."
+    },
+    {
+      "id": "maiori_amalfi_rt",
+      "name": "Maiori ↔ Amalfi ferry",
+      "eur_per_person": 5,
+      "unit": "person_each_way",
+      "category": "ferry",
+      "operator_minutes": 15,
+      "status": "operator_published_2026",
+      "source_url": "https://www.travelmar.it/_download/tariffe-2026.pdf",
+      "retrieved_at": "2026-11-15",
+      "valid_for_2027": false,
+      "notes": "15 min apenas travessia; atracar/esperar e caminhada pendentes."
+    },
+    {
+      "id": "maiori_positano_rt",
+      "name": "Maiori ↔ Positano ferry",
+      "eur_per_person": 15,
+      "unit": "person_each_way",
+      "category": "ferry",
+      "operator_minutes": null,
+      "status": "operator_published_2026",
+      "source_url": "https://www.travelmar.it/_download/tariffe-2026.pdf",
+      "retrieved_at": "2026-11-15",
+      "valid_for_2027": false,
+      "notes": "Pode exigir conexão/troca de embarcação em Amalfi; nunca usar 15 min como duração até Positano."
+    },
+    {
+      "id": "maiori_minori_rt",
+      "name": "Maiori ↔ Minori ferry",
+      "eur_per_person": 3,
+      "unit": "person_each_way",
+      "category": "ferry",
+      "operator_minutes": 5,
+      "status": "operator_published_2026",
+      "source_url": "https://www.travelmar.it/_download/tariffe-2026.pdf",
+      "retrieved_at": "2026-11-15",
+      "valid_for_2027": false,
+      "notes": "Em muitas condições dá para caminhar, com custo de passeio local desconhecido."
+    },
+    {
+      "id": "amalfi_capri_rt",
+      "name": "Amalfi ↔ Capri, NLG 2026",
+      "eur_per_person": 48,
+      "unit": "person_roundtrip",
+      "category": "ferry",
+      "operator_minutes": null,
+      "status": "operator_published_2026",
+      "source_url": "https://www.nlg.it/en/routes/line-amalfi-capri/",
+      "retrieved_at": "2026-11-15",
+      "valid_for_2027": false,
+      "notes": "€48 por adulto ida+volta + contribuição de desembarque €5/pessoa de abril a outubro; horários publicados 01/04–03/11/2026."
+    },
+    {
+      "id": "maiori_capri_rt",
+      "name": "Maiori ↔ Capri, NLG 2026",
+      "eur_per_person": 56,
+      "unit": "person_roundtrip",
+      "category": "ferry",
+      "operator_minutes": null,
+      "status": "operator_published_2026",
+      "source_url": "https://www.nlg.it/tratte/capri-maiori/",
+      "retrieved_at": "2026-11-15",
+      "valid_for_2027": false,
+      "notes": "€56 por adulto ida+volta + contribuição de desembarque €5/pessoa abril–outubro; serviço publicado só até 30/09/2026; conexão em Amalfi."
+    },
+    {
+      "id": "capri_landing",
+      "name": "Contribuição de desembarque Capri (abr–out)",
+      "eur_per_person": 5,
+      "unit": "person_ticket",
+      "category": "tax",
+      "operator_minutes": null,
+      "status": "operator_published_2026",
+      "source_url": "https://www.nlg.it/en/routes/line-amalfi-capri/",
+      "retrieved_at": "2026-11-15",
+      "valid_for_2027": false,
+      "notes": "Depende da época e vigência, €5 por pessoa entre abril e outubro de 2026."
+    },
+    {
+      "id": "pompeii_express",
+      "name": "Pompeia Express: cidade arqueológica",
+      "eur_per_person": 20,
+      "unit": "person_ticket",
+      "category": "admission",
+      "operator_minutes": null,
+      "status": "operator_published_2026",
+      "source_url": "https://pompeiisites.org/en/visiting-info/timetables-and-tickets/",
+      "retrieved_at": "2026-11-15",
+      "valid_for_2027": false,
+      "notes": "Ingresso oficial €20 adulto em 2026; viagem e guia separados."
+    },
+    {
+      "id": "naples_alibus",
+      "name": "Alibus Nápoles estação/porto → aeroporto",
+      "eur_per_person": 5,
+      "unit": "person_oneway",
+      "category": "bus",
+      "operator_minutes": 15,
+      "status": "operator_published_2026",
+      "source_url": "https://www.anm.it/s/alibus?language=it",
+      "retrieved_at": "2026-11-15",
+      "valid_for_2027": false,
+      "notes": "€5/pessoa; 15 min aeroporto–estação indicados pela ANM, trânsito pode variar."
+    },
+    {
+      "id": "salerno_minori",
+      "name": "Salerno → Minori por ferry",
+      "eur_per_person": 10,
+      "unit": "person_oneway",
+      "category": "ferry",
+      "operator_minutes": null,
+      "status": "operator_published_2026",
+      "source_url": "https://www.travelmar.it/_download/tariffe-2026.pdf",
+      "retrieved_at": "2026-11-15",
+      "valid_for_2027": false,
+      "notes": "Ferry €10 por trecho/pessoa em 2026. Tempo navegação completo e frequência da data pendentes."
+    },
+    {
+      "id": "minori_amalfi_rt",
+      "name": "Minori ↔ Amalfi ferry",
+      "eur_per_person": 5,
+      "unit": "person_each_way",
+      "category": "ferry",
+      "operator_minutes": null,
+      "status": "operator_published_2026",
+      "source_url": "https://www.travelmar.it/_download/tariffe-2026.pdf",
+      "retrieved_at": "2026-11-15",
+      "valid_for_2027": false,
+      "notes": "Tarifa 2026 de Minori–Amalfi €5/pessoa/trecho; horários e volta não verificados."
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "balanced",
+      "label": "Equilibrado",
+      "recommended": true,
+      "days": 10,
+      "nights": 9,
+      "rome_nights": 4,
+      "coast_nights": 5,
+      "naples_nights": 0,
+      "coast_base": "maiori",
+      "pros": [
+        "4 noites em Roma cobrem os clássicos sem correr",
+        "Praia e descanso entre passeios",
+        "Uma única hospedagem na Costa Amalfitana"
+      ],
+      "cons": [
+        "Maiori exige ônibus/ferry após o trem de Roma",
+        "Saída para aeroporto de Nápoles pode ser arriscada se voo cedo"
+      ],
+      "key_paid_refs": [
+        "fco_termini",
+        "colosseum_forum",
+        "vatican_online",
+        "pantheon",
+        "rome_salerno",
+        "salerno_maiori",
+        "maiori_amalfi_rt",
+        "maiori_positano_rt"
+      ],
+      "days_detail": [
+        [
+          "Chegada",
+          "Roma",
+          "Chegada FCO, check-in, caminhada leve e jantar perto do hotel",
+          "low",
+          "leonardo",
+          "flex"
+        ],
+        [
+          "Roma antiga",
+          "Roma",
+          "Coliseu, Fórum e Palatino com pausas; sem tentar incluir Vaticano",
+          "high",
+          "walk",
+          "reservation"
+        ],
+        [
+          "Vaticano",
+          "Roma",
+          "Museus Vaticanos + Capela Sistina; Basílica de São Pedro se houver disposição",
+          "high",
+          "metro_walk",
+          "reservation"
+        ],
+        [
+          "Centro histórico",
+          "Roma",
+          "Panteão, Piazza Navona e Trevi; fim do dia em Trastevere",
+          "medium",
+          "walk",
+          "flex"
+        ],
+        [
+          "Troca de base",
+          "Maiori",
+          "Trem Roma–Salerno, almoço em Salerno e transferência planejada com plano B por ônibus",
+          "medium",
+          "rail_bus_or_ferry",
+          "weather"
+        ],
+        [
+          "Praia e Minori",
+          "Maiori",
+          "Praia de Maiori, passeio tranquilo até Minori e jantar sem horários rígidos",
+          "low",
+          "walk",
+          "flex"
+        ],
+        [
+          "Amalfi e Ravello",
+          "Maiori",
+          "Ferry ou ônibus até Amalfi; ônibus para Ravello; vila/mirante e retorno",
+          "medium",
+          "ferry_bus",
+          "weather"
+        ],
+        [
+          "Positano",
+          "Maiori",
+          "Passeio de meio a um dia, priorizando vista, praia e restaurante",
+          "medium",
+          "ferry_or_bus",
+          "weather"
+        ],
+        [
+          "Dia flexível",
+          "Maiori",
+          "Descanso na praia; Capri somente se mar, tarifas e volta permitirem",
+          "low",
+          "optional_ferry",
+          "flex"
+        ],
+        [
+          "Saída da Itália",
+          "Aeroporto Nápoles",
+          "Transfer com margem para check-in; não depender exclusivamente de ferry",
+          "medium",
+          "road_or_bus",
+          "flight"
+        ]
+      ]
+    },
+    {
+      "id": "economy",
+      "label": "Econômico e logístico",
+      "recommended": false,
+      "days": 10,
+      "nights": 9,
+      "rome_nights": 4,
+      "coast_nights": 4,
+      "naples_nights": 1,
+      "coast_base": "salerno",
+      "pros": [
+        "Acesso direto ao trem em Salerno facilita chegada e saída",
+        "Última noite em Nápoles reduz exposição ao trajeto da costa no dia do voo",
+        "Ferries curtos podem ficar como opcionais"
+      ],
+      "cons": [
+        "Menos noites à beira-mar",
+        "Terceiro hotel e nova mudança com malas"
+      ],
+      "key_paid_refs": [
+        "fco_termini",
+        "colosseum_forum",
+        "vatican_online",
+        "pantheon",
+        "rome_salerno",
+        "salerno_amalfi_rt",
+        "naples_alibus"
+      ],
+      "days_detail": [
+        [
+          "Chegada",
+          "Roma",
+          "Descanso e jantar próximo ao hotel",
+          "low",
+          "leonardo",
+          "flex"
+        ],
+        [
+          "Roma antiga",
+          "Roma",
+          "Coliseu, Fórum, Palatino",
+          "high",
+          "walk",
+          "reservation"
+        ],
+        [
+          "Vaticano",
+          "Roma",
+          "Museus e Capela Sistina; São Pedro conforme horário",
+          "high",
+          "metro_walk",
+          "reservation"
+        ],
+        [
+          "Roma a pé",
+          "Roma",
+          "Panteão, Navona, Trevi, Trastevere",
+          "medium",
+          "walk",
+          "flex"
+        ],
+        [
+          "Chegada à costa",
+          "Salerno",
+          "Trem direto Roma–Salerno e passeio no lungomare",
+          "low",
+          "rail",
+          "flex"
+        ],
+        [
+          "Amalfi",
+          "Salerno",
+          "Ferry Salerno–Amalfi, centro histórico e descanso",
+          "medium",
+          "ferry_or_bus",
+          "weather"
+        ],
+        [
+          "Costa com calma",
+          "Salerno",
+          "Maiori/Minori ou praia sem corrida entre vilas",
+          "low",
+          "ferry_or_bus",
+          "flex"
+        ],
+        [
+          "Dia de escolha",
+          "Salerno",
+          "Pompeia pela malha regional OU Positano, não ambos",
+          "medium",
+          "train_or_ferry",
+          "flex"
+        ],
+        [
+          "Nápoles",
+          "Nápoles",
+          "Transfer de Salerno, check-in e jantar em Nápoles; bagagens no hotel",
+          "medium",
+          "rail",
+          "logistics"
+        ],
+        [
+          "Saída",
+          "Aeroporto Nápoles",
+          "Alibus ou transfer do hotel com reserva de margem",
+          "low",
+          "alibus",
+          "flight"
+        ]
+      ]
+    },
+    {
+      "id": "experience",
+      "label": "Lua de mel e experiência",
+      "recommended": false,
+      "days": 10,
+      "nights": 9,
+      "rome_nights": 4,
+      "coast_nights": 5,
+      "naples_nights": 0,
+      "coast_base": "minori",
+      "pros": [
+        "Ambiente mais intimista em Minori",
+        "Cozinha local, praia e passeios de baixa intensidade",
+        "Uma hospedagem na costa, sem troca intermediária"
+      ],
+      "cons": [
+        "Minori ainda exige conexão desde Salerno",
+        "Hospedagem adequada e retorno ao aeroporto precisam de cotação"
+      ],
+      "key_paid_refs": [
+        "fco_termini",
+        "colosseum_forum",
+        "vatican_online",
+        "pantheon",
+        "rome_salerno",
+        "salerno_minori",
+        "minori_amalfi_rt"
+      ],
+      "days_detail": [
+        [
+          "Chegada",
+          "Roma",
+          "Acomodação, jantar a dois e caminhada leve",
+          "low",
+          "leonardo",
+          "flex"
+        ],
+        [
+          "Roma clássica",
+          "Roma",
+          "Coliseu, Fórum, Palatino em ritmo confortável",
+          "high",
+          "walk",
+          "reservation"
+        ],
+        [
+          "Vaticano",
+          "Roma",
+          "Museus, Capela Sistina e São Pedro com pausas",
+          "high",
+          "metro_walk",
+          "reservation"
+        ],
+        [
+          "Roma romântica",
+          "Roma",
+          "Panteão, bairro histórico e jantar em Trastevere",
+          "medium",
+          "walk",
+          "flex"
+        ],
+        [
+          "Transfer para Minori",
+          "Minori",
+          "Roma–Salerno e traslado terrestre ou ferry até Minori",
+          "medium",
+          "rail_bus_or_ferry",
+          "weather"
+        ],
+        [
+          "Praia e gastronomia",
+          "Minori",
+          "Dia livre entre Minori e Maiori, jantar sem pressa",
+          "low",
+          "walk",
+          "flex"
+        ],
+        [
+          "Ravello",
+          "Minori",
+          "Amalfi e Ravello: jardins e mirante, ritmo de meio período longo",
+          "medium",
+          "bus_or_ferry",
+          "weather"
+        ],
+        [
+          "Positano",
+          "Minori",
+          "Passeio de casal com praia e restaurante, retorno antes de escurecer",
+          "medium",
+          "bus_or_ferry",
+          "weather"
+        ],
+        [
+          "Dia de verdadeiramente descansar",
+          "Minori",
+          "Praia e paisagem; Capri só como alternativa em mar calmo",
+          "low",
+          "walk_or_optional_ferry",
+          "flex"
+        ],
+        [
+          "Saída",
+          "Aeroporto Nápoles",
+          "Transfer terrestre programado; ferry não é garantia",
+          "medium",
+          "road_or_bus",
+          "flight"
+        ]
+      ]
+    }
+  ],
+  "coast_bases": [
+    {
+      "id": "salerno",
+      "label": "Salerno",
+      "beach": "praias urbanas; exige deslocamento para praias de cartões-postais",
+      "romance": "boa oferta de restaurantes e passeio noturno na cidade",
+      "access": "estação alta velocidade, ferries e ônibus",
+      "luggage": "mais simples desde Roma e ao sair para Nápoles",
+      "risk": "ferry suspenso aumenta dependência de ônibus e limita passeios",
+      "hotel_five_nights_eur": null
+    },
+    {
+      "id": "maiori",
+      "label": "Maiori",
+      "beach": "praia ampla e confortável para relaxar",
+      "romance": "mais tranquila, à beira-mar",
+      "access": "ferry sazonal e ônibus SITA 5120",
+      "luggage": "uma conexão extra desde a estação Salerno; acompanhar bagagens no ferry ou ônibus",
+      "risk": "se mar ruim, ir por estrada; Capri direto não é garantido no período",
+      "hotel_five_nights_eur": null
+    },
+    {
+      "id": "minori",
+      "label": "Minori",
+      "beach": "praia menor, vilarejo charmoso",
+      "romance": "ambiente intimista e gastronômico",
+      "access": "perto de Maiori/Amalfi via ônibus, ferry e caminhada",
+      "luggage": "sem estação ferroviária; transferência adicional",
+      "risk": "ferries e frequência sazonal pendentes",
+      "hotel_five_nights_eur": null
+    },
+    {
+      "id": "amalfi",
+      "label": "Amalfi",
+      "beach": "praia central menor e movimentada",
+      "romance": "bonita, mas região movimentada",
+      "access": "nó de ferry e ônibus para Ravello/Positano",
+      "luggage": "escadas, ladeiras, acesso do hotel e estacionamento podem ser difíceis",
+      "risk": "preço de hotel desconhecido e pressão turística",
+      "hotel_five_nights_eur": null
+    }
+  ],
+  "unknown_costs": [
+    "hotel_romero_eur_2027",
+    "hotel_coast_eur_2027",
+    "hotel_naples_optional_eur_2027",
+    "food_couple_per_day_eur_2027",
+    "city_transport_and_last_mile",
+    "airport_near_naples_for_coast_base",
+    "flight_to_french_base_airport",
+    "travel_days_and_exact_flight_hours",
+    "2027_ferry_schedule_and_weather",
+    "Rome_restaurants_and_city_taxes",
+    "Capri_Pompeii_transport_and_guides"
+  ],
+  "note": "4 noites Roma + 5 noites costa = 9 noites, 10 dias de calendário quando chegada e saída caem em dias diferentes. 10 noites significa pelo menos 11 dias de calendário em regra."
+}
