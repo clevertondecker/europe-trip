@@ -13,6 +13,7 @@ from recommended_itineraries import approve_profile_scenario
 from unified_budget import scenario_total,resolve_french_budget
 from calendar_model import calendar_plan
 from public_plan_safety import ensure_public_plan_is_minimal
+from catalog_plan_validation import validate_catalog_packages
 
 
 class MoneyRegression(unittest.TestCase):
@@ -116,6 +117,21 @@ class CalendarIntegrity(unittest.TestCase):
         new=change_plan(old,{"assignments":{
             self.workday:"colmar",self.allowed:"colmar"}})
         self.assertEqual(len(new["assignments"]),2)
+
+
+class CatalogIntegrity(unittest.TestCase):
+    def test_catalog_rejects_misplaced_attraction_ids(self):
+        catalog=load_attractions()
+        plan=new_plan()
+        colmar=next(a["id"] for a in catalog["attractions"]
+                    if a["destination_id"]=="colmar")
+        basel=next(a["id"] for a in catalog["attractions"]
+                   if a["destination_id"]=="basel")
+        plan["packages"]={"colmar":[colmar]}
+        validate_catalog_packages(plan,catalog)
+        plan["packages"]={"colmar":[basel]}
+        with self.assertRaises(ValueError):
+            validate_catalog_packages(plan,catalog)
 
 
 class PrivacyGuard(unittest.TestCase):
