@@ -125,15 +125,17 @@ class ResearchPriceUITests(unittest.TestCase):
         text=" ".join(x.label for x in app.expander)
         self.assertIn("Pesquisa de preços",text)
         self.assertEqual(app.session_state["advisor_plan"]["packages"],{})
-        app.segmented_control(key="itinerary_section").set_value("Orçamento").run()
+        app.radio(key="ux_area").set_value("Orçamento").run()
+        app.segmented_control(key="ux_section").set_value("Simulações").run()
+        app.segmented_control(key="ux_budget_view").set_value("Consultor de passeios").run()
         self.assertTrue(any("Comparar preços de alimentação pesquisados" in x.label
                             for x in app.expander))
         self.assertFalse(app.exception,[e.message for e in app.exception])
 
     def test_confirmed_excursions_show_researched_budget_separately(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=100).run()
-        app.radio(key="main_navigation").set_value("Roteiro").run()
-        app.segmented_control(key="itinerary_section").set_value("Meus passeios").run()
+        app.radio(key="ux_area").set_value("Meu roteiro").run()
+        app.segmented_control(key="ux_section").set_value("França").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
         self.assertTrue(any("custos pesquisados de alimentação" in x.label.lower()
                             for x in app.expander))
