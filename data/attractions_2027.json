@@ -1,0 +1,1652 @@
+{
+  "schema_version": "1.0",
+  "checked_at": "2026-11-14",
+  "travelers": 2,
+  "source_policy": "Destino e existência da atração: fonte oficial consultada; duração: hipótese editorial; ingresso: número só quando fonte oficial publica; sem reservas para 2027. Fotos apenas Wikimedia Commons com licença e crédito.",
+  "destinations": [
+    {
+      "id": "mulhouse",
+      "name": "Mulhouse",
+      "country": "França",
+      "lat": 47.7508,
+      "lon": 7.3359,
+      "kind": "local",
+      "photo": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Mulhouse-Place_de_la_R%C3%A9union_(1).jpg",
+        "author": "Ji-Elle",
+        "license": "CC BY-SA 3.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/3.0/",
+        "source_page": "https://commons.wikimedia.org/wiki/File:Mulhouse-Place_de_la_R%C3%A9union_(1).jpg"
+      },
+      "source_url": "https://www.tourisme-mulhouse.com/en/what-to-do-in-mulhouse/getting-around-mulhouse-by-public-transport/",
+      "coordinates_precision": "city_area",
+      "checked_at": "2026-11-14"
+    },
+    {
+      "id": "strasbourg",
+      "name": "Strasbourg",
+      "country": "França",
+      "lat": 48.5734,
+      "lon": 7.7521,
+      "kind": "local",
+      "photo": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Cathedrale-strasbourg.jpg",
+        "author": "Wikimedia Commons photographer",
+        "license": "CC BY-SA 3.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/3.0/",
+        "source_page": "https://commons.wikimedia.org/wiki/File:Cathedrale-strasbourg.jpg"
+      },
+      "source_url": "https://www.visitstrasbourg.fr/en/discover/must-see-attractions/",
+      "coordinates_precision": "city_area",
+      "checked_at": "2026-11-14"
+    },
+    {
+      "id": "metz",
+      "name": "Metz",
+      "country": "França",
+      "lat": 49.1193,
+      "lon": 6.1757,
+      "kind": "local",
+      "photo": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Centre_Pompidou_%C3%A0_Metz.jpg",
+        "author": "LuxFoto09",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "source_page": "https://commons.wikimedia.org/wiki/File:Centre_Pompidou_%C3%A0_Metz.jpg"
+      },
+      "source_url": "https://www.tourisme-metz.com/en/discover-metz-metropole/top-15-tourist-spots-in-metz-metropole",
+      "coordinates_precision": "city_area",
+      "checked_at": "2026-11-14"
+    },
+    {
+      "id": "nancy",
+      "name": "Nancy",
+      "country": "França",
+      "lat": 48.6921,
+      "lon": 6.1844,
+      "kind": "local",
+      "photo": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Nancy_Place_Stanislas_1.jpg",
+        "author": "Wikimedia Commons photographer",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "source_page": "https://commons.wikimedia.org/wiki/File:Nancy_Place_Stanislas_1.jpg"
+      },
+      "source_url": "https://www.destination-nancy.com/en/tourisme/decouvrir-nancy/les-incontournables/",
+      "coordinates_precision": "city_area",
+      "checked_at": "2026-11-14"
+    },
+    {
+      "id": "colmar",
+      "name": "Colmar",
+      "country": "França",
+      "lat": 48.0794,
+      "lon": 7.3585,
+      "kind": "excursion",
+      "photo": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Petite_Venise_Colmar.jpg",
+        "author": "JJ Georges",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "source_page": "https://commons.wikimedia.org/wiki/File:Petite_Venise_Colmar.jpg"
+      },
+      "source_url": "https://tourisme-colmar.com/en/visit/presentation/discover",
+      "coordinates_precision": "city_area",
+      "checked_at": "2026-11-14"
+    },
+    {
+      "id": "freiburg",
+      "name": "Freiburg im Breisgau",
+      "country": "Alemanha",
+      "lat": 47.999,
+      "lon": 7.8421,
+      "kind": "excursion",
+      "photo": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Freiburg_im_Breisgau_M%C3%BCnster.jpg",
+        "author": "C. M.",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "source_page": "https://commons.wikimedia.org/wiki/File:Freiburg_im_Breisgau_M%C3%BCnster.jpg"
+      },
+      "source_url": "https://visit.freiburg.de/en/discover/sightseeing/top-10-sightseeing",
+      "coordinates_precision": "city_area",
+      "checked_at": "2026-11-14"
+    },
+    {
+      "id": "basel",
+      "name": "Basel",
+      "country": "Suíça",
+      "lat": 47.5596,
+      "lon": 7.5886,
+      "kind": "excursion",
+      "photo": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Basler_Munster.jpg",
+        "author": "RickH86",
+        "license": "CC BY-SA 3.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/3.0/",
+        "source_page": "https://commons.wikimedia.org/wiki/File:Basler_Munster.jpg"
+      },
+      "source_url": "https://www.basel.com/en/places-of-interest",
+      "coordinates_precision": "city_area",
+      "checked_at": "2026-11-14"
+    },
+    {
+      "id": "luxembourg",
+      "name": "Luxemburgo",
+      "country": "Luxemburgo",
+      "lat": 49.6116,
+      "lon": 6.1319,
+      "kind": "excursion",
+      "photo": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Luxembourg_Grund.jpg",
+        "author": "Jerome Herr",
+        "license": "CC BY-SA 1.0",
+        "license_url": null,
+        "source_page": "https://commons.wikimedia.org/wiki/File:Luxembourg_Grund.jpg"
+      },
+      "source_url": "https://www.visitluxembourg.com/place/bock-casemates-luxembourg",
+      "coordinates_precision": "city_area",
+      "checked_at": "2026-11-14"
+    },
+    {
+      "id": "interlaken",
+      "name": "Interlaken",
+      "country": "Suíça",
+      "lat": 46.6863,
+      "lon": 7.8632,
+      "kind": "overnight",
+      "photo": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Interlaken.jpg",
+        "author": "Kevin Boniface",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "source_page": "https://commons.wikimedia.org/wiki/File:Interlaken.jpg"
+      },
+      "source_url": "https://www.interlaken.ch/en/",
+      "coordinates_precision": "city_area",
+      "checked_at": "2026-11-14"
+    },
+    {
+      "id": "oeschinen",
+      "name": "Oeschinensee / Kandersteg",
+      "country": "Suíça",
+      "lat": 46.4989,
+      "lon": 7.7261,
+      "kind": "overnight",
+      "photo": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/0x-oeschinensee.jpg",
+        "author": "Oxensepp",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "source_page": "https://commons.wikimedia.org/wiki/File:0x-oeschinensee.jpg"
+      },
+      "source_url": "https://www.oeschinensee.ch/en/tarife-fahrplan/",
+      "coordinates_precision": "city_area",
+      "checked_at": "2026-11-14"
+    },
+    {
+      "id": "lauterbrunnen",
+      "name": "Lauterbrunnen",
+      "country": "Suíça",
+      "lat": 46.593,
+      "lon": 7.909,
+      "kind": "overnight",
+      "photo": null,
+      "source_url": "https://lauterbrunnen.swiss/en/destination/discover-the-lauterbrunnen-valley.html",
+      "coordinates_precision": "city_area",
+      "checked_at": "2026-11-14"
+    }
+  ],
+  "attractions": [
+    {
+      "id": "mulhouse_reunion",
+      "destination_id": "mulhouse",
+      "name": "Place de la Réunion",
+      "category": "arquitetura",
+      "summary": "Praça central renascentista, centro histórico para caminhar.",
+      "visit_minutes": 55,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "none",
+        "status": "not_applicable",
+        "validity": null,
+        "notes": "Passeio de espaço público externo; atividades ou acessos internos podem ser pagos"
+      },
+      "source_urls": [
+        "https://www.tourisme-mulhouse.com/en/experiences/historical-center/"
+      ],
+      "checked_at": "2026-11-14",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "Passeio de espaço público externo; atividades ou acessos internos podem ser pagos"
+    },
+    {
+      "id": "mulhouse_historical",
+      "destination_id": "mulhouse",
+      "name": "Musée Historique",
+      "category": "museu",
+      "summary": "História da cidade na antiga prefeitura da Place de la Réunion.",
+      "visit_minutes": 90,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "adult",
+        "status": "unknown",
+        "validity": null,
+        "notes": "Preço de ingresso não confirmado"
+      },
+      "source_urls": [
+        "https://www.tourisme-mulhouse.com/en/what-to-do-in-mulhouse/getting-around-mulhouse-by-public-transport/"
+      ],
+      "checked_at": "2026-11-14",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "Preço de ingresso não confirmado"
+    },
+    {
+      "id": "mulhouse_train",
+      "destination_id": "mulhouse",
+      "name": "Cité du Train",
+      "category": "museu",
+      "summary": "Museu ferroviário com locomotivas e trens históricos.",
+      "visit_minutes": 150,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": 16,
+        "currency": "EUR",
+        "per": "adult",
+        "status": "operator_published",
+        "validity": "tarifa publicada 2026/27; checar na data",
+        "notes": "Entrada regular adulto"
+      },
+      "source_urls": [
+        "https://www.tourisme-mulhouse.com/en/experiences/railway-museum-cite-du-train/"
+      ],
+      "checked_at": "2026-11-14",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "Entrada regular adulto"
+    },
+    {
+      "id": "mulhouse_auto",
+      "destination_id": "mulhouse",
+      "name": "Musée National de l’Automobile",
+      "category": "museu",
+      "summary": "Coleção histórica de automóveis; ingresso a confirmar.",
+      "visit_minutes": 150,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "adult",
+        "status": "unknown",
+        "validity": null,
+        "notes": "Preço de ingresso não confirmado"
+      },
+      "source_urls": [
+        "https://www.tourisme-mulhouse.com/en/what-to-do-in-mulhouse/getting-around-mulhouse-by-public-transport/"
+      ],
+      "checked_at": "2026-11-14",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "Preço de ingresso não confirmado"
+    },
+    {
+      "id": "mulhouse_fabric",
+      "destination_id": "mulhouse",
+      "name": "Musée de l'Impression sur Étoffes",
+      "category": "museu",
+      "summary": "História dos tecidos estampados de Mulhouse.",
+      "visit_minutes": 90,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "adult",
+        "status": "unknown",
+        "validity": null,
+        "notes": "Preço de ingresso não confirmado"
+      },
+      "source_urls": [
+        "https://www.tourisme-mulhouse.com/en/what-to-do-in-mulhouse/getting-around-mulhouse-by-public-transport/"
+      ],
+      "checked_at": "2026-11-14",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "Preço de ingresso não confirmado"
+    },
+    {
+      "id": "mulhouse_finearts",
+      "destination_id": "mulhouse",
+      "name": "Musée des Beaux-Arts",
+      "category": "museu",
+      "summary": "Arte em museu perto da estação.",
+      "visit_minutes": 75,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "adult",
+        "status": "unknown",
+        "validity": null,
+        "notes": "Preço de ingresso não confirmado"
+      },
+      "source_urls": [
+        "https://www.tourisme-mulhouse.com/en/what-to-do-in-mulhouse/getting-around-mulhouse-by-public-transport/"
+      ],
+      "checked_at": "2026-11-14",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "Preço de ingresso não confirmado"
+    },
+    {
+      "id": "strasbourg_cathedral",
+      "destination_id": "strasbourg",
+      "name": "Cathédrale Notre-Dame",
+      "category": "história",
+      "summary": "Catedral gótica; acesso à plataforma e visitas especiais podem ser pagos.",
+      "visit_minutes": 75,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "adult",
+        "status": "unknown",
+        "validity": null,
+        "notes": "Preço de ingresso não confirmado"
+      },
+      "source_urls": [
+        "https://www.visitstrasbourg.fr/en/discover/must-see-attractions/"
+      ],
+      "checked_at": "2026-11-14",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "Preço de ingresso não confirmado"
+    },
+    {
+      "id": "strasbourg_petite",
+      "destination_id": "strasbourg",
+      "name": "Petite France",
+      "category": "foto/paisagem",
+      "summary": "Bairro de canais e casas com estrutura de madeira.",
+      "visit_minutes": 90,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "none",
+        "status": "not_applicable",
+        "validity": null,
+        "notes": "Passeio de espaço público externo; atividades ou acessos internos podem ser pagos"
+      },
+      "source_urls": [
+        "https://www.visitstrasbourg.fr/en/discover/strasbourg-and-its-surrounding-area/petite-france/"
+      ],
+      "checked_at": "2026-11-14",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "Passeio de espaço público externo; atividades ou acessos internos podem ser pagos"
+    },
+    {
+      "id": "strasbourg_grande",
+      "destination_id": "strasbourg",
+      "name": "Grande Île",
+      "category": "arquitetura",
+      "summary": "Centro histórico reconhecido pela UNESCO.",
+      "visit_minutes": 90,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "none",
+        "status": "not_applicable",
+        "validity": null,
+        "notes": "Passeio de espaço público externo; atividades ou acessos internos podem ser pagos"
+      },
+      "source_urls": [
+        "https://www.visitstrasbourg.fr/en/discover/must-see-attractions/"
+      ],
+      "checked_at": "2026-11-14",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "Passeio de espaço público externo; atividades ou acessos internos podem ser pagos"
+    },
+    {
+      "id": "strasbourg_ponts",
+      "destination_id": "strasbourg",
+      "name": "Ponts Couverts",
+      "category": "história",
+      "summary": "Pontes e torres medievais no rio Ill.",
+      "visit_minutes": 35,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "none",
+        "status": "not_applicable",
+        "validity": null,
+        "notes": "Passeio de espaço público externo; atividades ou acessos internos podem ser pagos"
+      },
+      "source_urls": [
+        "https://www.visitstrasbourg.fr/en/discover/strasbourg-and-its-surrounding-area/petite-france/"
+      ],
+      "checked_at": "2026-11-14",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "Passeio de espaço público externo; atividades ou acessos internos podem ser pagos"
+    },
+    {
+      "id": "strasbourg_vauban",
+      "destination_id": "strasbourg",
+      "name": "Barrage Vauban",
+      "category": "história",
+      "summary": "Barragem histórica e vistas para as pontes; confirmar acesso à cobertura.",
+      "visit_minutes": 45,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "adult",
+        "status": "unknown",
+        "validity": null,
+        "notes": "Preço de ingresso não confirmado"
+      },
+      "source_urls": [
+        "https://www.visitstrasbourg.fr/en/discover/strasbourg-and-its-surrounding-area/petite-france/"
+      ],
+      "checked_at": "2026-11-14",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "Preço de ingresso não confirmado"
+    },
+    {
+      "id": "strasbourg_europe",
+      "destination_id": "strasbourg",
+      "name": "Bairro Europeu",
+      "category": "arquitetura",
+      "summary": "Parlamento Europeu e edifícios do bairro europeu; visita interna a reservar.",
+      "visit_minutes": 90,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "adult",
+        "status": "unknown",
+        "validity": null,
+        "notes": "Preço de ingresso não confirmado"
+      },
+      "source_urls": [
+        "https://www.visitstrasbourg.fr/en/discover/must-see-attractions/"
+      ],
+      "checked_at": "2026-11-14",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "Preço de ingresso não confirmado"
+    },
+    {
+      "id": "metz_cathedral",
+      "destination_id": "metz",
+      "name": "Cathédrale Saint-Étienne",
+      "category": "história",
+      "summary": "Catedral famosa pelos vitrais; visitas especiais a confirmar.",
+      "visit_minutes": 90,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "adult",
+        "status": "unknown",
+        "validity": null,
+        "notes": "Preço de ingresso não confirmado"
+      },
+      "source_urls": [
+        "https://www.tourisme-metz.com/en/discover-metz-metropole/top-15-tourist-spots-in-metz-metropole"
+      ],
+      "checked_at": "2026-11-14",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "Preço de ingresso não confirmado"
+    },
+    {
+      "id": "metz_pompidou",
+      "destination_id": "metz",
+      "name": "Centre Pompidou-Metz",
+      "category": "museu",
+      "summary": "Centro de exposições de arte contemporânea.",
+      "visit_minutes": 150,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "adult",
+        "status": "unknown",
+        "validity": null,
+        "notes": "Preço de ingresso não confirmado"
+      },
+      "source_urls": [
+        "https://www.tourisme-metz.com/en/discover-metz-metropole/top-15-tourist-spots-in-metz-metropole"
+      ],
+      "checked_at": "2026-11-14",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "Preço de ingresso não confirmado"
+    },
+    {
+      "id": "metz_cour",
+      "destination_id": "metz",
+      "name": "Musée de la Cour d’Or",
+      "category": "museu",
+      "summary": "Coleções arqueológicas e de arte em edifícios históricos.",
+      "visit_minutes": 120,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "adult",
+        "status": "unknown",
+        "validity": null,
+        "notes": "Preço de ingresso não confirmado"
+      },
+      "source_urls": [
+        "https://www.tourisme-metz.com/en/discover-metz-metropole/top-15-tourist-spots-in-metz-metropole"
+      ],
+      "checked_at": "2026-11-14",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "Preço de ingresso não confirmado"
+    },
+    {
+      "id": "metz_germans",
+      "destination_id": "metz",
+      "name": "Porte des Allemands",
+      "category": "história",
+      "summary": "Porta fortificada e caminhada junto às muralhas.",
+      "visit_minutes": 60,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "none",
+        "status": "not_applicable",
+        "validity": null,
+        "notes": "Passeio de espaço público externo; atividades ou acessos internos podem ser pagos"
+      },
+      "source_urls": [
+        "https://www.tourisme-metz.com/en/discover-metz-metropole/top-15-tourist-spots-in-metz-metropole"
+      ],
+      "checked_at": "2026-11-14",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "Passeio de espaço público externo; atividades ou acessos internos podem ser pagos"
+    },
+    {
+      "id": "metz_comedie",
+      "destination_id": "metz",
+      "name": "Place de la Comédie",
+      "category": "arquitetura",
+      "summary": "Praça histórica e ópera às margens do rio.",
+      "visit_minutes": 45,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "none",
+        "status": "not_applicable",
+        "validity": null,
+        "notes": "Passeio de espaço público externo; atividades ou acessos internos podem ser pagos"
+      },
+      "source_urls": [
+        "https://www.tourisme-metz.com/en/discover-metz-metropole/top-15-tourist-spots-in-metz-metropole"
+      ],
+      "checked_at": "2026-11-14",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "Passeio de espaço público externo; atividades ou acessos internos podem ser pagos"
+    },
+    {
+      "id": "metz_lake",
+      "destination_id": "metz",
+      "name": "Plan d'Eau de Metz",
+      "category": "natureza",
+      "summary": "Lago e trilhas urbanas para caminhada.",
+      "visit_minutes": 75,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "none",
+        "status": "not_applicable",
+        "validity": null,
+        "notes": "Passeio de espaço público externo; atividades ou acessos internos podem ser pagos"
+      },
+      "source_urls": [
+        "https://www.tourisme-metz.com/en/discover-metz-metropole/top-15-tourist-spots-in-metz-metropole"
+      ],
+      "checked_at": "2026-11-14",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "Passeio de espaço público externo; atividades ou acessos internos podem ser pagos"
+    },
+    {
+      "id": "nancy_stanislas",
+      "destination_id": "nancy",
+      "name": "Place Stanislas",
+      "category": "arquitetura",
+      "summary": "Conjunto monumental UNESCO, portões dourados e praça central.",
+      "visit_minutes": 75,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "none",
+        "status": "not_applicable",
+        "validity": null,
+        "notes": "Passeio de espaço público externo; atividades ou acessos internos podem ser pagos"
+      },
+      "source_urls": [
+        "https://www.destination-nancy.com/en/tourisme/decouvrir-nancy/les-incontournables/"
+      ],
+      "checked_at": "2026-11-14",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "Passeio de espaço público externo; atividades ou acessos internos podem ser pagos"
+    },
+    {
+      "id": "nancy_pepiniere",
+      "destination_id": "nancy",
+      "name": "Parc de la Pépinière",
+      "category": "natureza",
+      "summary": "Grande parque para caminhada perto do centro.",
+      "visit_minutes": 70,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "none",
+        "status": "not_applicable",
+        "validity": null,
+        "notes": "Passeio de espaço público externo; atividades ou acessos internos podem ser pagos"
+      },
+      "source_urls": [
+        "https://www.destination-nancy.com/en/tourisme/decouvrir-nancy/les-incontournables/"
+      ],
+      "checked_at": "2026-11-14",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "Passeio de espaço público externo; atividades ou acessos internos podem ser pagos"
+    },
+    {
+      "id": "nancy_majorelle",
+      "destination_id": "nancy",
+      "name": "Villa Majorelle",
+      "category": "museu",
+      "summary": "Casa Art Nouveau do início do século XX; preço a confirmar.",
+      "visit_minutes": 75,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "adult",
+        "status": "unknown",
+        "validity": null,
+        "notes": "Preço de ingresso não confirmado"
+      },
+      "source_urls": [
+        "https://www.destination-nancy.com/en/tourisme/quoi-faire-a-nancy/sites-de-visite-et-culture/musees/"
+      ],
+      "checked_at": "2026-11-14",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "Preço de ingresso não confirmado"
+    },
+    {
+      "id": "nancy_ecole",
+      "destination_id": "nancy",
+      "name": "Musée de l’École de Nancy",
+      "category": "museu",
+      "summary": "Acervo de Art Nouveau e artes decorativas.",
+      "visit_minutes": 105,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "adult",
+        "status": "unknown",
+        "validity": null,
+        "notes": "Preço de ingresso não confirmado"
+      },
+      "source_urls": [
+        "https://www.destination-nancy.com/en/tourisme/quoi-faire-a-nancy/sites-de-visite-et-culture/musees/"
+      ],
+      "checked_at": "2026-11-14",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "Preço de ingresso não confirmado"
+    },
+    {
+      "id": "nancy_beaux",
+      "destination_id": "nancy",
+      "name": "Musée des Beaux-Arts",
+      "category": "museu",
+      "summary": "Museu de arte junto à Place Stanislas.",
+      "visit_minutes": 110,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "adult",
+        "status": "unknown",
+        "validity": null,
+        "notes": "Preço de ingresso não confirmado"
+      },
+      "source_urls": [
+        "https://www.destination-nancy.com/en/tourisme/quoi-faire-a-nancy/sites-de-visite-et-culture/musees/"
+      ],
+      "checked_at": "2026-11-14",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "Preço de ingresso não confirmado"
+    },
+    {
+      "id": "nancy_aquarium",
+      "destination_id": "nancy",
+      "name": "Muséum-Aquarium",
+      "category": "museu",
+      "summary": "Museu de história natural e aquário.",
+      "visit_minutes": 90,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "adult",
+        "status": "unknown",
+        "validity": null,
+        "notes": "Preço de ingresso não confirmado"
+      },
+      "source_urls": [
+        "https://www.destination-nancy.com/en/tourisme/quoi-faire-a-nancy/sites-de-visite-et-culture/musees/"
+      ],
+      "checked_at": "2026-11-14",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "Preço de ingresso não confirmado"
+    },
+    {
+      "id": "colmar_venise",
+      "destination_id": "colmar",
+      "name": "Petite Venise",
+      "category": "foto/paisagem",
+      "summary": "Canais, pontes e casas enxaimel.",
+      "visit_minutes": 70,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "none",
+        "status": "not_applicable",
+        "validity": null,
+        "notes": "Passeio de espaço público externo; atividades ou acessos internos podem ser pagos"
+      },
+      "source_urls": [
+        "https://tourisme-colmar.com/en/visit/presentation/discover"
+      ],
+      "checked_at": "2026-11-14",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "Passeio de espaço público externo; atividades ou acessos internos podem ser pagos"
+    },
+    {
+      "id": "colmar_tanners",
+      "destination_id": "colmar",
+      "name": "Quartier des Tanneurs",
+      "category": "arquitetura",
+      "summary": "Bairro medieval de casas tradicionais.",
+      "visit_minutes": 55,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "none",
+        "status": "not_applicable",
+        "validity": null,
+        "notes": "Passeio de espaço público externo; atividades ou acessos internos podem ser pagos"
+      },
+      "source_urls": [
+        "https://tourisme-colmar.com/en/visit/presentation/discover"
+      ],
+      "checked_at": "2026-11-14",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "Passeio de espaço público externo; atividades ou acessos internos podem ser pagos"
+    },
+    {
+      "id": "colmar_pfister",
+      "destination_id": "colmar",
+      "name": "Maison Pfister",
+      "category": "história",
+      "summary": "Fachada histórica do século XVI.",
+      "visit_minutes": 30,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "none",
+        "status": "not_applicable",
+        "validity": null,
+        "notes": "Passeio de espaço público externo; atividades ou acessos internos podem ser pagos"
+      },
+      "source_urls": [
+        "https://tourisme-colmar.com/en/visit/presentation/discover"
+      ],
+      "checked_at": "2026-11-14",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "Passeio de espaço público externo; atividades ou acessos internos podem ser pagos"
+    },
+    {
+      "id": "colmar_stmartin",
+      "destination_id": "colmar",
+      "name": "Collégiale Saint-Martin",
+      "category": "história",
+      "summary": "Grande igreja no centro histórico; visitar exterior ou interior conforme abertura.",
+      "visit_minutes": 50,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "adult",
+        "status": "unknown",
+        "validity": null,
+        "notes": "Preço de ingresso não confirmado"
+      },
+      "source_urls": [
+        "https://tourisme-colmar.com/en/visit/presentation/discover"
+      ],
+      "checked_at": "2026-11-14",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "Preço de ingresso não confirmado"
+    },
+    {
+      "id": "colmar_heads",
+      "destination_id": "colmar",
+      "name": "Maison des Têtes",
+      "category": "arquitetura",
+      "summary": "Fachada renascentista com máscaras decorativas.",
+      "visit_minutes": 30,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "none",
+        "status": "not_applicable",
+        "validity": null,
+        "notes": "Passeio de espaço público externo; atividades ou acessos internos podem ser pagos"
+      },
+      "source_urls": [
+        "https://tourisme-colmar.com/en/visit/presentation/discover"
+      ],
+      "checked_at": "2026-11-14",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "Passeio de espaço público externo; atividades ou acessos internos podem ser pagos"
+    },
+    {
+      "id": "freiburg_munster",
+      "destination_id": "freiburg",
+      "name": "Freiburger Münster",
+      "category": "história",
+      "summary": "Catedral gótica no centro histórico.",
+      "visit_minutes": 65,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "adult",
+        "status": "unknown",
+        "validity": null,
+        "notes": "Preço de ingresso não confirmado"
+      },
+      "source_urls": [
+        "https://visit.freiburg.de/en/discover/sightseeing/top-10-sightseeing"
+      ],
+      "checked_at": "2026-11-14",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "Preço de ingresso não confirmado"
+    },
+    {
+      "id": "freiburg_bachle",
+      "destination_id": "freiburg",
+      "name": "Freiburger Bächle",
+      "category": "foto/paisagem",
+      "summary": "Pequenos canais de água pelas ruas do centro.",
+      "visit_minutes": 50,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "none",
+        "status": "not_applicable",
+        "validity": null,
+        "notes": "Passeio de espaço público externo; atividades ou acessos internos podem ser pagos"
+      },
+      "source_urls": [
+        "https://visit.freiburg.de/en/discover/sightseeing/top-10-sightseeing"
+      ],
+      "checked_at": "2026-11-14",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "Passeio de espaço público externo; atividades ou acessos internos podem ser pagos"
+    },
+    {
+      "id": "freiburg_schlossberg",
+      "destination_id": "freiburg",
+      "name": "Schlossberg",
+      "category": "natureza",
+      "summary": "Colina e mirantes para a cidade; funicular ou outros serviços pagos separados.",
+      "visit_minutes": 115,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "none",
+        "status": "not_applicable",
+        "validity": null,
+        "notes": "Passeio de espaço público externo; atividades ou acessos internos podem ser pagos"
+      },
+      "source_urls": [
+        "https://visit.freiburg.de/en/discover/sightseeing/top-10-sightseeing"
+      ],
+      "checked_at": "2026-11-14",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "Passeio de espaço público externo; atividades ou acessos internos podem ser pagos"
+    },
+    {
+      "id": "freiburg_market",
+      "destination_id": "freiburg",
+      "name": "Münstermarkt",
+      "category": "gastronomia",
+      "summary": "Mercado ao redor da catedral; compras opcionais.",
+      "visit_minutes": 65,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "none",
+        "status": "not_applicable",
+        "validity": null,
+        "notes": "Passeio de espaço público externo; atividades ou acessos internos podem ser pagos"
+      },
+      "source_urls": [
+        "https://visit.freiburg.de/en/discover/sightseeing/top-10-sightseeing"
+      ],
+      "checked_at": "2026-11-14",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "Passeio de espaço público externo; atividades ou acessos internos podem ser pagos"
+    },
+    {
+      "id": "basel_munster",
+      "destination_id": "basel",
+      "name": "Basler Münster e Pfalz",
+      "category": "história",
+      "summary": "Catedral e terraço com vistas para o Reno.",
+      "visit_minutes": 70,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "adult",
+        "status": "unknown",
+        "validity": null,
+        "notes": "Preço de ingresso não confirmado"
+      },
+      "source_urls": [
+        "https://www.basel.com/en/places-of-interest"
+      ],
+      "checked_at": "2026-11-14",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "Preço de ingresso não confirmado"
+    },
+    {
+      "id": "basel_townhall",
+      "destination_id": "basel",
+      "name": "Rathaus e Marktplatz",
+      "category": "arquitetura",
+      "summary": "Prefeitura de fachada vermelha e praça do mercado.",
+      "visit_minutes": 50,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "none",
+        "status": "not_applicable",
+        "validity": null,
+        "notes": "Passeio de espaço público externo; atividades ou acessos internos podem ser pagos"
+      },
+      "source_urls": [
+        "https://www.basel.com/en/places-of-interest"
+      ],
+      "checked_at": "2026-11-14",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "Passeio de espaço público externo; atividades ou acessos internos podem ser pagos"
+    },
+    {
+      "id": "basel_mittlere",
+      "destination_id": "basel",
+      "name": "Mittlere Brücke",
+      "category": "foto/paisagem",
+      "summary": "Ponte histórica e vista sobre o rio Reno.",
+      "visit_minutes": 35,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "none",
+        "status": "not_applicable",
+        "validity": null,
+        "notes": "Passeio de espaço público externo; atividades ou acessos internos podem ser pagos"
+      },
+      "source_urls": [
+        "https://www.basel.com/en/places-of-interest"
+      ],
+      "checked_at": "2026-11-14",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "Passeio de espaço público externo; atividades ou acessos internos podem ser pagos"
+    },
+    {
+      "id": "basel_oldtown",
+      "destination_id": "basel",
+      "name": "Centro histórico",
+      "category": "história",
+      "summary": "Ruas, fontes e praças da parte antiga.",
+      "visit_minutes": 90,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "none",
+        "status": "not_applicable",
+        "validity": null,
+        "notes": "Passeio de espaço público externo; atividades ou acessos internos podem ser pagos"
+      },
+      "source_urls": [
+        "https://www.basel.com/en/places-of-interest"
+      ],
+      "checked_at": "2026-11-14",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "Passeio de espaço público externo; atividades ou acessos internos podem ser pagos"
+    },
+    {
+      "id": "lux_bock",
+      "destination_id": "luxembourg",
+      "name": "Casamatas do Bock",
+      "category": "história",
+      "summary": "Túneis históricos subterrâneos, entrada sujeita a horário.",
+      "visit_minutes": 75,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": 11,
+        "currency": "EUR",
+        "per": "adult",
+        "status": "operator_published",
+        "validity": "tarifa publicada 2026; confirmar 2027",
+        "notes": "Entrada regular adulto"
+      },
+      "source_urls": [
+        "https://www.luxembourg-city.com/en/tours-activities/underground/bock-casemates"
+      ],
+      "checked_at": "2026-11-14",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "Entrada regular adulto"
+    },
+    {
+      "id": "lux_corniche",
+      "destination_id": "luxembourg",
+      "name": "Chemin de la Corniche",
+      "category": "foto/paisagem",
+      "summary": "Caminhada panorâmica sobre a cidade baixa.",
+      "visit_minutes": 60,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "none",
+        "status": "not_applicable",
+        "validity": null,
+        "notes": "Passeio de espaço público externo; atividades ou acessos internos podem ser pagos"
+      },
+      "source_urls": [
+        "https://www.visitluxembourg.com/place/bock-casemates-luxembourg"
+      ],
+      "checked_at": "2026-11-14",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "Passeio de espaço público externo; atividades ou acessos internos podem ser pagos"
+    },
+    {
+      "id": "lux_grund",
+      "destination_id": "luxembourg",
+      "name": "Bairro Grund",
+      "category": "arquitetura",
+      "summary": "Ruas, rio Alzette e vistas da cidade baixa.",
+      "visit_minutes": 80,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "none",
+        "status": "not_applicable",
+        "validity": null,
+        "notes": "Passeio de espaço público externo; atividades ou acessos internos podem ser pagos"
+      },
+      "source_urls": [
+        "https://www.visitluxembourg.com/place/bock-casemates-luxembourg"
+      ],
+      "checked_at": "2026-11-14",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "Passeio de espaço público externo; atividades ou acessos internos podem ser pagos"
+    },
+    {
+      "id": "lux_palace",
+      "destination_id": "luxembourg",
+      "name": "Palácio Grão-Ducal (exterior)",
+      "category": "história",
+      "summary": "Visita exterior; visitas internas dependem do calendário oficial.",
+      "visit_minutes": 30,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "none",
+        "status": "not_applicable",
+        "validity": null,
+        "notes": "Passeio de espaço público externo; atividades ou acessos internos podem ser pagos"
+      },
+      "source_urls": [
+        "https://www.visitluxembourg.com/place/bock-casemates-luxembourg"
+      ],
+      "checked_at": "2026-11-14",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "Passeio de espaço público externo; atividades ou acessos internos podem ser pagos"
+    },
+    {
+      "id": "interlaken_hohe",
+      "destination_id": "interlaken",
+      "name": "Höhematte e centro de Interlaken",
+      "category": "natureza",
+      "summary": "Passeio pelo centro com vista das montanhas.",
+      "visit_minutes": 75,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "none",
+        "status": "not_applicable",
+        "validity": null,
+        "notes": "Passeio de espaço público externo; atividades ou acessos internos podem ser pagos"
+      },
+      "source_urls": [
+        "https://www.interlaken.ch/en/"
+      ],
+      "checked_at": "2026-11-14",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "Passeio de espaço público externo; atividades ou acessos internos podem ser pagos"
+    },
+    {
+      "id": "interlaken_unterseen",
+      "destination_id": "interlaken",
+      "name": "Unterseen",
+      "category": "arquitetura",
+      "summary": "Centro histórico na região de Interlaken.",
+      "visit_minutes": 80,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "none",
+        "status": "not_applicable",
+        "validity": null,
+        "notes": "Passeio de espaço público externo; atividades ou acessos internos podem ser pagos"
+      },
+      "source_urls": [
+        "https://www.interlaken.ch/en/"
+      ],
+      "checked_at": "2026-11-14",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "Passeio de espaço público externo; atividades ou acessos internos podem ser pagos"
+    },
+    {
+      "id": "interlaken_harder",
+      "destination_id": "interlaken",
+      "name": "Harder Kulm (mirante)",
+      "category": "natureza",
+      "summary": "Mirante de montanha; transporte/ingresso específico a cotar.",
+      "visit_minutes": 150,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "adult",
+        "status": "unknown",
+        "validity": null,
+        "notes": "Preço de ingresso não confirmado"
+      },
+      "source_urls": [
+        "https://www.interlaken.ch/en/"
+      ],
+      "checked_at": "2026-11-14",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "Preço de ingresso não confirmado"
+    },
+    {
+      "id": "oesch_cable",
+      "destination_id": "oeschinen",
+      "name": "Teleférico Kandersteg–Oeschinensee (ida e volta)",
+      "category": "natureza",
+      "summary": "Teleférico da estação de vale; preço adulto ida e volta 2026.",
+      "visit_minutes": 30,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": 36,
+        "currency": "CHF",
+        "per": "adult_return",
+        "status": "operator_published",
+        "validity": "tarifa outono 2026; calendário 2027 não é preço de 2027",
+        "notes": "Valor por adulto já cobre subida e descida; não duplicar"
+      },
+      "source_urls": [
+        "https://www.oeschinensee.ch/en/tarife-fahrplan/"
+      ],
+      "checked_at": "2026-11-14",
+      "opening_hours": null,
+      "seasonality": "Operação alpina sazonal em 2027",
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "Valor por adulto já cobre subida e descida; não duplicar"
+    },
+    {
+      "id": "oesch_lake",
+      "destination_id": "oeschinen",
+      "name": "Lago Oeschinensee",
+      "category": "natureza",
+      "summary": "Paisagem alpina e trilhas sazonais com dificuldade variável.",
+      "visit_minutes": 150,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "none",
+        "status": "not_applicable",
+        "validity": null,
+        "notes": "Passeio de espaço público externo; atividades ou acessos internos podem ser pagos"
+      },
+      "source_urls": [
+        "https://www.oeschinensee.ch/en/tarife-fahrplan/"
+      ],
+      "checked_at": "2026-11-14",
+      "opening_hours": null,
+      "seasonality": "Operação alpina sazonal em 2027",
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "Passeio de espaço público externo; atividades ou acessos internos podem ser pagos"
+    },
+    {
+      "id": "oesch_trail",
+      "destination_id": "oeschinen",
+      "name": "Trilhas e mirantes de Oeschinensee",
+      "category": "natureza",
+      "summary": "Trilhas dependem do clima, neve e abertura; exige checagem.",
+      "visit_minutes": 120,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "adult",
+        "status": "unknown",
+        "validity": null,
+        "notes": "Preço de ingresso não confirmado"
+      },
+      "source_urls": [
+        "https://www.oeschinensee.ch/en/tarife-fahrplan/"
+      ],
+      "checked_at": "2026-11-14",
+      "opening_hours": null,
+      "seasonality": "Operação alpina sazonal em 2027",
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "Preço de ingresso não confirmado"
+    },
+    {
+      "id": "laut_staubbach",
+      "destination_id": "lauterbrunnen",
+      "name": "Cachoeira Staubbach",
+      "category": "natureza",
+      "summary": "Cachoeira próxima da vila; acesso sazonal ao pé da queda.",
+      "visit_minutes": 70,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "none",
+        "status": "not_applicable",
+        "validity": null,
+        "notes": "Passeio de espaço público externo; atividades ou acessos internos podem ser pagos"
+      },
+      "source_urls": [
+        "https://lauterbrunnen.swiss/en/destination/discover-the-lauterbrunnen-valley.html"
+      ],
+      "checked_at": "2026-11-14",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "Passeio de espaço público externo; atividades ou acessos internos podem ser pagos"
+    },
+    {
+      "id": "laut_trummelbach",
+      "destination_id": "lauterbrunnen",
+      "name": "Trümmelbachfälle",
+      "category": "natureza",
+      "summary": "Cachoeiras dentro da montanha; entrada paga e operação sazonal.",
+      "visit_minutes": 90,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": 18,
+        "currency": "CHF",
+        "per": "adult",
+        "status": "operator_published",
+        "validity": "preço publicado a partir de CHF18; sem bilhete para 2027",
+        "notes": "Valor mínimo publicado, confirmar tarifa exata"
+      },
+      "source_urls": [
+        "https://lauterbrunnen.swiss/en/map/detail/trummelbach-waterfalls-52c355bf-8544-4c9b-9885-427fc77657fb.html"
+      ],
+      "checked_at": "2026-11-14",
+      "opening_hours": null,
+      "seasonality": "Abertura normalmente abril–novembro, sujeita ao tempo",
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "Valor mínimo publicado, confirmar tarifa exata"
+    },
+    {
+      "id": "laut_valley",
+      "destination_id": "lauterbrunnen",
+      "name": "Caminhada pelo vale de Lauterbrunnen",
+      "category": "natureza",
+      "summary": "Trilha de vale e mirantes para outras cachoeiras.",
+      "visit_minutes": 120,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "none",
+        "status": "not_applicable",
+        "validity": null,
+        "notes": "Passeio de espaço público externo; atividades ou acessos internos podem ser pagos"
+      },
+      "source_urls": [
+        "https://lauterbrunnen.swiss/en/destination/discover-the-lauterbrunnen-valley.html"
+      ],
+      "checked_at": "2026-11-14",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "Passeio de espaço público externo; atividades ou acessos internos podem ser pagos"
+    }
+  ]
+}
