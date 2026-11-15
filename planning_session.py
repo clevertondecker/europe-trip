@@ -78,6 +78,25 @@ def select_package(destination:str,items:list[str])->dict:
                                valid_destinations=destinations,
                                valid_attractions=valid))
 
+def upsert_flexible_choice(destination:str,attraction_ids:list[str],
+                           period:str)->dict:
+    """Confirmed in-session user choice; no network write or mandatory date."""
+    from itinerary_flow_model import upsert_choice
+    return _commit(upsert_choice(bootstrap(),load_attractions(),
+                                 destination,attraction_ids,period))
+
+
+def remove_flexible_choice(destination:str)->dict:
+    from itinerary_flow_model import remove_choice
+    return _commit(remove_choice(bootstrap(),load_attractions(),destination))
+
+
+def accept_italy_starter(variant:str,*,confirmed:bool=False)->dict:
+    from itinerary_flow_model import adopt_italy_starter
+    return _commit(adopt_italy_starter(bootstrap(),load_attractions(),
+                                      variant,confirmed=confirmed))
+
+
 def delete_package(destination:str)->dict:
     return _commit(remove_package(bootstrap(),destination))
 
