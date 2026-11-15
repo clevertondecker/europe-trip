@@ -21,7 +21,10 @@ def _destination_photo(destination: dict) -> None:
         st.markdown("<div class='attraction-no-photo'>✦ Explore a cidade</div>",
                     unsafe_allow_html=True)
         return
-    st.image(photo["url"],use_container_width=True)
+    st.markdown(
+        f'<img class="attraction-photo" src="{escape(photo["url"],quote=True)}" '
+        f'alt="Fotografia ilustrativa de {escape(destination["name"],quote=True)}" loading="lazy">',
+        unsafe_allow_html=True)
     st.caption(f"Foto: {photo['author']} · {photo['license']} · "
                f"[crédito e licença]({photo['source_page']})")
 
