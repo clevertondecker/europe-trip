@@ -18,6 +18,8 @@ from finance_margin_ui import render_finance_margin_summary
 from outing_cost_evidence import load_outing_evidence,evidence_for_outing
 from draft_controls_ui import render_draft_controls
 from predefined_budget_ui import render_predefined_budget_adoption
+from outing_guide_model import build_outing_guide
+from outing_guide_ui import render_outing_guide
 
 def _currency(eur:float,chf:float)->str:
     return f"€ {eur:,.2f}  ·  CHF {chf:,.2f}"
@@ -40,7 +42,8 @@ def _navigate_to_my_outings():
     st.session_state["itinerary_section"]="Meus passeios"
 
 
-def _render_destination(profile:str,board:dict,row:dict,catalog:dict,plan:dict):
+def _render_destination(profile:str,board:dict,row:dict,catalog:dict,plan:dict,
+                        routes:dict,eurfx:float,chffx:float):
     dest=row["destination"]
     key=dest["id"]
     title=dest["name"]+" · "+dest["country"]
@@ -75,6 +78,12 @@ def _render_destination(profile:str,board:dict,row:dict,catalog:dict,plan:dict):
                     st.rerun()
                 except ValueError as exc:
                     st.error("Não foi possível adicionar: "+str(exc))
+        if st.checkbox("Ver guia: viagem, principais pontos e custos",
+                       key="scenario_guide_open_"+profile+"_"+key):
+            guide=build_outing_guide(plan,catalog,routes,key,
+                                     [a["id"] for a in row["attractions"]])
+            render_outing_guide(guide,key_prefix="scenario_guide_"+profile+"_"+key,
+                                eurfx=eurfx,chffx=chffx)
         with st.expander("Ver despesas, ingressos e fontes"):
             if row["components"]:
                 for item in row["components"]:
@@ -212,7 +221,7 @@ def render_scenario_boards(plan:dict,scenarios:list[dict],catalog:dict,routes:di
     total_rows=len(details["rows"])
     st.caption(f"{total_rows} destinos · exibindo {min(total_rows,visible)}")
     for row in details["rows"][:visible]:
-        _render_destination(profile,board,row,catalog,plan)
+        _render_destination(profile,board,row,catalog,plan,routes,eurfx,chffx)
     if total_rows>visible and st.button("Ver mais passeios",key="workspace_board_more_"+profile):
         st.session_state[shown_key]=visible+6
         st.rerun()
