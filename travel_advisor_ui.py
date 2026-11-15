@@ -1,7 +1,5 @@
 """Streamlit rule-based travel advisor; explicit preview/approval and gated storage."""
 from __future__ import annotations
-import hashlib
-import hmac
 import json
 from copy import deepcopy
 from datetime import date
@@ -13,6 +11,7 @@ from travel_advisor import assess_plan,recommendations,objective_weights
 from travel_optimizer import propose_schedule
 from trip_plan_model import new_plan,validate_plan,with_revision,apply_proposal
 from trip_plan_repository import GitHubPlanRepository
+from advisor_auth import is_verified_owner
 from data_model import get_scenario
 from unified_budget import resolve_french_budget,scenario_total
 
@@ -35,15 +34,32 @@ def _prepare_plan():
 
 def _owner_config():
     try:
-        c=st.secrets.get("advisor_github",{})
-        return {"token":c.get("token",""),"password_sha256":c.get("password_sha256","")}
+        settings=st.secrets.get("advisor_github",{})
+        auth=st.secrets.get("auth",{})
+        google=auth.get("google",{}) if auth else {}
+        return {"token":settings.get("token",""),
+                "owner_email":settings.get("owner_email",""),
+                "google_configured":bool(
+                    auth.get("cookie_secret") and auth.get("redirect_uri") and
+                    google.get("client_id") and google.get("client_secret"))}
     except Exception:
-        return {"token":"","password_sha256":""}
+        return {"token":"","owner_email":"","google_configured":False}
+
+def _owner_signed_in(cfg=None):
+    cfg=_owner_config() if cfg is None else cfg
+    if not cfg["google_configured"] or not cfg["owner_email"]:
+        return False
+    try:
+        return is_verified_owner(st.user,cfg["owner_email"])
+    except (AttributeError,KeyError,TypeError):
+        return False
 
 def _secure_save(plan):
     cfg=_owner_config()
-    if not cfg["token"] or not cfg["password_sha256"] or not st.session_state.get("advisor_owner_ok"):
-        raise PermissionError("GitHub write unavailable without owner authentication")
+    if not cfg["token"] or not _owner_signed_in(cfg):
+        raise PermissionError("Only the verified OIDC owner may write to GitHub")
+    if not st.session_state.get("advisor_public_repo_ack"):
+        raise PermissionError("Owner must acknowledge public repository visibility")
     sha=st.session_state.get("advisor_github_sha")
     next_sha=GitHubPlanRepository(cfg["token"]).save(plan,sha)
     st.session_state["advisor_github_sha"]=next_sha
@@ -207,23 +223,38 @@ def render_advisor(trip_data:dict,sync_sources:dict)->None:
             except (ValueError,KeyError,TypeError) as exc:
                 st.error("Arquivo de plano inválido: "+str(exc))
     cfg=_owner_config()
-    ready=bool(cfg["token"] and cfg["password_sha256"])
+    ready=bool(cfg["token"] and cfg["owner_email"] and cfg["google_configured"])
     if not ready:
-        st.info("Salvamento automático no GitHub desabilitado: configure token e hash "
-                "de autenticação do proprietário nos Secrets. Exportação JSON disponível.")
+        st.info("Gravação no GitHub desativada: configure o OAuth Google e "
+                "advisor_github.token / advisor_github.owner_email nos "
+                "Streamlit Secrets. A exportação JSON funciona sem credenciais.")
+    elif not _owner_signed_in(cfg):
+        st.info("Para salvar o plano no GitHub, entre com a conta Google "
+                "autorizada. A visualização e a exportação continuam livres.")
+        try:
+            logged_in=bool(st.user.get("is_logged_in",False))
+        except (AttributeError,TypeError):
+            logged_in=False
+        if logged_in:
+            st.warning("Esta conta Google não corresponde ao proprietário autorizado "
+                       "ou a sessão de identidade expirou. Nenhum acesso de escrita concedido.")
+            st.button("Sair do Google",key="advisor_google_logout",on_click=st.logout)
+        else:
+            st.button("Entrar com Google (proprietário)",
+                      key="advisor_google_login",on_click=st.login,args=["google"])
     else:
-        if not st.session_state.get("advisor_owner_ok"):
-            password=st.text_input("Senha do proprietário para escrita no GitHub",type="password",key="advisor_pass")
-            failures=st.session_state.get("advisor_failed_logins",0)
-            if st.button("Autorizar gravação",disabled=failures>=5,key="advisor_login"):
-                digest=hashlib.sha256(password.encode()).hexdigest()
-                if hmac.compare_digest(digest,cfg["password_sha256"]):
-                    st.session_state["advisor_owner_ok"]=True
-                    st.session_state["advisor_failed_logins"]=0
-                    st.rerun()
-                else:
-                    st.session_state["advisor_failed_logins"]=failures+1
-                    st.error("Autenticação não autorizada.")
+        st.success("Proprietário autenticado pelo Google. "
+                   "As gravações exigem confirmação explícita.")
+        st.button("Encerrar sessão Google",key="advisor_google_signout",
+                  on_click=st.logout)
+        st.checkbox("Entendo que o repositório GitHub atual é PÚBLICO e que "
+                    "planos salvos nele poderão ser vistos por outras pessoas. "
+                    "Não incluí informações pessoais ou confidenciais.",
+                    value=False,key="advisor_public_repo_ack")
+        if not st.session_state["advisor_public_repo_ack"]:
+            st.warning("A gravação só será habilitada após reconhecer a "
+                       "visibilidade pública do repositório. "
+                       "É mais seguro armazenar roteiros pessoais em repositório privado.")
         else:
             col1,col2=st.columns(2)
             with col1:
@@ -295,6 +326,7 @@ def render_advisor(trip_data:dict,sync_sources:dict)->None:
                                 st.info("Restaurado na sessão. Grave a nova revisão separadamente.")
                                 st.rerun()
                             except ValueError as exc:st.warning(str(exc))
-    st.caption("Gravação no GitHub é opcional e exige configuração prévia. "
-               "Para produção pública, preferir login OAuth/GitHub App e restrição por usuário. "
-               "Sem autenticação, este painel não escreve em repositórios.")
+    st.caption("A gravação GitHub requer OAuth Google com email verificado, "
+               "token de escrita server-side e confirmação explícita. "
+               "Nenhuma credencial é adicionada aos arquivos do repositório. "
+               "O app continua somente leitura quando essa configuração está ausente.")
