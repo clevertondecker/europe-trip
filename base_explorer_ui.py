@@ -13,6 +13,7 @@ from base_explorer_model import (base_opportunities,compare_bases,
 from destination_labels import place_label
 from base_research_expanded_ui import render_expanded_research
 from planning_session import update_fields
+from base_scenario_model import base_options, choose_exploratory_base
 
 EXISTING_BASES=frozenset({"mulhouse","strasbourg","metz","nancy"})
 
@@ -272,6 +273,7 @@ def render_base_explorer(plan:dict,trip_data:dict,finance_live:bool,
                "Todas as tarifas/tempos são referências de 2026; nenhuma passagem "
                "ou aluguel mobiliado foi confirmado para setembro–novembro de 2027.")
     names={b["id"]:_base_name(data,b["id"]) for b in data["bases"]}
+    options=base_options(data)
     active=plan["base_city"]
     st.caption("**Base oficial atual:** "+names[active]+
                " · **Novas candidatas:** Lille, Arras, Dijon e Reims. "
@@ -280,9 +282,16 @@ def render_base_explorer(plan:dict,trip_data:dict,finance_live:bool,
             ["Destinos próximos","Comparar mesmas viagens","Uma ou duas bases","Pesquisa ampliada"],
             default="Destinos próximos",key="base_explorer_mode")
     if mode=="Destinos próximos" or mode is None:
+        candidate=st.session_state.get("scenario_base_selected",active)
+        if candidate not in names:
+            candidate=active
         selected=st.selectbox("Cidade-base a explorar",list(names),
-                index=list(names).index(active),format_func=lambda x:names[x],
+                index=list(names).index(candidate),format_func=lambda x:names[x],
                 key="base_explorer_city")
+        st.session_state["scenario_base_selected"]=choose_exploratory_base(selected,options)
+        status=next(row["research_status"] for row in options if row["id"]==selected)
+        st.caption("Cenário exploratório · "+status+
+                   " · não modifica a cidade-base aprovada.")
         _nearby(data,selected)
         _choose_base(data,plan,selected)
     elif mode=="Comparar mesmas viagens":
