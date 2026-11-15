@@ -43,6 +43,10 @@ class TravelDashboardTests(unittest.TestCase):
         app.radio(key="main_navigation").set_value("Roteiro").run()
         app.segmented_control(key="itinerary_section").set_value("Visão geral").run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
+        self.assertIn("flow_add_open_button",{button.key for button in app.button})
+        self.assertIn("flow_go_budget",{button.key for button in app.button})
+        app.toggle(key="flow_show_legacy_dashboard").set_value(True).run()
+        self.assertFalse(app.exception,[x.message for x in app.exception])
         self.assertIn("dashboard_go_budget",{button.key for button in app.button})
         self.assertIn("dashboard_go_discover",{button.key for button in app.button})
         plan_id=app.session_state["advisor_plan"]["plan_id"]
