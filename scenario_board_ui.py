@@ -24,6 +24,8 @@ def _photo(dest:dict):
 
 def _update(profile:str,board:dict):
     st.session_state["scenario_edit_"+profile]=board
+    # A previously opened confirmation is invalid after any edit.
+    st.session_state["scenario_review_"+profile]=False
     st.rerun()
 
 def _render_destination(profile:str,board:dict,row:dict,catalog:dict):
