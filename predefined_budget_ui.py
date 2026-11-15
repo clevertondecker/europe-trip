@@ -6,6 +6,7 @@ import streamlit as st
 from predefined_budget_model import preset_budget_summary
 from recommended_itineraries import approve_profile_scenario
 from planning_session import accept_approved_plan
+from destination_labels import destination_names
 
 
 def _money(value:float)->str:
@@ -32,7 +33,7 @@ def render_predefined_budget_adoption(plan:dict,scenarios:list[dict],catalog:dic
     Existing official outings are always retained, and no proposal is persisted
     to GitHub without the existing owner save flow.
     """
-    names={d["id"]:d["name"] for d in catalog["destinations"]}
+    names=destination_names(catalog)
     attractions={a["id"]:a["name"] for a in catalog["attractions"]}
     options={s["profile"]:s for s in scenarios}
     st.markdown("### Adotar um roteiro pré-definido")
