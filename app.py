@@ -23,7 +23,9 @@ from route_preview import route_endpoints
 from attractions_ui import render_explorer
 from travel_advisor_ui import render_advisor, _recover_saved_plan, _secure_save, _owner_signed_in
 from travel_dashboard_ui import render_trip_dashboard
-from base_explorer_ui import render_base_explorer
+from base_explorer_ui import render_base_explorer, _comparison as render_route_comparison, _split_stay as render_split_stay
+from base_change_ui import render_base_change
+from budget_sections_ui import render_budget_summary, render_budget_details
 from base_scenario_model import base_options, choose_exploratory_base, hypothetical_city_name, expanded_rail_routes
 from base_research_expanded_model import load_research, find_city, observed_housing
 from base_scenario_ui import render_scenario_impact
@@ -428,16 +430,15 @@ else:
 
 # On the home page, avoid the extra tab row and the giant next-step control.
 # Pending research remains reachable through dashboard buttons and legacy links.
-if ux_area!="Minha viagem":
-    st.segmented_control("O que deseja fazer?",list(UX_SECTIONS[ux_area]),
+if ux_area!="Minha viagem" or ux_section!="Resumo":
+    st.segmented_control("Área: "+ux_area,list(UX_SECTIONS[ux_area]),
                          key="ux_section",on_change=_ux_section_changed,
                          selection_mode="single")
-elif ux_section=="Pendências e fontes":
-    st.button("← Voltar ao resumo",key="ux_home_return_summary",
-              on_click=_ux_next_task,args=("Minha viagem","Resumo"))
-if ux_area=="Explorar" and ux_section=="Mais pesquisas":
-    st.selectbox("Qual pesquisa deseja consultar?",list(RESEARCH_OPTIONS),
-                 key="ux_research",on_change=_ux_aux_changed)
+if ux_area=="Meu roteiro" and ux_section=="França":
+    st.segmented_control("França: o que planejar?",
+                         ["Meus passeios","França e escapadas","Transportes e custos"],
+                         key="ux_france_view",on_change=_ux_aux_changed,
+                         selection_mode="single")
 elif ux_area=="Meu roteiro" and ux_section=="Sugestões":
     st.segmented_control("Como deseja avançar?",list(SUGGESTION_OPTIONS),
                          key="ux_suggestion",on_change=_ux_aux_changed,
@@ -445,20 +446,23 @@ elif ux_area=="Meu roteiro" and ux_section=="Sugestões":
 page,itinerary_target,guide_target,base_target=ux_route(
     ux_area,ux_section,
     research=st.session_state.get("ux_research","Pesquisa ampliada"),
-    suggestion=st.session_state.get("ux_suggestion","Descobrir"))
+    suggestion=st.session_state.get("ux_suggestion","Descobrir"),
+    france=st.session_state.get("ux_france_view","Meus passeios"))
 if ux_area!="Minha viagem":
     st.caption(UX_DESCRIPTIONS.get((ux_area,ux_section),"Continue o planejamento."))
 # Navigation between tasks stays contextual, rather than a wall of controls.
 next_steps={
-    ("Explorar","Cidades-base"):("Comparar cidades","Explorar","Comparar cidades"),
-    ("Explorar","Comparar cidades"):("Simular o orçamento","Orçamento","Visão financeira"),
-    ("Explorar","Passeios e destinos"):("Organizar passeios","Meu roteiro","Meus passeios"),
-    ("Explorar","Mapa"):("Explorar cidades-base","Explorar","Cidades-base"),
-    ("Meu roteiro","Itália"):("Ver meus passeios","Meu roteiro","Meus passeios"),
-    ("Meu roteiro","Meus passeios"):("Organizar calendário","Meu roteiro","Calendário"),
-    ("Meu roteiro","Calendário"):("Revisar custos","Orçamento","Visão financeira"),
-    ("Meu roteiro","Sugestões"):("Revisar meus passeios","Meu roteiro","Meus passeios"),
-    ("Orçamento","Visão financeira"):("Comparar cidades-base","Explorar","Comparar cidades"),
+    ("Explorar","Cidades-base"):("Comparar impactos","Explorar","Comparar"),
+    ("Explorar","Comparar"):("Simular os custos","Orçamento","Simulações"),
+    ("Explorar","Passeios"):("Planejar passeios na França","Meu roteiro","França"),
+    ("Explorar","Mapa"):("Pesquisar cidades","Explorar","Cidades-base"),
+    ("Meu roteiro","Itália"):("Planejar a França","Meu roteiro","França"),
+    ("Meu roteiro","França"):("Organizar calendário","Meu roteiro","Calendário"),
+    ("Meu roteiro","Calendário"):("Revisar orçamento","Orçamento","Resumo financeiro"),
+    ("Meu roteiro","Sugestões"):("Ver passeios da França","Meu roteiro","França"),
+    ("Orçamento","Resumo financeiro"):("Criar simulação","Orçamento","Simulações"),
+    ("Orçamento","Simulações"):("Ver detalhamento","Orçamento","Detalhamento"),
+    ("Orçamento","Detalhamento"):("Comparar cidades","Explorar","Comparar"),
 }
 suggestion=next_steps.get((ux_area,ux_section))
 if suggestion:
@@ -1176,19 +1180,18 @@ elif page == "Roteiro":
         "Cidades-base":"Onde vale a pena ficar?",
         "Passeios e destinos":"O que podemos conhecer?",
         "Mais pesquisas":"Detalhes das pesquisas",
-        "Visão do roteiro":"Nossa viagem, etapa por etapa",
+        "Visão geral":"Nossa viagem, etapa por etapa",
         "Itália":"Nossa lua de mel na Itália",
-        "Meus passeios":"Passeios escolhidos",
+        "França":"Nossa estadia na França",
         "Calendário":"Organizar os dias da viagem",
         "Sugestões":"Ideias para melhorar o roteiro",
-        "Passeios e custos":"Custos dos passeios",
     }.get(ux_section,"Meu roteiro")
     st.markdown("<div class='page-eyebrow'>NOSSA EUROPA · "+escape(ux_area.upper())+"</div>"
                 "<div class='page-title'>"+escape(task_title)+"</div>"
                 "<div class='page-subtitle'>"+escape(
                     UX_DESCRIPTIONS.get((ux_area,ux_section),"Planeje sua viagem."))+
                 "</div>",unsafe_allow_html=True)
-    if ux_section=="Visão do roteiro":
+    if ux_section=="Visão geral":
         c1,c2,c3,c4=st.columns(4,gap="small")
         trip_metrics=[
             ("Casamento","04/09/2027","Data fixa"),
@@ -1281,7 +1284,8 @@ elif page == "Roteiro":
 
     elif itinerary_section == "Explorar bases":
         render_base_explorer(active_plan(),data,sync_sources["finance"]["status"]=="live",
-                             st.session_state.get("advisor_eurfx",6.3))
+                             st.session_state.get("advisor_eurfx",6.3),
+                             focused=(ux_area=="Explorar" and ux_section=="Cidades-base"))
 
     elif itinerary_section in ("Meus passeios","Descobrir","Orçamento","Calendário","Simular roteiros"):
         render_advisor(data,sync_sources,workspace_area=itinerary_section)
