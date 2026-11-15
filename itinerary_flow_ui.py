@@ -11,11 +11,13 @@ import streamlit as st
 
 from itinerary_flow_model import (
     destinations,get_choice,selected_rows,choice_counts,is_selected,
-    period_options,UNASSIGNED,ITALY_STAGE,FRANCE_STAGE
+    period_options,UNASSIGNED,ITALY_STAGE,FRANCE_STAGE,
+    validate_flow_backup
 )
 from planning_session import (active_plan,upsert_flexible_choice,
                               remove_flexible_choice)
 from planning_status import save_label,explain_storage_error
+from planning_store import sync_legacy_view
 from travel_advisor_ui import _owner_signed_in,_secure_save
 from attractions_model import load_base_routes,package_cost
 from advisor_finance import advisor_projection
@@ -162,8 +164,15 @@ def _selected_stage(rows:list[dict],stage:str,catalog:dict)->None:
     st.markdown("#### Etapa "+("1 · Lua de mel na Itália" if stage==ITALY_STAGE
                               else "2 · Temporada na França"))
     if not stage_rows:
-        st.info("Nenhum lugar escolhido nesta etapa. "
-                "Use **Adicionar passeio** para começar, sem marcar uma data.")
+        if stage==ITALY_STAGE:
+            st.caption("**Proposta de ponto de partida:** Roma (~4 noites) e "
+                       "Costa Amalfitana (~5 noites), sujeitas à revisão. "
+                       "Ainda não estão incluídas no seu plano.")
+            st.button("Revisar proposta italiana",key="flow_italy_starter",
+                      on_click=_navigate,args=("Meu roteiro","Itália"))
+        else:
+            st.info("Nenhum lugar escolhido na etapa francesa. "
+                    "Você pode adicionar passeios mesmo sem decidir a cidade-base.")
         return
     count=st.session_state.get("flow_visible_"+stage,4)
     for row in stage_rows[:count]:
@@ -219,7 +228,7 @@ def _compact_budget(plan:dict,catalog:dict,trip_data:dict,
               on_click=_navigate,args=("Orçamento","Detalhamento"))
 
 
-def _save_panel(plan:dict)->None:
+def _save_panel(plan:dict,catalog:dict)->None:
     if not st.session_state.get("flow_save_open"):
         return
     with st.container(border=True):
@@ -229,6 +238,32 @@ def _save_panel(plan:dict)->None:
             plan,ensure_ascii=False,indent=2),
             file_name="nossa-europa-planejamento.json",
             mime="application/json",key="flow_backup_download")
+        uploaded=st.file_uploader("Recuperar backup local (JSON)",
+                                  type=["json"],key="flow_import_json")
+        if uploaded is not None:
+            try:
+                candidate=json.loads(uploaded.getvalue().decode("utf-8"))
+                validate_flow_backup(candidate,catalog)
+            except (ValueError,KeyError,TypeError,UnicodeDecodeError) as exc:
+                st.error("Backup incompatível ou inválido. Nenhum dado foi substituído.")
+            else:
+                st.warning("Revisão do backup: "+
+                           str(len(selected_rows(candidate,catalog)))+
+                           " lugares. Restaurar substituirá o plano DESTA SESSÃO, "
+                           "sem modificar automaticamente arquivos do GitHub.")
+                if st.button("Confirmar recuperação nesta sessão",
+                             key="flow_import_confirm"):
+                    st.session_state["advisor_plan"]=candidate
+                    st.session_state["advisor_saved_snapshot"]=None
+                    st.session_state["advisor_github_sha"]=None
+                    st.session_state["advisor_autosave_pending"]=False
+                    st.session_state["advisor_autosave_optin"]=False
+                    st.session_state["advisor_local_changed"]=True
+                    sync_legacy_view(candidate,st.session_state)
+                    st.session_state["flow_notice"]=(
+                        "Backup recuperado nesta sessão; salve ou exporte para não perder.")
+                    st.session_state["flow_save_open"]=False
+                    st.rerun()
         if _owner_signed_in():
             st.warning("O repositório GitHub deste aplicativo é PÚBLICO: "
                        "as escolhas gravadas ficam acessíveis a outras pessoas.")
@@ -262,6 +297,10 @@ def render_itinerary_workbench(plan:dict,catalog:dict,
     saved=st.session_state.get("advisor_saved_snapshot")
     signed_in=_owner_signed_in()
     label,hint=save_label(plan,saved,signed_in)
+    if not signed_in:
+        dirty=(saved!=plan) if saved is not None else plan["revision"]>0
+        label="Alterações não salvas" if dirty else "Ainda não salvo"
+        hint="Você pode baixar um backup local; armazenamento remoto exige autenticação"
     st.markdown("### Meu roteiro")
     st.caption("Organize a viagem sem precisar decidir datas e reservas agora.")
     metrics=st.columns(3)
@@ -280,7 +319,7 @@ def render_itinerary_workbench(plan:dict,catalog:dict,
     if st.session_state.get("flow_notice"):
         st.success(st.session_state.pop("flow_notice"))
     _render_add(active_plan(),catalog)
-    _save_panel(active_plan())
+    _save_panel(active_plan(),catalog)
     rows=selected_rows(active_plan(),catalog)
     _selected_stage(rows,ITALY_STAGE,catalog)
     _selected_stage(rows,FRANCE_STAGE,catalog)
