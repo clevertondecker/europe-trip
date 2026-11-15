@@ -63,7 +63,9 @@ def _destinations(model:dict)->None:
 
 
 def _scenario_map(model:dict,catalog:dict,plan:dict)->None:
-    with st.expander("Ver mapa dos cenários",expanded=False):
+    show=st.checkbox("Mostrar mapa interativo dos estilos",
+                     key="scenario_map_visible",value=False)
+    if show:
         options=["Econômico","Equilibrado","Aproveitar ao máximo","União dos estilos"]
         selected=st.selectbox("Mostrar no mapa",options,key="scenario_comparison_map_filter")
         by_label={row["label"]:row for row in model["rows"]}
