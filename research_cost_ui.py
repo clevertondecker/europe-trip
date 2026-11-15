@@ -123,3 +123,26 @@ def render_research_summary(plan:dict,catalog:dict,routes:dict,
                        ". Não são passeios gratuitos.")
         st.caption("A projeção global já tem rubricas de alimentação/excursões: "
                    "esta soma não é acrescentada automaticamente para evitar dupla cobrança.")
+
+
+def render_research_profiles(plan:dict,scenarios:list[dict],catalog:dict,
+                             routes:dict,eurfx:float,chffx:float)->None:
+    with st.expander("Comparar preços de alimentação pesquisados entre estilos"):
+        st.caption("Comparação apenas ilustrativa: cada total inclui uma referência "
+                   "de almoço para duas pessoas, ingresso conhecido e trem normal "
+                   "quando pesquisado. NÃO incorpora automaticamente à projeção.")
+        table=[]
+        for option in scenarios:
+            pseudo={**plan,"packages":option["proposal_packages"]}
+            result=selected_trip_research(pseudo,catalog,routes,eurfx,chffx)
+            table.append({"Estilo":option["label"],
+                          "Passeios":result["total_count"],
+                          "Com referências combináveis":result["priced_count"],
+                          "Soma parcial em R$":result["priced_subtotal_brl"],
+                          "Passeios sem total":len(result["unpriced_destinations"])})
+        st.dataframe(table,hide_index=True,width="stretch")
+        st.warning("As somas são parciais e têm coberturas diferentes. "
+                   "Não é correto concluir que o estilo com menor subtotal "
+                   "é o mais barato quando há trajetos e refeições sem cotação.")
+        st.caption("Refeições em casa já estão contempladas em rubricas do "
+                   "orçamento geral: não somar refeições turísticas duas vezes.")
