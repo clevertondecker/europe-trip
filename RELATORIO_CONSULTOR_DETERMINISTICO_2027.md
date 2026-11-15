@@ -25,20 +25,17 @@ Esta função adiciona regras e otimização determinísticas aos componentes j�
 - `tests/test_travel_advisor.py` e `tests/test_travel_advisor_ui_smoke.py`: regressões.
 - `app.py`: roteamento para a aba nova; `.github/workflows/validate.yml`: CI ampliado.
 
-## Configuração de escrita no GitHub — opt-in e com cuidado
-O aplicativo, sem configuração, permite apenas **exportar/importar JSON**. Isso é intencional: ele pode ser público, e a integração atual com o Drive é somente leitura.
+## Ativar gravação GitHub: autenticação Google OIDC
 
-Para habilitar gravação, é necessário configurar no **Streamlit Secrets** uma seção chamada `[advisor_github]`, contendo:
-- `token`: token server-side associado a conta GitHub ou GitHub App com permissão de **Contents: Read & Write** no repositório `clevertondecker/europe-trip`. Preferir GitHub App de acesso restrito e com token temporário, ou token de menor escopo possível.
-- `password_sha256`: SHA-256 hexadecimal de senha de proprietário **longa, aleatória, exclusiva**, que não deve ser versionada. O hash não é uma solução de identidade multiusuário: não usar para acesso público amplo.
+O app segue em **somente leitura/exportação JSON** até a configuração pelo proprietário nos Streamlit Secrets. O login anterior por senha e hash SHA-256 foi descontinuado; nunca reutilizar `advisor_github.password_sha256`.
 
-**Atenção:** o token de escrita pode ter permissão técnica no repositório inteiro; a aplicação limita o caminho em código, mas isso NÃO equivale a um token restrito ao diretório. Para uso público e produção, substituir a autenticação simplificada por OAuth/GitHub App com verificação de usuário e proteção contra tentativas distribuídas. **Não colocar credenciais em chat, README ou commit.**
+A configuração atual exige Google OAuth Client, Google OIDC com e-mail verificado e não expirado, `[advisor_github].owner_email`, e token GitHub restrito ao repositório, guardado exclusivamente no servidor. O proprietário autenticado confirma expressamente que o repositório é público antes de salvar.
 
-Sem os dois Secrets, nenhum usuário da interface consegue chamar o método de gravação. A gravação exige senha do proprietário, segue confirmação explícita por botão e valida o SHA antes de sobrescrever. Em conflito, falha sem perda silenciosa.
+**Instruções completas (sem publicar credenciais):** [GUIA_ATIVAR_SALVAMENTO_GITHUB_SEGURO.md](GUIA_ATIVAR_SALVAMENTO_GITHUB_SEGURO.md).
 
-O GitHub tem histórico de alterações do arquivo como rastreabilidade; A UI autenticada permite listar planos JSON, consultar histórico de commits e pré-visualizar um snapshot; restaurar gera **uma nova revisão local**, que só será gravada mediante novo clique explícito. O histórico no GitHub permanece acessível independentemente da sessão.
+Em 15/11/2026, `clevertondecker/europe-trip` é **público**. Qualquer roteiro salvo ali poderá ser lido por terceiros; não incluir informações pessoais. O token GitHub tem poder de escrita no repositório selecionado, não apenas na pasta de planos. Para melhorar privacidade e segurança, considere um repositório de planos privado ou autenticação via GitHub App com tokens temporários.
 
-**Visibilidade:** a versão salva em um repositório público pode ser lida por qualquer pessoa! Não armazenar dados pessoais, reservas com nomes, número de documento, endereços privados ou outras informações sensíveis nele. Verifique se o repositório é privado antes de armazenar itinerários pessoais.
+GitHub registra versões do arquivo. A UI autenticada permite consultar planos, ler histórico de commits e pré-visualizar/restaurar como revisão local; uma restauração não é gravada sem uma nova confirmação explícita.
 
 ## Limitações para decisões reais
 A matriz tem 44 combinações origem/destino, com somente 10 tempos ferroviários registrados na auditoria inicial. A maioria não possui horários do último trem, chegada porta a porta, custo normal ou sazonalidade verificada para 2027. Portanto:
