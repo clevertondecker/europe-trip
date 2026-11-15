@@ -11,6 +11,7 @@ class CrossPageExplorationTests(unittest.TestCase):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=90).run()
         original=app.session_state["advisor_plan"].copy()
         app.radio(key="ux_area").set_value("Explorar").run()
+        app.segmented_control(key="ux_mode").set_value("Simulação").run()
         app.selectbox(key="scenario_sidebar").set_value("offenburg").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
         self.assertEqual(app.session_state["scenario_base_selected"],"offenburg")
