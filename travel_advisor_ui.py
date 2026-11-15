@@ -17,6 +17,7 @@ from planning_store import create_from_legacy,change_plan,sync_legacy_view
 from planning_session import active_plan,update_fields,accept_approved_plan
 from planning_status import save_label,explain_storage_error,friendly_timestamp
 from advisor_finance import advisor_projection
+from discovery_ui import render_discovery
 from advisor_presentation import present_risks,proposal_comparison,simple_next_step
 from data_model import get_scenario
 from unified_budget import resolve_french_budget,scenario_total
@@ -263,12 +264,22 @@ def render_advisor(trip_data:dict,sync_sources:dict)->None:
                     if item["source"]:
                         st.markdown("[Fonte]("+item["source"]+")")
     st.divider()
+    render_discovery(p,catalog,routes,trip_data,sync_sources,eurfx,chffx,use_city_rent)
+    st.divider()
     st.markdown("### Organizar meus passeios")
     st.caption("O otimizador só aloca passeios de duração compatível e com tempo de trem "
                "conhecido ou locais. Alpes e conexões não pesquisadas ficam pendentes, "
                "não são colocados arbitrariamente em um dia.")
-    if st.button("Encontrar uma organização melhor",key="advisor_generate",use_container_width=True):
-        st.session_state["advisor_proposals"]=propose_schedule(p,catalog,routes,profile)
+    if not p["packages"]:
+        st.info("Você ainda não escolheu passeios. Veja as recomendações acima e clique em "
+                "'Quero visitar' para começar; depois será possível organizar as datas.")
+        st.session_state.pop("advisor_proposals",None)
+    elif st.button("Encontrar uma organização melhor",key="advisor_generate",use_container_width=True):
+        new_proposals=propose_schedule(p,catalog,routes,profile)
+        st.session_state["advisor_proposals"]=new_proposals
+        if not new_proposals:
+            st.info("Seus passeios já estão organizados ou faltam informações de horários "
+                    "para propor uma mudança segura.")
     props=st.session_state.get("advisor_proposals",[])
     for index,proposal in enumerate(props):
         if proposal["base_revision"]!=p["revision"]:
