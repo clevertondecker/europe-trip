@@ -74,4 +74,26 @@ def propose_schedule(plan,attractions,routes,profile="balanced",max_variants=3):
            "status":"draft_unapproved",
            "note":"Sugestão heurística, sem horários de abertura/retorno confirmados. Nenhuma reserva."
         })
+    for candidate in proposals:
+        candidate["score"]=score_proposal(candidate,plan,routes,profile)
+    proposals.sort(key=lambda x:(-x["score"]["relative_score"],x["proposal_id"]))
     return proposals
+
+def score_proposal(proposal,plan,routes,profile):
+    """Relative ranking within considered verifiable candidates, never a truth metric."""
+    count=len(proposal["placed"])
+    rail_mins=sum((route_for(routes,plan["base_city"],dest)["train_minutes_one_way"] or 0)*2
+        for dest in proposal["placed"])
+    holidays=sum(1 for day,dest in proposal["assignments"].items()
+        if day not in plan["assignments"] and date.fromisoformat(day).weekday()<5)
+    unfinished=len(proposal["unresolved"])
+    if profile=="economy":
+        raw= count*70-rail_mins/12-unfinished*30
+    elif profile=="experience":
+        raw=count*95-rail_mins/35-unfinished*40+holidays*2
+    else:
+        raw=count*85-rail_mins/20-unfinished*35
+    return {"relative_score":round(raw,2),"scheduled":count,
+            "known_roundtrip_train_minutes":rail_mins,
+            "unscheduled":unfinished,
+            "method":"Relative heuristic using scheduled outings, known train-only travel and unresolved data. Not a guaranteed cost or route."}
