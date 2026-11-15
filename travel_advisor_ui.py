@@ -14,6 +14,7 @@ from trip_plan_model import new_plan,validate_plan,with_revision,apply_proposal
 from trip_plan_repository import GitHubPlanRepository
 from advisor_auth import is_verified_owner
 from planning_store import create_from_legacy,change_plan,sync_legacy_view
+from planning_session import active_plan,update_fields,accept_approved_plan
 from planning_status import save_label,explain_storage_error,friendly_timestamp
 from advisor_presentation import present_risks,proposal_comparison,simple_next_step
 from data_model import get_scenario
@@ -27,6 +28,16 @@ def _activate_loaded_plan(plan:dict,sha:str)->None:
     st.session_state["explore_packages"]=deepcopy(plan["packages"])
     st.session_state["explore_calendar"]=deepcopy(plan["assignments"])
     st.session_state["explore_base"]=plan["base_city"]
+    st.session_state["unified_scenario"]=plan["budget_scenario"]
+    st.session_state["itinerary_departure"]=date.fromisoformat(plan["departure_date"])
+    for key,source in (("itinerary_total_days","total_days"),
+                       ("itinerary_italy_days","italy_days"),
+                       ("itinerary_vacation_days","vacation_days"),
+                       ("itinerary_setup_days","setup_days")):
+        st.session_state[key]=plan[source]
+    for key in list(st.session_state):
+        if key.startswith("explore_mark_"):
+            del st.session_state[key]
     # Prevent Streamlit's old widget values from overwriting loaded fields.
     for key in ("advisor_base","advisor_profile","advisor_ceiling",
                 "advisor_proposals","advisor_snapshot_preview"):
@@ -153,22 +164,15 @@ def render_advisor(trip_data:dict,sync_sources:dict)->None:
             index=["60k","70k"].index(p["budget_scenario"]),key="advisor_ceiling",
             format_func=lambda x:"R$ "+x[:-1]+" mil")
     if base!=p["base_city"] or profile!=p["profile"] or ceiling!=p["budget_scenario"]:
-        p=change_plan(p,{"base_city":base,"profile":profile,"budget_scenario":ceiling})
-        st.session_state["advisor_plan"]=p
-        st.session_state.pop("advisor_proposals",None)
+        p=update_fields(base_city=base,profile=profile,budget_scenario=ceiling)
     with st.expander("Como o consultor toma decisões"):
         st.caption("Prioridades (interesse / custo / conforto / agenda): "+
                    " / ".join(str(x)+"%" for x in objective_weights(profile).values())+
                    ". As sugestões são geradas por regras Python, sem LLM.")
-    sync_packages=st.session_state.get("explore_packages",{})
-    if sync_packages!=p["packages"]:
-        st.warning("Sua lista de atrações da aba Explorar atrações está diferente da versão do consultor.")
-        if st.button("Importar seleção atual para o consultor",key="advisor_import_selection"):
-            p=change_plan(p,{"packages":deepcopy(sync_packages),
-                               "assignments":{}})
-            st.session_state["advisor_plan"]=p
-            st.session_state.pop("advisor_proposals",None)
-            st.rerun()
+    # One TripPlan is authoritative across attraction explorer, calendar and advisor.
+    # This replaces the former manual "Importar seleção" step.
+    st.session_state["explore_packages"]=deepcopy(p["packages"])
+    st.session_state["explore_calendar"]=deepcopy(p["assignments"])
     names=[bydest[d]["name"] for d in p["packages"] if d in bydest]
     st.markdown("**Passeios selecionados:** "+(", ".join(names) if names else "Nenhum — adicione atrações na aba Explorar atrações"))
     saved_label,saved_hint=save_label(
@@ -275,9 +279,7 @@ def render_advisor(trip_data:dict,sync_sources:dict)->None:
                 if st.button("Aprovar esta proposta",key=f"advisor_accept_{index}",
                              disabled=not diff,use_container_width=True):
                     updated=apply_proposal(p,proposal,approved=True)
-                    st.session_state["advisor_plan"]=updated
-                    st.session_state["explore_calendar"]=deepcopy(updated["assignments"])
-                    st.session_state.pop("advisor_proposals",None)
+                    accept_approved_plan(updated)
                     st.success("Sugestão aprovada! Seu planejamento tem alterações para salvar.")
                     st.rerun()
             with c2:
@@ -346,6 +348,12 @@ def render_advisor(trip_data:dict,sync_sources:dict)->None:
                     "planos salvos nele poderão ser vistos por outras pessoas. "
                     "Não incluí informações pessoais ou confidenciais.",
                     value=False,key="advisor_public_repo_ack")
+        if st.session_state.get("advisor_public_repo_ack"):
+            st.checkbox("Salvar minhas alterações aprovadas automaticamente",
+                        value=False,key="advisor_autosave_optin",
+                        help="As escolhas serão gravadas após sua confirmação. "
+                             "Não salva propostas ainda em análise. "
+                             "O repositório atual é público.")
         if not st.session_state["advisor_public_repo_ack"]:
             st.warning("A gravação só será habilitada após reconhecer a "
                        "visibilidade pública do repositório. "
