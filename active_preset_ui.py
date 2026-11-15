@@ -5,6 +5,8 @@ import streamlit as st
 
 from predefined_budget_ui import _confirm_preset
 from active_preset import preset_destination_names
+from outing_guide_model import build_outing_guide
+from outing_guide_ui import render_outing_guide
 from destination_labels import destination_names
 
 
@@ -12,7 +14,8 @@ def money(value:float)->str:
     return "R$ "+f"{value:,.0f}".replace(",",".")
 
 
-def render_active_preset(plan:dict,preset:dict,catalog:dict)->None:
+def render_active_preset(plan:dict,preset:dict,catalog:dict,*,routes:dict|None=None,
+                         eurfx:float=6.3,chffx:float=7.1)->None:
     option,summary=preset["option"],preset["summary"]
     names=destination_names(catalog)
     attractions={a["id"]:a["name"] for a in catalog["attractions"]}
@@ -30,6 +33,19 @@ def render_active_preset(plan:dict,preset:dict,catalog:dict)->None:
                         (" · Já confirmado" if official else " · Pré-selecionado"))
             st.caption("Atrações: "+(", ".join(attractions.get(a,a) for a in ids)
                                    if ids else "A definir"))
+            if routes is not None and ids:
+                guide=build_outing_guide(plan,catalog,routes,destination,ids)
+                minutes=guide["train_minutes_one_way"]
+                st.caption("Saída: "+guide["base_name"]+" · "+
+                           (str(minutes)+" min de trem (trecho)" if minutes is not None
+                            else "Passeio local" if guide["local"]
+                            else "Tempo ferroviário pendente")+
+                           " · subtotal histórico do casal: "+
+                           f"€ {guide['known_cost']['EUR']:.2f} · CHF {guide['known_cost']['CHF']:.2f}")
+                if st.checkbox("Ver guia de "+names.get(destination,destination),
+                               key="preset_guide_open_"+destination):
+                    render_outing_guide(guide,key_prefix="preset_guide_"+destination,
+                                        eurfx=eurfx,chffx=chffx)
         a,b,c=st.columns(3)
         a.metric("Verba prevista",money(summary["allowance_brl"]))
         b.metric("Custos históricos do roteiro",money(summary["known_brl"]))

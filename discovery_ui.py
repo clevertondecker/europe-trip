@@ -10,6 +10,8 @@ from destination_labels import place_label, country_flag
 from attractions_model import package_cost
 from advisor_finance import advisor_projection
 from scenario_board_ui import render_scenario_boards
+from outing_guide_model import build_outing_guide
+from outing_guide_ui import render_outing_guide
 
 def money(value):
     return "R$ "+f"{value:,.0f}".replace(",",".")
@@ -68,6 +70,12 @@ def _render_suggestion(rec,plan,catalog,routes,trip_data,live,eurfx,chffx,use_ci
                            " pendência(s) de custo/logística. Subtotal incompleto.")
             if rec["conditional"]:
                 st.caption("Tarifas com condições: "+", ".join(rec["conditional"]))
+            if st.checkbox("Ver guia: trajeto, pontos e custos",
+                           key="discovery_guide_toggle_"+rec["destination_id"]):
+                guide=build_outing_guide(plan,catalog,routes,rec["destination_id"],
+                                         rec["selected_attractions"])
+                render_outing_guide(guide,key_prefix="discovery_guide_"+rec["destination_id"],
+                                    eurfx=eurfx,chffx=chffx)
             with st.expander("Fontes e dados a confirmar"):
                 st.markdown("[Informações oficiais do destino]("+rec["source_url"]+")")
                 st.markdown("[Fonte da conexão]("+rec["route_source"]+")")

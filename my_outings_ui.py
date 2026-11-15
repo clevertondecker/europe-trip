@@ -11,6 +11,8 @@ from attractions_model import package_cost
 from advisor_finance import advisor_projection
 from destination_labels import place_label
 from active_preset_ui import render_active_preset
+from outing_guide_model import build_outing_guide
+from outing_guide_ui import render_outing_guide
 
 
 def _go_budget_presets()->None:
@@ -55,7 +57,7 @@ def _commit_selection(dest_id: str, selected: list[str], valid: set[str]) -> Non
 def _photo(dest: dict) -> None:
     photo = dest.get("photo")
     if photo and photo.get("url"):
-        st.image(photo["url"], width="stretch")
+        st.image(photo["url"], width=260)
         st.caption("Foto: " + photo["author"] + " · " + photo["license"])
 
 
@@ -95,7 +97,7 @@ def render_my_outings(plan: dict, catalog: dict, *, routes: dict | None = None,
     st.caption("O roteiro pré-definido do perfil aparece abaixo. "
                "Depois de confirmá-lo, seus passeios ficam na lista oficial para editar ou remover.")
     if preset is not None:
-        render_active_preset(plan,preset,catalog)
+        render_active_preset(plan,preset,catalog,routes=routes,eurfx=eurfx,chffx=chffx)
     st.markdown("#### Passeios confirmados — meu planejamento")
     a, b = st.columns(2, gap="small")
     a.metric("Passeios escolhidos", len(cards))
@@ -184,13 +186,10 @@ def render_my_outings(plan: dict, catalog: dict, *, routes: dict | None = None,
                            (", ".join(card["dates"]) if card["dates"] else "Sem data definida"))
                 st.write(" · ".join(card["attractions"]))
                 if routes is not None:
-                    one=package_cost(catalog,routes,plan["base_city"],plan["packages"][dest_id])
-                    euro=one["known_by_currency"]["EUR"]
-                    chf=one["known_by_currency"]["CHF"]
-                    st.caption(f"Bilhetes e transporte históricos conhecidos (casal): "
-                               f"€ {euro:.2f} · CHF {chf:.2f}")
-                    if one["missing"]:
-                        st.caption(f"⚠ {len(one['missing'])} componente(s) sem cotação completa")
+                    guide=build_outing_guide(plan,catalog,routes,dest_id,
+                                             plan["packages"][dest_id])
+                    render_outing_guide(guide,key_prefix="official_guide_"+dest_id,
+                                        eurfx=eurfx,chffx=chffx,allow_add_optional=True)
                 edit_col, remove_col = st.columns(2, gap="small")
                 with edit_col:
                     if st.button("✎ Editar", key="outing_edit_" + dest_id,

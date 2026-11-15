@@ -6,6 +6,8 @@ import streamlit as st
 from predefined_budget_model import preset_budget_summary
 from recommended_itineraries import approve_profile_scenario
 from planning_session import accept_approved_plan
+from outing_guide_model import build_outing_guide
+from outing_guide_ui import render_outing_guide
 from destination_labels import destination_names
 
 
@@ -27,7 +29,7 @@ def _confirm_preset(plan:dict,option:dict)->None:
 
 
 def render_predefined_budget_adoption(plan:dict,scenarios:list[dict],catalog:dict,
-                                      eurfx:float,chffx:float)->None:
+                                      eurfx:float,chffx:float,routes:dict|None=None)->None:
     """Let an owner deliberately replace an empty proposal with a chosen preset.
 
     Existing official outings are always retained, and no proposal is persisted
@@ -62,6 +64,17 @@ def render_predefined_budget_adoption(plan:dict,scenarios:list[dict],catalog:dic
                                 else " · Novo passeio sugerido"))
                 st.caption("Atrações: "+(", ".join(attractions.get(a,a) for a in ids)
                                        if ids else "Nenhuma selecionada"))
+                if routes is not None and ids:
+                    guide=build_outing_guide(plan,catalog,routes,dest,ids)
+                    minutes=guide["train_minutes_one_way"]
+                    st.caption("Saída: "+guide["base_name"]+" · "+
+                               (str(minutes)+" min de trem por trecho" if minutes is not None
+                                else "Visita local" if guide["local"] else
+                                "Tempo de viagem pendente"))
+                    if st.checkbox("Detalhar passeio "+names.get(dest,dest),
+                                   key="budget_guide_toggle_"+dest):
+                        render_outing_guide(guide,key_prefix="budget_guide_"+dest,
+                                            eurfx=eurfx,chffx=chffx)
         a,b,c=st.columns(3)
         a.metric("Verba para passeios",_money(summary["allowance_brl"]))
         b.metric("Gastos históricos conhecidos",_money(summary["known_brl"]))
