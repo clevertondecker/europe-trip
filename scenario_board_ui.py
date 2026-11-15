@@ -142,7 +142,7 @@ def render_scenario_boards(plan:dict,scenarios:list[dict],catalog:dict,routes:di
         st.info("Cada estilo abaixo contém um **roteiro pré-selecionado** de passeios e atrações. "
                 "Os números são provisões e custos históricos, não preços finais de 2027.")
         render_scenario_comparison(plan,scenarios,catalog,eurfx,chffx)
-        render_predefined_budget_adoption(plan,scenarios,catalog,eurfx,chffx)
+        render_predefined_budget_adoption(plan,scenarios,catalog,eurfx,chffx,routes=routes)
         return
     notice=st.session_state.pop("scenario_new_official_notice",None)
     if notice:
