@@ -21,6 +21,7 @@ from predefined_budget_ui import render_predefined_budget_adoption
 from outing_guide_model import build_outing_guide
 from outing_guide_ui import render_outing_guide
 from research_cost_ui import render_research_profiles
+from reconciled_trip_ui import render_reconciled_profiles,render_grocery_and_weekend_examples
 
 def _currency(eur:float,chf:float)->str:
     return f"€ {eur:,.2f}  ·  CHF {chf:,.2f}"
@@ -144,6 +145,9 @@ def render_scenario_boards(plan:dict,scenarios:list[dict],catalog:dict,routes:di
                 "Os números são provisões e custos históricos, não preços finais de 2027.")
         render_scenario_comparison(plan,scenarios,catalog,eurfx,chffx)
         render_research_profiles(plan,scenarios,catalog,routes,eurfx,chffx)
+        render_reconciled_profiles(plan,scenarios,catalog,routes,trip_data,
+                                   source_live,eurfx,chffx,use_city_rent)
+        render_grocery_and_weekend_examples()
         render_predefined_budget_adoption(plan,scenarios,catalog,eurfx,chffx,routes=routes)
         return
     notice=st.session_state.pop("scenario_new_official_notice",None)
@@ -151,6 +155,8 @@ def render_scenario_boards(plan:dict,scenarios:list[dict],catalog:dict,routes:di
         st.success(notice+" foi adicionado ao seu roteiro. Veja em Meus passeios.")
     render_scenario_comparison(plan,scenarios,catalog,eurfx,chffx)
     render_research_profiles(plan,scenarios,catalog,routes,eurfx,chffx)
+    render_reconciled_profiles(plan,scenarios,catalog,routes,trip_data,
+                               source_live,eurfx,chffx,use_city_rent)
     st.markdown("### Personalize uma proposta")
     st.caption("As edições aqui são rascunhos. Seu roteiro atual só muda ao "
                "adicionar um passeio individual ou aprovar uma proposta.")

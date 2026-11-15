@@ -14,6 +14,7 @@ from active_preset_ui import render_active_preset
 from outing_guide_model import build_outing_guide
 from outing_guide_ui import render_outing_guide
 from research_cost_ui import render_research_summary,render_city_base_research
+from reconciled_trip_ui import render_reconciled_budget,render_grocery_and_weekend_examples
 
 
 def _go_budget_presets()->None:
@@ -128,6 +129,9 @@ def render_my_outings(plan: dict, catalog: dict, *, routes: dict | None = None,
                    "a provisão. Alimentação, transporte urbano e outros valores "
                    "pendentes não são tratados como gratuitos.")
         render_research_summary(plan,catalog,routes,eurfx,chffx)
+        render_reconciled_budget(plan,catalog,routes,trip_data,finance_live,
+                                 eurfx,chffx,use_city_rent)
+        render_grocery_and_weekend_examples()
         render_city_base_research(plan,catalog,routes,eurfx,chffx)
 
     if st.button("＋ Adicionar passeio", type="primary",
