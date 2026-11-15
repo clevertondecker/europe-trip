@@ -83,6 +83,15 @@ def render_explorer(trip_data: dict, sync_sources: dict, map_view) -> None:
             transport_filter=st.selectbox(
                 "Acesso",["Todos","Apenas trem documentado / local","Pernoite em estudo"],
                 key="explore_route_filter")
+        x,y=st.columns(2,gap="medium")
+        with x:
+            ticket_filter=st.selectbox(
+                "Custo de acesso",["Todos","Passeio externo","Ingresso publicado","Ingresso a cotar"],
+                key="explore_ticket_filter")
+        with y:
+            interest_filter=st.selectbox(
+                "Minha preferência",["Todas","Quero visitar","Opcional","Descartar"],
+                key="explore_interest_filter")
         max_minutes=st.slider("Tempo máximo de trem conhecido por trecho (minutos)",
                               20,180,180,10,key="explore_max_minutes",
                               help="Não equivale ao tempo porta a porta. Rotas sem tempo confirmado ficam visíveis em Todos.")
@@ -90,8 +99,15 @@ def render_explorer(trip_data: dict, sync_sources: dict, map_view) -> None:
     for item in available:
         dest=item["destination"]
         r=item["route"]
+        marks_for_filter=st.session_state.get("explore_marks",{})
+        desired_ticket={"Passeio externo":"not_applicable",
+                        "Ingresso publicado":"operator_published",
+                        "Ingresso a cotar":"unknown"}.get(ticket_filter)
         relevant=[x for x in attractions["attractions"]
-                  if x["destination_id"]==dest["id"] and x["category"] in selected_categories]
+                  if x["destination_id"]==dest["id"] and x["category"] in selected_categories
+                  and (desired_ticket is None or x["ticket"]["status"]==desired_ticket)
+                  and (interest_filter=="Todas"
+                       or marks_for_filter.get(x["id"],"Opcional")==interest_filter)]
         if dest["country"] not in selected_countries or not relevant:
             continue
         if transport_filter=="Apenas trem documentado / local" and (
