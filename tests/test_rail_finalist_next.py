@@ -52,4 +52,23 @@ class RailFinalistExpansionTests(unittest.TestCase):
         self.assertIsNone(known_route("metz","rotterdam")["minutes"])
 
 
+class RailFinalistAppTest(unittest.TestCase):
+    def test_nancy_and_lille_research_visible_without_plan_change(self):
+        from pathlib import Path
+        from streamlit.testing.v1 import AppTest
+        app=AppTest.from_file(str(Path(__file__).resolve().parents[1]/"app.py"),
+                              default_timeout=110).run()
+        self.assertFalse(app.exception,[e.message for e in app.exception])
+        previous=deepcopy(app.session_state["advisor_plan"])
+        app.radio(key="ux_area").set_value("Explorar").run()
+        app.segmented_control(key="ux_section").set_value("Comparar").run()
+        app.multiselect(key="ux34_candidates").set_value(["nancy","lille"]).run()
+        app.multiselect(key="ux34_destinations").set_value(["luxembourg","brussels"]).run()
+        self.assertFalse(app.exception,[e.message for e in app.exception])
+        self.assertEqual(app.session_state["advisor_plan"],previous)
+        displayed=" ".join(str(x.value) for x in app.dataframe)
+        self.assertIn("Luxemburgo",displayed)
+        self.assertIn("Bruxelas",displayed)
+
+
 if __name__=="__main__":unittest.main()
