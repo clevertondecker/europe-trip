@@ -915,7 +915,20 @@
         "individual_listing_urls_count": 2,
         "verified_for_trip_dates": 0
       },
-      "neighborhoods": [],
+      "neighborhoods": [
+        {
+          "name": "Innenstadt",
+          "source_url": "https://offenburg.de/de/leben-in-offenburg/integration/willkommen-in-offenburg/ankommen-in-offenburg/institutionen-und-behoerden/",
+          "reason_to_investigate": "Bairro identificado em listagem institucional de centros de bairro; não há avaliação imobiliária associada",
+          "validated_rental_in_area": false
+        },
+        {
+          "name": "Oststadt",
+          "source_url": "https://offenburg.de/de/leben-in-offenburg/integration/willkommen-in-offenburg/ankommen-in-offenburg/institutionen-und-behoerden/",
+          "reason_to_investigate": "Bairro identificado em listagem institucional de centros de bairro; não há avaliação imobiliária associada",
+          "validated_rental_in_area": false
+        }
+      ],
       "weekend_rail_references": [],
       "missing": [
         "Confirmar apartamento completo 56–60 noites para duas pessoas após 04/09/2027",
@@ -1166,7 +1179,20 @@
         "individual_listing_urls_count": 0,
         "verified_for_trip_dates": 0
       },
-      "neighborhoods": [],
+      "neighborhoods": [
+        {
+          "name": "Frankenberger Viertel",
+          "source_url": "https://www.aachen-tourismus.de/en/das-frankenberger-viertel/",
+          "reason_to_investigate": "Bairro descrito pelo serviço oficial de turismo; verificar distância da estação e imóvel exato",
+          "validated_rental_in_area": false
+        },
+        {
+          "name": "Burtscheid",
+          "source_url": "https://www.aachen-tourismus.de/en/aachen-entdecken/details/poi/burtscheider-markt/",
+          "reason_to_investigate": "Bairro descrito pelo serviço oficial de turismo; verificar distância da estação e imóvel exato",
+          "validated_rental_in_area": false
+        }
+      ],
       "weekend_rail_references": [],
       "missing": [
         "Confirmar apartamento completo 56–60 noites para duas pessoas após 04/09/2027",
