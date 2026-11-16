@@ -30,7 +30,22 @@ def _pack_details(pack:dict)->None:
         else:
             st.caption("Coworking: sem oferta concreta pesquisada para esta cidade.")
         st.caption("Internet do imóvel, cesta de supermercado, transporte mensal e horários de trabalho: ainda não validados.")
-        st.caption("Clima de setembro a novembro: normais 1991–2020 ainda não extraídas do dataset municipal; não confundir ausência com 0 °C.")
+        climate=pack["climate"]
+        months=climate["months_9_10_11"]
+        if months:
+            st.markdown("**Clima histórico de setembro a novembro (estação próxima)**")
+            st.dataframe([{
+                "Mês":label,
+                "Temperatura média (°C)":months[str(number)]["tmean_c"],
+                "Chuva média (mm/mês)":months[str(number)]["precip_mm"]
+            } for number,label in ((9,"Setembro"),(10,"Outubro"),(11,"Novembro"))],
+                hide_index=True,width="stretch")
+            st.caption("Estação "+climate["station_name"]+" · normais 1991–2020, "
+                       "não previsão de 2027 nem medição do endereço do imóvel.")
+            st.markdown("[Fonte das normais da estação]("+climate["source_url"]+")")
+        else:
+            st.caption("Clima de setembro a novembro: normais 1991–2020 ainda não extraídas para estação próxima. "
+                       "Ausência de dados não equivale a temperatura ou chuva zero.")
     with st.expander("Moradia de 56–60 noites e bairros",expanded=False):
         h=pack["housing"]
         st.caption("Observações históricas de apartamentos: "+
