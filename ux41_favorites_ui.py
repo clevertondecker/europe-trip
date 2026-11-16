@@ -230,6 +230,8 @@ def render_favorite_comparison(study,five):
             for insight in comparison_insights(matrix):
                 st.caption("• "+insight)
         _routes(matrix)
+        from ux44_finance_comparison_ui import render_partial_finance
+        render_partial_finance(matrix)
         _details(matrix)
         st.markdown("**Abrir ficha completa sem perder favoritas**")
         cols=st.columns(min(3,len(selected)))
