@@ -1,47 +1,47 @@
-# Prompt — UX 3.7: Das pesquisas aos próximos passos
+# Prompt — UX 3.7: Próximo passo útil, sem duplicar o calendário
 
-**Estado:** RASCUNHO A · NÃO FINALIZADO (aguarda revisão UX independente)  
-**Evidências:** `base_coverage_model.py`, `base_weight_coverage_ui.py`, `outing_cost_evidence.py`, `city_decision_ui.py`, `ux_navigation.py`, `AGENTS_COORDINATION.md` e [issue #31](https://github.com/clevertondecker/europe-trip/issues/31).  
-**Pré-requisito:** auditar o calendário UX 3.5 real; não replicar alertas diários já existentes.
+**Estado:** RASCUNHO A v2 · NÃO FINALIZADO · aguardando REVISÃO_B sobre o SHA exato deste arquivo.
+**Auditoria técnica:** 16/11/2026, \`main\` \`579424f92ebcf86e9658b750689c7eda746b70e8\`. UX 3.5 **implementada** via PR #42; UX 3.6 **implementada em código** via PRs #43/#45, mas sincronização entre dispositivos ainda depende de configuração GCS/IAM/Secrets e validação manual. Nenhuma inspeção real mobile/desktop ou aprovação independente foi demonstrada.
+**Evidências de código:** \`smart_calendar_model.py\` (\`_visit_explanation\`, \`suggest_calendar\`, \`unresolved\`), \`smart_calendar_ui.py\` (\`_suggest\`, \`_review_panel\`), \`city_decision_model.py\` (\`compare_city_decisions\`), \`city_decision_ui.py\` (\`_render_coverage\`, \`_render_finance\`), \`base_coverage_model.py\` (\`missing_for_decision\`), \`base_weight_coverage_ui.py\`, \`outing_cost_evidence.py\`, \`ux_navigation.py\`, \`planning_context_ui.py\`, \`continuity_ui.py\`, \`app.py\` (Resumo e Pendências). Referências: issues #31 e #40.
 
-## Problema e objetivo
+## Evidência do problema e fronteira com a UX 3.5
 
-A aplicação já distingue trajetos observados, tarifas históricas e dados não pesquisados. Entretanto, o usuário ainda precisa decidir **qual pesquisa resolver primeiro** para escolher base, organizar Itália e França e tornar os passeios realizáveis.
+A UX 3.5 **já** sugere datas, mostra motivo, fonte e avisos de retorno/horário, expõe \`unresolved\`, permite revisão e retorna do orçamento/pesquisa ao calendário. **Não recriar** sugestões, alertas diários, calendário, botão de voltar, editor ou motor de rotas. Porém, \`smart_calendar_ui._suggest\` mostra \`unresolved\` somente quando existe uma proposta; se \`suggest_calendar\` retorna lista vazia, a tela oferece mensagem genérica. Um usuário pode não saber **qual dado pesquisar primeiro** nem chegar ao lugar correto a partir do alerta. Em paralelo, \`city_decision_model.compare_city_decisions\` devolve uma lista fixa de seis \`missing\` por candidata, e \`app.py\` já tem fila oficial P0–P3 do Drive e CTA de pesquisas. Um novo checklist genérico criaria três fontes concorrentes.
 
-**Resultado humano:** ver, no contexto de cada decisão importante, *o que impede avançar, por que importa, onde procurar e o que pode ser decidido sem certeza absoluta*.
+**Objetivo humano:** na decisão que estou tomando, responder em linguagem simples: “o que ainda falta confirmar?”, “qual a consequência?” e “onde resolvo isso?”, sem fingir que a pesquisa foi feita nem exigir outra tela para marcar tarefas.
 
-## Prompt de implementação proposto
+## Escopo mínimo proposto (preferido ao grafo de decisões)
 
-1. Construir um **grafo leve de decisões**, ancorado em entidades já existentes: cidade-base oficial e alternativas, duração, etapa, passeio, data planejada, hospedagem, ligação ferroviária e orçamento. Cada pendência indica `assunto`, `impacto`, `referência`, `fonte`, `atualizado_em`, `dado_faltante`, `próxima_ação`, `status`, `natureza_da_incerteza`. Não criar mais uma tabela genérica sem vínculos.
-2. **Priorizar por decisão desbloqueada**, não por contagem de links, quantidade de avisos ou score inventado. Por exemplo: antes de confirmar um bate-volta, verificar trem de retorno, último trecho e tempo mínimo; antes de comparar base, exigir aluguel para dois por janela equivalente.
-3. Mostrar no **Resumo** somente 3–5 próximos passos relevantes; em **Meu roteiro → Organizar viagem**, mostrar pendências específicas da visita/data; em **Explorar → Comparar**, mostrar insuficiências que impedem comparar as bases; em **Orçamento**, mostrar falta de custos com impacto. Não criar aba principal nova.
-4. Um item de pendência deve **abrir diretamente o destino/passeio/alternativa** que o originou e permitir voltar com uma ação ao contexto anterior. O filtro de pesquisa e estado de edição permanecem intactos.
-5. Distinguir **pendente de pesquisa**, **pesquisado historicamente**, **verificação atual necessária**, **decidido pelo viajante**, **reserva manual declarada**. Não equiparar ausência de fonte a impossibilidade.
-6. Reaproveitar dados versionados de `base_coverage_model`, `base_city_rail_evidence_expanded` e `outing_cost_evidence`. Nenhuma fonte histórica de 2026 deve ser apresentada como confirmação para 2027.
-7. Permitir marcar `não relevante para nós` de forma **reversível** e contextual, sem excluir dados oficiais ou esconder risco de agenda. Em decisões críticas, a dispensa deve trazer explicação.
-8. Criar **vista por decisão** em vez de vários checklists duplicados. Estilo progressivo: resumo curto + `Ver justificativa e fonte` somente sob demanda.
+1. Criar **um adaptador puro, somente leitura**, para converter avisos e lacunas já existentes em até **três ações contextuais** por decisão. Entradas explícitas: plano validado (\`plan_id\`, \`revision\`, \`base_city\`), contexto atual (visita/data ou comparação de bases), resultado do calendário 3.5, lacunas da comparação 3.4 e metadados de fonte disponíveis. Saída mínima: \`key\`, \`context\`, \`plain_label\`, \`why_it_matters\`, \`evidence_state\`, \`source_url|None\`, \`target\`, \`blocking|informational\`. **Não** introduzir grafo persistente, banco de tarefas, nova aba, score, notificações ou classificação automática de “pronto para reservar”.
+2. Derivar os itens a partir das **mesmas evidências** que alimentam as telas existentes, sem duplicar tabelas ou reescrever \`smart_calendar_model\`. Se não houver proposta porque nenhuma data é elegível, mostrar o bloqueio real recuperável (ex.: tempo de ida ausente, pernoite, etapa sem dia livre) **sem inferir retorno inexistente**. Se o calendário não fornecer detalhes suficientes, registrar uma limitação de contrato e usar o aviso existente; não fabricar causa.
+3. **Uma ocorrência por lacuna e escopo de decisão.** Identidade estável por \`(plan_id, scope, base_city, visit_id ou destination_id, missing_field)\`, com \`date\` quando a verificação depende do dia. Duas atrações na mesma visita não duplicam a pesquisa de retorno; visitas em dias diferentes podem exigir verificações distintas. A mesma lacuna não entra três vezes no Resumo, calendário e comparação: as telas apenas referenciam o mesmo item contextual, sem somar contadores incompatíveis.
+4. Priorizar **sem pontuação inventada**: (a) bloqueio da visita/data atualmente aberta, (b) bloqueio de decisão oficial ativa, (c) lacuna de comparação exploratória explicitamente aberta, (d) outras informações. Limitar o Resumo a no máximo **três** ações realmente ligadas ao plano/seleção; quando não houver, mostrar estado vazio honesto, não tarefas aleatórias das 30 cidades. A fila P0–P3 do Drive permanece **registro oficial somente leitura** e não deve ser reclassificada nem substituída.
+5. Apresentação mínima: uma linha com **“Antes de decidir, confirme…”**, consequência concreta e CTA **“Ver onde pesquisar”** junto da visita/comparação; em \`Minha viagem → Resumo\`, somente os itens do contexto oficial que impedem avançar. O calendário 3.5 mantém seus próprios avisos, com um link contextual opcional — não repetir cards inteiros. \`Minha viagem → Pendências\` continua exibindo a fila oficial do Drive, com distinção textual clara de “Pesquisa do roteiro” versus “Pendência oficial”.
+6. Navegação por \`ux_navigation.set_task\` e contexto existente em \`planning_context_ui\`: abrir o destino/visita ou pesquisa **em uma ação** e oferecer retorno ao ponto de origem **em uma ação**, preservando etapa, data, filtro e rascunho quando ainda válidos. Se o item foi removido, base/revision mudou ou a origem não existe, exibir fallback seguro para \`Meu roteiro → Meu planejamento\`, sem erro nem salto silencioso para outro passeio. Não tocar no plano ao navegar.
+7. Estados textuais: \`Não pesquisado\`, \`Referência histórica\`, \`Verificar para 2027\`, \`Verificado para o período específico\` **somente com evidência suficiente**. Dado desconhecido ≠ €0, sem ligação ou inviável; tempo de ida histórico ≠ retorno viável. Uma fonte antiga não fecha pendência automaticamente. Link de fonte ausente deve virar orientação de pesquisa, não URL inventada.
+8. **Sem novo botão “concluir tarefa” no MVP**: a pendência muda apenas quando o dado de origem muda validamente. Não guardar dispensas ou comentários sensíveis. A continuidade privada UX 3.6 é opcional e não deve ser exigida para ler os próximos passos; nunca escrever dados pessoais no GitHub, Drive ou logs.
 
-## Guardrails
+## Jornadas antes → depois
 
-- Não alterar `TripPlan` ou decisões do Drive automaticamente. Se houver persistência de pendências, usar o storage privado aprovado em UX 3.6 ou backup local com consentimento.
-- **Sem avisos alarmistas** nem excesso de badges; o usuário precisa compreender implicação prática, não uma suposta nota de maturidade.
-- Não interpretar legislação/autorizações de permanência como garantidas; requisitos legais precisam de fonte oficial atual e status informativo.
-- Não transformar o produto em leitor de notícias ou rastreador genérico.
-- Pendências de segurança e retorno não desaparecem só porque uma etapa foi marcada `organizada` no calendário.
+**Visita sem retorno comprovado:** antes, o calendário informa “sem retorno/última milha”, mas não conduz à pesquisa. Depois, ao abrir a visita, uma ação mostra “Confirme o trem de volta e a última milha para o dia planejado”; o CTA leva à pesquisa pertinente e o retorno preserva a visita e a data. **A data continua apenas aprovada no roteiro, não reservada.**
 
-## Aceite
+**Nenhuma proposta de calendário:** antes, surge “não há novas datas sugeríveis”. Depois, quando houver causa já conhecida no modelo, a interface expõe a primeira lacuna acionável sem inventar sugestão. Se não houver causa estruturada, informa honestamente a limitação e mantém o fluxo manual da 3.5.
 
-- Ao comparar Offenburg e Mulhouse, um trajeto sem retorno documentado cria **uma** pendência contextual, mesmo se houver várias atrações no destino.
-- Selecionar uma pendência abre a decisão correspondente e voltar restaura o editor sem retornar ao início.
-- Dados ferroviários sem pesquisa não geram `sem ligação`, `impossível` ou custo 0.
-- A mesma pendência não aparece com contagens conflitantes em três páginas.
-- Após resolver a fonte (sem alterar o plano), a pendência muda de status corretamente; quando fonte fica obsoleta, reabre.
-- Top 3 próximos passos no resumo provêm de bloqueios reais do plano, não de itens aleatórios do catálogo.
-- Avaliar com usuários leigos: identificar em até duas ações o dado mais importante para uma decisão e explicar a diferença entre `não pesquisado` e `não viável`.
-- Testes de módulo puro, versionamento de fonte, integração Streamlit, teclado/mobile, regressão de calendário e orçamento.
+**Comparar Offenburg × Mulhouse:** antes, a comparação lista seis lacunas genéricas para a candidata. Depois, apresenta até três verificações ligadas à escolha atual (ex.: retorno da mesma visita, aluguel para dois na mesma janela), sem transformar dados de uma base em prova para a outra nem aplicar a alternativa ao oficial.
 
-## Alternativa menor / condição de rejeição
+## Contratos, riscos e testes de aceite mensuráveis
 
-Se a UX 3.5 já oferecer indicadores suficientes e a navegação contextual funcionar, reduzir para um **componente reutilizável de próximos passos** com links internos. Não criar novo sistema de workflow, pontuação, feed ou notificações se apenas duplicar informação.
+- **Sem alteração canônica:** chamadas de geração, clique, navegação e retorno não mudam \`TripPlan\`, \`assignments\`, \`flexible_visits\`, cidade-base oficial, orçamento ou propostas 3.5. Teste de igualdade antes/depois e \`revision\` estável; simulação 3.4 não contamina o oficial (regressão P0 PR #44).
+- **Determinismo/deduplicação:** mesmos dados → mesmas \`key\`/ordem/quantidade; duas atrações em uma visita → um alerta de retorno; duas visitas com datas diferentes → contextos distinguíveis; nenhuma contagem divergente entre Resumo e detalhe.
+- **Sem evidência inventada:** matriz de casos: rota não pesquisada, somente ida histórica, volta sem última milha, pernoite, data de 2027 não coberta e fonte completa do período. Nenhum dos cinco primeiros vira “viável/confirmado” ou €0; a última hipótese só vira verificada com escopo/validade demonstrados.
+- **Nenhuma sugestão 3.5:** \`suggest_calendar=[]\` com \`unresolved\` acessível via evidência existente deve mostrar a lacuna, e sem causa estruturada deve exibir fallback honesto. Não criar data automática.
+- **Navegação/recuperação:** do alerta até o contexto de pesquisa ≤1 ação; voltar à visita/data/filtro ≤1 ação; item removido ou revisão alterada → fallback compreensível, sem exceção nem mutação. Verificar AppTest e cenário manual em desktop e largura ~375 px.
+- **Prioridade contextual:** Resumo contém 0–3 ações vinculadas ao plano oficial, não itens do catálogo aleatórios; comparação exploratória não aparece como obrigação do roteiro oficial; Drive P0–P3 mantém contagem/status originais.
+- **Fontes e privacidade:** URLs somente de fontes já existentes; ausência de link não gera link; nenhuma gravação em GitHub/Drive/Secrets ou telemetria identificável; nuvem GCS indisponível não impede leitura dos alertas.
+- **Medir, não supor:** registrar baseline de ações/trocas de área, retorno, compreensão da distinção “não pesquisado” × “não viável” e taxa de conclusão de 3 tarefas em teste manual. Sem navegador/participantes, registrar pendência e não afirmar sucesso visual/acessibilidade.
 
-**Entregável futuro:** PR específico, evidências rastreáveis, testes, sem merge automático.
+## Critério para NÃO implementar
+
+Primeiro testar com pelo menos uma jornada de calendário sem proposta e uma comparação real. Se os avisos/links atuais já permitirem identificar e abrir o dado relevante em ≤1 ação e voltar em ≤1 ação, **cancelar a UX 3.7** e registrar o motivo. Se a fricção for apenas um CTA ausente, implementar **somente o CTA contextual**; rejeitar o adaptador quando ele não reduzir passos. Qualquer implementação futura exige PR separado, CI e aceite A+B, sem merge automático.
+
+**Pedido à revisão B:** verificar se o adaptador e as três ações de fato reduzem carga cognitiva em relação à UX 3.5, se a navegação é compreensível sem jargão e se o estado vazio não cria falsas promessas. B pode vetar o pacote ou reduzir a um único CTA.
