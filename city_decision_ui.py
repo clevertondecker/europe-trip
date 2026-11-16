@@ -126,11 +126,14 @@ def _render_coverage(comparison:dict)->None:
         counts=item["changes"]
         with st.container(border=True):
             st.markdown("**"+city+" versus "+comparison["official_name"]+"**")
-            cols=st.columns(4)
-            for col,(label,key) in zip(cols,(
-                ("Mais rápido","Melhorou"),("Mais lento","Piorou"),
-                ("Semelhante","Semelhante"),("Desconhecido","Não pesquisado"))):
-                col.metric(label,counts[key])
+            # Linear reading works on narrow screens and assistive technology.
+            # All four outcomes remain visible without four metric columns.
+            st.markdown(
+                f"**{counts['Melhorou']} mais rápidos** · "
+                f"**{counts['Piorou']} mais lentos** · "
+                f"{counts['Semelhante']} semelhantes · "
+                f"{counts['Não pesquisado']} sem comparação pesquisada"
+            )
             st.caption("Comparação com tempo nas duas cidades: "+
                        str(item["paired_route_times"])+"/"+
                        str(len(comparison["destinations"]))+
