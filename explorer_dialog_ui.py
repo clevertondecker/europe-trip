@@ -44,7 +44,7 @@ def render_attraction_dialog(destination_id: str, base: str, catalog: dict, rout
         available = [a["id"] for a in here]
         key = "explore_package_select_" + destination_id
         if key not in st.session_state:
-            draft = st.session_state.get("explore_simulated_choices", {}).get(destination_id, previous)
+            draft = st.session_state.get("explore_simulated_choices", {}).get(destination_id, previous or available[:3])
             st.session_state[key] = [x for x in draft if x in available][:5]
         picked = st.multiselect(
             "Atrações desejadas (até cinco)", available, key=key,
