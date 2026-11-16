@@ -82,3 +82,25 @@ O exemplo contém `null` de propósito. Não confundir metadados de fonte com ev
 8. Revisar este catálogo quando descobrir fonte melhor, queda de serviço, mudança de licença ou publicação nova.
 
 **Governança:** `AGENTS_COORDINATION.md`; alterações em módulos compartilhados pelo integrador. Nenhum commit de dados particulares, chaves, sessões, reservas, planos privados ou arquivos restritos. Este catálogo deve permanecer versionado no GitHub para reutilização; não criar planilhas paralelas por cidade.
+
+
+## Novas fontes municipais verificadas — rodada de 16/11/2026
+
+Fontes de contexto público verificadas e utilizadas **apenas em descrições qualitativas**, com URL vinculada a cada observação no dataset `data/city_profiles_enriched.json`. Não representam preços nem estadias confirmadas.
+
+| Cidade | Referência municipal / operador | Área |
+|---|---|---|
+| Mulhouse | [Turismo municipal — transporte público](https://www.tourisme-mulhouse.com/en/what-to-do-in-mulhouse/getting-around-mulhouse-by-public-transport/) | mobilidade e museus |
+| Strasbourg | [Turismo oficial — bairros e áreas](https://www.visitstrasbourg.fr/en/discover/strasbourg-and-its-surrounding-area/) | contexto urbano |
+| Metz | [SNCF Connect — Metz/Luxembourg](https://www.sncf-connect.com/en-en/train/timetables/metz/luxembourg) | ligação ferroviária histórica |
+| Nancy | [Destination Nancy — turismo](https://www.destination-nancy.com/en/tourisme/) | patrimônio e parques |
+| Lille | [Ville de Lille — transports](https://www.lille.fr/Vivre-a-Lille/Me-deplacer/En-transports-en-commun) | transporte municipal |
+| Dijon | [Turismo Dijon Bourgogne](https://www.dijonbourgogne.com/en/tourism/) | contexto urbano |
+| Freiburg | [Portal municipal de turismo](https://visit.freiburg.de/en) | turismo, ambiente universitário |
+| Offenburg | [Ortenau Tourismus — Altstadt](https://www.ortenau-tourismus.de/attraktionen/offenburg-historische-innenstadt-faf825ebc9) | comércio, centro histórico |
+| Karlsruhe | [ZKM — acesso por transporte público](https://zkm.de/en/directions) | transporte urbano |
+| Trier | [Germany Travel — Trier](https://www.germany.travel/en/cities-culture/trier.html) | patrimônio romano |
+| Aachen | [Aachen Tourist Service — Catedral](https://www.aachen-tourismus.de/en/aachen-entdecken/details/poi/aachener-dom/) | patrimônio e acesso a pé |
+| Liège | [SNCB — Liège-Guillemins](https://www.belgiantrain.be/en/station-information/liege/liege-guillemins) | estação multimodal |
+
+**Atenção:** as fontes turísticas promovem seus destinos; fatos narrativos provenientes delas não constituem uma avaliação independente de habitabilidade, segurança ou custo. Nova cidade deve ser pesquisada nas mesmas categorias, com indicadores de fontes primárias e seus períodos.
