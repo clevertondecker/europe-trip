@@ -58,9 +58,28 @@ def _availability():
     return store,state.get("ux38_quotes")
 
 
+def _location_choices(existing=None):
+    """User-facing names, canonical IDs; preserve unknown legacy selections."""
+    from base_scenario_model import base_options
+    from base_change_model import destination_catalog
+    choices={"": "Sem cidade específica"}
+    for base in base_options():
+        choices.setdefault(base["id"],base["name"])
+    for code,name in destination_catalog().items():
+        choices.setdefault(code,name)
+    if existing and existing not in choices:
+        choices[existing]="Outra referência salva: "+existing
+    return choices
+
+
+def _form_namespace(previous=None):
+    """Different quotes must never share the same Streamlit widget state."""
+    return "edit_"+previous["id"].replace("-","") if previous is not None else "new"
+
+
 def _edit_form(plan,previous=None):
     is_edit=previous is not None
-    ident="edit" if is_edit else "new"
+    ident=_form_namespace(previous)
     french_start=date.fromisoformat(plan["departure_date"])+timedelta(days=plan["italy_days"])
     french_end=date.fromisoformat(plan["departure_date"])+timedelta(days=plan["total_days"])
     with st.form("ux38_form_"+ident):
@@ -70,8 +89,12 @@ def _edit_form(plan,previous=None):
                               format_func=lambda k:LABELS[k],
                               index=CATEGORIES.index(previous["category"]) if previous else 0,
                               key="ux38_"+ident+"_category")
-        city=st.text_input("Cidade/destino (ID, opcional)",value=previous["city_id"] or "" if previous else plan["base_city"],
-                           key="ux38_"+ident+"_city",max_chars=80)
+        current_city=(previous["city_id"] or "") if previous else plan["base_city"]
+        choices=_location_choices(current_city)
+        city=st.selectbox("Cidade ou destino (opcional)",list(choices),
+                          index=list(choices).index(current_city),
+                          format_func=lambda code: choices[code],
+                          key="ux38_"+ident+"_city")
         a,b,c=st.columns(3)
         money=a.text_input("Valor decimal",value=previous["amount"] if previous else "",
                            key="ux38_"+ident+"_amount",placeholder="2850.00")
@@ -107,7 +130,7 @@ def _edit_form(plan,previous=None):
                         value=previous["favorite"] if previous else False,key="ux38_"+ident+"_fav")
         done=st.form_submit_button("Atualizar cotação" if is_edit else "Adicionar cotação privada")
     if not done:return None
-    data={"name":name,"category":category,"city_id":city.strip() or None,
+    data={"name":name,"category":category,"city_id":city or None,
           "amount":money.strip(),"currency":currency,"unit":unit,
           "quantity":int(quantity),"travelers":int(travelers),
           "start_date":start.isoformat() if dated else None,
@@ -197,11 +220,12 @@ def render_quotes_details(plan:dict)->None:
 
 def render_quotes_summary(data:dict,plan:dict,finance_live:bool)->None:
     st.markdown("#### Minhas cotações pesquisadas")
-    state=st.session_state
-    collection=state.get("ux38_quotes")
+    store,collection=_availability()
+    if store is None:
+        return
     if collection is None:
-        st.caption("Para consultar suas cotações, abra **Orçamento → Detalhamento** e carregue "
-                   "os estudos privados. Nada é adicionado automaticamente ao orçamento.")
+        st.caption("Carregue suas cotações aqui mesmo para conferir o impacto hipotético "
+                   "na previsão. Nada é adicionado automaticamente ao orçamento.")
         return
     quotes=[q for q in collection["quotes"] if q["plan_id"]==plan["plan_id"]]
     if not quotes:
