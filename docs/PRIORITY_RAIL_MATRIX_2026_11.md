@@ -50,6 +50,27 @@ Se, apenas como **hipótese de planejamento**, cada uma das cinco voltas consumi
 - A classificação de bate-volta/pernoite é editorial, não confirmação; não há horários de volta validados.
 - A matriz de doze bases finalistas deve ser expandida depois, começando pelos destinos **já escolhidos** no plano, bases comparadas de fato e trajetos com mais impacto em incerteza. Esta entrega não pesquisa todas as combinações.
 
+## Lacunas remanescentes nas doze cidades finalistas
+
+Inventário dos **mesmos cinco destinos prioritários**, consultando as quatro fontes suportadas (`base_destination_routes`, `five_base_comparison_evidence`, `exploration_bases`, `base_city_rail_evidence_expanded`). Um trecho conta como pesquisado somente quando há minutos observados; `null` não vira rota inviável.
+
+| Base | Tempos existentes / 5 | Prioridade de lacunas |
+|---|---:|---|
+| Mulhouse | 5/5 | Verificar volta, preços e fontes secundárias |
+| Strasbourg | 5/5 | Verificar volta, preços e fontes secundárias |
+| Metz | 1/5 | Interlaken, Bruxelas, Brugge, Rotterdam |
+| Nancy | 0/5 | Todos os cinco |
+| Lille | 3/5 | Luxemburgo, Interlaken |
+| Dijon | 0/5 | Todos os cinco |
+| Freiburg im Breisgau | 0/5 | Todos os cinco |
+| Offenburg | 0/5 | Todos os cinco |
+| Karlsruhe | 0/5 | Todos os cinco |
+| Trier | 1/5 | Interlaken, Bruxelas, Brugge, Rotterdam |
+| Aachen | 0/5 | Todos os cinco |
+| Liège | 0/5 | Todos os cinco |
+
+**Não significa que as bases não tenham outras rotas pesquisadas**: o denominador nesta tabela é estritamente Luxemburgo, Interlaken, Bruxelas, Brugge e Rotterdam. A próxima rodada deve partir das bases realmente selecionadas na comparação e dos destinos escolhidos no plano; depois priorizar reduzir lacunas com maior efeito na decisão, sem expandir 12 × todos os destinos indiscriminadamente.
+
 ## Validação pendente
 
 1. Revisar em sessão real o painel Explorar → Comparar → destinos prioritários.
