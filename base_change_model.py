@@ -148,6 +148,12 @@ def destination_impact(plan:dict,candidate:str,dest_ids:list[str])->list[dict]:
                     "Piorou" if delta>=15 else "Semelhante")
         rows.append({"destination_id":dest,"destination":names[dest],
                      "official_minutes":a,"candidate_minutes":b,
+                     "official_fastest_minutes":before["minutes"],
+                     "candidate_fastest_minutes":after["minutes"],
+                     "comparison_basis":("representative" if
+                         before.get("representative_minutes") is not None and
+                         after.get("representative_minutes") is not None else
+                         "fastest_reference"),
                      "delta_minutes":delta,"status":status,
                      "official_fare":before["fare"],
                      "candidate_fare":after["fare"],
