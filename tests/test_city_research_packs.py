@@ -28,12 +28,16 @@ class ResearchPackModelTests(unittest.TestCase):
         self.assertEqual(stats["coworking_city_count"],4)
         self.assertEqual(stats["neighborhood_references"],26)
         self.assertEqual(stats["rail_operator_references"],5)
-        self.assertEqual(stats["comparable_climate_cities"],0)
+        self.assertEqual(stats["comparable_climate_cities"],6)
         self.assertEqual(stats["housing_confirmed_2027"],0)
 
     def test_no_historical_data_becomes_booked(self):
         for pack in self.data["cities"]:
-            self.assertIsNone(pack["climate"]["months_9_10_11"])
+            climate=pack["climate"]
+            if climate["months_9_10_11"] is not None:
+                self.assertEqual(set(climate["months_9_10_11"]),{"9","10","11"})
+                self.assertTrue(climate["source_url"].startswith("https://"))
+                self.assertEqual(climate["normal_period"],"1991–2020")
             self.assertIsNone(pack["daily_life"]["complete_comparable_basket_eur"])
             for rail in pack["weekend_rail_references"]:
                 self.assertFalse(rail["weekend_return_confirmed"])
@@ -53,7 +57,7 @@ class ResearchPackModelTests(unittest.TestCase):
         p["cities"][0]["housing"]["historical_listings"][0]["available_after_2027_09_04"]=True
         with self.assertRaises(ValueError):validate_city_packs(p,self.canonical)
         p=deepcopy(self.data)
-        p["cities"][0]["climate"]["months_9_10_11"]={"9":15}
+        p["cities"][0]["climate"]["months_9_10_11"]={"9":{"tmean_c":15,"precip_mm":40}}
         with self.assertRaises(ValueError):validate_city_packs(p,self.canonical)
         p=deepcopy(self.data)
         p["cities"][0]["weekend_rail_references"][0]["weekend_return_confirmed"]=True
