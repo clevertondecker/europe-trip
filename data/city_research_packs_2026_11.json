@@ -27,10 +27,26 @@
         "internet_in_rental_verified": false
       },
       "climate": {
-        "months_9_10_11": null,
+        "months_9_10_11": {
+          "9": {
+            "tmean_c": 15.9,
+            "precip_mm": 61.1
+          },
+          "10": {
+            "tmean_c": 11.3,
+            "precip_mm": 69.7
+          },
+          "11": {
+            "tmean_c": 6.2,
+            "precip_mm": 58.7
+          }
+        },
         "normal_period": "1991–2020",
         "source_candidate": "https://www.data.gouv.fr/datasets/normales-climatiques-mensuelles-1991-2020-par-commune-france",
-        "method": "Ainda não extraído e conferido para município/estação; previsão 2027 não substitui normal"
+        "method": "Normais de station météorologique 1991–2020, affichées par Meteociel à partir de données Météo-France; la station peut être distante du centre",
+        "station_name": "Mulhouse",
+        "source_url": "https://www.meteociel.fr/obs/clim/normales_records.php?code=68224006",
+        "observed_at": "2026-11-16"
       },
       "housing": {
         "historical_listings": [
@@ -145,10 +161,26 @@
         "internet_in_rental_verified": false
       },
       "climate": {
-        "months_9_10_11": null,
+        "months_9_10_11": {
+          "9": {
+            "tmean_c": 16.1,
+            "precip_mm": 54.6
+          },
+          "10": {
+            "tmean_c": 11.5,
+            "precip_mm": 59.5
+          },
+          "11": {
+            "tmean_c": 6.3,
+            "precip_mm": 47.6
+          }
+        },
         "normal_period": "1991–2020",
         "source_candidate": "https://www.data.gouv.fr/datasets/normales-climatiques-mensuelles-1991-2020-par-commune-france",
-        "method": "Ainda não extraído e conferido para município/estação; previsão 2027 não substitui normal"
+        "method": "Normais de station météorologique 1991–2020, affichées par Meteociel à partir de données Météo-France; la station peut être distante du centre",
+        "station_name": "Strasbourg-Entzheim",
+        "source_url": "https://www.meteociel.fr/obs/clim/normales_records.php?code=67124001",
+        "observed_at": "2026-11-16"
       },
       "housing": {
         "historical_listings": [
@@ -278,10 +310,26 @@
         "internet_in_rental_verified": false
       },
       "climate": {
-        "months_9_10_11": null,
+        "months_9_10_11": {
+          "9": {
+            "tmean_c": 15.7,
+            "precip_mm": 61.5
+          },
+          "10": {
+            "tmean_c": 11.3,
+            "precip_mm": 64.8
+          },
+          "11": {
+            "tmean_c": 6.5,
+            "precip_mm": 64.5
+          }
+        },
         "normal_period": "1991–2020",
         "source_candidate": "https://www.data.gouv.fr/datasets/normales-climatiques-mensuelles-1991-2020-par-commune-france",
-        "method": "Ainda não extraído e conferido para município/estação; previsão 2027 não substitui normal"
+        "method": "Normais de station météorologique 1991–2020, affichées par Meteociel à partir de données Météo-France; la station peut être distante du centre",
+        "station_name": "Metz-Frescaty",
+        "source_url": "https://www.meteociel.fr/obs/clim/normales_records.php?code=57039001",
+        "observed_at": "2026-11-16"
       },
       "housing": {
         "historical_listings": [
@@ -396,10 +444,26 @@
         "internet_in_rental_verified": false
       },
       "climate": {
-        "months_9_10_11": null,
+        "months_9_10_11": {
+          "9": {
+            "tmean_c": 15.6,
+            "precip_mm": 61.1
+          },
+          "10": {
+            "tmean_c": 11.3,
+            "precip_mm": 66.5
+          },
+          "11": {
+            "tmean_c": 6.4,
+            "precip_mm": 68.9
+          }
+        },
         "normal_period": "1991–2020",
         "source_candidate": "https://www.data.gouv.fr/datasets/normales-climatiques-mensuelles-1991-2020-par-commune-france",
-        "method": "Ainda não extraído e conferido para município/estação; previsão 2027 não substitui normal"
+        "method": "Normais de station météorologique 1991–2020, affichées par Meteociel à partir de données Météo-France; la station peut être distante du centre",
+        "station_name": "Nancy-Essey",
+        "source_url": "https://www.meteociel.fr/obs/clim/normales_records.php?code=54526001",
+        "observed_at": "2026-11-16"
       },
       "housing": {
         "historical_listings": [
@@ -506,10 +570,26 @@
         "internet_in_rental_verified": false
       },
       "climate": {
-        "months_9_10_11": null,
+        "months_9_10_11": {
+          "9": {
+            "tmean_c": 15.8,
+            "precip_mm": 56.8
+          },
+          "10": {
+            "tmean_c": 11.9,
+            "precip_mm": 64.1
+          },
+          "11": {
+            "tmean_c": 7.6,
+            "precip_mm": 75
+          }
+        },
         "normal_period": "1991–2020",
         "source_candidate": "https://www.data.gouv.fr/datasets/normales-climatiques-mensuelles-1991-2020-par-commune-france",
-        "method": "Ainda não extraído e conferido para município/estação; previsão 2027 não substitui normal"
+        "method": "Normais de station météorologique 1991–2020, affichées par Meteociel à partir de données Météo-France; la station peut être distante du centre",
+        "station_name": "Lille-Lesquin",
+        "source_url": "https://www.meteociel.fr/obs/clim/normales_records.php?code=59343001",
+        "observed_at": "2026-11-16"
       },
       "housing": {
         "historical_listings": [
@@ -593,10 +673,26 @@
         "internet_in_rental_verified": false
       },
       "climate": {
-        "months_9_10_11": null,
+        "months_9_10_11": {
+          "9": {
+            "tmean_c": 16.4,
+            "precip_mm": 56.4
+          },
+          "10": {
+            "tmean_c": 11.8,
+            "precip_mm": 73.6
+          },
+          "11": {
+            "tmean_c": 6.5,
+            "precip_mm": 77.6
+          }
+        },
         "normal_period": "1991–2020",
         "source_candidate": "https://www.data.gouv.fr/datasets/normales-climatiques-mensuelles-1991-2020-par-commune-france",
-        "method": "Ainda não extraído e conferido para município/estação; previsão 2027 não substitui normal"
+        "method": "Normais de station météorologique 1991–2020, affichées par Meteociel à partir de données Météo-France; la station peut être distante du centre",
+        "station_name": "Dijon-Longvic",
+        "source_url": "https://www.meteociel.fr/obs/clim/normales_records.php?code=21473001",
+        "observed_at": "2026-11-16"
       },
       "housing": {
         "historical_listings": [
