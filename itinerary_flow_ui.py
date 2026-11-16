@@ -6,6 +6,7 @@ proposals are not hotel, ticket or timing reservations.
 """
 from __future__ import annotations
 from html import escape
+from dataclasses import asdict
 import json
 from datetime import date,timedelta
 import streamlit as st
@@ -15,8 +16,8 @@ from itinerary_flow_model import (
     period_options,UNASSIGNED,ITALY_STAGE,FRANCE_STAGE,EUROPE_STAGE_LABEL,
     validate_flow_backup
 )
-from planning_session import (active_plan,upsert_flexible_choice,
-                              remove_flexible_choice,schedule_italy_visit,
+from planning_session import (active_plan,commit_outing,delete_outing,
+                              schedule_italy_visit,
                               schedule_package,unschedule_package)
 from planning_status import save_label,explain_storage_error
 from planning_store import sync_legacy_view
@@ -70,6 +71,7 @@ def _active_stage_changed()->None:
     state=st.session_state
     state["flow_stage"]=state["flow_active_stage"]
     state["flow_active_destination"]=None
+    state.pop("flow_edit_target",None)
 
 
 
@@ -176,7 +178,8 @@ def _render_add(plan:dict,catalog:dict)->None:
                 if st.button("Adicionar ao roteiro",type="primary",
                              key="flow_add_confirm",disabled=not picked):
                     try:
-                        upsert_flexible_choice(dest_id,picked,period)
+                        outcome=commit_outing(dest_id,picked,period,confirmed=True)
+                        st.session_state["ux45_flow_result"]=asdict(outcome)
                         st.session_state["flow_notice"]=(
                             dest["name"]+" incluído em Meu roteiro. "
                             "Continue adicionando outros lugares.")
@@ -187,7 +190,8 @@ def _render_add(plan:dict,catalog:dict)->None:
                 if st.button("Atualizar atrações e período",key="flow_add_update",
                              disabled=not picked):
                     try:
-                        upsert_flexible_choice(dest_id,picked,period)
+                        outcome=commit_outing(dest_id,picked,period,confirmed=True)
+                        st.session_state["ux45_flow_result"]=asdict(outcome)
                         st.session_state["flow_notice"]=(
                             dest["name"]+" atualizado no planejamento.")
                         st.rerun()
@@ -201,7 +205,8 @@ def _render_add(plan:dict,catalog:dict)->None:
 def _edit_destination(row:dict,catalog:dict)->None:
     item=get_choice(catalog,row["id"])
     labels={x["id"]:x["name"] for x in item["attractions"]}
-    with st.expander("Editar "+item["name"],expanded=False):
+    with st.expander("Editar "+item["name"],
+                     expanded=st.session_state.get("flow_edit_target")==row["id"]):
         attractions=st.multiselect(
             "Atrações em "+item["name"],list(labels),
             default=[x for x in row["attractions"] if x in labels],
@@ -216,7 +221,9 @@ def _edit_destination(row:dict,catalog:dict)->None:
             if st.button("Salvar alterações",key="flow_edit_save_"+row["id"],
                          disabled=not attractions,width="stretch"):
                 try:
-                    upsert_flexible_choice(row["id"],attractions,chosen)
+                    outcome=commit_outing(row["id"],attractions,chosen,confirmed=True)
+                    st.session_state["ux45_flow_result"]=asdict(outcome)
+                    st.session_state.pop("flow_edit_target",None)
                     st.session_state["flow_notice"]=(
                         item["name"]+" atualizado no seu roteiro.")
                     st.rerun()
@@ -234,7 +241,9 @@ def _edit_destination(row:dict,catalog:dict)->None:
             with yes:
                 if st.button("Confirmar remoção",
                              key="flow_remove_confirm_"+row["id"],type="primary"):
-                    remove_flexible_choice(row["id"])
+                    outcome=delete_outing(row["id"],confirmed=True)
+                    st.session_state["ux45_flow_result"]=asdict(outcome)
+                    st.session_state.pop("flow_edit_target",None)
                     st.session_state.pop("flow_removing",None)
                     st.session_state["flow_notice"]=item["name"]+" removido."
                     st.rerun()
@@ -246,6 +255,9 @@ def _edit_destination(row:dict,catalog:dict)->None:
 
 def _selected_stage(rows:list[dict],stage:str,catalog:dict)->None:
     stage_rows=[r for r in rows if r["stage"]==stage]
+    focus=st.session_state.get("flow_edit_target")
+    if focus:
+        stage_rows.sort(key=lambda row:row["id"]!=focus)
     st.markdown("#### Etapa "+("1 · Lua de mel na Itália" if stage==ITALY_STAGE
                               else "2 · Temporada europeia"))
     if stage==ITALY_STAGE:
@@ -354,7 +366,8 @@ def _render_organize(plan:dict,catalog:dict)->None:
                     key="flow_organize_period",format_func=_period_label)
                 if st.button("Guardar período",key="flow_organize_save_period",
                              type="primary"):
-                    upsert_flexible_choice(dest_id,row["attractions"],value)
+                    outcome=commit_outing(dest_id,row["attractions"],value,confirmed=True)
+                    st.session_state["ux45_flow_result"]=asdict(outcome)
                     st.session_state["flow_notice"]="Período de "+row["name"]+" atualizado."
                     st.rerun()
             else:
@@ -503,6 +516,24 @@ def render_itinerary_workbench(plan:dict,catalog:dict,
              on_click=_show_save,width="stretch")
     if st.session_state.get("flow_notice"):
         st.success(st.session_state.pop("flow_notice"))
+    latest=st.session_state.pop("ux45_flow_result",None)
+    if latest:
+        st.caption(latest["name"]+" · "+str(latest["attraction_count"])+" atração(ões) · "+
+                   ("período ainda não definido" if latest["period"]==UNASSIGNED
+                    else "período "+latest["period"])+
+                   (" · "+str(len(latest["dates"]))+" data(s) preservada(s)"
+                    if latest["dates"] else " · sem data definida")+
+                   (" · retorno de transporte pendente" if latest["transport_pending"] else "")+
+                   " · alterações apenas na sessão até salvar explicitamente.")
+    origin=st.session_state.get("ux45_origin")
+    if origin and origin.get("destination_id"):
+        st.info("Você veio de "+("Explorar passeios" if origin["area"]=="Explorar"
+                else "Descobrir sugestões")+
+                ". Pode editar aqui e voltar sem perder sua pesquisa.")
+        if st.button("Voltar à pesquisa de origem",key="ux45_back_to_origin"):
+            from ux45_navigation_context import return_to_origin
+            return_to_origin(st.session_state)
+            st.rerun()
     _render_add(active_plan(),catalog)
     _render_organize(active_plan(),catalog)
     _save_panel(active_plan(),catalog)
