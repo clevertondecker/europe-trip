@@ -151,8 +151,7 @@ def _persistence(study):
         if uploaded and st.button("Importar favoritas",key="ux41_favorites_import"):
             try:
                 imported=import_favorites(uploaded.getvalue(),study)
-                _set_favorites(imported,study)
-                st.success("Favoritas recuperadas somente nesta sessão.")
+                st.session_state["ux41_pending_import"]=imported
                 st.rerun()
             except ValueError as exc:
                 st.error(str(exc))
@@ -180,6 +179,12 @@ def _persistence(study):
 def render_favorite_comparison(study,five):
     st.markdown("#### Minhas cidades favoritas")
     choices={c["id"]:c for c in study["cities"]}
+    pending=st.session_state.pop("ux41_pending_import",None)
+    if pending is not None:
+        _set_favorites(pending,study)
+        st.session_state["ux41_import_notice"]=True
+    if st.session_state.pop("ux41_import_notice",False):
+        st.success("Favoritas recuperadas nesta sessão; salve no espaço privado ou baixe o JSON.")
     saved=validate_favorites(st.session_state.get("ux41_favorites",[]),study)
     # Widget lifetime is shorter than session lifetime when activities change.
     if "ux41_favorites_widget" not in st.session_state:
