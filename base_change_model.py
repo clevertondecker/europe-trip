@@ -19,19 +19,31 @@ from data_model import get_scenario
 from unified_budget import resolve_french_budget, scenario_total
 
 
+# Canonical aliases refer to the SAME city; never merge generic names by proximity.
+DESTINATION_ALIASES={"luxembourg_city":"luxembourg"}
+EVIDENCE_ALIASES={"luxembourg":"luxembourg_city"}
+
+
+def _canonical_destination(destination:str)->str:
+    return DESTINATION_ALIASES.get(destination,destination)
+
+
 def destination_catalog() -> dict[str, str]:
     choices={row["id"]:row["name"] for row in load_attractions()["destinations"]}
     for row in load_exploration()["destinations"]:
         choices.setdefault(row["id"],row["name"])
     for row in load_rail()["segments"]:
-        choices.setdefault(row["to"],row["destination"])
+        choices.setdefault(_canonical_destination(row["to"]),row["destination"])
+    choices.pop("luxembourg_city",None)
     return choices
 
 
 def planned_destinations(plan:dict)->list[str]:
     """Show selected destinations first, then clearly-marked research examples."""
     names=destination_catalog()
-    selected=[city for city in plan.get("packages",{}) if city in names]
+    selected=[_canonical_destination(city) for city in plan.get("packages",{})
+              if _canonical_destination(city) in names]
+    selected=list(dict.fromkeys(selected))
     if selected:
         return selected[:8]
     return [city for city in ("strasbourg","colmar","basel","freiburg","luxembourg")
@@ -40,6 +52,7 @@ def planned_destinations(plan:dict)->list[str]:
 
 def known_route(base_id:str,dest_id:str)->dict:
     """Use documented 2026 sources only; don't fabricate transitive rail routes."""
+    dest_id=_canonical_destination(dest_id)
     if base_id in {"mulhouse","strasbourg","metz","nancy"}:
         data=load_base_routes()
         route=next((r for r in data["routes"] if
@@ -50,20 +63,37 @@ def known_route(base_id:str,dest_id:str)->dict:
                     "source":route["source_url"],
                     "fare_condition":route["fare_type"],
                     "basis":route.get("retrieved_at","2026"),
-                    "note":route["notes"],"return_verified":False}
+                    "note":route["notes"],"return_verified":False,
+                    "representative_minutes":route.get("representative_minutes"),
+                    "transfers":route.get("transfers"),
+                    "operator":route.get("operator"),
+                    "origin_station":route.get("departure_point"),
+                    "destination_station":route.get("arrival_point"),
+                    "frequency_reference":route.get("frequency_reference"),
+                    "provenance":route.get("provenance","four_base_matrix_2026"),
+                    "missing":route.get("missing",[])}
     # Five-base study has dated operator evidence for routes absent from the
     # original four-base itinerary matrix. Prefer an observed station time
     # over a legacy placeholder with None, never infer a train connection.
     study=load_five_base_evidence()
+    evidence_id=EVIDENCE_ALIASES.get(dest_id,dest_id)
     verified=next((r for r in study["verified_time_routes"]
-                   if r["base_id"]==base_id and r["destination_id"]==dest_id),None)
+                   if r["base_id"]==base_id and r["destination_id"]==evidence_id),None)
     if verified is not None:
         return {"minutes":verified["fastest_train_oneway_min"],
                 "fare":verified.get("advertised_from_eur_person_oneway"),
                 "source":verified["source_url"],
                 "fare_condition":"advertised_from_not_normal_verified",
                 "basis":verified["checked_at"],"note":verified["notes"],
-                "return_verified":False}
+                "return_verified":False,
+                "representative_minutes":verified.get("representative_minutes"),
+                "transfers":verified.get("transfers"),
+                "operator":verified.get("operator"),
+                "origin_station":verified.get("origin_station"),
+                "destination_station":verified.get("destination_station"),
+                "frequency_reference":verified.get("frequency_reference"),
+                "provenance":"five_base_operator_2026",
+                "missing":verified.get("missing",[])}
     rail=load_rail()
     sample=next((r for r in rail["segments"] if
                  r["from"]==base_id and r["to"]==dest_id),None)
@@ -81,7 +111,15 @@ def known_route(base_id:str,dest_id:str)->dict:
                 "fare":route["fare_from_eur_person_oneway"],
                 "source":route["source_url"],"fare_condition":route["reference_status"],
                 "basis":route["retrieved_at"],"note":route["notes"],
-                "return_verified":False}
+                "return_verified":False,
+                "representative_minutes":route.get("representative_minutes"),
+                "transfers":route.get("transfers"),
+                "operator":route.get("operator"),
+                "origin_station":route.get("origin_station"),
+                "destination_station":route.get("destination_station"),
+                "frequency_reference":route.get("frequency_reference"),
+                "provenance":route.get("provenance","exploration_source_2026"),
+                "missing":route.get("missing",[])}
     return {"minutes":None,"fare":None,"source":None,"fare_condition":None,
             "basis":None,"note":"Ainda não pesquisado", "return_verified":False}
 
@@ -92,12 +130,15 @@ def destination_impact(plan:dict,candidate:str,dest_ids:list[str])->list[dict]:
     if official not in all_bases or candidate not in all_bases:
         raise ValueError("Cidade-base desconhecida")
     names=destination_catalog()
-    if len(dest_ids)>25 or len(set(dest_ids))!=len(dest_ids) or any(d not in names for d in dest_ids):
+    if (len(dest_ids)>25 or len({_canonical_destination(d) for d in dest_ids})!=len(dest_ids)
+            or any(_canonical_destination(d) not in names for d in dest_ids)):
         raise ValueError("Destinos inválidos ou duplicados")
     rows=[]
-    for dest in dest_ids:
+    for supplied in dest_ids:
+        dest=_canonical_destination(supplied)
         before,after=known_route(official,dest),known_route(candidate,dest)
-        a,b=before["minutes"],after["minutes"]
+        a,b=(before.get("representative_minutes") or before["minutes"]),\
+            (after.get("representative_minutes") or after["minutes"])
         if a is None or b is None:
             status="Não pesquisado"
             delta=None
@@ -107,6 +148,12 @@ def destination_impact(plan:dict,candidate:str,dest_ids:list[str])->list[dict]:
                     "Piorou" if delta>=15 else "Semelhante")
         rows.append({"destination_id":dest,"destination":names[dest],
                      "official_minutes":a,"candidate_minutes":b,
+                     "official_fastest_minutes":before["minutes"],
+                     "candidate_fastest_minutes":after["minutes"],
+                     "comparison_basis":("representative" if
+                         before.get("representative_minutes") is not None and
+                         after.get("representative_minutes") is not None else
+                         "fastest_reference"),
                      "delta_minutes":delta,"status":status,
                      "official_fare":before["fare"],
                      "candidate_fare":after["fare"],
@@ -117,7 +164,11 @@ def destination_impact(plan:dict,candidate:str,dest_ids:list[str])->list[dict]:
                      "official_note":before["note"],
                      "candidate_note":after["note"],
                      "official_basis":before["basis"],
-                     "candidate_basis":after["basis"]})
+                     "candidate_basis":after["basis"],
+                     "official_representative_minutes":before.get("representative_minutes"),
+                     "candidate_representative_minutes":after.get("representative_minutes"),
+                     "official_transfers":before.get("transfers"),
+                     "candidate_transfers":after.get("transfers")})
     return rows
 
 
