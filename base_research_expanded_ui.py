@@ -8,8 +8,8 @@ from __future__ import annotations
 import streamlit as st
 
 from base_research_expanded_model import (
-    COUNTRY_FLAGS,load_research,load_rail,find_city,observed_housing,
-    decision_readiness,research_overview,
+    COUNTRY_FLAGS,PRESETS,load_research,load_rail,find_city,observed_housing,
+    decision_readiness,research_overview,normalized_score,
 )
 from five_base_comparison_model import (
     BASE_IDS,COUNTRY_FLAGS as FIVE_FLAGS,load_five_base_evidence,route_observation,
@@ -27,9 +27,19 @@ def _money(amount):
     return "Não pesquisado" if amount is None else "€ "+f"{amount:,.0f}".replace(",",".")
 
 
+def _restore_widget(widget_key:str,saved_key:str,default):
+    if widget_key not in st.session_state:
+        st.session_state[widget_key]=st.session_state.get(saved_key,default)
+
+
+def _save_widget(widget_key:str,saved_key:str):
+    st.session_state[saved_key]=st.session_state[widget_key]
+
+
 def _open_city(city_id:str)->None:
     """Only UX local widgets; never set scenario_base_selected or TripPlan."""
     st.session_state["ux40_research_activity"]="Explorar uma cidade"
+    st.session_state["ux40_selected_city"]=city_id
     st.session_state["expanded_bases_detail_city"]=city_id
 
 
@@ -155,11 +165,15 @@ def _city_profile(city_id):
 def _explore_city(study,rail,five)->None:
     st.markdown("#### Explore uma cidade")
     options={c["id"]:c for c in study["cities"]}
+    _restore_widget("expanded_bases_detail_city","ux40_selected_city",next(iter(options)))
     st.selectbox("Cidade para examinar",list(options),
                  key="expanded_bases_detail_city",
+                 on_change=_save_widget,
+                 args=("expanded_bases_detail_city","ux40_selected_city"),
                  format_func=lambda key:COUNTRY_FLAGS.get(options[key]["country"],"")+
                                         " "+options[key]["name"])
     selected=st.session_state["expanded_bases_detail_city"]
+    st.session_state["ux40_selected_city"]=selected
     city=find_city(study,selected)
     h=observed_housing(city)
     st.markdown("#### "+city["name"]+" · "+city["country"])
@@ -172,10 +186,25 @@ def _explore_city(study,rail,five)->None:
     _city_profile(selected)
     _city_housing(city)
     _city_routes(selected,five,rail)
-    with st.expander("Pesquisa técnica · critérios ainda não pontuáveis"):
+    with st.expander("Pesquisa técnica · critérios, pesos e pontuação indisponível"):
+        preset=st.segmented_control("Ponderação",["Geral","Econômico","Explorador"],
+                                    default="Geral",key="expanded_bases_rank_preset")
+        preset_id={"Geral":"general","Econômico":"economy",
+                   "Explorador":"explorer"}.get(preset,"general")
+        evaluation=next(r for r in coverage_matrix(preset_id) if r["id"]==selected)
+        weights=dict(zip(("Moradia temporária","Trens e conexões","Passeios viáveis",
+                          "Custo dos passeios","Vida cotidiana/remoto",
+                          "Países práticos"),PRESETS[preset_id]))
+        st.caption("Pesos (%): "+", ".join(k+": "+str(v) for k,v in weights.items()))
+        info=normalized_score({k:v["comparable_score"]
+                               for k,v in evaluation["criteria"].items()},preset_id)
+        st.caption("Documentação ponderada: "+
+                   f'{evaluation["documentary_weighted_percent"]:.1f}%'+
+                   " · progresso de pesquisa, não qualidade da cidade.")
+        st.caption("Cobertura para nota: "+str(info["evidence_weight"])+
+                   "%. Nota final indisponível até indicadores comparáveis.")
         for item in decision_readiness(city)["reasons"]:
             st.caption("• "+item)
-        st.caption("Nenhuma nota final: as métricas comparáveis seguem incompletas.")
         if city.get("screening_notes"):
             st.info(city["screening_notes"])
     st.button("Voltar à comparação das cinco bases",
@@ -191,14 +220,26 @@ def _all_candidates(study)->None:
     corridors=["Todos"]+sorted({c["corridor"] for c in study["cities"]})
     col1,col2=st.columns(2)
     with col1:
-        country=st.selectbox("País",countries,key="expanded_bases_country_filter")
-        corridor=st.selectbox("Corredor geográfico",corridors,key="ux40_corridor_filter")
+        _restore_widget("expanded_bases_country_filter","ux40_saved_country","Todos")
+        country=st.selectbox("País",countries,key="expanded_bases_country_filter",
+                             on_change=_save_widget,
+                             args=("expanded_bases_country_filter","ux40_saved_country"))
+        _restore_widget("ux40_corridor_filter","ux40_saved_corridor","Todos")
+        corridor=st.selectbox("Corredor geográfico",corridors,key="ux40_corridor_filter",
+                              on_change=_save_widget,
+                              args=("ux40_corridor_filter","ux40_saved_corridor"))
     with col2:
+        _restore_widget("expanded_bases_only_shortlisted","ux40_saved_finalists",False)
         finalists=st.checkbox("Mostrar somente as 12 finalistas",
-                               value=False,key="expanded_bases_only_shortlisted")
+                              key="expanded_bases_only_shortlisted",
+                              on_change=_save_widget,
+                              args=("expanded_bases_only_shortlisted","ux40_saved_finalists"))
+        _restore_widget("ux40_evidence_filter","ux40_saved_evidence","Todas")
         evidence=st.selectbox("Evidências de moradia",
                              ["Todas","Com amostras de moradia","Sem amostras de moradia"],
-                             key="ux40_evidence_filter")
+                             key="ux40_evidence_filter",
+                             on_change=_save_widget,
+                             args=("ux40_evidence_filter","ux40_saved_evidence"))
     filtered=filter_candidates(study,country=country,only_finalists=finalists,
                                corridor=corridor,evidence=evidence)
     st.caption(str(len(filtered))+" cidades encontradas nas 30 candidatas.")
@@ -207,6 +248,9 @@ def _all_candidates(study)->None:
         "País":c["country"],"Corredor":c["corridor"],
         "Finalista":"Sim" if c["shortlist"] else "Não",
         "Anúncios históricos":observed_housing(c)["count"],
+        "Menor aluguel histórico/mês":_money(observed_housing(c)["minimum_eur_month"]),
+        "Mediana da amostra/mês":_money(observed_housing(c)["median_eur_month"]),
+        "Preço final 56–60 noites":"Não cotado",
         "Pesquisa de moradia":evidence_state(c),
     } for c in filtered],hide_index=True,width="stretch")
     if filtered:
