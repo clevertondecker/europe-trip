@@ -17,10 +17,21 @@ class DQ20RailPilotTests(unittest.TestCase):
 
     def test_missing_is_not_zero_or_impossible(self):
         rows=route_matrix()
-        lack=next(r for r in rows if r["base_id"]=="freiburg" and r["destination_id"]=="bruges_be")
-        self.assertIsNone(lack["station_to_station_fastest_min"])
-        self.assertEqual(lack["feasibility"],"dados_insuficientes")
+        # Every pilot pair now has at least a historical time observation,
+        # but none has a documented weekend roundtrip.
+        self.assertTrue(all(r["station_to_station_fastest_min"] is not None for r in rows))
+        bruges=next(r for r in rows if r["base_id"]=="freiburg" and r["destination_id"]=="bruges_be")
+        self.assertEqual(bruges["station_to_station_fastest_min"],391)
+        self.assertEqual(bruges["feasibility"],"viagem_longa_ou_exigente_indicativa")
         self.assertFalse(any(r["feasibility"]=="bate_volta_comprovado" for r in rows))
+        # Test the unknown-data policy with a deliberately removed source.
+        pilot=load_pilot()
+        pilot["observations"]=[r for r in pilot["observations"] if not
+             (r["origin_id"]=="freiburg" and r["destination_id"]=="bruges_be")]
+        missing=next(r for r in route_matrix(pilot) if
+                     r["base_id"]=="freiburg" and r["destination_id"]=="bruges_be")
+        self.assertIsNone(missing["station_to_station_fastest_min"])
+        self.assertEqual(missing["feasibility"],"dados_insuficientes")
 
     def test_canonical_and_supplemental_provenance_kept(self):
         rows=route_matrix()
@@ -41,6 +52,15 @@ class DQ20RailPilotTests(unittest.TestCase):
                          "viagem_longa_ou_exigente_indicativa")
         with self.assertRaises(ValueError):
             classify_feasibility(oneway_min=0)
+
+    def test_saturday_outbound_still_not_a_verified_return(self):
+        row=next(r for r in route_matrix() if
+                 r["base_id"]=="freiburg" and r["destination_id"]=="brussels")
+        self.assertEqual(row["station_to_station_fastest_min"],330)
+        self.assertTrue(row["weekend_outbound_verified"])
+        self.assertFalse(row["weekend_return_verified"])
+        self.assertIn("weekend_return",row["missing"])
+        self.assertEqual(row["feasibility"],"viagem_longa_ou_exigente_indicativa")
 
     def test_brussels_bruges_is_only_a_verified_segment(self):
         x=combined_brussels_bruges()

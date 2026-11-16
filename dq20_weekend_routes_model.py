@@ -89,19 +89,24 @@ def route_matrix(pilot:dict|None=None,rail:dict|None=None)->list[dict]:
                             complementary["source_url"] if complementary else None)
             result={"base_id":base,"destination_id":dest,"base_name":LABELS[base],
                     "destination_name":LABELS[dest],"station_to_station_fastest_min":known,
-                    "representative_min":(complementary["average_minutes"] if complementary else
-                                          original["typical_oneway_min"]),
+                    "representative_min":(complementary["average_minutes"] if
+                                          complementary and complementary["average_minutes"] is not None
+                                          else original["typical_oneway_min"]),
                     "representative_basis":"different_dated_sample" if complementary else "canonical_only",
                     "transfers_in_example":complementary["example_transfers"] if complementary else original["transfers"],
                     "fare_eur_person_oneway":None,
                     "source_url":fastest_source,"source_records":sources,
-                    "weekend_outbound_verified":False,"weekend_return_verified":False,
+                    "weekend_outbound_verified":bool(complementary and complementary["weekend_outbound_verified"]),
+                    "weekend_return_verified":False,
                     "last_mile_verified":False,"door_to_door_min":None,
                     "destination_visit_hours":None,"overnight_confirmed":False,
                     "reference_period":"2026 samples; not a 2027 timetable",
-                    "missing":["weekend_outbound","weekend_return","first_last_mile",
-                               "door_to_door","date_specific_2027","fare_condition"],
-                    "feasibility":classify_feasibility(oneway_min=known)}
+                    "missing":(["weekend_return","first_last_mile",
+                               "door_to_door","date_specific_2027","fare_condition"]+
+                               ([] if complementary and complementary["weekend_outbound_verified"] else
+                                ["weekend_outbound"])),
+                    "feasibility":classify_feasibility(oneway_min=known,
+                                weekend_outbound=bool(complementary and complementary["weekend_outbound_verified"]))}
             results.append(result)
     return results
 
