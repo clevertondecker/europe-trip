@@ -88,7 +88,8 @@ def add_study(collection:dict,draft:dict,base_plan_id:str|None=None)->tuple[dict
     return result,ident
 
 
-def change_study(collection:dict,study_id:str,operation:str,*,name:str|None=None,\n                 draft:dict|None=None)->tuple[dict,str|None]:
+def change_study(collection:dict,study_id:str,operation:str,*,name:str|None=None,
+                 draft:dict|None=None)->tuple[dict,str|None]:
     result=validate_collection(collection)
     existing=next((s for s in result["studies"] if s["id"]==study_id),None)
     if existing is None:raise ValueError("Estudo não encontrado")
