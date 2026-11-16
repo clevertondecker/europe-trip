@@ -80,7 +80,7 @@ def render_private_studies(comparison:dict,load_draft):
     if st.button("Reabrir estudo privado",key="ux34_cloud_open"):
         load_draft(deepcopy(old))
         st.rerun()
-    operation=st.radio("Gerenciar estudo",["Renomear","Duplicar","Excluir"],
+    operation=st.radio("Gerenciar estudo",["Atualizar com comparação atual","Renomear","Duplicar","Excluir"],
                        horizontal=True,key="ux34_cloud_operation")
     new_name=st.text_input("Novo nome",key="ux34_cloud_rename_name",
                             value=old["name"])
@@ -88,8 +88,13 @@ def render_private_studies(comparison:dict,load_draft):
                           key="ux34_cloud_confirm",value=False)
     if st.button("Aplicar ao estudo privado",key="ux34_cloud_apply",disabled=not confirmed):
         try:
-            ops={"Renomear":"rename","Duplicar":"duplicate","Excluir":"delete"}
-            proposed,_=change_study(records,chosen_id,ops[operation],name=new_name)
+            from city_decision_store import make_city_draft
+            ops={"Atualizar com comparação atual":"replace",
+                 "Renomear":"rename","Duplicar":"duplicate","Excluir":"delete"}
+            revision_draft=(make_city_draft(old["name"],comparison,old["notes"])
+                            if operation=="Atualizar com comparação atual" else None)
+            proposed,_=change_study(records,chosen_id,ops[operation],
+                                    name=new_name,draft=revision_draft)
             generation=cloud_commit(store,proposed,state.get("ux34_cloud_generation"))
             state["ux34_cloud_records"]=proposed
             state["ux34_cloud_generation"]=generation
