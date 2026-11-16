@@ -83,7 +83,7 @@ def add_study(collection:dict,draft:dict)->tuple[dict,str]:
     return result,ident
 
 
-def change_study(collection:dict,study_id:str,operation:str,*,name:str|None=None)->tuple[dict,str|None]:
+def change_study(collection:dict,study_id:str,operation:str,*,name:str|None=None,\n                 draft:dict|None=None)->tuple[dict,str|None]:
     result=validate_collection(collection)
     existing=next((s for s in result["studies"] if s["id"]==study_id),None)
     if existing is None:raise ValueError("Estudo não encontrado")
@@ -94,6 +94,13 @@ def change_study(collection:dict,study_id:str,operation:str,*,name:str|None=None
         draft=deepcopy(existing["draft"])
         draft["name"]=name or (draft["name"]+" (cópia)")[:80]
         return add_study(result,draft)
+    if operation=="replace":
+        from city_decision_store import validate_city_draft
+        if draft is None:raise ValueError("Comparação atual ausente")
+        existing["draft"]=validate_city_draft(draft)
+        existing["revision"]+=1
+        existing["updated_at"]=_now()
+        return result,study_id
     if operation=="rename":
         from city_decision_store import validate_city_draft
         draft=deepcopy(existing["draft"])
