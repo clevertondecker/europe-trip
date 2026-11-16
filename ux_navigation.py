@@ -139,6 +139,8 @@ def apply(state) -> tuple[str, str | None, str | None, str | None]:
     if section not in SECTIONS[area]:
         section = DEFAULT_SECTION[area]
         state["ux_section"] = section
+    # Remember a valid task independently of a deselected Streamlit widget.
+    state["_ux_last_section"] = section
     research = ("Calendário completo" if state.get("ux_organize_view")=="Calendário completo"
                 and (area,section)==("Meu roteiro","Organizar viagem")
                 else state.get("ux_research",RESEARCH_OPTIONS[0]))
@@ -211,7 +213,12 @@ def set_area(state, area: str) -> None:
     apply(state)
 
 
-def set_task(state, area: str, section: str) -> None:
+def set_task(state, area: str, section: str | None) -> None:
+    # Clicking an already selected segmented option may emit None. Treat it
+    # as a no-op instead of crashing or silently navigating elsewhere.
+    if section is None:
+        previous = state.get("_ux_last_section")
+        section = previous if previous in SECTIONS[area] else DEFAULT_SECTION[area]
     section = TASK_ALIASES.get((area,section),section)
     if section not in SECTIONS[area]:
         raise ValueError("Tarefa de navegação inválida")
