@@ -1,0 +1,176 @@
+{
+  "schema_version": 1,
+  "checked_at": "2026-11-16",
+  "scope": "airport structure and transit legs, no confirmed 2027 flights or booked Italy departure point",
+  "italy_scenario_reference": "data/italy_honeymoon_research_2027.json",
+  "italy_candidates": [
+    "rome",
+    "salerno",
+    "maiori",
+    "naples"
+  ],
+  "hotel_location_selected": false,
+  "naples_italy_connection": {
+    "source_url": "https://www.aeroportodinapoli.it/en/by-bus",
+    "airport": "NAP",
+    "leg": "Napoli Centrale ↔ Napoli Capodichino (NAP)",
+    "approx_bus_minutes": 15,
+    "service_days_or_windows_2027_verified": false,
+    "notes": "Alibus: 15 min estimate for station-airport leg, not coastal travel, waiting, flight or luggage. Published 2026 service windows subject to change."
+  },
+  "bases": [
+    {
+      "base_id": "mulhouse",
+      "airport_options": [
+        {
+          "airport_code": "BSL_MLH_EAP",
+          "airport_name": "EuroAirport Basel–Mulhouse–Freiburg",
+          "path": [
+            "Mulhouse Gare",
+            "Saint-Louis SNCF",
+            "Distribus 11",
+            "EuroAirport terminal"
+          ],
+          "modes": [
+            "regional_rail",
+            "airport_bus"
+          ],
+          "known_segments": [
+            {
+              "leg": "Saint-Louis SNCF → terminal",
+              "approx_min_range": [
+                10,
+                15
+              ],
+              "service_headway_min_range": [
+                15,
+                30
+              ],
+              "url": "https://www.euroairport.com/en/transport"
+            }
+          ],
+          "total_door_to_door_min": null,
+          "airline_to_brazil_verified": false,
+          "notes": "Trem Saint-Louis→Mulhouse anunciado pelo operador aeroportuário, mas conexão temporal exata e acesso ao alojamento desconhecidos."
+        }
+      ]
+    },
+    {
+      "base_id": "strasbourg",
+      "airport_options": [
+        {
+          "airport_code": "SXB",
+          "airport_name": "Strasbourg Entzheim",
+          "path": [
+            "Strasbourg Gare",
+            "TER Entzheim Aéroport",
+            "terminal"
+          ],
+          "modes": [
+            "regional_rail",
+            "walking_unknown"
+          ],
+          "known_segments": [
+            {
+              "leg": "Strasbourg Gare → Entzheim Aéroport",
+              "approx_min_range": [
+                7,
+                13
+              ],
+              "service_headway_min_range": null,
+              "url": "https://www.sncf-connect.com/train/horaires/strasbourg/entzheim"
+            }
+          ],
+          "total_door_to_door_min": null,
+          "airline_to_brazil_verified": false,
+          "notes": "Horário amostrado em novembro 2026; caminhada, espera, voos e conexões internacionais por confirmar."
+        },
+        {
+          "airport_code": "BSL_MLH_EAP",
+          "airport_name": "EuroAirport Basel–Mulhouse–Freiburg",
+          "path": [
+            "Strasbourg Gare",
+            "Saint-Louis SNCF",
+            "Distribus 11",
+            "EuroAirport terminal"
+          ],
+          "modes": [
+            "regional_rail",
+            "airport_bus"
+          ],
+          "known_segments": [
+            {
+              "leg": "Saint-Louis SNCF → terminal",
+              "approx_min_range": [
+                10,
+                15
+              ],
+              "service_headway_min_range": [
+                15,
+                30
+              ],
+              "url": "https://www.euroairport.com/en/transport"
+            }
+          ],
+          "total_door_to_door_min": null,
+          "airline_to_brazil_verified": false,
+          "notes": "Alternativa estrutural, mas o trajeto total Strasbourg→aeroporto não foi cronometrado no mesmo dia."
+        }
+      ]
+    },
+    {
+      "base_id": "freiburg",
+      "airport_options": [
+        {
+          "airport_code": "BSL_MLH_EAP",
+          "airport_name": "EuroAirport Basel–Mulhouse–Freiburg",
+          "path": [
+            "Freiburg Hbf/central bus station",
+            "Freiburger Reisedienst airport bus",
+            "EuroAirport terminal"
+          ],
+          "modes": [
+            "airport_bus"
+          ],
+          "known_segments": [
+            {
+              "leg": "Freiburg central bus station → terminal",
+              "approx_min_range": [
+                60,
+                60
+              ],
+              "service_headway_min_range": [
+                60,
+                60
+              ],
+              "url": "https://www.euroairport.com/en/transport"
+            }
+          ],
+          "total_door_to_door_min": null,
+          "airline_to_brazil_verified": false,
+          "notes": "Aeroporto publica ônibus aproximadamente a cada hora, cerca de 60 minutos; hotel/espera/voos ainda desconhecidos."
+        }
+      ]
+    }
+  ],
+  "global_missing": [
+    "final_italy_accommodation_and_checkout",
+    "italy_airport_selection",
+    "date_specific_2027_flight",
+    "airline_routes_brazil",
+    "fare_and_baggage",
+    "minimum_connection_time",
+    "hotel_to_station_time",
+    "airport_checkin_margin"
+  ],
+  "flight_or_rail_from_italy": {
+    "candidates": [
+      "rail_only",
+      "flight_plus_ground",
+      "rail_plus_flight"
+    ],
+    "route_details_verified": false,
+    "total_travel_minutes": null,
+    "flight_prices_2027": null
+  }
+}
