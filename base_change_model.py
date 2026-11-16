@@ -63,7 +63,15 @@ def known_route(base_id:str,dest_id:str)->dict:
                     "source":route["source_url"],
                     "fare_condition":route["fare_type"],
                     "basis":route.get("retrieved_at","2026"),
-                    "note":route["notes"],"return_verified":False}
+                    "note":route["notes"],"return_verified":False,
+                    "representative_minutes":route.get("representative_minutes"),
+                    "transfers":route.get("transfers"),
+                    "operator":route.get("operator"),
+                    "origin_station":route.get("departure_point"),
+                    "destination_station":route.get("arrival_point"),
+                    "frequency_reference":route.get("frequency_reference"),
+                    "provenance":route.get("provenance","four_base_matrix_2026"),
+                    "missing":route.get("missing",[])}
     # Five-base study has dated operator evidence for routes absent from the
     # original four-base itinerary matrix. Prefer an observed station time
     # over a legacy placeholder with None, never infer a train connection.
@@ -103,7 +111,15 @@ def known_route(base_id:str,dest_id:str)->dict:
                 "fare":route["fare_from_eur_person_oneway"],
                 "source":route["source_url"],"fare_condition":route["reference_status"],
                 "basis":route["retrieved_at"],"note":route["notes"],
-                "return_verified":False}
+                "return_verified":False,
+                "representative_minutes":route.get("representative_minutes"),
+                "transfers":route.get("transfers"),
+                "operator":route.get("operator"),
+                "origin_station":route.get("origin_station"),
+                "destination_station":route.get("destination_station"),
+                "frequency_reference":route.get("frequency_reference"),
+                "provenance":route.get("provenance","exploration_source_2026"),
+                "missing":route.get("missing",[])}
     return {"minutes":None,"fare":None,"source":None,"fare_condition":None,
             "basis":None,"note":"Ainda não pesquisado", "return_verified":False}
 
@@ -121,7 +137,8 @@ def destination_impact(plan:dict,candidate:str,dest_ids:list[str])->list[dict]:
     for supplied in dest_ids:
         dest=_canonical_destination(supplied)
         before,after=known_route(official,dest),known_route(candidate,dest)
-        a,b=before["minutes"],after["minutes"]
+        a,b=(before.get("representative_minutes") or before["minutes"]),\
+            (after.get("representative_minutes") or after["minutes"])
         if a is None or b is None:
             status="Não pesquisado"
             delta=None
