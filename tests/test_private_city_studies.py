@@ -44,6 +44,16 @@ class PrivateCityStudiesTests(unittest.TestCase):
         deleted,_=change_study(clone,ident,"delete")
         self.assertEqual(len(deleted["studies"]),1)
 
+    def test_replace_existing_study_preserves_id_and_increments_revision(self):
+        initial,ident=add_study(empty_collection(),self.draft)
+        revised=deepcopy(self.draft)
+        revised["notes"]="Nova pesquisa"
+        updated,same=change_study(initial,ident,"replace",draft=revised)
+        self.assertEqual(same,ident)
+        self.assertEqual(updated["studies"][0]["revision"],2)
+        self.assertEqual(updated["studies"][0]["draft"]["notes"],"Nova pesquisa")
+        self.assertEqual(initial["studies"][0]["revision"],1)
+
     def test_imported_owner_field_is_never_an_authorization(self):
         collection,ident=add_study(empty_collection(),self.draft)
         collection["studies"][0]["owner"]="someone@example.com"
