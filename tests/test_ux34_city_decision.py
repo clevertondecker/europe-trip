@@ -27,8 +27,10 @@ class DecisionModelTests(unittest.TestCase):
         return compare_city_decisions(
             plan, alternatives or ["offenburg","strasbourg"],
             dests or ["strasbourg","colmar"],
-            rents if rents is not None else {"mulhouse":None,
-                                              "offenburg":None,"strasbourg":None},
+            rents if rents is not None else {
+                plan["base_city"]:None,
+                **{candidate:None for candidate in
+                   (alternatives or ["offenburg","strasbourg"])}},
             self.data,False,days,6.3,
         )
 
