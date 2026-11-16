@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "checked_at": "2026-11-16",
+  "note": "Complement to dq20; 2026 samples and general service patterns are not confirmed 2027 travel. No full base-to-destination weekend roundtrip currently verified.",
+  "patterns": [
+    {
+      "origin_id": "brussels",
+      "destination_id": "bruges_be",
+      "weekend_first": "05:56",
+      "weekend_last": "00:23",
+      "mean_rail_minutes": 64,
+      "source_url": "https://www.belgiantrain.be/en/travel-info/origin-destination/brussels-bruges",
+      "source_type": "official_operator",
+      "kind": "weekend_pattern_not_date_specific",
+      "reference_year": 2026,
+      "valid_for_2027": false
+    },
+    {
+      "origin_id": "bruges_be",
+      "destination_id": "brussels",
+      "weekend_first": "04:59",
+      "weekend_last": "23:23",
+      "mean_rail_minutes": 64,
+      "source_url": "https://www.belgiantrain.be/en/travel-info/origin-destination/brussels-bruges",
+      "source_type": "official_operator",
+      "kind": "weekend_pattern_not_date_specific",
+      "reference_year": 2026,
+      "valid_for_2027": false
+    }
+  ],
+  "dated_services": [
+    {
+      "origin_id": "freiburg",
+      "destination_id": "brussels",
+      "travel_date": "2026-11-14",
+      "depart_local": "07:06",
+      "arrive_local": "12:36",
+      "changes": 2,
+      "source_url": "https://www.bahn.de/reisen/view/verbindung/freiburg/bruessel.shtml",
+      "source_type": "official_operator",
+      "notes": "Dated Saturday outbound already cited in DQ2.0; repeat here only to model direction and clock, no return"
+    },
+    {
+      "origin_id": "strasbourg",
+      "destination_id": "luxembourg_city",
+      "travel_date": "2026-11-21",
+      "depart_local": "22:00",
+      "arrive_local": "23:49",
+      "changes": 0,
+      "source_url": "https://pickthetrain.com/trains/strasbourg-to-luxembourg/",
+      "source_type": "secondary_open_data_republication",
+      "notes": "SNCF/SBB historical open-data sample; late Saturday departure proves no useful sightseeing time that same Saturday"
+    },
+    {
+      "origin_id": "luxembourg_city",
+      "destination_id": "strasbourg",
+      "travel_date": "2026-11-17",
+      "depart_local": "16:44",
+      "arrive_local": "19:00",
+      "changes": 1,
+      "source_url": "https://www.sncf-connect.com/en-en/train/timetables/luxembourg/strasbourg",
+      "source_type": "official_operator",
+      "notes": "Tuesday sample, explicitly not evidence of Sunday return"
+    }
+  ],
+  "verification_policy": {
+    "minimum_destination_hours": 4,
+    "requires_dated_outbound": true,
+    "requires_dated_return": true,
+    "requires_same_day_for_daytrip": true,
+    "requires_local_transfer_verified": true,
+    "year_2027_requires_specific_scheduled_services": true
+  },
+  "unfinished": [
+    "Find same-weekend return for 15 pairs; verify actual journeys on Sat/Sun with date-specific operator planner",
+    "Check transfer minutes and station accessibility for each hotel/address",
+    "Explore overnight Brussels+Bruges by combining full base outbound and Sunday return, not simply city pair frequency",
+    "Interlaken Ost does not include transfer to Lauterbrunnen, Oeschinensee or mountain activities",
+    "Calculate evening return with adequate buffer and at least four usable visiting hours",
+    "Validate 2027 dates when bookings/timetables open"
+  ]
+}
