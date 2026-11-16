@@ -82,5 +82,27 @@ class ExplorerGuardTests(unittest.TestCase):
         self.assertIn("explore_close_", modal)
 
 
+class ExplorerAppTest(unittest.TestCase):
+    def test_strasbourg_dialog_opens_and_closes_without_mutation(self):
+        from pathlib import Path
+        from streamlit.testing.v1 import AppTest
+        app = AppTest.from_file(str(Path(__file__).resolve().parents[1] / "app.py"),
+                                default_timeout=115).run()
+        self.assertFalse(app.exception, [x.message for x in app.exception])
+        app.radio(key="ux_area").set_value("Explorar").run()
+        app.segmented_control(key="ux_section").set_value("Passeios").run()
+        self.assertFalse(app.exception, [x.message for x in app.exception])
+        original = deepcopy(app.session_state["advisor_plan"])
+        button = app.button(key="explore_open_strasbourg")
+        button.click().run()
+        self.assertFalse(app.exception, [x.message for x in app.exception])
+        self.assertEqual(original, app.session_state["advisor_plan"])
+        self.assertIn("explore_close_strasbourg", {x.key for x in app.button})
+        app.button(key="explore_close_strasbourg").click().run()
+        self.assertFalse(app.exception, [x.message for x in app.exception])
+        app.button(key="explore_open_metz").click().run()
+        self.assertIn("explore_close_metz", {x.key for x in app.button})
+
+
 if __name__ == "__main__":
     unittest.main()
