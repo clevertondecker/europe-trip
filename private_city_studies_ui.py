@@ -93,7 +93,6 @@ def render_private_studies(comparison:dict,load_draft):
             generation=cloud_commit(store,proposed,state.get("ux34_cloud_generation"))
             state["ux34_cloud_records"]=proposed
             state["ux34_cloud_generation"]=generation
-            state.pop("ux34_cloud_selected",None)
             st.success("Operação confirmada no armazenamento privado.")
             st.rerun()
         except StorageConflict:
