@@ -1,0 +1,1580 @@
+{
+  "schema_version": 1,
+  "checked_at": "2026-11-16",
+  "basis": "Pesquisa pública incremental; nenhum preço de 2027 ou contrato confirmado. Fatos com URL e data; panorama e corredor reaproveitam IDs e dataset legado.",
+  "scope": "Casal, aproximadamente 56–60 noites, sem automóvel, remoto, outono 2027",
+  "cities": [
+    {
+      "city_id": "mulhouse",
+      "name": "Mulhouse",
+      "country": "França",
+      "shortlist": true,
+      "corridor": "Alsácia–Basel",
+      "summary": "Cidade cadastrada no corredor Alsácia–Basel. O turismo municipal documenta uma rede de bondes e conexão entre a estação e museus, incluindo o Cité du Train.",
+      "urban_profile": [
+        "O turismo municipal documenta uma rede de bondes e conexão entre a estação e museus, incluindo o Cité du Train."
+      ],
+      "housing": {
+        "historical_offer_count": 3,
+        "historical_observed_min_eur_month": 980,
+        "historical_observed_max_eur_month": 1360,
+        "period": "amostras históricas 2026, sem contrato para 56–60 noites",
+        "availability_2027_verified": false
+      },
+      "remote_work": {
+        "internet_in_property_verified": false,
+        "coworking_verified": false
+      },
+      "daily_costs": {
+        "comparable_basket_eur": null
+      },
+      "climate": {
+        "sep_oct_nov_normals": null,
+        "period": null
+      },
+      "quality_of_life": {
+        "numeric_score": null
+      },
+      "official_statistics_source": {
+        "name": "INSEE — comparateur de territoires",
+        "url": "https://www.insee.fr/fr/statistiques/2521169"
+      },
+      "evidence": [
+        {
+          "id": "mulhouse-public-20261116",
+          "section": "transport",
+          "summary": "O turismo municipal documenta uma rede de bondes e conexão entre a estação e museus, incluindo o Cité du Train.",
+          "source_url": "https://www.tourisme-mulhouse.com/en/what-to-do-in-mulhouse/getting-around-mulhouse-by-public-transport/",
+          "observed_at": "2026-11-16",
+          "reference_period": "informação institucional sem validade contratual 2027",
+          "scope": "cidade/estação citada na fonte",
+          "kind": "primary_public_context",
+          "limitations": "Descrição pública de contexto; não comprova preço de estadia, qualidade de vida, ou horários de 2027"
+        }
+      ],
+      "advantages": [
+        "O turismo municipal documenta uma rede de bondes e conexão entre a estação e museus, incluindo o Cité du Train."
+      ],
+      "limitations": [
+        "Moradia mobiliada para 56–60 noites em 2027 ainda não confirmada",
+        "Cesta cotidiana e clima comparáveis ainda não registrados"
+      ],
+      "research_gaps": [
+        "Comparar moradia mobiliada em datas específicas",
+        "Conferir frequência, retorno e última milha das viagens de fim de semana",
+        "Pesquisar custo cotidiano, conectividade e clima municipal"
+      ],
+      "last_reviewed_at": "2026-11-16"
+    },
+    {
+      "city_id": "strasbourg",
+      "name": "Strasbourg",
+      "country": "França",
+      "shortlist": true,
+      "corridor": "Alsácia–Alemanha",
+      "summary": "Cidade cadastrada no corredor Alsácia–Alemanha. O escritório de turismo descreve os bairros Grande Île, Petite France, Krutenau e Neustadt como áreas distintas.",
+      "urban_profile": [
+        "O escritório de turismo descreve os bairros Grande Île, Petite France, Krutenau e Neustadt como áreas distintas."
+      ],
+      "housing": {
+        "historical_offer_count": 3,
+        "historical_observed_min_eur_month": 850,
+        "historical_observed_max_eur_month": 1100,
+        "period": "amostras históricas 2026, sem contrato para 56–60 noites",
+        "availability_2027_verified": false
+      },
+      "remote_work": {
+        "internet_in_property_verified": false,
+        "coworking_verified": false
+      },
+      "daily_costs": {
+        "comparable_basket_eur": null
+      },
+      "climate": {
+        "sep_oct_nov_normals": null,
+        "period": null
+      },
+      "quality_of_life": {
+        "numeric_score": null
+      },
+      "official_statistics_source": {
+        "name": "INSEE — comparateur de territoires",
+        "url": "https://www.insee.fr/fr/statistiques/2521169"
+      },
+      "evidence": [
+        {
+          "id": "strasbourg-public-20261116",
+          "section": "quality_of_life",
+          "summary": "O escritório de turismo descreve os bairros Grande Île, Petite France, Krutenau e Neustadt como áreas distintas.",
+          "source_url": "https://www.visitstrasbourg.fr/en/discover/strasbourg-and-its-surrounding-area/",
+          "observed_at": "2026-11-16",
+          "reference_period": "informação institucional sem validade contratual 2027",
+          "scope": "cidade/estação citada na fonte",
+          "kind": "primary_public_context",
+          "limitations": "Descrição pública de contexto; não comprova preço de estadia, qualidade de vida, ou horários de 2027"
+        }
+      ],
+      "advantages": [
+        "O escritório de turismo descreve os bairros Grande Île, Petite France, Krutenau e Neustadt como áreas distintas."
+      ],
+      "limitations": [
+        "Moradia mobiliada para 56–60 noites em 2027 ainda não confirmada",
+        "Cesta cotidiana e clima comparáveis ainda não registrados"
+      ],
+      "research_gaps": [
+        "Comparar moradia mobiliada em datas específicas",
+        "Conferir frequência, retorno e última milha das viagens de fim de semana",
+        "Pesquisar custo cotidiano, conectividade e clima municipal"
+      ],
+      "last_reviewed_at": "2026-11-16"
+    },
+    {
+      "city_id": "metz",
+      "name": "Metz",
+      "country": "França",
+      "shortlist": true,
+      "corridor": "Mosela–Luxemburgo",
+      "summary": "Cidade cadastrada no corredor Mosela–Luxemburgo. A ligação ferroviária Metz–Luxembourg inclui exemplos de TER diretos de aproximadamente 53–54 minutos em horários pesquisados de 2026.",
+      "urban_profile": [
+        "A ligação ferroviária Metz–Luxembourg inclui exemplos de TER diretos de aproximadamente 53–54 minutos em horários pesquisados de 2026."
+      ],
+      "housing": {
+        "historical_offer_count": 3,
+        "historical_observed_min_eur_month": 650,
+        "historical_observed_max_eur_month": 1250,
+        "period": "amostras históricas 2026, sem contrato para 56–60 noites",
+        "availability_2027_verified": false
+      },
+      "remote_work": {
+        "internet_in_property_verified": false,
+        "coworking_verified": false
+      },
+      "daily_costs": {
+        "comparable_basket_eur": null
+      },
+      "climate": {
+        "sep_oct_nov_normals": null,
+        "period": null
+      },
+      "quality_of_life": {
+        "numeric_score": null
+      },
+      "official_statistics_source": {
+        "name": "INSEE — comparateur de territoires",
+        "url": "https://www.insee.fr/fr/statistiques/2521169"
+      },
+      "evidence": [
+        {
+          "id": "metz-public-20261116",
+          "section": "transport",
+          "summary": "A ligação ferroviária Metz–Luxembourg inclui exemplos de TER diretos de aproximadamente 53–54 minutos em horários pesquisados de 2026.",
+          "source_url": "https://www.sncf-connect.com/en-en/train/timetables/metz/luxembourg",
+          "observed_at": "2026-11-16",
+          "reference_period": "informação institucional sem validade contratual 2027",
+          "scope": "cidade/estação citada na fonte",
+          "kind": "primary_public_context",
+          "limitations": "Descrição pública de contexto; não comprova preço de estadia, qualidade de vida, ou horários de 2027"
+        }
+      ],
+      "advantages": [
+        "A ligação ferroviária Metz–Luxembourg inclui exemplos de TER diretos de aproximadamente 53–54 minutos em horários pesquisados de 2026."
+      ],
+      "limitations": [
+        "Moradia mobiliada para 56–60 noites em 2027 ainda não confirmada",
+        "Cesta cotidiana e clima comparáveis ainda não registrados"
+      ],
+      "research_gaps": [
+        "Comparar moradia mobiliada em datas específicas",
+        "Conferir frequência, retorno e última milha das viagens de fim de semana",
+        "Pesquisar custo cotidiano, conectividade e clima municipal"
+      ],
+      "last_reviewed_at": "2026-11-16"
+    },
+    {
+      "city_id": "nancy",
+      "name": "Nancy",
+      "country": "França",
+      "shortlist": true,
+      "corridor": "Lorena–Luxemburgo",
+      "summary": "Cidade cadastrada no corredor Lorena–Luxemburgo. O órgão turístico municipal documenta Place Stanislas, Parc de la Pépinière e atrações Art Nouveau.",
+      "urban_profile": [
+        "O órgão turístico municipal documenta Place Stanislas, Parc de la Pépinière e atrações Art Nouveau."
+      ],
+      "housing": {
+        "historical_offer_count": 3,
+        "historical_observed_min_eur_month": 660,
+        "historical_observed_max_eur_month": 1140,
+        "period": "amostras históricas 2026, sem contrato para 56–60 noites",
+        "availability_2027_verified": false
+      },
+      "remote_work": {
+        "internet_in_property_verified": false,
+        "coworking_verified": false
+      },
+      "daily_costs": {
+        "comparable_basket_eur": null
+      },
+      "climate": {
+        "sep_oct_nov_normals": null,
+        "period": null
+      },
+      "quality_of_life": {
+        "numeric_score": null
+      },
+      "official_statistics_source": {
+        "name": "INSEE — comparateur de territoires",
+        "url": "https://www.insee.fr/fr/statistiques/2521169"
+      },
+      "evidence": [
+        {
+          "id": "nancy-public-20261116",
+          "section": "quality_of_life",
+          "summary": "O órgão turístico municipal documenta Place Stanislas, Parc de la Pépinière e atrações Art Nouveau.",
+          "source_url": "https://www.destination-nancy.com/en/tourisme/",
+          "observed_at": "2026-11-16",
+          "reference_period": "informação institucional sem validade contratual 2027",
+          "scope": "cidade/estação citada na fonte",
+          "kind": "primary_public_context",
+          "limitations": "Descrição pública de contexto; não comprova preço de estadia, qualidade de vida, ou horários de 2027"
+        }
+      ],
+      "advantages": [
+        "O órgão turístico municipal documenta Place Stanislas, Parc de la Pépinière e atrações Art Nouveau."
+      ],
+      "limitations": [
+        "Moradia mobiliada para 56–60 noites em 2027 ainda não confirmada",
+        "Cesta cotidiana e clima comparáveis ainda não registrados"
+      ],
+      "research_gaps": [
+        "Comparar moradia mobiliada em datas específicas",
+        "Conferir frequência, retorno e última milha das viagens de fim de semana",
+        "Pesquisar custo cotidiano, conectividade e clima municipal"
+      ],
+      "last_reviewed_at": "2026-11-16"
+    },
+    {
+      "city_id": "colmar",
+      "name": "Colmar",
+      "country": "França",
+      "shortlist": false,
+      "corridor": "Alsácia–Basel",
+      "summary": "Cidade cadastrada no corredor Alsácia–Basel. Pesquisa inicial: características locais específicas ainda exigem documentação.",
+      "urban_profile": [],
+      "housing": {
+        "historical_offer_count": 0,
+        "historical_observed_min_eur_month": null,
+        "historical_observed_max_eur_month": null,
+        "period": "amostras históricas 2026, sem contrato para 56–60 noites",
+        "availability_2027_verified": false
+      },
+      "remote_work": {
+        "internet_in_property_verified": false,
+        "coworking_verified": false
+      },
+      "daily_costs": {
+        "comparable_basket_eur": null
+      },
+      "climate": {
+        "sep_oct_nov_normals": null,
+        "period": null
+      },
+      "quality_of_life": {
+        "numeric_score": null
+      },
+      "official_statistics_source": {
+        "name": "INSEE — comparateur de territoires",
+        "url": "https://www.insee.fr/fr/statistiques/2521169"
+      },
+      "evidence": [],
+      "advantages": [],
+      "limitations": [
+        "Moradia mobiliada para 56–60 noites em 2027 ainda não confirmada",
+        "Cesta cotidiana e clima comparáveis ainda não registrados"
+      ],
+      "research_gaps": [
+        "Comparar moradia mobiliada em datas específicas",
+        "Conferir frequência, retorno e última milha das viagens de fim de semana",
+        "Pesquisar custo cotidiano, conectividade e clima municipal"
+      ],
+      "last_reviewed_at": "2026-11-16"
+    },
+    {
+      "city_id": "selestat",
+      "name": "Sélestat",
+      "country": "França",
+      "shortlist": false,
+      "corridor": "Alsácia central",
+      "summary": "Cidade cadastrada no corredor Alsácia central. Pesquisa inicial: características locais específicas ainda exigem documentação.",
+      "urban_profile": [],
+      "housing": {
+        "historical_offer_count": 0,
+        "historical_observed_min_eur_month": null,
+        "historical_observed_max_eur_month": null,
+        "period": "amostras históricas 2026, sem contrato para 56–60 noites",
+        "availability_2027_verified": false
+      },
+      "remote_work": {
+        "internet_in_property_verified": false,
+        "coworking_verified": false
+      },
+      "daily_costs": {
+        "comparable_basket_eur": null
+      },
+      "climate": {
+        "sep_oct_nov_normals": null,
+        "period": null
+      },
+      "quality_of_life": {
+        "numeric_score": null
+      },
+      "official_statistics_source": {
+        "name": "INSEE — comparateur de territoires",
+        "url": "https://www.insee.fr/fr/statistiques/2521169"
+      },
+      "evidence": [],
+      "advantages": [],
+      "limitations": [
+        "Moradia mobiliada para 56–60 noites em 2027 ainda não confirmada",
+        "Cesta cotidiana e clima comparáveis ainda não registrados"
+      ],
+      "research_gaps": [
+        "Comparar moradia mobiliada em datas específicas",
+        "Conferir frequência, retorno e última milha das viagens de fim de semana",
+        "Pesquisar custo cotidiano, conectividade e clima municipal"
+      ],
+      "last_reviewed_at": "2026-11-16"
+    },
+    {
+      "city_id": "saint_louis",
+      "name": "Saint-Louis",
+      "country": "França",
+      "shortlist": false,
+      "corridor": "Tríplice fronteira Basel",
+      "summary": "Cidade cadastrada no corredor Tríplice fronteira Basel. Pesquisa inicial: características locais específicas ainda exigem documentação.",
+      "urban_profile": [],
+      "housing": {
+        "historical_offer_count": 0,
+        "historical_observed_min_eur_month": null,
+        "historical_observed_max_eur_month": null,
+        "period": "amostras históricas 2026, sem contrato para 56–60 noites",
+        "availability_2027_verified": false
+      },
+      "remote_work": {
+        "internet_in_property_verified": false,
+        "coworking_verified": false
+      },
+      "daily_costs": {
+        "comparable_basket_eur": null
+      },
+      "climate": {
+        "sep_oct_nov_normals": null,
+        "period": null
+      },
+      "quality_of_life": {
+        "numeric_score": null
+      },
+      "official_statistics_source": {
+        "name": "INSEE — comparateur de territoires",
+        "url": "https://www.insee.fr/fr/statistiques/2521169"
+      },
+      "evidence": [],
+      "advantages": [],
+      "limitations": [
+        "Moradia mobiliada para 56–60 noites em 2027 ainda não confirmada",
+        "Cesta cotidiana e clima comparáveis ainda não registrados"
+      ],
+      "research_gaps": [
+        "Comparar moradia mobiliada em datas específicas",
+        "Conferir frequência, retorno e última milha das viagens de fim de semana",
+        "Pesquisar custo cotidiano, conectividade e clima municipal"
+      ],
+      "last_reviewed_at": "2026-11-16"
+    },
+    {
+      "city_id": "belfort",
+      "name": "Belfort",
+      "country": "França",
+      "shortlist": false,
+      "corridor": "Borgonha–Alsácia",
+      "summary": "Cidade cadastrada no corredor Borgonha–Alsácia. Pesquisa inicial: características locais específicas ainda exigem documentação.",
+      "urban_profile": [],
+      "housing": {
+        "historical_offer_count": 0,
+        "historical_observed_min_eur_month": null,
+        "historical_observed_max_eur_month": null,
+        "period": "amostras históricas 2026, sem contrato para 56–60 noites",
+        "availability_2027_verified": false
+      },
+      "remote_work": {
+        "internet_in_property_verified": false,
+        "coworking_verified": false
+      },
+      "daily_costs": {
+        "comparable_basket_eur": null
+      },
+      "climate": {
+        "sep_oct_nov_normals": null,
+        "period": null
+      },
+      "quality_of_life": {
+        "numeric_score": null
+      },
+      "official_statistics_source": {
+        "name": "INSEE — comparateur de territoires",
+        "url": "https://www.insee.fr/fr/statistiques/2521169"
+      },
+      "evidence": [],
+      "advantages": [],
+      "limitations": [
+        "Moradia mobiliada para 56–60 noites em 2027 ainda não confirmada",
+        "Cesta cotidiana e clima comparáveis ainda não registrados"
+      ],
+      "research_gaps": [
+        "Comparar moradia mobiliada em datas específicas",
+        "Conferir frequência, retorno e última milha das viagens de fim de semana",
+        "Pesquisar custo cotidiano, conectividade e clima municipal"
+      ],
+      "last_reviewed_at": "2026-11-16"
+    },
+    {
+      "city_id": "besancon",
+      "name": "Besançon",
+      "country": "França",
+      "shortlist": false,
+      "corridor": "Borgonha–Jura",
+      "summary": "Cidade cadastrada no corredor Borgonha–Jura. Pesquisa inicial: características locais específicas ainda exigem documentação.",
+      "urban_profile": [],
+      "housing": {
+        "historical_offer_count": 0,
+        "historical_observed_min_eur_month": null,
+        "historical_observed_max_eur_month": null,
+        "period": "amostras históricas 2026, sem contrato para 56–60 noites",
+        "availability_2027_verified": false
+      },
+      "remote_work": {
+        "internet_in_property_verified": false,
+        "coworking_verified": false
+      },
+      "daily_costs": {
+        "comparable_basket_eur": null
+      },
+      "climate": {
+        "sep_oct_nov_normals": null,
+        "period": null
+      },
+      "quality_of_life": {
+        "numeric_score": null
+      },
+      "official_statistics_source": {
+        "name": "INSEE — comparateur de territoires",
+        "url": "https://www.insee.fr/fr/statistiques/2521169"
+      },
+      "evidence": [],
+      "advantages": [],
+      "limitations": [
+        "Moradia mobiliada para 56–60 noites em 2027 ainda não confirmada",
+        "Cesta cotidiana e clima comparáveis ainda não registrados"
+      ],
+      "research_gaps": [
+        "Comparar moradia mobiliada em datas específicas",
+        "Conferir frequência, retorno e última milha das viagens de fim de semana",
+        "Pesquisar custo cotidiano, conectividade e clima municipal"
+      ],
+      "last_reviewed_at": "2026-11-16"
+    },
+    {
+      "city_id": "thionville",
+      "name": "Thionville",
+      "country": "França",
+      "shortlist": false,
+      "corridor": "Luxemburgo–Mosela",
+      "summary": "Cidade cadastrada no corredor Luxemburgo–Mosela. Pesquisa inicial: características locais específicas ainda exigem documentação.",
+      "urban_profile": [],
+      "housing": {
+        "historical_offer_count": 0,
+        "historical_observed_min_eur_month": null,
+        "historical_observed_max_eur_month": null,
+        "period": "amostras históricas 2026, sem contrato para 56–60 noites",
+        "availability_2027_verified": false
+      },
+      "remote_work": {
+        "internet_in_property_verified": false,
+        "coworking_verified": false
+      },
+      "daily_costs": {
+        "comparable_basket_eur": null
+      },
+      "climate": {
+        "sep_oct_nov_normals": null,
+        "period": null
+      },
+      "quality_of_life": {
+        "numeric_score": null
+      },
+      "official_statistics_source": {
+        "name": "INSEE — comparateur de territoires",
+        "url": "https://www.insee.fr/fr/statistiques/2521169"
+      },
+      "evidence": [],
+      "advantages": [],
+      "limitations": [
+        "Moradia mobiliada para 56–60 noites em 2027 ainda não confirmada",
+        "Cesta cotidiana e clima comparáveis ainda não registrados"
+      ],
+      "research_gaps": [
+        "Comparar moradia mobiliada em datas específicas",
+        "Conferir frequência, retorno e última milha das viagens de fim de semana",
+        "Pesquisar custo cotidiano, conectividade e clima municipal"
+      ],
+      "last_reviewed_at": "2026-11-16"
+    },
+    {
+      "city_id": "haguenau",
+      "name": "Haguenau",
+      "country": "França",
+      "shortlist": false,
+      "corridor": "Norte da Alsácia",
+      "summary": "Cidade cadastrada no corredor Norte da Alsácia. Pesquisa inicial: características locais específicas ainda exigem documentação.",
+      "urban_profile": [],
+      "housing": {
+        "historical_offer_count": 0,
+        "historical_observed_min_eur_month": null,
+        "historical_observed_max_eur_month": null,
+        "period": "amostras históricas 2026, sem contrato para 56–60 noites",
+        "availability_2027_verified": false
+      },
+      "remote_work": {
+        "internet_in_property_verified": false,
+        "coworking_verified": false
+      },
+      "daily_costs": {
+        "comparable_basket_eur": null
+      },
+      "climate": {
+        "sep_oct_nov_normals": null,
+        "period": null
+      },
+      "quality_of_life": {
+        "numeric_score": null
+      },
+      "official_statistics_source": {
+        "name": "INSEE — comparateur de territoires",
+        "url": "https://www.insee.fr/fr/statistiques/2521169"
+      },
+      "evidence": [],
+      "advantages": [],
+      "limitations": [
+        "Moradia mobiliada para 56–60 noites em 2027 ainda não confirmada",
+        "Cesta cotidiana e clima comparáveis ainda não registrados"
+      ],
+      "research_gaps": [
+        "Comparar moradia mobiliada em datas específicas",
+        "Conferir frequência, retorno e última milha das viagens de fim de semana",
+        "Pesquisar custo cotidiano, conectividade e clima municipal"
+      ],
+      "last_reviewed_at": "2026-11-16"
+    },
+    {
+      "city_id": "saverne",
+      "name": "Saverne",
+      "country": "França",
+      "shortlist": false,
+      "corridor": "Estrasburgo–Lorena",
+      "summary": "Cidade cadastrada no corredor Estrasburgo–Lorena. Pesquisa inicial: características locais específicas ainda exigem documentação.",
+      "urban_profile": [],
+      "housing": {
+        "historical_offer_count": 0,
+        "historical_observed_min_eur_month": null,
+        "historical_observed_max_eur_month": null,
+        "period": "amostras históricas 2026, sem contrato para 56–60 noites",
+        "availability_2027_verified": false
+      },
+      "remote_work": {
+        "internet_in_property_verified": false,
+        "coworking_verified": false
+      },
+      "daily_costs": {
+        "comparable_basket_eur": null
+      },
+      "climate": {
+        "sep_oct_nov_normals": null,
+        "period": null
+      },
+      "quality_of_life": {
+        "numeric_score": null
+      },
+      "official_statistics_source": {
+        "name": "INSEE — comparateur de territoires",
+        "url": "https://www.insee.fr/fr/statistiques/2521169"
+      },
+      "evidence": [],
+      "advantages": [],
+      "limitations": [
+        "Moradia mobiliada para 56–60 noites em 2027 ainda não confirmada",
+        "Cesta cotidiana e clima comparáveis ainda não registrados"
+      ],
+      "research_gaps": [
+        "Comparar moradia mobiliada em datas específicas",
+        "Conferir frequência, retorno e última milha das viagens de fim de semana",
+        "Pesquisar custo cotidiano, conectividade e clima municipal"
+      ],
+      "last_reviewed_at": "2026-11-16"
+    },
+    {
+      "city_id": "reims",
+      "name": "Reims",
+      "country": "França",
+      "shortlist": false,
+      "corridor": "Champagne–Paris",
+      "summary": "Cidade cadastrada no corredor Champagne–Paris. Pesquisa inicial: características locais específicas ainda exigem documentação.",
+      "urban_profile": [],
+      "housing": {
+        "historical_offer_count": 0,
+        "historical_observed_min_eur_month": null,
+        "historical_observed_max_eur_month": null,
+        "period": "amostras históricas 2026, sem contrato para 56–60 noites",
+        "availability_2027_verified": false
+      },
+      "remote_work": {
+        "internet_in_property_verified": false,
+        "coworking_verified": false
+      },
+      "daily_costs": {
+        "comparable_basket_eur": null
+      },
+      "climate": {
+        "sep_oct_nov_normals": null,
+        "period": null
+      },
+      "quality_of_life": {
+        "numeric_score": null
+      },
+      "official_statistics_source": {
+        "name": "INSEE — comparateur de territoires",
+        "url": "https://www.insee.fr/fr/statistiques/2521169"
+      },
+      "evidence": [],
+      "advantages": [],
+      "limitations": [
+        "Moradia mobiliada para 56–60 noites em 2027 ainda não confirmada",
+        "Cesta cotidiana e clima comparáveis ainda não registrados"
+      ],
+      "research_gaps": [
+        "Comparar moradia mobiliada em datas específicas",
+        "Conferir frequência, retorno e última milha das viagens de fim de semana",
+        "Pesquisar custo cotidiano, conectividade e clima municipal"
+      ],
+      "last_reviewed_at": "2026-11-16"
+    },
+    {
+      "city_id": "lille",
+      "name": "Lille",
+      "country": "França",
+      "shortlist": true,
+      "corridor": "Bélgica–Países Baixos",
+      "summary": "Cidade cadastrada no corredor Bélgica–Países Baixos. A prefeitura documenta transporte coletivo com linhas de metrô e navettes urbanas, com rotas e horários próprios.",
+      "urban_profile": [
+        "A prefeitura documenta transporte coletivo com linhas de metrô e navettes urbanas, com rotas e horários próprios."
+      ],
+      "housing": {
+        "historical_offer_count": 2,
+        "historical_observed_min_eur_month": 840,
+        "historical_observed_max_eur_month": 910,
+        "period": "amostras históricas 2026, sem contrato para 56–60 noites",
+        "availability_2027_verified": false
+      },
+      "remote_work": {
+        "internet_in_property_verified": false,
+        "coworking_verified": false
+      },
+      "daily_costs": {
+        "comparable_basket_eur": null
+      },
+      "climate": {
+        "sep_oct_nov_normals": null,
+        "period": null
+      },
+      "quality_of_life": {
+        "numeric_score": null
+      },
+      "official_statistics_source": {
+        "name": "INSEE — comparateur de territoires",
+        "url": "https://www.insee.fr/fr/statistiques/2521169"
+      },
+      "evidence": [
+        {
+          "id": "lille-public-20261116",
+          "section": "transport",
+          "summary": "A prefeitura documenta transporte coletivo com linhas de metrô e navettes urbanas, com rotas e horários próprios.",
+          "source_url": "https://www.lille.fr/Vivre-a-Lille/Me-deplacer/En-transports-en-commun",
+          "observed_at": "2026-11-16",
+          "reference_period": "informação institucional sem validade contratual 2027",
+          "scope": "cidade/estação citada na fonte",
+          "kind": "primary_public_context",
+          "limitations": "Descrição pública de contexto; não comprova preço de estadia, qualidade de vida, ou horários de 2027"
+        }
+      ],
+      "advantages": [
+        "A prefeitura documenta transporte coletivo com linhas de metrô e navettes urbanas, com rotas e horários próprios."
+      ],
+      "limitations": [
+        "Moradia mobiliada para 56–60 noites em 2027 ainda não confirmada",
+        "Cesta cotidiana e clima comparáveis ainda não registrados"
+      ],
+      "research_gaps": [
+        "Comparar moradia mobiliada em datas específicas",
+        "Conferir frequência, retorno e última milha das viagens de fim de semana",
+        "Pesquisar custo cotidiano, conectividade e clima municipal"
+      ],
+      "last_reviewed_at": "2026-11-16"
+    },
+    {
+      "city_id": "arras",
+      "name": "Arras",
+      "country": "França",
+      "shortlist": false,
+      "corridor": "Flandres–Lille",
+      "summary": "Cidade cadastrada no corredor Flandres–Lille. Pesquisa inicial: características locais específicas ainda exigem documentação.",
+      "urban_profile": [],
+      "housing": {
+        "historical_offer_count": 0,
+        "historical_observed_min_eur_month": null,
+        "historical_observed_max_eur_month": null,
+        "period": "amostras históricas 2026, sem contrato para 56–60 noites",
+        "availability_2027_verified": false
+      },
+      "remote_work": {
+        "internet_in_property_verified": false,
+        "coworking_verified": false
+      },
+      "daily_costs": {
+        "comparable_basket_eur": null
+      },
+      "climate": {
+        "sep_oct_nov_normals": null,
+        "period": null
+      },
+      "quality_of_life": {
+        "numeric_score": null
+      },
+      "official_statistics_source": {
+        "name": "INSEE — comparateur de territoires",
+        "url": "https://www.insee.fr/fr/statistiques/2521169"
+      },
+      "evidence": [],
+      "advantages": [],
+      "limitations": [
+        "Moradia mobiliada para 56–60 noites em 2027 ainda não confirmada",
+        "Cesta cotidiana e clima comparáveis ainda não registrados"
+      ],
+      "research_gaps": [
+        "Comparar moradia mobiliada em datas específicas",
+        "Conferir frequência, retorno e última milha das viagens de fim de semana",
+        "Pesquisar custo cotidiano, conectividade e clima municipal"
+      ],
+      "last_reviewed_at": "2026-11-16"
+    },
+    {
+      "city_id": "dijon",
+      "name": "Dijon",
+      "country": "França",
+      "shortlist": true,
+      "corridor": "Borgonha–Suíça",
+      "summary": "Cidade cadastrada no corredor Borgonha–Suíça. O escritório turístico destaca o centro histórico protegido, o patrimônio gastronômico e a relação com a região vinícola da Borgonha.",
+      "urban_profile": [
+        "O escritório turístico destaca o centro histórico protegido, o patrimônio gastronômico e a relação com a região vinícola da Borgonha."
+      ],
+      "housing": {
+        "historical_offer_count": 3,
+        "historical_observed_min_eur_month": 800,
+        "historical_observed_max_eur_month": 1350,
+        "period": "amostras históricas 2026, sem contrato para 56–60 noites",
+        "availability_2027_verified": false
+      },
+      "remote_work": {
+        "internet_in_property_verified": false,
+        "coworking_verified": false
+      },
+      "daily_costs": {
+        "comparable_basket_eur": null
+      },
+      "climate": {
+        "sep_oct_nov_normals": null,
+        "period": null
+      },
+      "quality_of_life": {
+        "numeric_score": null
+      },
+      "official_statistics_source": {
+        "name": "INSEE — comparateur de territoires",
+        "url": "https://www.insee.fr/fr/statistiques/2521169"
+      },
+      "evidence": [
+        {
+          "id": "dijon-public-20261116",
+          "section": "quality_of_life",
+          "summary": "O escritório turístico destaca o centro histórico protegido, o patrimônio gastronômico e a relação com a região vinícola da Borgonha.",
+          "source_url": "https://www.dijonbourgogne.com/en/tourism/",
+          "observed_at": "2026-11-16",
+          "reference_period": "informação institucional sem validade contratual 2027",
+          "scope": "cidade/estação citada na fonte",
+          "kind": "primary_public_context",
+          "limitations": "Descrição pública de contexto; não comprova preço de estadia, qualidade de vida, ou horários de 2027"
+        }
+      ],
+      "advantages": [
+        "O escritório turístico destaca o centro histórico protegido, o patrimônio gastronômico e a relação com a região vinícola da Borgonha."
+      ],
+      "limitations": [
+        "Moradia mobiliada para 56–60 noites em 2027 ainda não confirmada",
+        "Cesta cotidiana e clima comparáveis ainda não registrados"
+      ],
+      "research_gaps": [
+        "Comparar moradia mobiliada em datas específicas",
+        "Conferir frequência, retorno e última milha das viagens de fim de semana",
+        "Pesquisar custo cotidiano, conectividade e clima municipal"
+      ],
+      "last_reviewed_at": "2026-11-16"
+    },
+    {
+      "city_id": "freiburg",
+      "name": "Freiburg im Breisgau",
+      "country": "Alemanha",
+      "shortlist": true,
+      "corridor": "Floresta Negra–Basel",
+      "summary": "Cidade cadastrada no corredor Floresta Negra–Basel. O portal turístico oficial apresenta Freiburg como cidade universitária situada próxima à Floresta Negra, com centro histórico e mercado da catedral.",
+      "urban_profile": [
+        "O portal turístico oficial apresenta Freiburg como cidade universitária situada próxima à Floresta Negra, com centro histórico e mercado da catedral."
+      ],
+      "housing": {
+        "historical_offer_count": 3,
+        "historical_observed_min_eur_month": 1400,
+        "historical_observed_max_eur_month": 2250,
+        "period": "amostras históricas 2026, sem contrato para 56–60 noites",
+        "availability_2027_verified": false
+      },
+      "remote_work": {
+        "internet_in_property_verified": false,
+        "coworking_verified": false
+      },
+      "daily_costs": {
+        "comparable_basket_eur": null
+      },
+      "climate": {
+        "sep_oct_nov_normals": null,
+        "period": null
+      },
+      "quality_of_life": {
+        "numeric_score": null
+      },
+      "official_statistics_source": {
+        "name": "Destatis — GV-ISys",
+        "url": "https://www.destatis.de/EN/Themes/Countries-Regions/Regional-Statistics/OnlineListMunicipalities/_inhalt.html"
+      },
+      "evidence": [
+        {
+          "id": "freiburg-public-20261116",
+          "section": "quality_of_life",
+          "summary": "O portal turístico oficial apresenta Freiburg como cidade universitária situada próxima à Floresta Negra, com centro histórico e mercado da catedral.",
+          "source_url": "https://visit.freiburg.de/en",
+          "observed_at": "2026-11-16",
+          "reference_period": "informação institucional sem validade contratual 2027",
+          "scope": "cidade/estação citada na fonte",
+          "kind": "primary_public_context",
+          "limitations": "Descrição pública de contexto; não comprova preço de estadia, qualidade de vida, ou horários de 2027"
+        }
+      ],
+      "advantages": [
+        "O portal turístico oficial apresenta Freiburg como cidade universitária situada próxima à Floresta Negra, com centro histórico e mercado da catedral."
+      ],
+      "limitations": [
+        "Moradia mobiliada para 56–60 noites em 2027 ainda não confirmada",
+        "Cesta cotidiana e clima comparáveis ainda não registrados"
+      ],
+      "research_gaps": [
+        "Comparar moradia mobiliada em datas específicas",
+        "Conferir frequência, retorno e última milha das viagens de fim de semana",
+        "Pesquisar custo cotidiano, conectividade e clima municipal"
+      ],
+      "last_reviewed_at": "2026-11-16"
+    },
+    {
+      "city_id": "offenburg",
+      "name": "Offenburg",
+      "country": "Alemanha",
+      "shortlist": true,
+      "corridor": "Estrasburgo–Floresta Negra",
+      "summary": "Cidade cadastrada no corredor Estrasburgo–Floresta Negra. O escritório turístico regional documenta o centro histórico de Offenburg, com área de pedestres, comércio e restaurantes.",
+      "urban_profile": [
+        "O escritório turístico regional documenta o centro histórico de Offenburg, com área de pedestres, comércio e restaurantes."
+      ],
+      "housing": {
+        "historical_offer_count": 3,
+        "historical_observed_min_eur_month": 1200,
+        "historical_observed_max_eur_month": 2800,
+        "period": "amostras históricas 2026, sem contrato para 56–60 noites",
+        "availability_2027_verified": false
+      },
+      "remote_work": {
+        "internet_in_property_verified": false,
+        "coworking_verified": false
+      },
+      "daily_costs": {
+        "comparable_basket_eur": null
+      },
+      "climate": {
+        "sep_oct_nov_normals": null,
+        "period": null
+      },
+      "quality_of_life": {
+        "numeric_score": null
+      },
+      "official_statistics_source": {
+        "name": "Destatis — GV-ISys",
+        "url": "https://www.destatis.de/EN/Themes/Countries-Regions/Regional-Statistics/OnlineListMunicipalities/_inhalt.html"
+      },
+      "evidence": [
+        {
+          "id": "offenburg-public-20261116",
+          "section": "quality_of_life",
+          "summary": "O escritório turístico regional documenta o centro histórico de Offenburg, com área de pedestres, comércio e restaurantes.",
+          "source_url": "https://www.ortenau-tourismus.de/attraktionen/offenburg-historische-innenstadt-faf825ebc9",
+          "observed_at": "2026-11-16",
+          "reference_period": "informação institucional sem validade contratual 2027",
+          "scope": "cidade/estação citada na fonte",
+          "kind": "primary_public_context",
+          "limitations": "Descrição pública de contexto; não comprova preço de estadia, qualidade de vida, ou horários de 2027"
+        }
+      ],
+      "advantages": [
+        "O escritório turístico regional documenta o centro histórico de Offenburg, com área de pedestres, comércio e restaurantes."
+      ],
+      "limitations": [
+        "Moradia mobiliada para 56–60 noites em 2027 ainda não confirmada",
+        "Cesta cotidiana e clima comparáveis ainda não registrados"
+      ],
+      "research_gaps": [
+        "Comparar moradia mobiliada em datas específicas",
+        "Conferir frequência, retorno e última milha das viagens de fim de semana",
+        "Pesquisar custo cotidiano, conectividade e clima municipal"
+      ],
+      "last_reviewed_at": "2026-11-16"
+    },
+    {
+      "city_id": "kehl",
+      "name": "Kehl",
+      "country": "Alemanha",
+      "shortlist": false,
+      "corridor": "Estrasburgo–Alemanha",
+      "summary": "Cidade cadastrada no corredor Estrasburgo–Alemanha. Pesquisa inicial: características locais específicas ainda exigem documentação.",
+      "urban_profile": [],
+      "housing": {
+        "historical_offer_count": 0,
+        "historical_observed_min_eur_month": null,
+        "historical_observed_max_eur_month": null,
+        "period": "amostras históricas 2026, sem contrato para 56–60 noites",
+        "availability_2027_verified": false
+      },
+      "remote_work": {
+        "internet_in_property_verified": false,
+        "coworking_verified": false
+      },
+      "daily_costs": {
+        "comparable_basket_eur": null
+      },
+      "climate": {
+        "sep_oct_nov_normals": null,
+        "period": null
+      },
+      "quality_of_life": {
+        "numeric_score": null
+      },
+      "official_statistics_source": {
+        "name": "Destatis — GV-ISys",
+        "url": "https://www.destatis.de/EN/Themes/Countries-Regions/Regional-Statistics/OnlineListMunicipalities/_inhalt.html"
+      },
+      "evidence": [],
+      "advantages": [],
+      "limitations": [
+        "Moradia mobiliada para 56–60 noites em 2027 ainda não confirmada",
+        "Cesta cotidiana e clima comparáveis ainda não registrados"
+      ],
+      "research_gaps": [
+        "Comparar moradia mobiliada em datas específicas",
+        "Conferir frequência, retorno e última milha das viagens de fim de semana",
+        "Pesquisar custo cotidiano, conectividade e clima municipal"
+      ],
+      "last_reviewed_at": "2026-11-16"
+    },
+    {
+      "city_id": "karlsruhe",
+      "name": "Karlsruhe",
+      "country": "Alemanha",
+      "shortlist": true,
+      "corridor": "Renânia–Alsácia",
+      "summary": "Cidade cadastrada no corredor Renânia–Alsácia. O ZKM documenta acesso de bonde a partir da estação central e conexão urbana por transporte público.",
+      "urban_profile": [
+        "O ZKM documenta acesso de bonde a partir da estação central e conexão urbana por transporte público."
+      ],
+      "housing": {
+        "historical_offer_count": 3,
+        "historical_observed_min_eur_month": 1290,
+        "historical_observed_max_eur_month": 1790,
+        "period": "amostras históricas 2026, sem contrato para 56–60 noites",
+        "availability_2027_verified": false
+      },
+      "remote_work": {
+        "internet_in_property_verified": false,
+        "coworking_verified": false
+      },
+      "daily_costs": {
+        "comparable_basket_eur": null
+      },
+      "climate": {
+        "sep_oct_nov_normals": null,
+        "period": null
+      },
+      "quality_of_life": {
+        "numeric_score": null
+      },
+      "official_statistics_source": {
+        "name": "Destatis — GV-ISys",
+        "url": "https://www.destatis.de/EN/Themes/Countries-Regions/Regional-Statistics/OnlineListMunicipalities/_inhalt.html"
+      },
+      "evidence": [
+        {
+          "id": "karlsruhe-public-20261116",
+          "section": "transport",
+          "summary": "O ZKM documenta acesso de bonde a partir da estação central e conexão urbana por transporte público.",
+          "source_url": "https://zkm.de/en/directions",
+          "observed_at": "2026-11-16",
+          "reference_period": "informação institucional sem validade contratual 2027",
+          "scope": "cidade/estação citada na fonte",
+          "kind": "primary_public_context",
+          "limitations": "Descrição pública de contexto; não comprova preço de estadia, qualidade de vida, ou horários de 2027"
+        }
+      ],
+      "advantages": [
+        "O ZKM documenta acesso de bonde a partir da estação central e conexão urbana por transporte público."
+      ],
+      "limitations": [
+        "Moradia mobiliada para 56–60 noites em 2027 ainda não confirmada",
+        "Cesta cotidiana e clima comparáveis ainda não registrados"
+      ],
+      "research_gaps": [
+        "Comparar moradia mobiliada em datas específicas",
+        "Conferir frequência, retorno e última milha das viagens de fim de semana",
+        "Pesquisar custo cotidiano, conectividade e clima municipal"
+      ],
+      "last_reviewed_at": "2026-11-16"
+    },
+    {
+      "city_id": "baden_baden",
+      "name": "Baden-Baden",
+      "country": "Alemanha",
+      "shortlist": false,
+      "corridor": "Floresta Negra",
+      "summary": "Cidade cadastrada no corredor Floresta Negra. Pesquisa inicial: características locais específicas ainda exigem documentação.",
+      "urban_profile": [],
+      "housing": {
+        "historical_offer_count": 0,
+        "historical_observed_min_eur_month": null,
+        "historical_observed_max_eur_month": null,
+        "period": "amostras históricas 2026, sem contrato para 56–60 noites",
+        "availability_2027_verified": false
+      },
+      "remote_work": {
+        "internet_in_property_verified": false,
+        "coworking_verified": false
+      },
+      "daily_costs": {
+        "comparable_basket_eur": null
+      },
+      "climate": {
+        "sep_oct_nov_normals": null,
+        "period": null
+      },
+      "quality_of_life": {
+        "numeric_score": null
+      },
+      "official_statistics_source": {
+        "name": "Destatis — GV-ISys",
+        "url": "https://www.destatis.de/EN/Themes/Countries-Regions/Regional-Statistics/OnlineListMunicipalities/_inhalt.html"
+      },
+      "evidence": [],
+      "advantages": [],
+      "limitations": [
+        "Moradia mobiliada para 56–60 noites em 2027 ainda não confirmada",
+        "Cesta cotidiana e clima comparáveis ainda não registrados"
+      ],
+      "research_gaps": [
+        "Comparar moradia mobiliada em datas específicas",
+        "Conferir frequência, retorno e última milha das viagens de fim de semana",
+        "Pesquisar custo cotidiano, conectividade e clima municipal"
+      ],
+      "last_reviewed_at": "2026-11-16"
+    },
+    {
+      "city_id": "saarbrucken",
+      "name": "Saarbrücken",
+      "country": "Alemanha",
+      "shortlist": false,
+      "corridor": "Lorena–Renânia",
+      "summary": "Cidade cadastrada no corredor Lorena–Renânia. Pesquisa inicial: características locais específicas ainda exigem documentação.",
+      "urban_profile": [],
+      "housing": {
+        "historical_offer_count": 0,
+        "historical_observed_min_eur_month": null,
+        "historical_observed_max_eur_month": null,
+        "period": "amostras históricas 2026, sem contrato para 56–60 noites",
+        "availability_2027_verified": false
+      },
+      "remote_work": {
+        "internet_in_property_verified": false,
+        "coworking_verified": false
+      },
+      "daily_costs": {
+        "comparable_basket_eur": null
+      },
+      "climate": {
+        "sep_oct_nov_normals": null,
+        "period": null
+      },
+      "quality_of_life": {
+        "numeric_score": null
+      },
+      "official_statistics_source": {
+        "name": "Destatis — GV-ISys",
+        "url": "https://www.destatis.de/EN/Themes/Countries-Regions/Regional-Statistics/OnlineListMunicipalities/_inhalt.html"
+      },
+      "evidence": [],
+      "advantages": [],
+      "limitations": [
+        "Moradia mobiliada para 56–60 noites em 2027 ainda não confirmada",
+        "Cesta cotidiana e clima comparáveis ainda não registrados"
+      ],
+      "research_gaps": [
+        "Comparar moradia mobiliada em datas específicas",
+        "Conferir frequência, retorno e última milha das viagens de fim de semana",
+        "Pesquisar custo cotidiano, conectividade e clima municipal"
+      ],
+      "last_reviewed_at": "2026-11-16"
+    },
+    {
+      "city_id": "trier",
+      "name": "Trier",
+      "country": "Alemanha",
+      "shortlist": true,
+      "corridor": "Luxemburgo–Vale do Mosela",
+      "summary": "Cidade cadastrada no corredor Luxemburgo–Vale do Mosela. A agência alemã de turismo documenta patrimônio romano, incluindo Porta Nigra e termas imperiais.",
+      "urban_profile": [
+        "A agência alemã de turismo documenta patrimônio romano, incluindo Porta Nigra e termas imperiais."
+      ],
+      "housing": {
+        "historical_offer_count": 3,
+        "historical_observed_min_eur_month": 800,
+        "historical_observed_max_eur_month": 1380,
+        "period": "amostras históricas 2026, sem contrato para 56–60 noites",
+        "availability_2027_verified": false
+      },
+      "remote_work": {
+        "internet_in_property_verified": false,
+        "coworking_verified": false
+      },
+      "daily_costs": {
+        "comparable_basket_eur": null
+      },
+      "climate": {
+        "sep_oct_nov_normals": null,
+        "period": null
+      },
+      "quality_of_life": {
+        "numeric_score": null
+      },
+      "official_statistics_source": {
+        "name": "Destatis — GV-ISys",
+        "url": "https://www.destatis.de/EN/Themes/Countries-Regions/Regional-Statistics/OnlineListMunicipalities/_inhalt.html"
+      },
+      "evidence": [
+        {
+          "id": "trier-public-20261116",
+          "section": "quality_of_life",
+          "summary": "A agência alemã de turismo documenta patrimônio romano, incluindo Porta Nigra e termas imperiais.",
+          "source_url": "https://www.germany.travel/en/cities-culture/trier.html",
+          "observed_at": "2026-11-16",
+          "reference_period": "informação institucional sem validade contratual 2027",
+          "scope": "cidade/estação citada na fonte",
+          "kind": "primary_public_context",
+          "limitations": "Descrição pública de contexto; não comprova preço de estadia, qualidade de vida, ou horários de 2027"
+        }
+      ],
+      "advantages": [
+        "A agência alemã de turismo documenta patrimônio romano, incluindo Porta Nigra e termas imperiais."
+      ],
+      "limitations": [
+        "Moradia mobiliada para 56–60 noites em 2027 ainda não confirmada",
+        "Cesta cotidiana e clima comparáveis ainda não registrados"
+      ],
+      "research_gaps": [
+        "Comparar moradia mobiliada em datas específicas",
+        "Conferir frequência, retorno e última milha das viagens de fim de semana",
+        "Pesquisar custo cotidiano, conectividade e clima municipal"
+      ],
+      "last_reviewed_at": "2026-11-16"
+    },
+    {
+      "city_id": "lorrach",
+      "name": "Lörrach",
+      "country": "Alemanha",
+      "shortlist": false,
+      "corridor": "Basel–Floresta Negra",
+      "summary": "Cidade cadastrada no corredor Basel–Floresta Negra. Pesquisa inicial: características locais específicas ainda exigem documentação.",
+      "urban_profile": [],
+      "housing": {
+        "historical_offer_count": 0,
+        "historical_observed_min_eur_month": null,
+        "historical_observed_max_eur_month": null,
+        "period": "amostras históricas 2026, sem contrato para 56–60 noites",
+        "availability_2027_verified": false
+      },
+      "remote_work": {
+        "internet_in_property_verified": false,
+        "coworking_verified": false
+      },
+      "daily_costs": {
+        "comparable_basket_eur": null
+      },
+      "climate": {
+        "sep_oct_nov_normals": null,
+        "period": null
+      },
+      "quality_of_life": {
+        "numeric_score": null
+      },
+      "official_statistics_source": {
+        "name": "Destatis — GV-ISys",
+        "url": "https://www.destatis.de/EN/Themes/Countries-Regions/Regional-Statistics/OnlineListMunicipalities/_inhalt.html"
+      },
+      "evidence": [],
+      "advantages": [],
+      "limitations": [
+        "Moradia mobiliada para 56–60 noites em 2027 ainda não confirmada",
+        "Cesta cotidiana e clima comparáveis ainda não registrados"
+      ],
+      "research_gaps": [
+        "Comparar moradia mobiliada em datas específicas",
+        "Conferir frequência, retorno e última milha das viagens de fim de semana",
+        "Pesquisar custo cotidiano, conectividade e clima municipal"
+      ],
+      "last_reviewed_at": "2026-11-16"
+    },
+    {
+      "city_id": "aachen",
+      "name": "Aachen",
+      "country": "Alemanha",
+      "shortlist": true,
+      "corridor": "Bélgica–Países Baixos",
+      "summary": "Cidade cadastrada no corredor Bélgica–Países Baixos. O serviço oficial de turismo documenta a catedral e informa que fica a aproximadamente 15 minutos a pé da estação central.",
+      "urban_profile": [
+        "O serviço oficial de turismo documenta a catedral e informa que fica a aproximadamente 15 minutos a pé da estação central."
+      ],
+      "housing": {
+        "historical_offer_count": 3,
+        "historical_observed_min_eur_month": 1200,
+        "historical_observed_max_eur_month": 1500,
+        "period": "amostras históricas 2026, sem contrato para 56–60 noites",
+        "availability_2027_verified": false
+      },
+      "remote_work": {
+        "internet_in_property_verified": false,
+        "coworking_verified": false
+      },
+      "daily_costs": {
+        "comparable_basket_eur": null
+      },
+      "climate": {
+        "sep_oct_nov_normals": null,
+        "period": null
+      },
+      "quality_of_life": {
+        "numeric_score": null
+      },
+      "official_statistics_source": {
+        "name": "Destatis — GV-ISys",
+        "url": "https://www.destatis.de/EN/Themes/Countries-Regions/Regional-Statistics/OnlineListMunicipalities/_inhalt.html"
+      },
+      "evidence": [
+        {
+          "id": "aachen-public-20261116",
+          "section": "quality_of_life",
+          "summary": "O serviço oficial de turismo documenta a catedral e informa que fica a aproximadamente 15 minutos a pé da estação central.",
+          "source_url": "https://www.aachen-tourismus.de/en/aachen-entdecken/details/poi/aachener-dom/",
+          "observed_at": "2026-11-16",
+          "reference_period": "informação institucional sem validade contratual 2027",
+          "scope": "cidade/estação citada na fonte",
+          "kind": "primary_public_context",
+          "limitations": "Descrição pública de contexto; não comprova preço de estadia, qualidade de vida, ou horários de 2027"
+        }
+      ],
+      "advantages": [
+        "O serviço oficial de turismo documenta a catedral e informa que fica a aproximadamente 15 minutos a pé da estação central."
+      ],
+      "limitations": [
+        "Moradia mobiliada para 56–60 noites em 2027 ainda não confirmada",
+        "Cesta cotidiana e clima comparáveis ainda não registrados"
+      ],
+      "research_gaps": [
+        "Comparar moradia mobiliada em datas específicas",
+        "Conferir frequência, retorno e última milha das viagens de fim de semana",
+        "Pesquisar custo cotidiano, conectividade e clima municipal"
+      ],
+      "last_reviewed_at": "2026-11-16"
+    },
+    {
+      "city_id": "arlon",
+      "name": "Arlon",
+      "country": "Bélgica",
+      "shortlist": false,
+      "corridor": "Luxemburgo–Ardenas",
+      "summary": "Cidade cadastrada no corredor Luxemburgo–Ardenas. Pesquisa inicial: características locais específicas ainda exigem documentação.",
+      "urban_profile": [],
+      "housing": {
+        "historical_offer_count": 0,
+        "historical_observed_min_eur_month": null,
+        "historical_observed_max_eur_month": null,
+        "period": "amostras históricas 2026, sem contrato para 56–60 noites",
+        "availability_2027_verified": false
+      },
+      "remote_work": {
+        "internet_in_property_verified": false,
+        "coworking_verified": false
+      },
+      "daily_costs": {
+        "comparable_basket_eur": null
+      },
+      "climate": {
+        "sep_oct_nov_normals": null,
+        "period": null
+      },
+      "quality_of_life": {
+        "numeric_score": null
+      },
+      "official_statistics_source": {
+        "name": "Statbel — Open Data",
+        "url": "https://statbel.fgov.be/en/open-data"
+      },
+      "evidence": [],
+      "advantages": [],
+      "limitations": [
+        "Moradia mobiliada para 56–60 noites em 2027 ainda não confirmada",
+        "Cesta cotidiana e clima comparáveis ainda não registrados"
+      ],
+      "research_gaps": [
+        "Comparar moradia mobiliada em datas específicas",
+        "Conferir frequência, retorno e última milha das viagens de fim de semana",
+        "Pesquisar custo cotidiano, conectividade e clima municipal"
+      ],
+      "last_reviewed_at": "2026-11-16"
+    },
+    {
+      "city_id": "liege",
+      "name": "Liège",
+      "country": "Bélgica",
+      "shortlist": true,
+      "corridor": "Aachen–Maastricht",
+      "summary": "Cidade cadastrada no corredor Aachen–Maastricht. A operadora ferroviária belga documenta a estação Liège-Guillemins, com conexões de ônibus e bonde, Wi-Fi na estação e armários.",
+      "urban_profile": [
+        "A operadora ferroviária belga documenta a estação Liège-Guillemins, com conexões de ônibus e bonde, Wi-Fi na estação e armários."
+      ],
+      "housing": {
+        "historical_offer_count": 3,
+        "historical_observed_min_eur_month": 840,
+        "historical_observed_max_eur_month": 980,
+        "period": "amostras históricas 2026, sem contrato para 56–60 noites",
+        "availability_2027_verified": false
+      },
+      "remote_work": {
+        "internet_in_property_verified": false,
+        "coworking_verified": false
+      },
+      "daily_costs": {
+        "comparable_basket_eur": null
+      },
+      "climate": {
+        "sep_oct_nov_normals": null,
+        "period": null
+      },
+      "quality_of_life": {
+        "numeric_score": null
+      },
+      "official_statistics_source": {
+        "name": "Statbel — Open Data",
+        "url": "https://statbel.fgov.be/en/open-data"
+      },
+      "evidence": [
+        {
+          "id": "liege-public-20261116",
+          "section": "transport",
+          "summary": "A operadora ferroviária belga documenta a estação Liège-Guillemins, com conexões de ônibus e bonde, Wi-Fi na estação e armários.",
+          "source_url": "https://www.belgiantrain.be/en/station-information/liege/liege-guillemins",
+          "observed_at": "2026-11-16",
+          "reference_period": "informação institucional sem validade contratual 2027",
+          "scope": "cidade/estação citada na fonte",
+          "kind": "primary_public_context",
+          "limitations": "Descrição pública de contexto; não comprova preço de estadia, qualidade de vida, ou horários de 2027"
+        }
+      ],
+      "advantages": [
+        "A operadora ferroviária belga documenta a estação Liège-Guillemins, com conexões de ônibus e bonde, Wi-Fi na estação e armários."
+      ],
+      "limitations": [
+        "Moradia mobiliada para 56–60 noites em 2027 ainda não confirmada",
+        "Cesta cotidiana e clima comparáveis ainda não registrados"
+      ],
+      "research_gaps": [
+        "Comparar moradia mobiliada em datas específicas",
+        "Conferir frequência, retorno e última milha das viagens de fim de semana",
+        "Pesquisar custo cotidiano, conectividade e clima municipal"
+      ],
+      "last_reviewed_at": "2026-11-16"
+    },
+    {
+      "city_id": "namur",
+      "name": "Namur",
+      "country": "Bélgica",
+      "shortlist": false,
+      "corridor": "Bruxelas–Ardenas",
+      "summary": "Cidade cadastrada no corredor Bruxelas–Ardenas. Pesquisa inicial: características locais específicas ainda exigem documentação.",
+      "urban_profile": [],
+      "housing": {
+        "historical_offer_count": 0,
+        "historical_observed_min_eur_month": null,
+        "historical_observed_max_eur_month": null,
+        "period": "amostras históricas 2026, sem contrato para 56–60 noites",
+        "availability_2027_verified": false
+      },
+      "remote_work": {
+        "internet_in_property_verified": false,
+        "coworking_verified": false
+      },
+      "daily_costs": {
+        "comparable_basket_eur": null
+      },
+      "climate": {
+        "sep_oct_nov_normals": null,
+        "period": null
+      },
+      "quality_of_life": {
+        "numeric_score": null
+      },
+      "official_statistics_source": {
+        "name": "Statbel — Open Data",
+        "url": "https://statbel.fgov.be/en/open-data"
+      },
+      "evidence": [],
+      "advantages": [],
+      "limitations": [
+        "Moradia mobiliada para 56–60 noites em 2027 ainda não confirmada",
+        "Cesta cotidiana e clima comparáveis ainda não registrados"
+      ],
+      "research_gaps": [
+        "Comparar moradia mobiliada em datas específicas",
+        "Conferir frequência, retorno e última milha das viagens de fim de semana",
+        "Pesquisar custo cotidiano, conectividade e clima municipal"
+      ],
+      "last_reviewed_at": "2026-11-16"
+    },
+    {
+      "city_id": "luxembourg_city",
+      "name": "Luxembourg City",
+      "country": "Luxemburgo",
+      "shortlist": false,
+      "corridor": "Grande Região",
+      "summary": "Cidade cadastrada no corredor Grande Região. Pesquisa inicial: características locais específicas ainda exigem documentação.",
+      "urban_profile": [],
+      "housing": {
+        "historical_offer_count": 0,
+        "historical_observed_min_eur_month": null,
+        "historical_observed_max_eur_month": null,
+        "period": "amostras históricas 2026, sem contrato para 56–60 noites",
+        "availability_2027_verified": false
+      },
+      "remote_work": {
+        "internet_in_property_verified": false,
+        "coworking_verified": false
+      },
+      "daily_costs": {
+        "comparable_basket_eur": null
+      },
+      "climate": {
+        "sep_oct_nov_normals": null,
+        "period": null
+      },
+      "quality_of_life": {
+        "numeric_score": null
+      },
+      "official_statistics_source": {
+        "name": "STATEC — Statistiques",
+        "url": "https://statistiques.public.lu/en.html"
+      },
+      "evidence": [],
+      "advantages": [],
+      "limitations": [
+        "Moradia mobiliada para 56–60 noites em 2027 ainda não confirmada",
+        "Cesta cotidiana e clima comparáveis ainda não registrados"
+      ],
+      "research_gaps": [
+        "Comparar moradia mobiliada em datas específicas",
+        "Conferir frequência, retorno e última milha das viagens de fim de semana",
+        "Pesquisar custo cotidiano, conectividade e clima municipal"
+      ],
+      "last_reviewed_at": "2026-11-16"
+    },
+    {
+      "city_id": "esch",
+      "name": "Esch-sur-Alzette",
+      "country": "Luxemburgo",
+      "shortlist": false,
+      "corridor": "Luxemburgo sul",
+      "summary": "Cidade cadastrada no corredor Luxemburgo sul. Pesquisa inicial: características locais específicas ainda exigem documentação.",
+      "urban_profile": [],
+      "housing": {
+        "historical_offer_count": 0,
+        "historical_observed_min_eur_month": null,
+        "historical_observed_max_eur_month": null,
+        "period": "amostras históricas 2026, sem contrato para 56–60 noites",
+        "availability_2027_verified": false
+      },
+      "remote_work": {
+        "internet_in_property_verified": false,
+        "coworking_verified": false
+      },
+      "daily_costs": {
+        "comparable_basket_eur": null
+      },
+      "climate": {
+        "sep_oct_nov_normals": null,
+        "period": null
+      },
+      "quality_of_life": {
+        "numeric_score": null
+      },
+      "official_statistics_source": {
+        "name": "STATEC — Statistiques",
+        "url": "https://statistiques.public.lu/en.html"
+      },
+      "evidence": [],
+      "advantages": [],
+      "limitations": [
+        "Moradia mobiliada para 56–60 noites em 2027 ainda não confirmada",
+        "Cesta cotidiana e clima comparáveis ainda não registrados"
+      ],
+      "research_gaps": [
+        "Comparar moradia mobiliada em datas específicas",
+        "Conferir frequência, retorno e última milha das viagens de fim de semana",
+        "Pesquisar custo cotidiano, conectividade e clima municipal"
+      ],
+      "last_reviewed_at": "2026-11-16"
+    }
+  ]
+}
