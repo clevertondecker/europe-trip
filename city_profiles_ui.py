@@ -79,7 +79,7 @@ def _profile_card(profile:dict,row:dict):
         st.caption("População do município ("+str(demographics["reference_year"])+"): "+
                    f"{population:,}".replace(",",".")+
                    " habitantes · não inclui a aglomeração. "+
-                   "[Fonte INSEE]("+demographics["source_url"]+")")
+                   "[Fonte estatística municipal]("+demographics["source_url"]+")")
     with st.container(border=True):
         st.markdown("**Vida prática durante dois meses**")
         housing=profile["housing"]
