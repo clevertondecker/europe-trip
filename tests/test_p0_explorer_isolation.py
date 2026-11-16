@@ -102,6 +102,9 @@ class ExplorerAppTest(unittest.TestCase):
         self.assertFalse(app.exception, [x.message for x in app.exception])
         app.button(key="explore_open_metz").click().run()
         self.assertIn("explore_close_metz", {x.key for x in app.button})
+        app.button(key="explore_close_metz").click().run()
+        app.button(key="explore_open_strasbourg").click().run()
+        self.assertIn("explore_close_strasbourg", {x.key for x in app.button})
 
 
 if __name__ == "__main__":
