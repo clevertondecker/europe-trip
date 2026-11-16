@@ -423,10 +423,6 @@ elif ux_area=="Meu roteiro" and ux_section=="Melhorar meu roteiro":
     if st.session_state.get("ux_improve_view")=="Guias especializados":
         st.selectbox("Qual guia?",list(UX_GUIDES),
                      key="ux_guide_view",on_change=_ux_aux_changed)
-elif ux_area=="Explorar" and ux_section=="Cidades-base":
-    st.segmented_control("Conteúdo da cidade-base",
-                         ["Visão da cidade","Pesquisa ampliada"],
-                         key="ux_city_view",on_change=_ux_aux_changed)
 elif ux_area=="Orçamento" and ux_section=="Simulações":
     st.segmented_control("Ferramenta de simulação",
                          ["Simulação geral","Consultor de passeios"],
@@ -444,7 +440,7 @@ page,itinerary_target,guide_target,base_target=ux_route(
     city_view=st.session_state.get("ux_city_view","Visão da cidade"),
     budget_view=st.session_state.get("ux_budget_view","Simulação geral"),
     guide_view=st.session_state.get("ux_guide_view","Itália e Costa Amalfitana"))
-if ux_area!="Minha viagem":
+if ux_area!="Minha viagem" and (ux_area,ux_section)!=("Explorar","Cidades-base"):
     st.caption(UX_DESCRIPTIONS.get((ux_area,ux_section),"Continue o planejamento."))
 if (ux_area=="Meu roteiro" and ux_section=="Melhorar meu roteiro" and
     st.session_state.get("flow_return_stage")):
@@ -1180,7 +1176,7 @@ elif page == "Roteiro":
     # The page title follows the current task, rather than showing a giant
     # generic trip dashboard above every single tool.
     task_title={
-        "Cidades-base":"Onde vale a pena ficar?",
+        "Cidades-base":"Explorar cidades-base",
         "Passeios e destinos":"O que podemos conhecer?",
         "Mais pesquisas":"Detalhes das pesquisas",
         "Meu planejamento":"Meu planejamento",
@@ -1301,14 +1297,9 @@ elif page == "Roteiro":
         render_explorer(data,sync_sources,map_view)
 
     elif itinerary_section == "Explorar bases":
-        if (ux_area=="Explorar" and ux_section=="Cidades-base" and
-            st.session_state.get("ux_city_view")=="Pesquisa ampliada"):
-            st.session_state["base_explorer_mode"]="Pesquisa ampliada"
         render_base_explorer(active_plan(),data,sync_sources["finance"]["status"]=="live",
                              st.session_state.get("advisor_eurfx",6.3),
-                             focused=(ux_area=="Explorar" and ux_section=="Cidades-base"
-                                      and st.session_state.get("ux_city_view","Visão da cidade")
-                                      == "Visão da cidade"))
+                             focused=(ux_area=="Explorar" and ux_section=="Cidades-base"))
 
     elif itinerary_section in ("Meus passeios","Descobrir","Orçamento","Calendário","Simular roteiros"):
         if itinerary_section=="Calendário":

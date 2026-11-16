@@ -30,6 +30,7 @@ def _set_favorites(ids,study):
 
 def _open_favorite_city(city_id):
     st.session_state["ux40_research_activity"]="Explorar uma cidade"
+    st.session_state["ux42_city_activity"]="Explorar cidades"
     st.session_state["ux40_selected_city"]=city_id
     st.session_state["expanded_bases_detail_city"]=city_id
 

@@ -100,18 +100,18 @@ class ExpandedBaseResearchAppTests(unittest.TestCase):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=100).run()
         app.radio(key="ux_area").set_value("Explorar").run()
         app.segmented_control(key="ux_section").set_value("Cidades-base").run()
-        app.segmented_control(key="ux_city_view").set_value("Pesquisa ampliada").run()
+        app.segmented_control(key="ux42_city_activity").set_value("Comparar favoritas").run()
         original=deepcopy(app.session_state["advisor_plan"])
-        self.assertEqual(app.session_state["ux_city_view"],"Pesquisa ampliada")
+        self.assertEqual(app.session_state["ux42_city_activity"],"Comparar favoritas")
         self.assertFalse(app.exception,[e.message for e in app.exception])
         self.assertEqual(app.session_state["advisor_plan"],original)
         # UX 4.0: filters and city details are contextual rather than on entry.
-        self.assertEqual(app.session_state["ux40_research_activity"],"Comparar cidades")
-        app.segmented_control(key="ux40_research_activity").set_value(
-            "Todas as candidatas").run()
+        self.assertEqual(app.session_state["ux42_city_activity"],"Comparar favoritas")
+        app.segmented_control(key="ux42_city_activity").set_value(
+            "Explorar cidades").run()
         self.assertIn("expanded_bases_country_filter",{x.key for x in app.selectbox})
-        app.segmented_control(key="ux40_research_activity").set_value(
-            "Explorar uma cidade").run()
+        app.segmented_control(key="ux42_city_activity").set_value(
+            "Explorar cidades").run()
         self.assertIn("expanded_bases_detail_city",{x.key for x in app.selectbox})
         self.assertIn("expanded_bases_rank_preset",{x.key for x in app.segmented_control})
         app.selectbox(key="expanded_bases_detail_city").set_value("trier").run()

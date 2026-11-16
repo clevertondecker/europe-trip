@@ -219,7 +219,7 @@ def set_task(state, area: str, section: str) -> None:
     state["ux_section"] = section
     section = TASK_ALIASES.get((area, section), section)
     if (area, section)==("Explorar", "Cidades-base"):
-        state["base_explorer_mode"]="Destinos próximos"
+        state["ux42_city_activity"]="Explorar cidades"
     apply(state)
 
 
