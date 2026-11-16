@@ -6,11 +6,13 @@ previewed, then passed to app startup for pre-widget confirmed restoration.
 from __future__ import annotations
 
 from copy import deepcopy
+from hashlib import sha256
+import json
 from private_continuity_store import PrivateArchiveStore, StorageConflict, StorageUnavailable
 import streamlit as st
 
 from continuity_archive_model import (
-    make_archive,export_archive,import_archive,preview_restore,confirm_restore,
+    make_archive,export_archive,import_archive,preview_restore,confirm_restore,plan_fingerprint,
 )
 from planning_status import save_label
 from itinerary_flow_model import selected_rows
@@ -99,6 +101,13 @@ def _private_store():
         return None
 
 
+def _archive_fingerprint(archive:dict)->str:
+    """Compare content, ignoring the generated export timestamp."""
+    value={key:val for key,val in archive.items() if key!="exported_at"}
+    raw=json.dumps(value,ensure_ascii=False,sort_keys=True,separators=(",",":")).encode("utf-8")
+    return sha256(raw).hexdigest()
+
+
 def _private_archive(plan, catalog):
     state = st.session_state
     return make_archive(plan, catalog, _safe_context(plan, catalog),
@@ -134,6 +143,9 @@ def restore_private_on_start(catalog):
         state["advisor_local_changed"] = False
         state["ux36_cloud_generation"] = generation
         state["ux36_cloud_status"] = "Salvo em espaço privado"
+        state["ux36_saved_plan_fingerprint"] = plan_fingerprint(plan)
+        state["ux36_saved_archive_fingerprint"] = _archive_fingerprint(archive)
+        state["ux36_cloud_dirty"] = False
         for target, source in (
             ("ux_area", "area"), ("ux_section", "section"),
             ("ux_organize_view", "organize_view"),
@@ -160,6 +172,8 @@ def save_private_now(plan, catalog):
     generation = store.save(raw, state.get("ux36_cloud_generation"))
     state["ux36_cloud_generation"] = generation
     state["ux36_cloud_status"] = "Salvo em espaço privado"
+    state["ux36_saved_plan_fingerprint"] = plan_fingerprint(plan)
+    state["ux36_saved_archive_fingerprint"] = _archive_fingerprint(import_archive(raw,catalog))
     state["ux36_cloud_dirty"] = False
 
 
@@ -180,6 +194,13 @@ def render_private_controls(plan, catalog):
         return
     state = st.session_state
     status = state.get("ux36_cloud_status", "Apenas nesta sessão")
+    try:
+        current = _private_archive(plan, catalog)
+        if (state.get("ux36_saved_archive_fingerprint") != _archive_fingerprint(current)
+                and status == "Salvo em espaço privado"):
+            status = "Alterações não salvas"
+    except (ValueError, TypeError, KeyError):
+        status = "Dados locais precisam de revisão antes de salvar"
     if state.get("ux36_cloud_dirty") and status == "Salvo em espaço privado":
         status = "Alterações não salvas"
     st.caption("**Status privado:** " + status)
@@ -198,7 +219,8 @@ def private_status_label(fallback):
     """Show private success only after a confirmed remote response."""
     state = st.session_state
     if (state.get("ux36_cloud_status") == "Salvo em espaço privado"
-            and not state.get("ux36_cloud_dirty")):
+            and not state.get("ux36_cloud_dirty")
+            and state.get("ux36_saved_plan_fingerprint") == plan_fingerprint(bootstrap())):
         return ("Salvo em espaço privado", "Recuperável após entrar com a conta autorizada")
     if state.get("ux36_cloud_status", "").startswith("Erro"):
         return ("Alterações apenas nesta sessão", "Salve uma cópia privada ou baixe o backup")
@@ -232,8 +254,8 @@ def render_continuity_panel(plan:dict,catalog:dict)->None:
             st.download_button("Baixar cópia de segurança",
                                data=raw,file_name="nossa-europa-copia-privada.json",
                                mime="application/json",key="ux36_download")
-            st.caption("O download não é uma confirmação de sincronização online; "
-                       "para recuperar em outro dispositivo, abra este mesmo arquivo lá.")
+            st.caption("Este download não confirma salvamento na nuvem. "
+                       "Para recuperar o arquivo manualmente em outro dispositivo, abra-o lá.")
         uploaded=st.file_uploader("Abrir cópia de segurança (JSON)",
                                   type=["json"],key="ux36_upload")
         if uploaded is not None:
@@ -291,6 +313,10 @@ def render_continuity_panel(plan:dict,catalog:dict)->None:
             if b.button("Cancelar recuperação",key="ux36_restore_cancel"):
                 st.session_state.pop("ux36_review",None)
                 st.rerun()
-        st.caption("**Status:** apenas nesta sessão ou em backup local. "
-                   "Sincronização privada automática entre dispositivos "
-                   "ainda não está disponível.")
+        if _private_store() is None:
+            st.caption("**Armazenamento:** nesta sessão ou em backup JSON local. "
+                       "Sincronização privada requer configuração no Streamlit Cloud.")
+        else:
+            st.caption("**Armazenamento:** cópia privada disponível para o proprietário autenticado. "
+                       "Salvamento automático só funciona após ativação explícita; "
+                       "rascunhos e contexto podem exigir salvar manualmente.")
