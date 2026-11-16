@@ -189,8 +189,11 @@ def render_explorer(trip_data: dict, sync_sources: dict, map_view) -> None:
             partial=package_cost(attractions,routes,base,example_ids)
             def fmt(cost):return f"€{cost:.2f}"
             if r["train_minutes_one_way"] is not None:
-                travel_label=f"{r['train_minutes_one_way']} min no trem/trecho"
-                fare=f"€{r['fare_eur_person_oneway']*4:.2f} / casal ida+volta*"
+                travel_label=f"{r['train_minutes_one_way']} min no trem/trecho (ida)"
+                fare=(f"Desde €{r['fare_eur_person_oneway']:.2f} por pessoa, "
+                      "só ida, histórico e condicional; volta a verificar"
+                      if r["fare_eur_person_oneway"] is not None else
+                      "Tarifa de ida e volta não pesquisada")
             elif d["id"]==base:
                 travel_label="Na cidade-base"
                 fare="Transporte local a verificar"
