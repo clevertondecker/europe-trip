@@ -49,12 +49,19 @@ def validate_profiles(data:dict,canonical:dict|None=None)->dict:
         if demographics is not None:
             value=demographics.get("population_municipal")
             if value is not None:
-                if type(value) is not int or value<=0 or demographics.get("reference_year")!=2023:
+                year=demographics.get("reference_year")
+                if type(value) is not int or value<=0 or type(year) is not int or not 2020<=year<=2026:
                     raise ValueError("População municipal inválida")
-                if demographics.get("geographic_scope")!="commune (municipalité)":
-                    raise ValueError("Perímetro estatístico incomparável")
-                if not str(demographics.get("source_url","")).startswith("https://www.insee.fr/"):
-                    raise ValueError("Fonte municipal não verificada")
+                scope=demographics.get("geographic_scope")
+                if not isinstance(scope,str) or not scope:
+                    raise ValueError("Perímetro de observação ausente")
+                url=demographics.get("source_url","")
+                allow={"França":("https://www.insee.fr/",),
+                       "Alemanha":("https://fritz.freiburg.de/","https://www.offenburg.de/",
+                                   "https://www.karlsruhe.de/","https://www.trier.de/",
+                                   "https://www.aachen.de/")}
+                if not isinstance(url,str) or not any(url.startswith(prefix) for prefix in allow.get(row["country"],())):
+                    raise ValueError("Fonte estatística municipal não validada")
         if row.get("housing",{}).get("availability_2027_verified") is not False:
             raise ValueError("Disponibilidade de 2027 não comprovada")
         for field in ("advantages","limitations","research_gaps","evidence"):
@@ -90,7 +97,7 @@ def compact_comparison(data:dict,city_ids:list[str])->list[dict]:
         result.append({
             "Cidade":row["name"],
             "País":row["country"],
-            "População municipal (2023)":row.get("demographics",{}).get("population_municipal") or "Não pesquisado",
+            "População municipal (ano indicado)":\n                (str(row["demographics"]["population_municipal"])+" ("+str(row["demographics"]["reference_year"])+")")\n                if row.get("demographics",{}).get("population_municipal") is not None else "Não pesquisado",
             "Corredor":row["corridor"],
             "Moradia: amostras 2026":house["historical_offer_count"],
             "Faixa observada EUR/mês":
