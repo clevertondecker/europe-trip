@@ -258,10 +258,14 @@ def _select_scenario_sidebar() -> None:
 
 
 def _ux_area_changed() -> None:
+    st.session_state.pop("ux45_origin",None)
+    st.session_state.pop("flow_edit_target",None)
     set_ux_area(st.session_state,st.session_state["ux_area"])
 
 
 def _ux_section_changed() -> None:
+    st.session_state.pop("ux45_origin",None)
+    st.session_state.pop("flow_edit_target",None)
     set_ux_task(st.session_state,st.session_state["ux_area"],
                 st.session_state["ux_section"])
 
