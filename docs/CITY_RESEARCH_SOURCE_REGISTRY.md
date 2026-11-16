@@ -133,3 +133,19 @@ Fontes de contexto público verificadas e utilizadas **apenas em descrições qu
 **Clima**: [normais francesas 1991–2020 via ERA5-Land reanalisada](https://www.data.gouv.fr/datasets/normales-climatiques-mensuelles-1991-2020-par-commune-france) são CC BY 4.0 com atribuição Copernicus obrigatória, resolução de ~9 km e não são medições de estações. Dataset identificado, **valores municipais ainda não importados** nesta rodada; não publicar médias sem ler o recurso bruto.
 
 **Custo e coworking:** manter os registros existentes em `data/city_research_round2_2026.json`; índices de Numbeo são referências colaborativas históricas, sem scraping. Horários e condições de uso dos espaços requerem revalidação diretamente com fornecedores antes da viagem.
+
+
+### Normais climáticas de estações — seis finalistas francesas (1991–2020)
+
+Valores de temperatura média (°C) e chuva mensal (mm) extraídos das tabelas de normais 1991–2020 exibidas pelo **Meteociel com dados Météo-France**, para as estações abaixo, em 16/11/2026. **Não equivalem a normais municipais pontuais**, pois estação e centro urbano podem ter altitudes/localizações diferentes.
+
+| Cidade-base | Estação de referência | URL |
+|---|---|---|
+| Mulhouse | Mulhouse | https://www.meteociel.fr/obs/clim/normales_records.php?code=68224006 |
+| Strasbourg | Strasbourg-Entzheim | https://www.meteociel.fr/obs/clim/normales_records.php?code=67124001 |
+| Metz | Metz-Frescaty | https://www.meteociel.fr/obs/clim/normales_records.php?code=57039001 |
+| Nancy | Nancy-Essey | https://www.meteociel.fr/obs/clim/normales_records.php?code=54526001 |
+| Lille | Lille-Lesquin | https://www.meteociel.fr/obs/clim/normales_records.php?code=59343001 |
+| Dijon | Dijon-Longvic | https://www.meteociel.fr/obs/clim/normales_records.php?code=21473001 |
+
+**Método de reutilização:** conferir mês/estação/período de 30 anos, atribuir Météo-France na descrição da fonte, guardar link do agregador e verificar direitos antes de reprodução em massa; não transferir dados da estação para o endereço exato de hospedagem, nem comparar condições meteorológicas de 2027.
