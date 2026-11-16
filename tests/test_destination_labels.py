@@ -27,8 +27,9 @@ class DestinationLabelsTests(unittest.TestCase):
 
     def test_active_profile_shows_country_flags_on_preset(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=90).run()
-        app.radio(key="main_navigation").set_value("Roteiro").run()
-        app.segmented_control(key="itinerary_section").set_value("Meus passeios").run()
+        app.radio(key="ux_area").set_value("Meu roteiro").run()
+        app.segmented_control(key="ux_section").set_value("Melhorar meu roteiro").run()
+        app.selectbox(key="ux_improve_view").set_value("Temporada europeia").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
         display=" ".join(x.value for x in list(app.markdown)+list(app.caption))
         self.assertIn("🇫🇷",display)

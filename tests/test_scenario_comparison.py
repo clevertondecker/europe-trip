@@ -66,8 +66,9 @@ class ScenarioComparisonModelTests(unittest.TestCase):
 class ScenarioComparisonUITests(unittest.TestCase):
     def test_profile_button_expands_visible_details_and_toggles(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=100).run()
-        app.radio(key="main_navigation").set_value("Roteiro").run()
-        app.segmented_control(key="itinerary_section").set_value("Simular roteiros").run()
+        app.radio(key="ux_area").set_value("Meu roteiro").run()
+        app.segmented_control(key="ux_section").set_value("Melhorar meu roteiro").run()
+        app.selectbox(key="ux_improve_view").set_value("Simular roteiros").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
         before=deepcopy(app.session_state["advisor_plan"])
         self.assertFalse(any("Detalhes do Econômico" in m.value for m in app.markdown))
@@ -90,8 +91,9 @@ class ScenarioComparisonUITests(unittest.TestCase):
 
     def test_single_suggestion_adds_to_real_plan_and_reprices(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=100).run()
-        app.radio(key="main_navigation").set_value("Roteiro").run()
-        app.segmented_control(key="itinerary_section").set_value("Simular roteiros").run()
+        app.radio(key="ux_area").set_value("Meu roteiro").run()
+        app.segmented_control(key="ux_section").set_value("Melhorar meu roteiro").run()
+        app.selectbox(key="ux_improve_view").set_value("Simular roteiros").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
         original=deepcopy(app.session_state["advisor_plan"])
         candidate=next(x for x in app.session_state["scenario_edit_balanced"]["packages"]
@@ -105,7 +107,7 @@ class ScenarioComparisonUITests(unittest.TestCase):
         self.assertEqual(app.session_state["advisor_plan"]["revision"],original["revision"]+1)
         self.assertEqual(app.session_state["advisor_plan"]["packages"],
                          app.session_state["explore_packages"])
-        app.segmented_control(key="itinerary_section").set_value("Meus passeios").run()
+        app.selectbox(key="ux_improve_view").set_value("Temporada europeia").run()
         self.assertIn("outing_edit_"+candidate,{b.key for b in app.button})
 
 

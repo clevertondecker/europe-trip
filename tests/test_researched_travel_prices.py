@@ -119,8 +119,8 @@ class ResearchPriceUITests(unittest.TestCase):
     def test_guide_shows_researched_prices_without_applying_to_official_plan(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=100).run()
         app.radio(key="ux_area").set_value("Meu roteiro").run()
-        app.segmented_control(key="ux_section").set_value("Sugestões").run()
-        app.segmented_control(key="ux_suggestion").set_value("Descobrir").run()
+        app.segmented_control(key="ux_section").set_value("Melhorar meu roteiro").run()
+        app.selectbox(key="ux_improve_view").set_value("Descobrir").run()
         app.checkbox(key="discovery_guide_toggle_colmar").check().run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
         text=" ".join(x.label for x in app.expander)
@@ -136,7 +136,8 @@ class ResearchPriceUITests(unittest.TestCase):
     def test_confirmed_excursions_show_researched_budget_separately(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=100).run()
         app.radio(key="ux_area").set_value("Meu roteiro").run()
-        app.segmented_control(key="ux_section").set_value("França").run()
+        app.segmented_control(key="ux_section").set_value("Melhorar meu roteiro").run()
+        app.selectbox(key="ux_improve_view").set_value("Temporada europeia").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
         self.assertTrue(any("custos pesquisados de alimentação" in x.label.lower()
                             for x in app.expander))

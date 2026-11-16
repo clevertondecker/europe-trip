@@ -13,9 +13,13 @@ ROOT=Path(__file__).resolve().parents[1]
 class CityBaseDecisionTests(unittest.TestCase):
     def test_15_tabs_across_four_areas(self):
         self.assertEqual(list(SECTIONS),["Minha viagem","Explorar","Meu roteiro","Orçamento"])
-        self.assertEqual(sum(map(len,SECTIONS.values())),15)
+        self.assertEqual(sum(map(len,SECTIONS.values())),13)
+        self.assertEqual(SECTIONS["Meu roteiro"],(
+            "Meu planejamento","Organizar viagem","Melhorar meu roteiro"))
         self.assertEqual(route("Explorar","Comparar")[0],"Comparar cidades")
-        self.assertEqual(route("Meu roteiro","França",france="Transportes e custos")[2],
+        self.assertEqual(route("Meu roteiro","Melhorar meu roteiro",
+                                suggestion="Guias especializados",
+                                guide_view="Transportes e custos")[2],
                          "Transportes e custos")
         self.assertEqual(route("Orçamento","Simulações")[0],"Orçamento")
 

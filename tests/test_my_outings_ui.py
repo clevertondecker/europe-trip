@@ -28,8 +28,9 @@ class DirectOutingsTests(unittest.TestCase):
 
     def test_add_edit_remove_are_canonical_and_removal_needs_confirmation(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=90).run()
-        app.radio(key="main_navigation").set_value("Roteiro").run()
-        app.segmented_control(key="itinerary_section").set_value("Meus passeios").run()
+        app.radio(key="ux_area").set_value("Meu roteiro").run()
+        app.segmented_control(key="ux_section").set_value("Melhorar meu roteiro").run()
+        app.selectbox(key="ux_improve_view").set_value("Temporada europeia").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
         self.assertNotIn("scenario_review_button_balanced",{b.key for b in app.button})
         self.assertEqual(app.session_state["advisor_plan"]["packages"],{})

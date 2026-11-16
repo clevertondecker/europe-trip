@@ -27,11 +27,56 @@ from advisor_finance import advisor_projection
 
 def _navigate(area:str,task:str)->None:
     from ux_navigation import set_task
-    set_task(st.session_state,area,task)
+    from attractions_model import load_attractions
+    from itinerary_flow_model import get_choice
+    state=st.session_state
+    stage=state.get("flow_active_stage",state.get("flow_stage",ITALY_STAGE))
+    state["flow_return_stage"]=stage
+    state["flow_return_destination"]=state.get("flow_active_destination")
+    state["flow_return_add_open"]=bool(state.get("flow_add_open",False))
+    chosen=state.get("flow_active_destination")
+    if chosen:
+        try:
+            state["flow_return_city"]=get_choice(load_attractions(),chosen)["name"]
+        except (KeyError,ValueError):
+            state["flow_return_city"]=None
+    set_task(state,area,task)
+
+
+def _stage_changed()->None:
+    st.session_state["flow_active_stage"]=st.session_state["flow_stage"]
+
+
+def _chosen_destination_changed()->None:
+    st.session_state["flow_active_destination"]=st.session_state["flow_add_destination"]
+
+
+def _search_changed()->None:
+    st.session_state["flow_search_saved"]=st.session_state["flow_search"]
+
+
+def _picks_changed(destination:str)->None:
+    st.session_state.setdefault("flow_pending_attractions",{})[destination]=list(
+        st.session_state["flow_pick_"+destination])
+
+
+def _period_changed(destination:str)->None:
+    st.session_state.setdefault("flow_pending_periods",{})[destination]=(
+        st.session_state["flow_period_"+destination])
+
+
+
+def _active_stage_changed()->None:
+    state=st.session_state
+    state["flow_stage"]=state["flow_active_stage"]
+    state["flow_active_destination"]=None
+
 
 
 def _show_add()->None:
     st.session_state["flow_add_open"]=True
+    st.session_state["flow_stage"]=st.session_state.get(
+        "flow_active_stage",ITALY_STAGE)
     st.session_state["flow_save_open"]=False
     st.session_state["flow_organize_open"]=False
 
@@ -72,8 +117,12 @@ def _render_add(plan:dict,catalog:dict)->None:
         stage=st.segmented_control(
             "Em qual etapa?",[ITALY_STAGE,FRANCE_STAGE],default=ITALY_STAGE,
             key="flow_stage",selection_mode="single",
-            format_func=_stage_label)
+            format_func=_stage_label,on_change=_stage_changed)
+        if "flow_search" not in st.session_state:
+            st.session_state["flow_search"]=st.session_state.get(
+                "flow_search_saved","")
         term=st.text_input("Buscar cidade ou atração",key="flow_search",
+                           on_change=_search_changed,
                            placeholder="Ex.: Amalfi, Ravello, Colmar, Vaticano")
         all_choices=[d for d in destinations(catalog) if d["stage"]==stage]
         if term.strip():
@@ -85,10 +134,15 @@ def _render_add(plan:dict,catalog:dict)->None:
             st.info("Nenhum lugar encontrado. Tente outra busca ou etapa.")
         else:
             lookup={d["id"]:d for d in all_choices}
+            previous=st.session_state.get("flow_active_destination")
+            if previous in lookup and st.session_state.get("flow_add_destination")!=previous:
+                st.session_state["flow_add_destination"]=previous
             dest_id=st.selectbox("Lugar",list(lookup),
                                  format_func=lambda key:lookup[key]["name"],
-                                 key="flow_add_destination")
+                                 key="flow_add_destination",
+                                 on_change=_chosen_destination_changed)
             dest=lookup[dest_id]
+            st.session_state["flow_active_destination"]=dest_id
             already=is_selected(plan,dest_id)
             current=next((row for row in selected_rows(plan,catalog)
                           if row["id"]==dest_id),None)
@@ -97,16 +151,25 @@ def _render_add(plan:dict,catalog:dict)->None:
                         "Você pode editar suas atrações abaixo.")
             labels={a["id"]:a["name"] for a in dest["attractions"]}
             defaults=(current["attractions"] if current else [])
+            draft=st.session_state.get("flow_pending_attractions",{}).get(
+                dest_id,defaults)
+            pick_key="flow_pick_"+dest_id
+            if pick_key not in st.session_state:
+                st.session_state[pick_key]=[x for x in draft if x in labels]
             picked=st.multiselect("Atrações desejadas (1 a 5)",list(labels),
-                                  default=[x for x in defaults if x in labels],
                                   format_func=lambda key:labels[key],
-                                  key="flow_pick_"+dest_id,max_selections=5)
+                                  key=pick_key,max_selections=5,
+                                  on_change=_picks_changed,args=(dest_id,))
             periods=period_options(stage)
+            period_key="flow_period_"+dest_id
+            selected_period=st.session_state.get(
+                "flow_pending_periods",{}).get(
+                    dest_id,current["period"] if current else UNASSIGNED)
+            if period_key not in st.session_state and selected_period in periods:
+                st.session_state[period_key]=selected_period
             period=st.selectbox("Quando? (opcional)",periods,
-                                index=periods.index(current["period"])
-                                if current and current["period"] in periods else 0,
-                                key="flow_period_"+dest_id,
-                                format_func=_period_label)
+                                key=period_key,on_change=_period_changed,
+                                args=(dest_id,),format_func=_period_label)
             st.caption("Sem data obrigatória · Não adiciona reservas nem "
                        "altera o roteiro de outra cidade-base.")
             if not already:
@@ -408,8 +471,23 @@ def render_itinerary_workbench(plan:dict,catalog:dict,
         dirty=(saved!=plan) if saved is not None else plan["revision"]>0
         label="Alterações não salvas" if dirty else "Ainda não salvo"
         hint="Você pode baixar um backup local; armazenamento remoto exige autenticação"
-    st.markdown("### Meu roteiro")
+    st.markdown("### Meu planejamento")
     st.caption("Organize a viagem sem precisar decidir datas e reservas agora.")
+    if "flow_active_stage" not in st.session_state:
+        st.session_state["flow_active_stage"]=st.session_state.get(
+            "flow_stage",ITALY_STAGE)
+    stage=st.segmented_control("Etapa que estou planejando",
+        [ITALY_STAGE,FRANCE_STAGE],
+        key="flow_active_stage",selection_mode="single",
+        format_func=_stage_label,on_change=_active_stage_changed)
+    city=st.session_state.get("flow_active_destination")
+    if city:
+        try:
+            city=get_choice(catalog,city)["name"]
+        except (ValueError,KeyError):
+            city=None
+    st.caption(" › ".join(["Meu roteiro","Meu planejamento",
+                           _stage_label(stage)]+([city] if city else [])))
     metrics=st.columns(3)
     metrics[0].metric("Itália",str(plan["italy_days"])+" dias")
     metrics[1].metric("Temporada europeia",str(plan["total_days"]-plan["italy_days"])+" dias")
@@ -429,8 +507,11 @@ def render_itinerary_workbench(plan:dict,catalog:dict,
     _render_organize(active_plan(),catalog)
     _save_panel(active_plan(),catalog)
     rows=selected_rows(active_plan(),catalog)
-    _selected_stage(rows,ITALY_STAGE,catalog)
-    _selected_stage(rows,FRANCE_STAGE,catalog)
+    _selected_stage(rows,stage,catalog)
+    other=FRANCE_STAGE if stage==ITALY_STAGE else ITALY_STAGE
+    other_count=sum(x["stage"]==other for x in rows)
+    st.caption(str(other_count)+" lugar(es) na etapa "+_stage_label(other)+
+               ". Troque a etapa acima sem perder a busca ou suas escolhas.")
     with st.expander("Melhorar meu roteiro",expanded=False):
         st.caption("As sugestões abaixo não alteram suas escolhas automaticamente.")
         if not any(r["stage"]==ITALY_STAGE for r in rows):
@@ -440,6 +521,7 @@ def render_itinerary_workbench(plan:dict,catalog:dict,
         st.write("• Compare deslocamentos e distribua os dias antes de reservar.")
         st.button("Abrir sugestões detalhadas",key="flow_go_suggestions",
                   on_click=_navigate,args=("Meu roteiro","Sugestões"))
-    _compact_budget(active_plan(),catalog,trip_data,finance_live,eurfx,chffx)
+    with st.expander("Ver impacto financeiro estimado",expanded=False):
+        _compact_budget(active_plan(),catalog,trip_data,finance_live,eurfx,chffx)
     st.caption("Escolhido = incluído no plano · Organizado = com período ou data "
                "· Reservado = somente com confirmação externa (não inferida).")
