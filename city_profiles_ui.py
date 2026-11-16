@@ -11,6 +11,13 @@ def _profile_card(profile:dict,row:dict):
     st.markdown("#### "+profile["name"]+" · "+profile["country"])
     st.caption(profile["corridor"]+" · "+("Finalista" if profile["shortlist"] else "Em observação"))
     st.write(profile["summary"])
+    demographics=profile.get("demographics") or {}
+    population=demographics.get("population_municipal")
+    if population is not None:
+        st.caption("População do município em 2023: "+
+                   f"{population:,}".replace(",",".")+
+                   " habitantes · não inclui a aglomeração. "+
+                   "[Fonte INSEE]("+demographics["source_url"]+")")
     with st.container(border=True):
         st.markdown("**Vida prática durante dois meses**")
         housing=profile["housing"]
