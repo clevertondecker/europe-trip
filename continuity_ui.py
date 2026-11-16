@@ -6,6 +6,7 @@ previewed, then passed to app startup for pre-widget confirmed restoration.
 from __future__ import annotations
 
 from copy import deepcopy
+from private_continuity_store import PrivateArchiveStore, StorageConflict, StorageUnavailable
 import streamlit as st
 
 from continuity_archive_model import (
@@ -74,6 +75,8 @@ def apply_pending_restore(catalog:dict)->None:
         state.pop("ux35_review_proposal",None)
         state.pop("ux36_review",None)
         sync_legacy_view(plan,state,include_controls=True)
+        state["ux36_local_restored"]=True
+        state["ux36_cloud_status"]="Backup local recuperado; não salvo na nuvem"
         state["ux36_message"]=(
             "Cópia recuperada nesta sessão. Ainda não está salva online. "
             "Guarde um novo backup local antes de fechar o navegador.")
@@ -81,8 +84,118 @@ def apply_pending_restore(catalog:dict)->None:
         state["ux36_error"]="A recuperação foi interrompida: "+str(exc)
 
 
+
+def _private_store():
+    from travel_advisor_ui import _owner_config, _owner_signed_in
+    if not _owner_signed_in():
+        return None
+    try:
+        bucket = st.secrets.get("ux36_private_storage", {}).get("bucket")
+        if not bucket:
+            return None
+        return PrivateArchiveStore(bucket, dict(st.secrets["gcp_service_account"]),
+                                   _owner_config()["owner_email"])
+    except (KeyError, ValueError, TypeError, AttributeError, StorageUnavailable):
+        return None
+
+
+def _private_archive(plan, catalog):
+    state = st.session_state
+    return make_archive(plan, catalog, _safe_context(plan, catalog),
+                        list(state.get("ux34_drafts", {}).values()),
+                        list(state.get("ux35_proposals", [])))
+
+
+def restore_private_on_start(catalog):
+    """Restore before any widgets, on a fresh owner session only."""
+    state = st.session_state
+    if state.get("ux36_bootstrapped"):
+        return
+    state["ux36_bootstrapped"] = True
+    if state.get("ux36_local_restored") or state.get("advisor_local_changed"):
+        return
+    store = _private_store()
+    if store is None:
+        return
+    try:
+        loaded = store.load()
+        if loaded is None:
+            return
+        raw, generation = loaded
+        archive = import_archive(raw, catalog)
+        plan, context = archive["plan"], archive["continuation"]
+        state["advisor_plan"] = deepcopy(plan)
+        state["advisor_saved_snapshot"] = None  # private != public GitHub
+        state["advisor_github_sha"] = None
+        state["advisor_autosave_pending"] = False
+        state["advisor_autosave_optin"] = False
+        state["advisor_public_repo_ack"] = False
+        state["advisor_local_changed"] = False
+        state["ux36_cloud_generation"] = generation
+        state["ux36_cloud_status"] = "Salvo em espaço privado"
+        for target, source in (
+            ("ux_area", "area"), ("ux_section", "section"),
+            ("ux_organize_view", "organize_view"),
+            ("flow_stage", "stage"), ("flow_active_stage", "stage"),
+            ("flow_active_destination", "destination_id"),
+            ("flow_search_saved", "search"), ("ux35_stage", "calendar_stage")
+        ):
+            state[target] = context[source]
+        if context["calendar_week"] is not None:
+            state["ux35_week"] = context["calendar_week"]
+        state["ux34_drafts"] = {d["name"]: deepcopy(d) for d in archive["city_studies"]}
+        state["ux35_proposals"] = deepcopy(archive["calendar_drafts"])
+        sync_legacy_view(plan, state, include_controls=True)
+    except (ValueError, KeyError, TypeError, StorageConflict, StorageUnavailable):
+        state["ux36_cloud_status"] = "Erro ao recuperar; use um backup local"
+
+
+def save_private_now(plan, catalog):
+    store = _private_store()
+    if store is None:
+        raise StorageUnavailable("Login ou bucket privado não configurado")
+    raw = export_archive(_private_archive(plan, catalog), catalog)
+    state = st.session_state
+    generation = store.save(raw, state.get("ux36_cloud_generation"))
+    state["ux36_cloud_generation"] = generation
+    state["ux36_cloud_status"] = "Salvo em espaço privado"
+    state["ux36_cloud_dirty"] = False
+
+
+def autosave_private_if_requested(catalog):
+    state = st.session_state
+    if not (state.get("ux36_private_autosave") and state.pop("ux36_cloud_dirty", False)):
+        return
+    try:
+        save_private_now(state["advisor_plan"], catalog)
+    except (ValueError, TypeError, KeyError, StorageConflict, StorageUnavailable):
+        state["ux36_cloud_status"] = "Erro ao salvar; alterações apenas nesta sessão"
+
+
+def render_private_controls(plan, catalog):
+    store = _private_store()
+    if store is None:
+        st.caption("Nuvem privada indisponível: requer login do proprietário e bucket GCS configurado. Use o backup local.")
+        return
+    state = st.session_state
+    status = state.get("ux36_cloud_status", "Apenas nesta sessão")
+    if state.get("ux36_cloud_dirty") and status == "Salvo em espaço privado":
+        status = "Alterações não salvas"
+    st.caption("**Status privado:** " + status)
+    st.checkbox("Salvar automaticamente minhas alterações do roteiro", key="ux36_private_autosave")
+    if st.button("Salvar cópia privada agora", key="ux36_cloud_save"):
+        try:
+            save_private_now(plan, catalog)
+            st.success("Cópia privada confirmada. Ela estará disponível na próxima sessão.")
+        except StorageConflict:
+            st.error("Outra sessão alterou o planejamento. Baixe o backup local, reabra e compare antes de substituir.")
+        except (StorageUnavailable, ValueError, KeyError, TypeError):
+            st.error("Falha no armazenamento privado. Baixe uma cópia local.")
+
+
 def render_continuity_panel(plan:dict,catalog:dict)->None:
     with st.expander("Recuperar ou guardar uma cópia privada",expanded=False):
+        render_private_controls(plan, catalog)
         st.caption("Seus estudos e mudanças ficam nesta sessão até um salvamento "
                    "ou download. Este arquivo é um JSON local **sem criptografia**: "
                    "guarde-o em local privado. Nada é enviado automaticamente "
