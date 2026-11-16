@@ -25,6 +25,7 @@ from travel_advisor_ui import render_advisor, _recover_saved_plan, _secure_save,
 from travel_dashboard_ui import render_trip_dashboard
 from itinerary_flow_ui import render_itinerary_workbench
 from smart_calendar_ui import render_smart_calendar
+from continuity_ui import apply_pending_restore,render_continuity_panel
 from planning_context_ui import (render_context,render_home_continue,
                                  render_breadcrumb,return_to_edit,show_settings)
 from base_explorer_ui import render_base_explorer, _comparison as render_route_comparison, _split_stay as render_split_stay
@@ -54,6 +55,8 @@ st.set_page_config(page_title="Nossa Europa 2027", page_icon="🌍", layout="wid
 # Authenticated new sessions recover the latest saved GitHub plan.
 _recover_saved_plan()
 bootstrap_trip()
+# Manual recovery is committed before nav/widgets; no automatic cloud writes.
+apply_pending_restore(load_attractions())
 restored_mode=st.session_state.pop("ux_pending_mode",None)
 if restored_mode in ("Oficial","Simulação"):
     st.session_state["ux_mode"]=restored_mode
@@ -446,6 +449,7 @@ if (ux_area=="Meu roteiro" and ux_section=="Melhorar meu roteiro" and
                       show_return=True)
 if page == "Visão geral":
     render_home_continue(active_plan())
+    render_continuity_panel(active_plan(),load_attractions())
     st.markdown("""<div class="home-hero" role="region" aria-label="Apresentação da viagem">
       <div class="home-hero__content"><div class="home-hero__eyebrow">ITÁLIA → FRANÇA · 2027</div>
       <h1>Uma viagem para viver,<br>não só visitar.</h1>
