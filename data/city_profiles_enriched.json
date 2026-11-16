@@ -50,10 +50,22 @@
           "scope": "cidade/estação citada na fonte",
           "kind": "primary_public_context",
           "limitations": "Descrição pública de contexto; não comprova preço de estadia, qualidade de vida, ou horários de 2027"
+        },
+        {
+          "id": "mulhouse-public2-20261116",
+          "section": "quality_of_life",
+          "summary": "O turismo municipal lista Cité du Train e Museu Nacional do Automóvel entre as atrações conectadas ao transporte público.",
+          "source_url": "https://www.tourisme-mulhouse.com/en/what-to-do-in-mulhouse/getting-around-mulhouse-by-public-transport/",
+          "observed_at": "2026-11-16",
+          "reference_period": "contexto público disponível na data de consulta",
+          "scope": "local/serviço citado",
+          "kind": "primary_public_context",
+          "limitations": "Fato institucional de contexto, não preço ou confirmação de acessibilidade/horário em 2027"
         }
       ],
       "advantages": [
-        "O turismo municipal documenta uma rede de bondes e conexão entre a estação e museus, incluindo o Cité du Train."
+        "O turismo municipal documenta uma rede de bondes e conexão entre a estação e museus, incluindo o Cité du Train.",
+        "O turismo municipal lista Cité du Train e Museu Nacional do Automóvel entre as atrações conectadas ao transporte público."
       ],
       "limitations": [
         "Moradia mobiliada para 56–60 noites em 2027 ainda não confirmada",
@@ -112,10 +124,22 @@
           "scope": "cidade/estação citada na fonte",
           "kind": "primary_public_context",
           "limitations": "Descrição pública de contexto; não comprova preço de estadia, qualidade de vida, ou horários de 2027"
+        },
+        {
+          "id": "strasbourg-public2-20261116",
+          "section": "quality_of_life",
+          "summary": "O material do turismo identifica Krutenau como bairro mais animado à noite e Neustadt como bairro imperial de patrimônio arquitetônico.",
+          "source_url": "https://www.visitstrasbourg.fr/en/discover/strasbourg-and-its-surrounding-area/",
+          "observed_at": "2026-11-16",
+          "reference_period": "contexto público disponível na data de consulta",
+          "scope": "local/serviço citado",
+          "kind": "primary_public_context",
+          "limitations": "Fato institucional de contexto, não preço ou confirmação de acessibilidade/horário em 2027"
         }
       ],
       "advantages": [
-        "O escritório de turismo descreve os bairros Grande Île, Petite France, Krutenau e Neustadt como áreas distintas."
+        "O escritório de turismo descreve os bairros Grande Île, Petite France, Krutenau e Neustadt como áreas distintas.",
+        "O material do turismo identifica Krutenau como bairro mais animado à noite e Neustadt como bairro imperial de patrimônio arquitetônico."
       ],
       "limitations": [
         "Moradia mobiliada para 56–60 noites em 2027 ainda não confirmada",
@@ -174,10 +198,22 @@
           "scope": "cidade/estação citada na fonte",
           "kind": "primary_public_context",
           "limitations": "Descrição pública de contexto; não comprova preço de estadia, qualidade de vida, ou horários de 2027"
+        },
+        {
+          "id": "metz-public2-20261116",
+          "section": "transport",
+          "summary": "Nos exemplos de 2026 da SNCF Connect há trens TER diretos de Metz a Luxembourg, porém o retorno de 2027 segue não verificado.",
+          "source_url": "https://www.sncf-connect.com/en-en/train/timetables/metz/luxembourg",
+          "observed_at": "2026-11-16",
+          "reference_period": "contexto público disponível na data de consulta",
+          "scope": "local/serviço citado",
+          "kind": "primary_public_context",
+          "limitations": "Fato institucional de contexto, não preço ou confirmação de acessibilidade/horário em 2027"
         }
       ],
       "advantages": [
-        "A ligação ferroviária Metz–Luxembourg inclui exemplos de TER diretos de aproximadamente 53–54 minutos em horários pesquisados de 2026."
+        "A ligação ferroviária Metz–Luxembourg inclui exemplos de TER diretos de aproximadamente 53–54 minutos em horários pesquisados de 2026.",
+        "Nos exemplos de 2026 da SNCF Connect há trens TER diretos de Metz a Luxembourg, porém o retorno de 2027 segue não verificado."
       ],
       "limitations": [
         "Moradia mobiliada para 56–60 noites em 2027 ainda não confirmada",
@@ -236,10 +272,22 @@
           "scope": "cidade/estação citada na fonte",
           "kind": "primary_public_context",
           "limitations": "Descrição pública de contexto; não comprova preço de estadia, qualidade de vida, ou horários de 2027"
+        },
+        {
+          "id": "nancy-public2-20261116",
+          "section": "quality_of_life",
+          "summary": "O turismo oficial apresenta o conjunto da Place Stanislas como patrimônio UNESCO e inclui o parque Pépinière entre as atrações.",
+          "source_url": "https://www.destination-nancy.com/en/tourisme/",
+          "observed_at": "2026-11-16",
+          "reference_period": "contexto público disponível na data de consulta",
+          "scope": "local/serviço citado",
+          "kind": "primary_public_context",
+          "limitations": "Fato institucional de contexto, não preço ou confirmação de acessibilidade/horário em 2027"
         }
       ],
       "advantages": [
-        "O órgão turístico municipal documenta Place Stanislas, Parc de la Pépinière e atrações Art Nouveau."
+        "O órgão turístico municipal documenta Place Stanislas, Parc de la Pépinière e atrações Art Nouveau.",
+        "O turismo oficial apresenta o conjunto da Place Stanislas como patrimônio UNESCO e inclui o parque Pépinière entre as atrações."
       ],
       "limitations": [
         "Moradia mobiliada para 56–60 noites em 2027 ainda não confirmada",
@@ -712,10 +760,22 @@
           "scope": "cidade/estação citada na fonte",
           "kind": "primary_public_context",
           "limitations": "Descrição pública de contexto; não comprova preço de estadia, qualidade de vida, ou horários de 2027"
+        },
+        {
+          "id": "lille-public2-20261116",
+          "section": "transport",
+          "summary": "A prefeitura descreve a navette Vieux-Lille e a linha circular Citadine como serviços de mobilidade no centro e bairros.",
+          "source_url": "https://www.lille.fr/Vivre-a-Lille/Me-deplacer/En-transports-en-commun",
+          "observed_at": "2026-11-16",
+          "reference_period": "contexto público disponível na data de consulta",
+          "scope": "local/serviço citado",
+          "kind": "primary_public_context",
+          "limitations": "Fato institucional de contexto, não preço ou confirmação de acessibilidade/horário em 2027"
         }
       ],
       "advantages": [
-        "A prefeitura documenta transporte coletivo com linhas de metrô e navettes urbanas, com rotas e horários próprios."
+        "A prefeitura documenta transporte coletivo com linhas de metrô e navettes urbanas, com rotas e horários próprios.",
+        "A prefeitura descreve a navette Vieux-Lille e a linha circular Citadine como serviços de mobilidade no centro e bairros."
       ],
       "limitations": [
         "Moradia mobiliada para 56–60 noites em 2027 ainda não confirmada",
@@ -820,10 +880,22 @@
           "scope": "cidade/estação citada na fonte",
           "kind": "primary_public_context",
           "limitations": "Descrição pública de contexto; não comprova preço de estadia, qualidade de vida, ou horários de 2027"
+        },
+        {
+          "id": "dijon-public2-20261116",
+          "section": "quality_of_life",
+          "summary": "O centro protegido e a Cidade Internacional da Gastronomia e do Vinho aparecem na oferta cultural e turística local.",
+          "source_url": "https://www.dijonbourgogne.com/en/tourism/",
+          "observed_at": "2026-11-16",
+          "reference_period": "contexto público disponível na data de consulta",
+          "scope": "local/serviço citado",
+          "kind": "primary_public_context",
+          "limitations": "Fato institucional de contexto, não preço ou confirmação de acessibilidade/horário em 2027"
         }
       ],
       "advantages": [
-        "O escritório turístico destaca o centro histórico protegido, o patrimônio gastronômico e a relação com a região vinícola da Borgonha."
+        "O escritório turístico destaca o centro histórico protegido, o patrimônio gastronômico e a relação com a região vinícola da Borgonha.",
+        "O centro protegido e a Cidade Internacional da Gastronomia e do Vinho aparecem na oferta cultural e turística local."
       ],
       "limitations": [
         "Moradia mobiliada para 56–60 noites em 2027 ainda não confirmada",
@@ -882,10 +954,22 @@
           "scope": "cidade/estação citada na fonte",
           "kind": "primary_public_context",
           "limitations": "Descrição pública de contexto; não comprova preço de estadia, qualidade de vida, ou horários de 2027"
+        },
+        {
+          "id": "freiburg-public2-20261116",
+          "section": "quality_of_life",
+          "summary": "O portal oficial descreve o Münstermarkt e a proximidade da Floresta Negra como parte da experiência local.",
+          "source_url": "https://visit.freiburg.de/en",
+          "observed_at": "2026-11-16",
+          "reference_period": "contexto público disponível na data de consulta",
+          "scope": "local/serviço citado",
+          "kind": "primary_public_context",
+          "limitations": "Fato institucional de contexto, não preço ou confirmação de acessibilidade/horário em 2027"
         }
       ],
       "advantages": [
-        "O portal turístico oficial apresenta Freiburg como cidade universitária situada próxima à Floresta Negra, com centro histórico e mercado da catedral."
+        "O portal turístico oficial apresenta Freiburg como cidade universitária situada próxima à Floresta Negra, com centro histórico e mercado da catedral.",
+        "O portal oficial descreve o Münstermarkt e a proximidade da Floresta Negra como parte da experiência local."
       ],
       "limitations": [
         "Moradia mobiliada para 56–60 noites em 2027 ainda não confirmada",
@@ -944,10 +1028,22 @@
           "scope": "cidade/estação citada na fonte",
           "kind": "primary_public_context",
           "limitations": "Descrição pública de contexto; não comprova preço de estadia, qualidade de vida, ou horários de 2027"
+        },
+        {
+          "id": "offenburg-public2-20261116",
+          "section": "quality_of_life",
+          "summary": "O portal regional descreve o Rathaus barroco, o Fischmarkt e o comércio do centro antigo.",
+          "source_url": "https://www.ortenau-tourismus.de/attraktionen/offenburg-historische-innenstadt-faf825ebc9",
+          "observed_at": "2026-11-16",
+          "reference_period": "contexto público disponível na data de consulta",
+          "scope": "local/serviço citado",
+          "kind": "primary_public_context",
+          "limitations": "Fato institucional de contexto, não preço ou confirmação de acessibilidade/horário em 2027"
         }
       ],
       "advantages": [
-        "O escritório turístico regional documenta o centro histórico de Offenburg, com área de pedestres, comércio e restaurantes."
+        "O escritório turístico regional documenta o centro histórico de Offenburg, com área de pedestres, comércio e restaurantes.",
+        "O portal regional descreve o Rathaus barroco, o Fischmarkt e o comércio do centro antigo."
       ],
       "limitations": [
         "Moradia mobiliada para 56–60 noites em 2027 ainda não confirmada",
@@ -1052,10 +1148,22 @@
           "scope": "cidade/estação citada na fonte",
           "kind": "primary_public_context",
           "limitations": "Descrição pública de contexto; não comprova preço de estadia, qualidade de vida, ou horários de 2027"
+        },
+        {
+          "id": "karlsruhe-public2-20261116",
+          "section": "transport",
+          "summary": "O ZKM apresenta a linha 6 de bonde desde Karlsruhe Hauptbahnhof com deslocamento ilustrativo de cerca de 6 minutos.",
+          "source_url": "https://zkm.de/en/directions",
+          "observed_at": "2026-11-16",
+          "reference_period": "contexto público disponível na data de consulta",
+          "scope": "local/serviço citado",
+          "kind": "primary_public_context",
+          "limitations": "Fato institucional de contexto, não preço ou confirmação de acessibilidade/horário em 2027"
         }
       ],
       "advantages": [
-        "O ZKM documenta acesso de bonde a partir da estação central e conexão urbana por transporte público."
+        "O ZKM documenta acesso de bonde a partir da estação central e conexão urbana por transporte público.",
+        "O ZKM apresenta a linha 6 de bonde desde Karlsruhe Hauptbahnhof com deslocamento ilustrativo de cerca de 6 minutos."
       ],
       "limitations": [
         "Moradia mobiliada para 56–60 noites em 2027 ainda não confirmada",
@@ -1206,10 +1314,22 @@
           "scope": "cidade/estação citada na fonte",
           "kind": "primary_public_context",
           "limitations": "Descrição pública de contexto; não comprova preço de estadia, qualidade de vida, ou horários de 2027"
+        },
+        {
+          "id": "trier-public2-20261116",
+          "section": "quality_of_life",
+          "summary": "A agência alemã de turismo apresenta Porta Nigra, anfiteatro e termas como pontos do patrimônio romano.",
+          "source_url": "https://www.germany.travel/en/cities-culture/trier.html",
+          "observed_at": "2026-11-16",
+          "reference_period": "contexto público disponível na data de consulta",
+          "scope": "local/serviço citado",
+          "kind": "primary_public_context",
+          "limitations": "Fato institucional de contexto, não preço ou confirmação de acessibilidade/horário em 2027"
         }
       ],
       "advantages": [
-        "A agência alemã de turismo documenta patrimônio romano, incluindo Porta Nigra e termas imperiais."
+        "A agência alemã de turismo documenta patrimônio romano, incluindo Porta Nigra e termas imperiais.",
+        "A agência alemã de turismo apresenta Porta Nigra, anfiteatro e termas como pontos do patrimônio romano."
       ],
       "limitations": [
         "Moradia mobiliada para 56–60 noites em 2027 ainda não confirmada",
@@ -1314,10 +1434,22 @@
           "scope": "cidade/estação citada na fonte",
           "kind": "primary_public_context",
           "limitations": "Descrição pública de contexto; não comprova preço de estadia, qualidade de vida, ou horários de 2027"
+        },
+        {
+          "id": "aachen-public2-20261116",
+          "section": "quality_of_life",
+          "summary": "O serviço turístico informa restrições de visita à catedral durante celebrações e possível fechamento sem aviso.",
+          "source_url": "https://www.aachen-tourismus.de/en/aachen-entdecken/details/poi/aachener-dom/",
+          "observed_at": "2026-11-16",
+          "reference_period": "contexto público disponível na data de consulta",
+          "scope": "local/serviço citado",
+          "kind": "primary_public_context",
+          "limitations": "Fato institucional de contexto, não preço ou confirmação de acessibilidade/horário em 2027"
         }
       ],
       "advantages": [
-        "O serviço oficial de turismo documenta a catedral e informa que fica a aproximadamente 15 minutos a pé da estação central."
+        "O serviço oficial de turismo documenta a catedral e informa que fica a aproximadamente 15 minutos a pé da estação central.",
+        "O serviço turístico informa restrições de visita à catedral durante celebrações e possível fechamento sem aviso."
       ],
       "limitations": [
         "Moradia mobiliada para 56–60 noites em 2027 ainda não confirmada",
@@ -1422,10 +1554,22 @@
           "scope": "cidade/estação citada na fonte",
           "kind": "primary_public_context",
           "limitations": "Descrição pública de contexto; não comprova preço de estadia, qualidade de vida, ou horários de 2027"
+        },
+        {
+          "id": "liege-public2-20261116",
+          "section": "transport",
+          "summary": "A operadora SNCB lista Liège-Guillemins com Wi-Fi na estação, armários e acesso por ônibus/bonde.",
+          "source_url": "https://www.belgiantrain.be/en/station-information/liege/liege-guillemins",
+          "observed_at": "2026-11-16",
+          "reference_period": "contexto público disponível na data de consulta",
+          "scope": "local/serviço citado",
+          "kind": "primary_public_context",
+          "limitations": "Fato institucional de contexto, não preço ou confirmação de acessibilidade/horário em 2027"
         }
       ],
       "advantages": [
-        "A operadora ferroviária belga documenta a estação Liège-Guillemins, com conexões de ônibus e bonde, Wi-Fi na estação e armários."
+        "A operadora ferroviária belga documenta a estação Liège-Guillemins, com conexões de ônibus e bonde, Wi-Fi na estação e armários.",
+        "A operadora SNCB lista Liège-Guillemins com Wi-Fi na estação, armários e acesso por ônibus/bonde."
       ],
       "limitations": [
         "Moradia mobiliada para 56–60 noites em 2027 ainda não confirmada",
