@@ -31,7 +31,10 @@ def _evidence_table(rows,*,long=False):
             "Cidade":r["name"],
             "Moradia":_status(r,"temporary_housing"),
             "Trens":str(r["route_basket_with_time"])+"/15 tempos" if
-                        r["route_basket_with_time"] else "Não pesquisado",
+                        r["route_basket_with_time"] else
+                        ("Rede pesquisada · tempos pendentes" if
+                         r["criteria"]["rail_connectivity"]["documented_count"]
+                         else "Não pesquisado"),
             "Passeios":_status(r,"viable_destinations"),
             "Custos":_status(r,"outing_cost"),
             "Vida cotidiana":_status(r,"daily_life_remote_work"),
