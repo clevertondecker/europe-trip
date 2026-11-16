@@ -600,6 +600,60 @@
         "2027_timetable"
       ],
       "notes": "Destino é Brugge, Bélgica (não Bruges, França). Tempo típico de ida da fonte secundária, com múltiplas conexões. Confirmar nas operadoras SNCF e SNCB, especialmente trocas e horários de retorno."
+    },
+    {
+      "base_id": "mulhouse",
+      "destination_id": "rotterdam",
+      "train_minutes_oneway_min": 366,
+      "fare_from_eur_person_oneway": null,
+      "reference_status": "official_operator_2026",
+      "source_url": "https://www.sncf-connect.com/train/trajet/mulhouse/rotterdam",
+      "retrieved_at": "2026-11-16",
+      "return_verified_2027": false,
+      "origin_station": "Mulhouse",
+      "destination_station": "Rotterdam Centraal",
+      "operator": "TGV Lyria / Eurostar / TER",
+      "representative_minutes": 388,
+      "transfers": 1,
+      "frequency_reference": "9 opções listadas em um dia de referência, não frequência garantida",
+      "roundtrip_couple_eur": null,
+      "provenance": "SNCF Connect oficial, novembro de 2026",
+      "missing": [
+        "2027_timetable",
+        "return_schedule",
+        "normal_fare",
+        "roundtrip_couple",
+        "first_last_mile",
+        "weekend_feasibility"
+      ],
+      "notes": "Muitas opções via Paris requerem transferência de estação; ida longa, retorno de 2027 não confirmado"
+    },
+    {
+      "base_id": "strasbourg",
+      "destination_id": "rotterdam",
+      "train_minutes_oneway_min": 310,
+      "fare_from_eur_person_oneway": null,
+      "reference_status": "official_operator_2026",
+      "source_url": "https://www.sncf-connect.com/en-en/train/route/strasbourg/rotterdam",
+      "retrieved_at": "2026-11-16",
+      "return_verified_2027": false,
+      "origin_station": "Strasbourg",
+      "destination_station": "Rotterdam Centraal",
+      "operator": "SNCF TGV / Eurostar",
+      "representative_minutes": 339,
+      "transfers": 1,
+      "frequency_reference": "8 opções listadas em um dia de referência, não frequência garantida",
+      "roundtrip_couple_eur": null,
+      "provenance": "SNCF Connect oficial, novembro de 2026",
+      "missing": [
+        "2027_timetable",
+        "return_schedule",
+        "normal_fare",
+        "roundtrip_couple",
+        "first_last_mile",
+        "weekend_feasibility"
+      ],
+      "notes": "Exemplos via Paris Est → Nord requerem deslocamento entre estações; conexão ferroviária não resume a complexidade"
     }
   ]
 }
