@@ -74,6 +74,7 @@ def apply_pending_restore(catalog:dict)->None:
         state["ux34_drafts"]={d["name"]:deepcopy(d) for d
                              in pending["archive"]["city_studies"]}
         state["ux35_proposals"]=deepcopy(pending["archive"]["calendar_drafts"])
+        state["ux41_favorites"]=list(pending["archive"].get("city_favorites",[]))
         state.pop("ux35_review_proposal",None)
         state.pop("ux36_review",None)
         sync_legacy_view(plan,state,include_controls=True)
@@ -112,7 +113,8 @@ def _private_archive(plan, catalog):
     state = st.session_state
     return make_archive(plan, catalog, _safe_context(plan, catalog),
                         list(state.get("ux34_drafts", {}).values()),
-                        list(state.get("ux35_proposals", [])))
+                        list(state.get("ux35_proposals", [])),
+                        city_favorites=list(state.get("ux41_favorites",[])))
 
 
 def restore_private_on_start(catalog):
@@ -158,6 +160,7 @@ def restore_private_on_start(catalog):
             state["ux35_week"] = context["calendar_week"]
         state["ux34_drafts"] = {d["name"]: deepcopy(d) for d in archive["city_studies"]}
         state["ux35_proposals"] = deepcopy(archive["calendar_drafts"])
+        state["ux41_favorites"] = list(archive.get("city_favorites",[]))
         sync_legacy_view(plan, state, include_controls=True)
     except (ValueError, KeyError, TypeError, StorageConflict, StorageUnavailable):
         state["ux36_cloud_status"] = "Erro ao recuperar; use um backup local"
@@ -275,7 +278,8 @@ def render_continuity_panel(plan:dict,catalog:dict)->None:
             city=list(st.session_state.get("ux34_drafts",{}).values())
             calendars=list(st.session_state.get("ux35_proposals",[]))
         try:
-            archive=make_archive(plan,catalog,_safe_context(plan,catalog),city,calendars)
+            archive=make_archive(plan,catalog,_safe_context(plan,catalog),city,calendars,
+                                 city_favorites=list(st.session_state.get("ux41_favorites",[])))
             raw=export_archive(archive,catalog)
         except (ValueError,TypeError,KeyError) as exc:
             st.warning("Não foi possível incluir esse contexto. "
