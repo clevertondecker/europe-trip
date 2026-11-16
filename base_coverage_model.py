@@ -264,6 +264,17 @@ def city_evidence(city,*,study=None,rail=None,exploration=None,
             scope="preço/m²/mês do anúncio sem datas 2027",
             kind=observed_source.get("source_type","catalogue_snapshot"),
             limitation="URLs genéricas; sem evidência de imóvel inteiro, dois adultos, contrato ou taxas"))
+    for listing in five_listings:
+        if (listing.get("source_is_direct_listing")=="direct_listing_page"
+                and _valid_url(listing.get("source_url"))):
+            evidence.append(_make_evidence(
+                city_id=city["id"],criterion="temporary_housing",
+                indicator="anúncio individual histórico de apartamento mobiliado",
+                value=listing["monthly_eur"],unit="EUR/mês (anúncio de 2026)",
+                source_url=listing["source_url"],date_observed=five["checked_at"],
+                scope=listing.get("title","anúncio individual"),
+                kind="direct_listing_observation_2026",
+                limitation="Sem confirmação de dois adultos, 56–60 noites, internet, taxas totais, caução ou disponibilidade outono/2027"))
     for r in timed:
         evidence.append(_make_evidence(
             city_id=city["id"],criterion="rail_connectivity",
