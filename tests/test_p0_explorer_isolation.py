@@ -41,24 +41,24 @@ class ExplorerGuardTests(unittest.TestCase):
 
     def test_active_handler_uses_existing_continuous_itinerary_operation(self):
         with patch.object(guard, "active_plan", return_value=self.plan), patch.object(
-            guard, "upsert_flexible_choice"
+            guard, "commit_outing"
         ) as operation:
             guard.save_outing(self.base, "Oficial", "strasbourg", [self.attraction["id"]])
             operation.assert_called_once_with(
-                "strasbourg", [self.attraction["id"]], "Ainda não definido"
+                "strasbourg", [self.attraction["id"]], confirmed=True
             )
 
     def test_active_delete_preference_schedule_use_canonical_handlers(self):
         with patch.object(guard, "active_plan", return_value=self.plan), patch.object(
-            guard, "remove_flexible_choice"
+            guard, "delete_outing"
         ) as remove, patch.object(guard, "update_interest") as preference, patch.object(
             guard, "schedule_package"
         ) as schedule, patch.object(guard, "unschedule_package") as unschedule:
-            guard.remove_outing(self.base, "Oficial", "strasbourg")
+            guard.remove_outing(self.base, "Oficial", "strasbourg", confirmed=True)
             guard.change_interest(self.base, "Oficial", self.attraction["id"], "Descartar")
             guard.schedule_outing(self.base, "Oficial", "2027-09-25", "strasbourg")
             guard.unschedule_outing(self.base, "Oficial", "2027-09-25")
-        remove.assert_called_once()
+        remove.assert_called_once_with("strasbourg",confirmed=True)
         preference.assert_called_once()
         schedule.assert_called_once()
         unschedule.assert_called_once()
