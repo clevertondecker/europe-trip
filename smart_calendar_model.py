@@ -229,7 +229,10 @@ def manual_calendar_move(plan:dict,catalog:dict,dest_id:str,stage:str,
     old=found["exact_dates"]
     if stage==FRANCE_STAGE and len(old)>1 and from_day is None:
         raise ValueError("Indique a visita específica ao reagendar destino repetido")
-    current=from_day if from_day is not None else (old[0] if old else None)
+    # An explicit empty origin means "add another visit". None means
+    # "use the only existing visit" for backward compatibility.
+    current=(None if from_day=="" else from_day if from_day is not None
+             else (old[0] if old else None))
     if current and current not in old:
         raise ValueError("Data antiga não pertence a este destino")
     if day is not None:
