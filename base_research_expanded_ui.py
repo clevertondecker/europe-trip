@@ -18,6 +18,7 @@ from five_base_comparison_ui import render_five_base_study
 from base_coverage_model import coverage_matrix
 from city_profiles_model import load_profiles,profile_by_id
 from city_research_packs_model import load_city_packs,pack_for_city
+from ux41_favorites_ui import render_favorite_comparison
 from ux40_research_model import (
     ACTIVITIES,five_base_cards,filter_candidates,evidence_state,
 )
@@ -279,7 +280,9 @@ def render_expanded_research()->None:
                          default=ACTIVITIES[0],key="ux40_research_activity")
     activity=st.session_state["ux40_research_activity"]
     if activity=="Comparar cidades":
-        _five_city_comparison(study,five)
+        render_favorite_comparison(study,five)
+        with st.expander("Referência: as cinco bases aprofundadas"):
+            _five_city_comparison(study,five)
     elif activity=="Explorar uma cidade":
         _explore_city(study,rail,five)
     else:

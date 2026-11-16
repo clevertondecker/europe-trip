@@ -16,6 +16,8 @@ from itinerary_flow_model import validate_flow_backup,selected_rows
 from city_decision_store import validate_city_draft
 from smart_calendar_model import review_calendar_change
 from ux_navigation import AREAS,SECTIONS
+from base_research_expanded_model import load_research
+from ux41_favorites_model import validate_favorites
 
 ARCHIVE_SCHEMA=1
 ARCHIVE_KIND="nossa-europa-local-archive"
@@ -75,7 +77,8 @@ def validate_continuation(context:dict,plan:dict,catalog:dict)->dict:
 
 def make_archive(plan:dict,catalog:dict,context:dict|None=None,
                  city_studies:list[dict]|None=None,
-                 calendar_drafts:list[dict]|None=None)->dict:
+                 calendar_drafts:list[dict]|None=None,
+                 city_favorites:list[str]|None=None)->dict:
     validate_flow_backup(plan,catalog)
     continuation=validate_continuation(context or {},plan,catalog)
     studies=city_studies or []
@@ -97,6 +100,7 @@ def make_archive(plan:dict,catalog:dict,context:dict|None=None,
         "continuation":continuation,
         "city_studies":verified_studies,
         "calendar_drafts":verified_calendars,
+        "city_favorites":validate_favorites(city_favorites or [],load_research()),
     }
     if len(_json_bytes(result))>MAX_FILE_BYTES:
         raise ValueError("Backup grande demais")
@@ -106,7 +110,9 @@ def make_archive(plan:dict,catalog:dict,context:dict|None=None,
 def validate_archive(document:dict,catalog:dict)->dict:
     required={"schema_version","kind","exported_at","storage","plan",
               "continuation","city_studies","calendar_drafts"}
-    if not isinstance(document,dict) or set(document)!=required:
+    if (not isinstance(document,dict) or
+        not required<=set(document) or
+        set(document)-required-{"city_favorites"}):
         raise ValueError("Formato do arquivo desconhecido")
     if document["schema_version"]!=ARCHIVE_SCHEMA or document["kind"]!=ARCHIVE_KIND:
         raise ValueError("Versão incompatível do arquivo de continuidade")
@@ -127,9 +133,11 @@ def validate_archive(document:dict,catalog:dict)->dict:
         raise ValueError("Estudos do backup inválidos")
     for study in studies:validate_city_draft(study)
     for draft in calendars:review_calendar_change(plan,draft,catalog)
+    fav=validate_favorites(document.get("city_favorites",[]),load_research())
     return {**document,"plan":plan,"continuation":context,
             "city_studies":deepcopy(studies),
-            "calendar_drafts":deepcopy(calendars)}
+            "calendar_drafts":deepcopy(calendars),
+            "city_favorites":fav}
 
 
 def export_archive(archive:dict,catalog:dict)->bytes:
