@@ -95,7 +95,7 @@ def _nearby(data:dict,base_id:str)->None:
                 if quote.get("listing_url") or quote.get("catalogue_url"):
                     st.markdown("[Fonte da pesquisa]("+
                                 (quote.get("listing_url") or quote["catalogue_url"])+")")
-        st.caption("Use Pesquisa ampliada para a avaliação completa desta cidade.")
+        st.caption("Para consultar a ficha completa, escolha Explorar cidades.")
         return
     st.markdown("### "+_base_name(data,base_id)+" · "+base["corridor"])
     if base["rent_market_eur_m2"] is None:
