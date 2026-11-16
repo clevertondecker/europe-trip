@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import streamlit as st
 
-from base_change_model import destination_catalog
+from base_change_model import destination_catalog,_canonical_destination
 from base_scenario_model import base_options
 from city_decision_model import (
     compare_city_decisions,shared_destinations,review_base_application,
@@ -35,7 +35,8 @@ def _load_draft(draft:dict)->None:
     st.session_state["ux34_candidates"]=[
         base for base in draft["alternatives"]
         if base in names and base!=current["base_city"]]
-    st.session_state["ux34_destinations"]=draft["destination_ids"]
+    st.session_state["ux34_destinations"]=list(dict.fromkeys(
+        _canonical_destination(d) for d in draft["destination_ids"]))
     st.session_state["ux34_days"]=draft["stay_days"]
     st.session_state["ux34_fx"]=draft["eur_fx"]
     for key,amount in draft["rents_eur_month"].items():
@@ -107,6 +108,12 @@ def _render_routes(comparison:dict)->None:
                     st.caption("Conexões no exemplo pesquisado: "+str(r["transfers"]))
                 if r.get("frequency_reference"):
                     st.caption(r["frequency_reference"])
+                reference=r.get("representative_minutes")
+                if reference is not None:
+                    st.caption("Logística: "+(
+                        "Pernoite a avaliar; ida superior a 4h." if reference>=240 else
+                        "Bate-volta a verificar com horários reais de ida e volta."
+                    ))
                 st.caption(r["note"])
                 if r["source"]:
                     st.markdown("[Consultar fonte]("+r["source"]+")")
@@ -127,7 +134,8 @@ def _render_coverage(comparison:dict)->None:
             st.caption("Comparação com tempo nas duas cidades: "+
                        str(item["paired_route_times"])+"/"+
                        str(len(comparison["destinations"]))+
-                       " destinos. Critério ilustrativo: ≥15 min de diferença só ida.")
+                       " destinos. Critério ilustrativo: ≥15 min de diferença só ida, "
+                       "usando tempos típicos quando disponíveis nas duas bases.")
             if (item["candidate_only_researched"] or
                 item["official_only_researched"]):
                 st.caption("Pesquisa assimétrica: "+
