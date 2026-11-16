@@ -104,3 +104,51 @@ Fontes de contexto público verificadas e utilizadas **apenas em descrições qu
 | Liège | [SNCB — Liège-Guillemins](https://www.belgiantrain.be/en/station-information/liege/liege-guillemins) | estação multimodal |
 
 **Atenção:** as fontes turísticas promovem seus destinos; fatos narrativos provenientes delas não constituem uma avaliação independente de habitabilidade, segurança ou custo. Nova cidade deve ser pesquisada nas mesmas categorias, com indicadores de fontes primárias e seus períodos.
+
+
+## Fontes locais acrescentadas pelos pacotes 1–3 (16/11/2026)
+
+**Bairros — evidências institucionais** (os bairros são pontos de partida para procurar imóveis, nunca garantias de segurança, preço ou adequação):
+
+| Município | Fonte | Escopo |
+|---|---|---|
+| Mulhouse | [Turismo municipal — bairros](https://www.tourisme-mulhouse.com/app/uploads/mulhouse-tourisme/2025/07/DP_2025-FR_BD.pdf) | Centre Historique, Rebberg e Nouveau Quartier |
+| Strasbourg | [Turismo — quartiers](https://www.visitstrasbourg.fr/decouvrir-strasbourg/strasbourg-et-alentours/les-quartiers-de-strasbourg/) | Gare-Tribunal, Krutenau e Neudorf |
+| Metz | [Prefeitura — conseils de quartier](https://metz.fr/engager-entraider/citoyennete/conseils-quartiers.php) | Gare/Nouvelle Ville, Sablon/Amphithéâtre e Centro |
+| Nancy | [Prefeitura — quartiers](https://www.nancy.fr/nancy-la-ville/quartiers-et-territoires) | Centre-ville/Charles III, Poincaré/Foch, Vieille Ville |
+| Lille | [Prefeitura — transportes](https://www.lille.fr/Vivre-a-Lille/Me-deplacer/En-transports-en-commun) | Bairros cobertos por serviços urbanos descritos |
+| Dijon | [Prefeitura — Montchapet](https://patrimoine.dijon.fr/le-patrimoine-dijonnais-en-ligne/123-quartiers/quartier-montchapet/) | Montchapet |
+| Freiburg | [Prefeitura — Stadtbezirksatlas 2025](https://www.freiburg.de/pb,%2CLde/2480165.html) | Stühlinger, Wiehre, Vauban |
+| Karlsruhe | [Prefeitura — Stadtteile](https://www.karlsruhe.de/stadt-rathaus/stadtteile-ortsverwaltungen/karlsruher-stadtteile) | Innenstadt-Ost, Innenstadt-West, Nordweststadt |
+| Trier | [Prefeitura — Ortsbezirke](https://www.trier.de/leben-in-trier/stadtportrait/ortsbezirke/index.html) | Mitte-Gartenfeld |
+| Liège | [Police — secteurs](https://www.policeliege.be/page/stat/secteurs) | Liège-Centre/Outremeuse, Guillemins/Avroy |
+
+**Operadores — ligações e regras tarifárias históricas**:
+
+- [TER Mulhouse–Strasbourg](https://www.ter.sncf.com/grand-est/trajet-mulhouse-strasbourg): cerca de 53 min, até 33 idas/voltas diárias e condição Carte Fluo; não usar como horários de fim de semana de 2027.
+- [TER Metz–Strasbourg](https://www.ter.sncf.com/grand-est/trajet-metz-strasbourg): 1h36, seis idas/voltas diárias publicadas e tarifa Carte Fluo; restrições de data.
+- [TER linhas Grand Est](https://www.ter.sncf.com/grand-est/se-deplacer/lignes): Nancy–Metz, até 52 idas/voltas, tempo mínimo publicado de 38 min.
+- [Carte Fluo](https://www.ter.sncf.com/grand-est/tarifs-cartes/cartes-reduction/carte-fluo): €30/ano com regras de 50% e benefício de acompanhante aos fins de semana/feriados em trajetos elegíveis. Não duplicar desconto automaticamente.
+
+**Clima**: [normais francesas 1991–2020 via ERA5-Land reanalisada](https://www.data.gouv.fr/datasets/normales-climatiques-mensuelles-1991-2020-par-commune-france) são CC BY 4.0 com atribuição Copernicus obrigatória, resolução de ~9 km e não são medições de estações. Dataset identificado, **valores municipais ainda não importados** nesta rodada; não publicar médias sem ler o recurso bruto.
+
+**Custo e coworking:** manter os registros existentes em `data/city_research_round2_2026.json`; índices de Numbeo são referências colaborativas históricas, sem scraping. Horários e condições de uso dos espaços requerem revalidação diretamente com fornecedores antes da viagem.
+
+
+### Normais climáticas de estações — seis finalistas francesas (1991–2020)
+
+Valores de temperatura média (°C) e chuva mensal (mm) extraídos das tabelas de normais 1991–2020 exibidas pelo **Meteociel com dados Météo-France**, para as estações abaixo, em 16/11/2026. **Não equivalem a normais municipais pontuais**, pois estação e centro urbano podem ter altitudes/localizações diferentes.
+
+| Cidade-base | Estação de referência | URL |
+|---|---|---|
+| Mulhouse | Mulhouse | https://www.meteociel.fr/obs/clim/normales_records.php?code=68224006 |
+| Strasbourg | Strasbourg-Entzheim | https://www.meteociel.fr/obs/clim/normales_records.php?code=67124001 |
+| Metz | Metz-Frescaty | https://www.meteociel.fr/obs/clim/normales_records.php?code=57039001 |
+| Nancy | Nancy-Essey | https://www.meteociel.fr/obs/clim/normales_records.php?code=54526001 |
+| Lille | Lille-Lesquin | https://www.meteociel.fr/obs/clim/normales_records.php?code=59343001 |
+| Dijon | Dijon-Longvic | https://www.meteociel.fr/obs/clim/normales_records.php?code=21473001 |
+
+**Método de reutilização:** conferir mês/estação/período de 30 anos, atribuir Météo-France na descrição da fonte, guardar link do agregador e verificar direitos antes de reprodução em massa; não transferir dados da estação para o endereço exato de hospedagem, nem comparar condições meteorológicas de 2027.
+
+
+**Bairros complementares (Alemanha)**: [Município de Offenburg — centros de bairro](https://offenburg.de/de/leben-in-offenburg/integration/willkommen-in-offenburg/ankommen-in-offenburg/institutionen-und-behoerden/) identifica Innenstadt e Oststadt. [Aachen Tourist Service — Frankenberger Viertel](https://www.aachen-tourismus.de/en/das-frankenberger-viertel/) e [Burtscheider Markt](https://www.aachen-tourismus.de/en/aachen-entdecken/details/poi/burtscheider-markt/) documentam Frankenberger Viertel e Burtscheid. Essas referências urbanas **não** são validação de aluguel, transporte até estação ou segurança individual.
