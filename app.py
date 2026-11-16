@@ -29,6 +29,7 @@ from planning_context_ui import (render_context,render_home_continue,
 from base_explorer_ui import render_base_explorer, _comparison as render_route_comparison, _split_stay as render_split_stay
 from base_explorer_model import load_exploration
 from base_change_ui import render_base_change
+from city_decision_ui import render_city_decision
 from base_weight_coverage_ui import render_weight_coverage
 from budget_sections_ui import render_budget_summary, render_budget_details
 from base_scenario_model import base_options, choose_exploratory_base, hypothetical_city_name, expanded_rail_routes
@@ -698,9 +699,9 @@ elif page == "Comparar cidades":
         "Comparar mesmas viagens","Uma ou duas bases","Estudo histórico"],
         key="ux_compare_mode",selection_mode="single")
     if compare_mode in ("Impacto da troca",None):
-        render_base_change(active_plan(),data,
-                           sync_sources["finance"]["status"]=="live",
-                           int(st.session_state.get("ux_days_value",60)))
+        render_city_decision(active_plan(),data,
+                             sync_sources["finance"]["status"]=="live",
+                             int(st.session_state.get("ux_days_value",60)))
     elif compare_mode=="Pesos das 30 cidades":
         render_weight_coverage()
     elif compare_mode=="Comparar mesmas viagens":
