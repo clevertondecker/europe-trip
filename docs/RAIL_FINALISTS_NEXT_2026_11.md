@@ -15,4 +15,25 @@ Inventário reutilizado: os dez pares Mulhouse/Strasbourg × cinco destinos do P
 
 **Pendências:** todas as quatro tarifas normais, ida/volta para casal, últimas conexões de fim de semana, pernoite, última milha, disponibilidade 2027 e pesquisa dos demais pares permanecem desconhecidos. Não atualizar orçamento ou decisões oficiais. Não considerar rota desconhecida inviável.
 
+## Cobertura recalculada da cesta de cinco destinos
+
+Levantamento da `main` mais estas quatro observações, contando **apenas** Luxemburgo, Interlaken Ost, Bruxelas, Brugge (Bélgica) e Rotterdam. Não é ranking de qualidade nem quantidade total de destinos conhecidos:
+
+| Cidade-base finalista | Rotas com tempo de ida / 5 |
+|---|---:|
+| Mulhouse | 5/5 |
+| Strasbourg | 5/5 |
+| Metz | 2/5 |
+| Nancy | 2/5 |
+| Lille | 4/5 |
+| Dijon | 0/5 |
+| Freiburg im Breisgau | 0/5 |
+| Offenburg | 0/5 |
+| Karlsruhe | 0/5 |
+| Trier | 1/5 |
+| Aachen | 0/5 |
+| Liège | 0/5 |
+
+A consulta de candidatos considera os aliases `luxembourg`/`luxembourg_city`, sem duplicar. Para algumas bases fora das quatro oficiais, estas são lacunas documentais, não ausência de serviço ferroviário.
+
 **Prioridade próxima:** recuperar a lista de destinos ativos do TripPlan, selecionar bases realmente em comparação, e pesquisar um segundo lote justificado com operadores oficiais. Sem expansão automática para toda a matriz 12 × 5.
