@@ -25,6 +25,7 @@ from travel_advisor_ui import render_advisor, _recover_saved_plan, _secure_save,
 from travel_dashboard_ui import render_trip_dashboard
 from itinerary_flow_ui import render_itinerary_workbench
 from smart_calendar_ui import render_smart_calendar
+from ux37_next_actions_ui import render_next_actions,render_return_to_summary
 from continuity_ui import (apply_pending_restore,render_continuity_panel,
                            restore_private_on_start,autosave_private_if_requested,private_status_label)
 from planning_context_ui import (render_context,render_home_continue,
@@ -450,8 +451,11 @@ if (ux_area=="Meu roteiro" and ux_section=="Melhorar meu roteiro" and
     render_breadcrumb(stage=st.session_state.get("flow_return_stage"),
                       city=st.session_state.get("flow_return_city"),
                       show_return=True)
+if page != "Visão geral":
+    render_return_to_summary()
 if page == "Visão geral":
     render_home_continue(active_plan())
+    render_next_actions(active_plan(),load_attractions())
     render_continuity_panel(active_plan(),load_attractions())
     st.markdown("""<div class="home-hero" role="region" aria-label="Apresentação da viagem">
       <div class="home-hero__content"><div class="home-hero__eyebrow">ITÁLIA → FRANÇA · 2027</div>
