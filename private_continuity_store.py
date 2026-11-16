@@ -7,11 +7,12 @@ GCS object generations provide optimistic concurrency across browser sessions.
 from __future__ import annotations
 
 import hashlib
-import json
 import re
 from urllib.parse import quote
 
 from google.auth.transport.requests import AuthorizedSession
+from google.auth.exceptions import GoogleAuthError
+from requests.exceptions import RequestException
 from google.oauth2.service_account import Credentials
 
 MAX_ARCHIVE_BYTES = 450_000
@@ -55,14 +56,23 @@ class PrivateArchiveStore:
                 + quote(self.bucket, safe="") + "/o/" + quote(self.key, safe=""))
 
     def load(self) -> tuple[bytes, int] | None:
-        response = self.http.get(self._metadata_url(), timeout=12)
+        try:
+            response = self.http.get(self._metadata_url(), timeout=12)
+        except (GoogleAuthError, RequestException) as exc:
+            raise StorageUnavailable("Não foi possível acessar armazenamento privado") from exc
         if response.status_code == 404:
             return None
         if response.status_code != 200:
             raise StorageUnavailable("Não foi possível consultar cópia privada")
         metadata = response.json()
-        generation = int(metadata["generation"])
-        data = self.http.get(self._metadata_url(), params={"alt": "media", "generation": generation}, timeout=12)
+        try:
+            generation = int(metadata["generation"])
+        except (ValueError, TypeError, KeyError) as exc:
+            raise StorageUnavailable("Metadados inválidos da cópia privada") from exc
+        try:
+            data = self.http.get(self._metadata_url(), params={"alt": "media", "generation": generation}, timeout=12)
+        except (GoogleAuthError, RequestException) as exc:
+            raise StorageUnavailable("Não foi possível baixar cópia privada") from exc
         if data.status_code in (404, 412):
             raise StorageConflict("A cópia mudou durante a leitura")
         if data.status_code != 200 or len(data.content) > MAX_ARCHIVE_BYTES:
@@ -77,7 +87,8 @@ class PrivateArchiveStore:
         ):
             raise ValueError("Versão de salvamento inválida")
         # Never overwrite an existing object without its exact generation.
-        response = self.http.post(
+        try:
+            response = self.http.post(
             "https://storage.googleapis.com/upload/storage/v1/b/"
             + quote(self.bucket, safe="") + "/o",
             params={
@@ -88,9 +99,14 @@ class PrivateArchiveStore:
             data=raw,
             headers={"Content-Type": "application/json; charset=utf-8"},
             timeout=15,
-        )
+            )
+        except (GoogleAuthError, RequestException) as exc:
+            raise StorageUnavailable("Conexão indisponível; nenhuma cópia privada foi confirmada") from exc
         if response.status_code in (409, 412):
             raise StorageConflict("Outra sessão salvou alterações; recupere e compare antes de sobrescrever")
         if response.status_code not in (200, 201):
             raise StorageUnavailable("Falha ao salvar cópia privada; mantenha o backup local")
-        return int(response.json()["generation"])
+        try:
+            return int(response.json()["generation"])
+        except (KeyError, TypeError, ValueError) as exc:
+            raise StorageUnavailable("A gravação não retornou versão confirmada") from exc
