@@ -546,6 +546,60 @@
       "retrieved_at": "2026-11-15",
       "return_verified_2027": false,
       "notes": "Trajeto reverso não inferido de Metz→Nancy."
+    },
+    {
+      "base_id": "mulhouse",
+      "destination_id": "bruges_be",
+      "train_minutes_oneway_min": 354,
+      "fare_from_eur_person_oneway": null,
+      "reference_status": "secondary_historical_sample_2026",
+      "source_url": "https://www.thetrainline.com/en/train-times/mulhouse-to-bruges-brugge",
+      "retrieved_at": "2026-11-16",
+      "return_verified_2027": false,
+      "origin_station": "Mulhouse Ville",
+      "destination_station": "Brugge (Bélgica)",
+      "operator": "SNCF / Eurostar / SNCB",
+      "representative_minutes": 431,
+      "transfers": 2,
+      "frequency_reference": "30 opções diárias citadas pela fonte secundária; serviços/trechos variáveis",
+      "roundtrip_couple_eur": null,
+      "provenance": "Trainline, fonte secundária",
+      "missing": [
+        "official_operator_crosscheck",
+        "transfer_stations",
+        "return_schedule",
+        "normal_fare",
+        "roundtrip_couple",
+        "2027_timetable"
+      ],
+      "notes": "Destino é Brugge, Bélgica (não Bruges, França). Tempo típico de ida da fonte secundária, com múltiplas conexões. Confirmar nas operadoras SNCF e SNCB, especialmente trocas e horários de retorno."
+    },
+    {
+      "base_id": "strasbourg",
+      "destination_id": "bruges_be",
+      "train_minutes_oneway_min": 295,
+      "fare_from_eur_person_oneway": null,
+      "reference_status": "secondary_historical_sample_2026",
+      "source_url": "https://www.thetrainline.com/en/train-times/strasbourg-to-bruges-brugge",
+      "retrieved_at": "2026-11-16",
+      "return_verified_2027": false,
+      "origin_station": "Strasbourg",
+      "destination_station": "Brugge (Bélgica)",
+      "operator": "SNCF / Eurostar / SNCB",
+      "representative_minutes": 385,
+      "transfers": 2,
+      "frequency_reference": "23 opções diárias citadas pela fonte secundária; serviços/trechos variáveis",
+      "roundtrip_couple_eur": null,
+      "provenance": "Trainline, fonte secundária",
+      "missing": [
+        "official_operator_crosscheck",
+        "transfer_stations",
+        "return_schedule",
+        "normal_fare",
+        "roundtrip_couple",
+        "2027_timetable"
+      ],
+      "notes": "Destino é Brugge, Bélgica (não Bruges, França). Tempo típico de ida da fonte secundária, com múltiplas conexões. Confirmar nas operadoras SNCF e SNCB, especialmente trocas e horários de retorno."
     }
   ]
 }
