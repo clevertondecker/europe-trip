@@ -17,6 +17,7 @@ from planning_store import create_from_legacy,change_plan,sync_legacy_view
 from catalog_plan_validation import validate_catalog_packages
 from planning_session import active_plan,update_fields,accept_approved_plan
 from planning_status import save_label,explain_storage_error,friendly_timestamp
+from continuity_ui import private_status_label
 from advisor_finance import advisor_projection
 from discovery_ui import render_discovery
 from my_outings_ui import render_my_outings
@@ -199,9 +200,9 @@ def render_advisor(trip_data:dict,sync_sources:dict,workspace_area:str='Meus pas
     names=[place_label(bydest[d]["name"],bydest[d]["country"]) for d in p["packages"] if d in bydest]
     if workspace_area != "Meus passeios":
         st.caption("Passeios escolhidos: "+(", ".join(names) if names else "Nenhum ainda"))
-    saved_label,saved_hint=save_label(
+    saved_label,saved_hint=private_status_label(save_label(
         p,st.session_state.get("advisor_saved_snapshot"),
-        _owner_signed_in())
+        _owner_signed_in()))
     st.caption(f"**{saved_label}** · {saved_hint}")
     profile_name={"economy":"Econômico","balanced":"Equilibrado",
                   "experience":"Aproveitar ao máximo"}[p["profile"]]
