@@ -18,7 +18,7 @@
 | `data/five_base_comparison_evidence_2026_11.json` | Cinco bases, cesta fixa de 15 destinos, 23 referências de horário | Comparar **cobertura da pesquisa** ferroviária na mesma cesta; alguns anúncios com URL individual | Tempos mínimos de ida, não retorno nem porta a porta; 2027 não validado |
 | `data/exploration_bases_2027.json` | 8 cidades-base e 27 registros de rotas | Reutilizar tempos/valores históricos em pares ainda sem registro na matriz principal | Referências de operador e tarifas “desde”; não custos totais |
 | `data/base_destination_routes_2027.json` | 4 bases antigas, 44 pares (muitos explicitamente não pesquisados) | Somente linhas com tempo e fonte documentados | Uma linha `route_to_research` não prova tempo ou inviabilidade |
-| `data/base_city_rail_evidence_expanded_2026_11.json` | 6 amostras iniciais, ampliadas para 9 | Horários efetivamente publicados para 16/11/2026 | Uma segunda-feira, não calendário de 2027 nem retorno |
+| `data/base_city_rail_evidence_expanded_2026_11.json` | 6 amostras iniciais, ampliadas para 11 | Horários efetivamente publicados para 16/11/2026 | Uma segunda-feira, não calendário de 2027 nem retorno |
 | `data/city_research_round2_2026.json` | Mulhouse, Strasbourg, Metz, Nancy | Restaurante de referência, coworking e restrições de expediente | Numbeo colaborativo; internet e acesso noturno não comprovados |
 | Drive `Europa_2027_Base_COMPLETA.md` v1.3 | Pesquisa acumulada e ranking editorial original | Contexto, decisões, hipóteses, histórico de valores | Ranking de 0–5 com **outros pesos e critérios**: não transportar as notas |
 | Drive `02_REGISTRO_DE_PESQUISAS` | Política de fontes, unidades e revisões | Regras de qualidade e separação de hipóteses | Não alimenta automaticamente os JSONs |
@@ -44,9 +44,9 @@ A documentação anterior também descreve cinco bases prioritárias; o catálog
 | Dijon | 3 | 0 | 0 | Não há cesta equivalente | Indisponível |
 | Freiburg im Breisgau | 3 | 0 | 0 | Não há cesta equivalente | Indisponível |
 | Offenburg | 3 | 5 | 5 | Não há cesta equivalente | Indisponível |
-| Karlsruhe | 3 | 0 | 0 | Não há cesta equivalente | Indisponível |
+| Karlsruhe | 3 | 1 | 0 | Não há cesta equivalente | Indisponível |
 | Trier | 3 | 1 | 0 | Não há cesta equivalente | Indisponível |
-| Aachen | 3 | 0 | 0 | Não há cesta equivalente | Indisponível |
+| Aachen | 3 | 1 | 0 | Não há cesta equivalente | Indisponível |
 | Liège | 3 | 0 | 0 | Não há cesta equivalente | Indisponível |
 
 **Esclarecimento:** um 0/15 significa **sem tempo incorporado à cesta comum**, não que a cidade não tenha trem, atrações ou conexão. Por exemplo, Freiburg, Karlsruhe e Offenburg estão no corredor do Alto Reno; Dijon–Beaune é uma conexão publicada, mas Beaune **não** está entre os 15 destinos comuns e, portanto, não aumenta artificialmente a cobertura comparável.
@@ -61,12 +61,19 @@ A pesquisa detalhada das cinco bases tem três anúncios para Lille, enquanto a 
 - [Strasbourg → Mulhouse](https://www.sncf-connect.com/train/horaires/strasbourg/mulhouse): melhor **49 min** de TGV, TER em torno de **53 min**, média **55 min**. Fora da cesta comum; não é tarifa/retorno de passeio.
 - [Lille → Bruxelas](https://www.sncf-connect.com/en-en/train/timetables/lille/brussels): referência previamente catalogada, sem substituir a passagem “desde” por uma tarifa média.
 
+- [Karlsruhe → Strasbourg](https://www.sncf-connect.com/en-en/train/timetables/karlsruhe/strasbourg): referência de segunda 16/11/2026, melhor trem direto **41 min**, média divulgada **70 min**, com ligação regional via Offenburg mais lenta. Dentro da cesta comum, porém sem retorno/2027.
+- [Aachen → Köln](https://www.sncf-connect.com/en-en/train/route/aachen/cologne): referência de 16/11/2026, melhor percurso divulgado **38 min**, média **43 min**, envolvendo trens e estações distintas; dentro da cesta comum, sem custo do casal nem retorno de passeio.
+
 **Rede e condições de moradia:**
 - [TGO Rheintalbahn](https://www.ortenaulinie.de/startseite/fahrplan/rheintalbahn.html): documenta a rede de Karlsruhe, Offenburg, Freiburg e Basel; não constitui matriz de 15 tempos.
 - [CFL horários](https://www.cfl.lu/en-gb/timetable/sheets): documenta a ligação Luxembourg–Wasserbillig–Trier; não comprova o retorno de um passeio.
 - [Service-Public — bail mobilité](https://www.service-public.gouv.fr/particuliers/vosdroits/F34759): modalidade de aluguel mobiliado de 1–10 meses em hipóteses qualificadas; elegibilidade do casal não verificada.
 - [Wunderflats — mínimo geral](https://wunderflats.com/en/help/post/75000062964): plataforma informa mínimo usual de um mês, sujeito a condições locais/individuais.
 - [HousingAnywhere Offenburg](https://housinganywhere.com/s/Offenburg--Germany/furnished-apartments): a lista inclui imóveis de **outras cidades**, inclusive Strasbourg; não contar todos como moradia em Offenburg. Sem cotação de 56–60 noites com internet e taxas verificadas.
+- [DB Freiburg → Basel](https://www.bahn.de/reisen/view/verbindung/freiburg/basel.shtml): exemplo de trem rápido **36 min** e regional **62 min** em **23/11/2026**, data de amostra diferente; não integrado à cobertura de 15 destinos do dia 16.
+- [SNCB Liège–Bruxelles](https://www.belgiantrain.be/fr/travel-info/origin-destination/brussels-liege): média informada de **~64 min**, mas não a mesma medida de tempo mais rápido; manter como contexto até amostra padronizada.
+- [SNCB Liège-Guillemins](https://www.belgiantrain.be/en/station-information/liege/liege-guillemins): estação com tram/ônibus e Wi-Fi; **não** equivale à internet do apartamento nem ao acesso final de cada passeio.
+- [SNCB Aachen internacional](https://www.belgiantrain.be/en/products/crossborder/aachen): conexão regional transfronteiriça horária com Liège, mas Liège não integra a cesta de 15, então não há pontuação adicional.
 
 Essas verificações são **referências contextuais ou históricas** e ficam registradas no dataset canônico existente, sem gerar cotação fictícia nem nova pontuação.
 
@@ -115,7 +122,7 @@ O quadro principal mostra as 12 finalistas por padrão e oferece as 30 sob deman
 - **Offenburg:** 5/15 tempos e forte conexão documental com Strasbourg/Alto Reno; ofertas temporárias históricas variam muito e catálogos abrangem municípios vizinhos, aumentando o risco de concluir preço errado.
 - **Metz:** conexão de referência com Luxembourg e 3/15 da cesta, além de pesquisa cotidiana para casal; ainda falta cobertura comparável de passeios e tarifas regulares.
 
-**Investigações especialmente importantes, sem exclusão:** Nancy (2/15 após nova fonte de Luxembourg), Trier (Luxembourg, 1/15), Freiburg/Karlsruhe (corredor ferroviário sem matriz padronizada suficiente), Dijon (Beaune fora da cesta), Aachen e Liège (eixo internacional ainda não documentado nos mesmos 15 destinos). **Sem pesquisa na matriz não significa pior cidade.**
+**Investigações especialmente importantes, sem exclusão:** Nancy (2/15 após nova fonte de Luxembourg), Trier (Luxembourg, 1/15), Freiburg (corredor ferroviário sem a matriz comum), **Karlsruhe (1/15)**, Dijon (Beaune fora da cesta), **Aachen (1/15)** e Liège (eixo ferroviário com fonte da SNCB mas sem dado padronizado na cesta). **Sem pesquisa na matriz não significa pior cidade.**
 
 Nenhuma cidade-base foi aprovada; a decisão D-004 do Drive continua aberta.
 
