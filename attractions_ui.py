@@ -180,6 +180,29 @@ def render_explorer(trip_data: dict, sync_sources: dict, map_view) -> None:
     feedback=st.session_state.pop("explore_feedback",None)
     if feedback:
         st.success(feedback+" Alterações ainda não foram salvas remotamente.")
+    outcome=st.session_state.get("ux45_explore_result")
+    if outcome:
+        message=("incluído" if outcome["action"]=="added" else
+                 "atualizado" if outcome["action"]=="updated" else "removido")
+        st.success(outcome["name"]+" "+message+" no planejamento desta sessão.")
+        st.caption(str(outcome["attraction_count"])+" atração(ões) · "+
+                   ("período "+outcome["period"] if outcome["period"]!="Ainda não definido"
+                    else "sem período definido")+" · "+
+                   (str(len(outcome["dates"]))+" data(s) planejada(s)"
+                    if outcome["dates"] else "sem data definida")+
+                   (" · transporte de retorno a confirmar" if outcome["transport_pending"]
+                    else "")+" · ainda não salvo remotamente.")
+        next_col,view_col=st.columns(2)
+        if next_col.button("Continuar explorando",key="ux45_explore_continue"):
+            st.session_state.pop("ux45_explore_result",None)
+            st.rerun()
+        if outcome["action"]!="removed" and view_col.button(
+                "Ver no meu roteiro",key="ux45_explore_to_planner"):
+            from ux45_navigation_context import handoff
+            handoff(st.session_state,area="Explorar",section="Passeios",
+                    destination_id=outcome["destination_id"])
+            st.session_state.pop("ux45_explore_result",None)
+            st.rerun()
     for start in range(0,len(filtered),2):
         for col,item in zip(st.columns(2,gap="medium"),filtered[start:start+2]):
             d=item["destination"]
