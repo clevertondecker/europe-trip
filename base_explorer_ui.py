@@ -425,11 +425,11 @@ def render_base_explorer(plan:dict,trip_data:dict,finance_live:bool,
             _nearby(data,selected)
             st.caption("Os tempos e tarifas são referências históricas; retornos e "
                        "custos completos para 2027 ainda não foram validados.")
-            with st.expander("Comparar os mesmos passeios entre bases"):
+            if st.checkbox("Comparar os mesmos passeios entre bases",key="ux42_show_comparison"):
                 _comparison(data)
-            with st.expander("Estudar uma ou duas bases"):
+            if st.checkbox("Estudar uma ou duas bases",key="ux42_show_split"):
                 _split_stay(data,plan,trip_data,finance_live,eurfx)
-        with st.expander("Ferramentas avançadas e cenários"):
+        if st.checkbox("Mostrar ferramentas avançadas e cenários",key="ux42_show_advanced"):
             _scenario_backups(plan,study_options)
             st.caption("As ferramentas históricas continuam disponíveis sem "
                        "alterar a cidade-base oficial.")
