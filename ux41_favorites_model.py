@@ -9,7 +9,7 @@ import json
 
 from base_research_expanded_model import observed_housing
 from base_coverage_model import coverage_matrix
-from five_base_comparison_model import BASE_IDS,route_observation
+from rail_evidence_unified_model import load_rail_evidence,route_evidence
 
 MAX_FAVORITES=3
 FAVORITES_KIND="nossa-europa-exploratory-city-favorites"
@@ -65,6 +65,7 @@ def comparative_matrix(study:dict, five:dict,profiles:dict,packs:dict,
         raise ValueError("Cesta de passeios inválida")
     known=coverage_matrix("general",study=study)
     coverage={row["id"]:row for row in known}
+    rail_evidence=load_rail_evidence()
     views=[]
     for key in ids:
         c=candidates[key]
@@ -76,27 +77,27 @@ def comparative_matrix(study:dict, five:dict,profiles:dict,packs:dict,
         two_adults=sum(x.get("two_adults_confirmed") is True for x in c["housing_offers"])
         routes=[]
         for dest in dest_ids:
-            if key in BASE_IDS:
-                route=route_observation(five,key,dest)
-                duration=route["train_min"]
-                regional=route["regional_min"]
-                note=route["notes"]
-                source=route["source_url"]
-                if route["status"]=="local_no_intercity_train":
-                    status="local"
-                elif duration is not None:
-                    status="documented_oneway"
-                else:status="not_researched"
-            else:
-                # The other 25 cities have scattered legacy rail observations;
-                # none is a same-basket verified route in this exact five-base matrix.
-                duration=regional=source=None
-                status="not_compared_on_shared_basket"
-                note="A rota não foi validada na mesma matriz de 15 destinos"
-            routes.append({"destination_id":dest,"destination_name":destinations[dest]["name"],
-                           "duration_min_oneway":duration,"regional_min_oneway":regional,
-                           "source_url":source,"status":status,"note":note,
-                           "return_2027_verified":False,"last_mile_verified":False})
+            evidence=route_evidence(rail_evidence,key,dest)
+            status=evidence["status"]
+            observations=evidence["observations"]
+            routes.append({
+                "destination_id":dest,
+                "destination_name":destinations[dest]["name"],
+                "duration_min_oneway":evidence["minimum_oneway_min"],
+                "typical_min_oneway":evidence["typical_oneway_min"],
+                "regional_min_oneway":evidence["regional_oneway_min"],
+                "transfers":evidence["transfers"],
+                "fare_from_eur_person_oneway":evidence["fare_from_eur_person_oneway"],
+                "source_url":evidence["source_url"],
+                "source_dataset":evidence.get("source_dataset"),
+                "evidence_date":evidence.get("source_date"),
+                "observations":observations,
+                "status":("documented_oneway" if status=="historical_time" else status),
+                "comparable":evidence["comparable"],
+                "note":"Tempo histórico documentado; comparação de horários não validada"
+                    if status=="historical_time" else
+                    "Informações parciais; não concluir impossibilidade de viajar",
+                "return_2027_verified":False,"last_mile_verified":False})
         documented=sum(x["status"]=="documented_oneway" for x in routes)
         daily=pack.get("daily_life") or {}
         remote=pack.get("remote_work") or {}
