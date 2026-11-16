@@ -19,8 +19,8 @@ A tela começava com três métricas técnicas, um aviso longo, cinco bases dent
 ## Estado e navegação
 
 - Chaves locais: `ux40_research_activity`, `ux40_open_<city_id>`, `ux40_back_compare`, `ux40_corridor_filter`, `ux40_evidence_filter`, `ux40_list_selected`, `ux40_list_open`.
-- Chaves legadas preservadas: `expanded_bases_detail_city`, `expanded_bases_country_filter`, `expanded_bases_only_shortlisted`, `five_base_detail`, `five_base_destinations`, `five_base_show_unknown` e `five_base_manual_*`.
-- `base_explorer_ui.py`, `five_base_comparison_ui.py`, `five_base_comparison_model.py`, `base_research_expanded_model.py` e fórmulas financeiras continuam intactos.
+- Estado persistente espelhado: `ux40_selected_city`, `ux40_saved_country`, `ux40_saved_finalists`, `ux40_saved_corridor`, `ux40_saved_evidence`, `ux40_saved_five_destinations` e `ux40_saved_five_detail`, para recuperar widgets quando Streamlit remove uma atividade do DOM.\n- Chaves legadas preservadas: `expanded_bases_detail_city`, `expanded_bases_country_filter`, `expanded_bases_only_shortlisted`, `five_base_detail`, `five_base_destinations`, `five_base_show_unknown` e `five_base_manual_*`.
+- `base_explorer_ui.py`, `five_base_comparison_model.py`, `base_research_expanded_model.py` e fórmulas financeiras continuam intactos.
 
 ## Antes / depois
 
@@ -43,3 +43,7 @@ A tela começava com três métricas técnicas, um aviso longo, cinco bases dent
 ## Fase seguinte sugerida
 
 Usar o aplicativo com cinco bases e duas ou três trocas de atividade; corrigir somente regressões evidenciadas por navegação real, sem iniciar novas features desnecessárias. **Não publicar nem mesclar antes de aprovação explícita.**
+
+## Ajustes após a primeira execução de CI
+
+O primeiro CI detectou dois comportamentos esperados da nova navegação: o teste legado ainda buscava filtros na tela inicial e Streamlit descartava estados de widgets de atividades desmontadas. Adaptado o teste legado ao fluxo contextual e criado espelhamento permanente das seleções (incluindo os 15 destinos) em `st.session_state`. `five_base_comparison_ui.py` muda apenas callbacks de estado dos widgets, não sua lógica de domínio.
