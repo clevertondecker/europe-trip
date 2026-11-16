@@ -24,7 +24,7 @@ def _weather(months):
 def render_dq20_panel(selected_ids:list[str])->None:
     if len(selected_ids)<2 or not set(selected_ids)<= {"mulhouse","strasbourg","freiburg"}:
         return
-    with st.expander("Pesquisa aprofundada: passeios, rotina e logística (piloto)"):
+    with st.expander("Arquivo de pesquisa 2.0 · referências históricas detalhadas"):
         st.caption("Piloto independente para Luxemburgo, Interlaken, Bruxelas, "
                    "Bruges e Rotterdam. Não altera sua cesta de passeios de cima.")
         as_brazil=st.checkbox("Simular expediente 9h–18h no Brasil (hipótese)",
