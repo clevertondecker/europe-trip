@@ -52,14 +52,14 @@ class UX40StreamlitTests(unittest.TestCase):
         self.official=deepcopy(self.app.session_state["advisor_plan"])
         self.app.radio(key="ux_area").set_value("Explorar").run()
         self.app.segmented_control(key="ux_section").set_value("Cidades-base").run()
-        self.app.segmented_control(key="ux_city_view").set_value("Pesquisa ampliada").run()
+        self.app.segmented_control(key="ux42_city_activity").set_value("Comparar favoritas").run()
         self.assertFalse(self.app.exception,[e.message for e in self.app.exception])
 
     def test_three_actions_and_five_cards_without_full_report_at_top(self):
         self.assertEqual(tuple(ACTIVITIES),("Comparar cidades","Explorar uma cidade",
                                             "Todas as candidatas"))
-        self.assertEqual(self.app.session_state["ux40_research_activity"],"Comparar cidades")
-        self.assertTrue(any("Onde vale mais a pena morar?" in x.value
+        self.assertEqual(self.app.session_state["ux42_city_activity"],"Comparar favoritas")
+        self.assertTrue(any("Comparar favoritas" in x.value
                             for x in self.app.markdown))
         self.assertIn("ux40_open_offenburg",{b.key for b in self.app.button})
         self.assertIn("five_base_destinations",{x.key for x in self.app.multiselect})
@@ -68,14 +68,14 @@ class UX40StreamlitTests(unittest.TestCase):
     def test_open_offenburg_and_return_without_losing_context(self):
         self.app.button(key="ux40_open_offenburg").click().run()
         self.assertFalse(self.app.exception,[e.message for e in self.app.exception])
-        self.assertEqual(self.app.session_state["ux40_research_activity"],"Explorar uma cidade")
+        self.assertEqual(self.app.session_state["ux42_city_activity"],"Explorar cidades")
         self.assertEqual(self.app.session_state["expanded_bases_detail_city"],"offenburg")
         self.app.button(key="ux40_back_compare").click().run()
-        self.assertEqual(self.app.session_state["ux40_research_activity"],"Comparar cidades")
+        self.assertEqual(self.app.session_state["ux42_city_activity"],"Comparar favoritas")
         # Widget state is removed when its activity is hidden; durable state remains.
         self.assertEqual(self.app.session_state["ux40_selected_city"],"offenburg")
-        self.app.segmented_control(key="ux40_research_activity").set_value(
-            "Explorar uma cidade").run()
+        self.app.segmented_control(key="ux42_city_activity").set_value(
+            "Explorar cidades").run()
         self.assertEqual(self.app.session_state["expanded_bases_detail_city"],"offenburg")
         self.assertEqual(self.app.session_state["advisor_plan"],self.official)
 
@@ -89,19 +89,19 @@ class UX40StreamlitTests(unittest.TestCase):
                          ["strasbourg","luxembourg_city"])
         self.app.segmented_control(key="ux40_research_activity").set_value(
             "Explorar uma cidade").run()
-        self.app.segmented_control(key="ux40_research_activity").set_value(
-            "Comparar cidades").run()
+        self.app.segmented_control(key="ux42_city_activity").set_value(
+            "Comparar favoritas").run()
         self.assertEqual(self.app.session_state["five_base_destinations"],
                          ["strasbourg","luxembourg_city"])
         self.assertEqual(self.app.session_state["advisor_plan"],self.official)
 
     def test_country_corridor_and_finalist_filter_persist(self):
-        self.app.segmented_control(key="ux40_research_activity").set_value("Todas as candidatas").run()
+        self.app.segmented_control(key="ux42_city_activity").set_value("Explorar cidades").run()
         self.app.selectbox(key="expanded_bases_country_filter").set_value("Alemanha").run()
         self.app.checkbox(key="expanded_bases_only_shortlisted").check().run()
         self.assertFalse(self.app.exception,[e.message for e in self.app.exception])
         self.assertTrue(any("5 cidades encontradas" in x.value for x in self.app.caption))
-        self.app.segmented_control(key="ux40_research_activity").set_value("Comparar cidades").run()
+        self.app.segmented_control(key="ux42_city_activity").set_value("Comparar favoritas").run()
         self.app.segmented_control(key="ux40_research_activity").set_value("Todas as candidatas").run()
         self.assertEqual(self.app.session_state["expanded_bases_country_filter"],"Alemanha")
         self.assertTrue(self.app.session_state["expanded_bases_only_shortlisted"])
