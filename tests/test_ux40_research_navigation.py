@@ -87,8 +87,8 @@ class UX40StreamlitTests(unittest.TestCase):
         items.set_value(["strasbourg","luxembourg_city"]).run()
         self.assertEqual(self.app.session_state["ux40_saved_five_destinations"],
                          ["strasbourg","luxembourg_city"])
-        self.app.segmented_control(key="ux40_research_activity").set_value(
-            "Explorar uma cidade").run()
+        self.app.segmented_control(key="ux42_city_activity").set_value(
+            "Explorar cidades").run()
         self.app.segmented_control(key="ux42_city_activity").set_value(
             "Comparar favoritas").run()
         self.assertEqual(self.app.session_state["five_base_destinations"],
@@ -102,7 +102,7 @@ class UX40StreamlitTests(unittest.TestCase):
         self.assertFalse(self.app.exception,[e.message for e in self.app.exception])
         self.assertTrue(any("5 cidades encontradas" in x.value for x in self.app.caption))
         self.app.segmented_control(key="ux42_city_activity").set_value("Comparar favoritas").run()
-        self.app.segmented_control(key="ux40_research_activity").set_value("Todas as candidatas").run()
+        self.app.segmented_control(key="ux42_city_activity").set_value("Explorar cidades").run()
         self.assertEqual(self.app.session_state["expanded_bases_country_filter"],"Alemanha")
         self.assertTrue(self.app.session_state["expanded_bases_only_shortlisted"])
         self.assertEqual(self.app.session_state["advisor_plan"],self.official)
