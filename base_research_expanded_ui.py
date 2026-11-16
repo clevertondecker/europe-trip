@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import streamlit as st
 from five_base_comparison_ui import render_five_base_study
+from base_coverage_model import coverage_matrix
 from exploratory_selection import sync_city_widget, set_city_from_widget
 
 from base_research_expanded_model import (
@@ -116,7 +117,11 @@ def render_expanded_research()->None:
                                 default="Geral",key="expanded_bases_rank_preset")
     preset_id={"Geral":"general","Econômico":"economy",
                "Explorador":"explorer"}.get(preset,"general")
-    info=normalized_score({},preset_id)
+    evaluated=next(row for row in coverage_matrix(preset_id)
+                   if row["id"]==selected)
+    info=normalized_score(
+        {key:evaluated["criteria"][key]["comparable_score"]
+         for key in evaluated["criteria"]},preset_id)
     weights=dict(zip(("Moradia temporária","Trens e conexões",
                       "Passeios viáveis","Custo dos passeios",
                       "Vida cotidiana/remoto","Países práticos"),PRESETS[preset_id]))
@@ -125,8 +130,17 @@ def render_expanded_research()->None:
                "A fórmula não redistribui o peso de uma categoria ausente "
                "para outra; assim, uma cidade com pouca pesquisa não é "
                "beneficiada artificialmente.")
-    st.caption("Cobertura dos critérios já mensuráveis no mesmo padrão para "
-               "todas as finalistas: "+str(info["evidence_weight"])+"%.")
+    st.caption("**Documentação pesquisada:** "+
+               f'{evaluated["documentary_weighted_percent"]:.1f}%'+
+               " dos requisitos ponderados deste perfil. O valor mede pesquisa "
+               "existente, não qualidade de vida ou nota de cidade.")
+    st.caption("**Cobertura elegível para pontuação:** "+
+               str(info["evidence_weight"])+"%. O critério só entra na "
+               "nota quando todos os seus indicadores são suficientemente "
+               "completos e comparáveis.")
+    st.caption("Na aba Explorar → Comparar → Pesos das 30 cidades, compare "
+               "os 15 destinos comuns, os requisitos restantes e as fontes "
+               "detalhadas sem modificar a base oficial.")
 
     st.markdown("#### Amostra ferroviária de operadores")
     st.caption("Dados publicados para **segunda, 16/11/2026**; não representam "
