@@ -87,6 +87,25 @@ def upsert_flexible_choice(destination:str,attraction_ids:list[str],
                                  destination,attraction_ids,period))
 
 
+def commit_outing(destination:str,attraction_ids:list[str],
+                  period:str|None=None,*,confirmed:bool=False):
+    """Confirmed canonical change plus structured feedback for every UI entry."""
+    from ux45_outing_contract import apply_outing
+    next_plan,result=apply_outing(bootstrap(),load_attractions(),destination,
+                                  attraction_ids,period,confirmed=confirmed)
+    _commit(next_plan)
+    return result
+
+
+def delete_outing(destination:str,*,confirmed:bool=False):
+    """Explicit removal including assigned dates; Italy remains stage-specific."""
+    from ux45_outing_contract import remove_outing
+    next_plan,result=remove_outing(bootstrap(),load_attractions(),destination,
+                                   confirmed=confirmed)
+    _commit(next_plan)
+    return result
+
+
 def remove_flexible_choice(destination:str)->dict:
     from itinerary_flow_model import remove_choice
     return _commit(remove_choice(bootstrap(),load_attractions(),destination))
