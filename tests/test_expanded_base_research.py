@@ -105,7 +105,13 @@ class ExpandedBaseResearchAppTests(unittest.TestCase):
         self.assertEqual(app.session_state["ux_city_view"],"Pesquisa ampliada")
         self.assertFalse(app.exception,[e.message for e in app.exception])
         self.assertEqual(app.session_state["advisor_plan"],original)
+        # UX 4.0: filters and city details are contextual rather than on entry.
+        self.assertEqual(app.session_state["ux40_research_activity"],"Comparar cidades")
+        app.segmented_control(key="ux40_research_activity").set_value(
+            "Todas as candidatas").run()
         self.assertIn("expanded_bases_country_filter",{x.key for x in app.selectbox})
+        app.segmented_control(key="ux40_research_activity").set_value(
+            "Explorar uma cidade").run()
         self.assertIn("expanded_bases_detail_city",{x.key for x in app.selectbox})
         self.assertIn("expanded_bases_rank_preset",{x.key for x in app.segmented_control})
         app.selectbox(key="expanded_bases_detail_city").set_value("trier").run()

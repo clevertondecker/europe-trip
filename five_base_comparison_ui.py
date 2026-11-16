@@ -24,6 +24,16 @@ def _eur(v)->str:
     return "Não cotado" if v is None else "€ "+f"{v:,.2f}".replace(",","_").replace(".",",").replace("_",".")
 
 
+def _save_destinations():
+    # A Streamlit widget is removed from session_state when its activity is hidden.
+    st.session_state["ux40_saved_five_destinations"]=list(
+        st.session_state["five_base_destinations"])
+
+
+def _save_base_selection():
+    st.session_state["ux40_saved_five_detail"]=st.session_state["five_base_detail"]
+
+
 def render_five_base_study()->None:
     data=load_five_base_evidence()
     bases={b["id"]:b for b in data["housing"]}
@@ -34,10 +44,13 @@ def render_five_base_study()->None:
                window["departure_2027_assumption"]+" (60 noites). O roteiro oficial "
                "não fixou essa data. A lista de 15 destinos é idêntica para as "
                "cinco bases, mas **NÃO** significa 15 passeios viáveis em cada uma.")
+    saved=st.session_state.get("ux40_saved_five_destinations",list(destinations))
+    saved=[item for item in saved if item in destinations]
     chosen=st.multiselect("Destinos geográficos a incluir na comparação",
-                          list(destinations),default=list(destinations),
+                          list(destinations),default=saved,
                           format_func=lambda id:COUNTRY_FLAGS.get(destinations[id]["country"],"")+
-                          " "+destinations[id]["name"],key="five_base_destinations")
+                          " "+destinations[id]["name"],key="five_base_destinations",
+                          on_change=_save_destinations)
     if not chosen:
         st.info("Selecione ao menos um destino para comparar.")
         return
@@ -66,8 +79,10 @@ def render_five_base_study()->None:
                "já visitáveis de modo prático para a data de viagem.")
 
     selected=st.selectbox("Explorar uma das cinco bases",list(BASE_IDS),
+                         index=list(BASE_IDS).index(st.session_state.get(
+                             "ux40_saved_five_detail",BASE_IDS[0])),
                          format_func=lambda id:_label(bases[id]),
-                         key="five_base_detail")
+                         key="five_base_detail",on_change=_save_base_selection)
     b=bases[selected];h=housing_sample(b)
     st.markdown("#### "+_label(b)+" — referências de aluguel mobiliado")
     st.caption("Três referências diferentes de anúncios publicados em 2026. "
