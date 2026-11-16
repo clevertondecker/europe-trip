@@ -42,6 +42,7 @@ REQUIREMENTS={
         "Distância a estação verificada",
     ),
     "rail_connectivity":(
+        "Rede ou ligação ferroviária com fonte específica",
         "Tempos estação–estação para a cesta comum",
         "Frequência das ligações pesquisadas",
         "Conexões/trocas verificadas",
@@ -237,7 +238,21 @@ def city_evidence(city,*,study=None,rail=None,exploration=None,
     common=len(basket)
     # A criterion counts as "documented" only with a real sourced item. For
     # basket-coverage checklist flags, the actual fraction is separately shown.
-    rflags=[len(timed)/common,len(freq)/common,
+    # Sourced network evidence outside the fixed basket is genuine
+    # documentary research, but it cannot become a comparable time.
+    rail_references=[
+        note for note in study.get("research_updates",[])
+        if note.get("city_id")==city["id"] and
+           note.get("criterion")=="rail_connectivity" and
+           note.get("kind") in (
+               "official_network_reference","operator_schedule_reference",
+               "regional_network_reference",
+               "operator_schedule_different_sample_day",
+               "official_operator_route_overview",
+           ) and _valid_url(note.get("source_url"))
+    ]
+    rflags=[bool(timed or rail_references),
+            len(timed)/common,len(freq)/common,
             len(turns)/common,len(verified_returns)/common]
     vflags=[len(timed)/common,len(verified_returns)/common,0]
     cflags=[len(fares)/common,0,0]
