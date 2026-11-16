@@ -111,12 +111,13 @@ def restore_private_on_start(catalog):
     state = st.session_state
     if state.get("ux36_bootstrapped"):
         return
-    state["ux36_bootstrapped"] = True
     if state.get("ux36_local_restored") or state.get("advisor_local_changed"):
+        state["ux36_bootstrapped"] = True
         return
     store = _private_store()
     if store is None:
         return
+    state["ux36_bootstrapped"] = True
     try:
         loaded = store.load()
         if loaded is None:
