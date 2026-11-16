@@ -209,7 +209,7 @@ def _explore_city(study,rail,five)->None:
             st.caption("• "+item)
         if city.get("screening_notes"):
             st.info(city["screening_notes"])
-    st.button("Voltar à comparação das cinco bases",
+    st.button("Voltar à comparação de favoritas",
               key="ux40_back_compare",on_click=lambda:
               st.session_state.update({"ux40_research_activity":"Comparar cidades",
                                        "ux42_city_activity":"Comparar favoritas"}))
