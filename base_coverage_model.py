@@ -6,13 +6,15 @@ Every city is assessed against the SAME fixed 15-destination basket.
 """
 from __future__ import annotations
 
-from collections import defaultdict
+from pathlib import Path
+import json
 from copy import deepcopy
 
 from base_research_expanded_model import (
     CRITERIA,PRESETS,load_research,load_rail,observed_housing,normalized_score,
 )
 from base_explorer_model import load_exploration
+from attractions_model import load_base_routes
 from five_base_comparison_model import load_five_base_evidence
 
 LABELS={
@@ -99,7 +101,15 @@ def _make_evidence(*,city_id,criterion,indicator,value,unit,source_url,
     }
 
 
-def _dataset_routes(city_id,rail,exploration,five):
+def load_round2():
+    path=Path(__file__).resolve().parent/"data"/"city_research_round2_2026.json"
+    data=json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(data.get("cities"),list) or len(data["cities"])<4:
+        raise ValueError("Referências de vida cotidiana incompletas")
+    return data
+
+
+def _dataset_routes(city_id,rail,exploration,five,base_routes):
     """Precedence: same-basket rail-specific study, then exploratory,
     then expanded operator excerpts. No sum of duplicated source records."""
     basket={d["id"]:d for d in five["common_destinations"]}
@@ -127,6 +137,20 @@ def _dataset_routes(city_id,rail,exploration,five):
             "source_url":item["source_url"],"date":item.get("retrieved_at"),
             "scope":"referência histórica de ida estação–estação",
             "frequency":None,"transfers":None,"return_verified":False,
+        }
+    for item in base_routes["routes"]:
+        dest=item["destination_id"]
+        if item["base_id"]!=city_id or dest not in basket or dest in rows:
+            continue
+        minutes=item.get("train_minutes_one_way")
+        if minutes is None or not _valid_url(item.get("source_url")):continue
+        rows[dest]={
+            "destination_id":dest,"minutes":minutes,
+            "fare_oneway":item.get("fare_eur_person_oneway"),
+            "source_url":item["source_url"],"date":item.get("retrieved_at"),
+            "scope":"referência histórica TER, estação–estação",
+            "frequency":None,"transfers":item.get("transfers"),
+            "return_verified":item.get("weekend_return_verified") is True,
         }
     for item in rail["segments"]:
         dest=item["to"]
@@ -164,25 +188,29 @@ def _finish(key,flags):
 
 
 def city_evidence(city,*,study=None,rail=None,exploration=None,
-                  five=None,round2=None):
+                  five=None,round2=None,base_routes=None):
     """Fixed requirements; never turn missing fares/listings into zero euros."""
     if study is None:study=load_research()
     if rail is None:rail=load_rail()
     if exploration is None:exploration=load_exploration()
     if five is None:five=load_five_base_evidence()
-    if round2 is None:
-        from city_research_round2_model import load_round2
-        round2=load_round2()
+    if round2 is None:round2=load_round2()
+    if base_routes is None:base_routes=load_base_routes()
     # Accept parsed round2 dict or a list of city rows (compatibility).
     round2_cities=round2.get("cities",[]) if isinstance(round2,dict) else round2
     everyday=next((row for row in round2_cities if row["id"]==city["id"]),{})
-    basket,routes=_dataset_routes(city["id"],rail,exploration,five)
+    basket,routes=_dataset_routes(city["id"],rail,exploration,five,base_routes)
     observed=observed_housing(city)
     offers=city["housing_offers"]
     observed_source=next((x for x in offers if _valid_url(x.get("catalogue_url"))),None)
+    five_housing=next((x for x in five["housing"] if x["id"]==city["id"]),{})
+    five_listings=five_housing.get("listings",[])
     hflags=[
-        bool(observed["count"]),
-        any(_valid_url(x.get("listing_url")) for x in offers),
+        bool(observed["count"] or five_listings),
+        any(_valid_url(x.get("listing_url")) for x in offers) or
+          any(_valid_url(x.get("source_url")) and
+              x.get("source_is_direct_listing")=="direct_listing_page"
+              for x in five_listings),
         any(x.get("two_adults_confirmed") is True for x in offers),
         any(x.get("short_stay_56_to_60_nights_confirmed") is True for x in offers),
         any(x.get("all_mandatory_fees_known") is True for x in offers),
@@ -283,20 +311,19 @@ def city_evidence(city,*,study=None,rail=None,exploration=None,
 
 
 def coverage_matrix(profile="general",study=None,rail=None,exploration=None,
-                    five=None,round2=None):
+                    five=None,round2=None,base_routes=None):
     """Same documentary facts, different fixed weighting; no quality ranking."""
     if profile not in PRESETS:raise ValueError("Perfil inválido")
     if study is None:study=load_research()
     if rail is None:rail=load_rail()
     if exploration is None:exploration=load_exploration()
     if five is None:five=load_five_base_evidence()
-    if round2 is None:
-        from city_research_round2_model import load_round2
-        round2=load_round2()
+    if round2 is None:round2=load_round2()
+    if base_routes is None:base_routes=load_base_routes()
     out=[]
     for city in study["cities"]:
         result=city_evidence(city,study=study,rail=rail,exploration=exploration,
-                             five=five,round2=round2)
+                             five=five,round2=round2,base_routes=base_routes)
         weighted=sum(PRESETS[profile][i]*result["criteria"][key]["documentary_percent"]/100
                      for i,key in enumerate(CRITERIA))
         result["documentary_weighted_percent"]=round(weighted,1)
