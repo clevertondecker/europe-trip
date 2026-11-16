@@ -19,7 +19,7 @@ class FiveBaseComparisonModelTests(unittest.TestCase):
     def test_five_cities_fifteen_same_destinations_and_no_2027_quotes(self):
         self.assertEqual(tuple(self.data["base_ids"]),BASE_IDS)
         self.assertEqual(len(self.data["common_destinations"]),15)
-        self.assertEqual(len(self.data["verified_time_routes"]),23)
+        self.assertEqual(len(self.data["verified_time_routes"]),27)
         self.assertEqual(sum(len(b["listings"]) for b in self.data["housing"]),15)
         self.assertTrue(all(len(b["listings"])==3 for b in self.data["housing"]))
         self.assertEqual(self.data["research_window"]["nights"],60)
@@ -53,8 +53,8 @@ class FiveBaseComparisonModelTests(unittest.TestCase):
         by={row["base_id"]:row for row in rows}
         self.assertEqual(by["offenburg"]["with_station_times"],5)
         self.assertEqual(by["trier"]["with_station_times"],1)
-        self.assertEqual(by["mulhouse"]["with_station_times"],4)
-        self.assertEqual(by["strasbourg"]["with_station_times"],8)
+        self.assertEqual(by["mulhouse"]["with_station_times"],6)
+        self.assertEqual(by["strasbourg"]["with_station_times"],10)
         self.assertEqual(by["lille"]["with_station_times"],6)
         self.assertEqual(by["trier"]["with_fare_samples"],0)
         self.assertEqual(by["trier"]["without_station_times"],14)
