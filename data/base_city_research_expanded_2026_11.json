@@ -1315,6 +1315,62 @@
       "limitation": "Resultados do portal incluem Strasbourg e Oberkirch; não atribuir todos os anúncios a Offenburg nem inferir preço para a cidade",
       "score_eligible": false,
       "revalidate_for_2027": true
+    },
+    {
+      "city_id": "freiburg",
+      "criterion": "rail_connectivity",
+      "indicator": "Freiburg Hbf → Basel SBB: 36 min no exemplo de serviço rápido e 62 min RE (23/11/2026)",
+      "value": null,
+      "unit": null,
+      "source_url": "https://www.bahn.de/reisen/view/verbindung/freiburg/basel.shtml",
+      "observed_at": "2026-11-15",
+      "scope": "DB: referência para segunda 23/11/2026; data diferente da cesta ferroviária de 16/11/2026",
+      "kind": "operator_schedule_different_sample_day",
+      "limitation": "Não pontuar na matriz comum por usar data/amostra distintas; não há retorno prático, tarifa normal do casal ou custo final 2027",
+      "score_eligible": false,
+      "revalidate_for_2027": true
+    },
+    {
+      "city_id": "liege",
+      "criterion": "rail_connectivity",
+      "indicator": "Liège–Bruxelas: duração média informada pela SNCB cerca de 64 minutos",
+      "value": 64,
+      "unit": "minutos (média informada pela operadora)",
+      "source_url": "https://www.belgiantrain.be/fr/travel-info/origin-destination/brussels-liege",
+      "observed_at": "2026-11-15",
+      "scope": "SNCB: corredor nacional, sem amostra idêntica de partida e destino da cesta ferroviária",
+      "kind": "official_operator_route_overview",
+      "limitation": "Média não equivale a melhor duração; sem verificação de calendário/retorno de 2027. Não confundir com itinerário com voltas via Aachen listado por outro agregador",
+      "score_eligible": false,
+      "revalidate_for_2027": true
+    },
+    {
+      "city_id": "liege",
+      "criterion": "daily_life_remote_work",
+      "indicator": "Estação Liège-Guillemins dispõe de ônibus, tram e Wi-Fi na estação",
+      "value": null,
+      "unit": null,
+      "source_url": "https://www.belgiantrain.be/en/station-information/liege/liege-guillemins",
+      "observed_at": "2026-11-15",
+      "scope": "Infraestrutura de estação e intermodalidade, não conectividade de apartamento",
+      "kind": "official_station_infrastructure",
+      "limitation": "Wi-Fi na estação não é internet confiável para home office no imóvel; custo urbano e distâncias a pé não pesquisados",
+      "score_eligible": false,
+      "revalidate_for_2027": true
+    },
+    {
+      "city_id": "aachen",
+      "criterion": "rail_connectivity",
+      "indicator": "Linha regional horária Liège-Guillemins–Aachen Hbf (via Verviers e Welkenraedt)",
+      "value": null,
+      "unit": null,
+      "source_url": "https://www.belgiantrain.be/en/products/crossborder/aachen",
+      "observed_at": "2026-11-15",
+      "scope": "SNCB apresenta serviço transfronteiriço e modalidades de bilhete",
+      "kind": "official_network_reference",
+      "limitation": "Liège não pertence à cesta fixa de 15; não implica retorno em 2027 nem preço para dois",
+      "score_eligible": false,
+      "revalidate_for_2027": true
     }
   ],
   "research_update_methodology": "Anotações estruturais verificadas em 15/11/2026; sem cotações adicionais de imóveis individuais ou tarifas para 2027. Não alimentam scores; matriz comparável exige destinos comuns e validação de retorno."
