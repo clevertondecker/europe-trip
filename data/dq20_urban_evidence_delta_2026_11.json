@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "checked_at": "2026-11-16",
+  "scope": "Public municipal/operational facts supplementary to canonical city_research_packs; not personal safety scores or rental availability.",
+  "cities": [
+    {
+      "city_id": "mulhouse",
+      "transport": {
+        "network": "Soléa",
+        "network_url": "https://www.solea.info/se-deplacer/plans/plans-des-lignes",
+        "evening_reference": "Linhas tram 1 e 2 com frequência de aproximadamente 20 min no período noturno; linha 1 último serviço a partir de Gare Centrale às 23h33, conforme oferta anunciada em 2025 (alterações temporárias possíveis).",
+        "evening_url": "https://www.solea.info/les-lignes-tram-1-et-2-evoluent-en-soiree-pour-mieux-vous-accompagner",
+        "late_access_verified_for_address": false,
+        "late_service_confirmed_for_2027": false
+      },
+      "remote_work": {
+        "supplemental_coworking_url": null,
+        "description": "Coworking já documentado no pacote original; horário e uso noturno dependem do contrato.",
+        "suitable_for_brazil_9_to_18": null
+      },
+      "urban": {
+        "walkable_neighborhoods_verified": false,
+        "public_safety_official_comparable": null,
+        "local_services_proximity_verified": false,
+        "parks_public_reference": null
+      }
+    },
+    {
+      "city_id": "strasbourg",
+      "transport": {
+        "network": "CTS",
+        "network_url": "https://www.cts-strasbourg.eu/fr/nous-connaitre/notre-reseau/tram-et-bus/",
+        "evening_reference": "Tram de domingo até 00h30; rede CTS também possui ônibus noturno Hibus de quinta a sábado (após 00h30, aproximadamente 1 por hora) em rotas específicas.",
+        "evening_url": "https://www.cts-strasbourg.eu/fr/nous-connaitre/notre-reseau/lignes-de-nuit-et-soirees/",
+        "late_access_verified_for_address": false,
+        "late_service_confirmed_for_2027": false
+      },
+      "remote_work": {
+        "supplemental_coworking_url": null,
+        "description": "Coworking DOKO BÜRO já documentado, mas horário publicado até 19h é inadequado para uso noturno sem autorização adicional.",
+        "suitable_for_brazil_9_to_18": false
+      },
+      "urban": {
+        "walkable_neighborhoods_verified": false,
+        "public_safety_official_comparable": null,
+        "local_services_proximity_verified": false,
+        "parks_public_reference": null
+      }
+    },
+    {
+      "city_id": "freiburg",
+      "transport": {
+        "network": "VAG",
+        "network_url": "https://www.vag-freiburg.de/fahrplan",
+        "evening_reference": "VAG informa operação diurna típica entre 5h30 e 00h30; trams de noite nos fins de semana e em vésperas de feriados selecionados. Não é uma comprovação de acesso ao imóvel.",
+        "evening_url": "https://www.vag-freiburg.de/fahrplan/nachtverkehr/mit-bus-und-bahn",
+        "late_access_verified_for_address": false,
+        "late_service_confirmed_for_2027": false
+      },
+      "remote_work": {
+        "supplemental_coworking_url": "https://visit.freiburg.de/en/info/coworking-and-workation",
+        "description": "Portal turístico da cidade lista espaços de coworking, em sua maioria com horário comercial; possibilidade de uso após 22h não verificada.",
+        "suitable_for_brazil_9_to_18": null
+      },
+      "urban": {
+        "walkable_neighborhoods_verified": false,
+        "public_safety_official_comparable": null,
+        "local_services_proximity_verified": false,
+        "parks_public_reference": "https://visit.freiburg.de/en"
+      }
+    }
+  ]
+}
