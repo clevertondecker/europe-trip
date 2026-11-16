@@ -289,8 +289,11 @@ def render_explorer(trip_data: dict, sync_sources: dict, map_view) -> None:
                     with one:st.markdown(f"**{day}:** {by_id.get(destid,{}).get('name',destid)}")
                     with two:
                         if st.button("Remover",key=f"explore_calendar_remove_{day}",disabled=not editable):
-                            unschedule_outing(base,st.session_state.get("ux_mode","Oficial"),day)
-                            st.rerun()
+                            try:
+                                unschedule_outing(base,st.session_state.get("ux_mode","Oficial"),day)
+                                st.rerun()
+                            except (ValueError, SimulationWriteBlocked) as exc:
+                                st.warning(str(exc))
 
         st.markdown("#### Levar o custo conhecido ao orçamento")
         left,right=st.columns(2,gap="medium")
