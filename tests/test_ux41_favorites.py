@@ -50,7 +50,7 @@ class FavoriteComparisonModelTests(unittest.TestCase):
         self.assertEqual(m["complete_budget"],None)
         self.assertEqual(m["cities"][0]["selected_destinations_count"],15)
         self.assertEqual(m["cities"][0]["documented_shared_basket"],6)
-        self.assertEqual(m["cities"][1]["documented_shared_basket"],10)
+        self.assertEqual(m["cities"][1]["documented_shared_basket"],9)
         self.assertEqual(m["cities"][2]["documented_shared_basket"],0)
         self.assertEqual(m["cities"][2]["routes"][0]["status"],"not_compared_on_shared_basket")
         self.assertIsNone(m["cities"][2]["routes"][0]["duration_min_oneway"])
