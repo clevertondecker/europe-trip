@@ -654,6 +654,84 @@
         "weekend_feasibility"
       ],
       "notes": "Exemplos via Paris Est → Nord requerem deslocamento entre estações; conexão ferroviária não resume a complexidade"
+    },
+    {
+      "base_id": "nancy",
+      "destination_id": "brussels",
+      "train_minutes_oneway_min": 211,
+      "representative_minutes": 244,
+      "origin_station": "Nancy",
+      "destination_station": "Bruxelles-Midi / Brussel-Zuid",
+      "operator": "SNCF TGV / Eurostar",
+      "transfers": null,
+      "frequency_reference": "13 opções publicadas em amostra de novembro/2026; não garantidas para 2027",
+      "fare_from_eur_person_oneway": null,
+      "reference_status": "official_operator_sample_2026",
+      "source_url": "https://www.sncf-connect.com/en-en/train/route/nancy/brussels",
+      "retrieved_at": "2026-11-16",
+      "return_verified_2027": false,
+      "roundtrip_couple_eur": null,
+      "missing": [
+        "2027_timetable",
+        "return_schedule",
+        "normal_fare",
+        "roundtrip_couple",
+        "transfer_stations",
+        "last_mile"
+      ],
+      "notes": "Conexão via Paris pode exigir transferência Paris Est → Nord (duas estações diferentes). O mínimo de 3h31 não garante mesma logística todo dia."
+    },
+    {
+      "base_id": "lille",
+      "destination_id": "luxembourg",
+      "train_minutes_oneway_min": 231,
+      "representative_minutes": 278,
+      "origin_station": "Lille Flandres / Lille Europe",
+      "destination_station": "Luxembourg",
+      "operator": "SNCF TGV / TER",
+      "transfers": null,
+      "frequency_reference": "10 opções publicadas em amostra de novembro/2026; não garantidas para 2027",
+      "fare_from_eur_person_oneway": null,
+      "reference_status": "official_operator_sample_2026",
+      "source_url": "https://www.sncf-connect.com/en-en/train/route/lille/luxembourg",
+      "retrieved_at": "2026-11-16",
+      "return_verified_2027": false,
+      "roundtrip_couple_eur": null,
+      "missing": [
+        "2027_timetable",
+        "return_schedule",
+        "normal_fare",
+        "roundtrip_couple",
+        "transfer_stations",
+        "last_mile"
+      ],
+      "notes": "Viagens listadas podem trocar Paris Nord → Paris Est, ou via Lorraine TGV/Metz. Mínimo não é tempo porta a porta."
+    },
+    {
+      "base_id": "metz",
+      "destination_id": "brussels",
+      "train_minutes_oneway_min": 199,
+      "representative_minutes": 221,
+      "origin_station": "Metz",
+      "destination_station": "Bruxelles-Midi / Brussel-Zuid",
+      "operator": "SNCF TGV / Eurostar",
+      "transfers": null,
+      "frequency_reference": "11 opções publicadas em amostra de novembro/2026; não garantidas para 2027",
+      "fare_from_eur_person_oneway": null,
+      "reference_status": "official_operator_sample_2026",
+      "source_url": "https://www.sncf-connect.com/train/trajet/metz/bruxelles",
+      "retrieved_at": "2026-11-16",
+      "return_verified_2027": false,
+      "roundtrip_couple_eur": null,
+      "missing": [
+        "2027_timetable",
+        "return_schedule",
+        "normal_fare",
+        "roundtrip_couple",
+        "transfer_stations",
+        "last_mile"
+      ],
+      "notes": "Média histórica da rota SNCF, conexões e retorno não confirmados. Conferir transferência física entre estações na data."
     }
   ]
 }
