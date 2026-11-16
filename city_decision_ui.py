@@ -187,8 +187,8 @@ def _render_finance(comparison:dict)->None:
 
 def _draft_panel(comparison:dict)->None:
     with st.expander("Guardar ou recuperar um estudo",expanded=False):
-        st.caption("Estudos ficam nesta sessão. Para reutilizá-los após fechar "
-                   "o navegador, baixe o JSON e importe novamente. "
+        st.caption("Estudos locais ficam nesta sessão; para continuar em outro dispositivo, "
+                   "use Meus estudos privados abaixo. O backup JSON continua disponível. "
                    "**Nada é publicado no GitHub.**")
         a,b=st.columns([2,1])
         name=a.text_input("Nome da alternativa",value="Comparar "+
@@ -214,6 +214,8 @@ def _draft_panel(comparison:dict)->None:
             r.download_button("Baixar JSON",export_city_draft(drafts[chosen]),
                               file_name="nossa-europa-estudo-cidades.json",
                               mime="application/json",key="ux34_export_json")
+        from private_city_studies_ui import render_private_studies
+        render_private_studies(comparison,_load_draft)
         file=st.file_uploader("Importar estudo JSON",type=["json"],
                               key="ux34_import_file")
         if file is not None and st.button("Validar e recuperar",
