@@ -81,6 +81,10 @@ def return_to_edit()->None:
     state=st.session_state
     state["flow_stage"]=state.get("flow_return_stage","Itália")
     state["flow_active_stage"]=state["flow_stage"]
+    if state.pop("ux35_return",False):
+        state["ux_organize_view"]="Calendário inteligente"
+        set_task(state,"Meu roteiro","Organizar viagem")
+        return
     if state.get("flow_return_destination"):
         state["flow_active_destination"]=state["flow_return_destination"]
     if state.get("flow_return_add_open"):

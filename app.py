@@ -24,6 +24,7 @@ from attractions_ui import render_explorer
 from travel_advisor_ui import render_advisor, _recover_saved_plan, _secure_save, _owner_signed_in
 from travel_dashboard_ui import render_trip_dashboard
 from itinerary_flow_ui import render_itinerary_workbench
+from smart_calendar_ui import render_smart_calendar
 from planning_context_ui import (render_context,render_home_continue,
                                  render_breadcrumb,return_to_edit,show_settings)
 from base_explorer_ui import render_base_explorer, _comparison as render_route_comparison, _split_stay as render_split_stay
@@ -405,7 +406,7 @@ if ux_area!="Minha viagem" or ux_section!="Resumo":
                          selection_mode="single")
 if ux_area=="Meu roteiro" and ux_section=="Organizar viagem":
     st.segmented_control("Como organizar?",
-                         ["Por período ou data","Calendário completo"],
+                         ["Por período ou data","Calendário inteligente","Calendário completo"],
                          key="ux_organize_view",on_change=_ux_aux_changed)
 elif ux_area=="Meu roteiro" and ux_section=="Melhorar meu roteiro":
     st.selectbox("Escolha uma ferramenta de apoio",[
@@ -1231,14 +1232,22 @@ elif page == "Roteiro":
         map_view(markers,height=height,show_labels=False,zoom=zoom,center=center)
 
     if itinerary_section == "Visão geral":
-        if ux_section=="Organizar viagem":
-            st.session_state["flow_organize_open"]=True
-        render_itinerary_workbench(
-            active_plan(),load_attractions(),data,
-            sync_sources["finance"]["status"]=="live",
-            st.session_state.get("advisor_eurfx",6.3),
-            st.session_state.get("advisor_chffx",7.1))
-        if st.toggle("Mostrar painel detalhado e mapas antigos",
+        if (ux_area,ux_section)==("Meu roteiro","Organizar viagem") and (
+            st.session_state.get("ux_organize_view")=="Calendário inteligente"):
+            render_smart_calendar(
+                active_plan(),load_attractions(),load_base_routes(),data,sync_sources)
+        else:
+            if ux_section=="Organizar viagem":
+                st.session_state["flow_organize_open"]=True
+            render_itinerary_workbench(
+                active_plan(),load_attractions(),data,
+                sync_sources["finance"]["status"]=="live",
+                st.session_state.get("advisor_eurfx",6.3),
+                st.session_state.get("advisor_chffx",7.1))
+        if st.session_state.get("ux_organize_view")=="Calendário inteligente" and (
+                ux_area,ux_section)==("Meu roteiro","Organizar viagem"):
+            pass
+        elif st.toggle("Mostrar painel detalhado e mapas antigos",
                      value=False,key="flow_show_legacy_dashboard"):
             dashboard_plan=active_plan()
             render_trip_dashboard(
