@@ -61,6 +61,17 @@
           "scope": "local/serviço citado",
           "kind": "primary_public_context",
           "limitations": "Fato institucional de contexto, não preço ou confirmação de acessibilidade/horário em 2027"
+        },
+        {
+          "id": "mulhouse-insee-pop-2023",
+          "section": "quality_of_life",
+          "summary": "População municipal em 2023: 104.978 habitantes; densidade: 4.733 habitantes/km².",
+          "source_url": "https://www.insee.fr/fr/statistiques/1405599?geo=COM-68224",
+          "observed_at": "2026-11-16",
+          "reference_period": "recenseamento 2023, geografia 01/01/2026",
+          "scope": "COM-68224",
+          "kind": "official_municipal_statistic",
+          "limitations": "População do município, não da área metropolitana; não mede qualidade de vida."
         }
       ],
       "advantages": [
@@ -76,7 +87,14 @@
         "Conferir frequência, retorno e última milha das viagens de fim de semana",
         "Pesquisar custo cotidiano, conectividade e clima municipal"
       ],
-      "last_reviewed_at": "2026-11-16"
+      "last_reviewed_at": "2026-11-16",
+      "demographics": {
+        "population_municipal": 104978,
+        "density_per_km2": 4733,
+        "reference_year": 2023,
+        "geographic_scope": "commune (municipalité)",
+        "source_url": "https://www.insee.fr/fr/statistiques/1405599?geo=COM-68224"
+      }
     },
     {
       "city_id": "strasbourg",
@@ -135,6 +153,17 @@
           "scope": "local/serviço citado",
           "kind": "primary_public_context",
           "limitations": "Fato institucional de contexto, não preço ou confirmação de acessibilidade/horário em 2027"
+        },
+        {
+          "id": "strasbourg-insee-pop-2023",
+          "section": "quality_of_life",
+          "summary": "População municipal em 2023: 293.771 habitantes; densidade: 3.753,8 habitantes/km².",
+          "source_url": "https://www.insee.fr/fr/statistiques/1405599?geo=COM-67482",
+          "observed_at": "2026-11-16",
+          "reference_period": "recenseamento 2023, geografia 01/01/2026",
+          "scope": "COM-67482",
+          "kind": "official_municipal_statistic",
+          "limitations": "População do município, não da área metropolitana; não mede qualidade de vida."
         }
       ],
       "advantages": [
@@ -150,7 +179,14 @@
         "Conferir frequência, retorno e última milha das viagens de fim de semana",
         "Pesquisar custo cotidiano, conectividade e clima municipal"
       ],
-      "last_reviewed_at": "2026-11-16"
+      "last_reviewed_at": "2026-11-16",
+      "demographics": {
+        "population_municipal": 293771,
+        "density_per_km2": 3753.8,
+        "reference_year": 2023,
+        "geographic_scope": "commune (municipalité)",
+        "source_url": "https://www.insee.fr/fr/statistiques/1405599?geo=COM-67482"
+      }
     },
     {
       "city_id": "metz",
@@ -209,6 +245,17 @@
           "scope": "local/serviço citado",
           "kind": "primary_public_context",
           "limitations": "Fato institucional de contexto, não preço ou confirmação de acessibilidade/horário em 2027"
+        },
+        {
+          "id": "metz-insee-pop-2023",
+          "section": "quality_of_life",
+          "summary": "População municipal em 2023: 122.572 habitantes; densidade: 2.922,6 habitantes/km².",
+          "source_url": "https://www.insee.fr/fr/statistiques/1405599?geo=COM-57463",
+          "observed_at": "2026-11-16",
+          "reference_period": "recenseamento 2023, geografia 01/01/2026",
+          "scope": "COM-57463",
+          "kind": "official_municipal_statistic",
+          "limitations": "População do município, não da área metropolitana; não mede qualidade de vida."
         }
       ],
       "advantages": [
@@ -224,7 +271,14 @@
         "Conferir frequência, retorno e última milha das viagens de fim de semana",
         "Pesquisar custo cotidiano, conectividade e clima municipal"
       ],
-      "last_reviewed_at": "2026-11-16"
+      "last_reviewed_at": "2026-11-16",
+      "demographics": {
+        "population_municipal": 122572,
+        "density_per_km2": 2922.6,
+        "reference_year": 2023,
+        "geographic_scope": "commune (municipalité)",
+        "source_url": "https://www.insee.fr/fr/statistiques/1405599?geo=COM-57463"
+      }
     },
     {
       "city_id": "nancy",
@@ -283,6 +337,17 @@
           "scope": "local/serviço citado",
           "kind": "primary_public_context",
           "limitations": "Fato institucional de contexto, não preço ou confirmação de acessibilidade/horário em 2027"
+        },
+        {
+          "id": "nancy-insee-pop-2023",
+          "section": "quality_of_life",
+          "summary": "População municipal em 2023: 103.671 habitantes; densidade: 6.906,8 habitantes/km².",
+          "source_url": "https://www.insee.fr/fr/statistiques/1405599?geo=COM-54395",
+          "observed_at": "2026-11-16",
+          "reference_period": "recenseamento 2023, geografia 01/01/2026",
+          "scope": "COM-54395",
+          "kind": "official_municipal_statistic",
+          "limitations": "População do município, não da área metropolitana; não mede qualidade de vida."
         }
       ],
       "advantages": [
@@ -298,7 +363,14 @@
         "Conferir frequência, retorno e última milha das viagens de fim de semana",
         "Pesquisar custo cotidiano, conectividade e clima municipal"
       ],
-      "last_reviewed_at": "2026-11-16"
+      "last_reviewed_at": "2026-11-16",
+      "demographics": {
+        "population_municipal": 103671,
+        "density_per_km2": 6906.8,
+        "reference_year": 2023,
+        "geographic_scope": "commune (municipalité)",
+        "source_url": "https://www.insee.fr/fr/statistiques/1405599?geo=COM-54395"
+      }
     },
     {
       "city_id": "colmar",
@@ -344,7 +416,14 @@
         "Conferir frequência, retorno e última milha das viagens de fim de semana",
         "Pesquisar custo cotidiano, conectividade e clima municipal"
       ],
-      "last_reviewed_at": "2026-11-16"
+      "last_reviewed_at": "2026-11-16",
+      "demographics": {
+        "population_municipal": null,
+        "density_per_km2": null,
+        "reference_year": null,
+        "geographic_scope": "municipality",
+        "source_url": null
+      }
     },
     {
       "city_id": "selestat",
@@ -390,7 +469,14 @@
         "Conferir frequência, retorno e última milha das viagens de fim de semana",
         "Pesquisar custo cotidiano, conectividade e clima municipal"
       ],
-      "last_reviewed_at": "2026-11-16"
+      "last_reviewed_at": "2026-11-16",
+      "demographics": {
+        "population_municipal": null,
+        "density_per_km2": null,
+        "reference_year": null,
+        "geographic_scope": "municipality",
+        "source_url": null
+      }
     },
     {
       "city_id": "saint_louis",
@@ -436,7 +522,14 @@
         "Conferir frequência, retorno e última milha das viagens de fim de semana",
         "Pesquisar custo cotidiano, conectividade e clima municipal"
       ],
-      "last_reviewed_at": "2026-11-16"
+      "last_reviewed_at": "2026-11-16",
+      "demographics": {
+        "population_municipal": null,
+        "density_per_km2": null,
+        "reference_year": null,
+        "geographic_scope": "municipality",
+        "source_url": null
+      }
     },
     {
       "city_id": "belfort",
@@ -482,7 +575,14 @@
         "Conferir frequência, retorno e última milha das viagens de fim de semana",
         "Pesquisar custo cotidiano, conectividade e clima municipal"
       ],
-      "last_reviewed_at": "2026-11-16"
+      "last_reviewed_at": "2026-11-16",
+      "demographics": {
+        "population_municipal": null,
+        "density_per_km2": null,
+        "reference_year": null,
+        "geographic_scope": "municipality",
+        "source_url": null
+      }
     },
     {
       "city_id": "besancon",
@@ -528,7 +628,14 @@
         "Conferir frequência, retorno e última milha das viagens de fim de semana",
         "Pesquisar custo cotidiano, conectividade e clima municipal"
       ],
-      "last_reviewed_at": "2026-11-16"
+      "last_reviewed_at": "2026-11-16",
+      "demographics": {
+        "population_municipal": null,
+        "density_per_km2": null,
+        "reference_year": null,
+        "geographic_scope": "municipality",
+        "source_url": null
+      }
     },
     {
       "city_id": "thionville",
@@ -574,7 +681,14 @@
         "Conferir frequência, retorno e última milha das viagens de fim de semana",
         "Pesquisar custo cotidiano, conectividade e clima municipal"
       ],
-      "last_reviewed_at": "2026-11-16"
+      "last_reviewed_at": "2026-11-16",
+      "demographics": {
+        "population_municipal": null,
+        "density_per_km2": null,
+        "reference_year": null,
+        "geographic_scope": "municipality",
+        "source_url": null
+      }
     },
     {
       "city_id": "haguenau",
@@ -620,7 +734,14 @@
         "Conferir frequência, retorno e última milha das viagens de fim de semana",
         "Pesquisar custo cotidiano, conectividade e clima municipal"
       ],
-      "last_reviewed_at": "2026-11-16"
+      "last_reviewed_at": "2026-11-16",
+      "demographics": {
+        "population_municipal": null,
+        "density_per_km2": null,
+        "reference_year": null,
+        "geographic_scope": "municipality",
+        "source_url": null
+      }
     },
     {
       "city_id": "saverne",
@@ -666,7 +787,14 @@
         "Conferir frequência, retorno e última milha das viagens de fim de semana",
         "Pesquisar custo cotidiano, conectividade e clima municipal"
       ],
-      "last_reviewed_at": "2026-11-16"
+      "last_reviewed_at": "2026-11-16",
+      "demographics": {
+        "population_municipal": null,
+        "density_per_km2": null,
+        "reference_year": null,
+        "geographic_scope": "municipality",
+        "source_url": null
+      }
     },
     {
       "city_id": "reims",
@@ -712,7 +840,14 @@
         "Conferir frequência, retorno e última milha das viagens de fim de semana",
         "Pesquisar custo cotidiano, conectividade e clima municipal"
       ],
-      "last_reviewed_at": "2026-11-16"
+      "last_reviewed_at": "2026-11-16",
+      "demographics": {
+        "population_municipal": null,
+        "density_per_km2": null,
+        "reference_year": null,
+        "geographic_scope": "municipality",
+        "source_url": null
+      }
     },
     {
       "city_id": "lille",
@@ -771,6 +906,17 @@
           "scope": "local/serviço citado",
           "kind": "primary_public_context",
           "limitations": "Fato institucional de contexto, não preço ou confirmação de acessibilidade/horário em 2027"
+        },
+        {
+          "id": "lille-insee-pop-2023",
+          "section": "quality_of_life",
+          "summary": "População municipal em 2023: 238.246 habitantes; densidade: 6.840,3 habitantes/km².",
+          "source_url": "https://www.insee.fr/fr/statistiques/1405599?geo=COM-59350",
+          "observed_at": "2026-11-16",
+          "reference_period": "recenseamento 2023, geografia 01/01/2026",
+          "scope": "COM-59350",
+          "kind": "official_municipal_statistic",
+          "limitations": "População do município, não da área metropolitana; não mede qualidade de vida."
         }
       ],
       "advantages": [
@@ -786,7 +932,14 @@
         "Conferir frequência, retorno e última milha das viagens de fim de semana",
         "Pesquisar custo cotidiano, conectividade e clima municipal"
       ],
-      "last_reviewed_at": "2026-11-16"
+      "last_reviewed_at": "2026-11-16",
+      "demographics": {
+        "population_municipal": 238246,
+        "density_per_km2": 6840.3,
+        "reference_year": 2023,
+        "geographic_scope": "commune (municipalité)",
+        "source_url": "https://www.insee.fr/fr/statistiques/1405599?geo=COM-59350"
+      }
     },
     {
       "city_id": "arras",
@@ -832,7 +985,14 @@
         "Conferir frequência, retorno e última milha das viagens de fim de semana",
         "Pesquisar custo cotidiano, conectividade e clima municipal"
       ],
-      "last_reviewed_at": "2026-11-16"
+      "last_reviewed_at": "2026-11-16",
+      "demographics": {
+        "population_municipal": null,
+        "density_per_km2": null,
+        "reference_year": null,
+        "geographic_scope": "municipality",
+        "source_url": null
+      }
     },
     {
       "city_id": "dijon",
@@ -891,6 +1051,17 @@
           "scope": "local/serviço citado",
           "kind": "primary_public_context",
           "limitations": "Fato institucional de contexto, não preço ou confirmação de acessibilidade/horário em 2027"
+        },
+        {
+          "id": "dijon-insee-pop-2023",
+          "section": "quality_of_life",
+          "summary": "População municipal em 2023: 161.830 habitantes; densidade: 4.004,7 habitantes/km².",
+          "source_url": "https://www.insee.fr/fr/statistiques/1405599?geo=COM-21231",
+          "observed_at": "2026-11-16",
+          "reference_period": "recenseamento 2023, geografia 01/01/2026",
+          "scope": "COM-21231",
+          "kind": "official_municipal_statistic",
+          "limitations": "População do município, não da área metropolitana; não mede qualidade de vida."
         }
       ],
       "advantages": [
@@ -906,7 +1077,14 @@
         "Conferir frequência, retorno e última milha das viagens de fim de semana",
         "Pesquisar custo cotidiano, conectividade e clima municipal"
       ],
-      "last_reviewed_at": "2026-11-16"
+      "last_reviewed_at": "2026-11-16",
+      "demographics": {
+        "population_municipal": 161830,
+        "density_per_km2": 4004.7,
+        "reference_year": 2023,
+        "geographic_scope": "commune (municipalité)",
+        "source_url": "https://www.insee.fr/fr/statistiques/1405599?geo=COM-21231"
+      }
     },
     {
       "city_id": "freiburg",
@@ -980,7 +1158,14 @@
         "Conferir frequência, retorno e última milha das viagens de fim de semana",
         "Pesquisar custo cotidiano, conectividade e clima municipal"
       ],
-      "last_reviewed_at": "2026-11-16"
+      "last_reviewed_at": "2026-11-16",
+      "demographics": {
+        "population_municipal": null,
+        "density_per_km2": null,
+        "reference_year": null,
+        "geographic_scope": "municipality",
+        "source_url": null
+      }
     },
     {
       "city_id": "offenburg",
@@ -1054,7 +1239,14 @@
         "Conferir frequência, retorno e última milha das viagens de fim de semana",
         "Pesquisar custo cotidiano, conectividade e clima municipal"
       ],
-      "last_reviewed_at": "2026-11-16"
+      "last_reviewed_at": "2026-11-16",
+      "demographics": {
+        "population_municipal": null,
+        "density_per_km2": null,
+        "reference_year": null,
+        "geographic_scope": "municipality",
+        "source_url": null
+      }
     },
     {
       "city_id": "kehl",
@@ -1100,7 +1292,14 @@
         "Conferir frequência, retorno e última milha das viagens de fim de semana",
         "Pesquisar custo cotidiano, conectividade e clima municipal"
       ],
-      "last_reviewed_at": "2026-11-16"
+      "last_reviewed_at": "2026-11-16",
+      "demographics": {
+        "population_municipal": null,
+        "density_per_km2": null,
+        "reference_year": null,
+        "geographic_scope": "municipality",
+        "source_url": null
+      }
     },
     {
       "city_id": "karlsruhe",
@@ -1174,7 +1373,14 @@
         "Conferir frequência, retorno e última milha das viagens de fim de semana",
         "Pesquisar custo cotidiano, conectividade e clima municipal"
       ],
-      "last_reviewed_at": "2026-11-16"
+      "last_reviewed_at": "2026-11-16",
+      "demographics": {
+        "population_municipal": null,
+        "density_per_km2": null,
+        "reference_year": null,
+        "geographic_scope": "municipality",
+        "source_url": null
+      }
     },
     {
       "city_id": "baden_baden",
@@ -1220,7 +1426,14 @@
         "Conferir frequência, retorno e última milha das viagens de fim de semana",
         "Pesquisar custo cotidiano, conectividade e clima municipal"
       ],
-      "last_reviewed_at": "2026-11-16"
+      "last_reviewed_at": "2026-11-16",
+      "demographics": {
+        "population_municipal": null,
+        "density_per_km2": null,
+        "reference_year": null,
+        "geographic_scope": "municipality",
+        "source_url": null
+      }
     },
     {
       "city_id": "saarbrucken",
@@ -1266,7 +1479,14 @@
         "Conferir frequência, retorno e última milha das viagens de fim de semana",
         "Pesquisar custo cotidiano, conectividade e clima municipal"
       ],
-      "last_reviewed_at": "2026-11-16"
+      "last_reviewed_at": "2026-11-16",
+      "demographics": {
+        "population_municipal": null,
+        "density_per_km2": null,
+        "reference_year": null,
+        "geographic_scope": "municipality",
+        "source_url": null
+      }
     },
     {
       "city_id": "trier",
@@ -1340,7 +1560,14 @@
         "Conferir frequência, retorno e última milha das viagens de fim de semana",
         "Pesquisar custo cotidiano, conectividade e clima municipal"
       ],
-      "last_reviewed_at": "2026-11-16"
+      "last_reviewed_at": "2026-11-16",
+      "demographics": {
+        "population_municipal": null,
+        "density_per_km2": null,
+        "reference_year": null,
+        "geographic_scope": "municipality",
+        "source_url": null
+      }
     },
     {
       "city_id": "lorrach",
@@ -1386,7 +1613,14 @@
         "Conferir frequência, retorno e última milha das viagens de fim de semana",
         "Pesquisar custo cotidiano, conectividade e clima municipal"
       ],
-      "last_reviewed_at": "2026-11-16"
+      "last_reviewed_at": "2026-11-16",
+      "demographics": {
+        "population_municipal": null,
+        "density_per_km2": null,
+        "reference_year": null,
+        "geographic_scope": "municipality",
+        "source_url": null
+      }
     },
     {
       "city_id": "aachen",
@@ -1460,7 +1694,14 @@
         "Conferir frequência, retorno e última milha das viagens de fim de semana",
         "Pesquisar custo cotidiano, conectividade e clima municipal"
       ],
-      "last_reviewed_at": "2026-11-16"
+      "last_reviewed_at": "2026-11-16",
+      "demographics": {
+        "population_municipal": null,
+        "density_per_km2": null,
+        "reference_year": null,
+        "geographic_scope": "municipality",
+        "source_url": null
+      }
     },
     {
       "city_id": "arlon",
@@ -1506,7 +1747,14 @@
         "Conferir frequência, retorno e última milha das viagens de fim de semana",
         "Pesquisar custo cotidiano, conectividade e clima municipal"
       ],
-      "last_reviewed_at": "2026-11-16"
+      "last_reviewed_at": "2026-11-16",
+      "demographics": {
+        "population_municipal": null,
+        "density_per_km2": null,
+        "reference_year": null,
+        "geographic_scope": "municipality",
+        "source_url": null
+      }
     },
     {
       "city_id": "liege",
@@ -1580,7 +1828,14 @@
         "Conferir frequência, retorno e última milha das viagens de fim de semana",
         "Pesquisar custo cotidiano, conectividade e clima municipal"
       ],
-      "last_reviewed_at": "2026-11-16"
+      "last_reviewed_at": "2026-11-16",
+      "demographics": {
+        "population_municipal": null,
+        "density_per_km2": null,
+        "reference_year": null,
+        "geographic_scope": "municipality",
+        "source_url": null
+      }
     },
     {
       "city_id": "namur",
@@ -1626,7 +1881,14 @@
         "Conferir frequência, retorno e última milha das viagens de fim de semana",
         "Pesquisar custo cotidiano, conectividade e clima municipal"
       ],
-      "last_reviewed_at": "2026-11-16"
+      "last_reviewed_at": "2026-11-16",
+      "demographics": {
+        "population_municipal": null,
+        "density_per_km2": null,
+        "reference_year": null,
+        "geographic_scope": "municipality",
+        "source_url": null
+      }
     },
     {
       "city_id": "luxembourg_city",
@@ -1672,7 +1934,14 @@
         "Conferir frequência, retorno e última milha das viagens de fim de semana",
         "Pesquisar custo cotidiano, conectividade e clima municipal"
       ],
-      "last_reviewed_at": "2026-11-16"
+      "last_reviewed_at": "2026-11-16",
+      "demographics": {
+        "population_municipal": null,
+        "density_per_km2": null,
+        "reference_year": null,
+        "geographic_scope": "municipality",
+        "source_url": null
+      }
     },
     {
       "city_id": "esch",
@@ -1718,7 +1987,14 @@
         "Conferir frequência, retorno e última milha das viagens de fim de semana",
         "Pesquisar custo cotidiano, conectividade e clima municipal"
       ],
-      "last_reviewed_at": "2026-11-16"
+      "last_reviewed_at": "2026-11-16",
+      "demographics": {
+        "population_municipal": null,
+        "density_per_km2": null,
+        "reference_year": null,
+        "geographic_scope": "municipality",
+        "source_url": null
+      }
     }
   ]
 }
