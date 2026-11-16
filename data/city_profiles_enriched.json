@@ -405,7 +405,19 @@
         "name": "INSEE — comparateur de territoires",
         "url": "https://www.insee.fr/fr/statistiques/2521169"
       },
-      "evidence": [],
+      "evidence": [
+        {
+          "id": "colmar-insee-pop-2023",
+          "section": "quality_of_life",
+          "summary": "População municipal no recenseamento de 2023: 66.970 habitantes; densidade: 1.006 habitantes/km².",
+          "source_url": "https://www.insee.fr/fr/statistiques/1405599?geo=COM-68066",
+          "observed_at": "2026-11-16",
+          "reference_period": "recenseamento 2023, geografia 01/01/2026",
+          "scope": "COM-68066",
+          "kind": "official_municipal_statistic",
+          "limitations": "População do município, não da aglomeração; não é nota de qualidade de vida."
+        }
+      ],
       "advantages": [],
       "limitations": [
         "Moradia mobiliada para 56–60 noites em 2027 ainda não confirmada",
@@ -418,11 +430,11 @@
       ],
       "last_reviewed_at": "2026-11-16",
       "demographics": {
-        "population_municipal": null,
-        "density_per_km2": null,
-        "reference_year": null,
-        "geographic_scope": "municipality",
-        "source_url": null
+        "population_municipal": 66970,
+        "density_per_km2": 1006,
+        "reference_year": 2023,
+        "geographic_scope": "commune (municipalité)",
+        "source_url": "https://www.insee.fr/fr/statistiques/1405599?geo=COM-68066"
       }
     },
     {
@@ -458,7 +470,19 @@
         "name": "INSEE — comparateur de territoires",
         "url": "https://www.insee.fr/fr/statistiques/2521169"
       },
-      "evidence": [],
+      "evidence": [
+        {
+          "id": "selestat-insee-pop-2023",
+          "section": "quality_of_life",
+          "summary": "População municipal no recenseamento de 2023: 19.589 habitantes; densidade: 441,2 habitantes/km².",
+          "source_url": "https://www.insee.fr/fr/statistiques/1405599?geo=COM-67462",
+          "observed_at": "2026-11-16",
+          "reference_period": "recenseamento 2023, geografia 01/01/2026",
+          "scope": "COM-67462",
+          "kind": "official_municipal_statistic",
+          "limitations": "População do município, não da aglomeração; não é nota de qualidade de vida."
+        }
+      ],
       "advantages": [],
       "limitations": [
         "Moradia mobiliada para 56–60 noites em 2027 ainda não confirmada",
@@ -471,11 +495,11 @@
       ],
       "last_reviewed_at": "2026-11-16",
       "demographics": {
-        "population_municipal": null,
-        "density_per_km2": null,
-        "reference_year": null,
-        "geographic_scope": "municipality",
-        "source_url": null
+        "population_municipal": 19589,
+        "density_per_km2": 441.2,
+        "reference_year": 2023,
+        "geographic_scope": "commune (municipalité)",
+        "source_url": "https://www.insee.fr/fr/statistiques/1405599?geo=COM-67462"
       }
     },
     {
@@ -511,7 +535,19 @@
         "name": "INSEE — comparateur de territoires",
         "url": "https://www.insee.fr/fr/statistiques/2521169"
       },
-      "evidence": [],
+      "evidence": [
+        {
+          "id": "saint_louis-insee-pop-2023",
+          "section": "quality_of_life",
+          "summary": "População municipal no recenseamento de 2023: 22.805 habitantes; densidade: 1.353,4 habitantes/km².",
+          "source_url": "https://www.insee.fr/fr/statistiques/1405599?geo=COM-68297",
+          "observed_at": "2026-11-16",
+          "reference_period": "recenseamento 2023, geografia 01/01/2026",
+          "scope": "COM-68297",
+          "kind": "official_municipal_statistic",
+          "limitations": "População do município, não da aglomeração; não é nota de qualidade de vida."
+        }
+      ],
       "advantages": [],
       "limitations": [
         "Moradia mobiliada para 56–60 noites em 2027 ainda não confirmada",
@@ -524,11 +560,11 @@
       ],
       "last_reviewed_at": "2026-11-16",
       "demographics": {
-        "population_municipal": null,
-        "density_per_km2": null,
-        "reference_year": null,
-        "geographic_scope": "municipality",
-        "source_url": null
+        "population_municipal": 22805,
+        "density_per_km2": 1353.4,
+        "reference_year": 2023,
+        "geographic_scope": "commune (municipalité)",
+        "source_url": "https://www.insee.fr/fr/statistiques/1405599?geo=COM-68297"
       }
     },
     {
@@ -564,7 +600,19 @@
         "name": "INSEE — comparateur de territoires",
         "url": "https://www.insee.fr/fr/statistiques/2521169"
       },
-      "evidence": [],
+      "evidence": [
+        {
+          "id": "belfort-insee-pop-2023",
+          "section": "quality_of_life",
+          "summary": "População municipal no recenseamento de 2023: 45.912 habitantes; densidade: 2.684,9 habitantes/km².",
+          "source_url": "https://www.insee.fr/fr/statistiques/1405599?geo=COM-90010",
+          "observed_at": "2026-11-16",
+          "reference_period": "recenseamento 2023, geografia 01/01/2026",
+          "scope": "COM-90010",
+          "kind": "official_municipal_statistic",
+          "limitations": "População do município, não da aglomeração; não é nota de qualidade de vida."
+        }
+      ],
       "advantages": [],
       "limitations": [
         "Moradia mobiliada para 56–60 noites em 2027 ainda não confirmada",
@@ -577,11 +625,11 @@
       ],
       "last_reviewed_at": "2026-11-16",
       "demographics": {
-        "population_municipal": null,
-        "density_per_km2": null,
-        "reference_year": null,
-        "geographic_scope": "municipality",
-        "source_url": null
+        "population_municipal": 45912,
+        "density_per_km2": 2684.9,
+        "reference_year": 2023,
+        "geographic_scope": "commune (municipalité)",
+        "source_url": "https://www.insee.fr/fr/statistiques/1405599?geo=COM-90010"
       }
     },
     {
@@ -617,7 +665,19 @@
         "name": "INSEE — comparateur de territoires",
         "url": "https://www.insee.fr/fr/statistiques/2521169"
       },
-      "evidence": [],
+      "evidence": [
+        {
+          "id": "besancon-insee-pop-2023",
+          "section": "quality_of_life",
+          "summary": "População municipal no recenseamento de 2023: 118.489 habitantes; densidade: 1.821,5 habitantes/km².",
+          "source_url": "https://www.insee.fr/fr/statistiques/1405599?geo=COM-25056",
+          "observed_at": "2026-11-16",
+          "reference_period": "recenseamento 2023, geografia 01/01/2026",
+          "scope": "COM-25056",
+          "kind": "official_municipal_statistic",
+          "limitations": "População do município, não da aglomeração; não é nota de qualidade de vida."
+        }
+      ],
       "advantages": [],
       "limitations": [
         "Moradia mobiliada para 56–60 noites em 2027 ainda não confirmada",
@@ -630,11 +690,11 @@
       ],
       "last_reviewed_at": "2026-11-16",
       "demographics": {
-        "population_municipal": null,
-        "density_per_km2": null,
-        "reference_year": null,
-        "geographic_scope": "municipality",
-        "source_url": null
+        "population_municipal": 118489,
+        "density_per_km2": 1821.5,
+        "reference_year": 2023,
+        "geographic_scope": "commune (municipalité)",
+        "source_url": "https://www.insee.fr/fr/statistiques/1405599?geo=COM-25056"
       }
     },
     {
@@ -670,7 +730,19 @@
         "name": "INSEE — comparateur de territoires",
         "url": "https://www.insee.fr/fr/statistiques/2521169"
       },
-      "evidence": [],
+      "evidence": [
+        {
+          "id": "thionville-insee-pop-2023",
+          "section": "quality_of_life",
+          "summary": "População municipal no recenseamento de 2023: 42.658 habitantes; densidade: 855,2 habitantes/km².",
+          "source_url": "https://www.insee.fr/fr/statistiques/1405599?geo=COM-57672",
+          "observed_at": "2026-11-16",
+          "reference_period": "recenseamento 2023, geografia 01/01/2026",
+          "scope": "COM-57672",
+          "kind": "official_municipal_statistic",
+          "limitations": "População do município, não da aglomeração; não é nota de qualidade de vida."
+        }
+      ],
       "advantages": [],
       "limitations": [
         "Moradia mobiliada para 56–60 noites em 2027 ainda não confirmada",
@@ -683,11 +755,11 @@
       ],
       "last_reviewed_at": "2026-11-16",
       "demographics": {
-        "population_municipal": null,
-        "density_per_km2": null,
-        "reference_year": null,
-        "geographic_scope": "municipality",
-        "source_url": null
+        "population_municipal": 42658,
+        "density_per_km2": 855.2,
+        "reference_year": 2023,
+        "geographic_scope": "commune (municipalité)",
+        "source_url": "https://www.insee.fr/fr/statistiques/1405599?geo=COM-57672"
       }
     },
     {
@@ -723,7 +795,19 @@
         "name": "INSEE — comparateur de territoires",
         "url": "https://www.insee.fr/fr/statistiques/2521169"
       },
-      "evidence": [],
+      "evidence": [
+        {
+          "id": "haguenau-insee-pop-2023",
+          "section": "quality_of_life",
+          "summary": "População municipal no recenseamento de 2023: 36.391 habitantes; densidade: 199,3 habitantes/km².",
+          "source_url": "https://www.insee.fr/fr/statistiques/1405599?geo=COM-67180",
+          "observed_at": "2026-11-16",
+          "reference_period": "recenseamento 2023, geografia 01/01/2026",
+          "scope": "COM-67180",
+          "kind": "official_municipal_statistic",
+          "limitations": "População do município, não da aglomeração; não é nota de qualidade de vida."
+        }
+      ],
       "advantages": [],
       "limitations": [
         "Moradia mobiliada para 56–60 noites em 2027 ainda não confirmada",
@@ -736,11 +820,11 @@
       ],
       "last_reviewed_at": "2026-11-16",
       "demographics": {
-        "population_municipal": null,
-        "density_per_km2": null,
-        "reference_year": null,
-        "geographic_scope": "municipality",
-        "source_url": null
+        "population_municipal": 36391,
+        "density_per_km2": 199.3,
+        "reference_year": 2023,
+        "geographic_scope": "commune (municipalité)",
+        "source_url": "https://www.insee.fr/fr/statistiques/1405599?geo=COM-67180"
       }
     },
     {
@@ -776,7 +860,19 @@
         "name": "INSEE — comparateur de territoires",
         "url": "https://www.insee.fr/fr/statistiques/2521169"
       },
-      "evidence": [],
+      "evidence": [
+        {
+          "id": "saverne-insee-pop-2023",
+          "section": "quality_of_life",
+          "summary": "População municipal no recenseamento de 2023: 11.460 habitantes; densidade: 440,6 habitantes/km².",
+          "source_url": "https://www.insee.fr/fr/statistiques/1405599?geo=COM-67437",
+          "observed_at": "2026-11-16",
+          "reference_period": "recenseamento 2023, geografia 01/01/2026",
+          "scope": "COM-67437",
+          "kind": "official_municipal_statistic",
+          "limitations": "População do município, não da aglomeração; não é nota de qualidade de vida."
+        }
+      ],
       "advantages": [],
       "limitations": [
         "Moradia mobiliada para 56–60 noites em 2027 ainda não confirmada",
@@ -789,11 +885,11 @@
       ],
       "last_reviewed_at": "2026-11-16",
       "demographics": {
-        "population_municipal": null,
-        "density_per_km2": null,
-        "reference_year": null,
-        "geographic_scope": "municipality",
-        "source_url": null
+        "population_municipal": 11460,
+        "density_per_km2": 440.6,
+        "reference_year": 2023,
+        "geographic_scope": "commune (municipalité)",
+        "source_url": "https://www.insee.fr/fr/statistiques/1405599?geo=COM-67437"
       }
     },
     {
@@ -829,7 +925,19 @@
         "name": "INSEE — comparateur de territoires",
         "url": "https://www.insee.fr/fr/statistiques/2521169"
       },
-      "evidence": [],
+      "evidence": [
+        {
+          "id": "reims-insee-pop-2023",
+          "section": "quality_of_life",
+          "summary": "População municipal no recenseamento de 2023: 177.674 habitantes; densidade: 3.788,4 habitantes/km².",
+          "source_url": "https://www.insee.fr/fr/statistiques/1405599?geo=COM-51454",
+          "observed_at": "2026-11-16",
+          "reference_period": "recenseamento 2023, geografia 01/01/2026",
+          "scope": "COM-51454",
+          "kind": "official_municipal_statistic",
+          "limitations": "População do município, não da aglomeração; não é nota de qualidade de vida."
+        }
+      ],
       "advantages": [],
       "limitations": [
         "Moradia mobiliada para 56–60 noites em 2027 ainda não confirmada",
@@ -842,11 +950,11 @@
       ],
       "last_reviewed_at": "2026-11-16",
       "demographics": {
-        "population_municipal": null,
-        "density_per_km2": null,
-        "reference_year": null,
-        "geographic_scope": "municipality",
-        "source_url": null
+        "population_municipal": 177674,
+        "density_per_km2": 3788.4,
+        "reference_year": 2023,
+        "geographic_scope": "commune (municipalité)",
+        "source_url": "https://www.insee.fr/fr/statistiques/1405599?geo=COM-51454"
       }
     },
     {
@@ -974,7 +1082,19 @@
         "name": "INSEE — comparateur de territoires",
         "url": "https://www.insee.fr/fr/statistiques/2521169"
       },
-      "evidence": [],
+      "evidence": [
+        {
+          "id": "arras-insee-pop-2023",
+          "section": "quality_of_life",
+          "summary": "População municipal no recenseamento de 2023: 42.875 habitantes; densidade: 3.686,6 habitantes/km².",
+          "source_url": "https://www.insee.fr/fr/statistiques/1405599?geo=COM-62041",
+          "observed_at": "2026-11-16",
+          "reference_period": "recenseamento 2023, geografia 01/01/2026",
+          "scope": "COM-62041",
+          "kind": "official_municipal_statistic",
+          "limitations": "População do município, não da aglomeração; não é nota de qualidade de vida."
+        }
+      ],
       "advantages": [],
       "limitations": [
         "Moradia mobiliada para 56–60 noites em 2027 ainda não confirmada",
@@ -987,11 +1107,11 @@
       ],
       "last_reviewed_at": "2026-11-16",
       "demographics": {
-        "population_municipal": null,
-        "density_per_km2": null,
-        "reference_year": null,
-        "geographic_scope": "municipality",
-        "source_url": null
+        "population_municipal": 42875,
+        "density_per_km2": 3686.6,
+        "reference_year": 2023,
+        "geographic_scope": "commune (municipalité)",
+        "source_url": "https://www.insee.fr/fr/statistiques/1405599?geo=COM-62041"
       }
     },
     {
