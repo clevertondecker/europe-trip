@@ -3,7 +3,7 @@
   "retrieved_at": "2026-11-15",
   "basis_date": "2026-11-16",
   "basis_day": "Monday",
-  "note": "Referências em horários divulgados para segunda 16/11/2026 (não sábado e não datas 2027). Minutos mínimos podem ser de TGV e não representam tempo normal de TER. Primeiro/último da origem não significa possibilidade de retorno. Sem dados de porta a porta. Inclusões verificadas 15/11/2026: Nancy–Luxemburgo, Dijon–Beaune e Strasbourg–Mulhouse como horários publicados para 16/11/2026; somente Nancy–Luxemburgo integra a cesta fixa de 15 destinos. Nenhum retorno, última milha ou preço 2027 validado.",
+  "note": "Referências em horários divulgados para segunda 16/11/2026 (não sábado e não datas 2027). Minutos mínimos podem ser de TGV e não representam tempo normal de TER. Primeiro/último da origem não significa possibilidade de retorno. Sem dados de porta a porta. Inclusões verificadas 15/11/2026: Nancy–Luxemburgo, Dijon–Beaune e Strasbourg–Mulhouse como horários publicados para 16/11/2026; somente Nancy–Luxemburgo integra a cesta fixa de 15 destinos. Nenhum retorno, última milha ou preço 2027 validado. Inclusões 15/11/2026 também incluem Karlsruhe–Strasbourg e Aachen–Köln com fontes do operador/vendedor, horários amostrados 16/11/2026; tempos mais rápidos e regional diferem.",
   "segments": [
     {
       "from": "offenburg",
@@ -140,6 +140,38 @@
       "advertised_fare_from_eur_person_oneway": null,
       "source_url": "https://www.sncf-connect.com/train/horaires/strasbourg/mulhouse",
       "notes": "Referência de segunda 16/11/2026: TGV mínimo 49min e TER típico 53min. Mulhouse está fora da cesta fixa dos 15; último horário da origem não comprova retorno do passeio."
+    },
+    {
+      "from": "karlsruhe",
+      "to": "strasbourg",
+      "origin": "Karlsruhe Hbf",
+      "destination": "Strasbourg",
+      "fastest_minutes": 41,
+      "representative_regional_minutes": 63,
+      "average_minutes": 70,
+      "services_on_sample_day": 27,
+      "first_origin_departure": "04:31",
+      "last_origin_departure": "22:09",
+      "advertised_fare_from_eur_person_oneway": null,
+      "source_url": "https://www.sncf-connect.com/en-en/train/timetables/karlsruhe/strasbourg",
+      "transfers_for_fastest": 0,
+      "notes": "Segunda 16/11/2026: melhor trem direto DB/SNCF 41min; viagens via Offenburg em torno de 63min; não comprova retorno, custo ou horários 2027."
+    },
+    {
+      "from": "aachen",
+      "to": "cologne",
+      "origin": "Aachen Hbf",
+      "destination": "Köln Hbf",
+      "fastest_minutes": 38,
+      "representative_regional_minutes": 44,
+      "average_minutes": 43,
+      "services_on_sample_day": 24,
+      "first_origin_departure": "05:21",
+      "last_origin_departure": "23:21",
+      "advertised_fare_from_eur_person_oneway": null,
+      "source_url": "https://www.sncf-connect.com/en-en/train/route/aachen/cologne",
+      "transfers_for_fastest": 0,
+      "notes": "Página de Monday 16/11/2026 mistura trens regionais Aachen Rothe Erde→Köln Ehrenfeld e Eurostar Aachen Hbf→Köln Hbf. 38min é melhor percurso publicado; não assumir que o mesmo tempo/estação se aplica ao regional. Retorno de passeio e preço não verificados."
     }
   ],
   "passes": [
