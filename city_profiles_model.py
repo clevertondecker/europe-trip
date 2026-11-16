@@ -45,6 +45,16 @@ def validate_profiles(data:dict,canonical:dict|None=None)->dict:
             raise ValueError("Fonte estatística ausente")
         if row.get("quality_of_life",{}).get("numeric_score") is not None:
             raise ValueError("Sem score numérico sem métricas comparáveis")
+        demographics=row.get("demographics")
+        if demographics is not None:
+            value=demographics.get("population_municipal")
+            if value is not None:
+                if type(value) is not int or value<=0 or demographics.get("reference_year")!=2023:
+                    raise ValueError("População municipal inválida")
+                if demographics.get("geographic_scope")!="commune (municipalité)":
+                    raise ValueError("Perímetro estatístico incomparável")
+                if not str(demographics.get("source_url","")).startswith("https://www.insee.fr/"):
+                    raise ValueError("Fonte municipal não verificada")
         if row.get("housing",{}).get("availability_2027_verified") is not False:
             raise ValueError("Disponibilidade de 2027 não comprovada")
         for field in ("advantages","limitations","research_gaps","evidence"):
@@ -80,6 +90,7 @@ def compact_comparison(data:dict,city_ids:list[str])->list[dict]:
         result.append({
             "Cidade":row["name"],
             "País":row["country"],
+            "População municipal (2023)":row.get("demographics",{}).get("population_municipal") or "Não pesquisado",
             "Corredor":row["corridor"],
             "Moradia: amostras 2026":house["historical_offer_count"],
             "Faixa observada EUR/mês":
