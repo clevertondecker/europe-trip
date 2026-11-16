@@ -27,7 +27,7 @@ def italy_plan():
 
 def france_plan():
     p=new_plan()
-    return set_package(p,"colmar",["colmar_old_town"],
+    return set_package(p,"colmar",["colmar_venise"],
                        valid_destinations={x["id"] for x in load_attractions()["destinations"]},
                        valid_attractions={x["id"] for x in load_attractions()["attractions"]
                                           if x["destination_id"]=="colmar"})
@@ -159,7 +159,7 @@ class SmartCalendarModelTests(unittest.TestCase):
         first=manual_calendar_move(p,self.catalog,"colmar","França","2027-09-25")
         p=apply_calendar_change(p,first,self.catalog,confirmed=True)
         second=manual_calendar_move(p,self.catalog,"colmar","França",
-                                    "2027-10-09",from_day=None)
+                                    "2027-10-09",from_day="")
         p2=apply_calendar_change(p,second,self.catalog,confirmed=True)
         self.assertEqual(len(p2["assignments"]),2)
         self.assertEqual(p2["packages"],p["packages"])
