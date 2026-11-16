@@ -149,3 +149,6 @@ Valores de temperatura média (°C) e chuva mensal (mm) extraídos das tabelas d
 | Dijon | Dijon-Longvic | https://www.meteociel.fr/obs/clim/normales_records.php?code=21473001 |
 
 **Método de reutilização:** conferir mês/estação/período de 30 anos, atribuir Météo-France na descrição da fonte, guardar link do agregador e verificar direitos antes de reprodução em massa; não transferir dados da estação para o endereço exato de hospedagem, nem comparar condições meteorológicas de 2027.
+
+
+**Bairros complementares (Alemanha)**: [Município de Offenburg — centros de bairro](https://offenburg.de/de/leben-in-offenburg/integration/willkommen-in-offenburg/ankommen-in-offenburg/institutionen-und-behoerden/) identifica Innenstadt e Oststadt. [Aachen Tourist Service — Frankenberger Viertel](https://www.aachen-tourismus.de/en/das-frankenberger-viertel/) e [Burtscheider Markt](https://www.aachen-tourismus.de/en/aachen-entdecken/details/poi/burtscheider-markt/) documentam Frankenberger Viertel e Burtscheid. Essas referências urbanas **não** são validação de aluguel, transporte até estação ou segurança individual.
