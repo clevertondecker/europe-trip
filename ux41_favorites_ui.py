@@ -230,6 +230,8 @@ def render_favorite_comparison(study,five):
             for insight in comparison_insights(matrix):
                 st.caption("• "+insight)
         _routes(matrix)
+        from dq20_comparison_ui import render_dq20_panel
+        render_dq20_panel(list(selected))
         from ux44_finance_comparison_ui import render_partial_finance
         render_partial_finance(matrix)
         _details(matrix)
