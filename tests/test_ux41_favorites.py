@@ -102,7 +102,7 @@ class FavoriteComparisonStreamlitTests(unittest.TestCase):
         original=deepcopy(app.session_state["advisor_plan"])
         app.radio(key="ux_area").set_value("Explorar").run()
         app.segmented_control(key="ux_section").set_value("Cidades-base").run()
-        app.segmented_control(key="ux_city_view").set_value("Pesquisa ampliada").run()
+        app.segmented_control(key="ux42_city_activity").set_value("Comparar favoritas").run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
         app.multiselect(key="ux41_favorites_widget").set_value(
             ["mulhouse","strasbourg","freiburg"]).run()
