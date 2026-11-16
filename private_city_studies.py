@@ -35,7 +35,7 @@ def validate_collection(value:dict)->dict:
         raise ValueError("Limite de estudos inválido")
     ids=set()
     for row in entries:
-        if not isinstance(row,dict) or set(row)!={"id","created_at","updated_at","revision","draft"}:
+        if not isinstance(row,dict) or set(row)!={"id","created_at","updated_at","revision","draft","base_plan_id"}:
             raise ValueError("Formato do estudo inválido")
         ident=row["id"]
         from uuid import UUID
@@ -45,6 +45,10 @@ def validate_collection(value:dict)->dict:
             raise ValueError("Identificador de estudo inválido") from exc
         if ident in ids:raise ValueError("Estudo duplicado")
         ids.add(ident)
+        if (row["base_plan_id"] is not None and
+                (not isinstance(row["base_plan_id"],str) or
+                 not row["base_plan_id"].startswith("trip-") or len(row["base_plan_id"])>100)):
+            raise ValueError("Vínculo de planejamento inválido")
         if type(row["revision"]) is not int or row["revision"]<1:
             raise ValueError("Revisão inválida")
         for key in ("created_at","updated_at"):
@@ -72,14 +76,15 @@ def decode_collection(raw:bytes)->dict:
         raise ValueError("JSON de estudos inválido") from exc
 
 
-def add_study(collection:dict,draft:dict)->tuple[dict,str]:
+def add_study(collection:dict,draft:dict,base_plan_id:str|None=None)->tuple[dict,str]:
     from city_decision_store import validate_city_draft
     result=validate_collection(collection)
     if len(result["studies"])>=MAX_STUDIES:raise ValueError("Limite de estudos atingido")
     ident=str(uuid4())
     at=_now()
     result["studies"].append({"id":ident,"created_at":at,"updated_at":at,
-                              "revision":1,"draft":validate_city_draft(draft)})
+                              "revision":1,"draft":validate_city_draft(draft),
+                              "base_plan_id":base_plan_id})
     return result,ident
 
 
@@ -93,7 +98,7 @@ def change_study(collection:dict,study_id:str,operation:str,*,name:str|None=None
     if operation=="duplicate":
         draft=deepcopy(existing["draft"])
         draft["name"]=name or (draft["name"]+" (cópia)")[:80]
-        return add_study(result,draft)
+        return add_study(result,draft,existing["base_plan_id"])
     if operation=="replace":
         from city_decision_store import validate_city_draft
         if draft is None:raise ValueError("Comparação atual ausente")
