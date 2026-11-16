@@ -11,3 +11,7 @@ Dados estruturados: `data/city_profiles_enriched.json`, ligados por `city_id`; a
 **Qualidade:** executar AppTest, testes existentes, compatibilidade mobile e abrir links externos em navegador real quando disponível. Sem alteração de TripPlan, pagamentos, reservas, orçamento ou GCS.
 
 **Revisões:** Engenharia: preserva contratos de navegação/estado. UX crítica: prioriza conhecer antes de inspecionar checklist; pendente avaliação independente e capturas reais de tela 375/768/1280 px. Sem alegar revisão independente inexistente.
+
+## Validação de composição
+
+A UI requer os novos dados do PR #56 e o catálogo do PR #55. O pipeline completo será executado também sobre a composição temporária direcionada à `main`. Não integrar sem respeito à ordem de dependências.
