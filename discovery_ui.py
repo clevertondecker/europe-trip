@@ -107,7 +107,7 @@ def _render_suggestion(rec,plan,catalog,routes,trip_data,live,eurfx,chffx,use_ci
                 else:
                     info=preview_outing(plan,catalog,rec["destination_id"])
                     options={a["id"]:a["name"] for a in catalog["attractions"]
-                             if a["destination_id"]==rec["destination_id"]]
+                             if a["destination_id"]==rec["destination_id"]}
                     default=[a for a in (info["selected_attractions"] or
                                          rec["selected_attractions"]) if a in options]
                     key="ux45_discovery_attrs_"+rec["destination_id"]
