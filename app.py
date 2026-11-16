@@ -25,7 +25,8 @@ from travel_advisor_ui import render_advisor, _recover_saved_plan, _secure_save,
 from travel_dashboard_ui import render_trip_dashboard
 from itinerary_flow_ui import render_itinerary_workbench
 from smart_calendar_ui import render_smart_calendar
-from continuity_ui import apply_pending_restore,render_continuity_panel
+from continuity_ui import (apply_pending_restore,render_continuity_panel,
+                           restore_private_on_start,autosave_private_if_requested)
 from planning_context_ui import (render_context,render_home_continue,
                                  render_breadcrumb,return_to_edit,show_settings)
 from base_explorer_ui import render_base_explorer, _comparison as render_route_comparison, _split_stay as render_split_stay
@@ -57,6 +58,7 @@ _recover_saved_plan()
 bootstrap_trip()
 # Manual recovery is committed before nav/widgets; no automatic cloud writes.
 apply_pending_restore(load_attractions())
+restore_private_on_start(load_attractions())
 restored_mode=st.session_state.pop("ux_pending_mode",None)
 if restored_mode in ("Oficial","Simulação"):
     st.session_state["ux_mode"]=restored_mode
@@ -93,6 +95,7 @@ if st.session_state.pop("advisor_autosave_pending",False):
             st.session_state["advisor_autosave_error"]=(
                 "Não foi possível salvar automaticamente. Suas escolhas continuam nesta sessão. "
                 "Use Salvar planejamento para tentar novamente.")
+autosave_private_if_requested(load_attractions())
 data = load_data()
 
 @st.cache_data(ttl=300, show_spinner=False)
