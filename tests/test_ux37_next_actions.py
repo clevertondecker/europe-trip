@@ -68,5 +68,27 @@ class ContextualActionsTests(unittest.TestCase):
         self.assertTrue(all(x["section"] in SECTIONS[x["area"]] for x in actions))
 
 
+class NextActionsAppTest(unittest.TestCase):
+    def test_summary_action_navigates_without_mutation_and_can_return(self):
+        from pathlib import Path
+        from streamlit.testing.v1 import AppTest
+        app = AppTest.from_file(
+            str(Path(__file__).resolve().parents[1] / "app.py"),
+            default_timeout=110
+        ).run()
+        self.assertFalse(app.exception, [x.message for x in app.exception])
+        before = deepcopy(app.session_state["advisor_plan"])
+        app.button(key="ux37_open_housing:" + before["base_city"]).click().run()
+        self.assertFalse(app.exception, [x.message for x in app.exception])
+        self.assertEqual(app.session_state["ux_area"], "Explorar")
+        self.assertEqual(app.session_state["ux_section"], "Comparar")
+        self.assertEqual(before, app.session_state["advisor_plan"])
+        app.button(key="ux37_return_summary").click().run()
+        self.assertFalse(app.exception, [x.message for x in app.exception])
+        self.assertEqual(app.session_state["ux_area"], "Minha viagem")
+        self.assertEqual(app.session_state["ux_section"], "Resumo")
+        self.assertEqual(before, app.session_state["advisor_plan"])
+
+
 if __name__ == "__main__":
     unittest.main()
