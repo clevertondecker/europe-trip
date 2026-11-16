@@ -1,0 +1,116 @@
+{
+  "schema_version": 1,
+  "checked_at": "2026-11-16",
+  "longhaul_examples": [
+    {
+      "airport_code": "ZRH",
+      "destination_code": "GRU",
+      "route_type": "direct_scheduled_at_research_date",
+      "carrier": "SWISS",
+      "flight_example": "LX92",
+      "reference_local_departure": "22:40",
+      "reference_2026_min_flight": 705,
+      "source_url": "https://www.swiss.com/lhg/br/pt/o-d/cy-cy/zurique-sao-paulo",
+      "published_for_trip_date_2027": false,
+      "quote_for_couple_2027": null
+    },
+    {
+      "airport_code": "FRA",
+      "destination_code": "GRU",
+      "route_type": "direct_scheduled_at_research_date",
+      "carrier": "Lufthansa",
+      "flight_example": "LH506",
+      "reference_local_departure": "22:05",
+      "reference_2026_min_flight": 705,
+      "source_url": "https://www.lufthansa.com/lhg/br/en/o-d/cy-cy/frankfurt-sao-paulo",
+      "published_for_trip_date_2027": false,
+      "quote_for_couple_2027": null
+    }
+  ],
+  "ground_samples": [
+    {
+      "base_id": "freiburg",
+      "airport_code": "FRA",
+      "from": "Freiburg (Breisgau) Hbf",
+      "to": "Frankfurt (M) Flughafen Fernbf",
+      "sample_date": "2026-11-28",
+      "sample_departure": "07:27",
+      "sample_arrival": "09:38",
+      "minutes": 131,
+      "changes": 1,
+      "source_url": "https://www.bahn.de/reisen/view/verbindung/freiburg/flughafen-frankfurt.shtml",
+      "source_type": "official_operator",
+      "full_door_to_door": false
+    },
+    {
+      "base_id": "strasbourg",
+      "airport_code": "FRA",
+      "from": "Strasbourg Gare",
+      "to": "Frankfurt Flughafen Fernbahnhof",
+      "sample_date": null,
+      "sample_departure": "09:08",
+      "sample_arrival": "11:08",
+      "minutes": 120,
+      "changes": 1,
+      "source_url": "https://www.sncf-connect.com/train/horaires/strasbourg/aeroport-de-francfort-sur-le-main",
+      "source_type": "official_operator_general_timetable_2026",
+      "full_door_to_door": false
+    },
+    {
+      "base_id": "strasbourg",
+      "airport_code": "ZRH",
+      "from": "Strasbourg Gare",
+      "to": "Zürich HB (not Flughafen)",
+      "sample_date": "2026-11-17",
+      "sample_departure": "05:19",
+      "sample_arrival": "08:00",
+      "minutes": 161,
+      "changes": 1,
+      "source_url": "https://www.sncf-connect.com/en-en/train/timetables/strasbourg/z%C3%9Crich",
+      "source_type": "official_operator",
+      "full_door_to_door": false
+    }
+  ],
+  "naples_transfer_restriction": {
+    "mode": "Alibus",
+    "segment": "Napoli Centrale ↔ Napoli Capodichino airport",
+    "reference_min": 15,
+    "service_from_nov_2026": [
+      [
+        "06:00",
+        "09:00"
+      ],
+      [
+        "15:00",
+        "18:00"
+      ]
+    ],
+    "departure_frequency_min_during_published_window": 30,
+    "source_url": "https://www.aeroportodinapoli.it/en/by-bus",
+    "source_year": 2026,
+    "confirmed_for_2027": false,
+    "coast_to_station_not_included": true
+  },
+  "airports_to_research": [
+    "BSL_MLH_EAP",
+    "SXB",
+    "ZRH",
+    "FRA"
+  ],
+  "missing": [
+    "rental_address_to_station",
+    "connected_actual_flights",
+    "2027_route_and_price",
+    "terminal_transfer",
+    "visa_if_needed_transit",
+    "baggage_allowance",
+    "Napoli departure vs Rome departure approval",
+    "end_of_trip city/airport",
+    "GRU onward flight to user final Brazilian destination",
+    "minimum_airport_arrival_buffer",
+    "overnight_preflight_if_early",
+    "total_couple_cost"
+  ],
+  "italy_exit_country": "Italy",
+  "italy_exit_decision_confirmed": false
+}
