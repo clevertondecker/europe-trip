@@ -39,10 +39,21 @@ def validate_city_packs(data:dict,canonical:dict|None=None)->dict:
         if row["remote_work"].get("internet_in_rental_verified") is not False:
             raise ValueError("Internet de imóvel não comprovada")
         clim=row["climate"]
-        if clim["months_9_10_11"] is not None:
-            raise ValueError("Normal climática deve ser carregada de fonte compatível validada")
         if clim["normal_period"]!="1991–2020":
             raise ValueError("Período climático de referência alterado")
+        months=clim["months_9_10_11"]
+        if months is not None:
+            if row["city_id"] not in ("mulhouse","strasbourg","metz","nancy","lille","dijon"):
+                raise ValueError("Estação não documentada para esta cidade")
+            if set(months)!={"9","10","11"} or not clim.get("station_name") or not clim.get("source_url","").startswith("https://www.meteociel.fr/"):
+                raise ValueError("Normais sem estação, fonte ou meses completos")
+            if not clim.get("observed_at") or "station" not in clim.get("method","").lower():
+                raise ValueError("Normal sem período de coleta ou método meteorológico")
+            for values in months.values():
+                t=values.get("tmean_c")
+                rain=values.get("precip_mm")
+                if type(t) not in (int,float) or not -30<=t<=45 or type(rain) not in (int,float) or not 0<=rain<=1500:
+                    raise ValueError("Normal climática fora de faixa ou com unidade ausente")
         h=row["housing"]
         if h["verified_for_trip_dates"]!=0:
             raise ValueError("Imóveis para setembro 2027 não confirmados")
