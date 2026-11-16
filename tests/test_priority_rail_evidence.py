@@ -71,5 +71,26 @@ class PriorityRailEvidenceTests(unittest.TestCase):
         self.assertFalse(missing["return_verified"])
 
 
+class PriorityRailAppTest(unittest.TestCase):
+    def test_explorer_equal_conditions_shows_five_destinations_without_writes(self):
+        from pathlib import Path
+        from streamlit.testing.v1 import AppTest
+        app=AppTest.from_file(str(Path(__file__).resolve().parents[1]/"app.py"),
+                              default_timeout=110).run()
+        self.assertFalse(app.exception,[x.message for x in app.exception])
+        original=deepcopy(app.session_state["advisor_plan"])
+        app.radio(key="ux_area").set_value("Explorar").run()
+        app.segmented_control(key="ux_section").set_value("Comparar").run()
+        self.assertFalse(app.exception,[x.message for x in app.exception])
+        app.multiselect(key="ux34_destinations").set_value(list(DESTINATIONS)).run()
+        self.assertFalse(app.exception,[x.message for x in app.exception])
+        self.assertEqual(original,app.session_state["advisor_plan"])
+        self.assertEqual(original["revision"],app.session_state["advisor_plan"]["revision"])
+        frame_text=" ".join(str(x.value) for x in app.dataframe)
+        # The matched five destinations must be visible in the comparison grid.
+        for label in ("Luxemburgo","Interlaken","Bruxelas","Bruges","Rotterdam"):
+            self.assertIn(label,frame_text)
+
+
 if __name__ == "__main__":
     unittest.main()
