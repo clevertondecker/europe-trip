@@ -72,7 +72,27 @@ class UX40StreamlitTests(unittest.TestCase):
         self.assertEqual(self.app.session_state["expanded_bases_detail_city"],"offenburg")
         self.app.button(key="ux40_back_compare").click().run()
         self.assertEqual(self.app.session_state["ux40_research_activity"],"Comparar cidades")
+        # Widget state is removed when its activity is hidden; durable state remains.
+        self.assertEqual(self.app.session_state["ux40_selected_city"],"offenburg")
+        self.app.segmented_control(key="ux40_research_activity").set_value(
+            "Explorar uma cidade").run()
         self.assertEqual(self.app.session_state["expanded_bases_detail_city"],"offenburg")
+        self.assertEqual(self.app.session_state["advisor_plan"],self.official)
+
+
+    def test_same_fifteen_destinations_selection_is_restored(self):
+        selected=[x.value for x in self.app.multiselect if x.key=="five_base_destinations"]
+        self.assertTrue(selected)
+        items=self.app.multiselect(key="five_base_destinations")
+        items.set_value(["strasbourg","luxembourg_city"]).run()
+        self.assertEqual(self.app.session_state["ux40_saved_five_destinations"],
+                         ["strasbourg","luxembourg_city"])
+        self.app.segmented_control(key="ux40_research_activity").set_value(
+            "Explorar uma cidade").run()
+        self.app.segmented_control(key="ux40_research_activity").set_value(
+            "Comparar cidades").run()
+        self.assertEqual(self.app.session_state["five_base_destinations"],
+                         ["strasbourg","luxembourg_city"])
         self.assertEqual(self.app.session_state["advisor_plan"],self.official)
 
     def test_country_corridor_and_finalist_filter_persist(self):
