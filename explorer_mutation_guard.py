@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from planning_session import (
-    active_plan, upsert_flexible_choice, remove_flexible_choice,
+    active_plan, commit_outing, delete_outing,
     update_interest, schedule_package, unschedule_package,
 )
 from itinerary_flow_model import UNASSIGNED
@@ -23,14 +23,15 @@ def _guard(base: str, mode: str) -> None:
         )
 
 
-def save_outing(base: str, mode: str, destination: str, attractions: list[str]) -> None:
+def save_outing(base: str, mode: str, destination: str, attractions: list[str]):
     _guard(base, mode)
-    upsert_flexible_choice(destination, attractions, UNASSIGNED)
+    # An existing flexible period must not be reset by an explorer edit.
+    return commit_outing(destination, attractions, confirmed=True)
 
 
-def remove_outing(base: str, mode: str, destination: str) -> None:
+def remove_outing(base: str, mode: str, destination: str, *, confirmed: bool = False):
     _guard(base, mode)
-    remove_flexible_choice(destination)
+    return delete_outing(destination, confirmed=confirmed)
 
 
 def change_interest(base: str, mode: str, attraction: str, value: str) -> None:
