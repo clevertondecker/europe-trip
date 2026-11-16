@@ -52,7 +52,7 @@ class FavoriteComparisonModelTests(unittest.TestCase):
         self.assertEqual(m["cities"][0]["documented_shared_basket"],6)
         self.assertEqual(m["cities"][1]["documented_shared_basket"],9)
         self.assertEqual(m["cities"][2]["documented_shared_basket"],0)
-        self.assertEqual(m["cities"][2]["routes"][0]["status"],"not_compared_on_shared_basket")
+        self.assertEqual(m["cities"][2]["routes"][0]["status"],"not_researched")
         self.assertIsNone(m["cities"][2]["routes"][0]["duration_min_oneway"])
         self.assertTrue(all(not c["housing"]["available_2027_count"] for c in m["cities"]))
         self.assertTrue(all(not r["return_2027_verified"] for c in m["cities"]
