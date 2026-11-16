@@ -430,3 +430,33 @@ padding:17px 20px;margin:0 0 10px;}
 .scenario-style-card__count{font-weight:800;color:#255D61;font-size:1.1rem;}
 .scenario-style-card p{font-size:.82rem;color:#61757D;line-height:1.5;margin-top:10px;}
 @media(max-width:780px){.scenario-style-card{min-height:0;margin-top:4px;padding:14px;}}
+
+
+/* UX 3.9 — minimal mobile/accessibility polish, native Streamlit widgets.
+   No new navigation, no global column overrides. */
+:where([data-testid="stAppViewContainer"]) :is(button,input,textarea):focus-visible {
+  outline: 3px solid #177A9B !important;
+  outline-offset: 2px;
+}
+@media (max-width: 680px) {
+  [data-testid="stButton"] button,
+  [data-testid="stFormSubmitButton"] button,
+  [data-testid="stDownloadButton"] button,
+  [data-testid="stSegmentedControl"] button {
+    min-height: 44px !important;
+  }
+  .page-budget-row {flex-wrap:wrap;align-items:flex-start;}
+  .page-task {flex-wrap:wrap;}
+  .page-task__status {margin-left:auto;}
+  .city-digest,.city-score,.city-side {overflow-wrap:anywhere;}
+  .page-timeline__content {overflow-wrap:anywhere;}
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-testid="stAppViewContainer"] *,
+  [data-testid="stAppViewContainer"] *::before,
+  [data-testid="stAppViewContainer"] *::after {
+    scroll-behavior:auto !important;
+    transition-duration:0.01ms !important;
+    animation-duration:0.01ms !important;
+  }
+}

@@ -2,13 +2,27 @@
 
 App de lua de mel Itália → França, com mapa, orçamento, cronograma e pesquisas. Repositório de código: `clevertondecker/europe-trip`. Os arquivos oficiais da viagem continuam no **Google Drive**.
 
-## Workspace compacto do Roteiro (branch de redesign — 15/11/2026)
+## Como navegar (UX 3.9)
 
-Em **Roteiro**, selecione uma das quatro áreas: **Meus passeios** (edite e aprove propostas, faça backup e salve), **Descobrir** (catálogo com busca, filtro e mais resultados), **Orçamento** (comparação dos três estilos e indicadores financeiros) e **Calendário** (recomendações e organização de passeios). As pesquisas anteriores continuam disponíveis em **Guias e pesquisas**.
+A interface atual organiza o planejamento em **quatro áreas**, com controles de apoio dentro das atividades, sem precisar mudar de aplicativo:
 
-Configurações de cidade-base, perfil, teto, câmbio e aluguel estão em painéis recolhíveis. A troca de áreas mantém o plano ativo e os rascunhos, mas não cria reservas nem salva remotamente sem autenticação e confirmação. **Os valores continuam históricos e incompletos, não cotações para 2027.**
+| Área | Atividades | Para que serve |
+|---|---|---|
+| **Minha viagem** | Resumo · Pendências · Decisões | Continuar o planejamento, recuperar cópias privadas e revisar próximos passos |
+| **Explorar** | Cidades-base · Comparar · Passeios · Mapa | Pesquisar lugares e testar alternativas sem mudar a base oficial |
+| **Meu roteiro** | Meu planejamento · Organizar viagem · Melhorar meu roteiro | Escolher atrações, distribuir períodos/datas e revisar o roteiro |
+| **Orçamento** | Resumo financeiro · Simulações · Detalhamento | Ver provisões, simular condições e pesquisar cotações privadas |
 
-Consulte [o relatório de redesign](RELATORIO_REDESIGN_WORKSPACE_ROTEIRO_2027.md). Para validar antes do merge execute `python -m compileall -q .`, `python -m unittest discover -s tests -v` e confira Streamlit AppTest e desktop/mobile.
+### Cotações e estudos privados
+
+- Em **Orçamento → Detalhamento**, cadastre ou edite cotações de hospedagem, transportes e passeios. Em **Resumo financeiro**, você pode carregar a coleção e consultar impactos **hipotéticos** quando os períodos e as premissas forem equivalentes.
+- Em **Explorar → Comparar**, compare as cidades e gerencie os estudos privados. A comparação não modifica o `TripPlan`.
+- Em **Minha viagem → Resumo**, use a cópia de segurança e o salvamento privado do roteiro. O backup do roteiro, os estudos e as cotações possuem coleções distintas. O indicador de salvo não deve ser confundido com uma reserva.
+- Para continuar um passeio em edição, utilize **Meu roteiro → Meu planejamento**. O retorno contextual do Orçamento preserva os filtros de sessão quando disponíveis.
+
+**Limitações:** estes valores são fontes históricas ou cotações pesquisadas, não disponibilidade garantida para 2027. Dados desconhecidos não equivalem a custo zero. O app não confirma reservas nem registra pagamentos.
+
+A versão antiga do workspace foi documentada em [RELATORIO_REDESIGN_WORKSPACE_ROTEIRO_2027.md](RELATORIO_REDESIGN_WORKSPACE_ROTEIRO_2027.md), mantido como histórico. Para validar localmente, execute `python -m compileall -q .` e `python -m unittest discover -s tests -v`. Testes de navegador desktop/mobile e GCS real exigem ambiente autorizado e não são substituídos pelo Streamlit AppTest.
 
 ## O que sincroniza
 
