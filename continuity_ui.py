@@ -194,6 +194,17 @@ def render_private_controls(plan, catalog):
             st.error("Falha no armazenamento privado. Baixe uma cópia local.")
 
 
+def private_status_label(fallback):
+    """Show private success only after a confirmed remote response."""
+    state = st.session_state
+    if (state.get("ux36_cloud_status") == "Salvo em espaço privado"
+            and not state.get("ux36_cloud_dirty")):
+        return ("Salvo em espaço privado", "Recuperável após entrar com a conta autorizada")
+    if state.get("ux36_cloud_status", "").startswith("Erro"):
+        return ("Alterações apenas nesta sessão", "Salve uma cópia privada ou baixe o backup")
+    return fallback
+
+
 def render_continuity_panel(plan:dict,catalog:dict)->None:
     with st.expander("Recuperar ou guardar uma cópia privada",expanded=False):
         render_private_controls(plan, catalog)
