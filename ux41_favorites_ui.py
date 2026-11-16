@@ -61,8 +61,7 @@ def _brief_matrix(matrix):
             str(c["housing"]["observations_2026"]),
         "Tempos na cesta selecionada":lambda c:
             str(c["documented_shared_basket"])+"/"+
-            str(c["selected_destinations_count"]) if c["id"] in
-            ("offenburg","trier","mulhouse","strasbourg","lille") else "Sem matriz equivalente",
+            str(c["selected_destinations_count"])+" · tempos históricos",
         "Custo de vida comparável":lambda c:"Ainda não disponível",
         "Coworking pesquisado":lambda c:(
             c["daily"]["coworking_reference"]["name"] if
@@ -102,7 +101,11 @@ def _routes(matrix):
                 with col:
                     st.caption(c["name"])
                     if route["status"]=="documented_oneway":
-                        st.write(str(route["duration_min_oneway"])+" min · ida")
+                        st.write(str(route["duration_min_oneway"])+" min · ida histórica")
+                        if route.get("typical_min_oneway") is not None:
+                            st.caption("Média na amostra: "+str(route["typical_min_oneway"])+" min")
+                        if route.get("transfers") is not None:
+                            st.caption("Conexões documentadas: "+str(route["transfers"]))
                         if route["regional_min_oneway"] is not None:
                             st.caption("Regional documentado: "+
                                        str(route["regional_min_oneway"])+" min")
@@ -112,6 +115,8 @@ def _routes(matrix):
                         st.caption("Ainda não pesquisado na mesma matriz")
                     if route["source_url"]:
                         st.markdown("[Fonte ferroviária]("+route["source_url"]+")")
+                    if len(route.get("observations",[]))>1:
+                        st.caption(str(len(route["observations"]))+" registros de fontes diferentes; sem combinar durações ou tarifas")
         st.caption("Duração mínima isolada não comprova bate-volta, retorno, "
                    "tarifa válida ou acesso porta a porta.")
 
