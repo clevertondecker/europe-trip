@@ -13,7 +13,9 @@ from attractions_model import (
     load_attractions, load_base_routes, places_for_base, route_for,
     package_cost, approximate_feasibility, schedule_visit)
 from calendar_model import calendar_plan
-from planning_session import active_plan,update_fields,select_package,delete_package,schedule_package,unschedule_package,update_interest
+from planning_session import active_plan
+from explorer_mutation_guard import can_edit, schedule_outing, unschedule_outing, SimulationWriteBlocked
+from explorer_dialog_ui import render_attraction_dialog
 
 
 def _destination_photo(destination: dict) -> None:
@@ -77,7 +79,7 @@ def render_explorer(trip_data: dict, sync_sources: dict, map_view) -> None:
         args=("attractions_scenario_base",))
     st.session_state["scenario_base_selected"]=base
     official_base=active_plan()["base_city"]
-    editable=base==official_base
+    editable=can_edit(base, active_plan(), st.session_state.get("ux_mode", "Oficial"))
     if not editable:
         st.info("Simulação independente: o roteiro oficial permanece em "+
                 by_id[official_base]["name"]+
@@ -175,6 +177,9 @@ def render_explorer(trip_data: dict, sync_sources: dict, map_view) -> None:
         st.info("Nenhum destino corresponde aos filtros escolhidos.")
 
     st.markdown("<div class='page-section'>Destinos e passeios</div>",unsafe_allow_html=True)
+    feedback=st.session_state.pop("explore_feedback",None)
+    if feedback:
+        st.success(feedback+" Alterações ainda não foram salvas remotamente.")
     for start in range(0,len(filtered),2):
         for col,item in zip(st.columns(2,gap="medium"),filtered[start:start+2]):
             d=item["destination"]
@@ -212,61 +217,8 @@ def render_explorer(trip_data: dict, sync_sources: dict, map_view) -> None:
                         st.rerun()
 
     chosen=st.session_state.get("explore_selected_destination")
-    if chosen and chosen in by_id:
-        d=by_id[chosen]
-        st.divider()
-        st.markdown(f"<div class='page-section'>Atrações em {escape(d['name'])}</div>",
-                    unsafe_allow_html=True)
-        r=route_for(routes,base,chosen)
-        st.caption(f"Da base {by_id[base]['name']} · "
-                   f"trem: {str(r['train_minutes_one_way'])+' min/trecho' if r['train_minutes_one_way'] is not None else 'não verificado'} "
-                   "· duração porta a porta ainda não pesquisada")
-        attractions_here=[a for a in attractions["attractions"] if a["destination_id"]==chosen]
-        marks=active_plan().get("preferences",{})
-        for a in attractions_here:
-            with st.container(border=True):
-                left,right=st.columns([3,1],gap="medium")
-                with left:
-                    st.markdown(f"**{escape(a['name'])}**")
-                    st.write(a["summary"])
-                    st.caption(f"{a['category']} · visita sugerida: {a['visit_minutes']} min "
-                               f"(hipótese) · {_label_cost(a)}")
-                    if a["seasonality"]:
-                        st.caption("Sazonalidade: "+a["seasonality"])
-                    st.markdown(f"[Fonte da atração]({a['source_urls'][0]}) · "
-                                f"[Abrir localização no Google Maps]"
-                                f"(https://www.google.com/maps/search/?api=1&query="
-                                f"{quote(a['name']+', '+d['name'])})")
-                with right:
-                    current=marks.get(a["id"],"Opcional")
-                    marked=st.selectbox("Interesse",["Quero visitar","Opcional","Descartar"],
-                                        index=["Quero visitar","Opcional","Descartar"].index(current),
-                                        key=f"explore_mark_{a['id']}")
-                    if editable and marked!=marks.get(a["id"],"Opcional"):
-                        update_interest(a["id"],marked)
-                        marks=active_plan().get("preferences",{})
-        st.markdown("#### Montar passeio nessa cidade")
-        previous=packages.get(chosen,[])
-        if not previous:
-            previous=[a["id"] for a in attractions_here[:3]]
-        chosen_ids=st.multiselect(
-            "Selecione até cinco atrações para visitar no mesmo passeio",
-            [a["id"] for a in attractions_here],
-            default=previous,max_selections=5,
-            format_func=lambda code:by_attr[code]["name"],
-            key=f"explore_package_select_{chosen}")
-        time_total=sum(by_attr[x]["visit_minutes"] for x in chosen_ids)
-        st.caption(f"Tempo apenas dentro das atrações: {time_total//60}h{time_total%60:02d}. "
-                   "Não inclui caminhada, refeições, espera ou viagem desde a base.")
-        if st.button("Salvar passeio na minha lista",key=f"explore_save_{chosen}",
-                     use_container_width=True,disabled=not chosen_ids):
-            select_package(chosen,chosen_ids)
-            st.rerun()
-        if chosen in packages:
-            if st.button("Remover passeio da lista",key=f"explore_remove_{chosen}",
-                         use_container_width=True):
-                delete_package(chosen)
-                st.rerun()
+    if chosen in by_id:
+        render_attraction_dialog(chosen,base,attractions,routes,by_id,by_attr)
 
     st.markdown("<div class='page-section'>Minha lista de passeios e custos conhecidos</div>",
                 unsafe_allow_html=True)
@@ -323,12 +275,12 @@ def render_explorer(trip_data: dict, sync_sources: dict, map_view) -> None:
                 picked=st.selectbox("Dia disponível (férias ou fim de semana)",
                                     [r["date"] for r in allowed],key="explore_schedule_day")
             if st.button("Adicionar passeio ao calendário",key="explore_schedule_add",
-                         use_container_width=True):
+                         use_container_width=True,disabled=not editable):
                 try:
                     schedule_visit(days,active_plan()["assignments"],picked,destid)
-                    schedule_package(picked,destid)
+                    schedule_outing(base,st.session_state.get("ux_mode","Oficial"),picked,destid)
                     st.rerun()
-                except ValueError as e:
+                except (ValueError, SimulationWriteBlocked) as e:
                     st.warning(str(e))
             assignments=st.session_state.get("explore_calendar",{})
             if assignments:
@@ -337,7 +289,7 @@ def render_explorer(trip_data: dict, sync_sources: dict, map_view) -> None:
                     with one:st.markdown(f"**{day}:** {by_id.get(destid,{}).get('name',destid)}")
                     with two:
                         if st.button("Remover",key=f"explore_calendar_remove_{day}",disabled=not editable):
-                            unschedule_package(day)
+                            unschedule_outing(base,st.session_state.get("ux_mode","Oficial"),day)
                             st.rerun()
 
         st.markdown("#### Levar o custo conhecido ao orçamento")
