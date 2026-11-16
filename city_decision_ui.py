@@ -59,13 +59,37 @@ def _render_routes(comparison:dict)->None:
     for dest in comparison["destinations"]:
         entry={"Passeio":places[dest]}
         for city in [official]+alternatives:
-            value=rows[city][dest]["minutes"]
-            entry[names[city]+(" (meu plano)" if city==official else "")]=(
-                str(value)+" min" if value is not None else "Não pesquisado")
+            route=rows[city][dest]
+            typical=route.get("representative_minutes")
+            fastest=route["minutes"]
+            label=names[city]+(" (meu plano)" if city==official else "")
+            entry[label]=(f"{typical} min típico · {fastest} min mínimo (ida)"
+                          if typical is not None and fastest is not None else
+                          f"{fastest} min mínimo (ida)" if fastest is not None
+                          else "Não pesquisado")
         table.append(entry)
     st.dataframe(table,hide_index=True,width="stretch",height=270)
-    st.caption("Tempos mínimos históricos **somente de ida, estação a estação**. "
-               "Nenhum retorno de passeio foi validado para 2027.")
+    st.caption("Referências históricas de novembro/2026, somente ida, estação a estação. "
+               "O tempo típico é a média publicada pelo operador, não a garantia "
+               "de um trem em qualquer dia. Trocas de estação e última milha "
+               "não integram esses tempos. Nenhuma volta de 2027 foi validada.")
+    if len(alternatives)==1:
+        a,b=official,alternatives[0]
+        paired=[(d,rows[a][d].get("representative_minutes"),
+                   rows[b][d].get("representative_minutes"))
+                for d in comparison["destinations"]]
+        pairs=[v for v in paired if v[1] is not None and v[2] is not None]
+        if pairs:
+            sum_a=sum(v[1] for v in pairs)
+            sum_b=sum(v[2] for v in pairs)
+            st.markdown("**Subtotal ilustrativo das visitas comparáveis**")
+            st.caption(f"{len(pairs)}/{len(paired)} destinos com tempos típicos nas duas bases. "
+                       "Uma visita por destino, apenas ida: "
+                       f"{names[a]} {sum_a} min e {names[b]} {sum_b} min. "
+                       "Uma ida + volta hipotética com duração igual daria "
+                       f"{2*sum_a} min e {2*sum_b} min, respectivamente; "
+                       "**os retornos não foram pesquisados e isso não é um "
+                       "tempo total verificado**. Nenhuma rota incompleta integra a soma.")
     for city in [official]+alternatives:
         with st.expander("Fontes e modalidades · "+names[city],expanded=False):
             for r in comparison["profiles"][city]["routes"]:
@@ -76,6 +100,13 @@ def _render_routes(comparison:dict)->None:
                 fare=(f"€ {r['fare']:.2f} por pessoa e trecho (valor histórico/desde)"
                       if r["fare"] is not None else "Tarifa não documentada")
                 st.caption(fare+" · "+str(r["basis"] or "sem data de pesquisa"))
+                if r.get("representative_minutes") is not None:
+                    st.caption("Tempo típico de ida: "+str(r["representative_minutes"])+
+                               " min · mínimo de ida: "+str(r["minutes"])+" min")
+                if r.get("transfers") is not None:
+                    st.caption("Conexões no exemplo pesquisado: "+str(r["transfers"]))
+                if r.get("frequency_reference"):
+                    st.caption(r["frequency_reference"])
                 st.caption(r["note"])
                 if r["source"]:
                     st.markdown("[Consultar fonte]("+r["source"]+")")
