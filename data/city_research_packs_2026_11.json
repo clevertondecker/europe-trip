@@ -1,0 +1,1172 @@
+{
+  "schema_version": 1,
+  "checked_at": "2026-11-16",
+  "purpose": "Pacotes 1-3: complementar evidências já cadastradas sem reescrever os modelos oficiais",
+  "data_policy": "Dado ausente nunca zero ou disponibilidade presumida. Valores de 2026 são históricos, observados em outras fontes já arquivadas.",
+  "cities": [
+    {
+      "city_id": "mulhouse",
+      "daily_life": {
+        "restaurant_two_midrange_eur_2026": 67.5,
+        "restaurant_source_url": "https://fr.numbeo.com/co%C3%BBt-de-la-vie/ville/Mulhouse",
+        "restaurant_basis": "Estimativa colaborativa histórica coletada em 2026, não preço fixo nem cesta de custo de vida",
+        "complete_comparable_basket_eur": null,
+        "transport_monthly_pass_eur": null,
+        "grocery_basket_eur": null
+      },
+      "remote_work": {
+        "coworking_reference": {
+          "name": "La Jonction / Mulhouse Coworking",
+          "price_eur_2026": 15,
+          "price_basis": "day excluding tax (with €30 excluding tax monthly plan giving 1 day included)",
+          "source_url": "https://www.mulhouse-coworking.fr/",
+          "source_type": "provider",
+          "hours": "6h30–22h30 weekdays for dedicated spaces; day/nomad access conditions must be verified",
+          "limitations": "Acesso dedicado até 22h30 não cobre necessariamente 23h durante horário de verão francês; elegibilidade do plano e uso noturno exigem confirmação."
+        },
+        "internet_in_rental_verified": false
+      },
+      "climate": {
+        "months_9_10_11": null,
+        "normal_period": "1991–2020",
+        "source_candidate": "https://www.data.gouv.fr/datasets/normales-climatiques-mensuelles-1991-2020-par-commune-france",
+        "method": "Ainda não extraído e conferido para município/estação; previsão 2027 não substitui normal"
+      },
+      "housing": {
+        "historical_listings": [
+          {
+            "listing_ref": "mulhouse-1",
+            "observed_title_or_address": "Rue Louis Pasteur",
+            "monthly_eur_2026": 980,
+            "size_m2": 52,
+            "source_url": "https://housinganywhere.com/s/Mulhouse--France/furnished-apartments",
+            "source_is_direct_listing": false,
+            "confirmed_56_to_60_nights": false,
+            "available_after_2027_09_04": false,
+            "mandatory_fees_known": false,
+            "internet_in_property_verified": false,
+            "notes": "Observação histórica: ocupação de dois adultos, duração, preço e disponibilidade de 2027 não confirmados."
+          },
+          {
+            "listing_ref": "mulhouse-2",
+            "observed_title_or_address": "Rue des Franciscains",
+            "monthly_eur_2026": 1350,
+            "size_m2": 48,
+            "source_url": "https://housinganywhere.com/s/Mulhouse--France/furnished-apartments",
+            "source_is_direct_listing": false,
+            "confirmed_56_to_60_nights": false,
+            "available_after_2027_09_04": false,
+            "mandatory_fees_known": false,
+            "internet_in_property_verified": false,
+            "notes": "Observação histórica: ocupação de dois adultos, duração, preço e disponibilidade de 2027 não confirmados."
+          },
+          {
+            "listing_ref": "mulhouse-3",
+            "observed_title_or_address": "Boulevard de l'Europe",
+            "monthly_eur_2026": 1360,
+            "size_m2": 72,
+            "source_url": "https://housinganywhere.com/s/Mulhouse--France/furnished-apartments",
+            "source_is_direct_listing": false,
+            "confirmed_56_to_60_nights": false,
+            "available_after_2027_09_04": false,
+            "mandatory_fees_known": false,
+            "internet_in_property_verified": false,
+            "notes": "Observação histórica: ocupação de dois adultos, duração, preço e disponibilidade de 2027 não confirmados."
+          }
+        ],
+        "individual_listing_urls_count": 0,
+        "verified_for_trip_dates": 0
+      },
+      "neighborhoods": [
+        {
+          "name": "Centre Historique",
+          "source_url": "https://www.tourisme-mulhouse.com/app/uploads/mulhouse-tourisme/2025/07/DP_2025-FR_BD.pdf",
+          "reason_to_investigate": "Bairros identificados no material de turismo local; custo e distância a estações requerem checagem por endereço",
+          "validated_rental_in_area": false
+        },
+        {
+          "name": "Rebberg",
+          "source_url": "https://www.tourisme-mulhouse.com/app/uploads/mulhouse-tourisme/2025/07/DP_2025-FR_BD.pdf",
+          "reason_to_investigate": "Bairros identificados no material de turismo local; custo e distância a estações requerem checagem por endereço",
+          "validated_rental_in_area": false
+        },
+        {
+          "name": "Nouveau Quartier",
+          "source_url": "https://www.tourisme-mulhouse.com/app/uploads/mulhouse-tourisme/2025/07/DP_2025-FR_BD.pdf",
+          "reason_to_investigate": "Bairros identificados no material de turismo local; custo e distância a estações requerem checagem por endereço",
+          "validated_rental_in_area": false
+        }
+      ],
+      "weekend_rail_references": [
+        {
+          "destination_id": "strasbourg",
+          "duration_minutes_oneway": 53,
+          "source_url": "https://www.ter.sncf.com/grand-est/trajet-mulhouse-strasbourg",
+          "published_roundtrips_daily_up_to": 33,
+          "frequency_description": "até 33 idas/voltas diárias; pelo menos dois TER por hora segundo a página da linha",
+          "fare_eur_oneway_with_condition": 11.7,
+          "fare_condition": "Carte Fluo; cartão €30/ano e elegibilidade separados",
+          "weekend_return_confirmed": false,
+          "observed_at": "2026-11-16",
+          "valid_for_2027": false,
+          "return_timetable_verified": false,
+          "last_mile_verified": false,
+          "scope": "referência pública do operador; não reservar"
+        }
+      ],
+      "missing": [
+        "Confirmar apartamento completo 56–60 noites para duas pessoas após 04/09/2027",
+        "Comparar cesta cotidiana com mesmas unidades em todas as finalistas",
+        "Extrair normais climáticas com período e localização equivalentes",
+        "Confirmar trens de volta em sábado/domingo e última milha"
+      ],
+      "updated_at": "2026-11-16"
+    },
+    {
+      "city_id": "strasbourg",
+      "daily_life": {
+        "restaurant_two_midrange_eur_2026": 62.5,
+        "restaurant_source_url": "https://fr.numbeo.com/co%C3%BBt-de-la-vie/ville/Strasbourg",
+        "restaurant_basis": "Estimativa colaborativa histórica coletada em 2026, não preço fixo nem cesta de custo de vida",
+        "complete_comparable_basket_eur": null,
+        "transport_monthly_pass_eur": null,
+        "grocery_basket_eur": null
+      },
+      "remote_work": {
+        "coworking_reference": {
+          "name": "DOKO BÜRO",
+          "price_eur_2026": 175,
+          "price_basis": "month (published, no six-month commitment claimed for monthly option)",
+          "source_url": "https://label-tiers-lieux.grandest.fr/tiers-lieux/doko-buro/",
+          "source_type": "regional_directory",
+          "hours": "8h–19h weekdays, lunch interruption",
+          "limitations": "Não atende trabalho após 19h sem condições especiais."
+        },
+        "internet_in_rental_verified": false
+      },
+      "climate": {
+        "months_9_10_11": null,
+        "normal_period": "1991–2020",
+        "source_candidate": "https://www.data.gouv.fr/datasets/normales-climatiques-mensuelles-1991-2020-par-commune-france",
+        "method": "Ainda não extraído e conferido para município/estação; previsão 2027 não substitui normal"
+      },
+      "housing": {
+        "historical_listings": [
+          {
+            "listing_ref": "strasbourg-1",
+            "observed_title_or_address": "Avenue de Colmar",
+            "monthly_eur_2026": 950,
+            "size_m2": 50,
+            "source_url": "https://housinganywhere.com/s/Strasbourg--France/furnished-apartments",
+            "source_is_direct_listing": false,
+            "confirmed_56_to_60_nights": false,
+            "available_after_2027_09_04": false,
+            "mandatory_fees_known": false,
+            "internet_in_property_verified": false,
+            "notes": "Observação histórica: ocupação de dois adultos, duração, preço e disponibilidade de 2027 não confirmados."
+          },
+          {
+            "listing_ref": "strasbourg-2",
+            "observed_title_or_address": "Rue de la Ziegelau",
+            "monthly_eur_2026": 850,
+            "size_m2": 38,
+            "source_url": "https://housinganywhere.com/s/Strasbourg--France/furnished-apartments",
+            "source_is_direct_listing": false,
+            "confirmed_56_to_60_nights": false,
+            "available_after_2027_09_04": false,
+            "mandatory_fees_known": false,
+            "internet_in_property_verified": false,
+            "notes": "Observação histórica: ocupação de dois adultos, duração, preço e disponibilidade de 2027 não confirmados."
+          },
+          {
+            "listing_ref": "strasbourg-3",
+            "observed_title_or_address": "Rue des Glacières",
+            "monthly_eur_2026": 1100,
+            "size_m2": 36,
+            "source_url": "https://housinganywhere.com/s/Strasbourg--France/furnished-apartments",
+            "source_is_direct_listing": false,
+            "confirmed_56_to_60_nights": false,
+            "available_after_2027_09_04": false,
+            "mandatory_fees_known": false,
+            "internet_in_property_verified": false,
+            "notes": "Observação histórica: ocupação de dois adultos, duração, preço e disponibilidade de 2027 não confirmados."
+          }
+        ],
+        "individual_listing_urls_count": 0,
+        "verified_for_trip_dates": 0
+      },
+      "neighborhoods": [
+        {
+          "name": "Gare-Tribunal",
+          "source_url": "https://www.visitstrasbourg.fr/decouvrir-strasbourg/strasbourg-et-alentours/les-quartiers-de-strasbourg/",
+          "reason_to_investigate": "Gare-Tribunal abriga a estação; Krutenau é movimentada; Neudorf tem áreas de vida cotidiana. A rua escolhida precisa de avaliação própria",
+          "validated_rental_in_area": false
+        },
+        {
+          "name": "Bourse-Esplanade-Krutenau",
+          "source_url": "https://www.visitstrasbourg.fr/decouvrir-strasbourg/strasbourg-et-alentours/les-quartiers-de-strasbourg/",
+          "reason_to_investigate": "Gare-Tribunal abriga a estação; Krutenau é movimentada; Neudorf tem áreas de vida cotidiana. A rua escolhida precisa de avaliação própria",
+          "validated_rental_in_area": false
+        },
+        {
+          "name": "Neudorf",
+          "source_url": "https://www.visitstrasbourg.fr/decouvrir-strasbourg/strasbourg-et-alentours/les-quartiers-de-strasbourg/",
+          "reason_to_investigate": "Gare-Tribunal abriga a estação; Krutenau é movimentada; Neudorf tem áreas de vida cotidiana. A rua escolhida precisa de avaliação própria",
+          "validated_rental_in_area": false
+        }
+      ],
+      "weekend_rail_references": [
+        {
+          "destination_id": "mulhouse",
+          "duration_minutes_oneway": 53,
+          "source_url": "https://www.ter.sncf.com/grand-est/trajet-mulhouse-strasbourg",
+          "published_roundtrips_daily_up_to": 33,
+          "frequency_description": "até 33 idas/voltas diárias; horários de sábado para 2027 não conferidos",
+          "fare_eur_oneway_with_condition": 11.7,
+          "fare_condition": "Carte Fluo; cartão €30/ano e elegibilidade separados",
+          "weekend_return_confirmed": false,
+          "observed_at": "2026-11-16",
+          "valid_for_2027": false,
+          "return_timetable_verified": false,
+          "last_mile_verified": false,
+          "scope": "referência pública do operador; não reservar"
+        },
+        {
+          "destination_id": "metz",
+          "duration_minutes_oneway": 96,
+          "source_url": "https://www.ter.sncf.com/grand-est/trajet-metz-strasbourg",
+          "published_roundtrips_daily_up_to": 6,
+          "frequency_description": "Seis idas/voltas de dia divulgadas; não equivalem ao sábado de 2027",
+          "fare_eur_oneway_with_condition": 16.9,
+          "fare_condition": "Carte Fluo; tarifa condicionada",
+          "weekend_return_confirmed": false,
+          "observed_at": "2026-11-16",
+          "valid_for_2027": false,
+          "return_timetable_verified": false,
+          "last_mile_verified": false,
+          "scope": "referência pública do operador; não reservar"
+        }
+      ],
+      "missing": [
+        "Confirmar apartamento completo 56–60 noites para duas pessoas após 04/09/2027",
+        "Comparar cesta cotidiana com mesmas unidades em todas as finalistas",
+        "Extrair normais climáticas com período e localização equivalentes",
+        "Confirmar trens de volta em sábado/domingo e última milha"
+      ],
+      "updated_at": "2026-11-16"
+    },
+    {
+      "city_id": "metz",
+      "daily_life": {
+        "restaurant_two_midrange_eur_2026": 60,
+        "restaurant_source_url": "https://fr.numbeo.com/co%C3%BBt-de-la-vie/ville/Metz-France",
+        "restaurant_basis": "Estimativa colaborativa histórica coletada em 2026, não preço fixo nem cesta de custo de vida",
+        "complete_comparable_basket_eur": null,
+        "transport_monthly_pass_eur": null,
+        "grocery_basket_eur": null
+      },
+      "remote_work": {
+        "coworking_reference": {
+          "name": "B'CoWorker Metz (levantamento de mercado)",
+          "price_eur_2026": 15,
+          "price_basis": "day (second-hand directory; verify provider quote)",
+          "source_url": "https://comparatifcoworking.com/coworking/metz/",
+          "source_type": "secondary_directory",
+          "hours": null,
+          "limitations": "Site secundário publica €15/dia e €190/mês para o operador; horários e acesso pessoal ainda não confirmados."
+        },
+        "internet_in_rental_verified": false
+      },
+      "climate": {
+        "months_9_10_11": null,
+        "normal_period": "1991–2020",
+        "source_candidate": "https://www.data.gouv.fr/datasets/normales-climatiques-mensuelles-1991-2020-par-commune-france",
+        "method": "Ainda não extraído e conferido para município/estação; previsão 2027 não substitui normal"
+      },
+      "housing": {
+        "historical_listings": [
+          {
+            "listing_ref": "metz-1",
+            "observed_title_or_address": "Rue de Vercly",
+            "monthly_eur_2026": 650,
+            "size_m2": 35,
+            "source_url": "https://housinganywhere.com/room/ut1598487/fr/Metz/rue-de-vercly",
+            "source_is_direct_listing": true,
+            "confirmed_56_to_60_nights": false,
+            "available_after_2027_09_04": false,
+            "mandatory_fees_known": false,
+            "internet_in_property_verified": false,
+            "notes": "Observação histórica: ocupação de dois adultos, duração, preço e disponibilidade de 2027 não confirmados."
+          },
+          {
+            "listing_ref": "metz-2",
+            "observed_title_or_address": "Rue du Maître Échevin",
+            "monthly_eur_2026": 1250,
+            "size_m2": 80,
+            "source_url": "https://housinganywhere.com/room/ut1639224/fr/Metz/rue-du-ma-tre-chevin",
+            "source_is_direct_listing": true,
+            "confirmed_56_to_60_nights": false,
+            "available_after_2027_09_04": false,
+            "mandatory_fees_known": false,
+            "internet_in_property_verified": false,
+            "notes": "Observação histórica: ocupação de dois adultos, duração, preço e disponibilidade de 2027 não confirmados."
+          },
+          {
+            "listing_ref": "metz-3",
+            "observed_title_or_address": "Rue de la Chapelle",
+            "monthly_eur_2026": 700,
+            "size_m2": 20,
+            "source_url": "https://housinganywhere.com/s/Metz--France/furnished-apartments",
+            "source_is_direct_listing": false,
+            "confirmed_56_to_60_nights": false,
+            "available_after_2027_09_04": false,
+            "mandatory_fees_known": false,
+            "internet_in_property_verified": false,
+            "notes": "Observação histórica: ocupação de dois adultos, duração, preço e disponibilidade de 2027 não confirmados."
+          }
+        ],
+        "individual_listing_urls_count": 2,
+        "verified_for_trip_dates": 0
+      },
+      "neighborhoods": [
+        {
+          "name": "Sablon / Amphithéâtre",
+          "source_url": "https://metz.fr/engager-entraider/citoyennete/conseils-quartiers.php",
+          "reason_to_investigate": "Distritos reconhecidos pela cidade; avaliar distância real à Gare de Metz-Ville e custo de cada imóvel",
+          "validated_rental_in_area": false
+        },
+        {
+          "name": "Sainte-Thérèse / Nouvelle Ville / Gare",
+          "source_url": "https://metz.fr/engager-entraider/citoyennete/conseils-quartiers.php",
+          "reason_to_investigate": "Distritos reconhecidos pela cidade; avaliar distância real à Gare de Metz-Ville e custo de cada imóvel",
+          "validated_rental_in_area": false
+        },
+        {
+          "name": "Centre-Ville",
+          "source_url": "https://metz.fr/engager-entraider/citoyennete/conseils-quartiers.php",
+          "reason_to_investigate": "Distritos reconhecidos pela cidade; avaliar distância real à Gare de Metz-Ville e custo de cada imóvel",
+          "validated_rental_in_area": false
+        }
+      ],
+      "weekend_rail_references": [
+        {
+          "destination_id": "strasbourg",
+          "duration_minutes_oneway": 96,
+          "source_url": "https://www.ter.sncf.com/grand-est/trajet-metz-strasbourg",
+          "published_roundtrips_daily_up_to": 6,
+          "frequency_description": "Seis idas/voltas de dia divulgadas; data futura não confirmada",
+          "fare_eur_oneway_with_condition": 16.9,
+          "fare_condition": "Carte Fluo; tarifa condicionada",
+          "weekend_return_confirmed": false,
+          "observed_at": "2026-11-16",
+          "valid_for_2027": false,
+          "return_timetable_verified": false,
+          "last_mile_verified": false,
+          "scope": "referência pública do operador; não reservar"
+        }
+      ],
+      "missing": [
+        "Confirmar apartamento completo 56–60 noites para duas pessoas após 04/09/2027",
+        "Comparar cesta cotidiana com mesmas unidades em todas as finalistas",
+        "Extrair normais climáticas com período e localização equivalentes",
+        "Confirmar trens de volta em sábado/domingo e última milha"
+      ],
+      "updated_at": "2026-11-16"
+    },
+    {
+      "city_id": "nancy",
+      "daily_life": {
+        "restaurant_two_midrange_eur_2026": 60,
+        "restaurant_source_url": "https://fr.numbeo.com/co%C3%BBt-de-la-vie/ville/Nancy",
+        "restaurant_basis": "Estimativa colaborativa histórica coletada em 2026, não preço fixo nem cesta de custo de vida",
+        "complete_comparable_basket_eur": null,
+        "transport_monthly_pass_eur": null,
+        "grocery_basket_eur": null
+      },
+      "remote_work": {
+        "coworking_reference": {
+          "name": "Charlie Coworking",
+          "price_eur_2026": 90,
+          "price_basis": "month, full-time flex with no guaranteed seat; association yearly fee €75 per person mentioned",
+          "source_url": "https://www.coworking-nancy.org/",
+          "source_type": "provider",
+          "hours": "24/7 access via member key for eligible participants; plan terms require confirmation",
+          "limitations": "Acesso 24/7 anunciado, mas não está confirmado para o plano flexível, nem para dois meses ou trabalhador estrangeiro."
+        },
+        "internet_in_rental_verified": false
+      },
+      "climate": {
+        "months_9_10_11": null,
+        "normal_period": "1991–2020",
+        "source_candidate": "https://www.data.gouv.fr/datasets/normales-climatiques-mensuelles-1991-2020-par-commune-france",
+        "method": "Ainda não extraído e conferido para município/estação; previsão 2027 não substitui normal"
+      },
+      "housing": {
+        "historical_listings": [
+          {
+            "listing_ref": "nancy-1",
+            "observed_title_or_address": "Boulevard d'Haussonville",
+            "monthly_eur_2026": 660,
+            "size_m2": 32,
+            "source_url": "https://housinganywhere.com/s/Nancy--France/furnished-apartments",
+            "source_is_direct_listing": false,
+            "confirmed_56_to_60_nights": false,
+            "available_after_2027_09_04": false,
+            "mandatory_fees_known": false,
+            "internet_in_property_verified": false,
+            "notes": "Observação histórica: ocupação de dois adultos, duração, preço e disponibilidade de 2027 não confirmados."
+          },
+          {
+            "listing_ref": "nancy-2",
+            "observed_title_or_address": "Rue Christian Moench",
+            "monthly_eur_2026": 850,
+            "size_m2": 60,
+            "source_url": "https://housinganywhere.com/room/ut1360359/fr/Nancy/rue-christian-moench",
+            "source_is_direct_listing": true,
+            "confirmed_56_to_60_nights": false,
+            "available_after_2027_09_04": false,
+            "mandatory_fees_known": false,
+            "internet_in_property_verified": false,
+            "notes": "Observação histórica: ocupação de dois adultos, duração, preço e disponibilidade de 2027 não confirmados."
+          },
+          {
+            "listing_ref": "nancy-3",
+            "observed_title_or_address": "Rue du Téméraire",
+            "monthly_eur_2026": 1140,
+            "size_m2": 53,
+            "source_url": "https://housinganywhere.com/s/Nancy--France/furnished-apartments",
+            "source_is_direct_listing": false,
+            "confirmed_56_to_60_nights": false,
+            "available_after_2027_09_04": false,
+            "mandatory_fees_known": false,
+            "internet_in_property_verified": false,
+            "notes": "Observação histórica: ocupação de dois adultos, duração, preço e disponibilidade de 2027 não confirmados."
+          }
+        ],
+        "individual_listing_urls_count": 1,
+        "verified_for_trip_dates": 0
+      },
+      "neighborhoods": [
+        {
+          "name": "Centre-ville / Charles III",
+          "source_url": "https://www.nancy.fr/nancy-la-ville/quartiers-et-territoires",
+          "reason_to_investigate": "Bairros da prefeitura; nenhuma qualidade residencial individual foi verificada",
+          "validated_rental_in_area": false
+        },
+        {
+          "name": "Poincaré / Foch / Anatole France",
+          "source_url": "https://www.nancy.fr/nancy-la-ville/quartiers-et-territoires",
+          "reason_to_investigate": "Bairros da prefeitura; nenhuma qualidade residencial individual foi verificada",
+          "validated_rental_in_area": false
+        },
+        {
+          "name": "Léopold / Ville vieille",
+          "source_url": "https://www.nancy.fr/nancy-la-ville/quartiers-et-territoires",
+          "reason_to_investigate": "Bairros da prefeitura; nenhuma qualidade residencial individual foi verificada",
+          "validated_rental_in_area": false
+        }
+      ],
+      "weekend_rail_references": [
+        {
+          "destination_id": "metz",
+          "duration_minutes_oneway": 38,
+          "source_url": "https://www.ter.sncf.com/grand-est/se-deplacer/lignes",
+          "published_roundtrips_daily_up_to": 52,
+          "frequency_description": "até 52 idas/voltas diárias citadas na listagem regional; sábado exige conferir",
+          "fare_eur_oneway_with_condition": null,
+          "fare_condition": null,
+          "weekend_return_confirmed": false,
+          "observed_at": "2026-11-16",
+          "valid_for_2027": false,
+          "return_timetable_verified": false,
+          "last_mile_verified": false,
+          "scope": "referência pública do operador; não reservar"
+        }
+      ],
+      "missing": [
+        "Confirmar apartamento completo 56–60 noites para duas pessoas após 04/09/2027",
+        "Comparar cesta cotidiana com mesmas unidades em todas as finalistas",
+        "Extrair normais climáticas com período e localização equivalentes",
+        "Confirmar trens de volta em sábado/domingo e última milha"
+      ],
+      "updated_at": "2026-11-16"
+    },
+    {
+      "city_id": "lille",
+      "daily_life": {
+        "restaurant_two_midrange_eur_2026": null,
+        "restaurant_source_url": null,
+        "restaurant_basis": null,
+        "complete_comparable_basket_eur": null,
+        "transport_monthly_pass_eur": null,
+        "grocery_basket_eur": null
+      },
+      "remote_work": {
+        "coworking_reference": null,
+        "internet_in_rental_verified": false
+      },
+      "climate": {
+        "months_9_10_11": null,
+        "normal_period": "1991–2020",
+        "source_candidate": "https://www.data.gouv.fr/datasets/normales-climatiques-mensuelles-1991-2020-par-commune-france",
+        "method": "Ainda não extraído e conferido para município/estação; previsão 2027 não substitui normal"
+      },
+      "housing": {
+        "historical_listings": [
+          {
+            "listing_ref": "lille-1",
+            "observed_title_or_address": "Rue Roger Salengro",
+            "monthly_eur_2026": 840,
+            "size_m2": 35,
+            "source_url": "https://housinganywhere.com/room/ut1622222/fr/Lille/rue-roger-salengro",
+            "source_is_direct_listing": true,
+            "confirmed_56_to_60_nights": false,
+            "available_after_2027_09_04": false,
+            "mandatory_fees_known": false,
+            "internet_in_property_verified": false,
+            "notes": "Observação histórica: ocupação de dois adultos, duração, preço e disponibilidade de 2027 não confirmados."
+          },
+          {
+            "listing_ref": "lille-2",
+            "observed_title_or_address": "Rue Jean Bart",
+            "monthly_eur_2026": 910,
+            "size_m2": 45,
+            "source_url": "https://housinganywhere.com/s/Lille--France/furnished-apartments",
+            "source_is_direct_listing": false,
+            "confirmed_56_to_60_nights": false,
+            "available_after_2027_09_04": false,
+            "mandatory_fees_known": false,
+            "internet_in_property_verified": false,
+            "notes": "Observação histórica: ocupação de dois adultos, duração, preço e disponibilidade de 2027 não confirmados."
+          }
+        ],
+        "individual_listing_urls_count": 1,
+        "verified_for_trip_dates": 0
+      },
+      "neighborhoods": [
+        {
+          "name": "Vieux-Lille",
+          "source_url": "https://www.lille.fr/Vivre-a-Lille/Me-deplacer/En-transports-en-commun",
+          "reason_to_investigate": "Áreas conectadas pelas linhas/circuladores descritos pela prefeitura; não presumir deslocamento até Lille-Europe",
+          "validated_rental_in_area": false
+        },
+        {
+          "name": "Lille-Centre",
+          "source_url": "https://www.lille.fr/Vivre-a-Lille/Me-deplacer/En-transports-en-commun",
+          "reason_to_investigate": "Áreas conectadas pelas linhas/circuladores descritos pela prefeitura; não presumir deslocamento até Lille-Europe",
+          "validated_rental_in_area": false
+        },
+        {
+          "name": "Vauban-Esquermes",
+          "source_url": "https://www.lille.fr/Vivre-a-Lille/Me-deplacer/En-transports-en-commun",
+          "reason_to_investigate": "Áreas conectadas pelas linhas/circuladores descritos pela prefeitura; não presumir deslocamento até Lille-Europe",
+          "validated_rental_in_area": false
+        },
+        {
+          "name": "Wazemmes",
+          "source_url": "https://www.lille.fr/Vivre-a-Lille/Me-deplacer/En-transports-en-commun",
+          "reason_to_investigate": "Áreas conectadas pelas linhas/circuladores descritos pela prefeitura; não presumir deslocamento até Lille-Europe",
+          "validated_rental_in_area": false
+        }
+      ],
+      "weekend_rail_references": [],
+      "missing": [
+        "Confirmar apartamento completo 56–60 noites para duas pessoas após 04/09/2027",
+        "Comparar cesta cotidiana com mesmas unidades em todas as finalistas",
+        "Extrair normais climáticas com período e localização equivalentes",
+        "Confirmar trens de volta em sábado/domingo e última milha"
+      ],
+      "updated_at": "2026-11-16"
+    },
+    {
+      "city_id": "dijon",
+      "daily_life": {
+        "restaurant_two_midrange_eur_2026": null,
+        "restaurant_source_url": null,
+        "restaurant_basis": null,
+        "complete_comparable_basket_eur": null,
+        "transport_monthly_pass_eur": null,
+        "grocery_basket_eur": null
+      },
+      "remote_work": {
+        "coworking_reference": null,
+        "internet_in_rental_verified": false
+      },
+      "climate": {
+        "months_9_10_11": null,
+        "normal_period": "1991–2020",
+        "source_candidate": "https://www.data.gouv.fr/datasets/normales-climatiques-mensuelles-1991-2020-par-commune-france",
+        "method": "Ainda não extraído e conferido para município/estação; previsão 2027 não substitui normal"
+      },
+      "housing": {
+        "historical_listings": [
+          {
+            "listing_ref": "dijon-1",
+            "observed_title_or_address": "Rue Charles Dumont",
+            "monthly_eur_2026": 800,
+            "size_m2": 51,
+            "source_url": "https://housinganywhere.com/s/Dijon--France/furnished-apartments",
+            "source_is_direct_listing": false,
+            "confirmed_56_to_60_nights": false,
+            "available_after_2027_09_04": false,
+            "mandatory_fees_known": false,
+            "internet_in_property_verified": false,
+            "notes": "Observação histórica: ocupação de dois adultos, duração, preço e disponibilidade de 2027 não confirmados."
+          },
+          {
+            "listing_ref": "dijon-2",
+            "observed_title_or_address": "Rue Jean-Baptiste Carpeaux",
+            "monthly_eur_2026": 850,
+            "size_m2": 63,
+            "source_url": "https://housinganywhere.com/s/Dijon--France/furnished-apartments",
+            "source_is_direct_listing": false,
+            "confirmed_56_to_60_nights": false,
+            "available_after_2027_09_04": false,
+            "mandatory_fees_known": false,
+            "internet_in_property_verified": false,
+            "notes": "Observação histórica: ocupação de dois adultos, duração, preço e disponibilidade de 2027 não confirmados."
+          },
+          {
+            "listing_ref": "dijon-3",
+            "observed_title_or_address": "Rue du Faubourg Raines",
+            "monthly_eur_2026": 1350,
+            "size_m2": 40,
+            "source_url": "https://housinganywhere.com/s/Dijon--France/furnished-apartments",
+            "source_is_direct_listing": false,
+            "confirmed_56_to_60_nights": false,
+            "available_after_2027_09_04": false,
+            "mandatory_fees_known": false,
+            "internet_in_property_verified": false,
+            "notes": "Observação histórica: ocupação de dois adultos, duração, preço e disponibilidade de 2027 não confirmados."
+          }
+        ],
+        "individual_listing_urls_count": 0,
+        "verified_for_trip_dates": 0
+      },
+      "neighborhoods": [
+        {
+          "name": "Montchapet",
+          "source_url": "https://patrimoine.dijon.fr/le-patrimoine-dijonnais-en-ligne/123-quartiers/quartier-montchapet/",
+          "reason_to_investigate": "Bairro descrito pela cidade; outras opções residenciais ainda não pesquisadas",
+          "validated_rental_in_area": false
+        }
+      ],
+      "weekend_rail_references": [],
+      "missing": [
+        "Confirmar apartamento completo 56–60 noites para duas pessoas após 04/09/2027",
+        "Comparar cesta cotidiana com mesmas unidades em todas as finalistas",
+        "Extrair normais climáticas com período e localização equivalentes",
+        "Confirmar trens de volta em sábado/domingo e última milha"
+      ],
+      "updated_at": "2026-11-16"
+    },
+    {
+      "city_id": "freiburg",
+      "daily_life": {
+        "restaurant_two_midrange_eur_2026": null,
+        "restaurant_source_url": null,
+        "restaurant_basis": null,
+        "complete_comparable_basket_eur": null,
+        "transport_monthly_pass_eur": null,
+        "grocery_basket_eur": null
+      },
+      "remote_work": {
+        "coworking_reference": null,
+        "internet_in_rental_verified": false
+      },
+      "climate": {
+        "months_9_10_11": null,
+        "normal_period": "1991–2020",
+        "source_candidate": "https://opendata.dwd.de/climate_environment/CDC/observations_germany/climate/multi_annual/mean_91-20/",
+        "method": "Ainda não extraído e conferido para município/estação; previsão 2027 não substitui normal"
+      },
+      "housing": {
+        "historical_listings": [
+          {
+            "listing_ref": "freiburg-1",
+            "observed_title_or_address": "Fantastic quiet loft Freiburg",
+            "monthly_eur_2026": 1650,
+            "size_m2": 35,
+            "source_url": "https://wunderflats.com/en/furnished-apartments/freiburg",
+            "source_is_direct_listing": false,
+            "confirmed_56_to_60_nights": false,
+            "available_after_2027_09_04": false,
+            "mandatory_fees_known": false,
+            "internet_in_property_verified": false,
+            "notes": "Observação histórica: ocupação de dois adultos, duração, preço e disponibilidade de 2027 não confirmados."
+          },
+          {
+            "listing_ref": "freiburg-2",
+            "observed_title_or_address": "Fashionable studio Freiburg",
+            "monthly_eur_2026": 2250,
+            "size_m2": 31.55,
+            "source_url": "https://wunderflats.com/en/furnished-apartments/freiburg",
+            "source_is_direct_listing": false,
+            "confirmed_56_to_60_nights": false,
+            "available_after_2027_09_04": false,
+            "mandatory_fees_known": false,
+            "internet_in_property_verified": false,
+            "notes": "Observação histórica: ocupação de dois adultos, duração, preço e disponibilidade de 2027 não confirmados."
+          },
+          {
+            "listing_ref": "freiburg-3",
+            "observed_title_or_address": "Freiburg 2 Bedroom Apart",
+            "monthly_eur_2026": 1400,
+            "size_m2": 65,
+            "source_url": "https://wunderflats.com/en/furnished-apartments/freiburg",
+            "source_is_direct_listing": false,
+            "confirmed_56_to_60_nights": false,
+            "available_after_2027_09_04": false,
+            "mandatory_fees_known": false,
+            "internet_in_property_verified": false,
+            "notes": "Observação histórica: ocupação de dois adultos, duração, preço e disponibilidade de 2027 não confirmados."
+          }
+        ],
+        "individual_listing_urls_count": 0,
+        "verified_for_trip_dates": 0
+      },
+      "neighborhoods": [
+        {
+          "name": "Stühlinger",
+          "source_url": "https://www.freiburg.de/pb,%2CLde/2480165.html",
+          "reason_to_investigate": "Identificados no Stadtbezirksatlas 2025 municipal, sem pontuação de custo/hospedagem",
+          "validated_rental_in_area": false
+        },
+        {
+          "name": "Wiehre",
+          "source_url": "https://www.freiburg.de/pb,%2CLde/2480165.html",
+          "reason_to_investigate": "Identificados no Stadtbezirksatlas 2025 municipal, sem pontuação de custo/hospedagem",
+          "validated_rental_in_area": false
+        },
+        {
+          "name": "Vauban",
+          "source_url": "https://www.freiburg.de/pb,%2CLde/2480165.html",
+          "reason_to_investigate": "Identificados no Stadtbezirksatlas 2025 municipal, sem pontuação de custo/hospedagem",
+          "validated_rental_in_area": false
+        }
+      ],
+      "weekend_rail_references": [],
+      "missing": [
+        "Confirmar apartamento completo 56–60 noites para duas pessoas após 04/09/2027",
+        "Comparar cesta cotidiana com mesmas unidades em todas as finalistas",
+        "Extrair normais climáticas com período e localização equivalentes",
+        "Confirmar trens de volta em sábado/domingo e última milha"
+      ],
+      "updated_at": "2026-11-16"
+    },
+    {
+      "city_id": "offenburg",
+      "daily_life": {
+        "restaurant_two_midrange_eur_2026": null,
+        "restaurant_source_url": null,
+        "restaurant_basis": null,
+        "complete_comparable_basket_eur": null,
+        "transport_monthly_pass_eur": null,
+        "grocery_basket_eur": null
+      },
+      "remote_work": {
+        "coworking_reference": null,
+        "internet_in_rental_verified": false
+      },
+      "climate": {
+        "months_9_10_11": null,
+        "normal_period": "1991–2020",
+        "source_candidate": "https://opendata.dwd.de/climate_environment/CDC/observations_germany/climate/multi_annual/mean_91-20/",
+        "method": "Ainda não extraído e conferido para município/estação; previsão 2027 não substitui normal"
+      },
+      "housing": {
+        "historical_listings": [
+          {
+            "listing_ref": "offenburg-1",
+            "observed_title_or_address": "Weidenstrasse",
+            "monthly_eur_2026": 1200,
+            "size_m2": 90,
+            "source_url": "https://www.immobilienscout24.de/en/expose/170758812",
+            "source_is_direct_listing": true,
+            "confirmed_56_to_60_nights": false,
+            "available_after_2027_09_04": false,
+            "mandatory_fees_known": false,
+            "internet_in_property_verified": false,
+            "notes": "Observação histórica: ocupação de dois adultos, duração, preço e disponibilidade de 2027 não confirmados."
+          },
+          {
+            "listing_ref": "offenburg-2",
+            "observed_title_or_address": "Händelstraße",
+            "monthly_eur_2026": 2500,
+            "size_m2": 90,
+            "source_url": "https://www.immobilienscout24.de/expose/172439262",
+            "source_is_direct_listing": true,
+            "confirmed_56_to_60_nights": false,
+            "available_after_2027_09_04": false,
+            "mandatory_fees_known": false,
+            "internet_in_property_verified": false,
+            "notes": "Observação histórica: ocupação de dois adultos, duração, preço e disponibilidade de 2027 não confirmados."
+          },
+          {
+            "listing_ref": "offenburg-3",
+            "observed_title_or_address": "Gaswerkstraße",
+            "monthly_eur_2026": 2800,
+            "size_m2": 80,
+            "source_url": "https://www.immobilienscout24.de/Suche/de/baden-wuerttemberg/ortenaukreis/offenburg/wohnen-auf-zeit",
+            "source_is_direct_listing": false,
+            "confirmed_56_to_60_nights": false,
+            "available_after_2027_09_04": false,
+            "mandatory_fees_known": false,
+            "internet_in_property_verified": false,
+            "notes": "Observação histórica: ocupação de dois adultos, duração, preço e disponibilidade de 2027 não confirmados."
+          }
+        ],
+        "individual_listing_urls_count": 2,
+        "verified_for_trip_dates": 0
+      },
+      "neighborhoods": [],
+      "weekend_rail_references": [],
+      "missing": [
+        "Confirmar apartamento completo 56–60 noites para duas pessoas após 04/09/2027",
+        "Comparar cesta cotidiana com mesmas unidades em todas as finalistas",
+        "Extrair normais climáticas com período e localização equivalentes",
+        "Confirmar trens de volta em sábado/domingo e última milha"
+      ],
+      "updated_at": "2026-11-16"
+    },
+    {
+      "city_id": "karlsruhe",
+      "daily_life": {
+        "restaurant_two_midrange_eur_2026": null,
+        "restaurant_source_url": null,
+        "restaurant_basis": null,
+        "complete_comparable_basket_eur": null,
+        "transport_monthly_pass_eur": null,
+        "grocery_basket_eur": null
+      },
+      "remote_work": {
+        "coworking_reference": null,
+        "internet_in_rental_verified": false
+      },
+      "climate": {
+        "months_9_10_11": null,
+        "normal_period": "1991–2020",
+        "source_candidate": "https://opendata.dwd.de/climate_environment/CDC/observations_germany/climate/multi_annual/mean_91-20/",
+        "method": "Ainda não extraído e conferido para município/estação; previsão 2027 não substitui normal"
+      },
+      "housing": {
+        "historical_listings": [
+          {
+            "listing_ref": "karlsruhe-1",
+            "observed_title_or_address": "Quiet and lightful apartment",
+            "monthly_eur_2026": 1290,
+            "size_m2": 37,
+            "source_url": "https://wunderflats.com/en/furnished-apartments/karlsruhe",
+            "source_is_direct_listing": false,
+            "confirmed_56_to_60_nights": false,
+            "available_after_2027_09_04": false,
+            "mandatory_fees_known": false,
+            "internet_in_property_verified": false,
+            "notes": "Observação histórica: ocupação de dois adultos, duração, preço e disponibilidade de 2027 não confirmados."
+          },
+          {
+            "listing_ref": "karlsruhe-2",
+            "observed_title_or_address": "Beautiful great apartment",
+            "monthly_eur_2026": 1550,
+            "size_m2": 60,
+            "source_url": "https://wunderflats.com/en/furnished-apartments/karlsruhe",
+            "source_is_direct_listing": false,
+            "confirmed_56_to_60_nights": false,
+            "available_after_2027_09_04": false,
+            "mandatory_fees_known": false,
+            "internet_in_property_verified": false,
+            "notes": "Observação histórica: ocupação de dois adultos, duração, preço e disponibilidade de 2027 não confirmados."
+          },
+          {
+            "listing_ref": "karlsruhe-3",
+            "observed_title_or_address": "Fully furnished private parking",
+            "monthly_eur_2026": 1790,
+            "size_m2": 40,
+            "source_url": "https://wunderflats.com/en/furnished-apartments/karlsruhe",
+            "source_is_direct_listing": false,
+            "confirmed_56_to_60_nights": false,
+            "available_after_2027_09_04": false,
+            "mandatory_fees_known": false,
+            "internet_in_property_verified": false,
+            "notes": "Observação histórica: ocupação de dois adultos, duração, preço e disponibilidade de 2027 não confirmados."
+          }
+        ],
+        "individual_listing_urls_count": 0,
+        "verified_for_trip_dates": 0
+      },
+      "neighborhoods": [
+        {
+          "name": "Innenstadt-Ost",
+          "source_url": "https://www.karlsruhe.de/stadt-rathaus/stadtteile-ortsverwaltungen/karlsruher-stadtteile",
+          "reason_to_investigate": "Bairros municipais definidos, disponibilidade de acomodação não verificada",
+          "validated_rental_in_area": false
+        },
+        {
+          "name": "Innenstadt-West",
+          "source_url": "https://www.karlsruhe.de/stadt-rathaus/stadtteile-ortsverwaltungen/karlsruher-stadtteile",
+          "reason_to_investigate": "Bairros municipais definidos, disponibilidade de acomodação não verificada",
+          "validated_rental_in_area": false
+        },
+        {
+          "name": "Nordweststadt",
+          "source_url": "https://www.karlsruhe.de/stadt-rathaus/stadtteile-ortsverwaltungen/karlsruher-stadtteile",
+          "reason_to_investigate": "Bairros municipais definidos, disponibilidade de acomodação não verificada",
+          "validated_rental_in_area": false
+        }
+      ],
+      "weekend_rail_references": [],
+      "missing": [
+        "Confirmar apartamento completo 56–60 noites para duas pessoas após 04/09/2027",
+        "Comparar cesta cotidiana com mesmas unidades em todas as finalistas",
+        "Extrair normais climáticas com período e localização equivalentes",
+        "Confirmar trens de volta em sábado/domingo e última milha"
+      ],
+      "updated_at": "2026-11-16"
+    },
+    {
+      "city_id": "trier",
+      "daily_life": {
+        "restaurant_two_midrange_eur_2026": null,
+        "restaurant_source_url": null,
+        "restaurant_basis": null,
+        "complete_comparable_basket_eur": null,
+        "transport_monthly_pass_eur": null,
+        "grocery_basket_eur": null
+      },
+      "remote_work": {
+        "coworking_reference": null,
+        "internet_in_rental_verified": false
+      },
+      "climate": {
+        "months_9_10_11": null,
+        "normal_period": "1991–2020",
+        "source_candidate": "https://opendata.dwd.de/climate_environment/CDC/observations_germany/climate/multi_annual/mean_91-20/",
+        "method": "Ainda não extraído e conferido para município/estação; previsão 2027 não substitui normal"
+      },
+      "housing": {
+        "historical_listings": [
+          {
+            "listing_ref": "trier-1",
+            "observed_title_or_address": "Compact flat with desk",
+            "monthly_eur_2026": 800,
+            "size_m2": 25,
+            "source_url": "https://wunderflats.com/en/furnished-apartments/trier",
+            "source_is_direct_listing": false,
+            "confirmed_56_to_60_nights": false,
+            "available_after_2027_09_04": false,
+            "mandatory_fees_known": false,
+            "internet_in_property_verified": false,
+            "notes": "Observação histórica: ocupação de dois adultos, duração, preço e disponibilidade de 2027 não confirmados."
+          },
+          {
+            "listing_ref": "trier-2",
+            "observed_title_or_address": "2-room flat with home cinema",
+            "monthly_eur_2026": 1000,
+            "size_m2": 40,
+            "source_url": "https://wunderflats.com/en/furnished-apartments/trier",
+            "source_is_direct_listing": false,
+            "confirmed_56_to_60_nights": false,
+            "available_after_2027_09_04": false,
+            "mandatory_fees_known": false,
+            "internet_in_property_verified": false,
+            "notes": "Observação histórica: ocupação de dois adultos, duração, preço e disponibilidade de 2027 não confirmados."
+          },
+          {
+            "listing_ref": "trier-3",
+            "observed_title_or_address": "New beautiful apartment",
+            "monthly_eur_2026": 1380,
+            "size_m2": 48,
+            "source_url": "https://wunderflats.com/en/furnished-apartments/trier",
+            "source_is_direct_listing": false,
+            "confirmed_56_to_60_nights": false,
+            "available_after_2027_09_04": false,
+            "mandatory_fees_known": false,
+            "internet_in_property_verified": false,
+            "notes": "Observação histórica: ocupação de dois adultos, duração, preço e disponibilidade de 2027 não confirmados."
+          }
+        ],
+        "individual_listing_urls_count": 0,
+        "verified_for_trip_dates": 0
+      },
+      "neighborhoods": [
+        {
+          "name": "Mitte-Gartenfeld",
+          "source_url": "https://www.trier.de/leben-in-trier/stadtportrait/ortsbezirke/index.html",
+          "reason_to_investigate": "Centro histórico municipal; tempo até estação e locação específica pendentes",
+          "validated_rental_in_area": false
+        }
+      ],
+      "weekend_rail_references": [],
+      "missing": [
+        "Confirmar apartamento completo 56–60 noites para duas pessoas após 04/09/2027",
+        "Comparar cesta cotidiana com mesmas unidades em todas as finalistas",
+        "Extrair normais climáticas com período e localização equivalentes",
+        "Confirmar trens de volta em sábado/domingo e última milha"
+      ],
+      "updated_at": "2026-11-16"
+    },
+    {
+      "city_id": "aachen",
+      "daily_life": {
+        "restaurant_two_midrange_eur_2026": null,
+        "restaurant_source_url": null,
+        "restaurant_basis": null,
+        "complete_comparable_basket_eur": null,
+        "transport_monthly_pass_eur": null,
+        "grocery_basket_eur": null
+      },
+      "remote_work": {
+        "coworking_reference": null,
+        "internet_in_rental_verified": false
+      },
+      "climate": {
+        "months_9_10_11": null,
+        "normal_period": "1991–2020",
+        "source_candidate": "https://opendata.dwd.de/climate_environment/CDC/observations_germany/climate/multi_annual/mean_91-20/",
+        "method": "Ainda não extraído e conferido para município/estação; previsão 2027 não substitui normal"
+      },
+      "housing": {
+        "historical_listings": [
+          {
+            "listing_ref": "aachen-1",
+            "observed_title_or_address": "In the heart of Aachen",
+            "monthly_eur_2026": 1350,
+            "size_m2": 50,
+            "source_url": "https://wunderflats.com/en/furnished-apartments/aachen",
+            "source_is_direct_listing": false,
+            "confirmed_56_to_60_nights": false,
+            "available_after_2027_09_04": false,
+            "mandatory_fees_known": false,
+            "internet_in_property_verified": false,
+            "notes": "Observação histórica: ocupação de dois adultos, duração, preço e disponibilidade de 2027 não confirmados."
+          },
+          {
+            "listing_ref": "aachen-2",
+            "observed_title_or_address": "Karl's refuge",
+            "monthly_eur_2026": 1500,
+            "size_m2": 52,
+            "source_url": "https://wunderflats.com/en/furnished-apartments/aachen",
+            "source_is_direct_listing": false,
+            "confirmed_56_to_60_nights": false,
+            "available_after_2027_09_04": false,
+            "mandatory_fees_known": false,
+            "internet_in_property_verified": false,
+            "notes": "Observação histórica: ocupação de dois adultos, duração, preço e disponibilidade de 2027 não confirmados."
+          },
+          {
+            "listing_ref": "aachen-3",
+            "observed_title_or_address": "Furnished suite at Aquis Plaza",
+            "monthly_eur_2026": 1200,
+            "size_m2": 37,
+            "source_url": "https://wunderflats.com/en/furnished-apartments/aachen",
+            "source_is_direct_listing": false,
+            "confirmed_56_to_60_nights": false,
+            "available_after_2027_09_04": false,
+            "mandatory_fees_known": false,
+            "internet_in_property_verified": false,
+            "notes": "Observação histórica: ocupação de dois adultos, duração, preço e disponibilidade de 2027 não confirmados."
+          }
+        ],
+        "individual_listing_urls_count": 0,
+        "verified_for_trip_dates": 0
+      },
+      "neighborhoods": [],
+      "weekend_rail_references": [],
+      "missing": [
+        "Confirmar apartamento completo 56–60 noites para duas pessoas após 04/09/2027",
+        "Comparar cesta cotidiana com mesmas unidades em todas as finalistas",
+        "Extrair normais climáticas com período e localização equivalentes",
+        "Confirmar trens de volta em sábado/domingo e última milha"
+      ],
+      "updated_at": "2026-11-16"
+    },
+    {
+      "city_id": "liege",
+      "daily_life": {
+        "restaurant_two_midrange_eur_2026": null,
+        "restaurant_source_url": null,
+        "restaurant_basis": null,
+        "complete_comparable_basket_eur": null,
+        "transport_monthly_pass_eur": null,
+        "grocery_basket_eur": null
+      },
+      "remote_work": {
+        "coworking_reference": null,
+        "internet_in_rental_verified": false
+      },
+      "climate": {
+        "months_9_10_11": null,
+        "normal_period": "1991–2020",
+        "source_candidate": "https://www.meteo.be/fr/climat/climat-de-la-belgique",
+        "method": "Ainda não extraído e conferido para município/estação; previsão 2027 não substitui normal"
+      },
+      "housing": {
+        "historical_listings": [
+          {
+            "listing_ref": "liege-1",
+            "observed_title_or_address": "Boulevard Saucy",
+            "monthly_eur_2026": 880,
+            "size_m2": 50,
+            "source_url": "https://housinganywhere.com/s/Li%C3%A8ge--Belgium/furnished-apartments",
+            "source_is_direct_listing": false,
+            "confirmed_56_to_60_nights": false,
+            "available_after_2027_09_04": false,
+            "mandatory_fees_known": false,
+            "internet_in_property_verified": false,
+            "notes": "Observação histórica: ocupação de dois adultos, duração, preço e disponibilidade de 2027 não confirmados."
+          },
+          {
+            "listing_ref": "liege-2",
+            "observed_title_or_address": "Quai Godefroid-Kurth",
+            "monthly_eur_2026": 980,
+            "size_m2": 40,
+            "source_url": "https://housinganywhere.com/s/Li%C3%A8ge--Belgium/furnished-apartments",
+            "source_is_direct_listing": false,
+            "confirmed_56_to_60_nights": false,
+            "available_after_2027_09_04": false,
+            "mandatory_fees_known": false,
+            "internet_in_property_verified": false,
+            "notes": "Observação histórica: ocupação de dois adultos, duração, preço e disponibilidade de 2027 não confirmados."
+          },
+          {
+            "listing_ref": "liege-3",
+            "observed_title_or_address": "Rue Grande-Bêche",
+            "monthly_eur_2026": 840,
+            "size_m2": 30,
+            "source_url": "https://housinganywhere.com/s/Li%C3%A8ge--Belgium/furnished-apartments",
+            "source_is_direct_listing": false,
+            "confirmed_56_to_60_nights": false,
+            "available_after_2027_09_04": false,
+            "mandatory_fees_known": false,
+            "internet_in_property_verified": false,
+            "notes": "Observação histórica: ocupação de dois adultos, duração, preço e disponibilidade de 2027 não confirmados."
+          }
+        ],
+        "individual_listing_urls_count": 0,
+        "verified_for_trip_dates": 0
+      },
+      "neighborhoods": [
+        {
+          "name": "Liège-Centre / Outremeuse",
+          "source_url": "https://www.policeliege.be/page/stat/secteurs",
+          "reason_to_investigate": "Setores urbanos publicados; segurança e conveniência de imóvel não podem ser inferidas",
+          "validated_rental_in_area": false
+        },
+        {
+          "name": "Guillemins / Avroy",
+          "source_url": "https://www.policeliege.be/page/stat/secteurs",
+          "reason_to_investigate": "Setores urbanos publicados; segurança e conveniência de imóvel não podem ser inferidas",
+          "validated_rental_in_area": false
+        }
+      ],
+      "weekend_rail_references": [],
+      "missing": [
+        "Confirmar apartamento completo 56–60 noites para duas pessoas após 04/09/2027",
+        "Comparar cesta cotidiana com mesmas unidades em todas as finalistas",
+        "Extrair normais climáticas com período e localização equivalentes",
+        "Confirmar trens de volta em sábado/domingo e última milha"
+      ],
+      "updated_at": "2026-11-16"
+    }
+  ]
+}
