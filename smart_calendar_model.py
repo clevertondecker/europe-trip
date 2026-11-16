@@ -285,6 +285,36 @@ def review_calendar_change(plan:dict,proposal:dict,catalog:dict)->dict:
             report=assess_day(plan,rows[dest],day)
             if not report["allowed"] and day!=old:
                 raise ValueError(report["reason"])
+    # A portable JSON draft is untrusted: the visible review must cover
+    # *exactly* every persisted change, not a harmless-looking subset.
+    expected_assignments=deepcopy(plan.get("assignments",{}))
+    expected_italy={v["destination_id"]:v["exact_date"] for v
+                    in plan.get("flexible_visits",[])
+                    if v.get("stage")==ITALY_STAGE and v.get("exact_date")}
+    seen_moves=set()
+    for item in changes:
+        dest=item["destination_id"]
+        old=item.get("from_date");new=item.get("to_date")
+        if (not isinstance(dest,str) or
+            old is not None and not isinstance(old,str) or
+            new is not None and not isinstance(new,str) or
+            item.get("reservation") is not False):
+            raise ValueError("Alteração de data inválida ou reserva indevida")
+        unique=(item["stage"],dest,old,new)
+        if unique in seen_moves:
+            raise ValueError("Mudança duplicada no rascunho")
+        seen_moves.add(unique)
+        if item["stage"]==FRANCE_STAGE:
+            if old:expected_assignments.pop(old,None)
+            if new:
+                if new in expected_assignments:
+                    raise ValueError("Outro passeio já ocupa esta data")
+                expected_assignments[new]=dest
+        else:
+            if old:expected_italy.pop(dest,None)
+            if new:expected_italy[dest]=new
+    if expected_assignments!=assignments or expected_italy!=italian:
+        raise ValueError("O rascunho inclui datas que não apareceram na revisão")
     if any(not isinstance(d,str) or not isinstance(v,str) for d,v in assignments.items()):
         raise ValueError("Datas ou destinos inválidos")
     schedule={r["date"]:r for r in availability_matrix(plan)}
