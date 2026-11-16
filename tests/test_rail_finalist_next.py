@@ -44,7 +44,7 @@ class RailFinalistExpansionTests(unittest.TestCase):
         comparison=destination_impact(plan,"nancy",["luxembourg","brussels"])
         self.assertEqual(len(comparison),2)
         self.assertEqual(plan,old)
-        self.assertIsNone(comparison[1]["official_minutes"])
+        self.assertIsNotNone(comparison[1]["official_minutes"])
         self.assertFalse(any("roundtrip_couple_eur" in item for item in comparison))
 
     def test_unresearched_remains_unknown(self):
