@@ -54,6 +54,15 @@ class PrivateCityStudiesTests(unittest.TestCase):
         self.assertEqual(updated["studies"][0]["draft"]["notes"],"Nova pesquisa")
         self.assertEqual(initial["studies"][0]["revision"],1)
 
+    def test_study_is_tied_to_reference_plan_id(self):
+        collection,ident=add_study(empty_collection(),self.draft,self.plan["plan_id"])
+        self.assertEqual(collection["studies"][0]["base_plan_id"],self.plan["plan_id"])
+        clone,new_id=change_study(collection,ident,"duplicate")
+        self.assertEqual(clone["studies"][-1]["base_plan_id"],self.plan["plan_id"])
+        invalid=deepcopy(clone)
+        invalid["studies"][0]["base_plan_id"]="../outside"
+        with self.assertRaises(ValueError):encode_collection(invalid)
+
     def test_imported_owner_field_is_never_an_authorization(self):
         collection,ident=add_study(empty_collection(),self.draft)
         collection["studies"][0]["owner"]="someone@example.com"
