@@ -88,7 +88,7 @@ class WorkflowAppTests(unittest.TestCase):
         initial=deepcopy(at.session_state["advisor_plan"])
         at.button(key="workflow_open_settings").click().run()
         self.assertFalse(at.exception,[e.message for e in at.exception])
-        self.assertIn("workflow_trip_settings",{f.key for f in at.form})
+        self.assertTrue(any(x.label=="Duração total (dias)" for x in at.number_input))
         self.assertEqual(at.session_state["advisor_plan"],initial)
         at.button(key="workflow_open_alternative").click().run()
         self.assertFalse(at.exception,[e.message for e in at.exception])
