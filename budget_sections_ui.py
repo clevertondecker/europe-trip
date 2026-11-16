@@ -3,6 +3,7 @@ from __future__ import annotations
 import streamlit as st
 from data_model import calculate_scenario, get_scenario, money_brl
 from unified_budget import resolve_french_budget
+from quote_research_ui import render_quotes_summary,render_quotes_details
 
 
 def render_budget_summary(data:dict,plan:dict,finance_live:bool)->None:
@@ -21,6 +22,7 @@ def render_budget_summary(data:dict,plan:dict,finance_live:bool)->None:
     st.dataframe([{"Categoria":row["name"],"Valor (R$)":round(row["amount"],2)}
                   for row in scenario["components"]],
                  hide_index=True,width="stretch",height=265)
+    render_quotes_summary(data,plan,finance_live)
     st.caption("Para testar outra cidade-base, duração, aluguel ou câmbio, "
                "abra a aba **Simulações**. A referência oficial não muda ao simular.")
 
@@ -49,5 +51,6 @@ def render_budget_details(data:dict,plan:dict,finance_live:bool)->None:
     st.warning("Valores não incluem cotações verificadas de hospedagem mobiliada para "
                "60 noites nem todas as viagens de trem. Não classifique informação "
                "desconhecida como €0.")
+    render_quotes_details(plan)
     st.link_button("Consultar planilha financeira oficial",
                    data["sources"]["spreadsheet"],width="stretch")
