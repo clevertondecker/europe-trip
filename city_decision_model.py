@@ -11,7 +11,7 @@ from copy import deepcopy
 from math import isfinite
 
 from base_change_model import (
-    destination_catalog,destination_impact,impact_summary,
+    _canonical_destination,destination_catalog,destination_impact,impact_summary,
     comparable_rent_whatif,known_route,planned_destinations,
 )
 from base_scenario_model import base_options
@@ -91,6 +91,7 @@ def compare_city_decisions(plan:dict,alternatives:list[str],destinations:list[st
                            rents:dict,trip_data:dict,finance_live:bool,
                            french_days:int,eur_fx:float)->dict:
     """Source-aware what-if. Never writes the user's official plan."""
+    destinations=[_canonical_destination(d) for d in destinations]
     bases,places=_validate_inputs(plan,alternatives,destinations,
                                    rents,french_days,eur_fx)
     reference=plan["base_city"]
@@ -144,7 +145,8 @@ def compare_city_decisions(plan:dict,alternatives:list[str],destinations:list[st
                       "Passeios escolhidos","Estilo e cenário do orçamento",
                       "Decisões do Drive","Reservas (não confirmadas)"],
         "methodology":"Mesma lista de passeios, duração, casal e cenário financeiro; "
-            "tempos mínimos de ida históricos, sem conclusão sobre volta; "
+            "tempos históricos de ida: típicos quando disponíveis em ambas as bases, "
+            "mínimos somente como referência subsidiária; sem conclusão sobre volta; "
             "provisões de moradia são hipóteses inseridas pelo usuário.",
     }
 
