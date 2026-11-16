@@ -67,6 +67,7 @@ def resume_plan()->None:
     if stage not in ("Itália","França"):
         stage=resume_target(plan)["stage"]
     st.session_state["flow_stage"]=stage
+    st.session_state["flow_active_stage"]=stage
     if destination is not None:
         st.session_state["flow_active_destination"]=destination
     st.session_state["flow_add_open"]=bool(st.session_state.get("flow_add_open"))
@@ -78,6 +79,7 @@ def return_to_edit()->None:
     from ux_navigation import set_task
     state=st.session_state
     state["flow_stage"]=state.get("flow_return_stage","Itália")
+    state["flow_active_stage"]=state["flow_stage"]
     if state.get("flow_return_destination"):
         state["flow_active_destination"]=state["flow_return_destination"]
     if state.get("flow_return_add_open"):
