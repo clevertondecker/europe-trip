@@ -1,57 +1,204 @@
-"""Overview of six common criterion weights for all 30 candidate bases.
-
-A weight profile is shared; there is no independent per-city weight. Ranking is
-withheld until comparable evidence exists, rather than assigning missing = 0.
-"""
+"""Evidence-first 30-city research comparison (not an invented score table)."""
 from __future__ import annotations
-import streamlit as st
-from base_research_expanded_model import (
-    PRESETS,CRITERIA,load_research,observed_housing,normalized_score
-)
-from base_scenario_model import base_options
 
-LABELS=("Moradia temporária","Trens e conexões","Passeios viáveis",
-        "Custos dos passeios","Vida cotidiana / remoto","Países práticos")
+import streamlit as st
+
+from base_research_expanded_model import PRESETS,load_research
+from base_coverage_model import (
+    LABELS,REQUIREMENTS,coverage_matrix,coverage_summary,UNRESEARCHED,PARTIAL,
+)
+from five_base_comparison_model import load_five_base_evidence
+
 PROFILE_IDS={"Geral":"general","Economia":"economy","Explorador":"explorer"}
+CRITERIA_KEYS=list(LABELS)
+
+
+def _status(row,key):
+    entry=row["criteria"][key]
+    if entry["documented_count"]==0:return "Não pesquisado"
+    return "Parcial" if entry["documented_count"]<entry["requirements_count"] else "Pesquisado"
+
+
+def _currency(value):
+    return "Não documentado" if value is None else "€ "+f"{value:,.0f}".replace(",",".")
+
+
+def _evidence_table(rows,*,long=False):
+    items=[]
+    for r in rows:
+        housing=r["housing"]
+        items.append({
+            "Cidade":r["name"],
+            "Moradia":_status(r,"temporary_housing"),
+            "Trens":str(r["route_basket_with_time"])+"/15 tempos" if
+                        r["route_basket_with_time"] else
+                        ("Rede pesquisada · tempos pendentes" if
+                         r["criteria"]["rail_connectivity"]["documented_count"]
+                         else "Não pesquisado"),
+            "Passeios":_status(r,"viable_destinations"),
+            "Custos":_status(r,"outing_cost"),
+            "Vida cotidiana":_status(r,"daily_life_remote_work"),
+            "Documentação ponderada":f'{r["documentary_weighted_percent"]:.1f}%',
+            "Nota final":"Indisponível",
+            "Situação":"Pesquisa parcial" if r["status"]==PARTIAL
+                       else "Sem pesquisa",
+        })
+    return items
+
+
+def _city_detail(row):
+    st.markdown("#### "+row["name"]+" · evidências e pendências")
+    a,b,c=st.columns(3)
+    a.metric("Moradia histórica",str(row["housing"]["count"])+" observações")
+    b.metric("Tempos da mesma cesta",f'{row["route_basket_with_time"]}/15')
+    c.metric("Tarifas de ida documentadas",f'{row["route_basket_with_fare"]}/15')
+    if row["housing"]["count"]:
+        h=row["housing"]
+        st.caption("Amostra não representativa do mercado (€/mês): "+
+                   _currency(h["minimum_eur_month"])+" a "+
+                   _currency(h["maximum_eur_month"])+
+                   "; mediana apenas dos registros consultados "+
+                   _currency(h["median_eur_month"])+
+                   ". Nenhuma hospedagem para 2027 foi cotada integralmente.")
+    st.caption("Países com ao menos uma referência de tempo ferroviário: "+
+               (", ".join(row["international_countries_with_time"])
+                if row["international_countries_with_time"] else
+                "nenhum comprovado pela amostra atual")+
+               ". Isso NÃO significa retorno viável, nem que os demais países "
+               "sejam inacessíveis.")
+    for key,item in row["criteria"].items():
+        with st.expander(item["label"]+" · "+str(item["documented_count"])+"/"+
+                         str(item["requirements_count"])+" requisitos documentais"):
+            for check in item["checks"]:
+                st.caption(("✓ " if check["documented"] else "○ ")+
+                           check["requirement"])
+            st.warning("Para pontuar: "+item["scoring_gap"]+
+                       ". Dados faltantes não foram considerados zero.")
+    with st.expander("Abrir fontes e dados históricos",expanded=False):
+        if not row["evidence"]:
+            st.info("Ainda não há fonte catalogada para os requisitos desta cidade.")
+        else:
+            for item in row["evidence"]:
+                with st.container(border=True):
+                    st.markdown("**"+item["indicator"]+"** · "+LABELS[
+                        item["criterion"]])
+                    st.caption(("Valor: "+str(item["value"])+" "+
+                                str(item["unit"] or "")) if
+                               item["value"] is not None else
+                               "Referência contextual sem valor numérico")
+                    st.caption("Observação: "+str(item["observed_at"] or
+                               "data não identificada")+" · Escopo: "+
+                               str(item["scope"])+" · Tipo: "+item["kind"])
+                    st.markdown("[Ver fonte]("+item["source_url"]+")")
+                    st.caption("Limite: "+item["limitation"])
+    st.caption("**Por que não há nota final?** Nenhuma das seis métricas de "
+               "qualidade está completa e padronizada para comparar os mesmos "
+               "indicadores. Amostras de aluguel e horários de ida de 2026 são "
+               "pesquisa útil, não ofertas ou itinerários verificados para 2027.")
+
+
+def _side_by_side(rows):
+    choices={r["id"]:r for r in rows}
+    shortlist=[r["id"] for r in rows if r["shortlist"]]
+    st.markdown("### Comparar duas ou três finalistas")
+    picked=st.multiselect("Cidades para comparar",shortlist,
+                          default=[x for x in ("mulhouse","strasbourg","offenburg")
+                                   if x in choices],
+                          max_selections=3,key="ux_30_shortlist_compare",
+                          format_func=lambda key:choices[key]["name"])
+    if len(picked)<2:
+        st.info("Selecione ao menos duas finalistas para comparação.")
+        return
+    cols=st.columns(len(picked))
+    for col,key in zip(cols,picked):
+        r=choices[key]
+        with col:
+            with st.container(border=True):
+                st.markdown("**"+r["name"]+"**")
+                st.caption("Pesquisa documental ponderada: "+
+                           f'{r["documentary_weighted_percent"]:.1f}%'+
+                           " · não é nota de qualidade")
+                st.caption("Aluguel observado: "+
+                           _currency(r["housing"]["median_eur_month"])+
+                           "/mês (mediana de amostra histórica)")
+                st.caption("Tempos de trem documentados: "+
+                           str(r["route_basket_with_time"])+"/15")
+                st.caption("Tarifas de ida: "+
+                           str(r["route_basket_with_fare"])+"/15")
+                st.caption("Países com tempo observado: "+
+                           (", ".join(r["international_countries_with_time"])
+                            or "Não pesquisado"))
+                st.caption("Vida cotidiana: "+
+                           _status(r,"daily_life_remote_work"))
+                st.caption("Cotações elegíveis para 2027: **nenhuma confirmada**")
+    st.caption("As contagens mostram onde há pesquisa, não quantos passeios são "
+               "viáveis. Moradia com maior número de anúncios não recebe "
+               "automaticamente nota melhor. Preços não comparáveis não são "
+               "somados, nem usados para declarar economia.")
 
 
 def render_weight_coverage()->None:
-    st.markdown("### Critérios e pesos das 30 cidades-base")
-    st.caption("Os pesos são iguais para todas as cidades dentro de um perfil. "
-               "O que muda entre elas são as evidências disponíveis; uma categoria "
-               "sem pesquisa não recebe nota zero nem sua importância é redistribuída.")
-    profile=st.segmented_control(
-        "Perfil de decisão",list(PROFILE_IDS),
-        key="ux_30_weight_profile",selection_mode="single")
+    st.markdown("### Comparar 30 cidades-base · o que já sabemos")
+    st.caption("Casal sem carro, cerca de dois meses de temporada europeia. "
+               "Pesquisa e pontuação são indicadores **diferentes**; selecionar "
+               "uma cidade aqui não altera o plano oficial.")
+    profile=st.segmented_control("O que priorizar?",
+                                 list(PROFILE_IDS),key="ux_30_weight_profile",
+                                 selection_mode="single")
     profile_id=PROFILE_IDS.get(profile,"general")
-    weights=dict(zip(LABELS,PRESETS[profile_id]))
-    st.dataframe([{"Critério":label,"Peso (%)":weight}
-                  for label,weight in weights.items()],
-                 hide_index=True,width="stretch",height=250)
-    data=load_research()
-    bases={b["id"]:b for b in base_options()}
-    rows=[]
-    for city in data["cities"]:
-        # Historical apartment listings are not eligible 2027 short-stay quotes.
-        # No normalized 0-100 criterion exists for any of these candidates yet.
-        result=normalized_score({},profile_id)
-        housing=observed_housing(city)
-        rows.append({
-            "Cidade-base":city["name"],
-            "País":city["country"],
-            "Anúncios históricos":housing["count"],
-            "Cotações 2027 completas":city["eligible_2027_quotes"],
-            "Rotas pesquisadas":bases[city["id"]]["routes"],
-            "Cobertura dos critérios ponderados":f'{result["evidence_weight"]}%',
-            "Nota final":"Não calculável",
-            "Situação":"Pesquisa em andamento",
-        })
-    st.markdown("**Cobertura de pesquisa das cidades**")
-    st.dataframe(rows,hide_index=True,width="stretch",height=340)
-    st.warning("Nenhuma das 30 cidades possui cobertura suficiente para uma "
-               "nota final confiável. O quadro acima é de disponibilidade de "
-               "evidências, não uma classificação de melhores cidades.")
-    st.caption("Quando houver dados comparáveis, cada critério será avaliado na "
-               "mesma escala e ponderado sem alterar os pesos faltantes. "
-               "Pelo menos três cotações elegíveis de hospedagem em 2027, "
-               "rotas completas e condições de trabalho remoto exigem validação.")
+    rows=coverage_matrix(profile_id)
+    summary=coverage_summary(rows)
+    a,b,c,d,e=st.columns(5)
+    a.metric("Cidades",summary["cities"])
+    b.metric("Com moradia pesquisada",summary["housing_documented"])
+    c.metric("Com tempos ferroviários",summary["rail_documented"])
+    d.metric("Com critério pontuável",summary["has_comparable_criterion"])
+    e.metric("Prontas para decisão",summary["decision_ready"])
+
+    st.info("**Atenção:** o percentual agora mede **progresso documental por "
+            "requisito**, não a qualidade da cidade. O antigo 0% vinha da "
+            "avaliação de um dicionário vazio para todas as cidades. "
+            "A cobertura para pontuação e a nota final continuam indisponíveis "
+            "até existirem métricas completas e comparáveis.")
+    with st.expander("Entenda os seis critérios e seus pesos",expanded=False):
+        st.dataframe([{"Critério":LABELS[key],
+                       "Peso no perfil (%)":weight,
+                       "O que precisamos documentar":len(REQUIREMENTS[key])}
+                      for key,weight in zip(CRITERIA_KEYS,PRESETS[profile_id])],
+                     hide_index=True,width="stretch")
+        st.caption("A ponderação da **documentação** usa os seis pesos originais "
+                   "sobre a fração de itens verificados de cada categoria. "
+                   "Não redistribui peso de pesquisa faltante. "
+                   "Esse indicador não é uma nota de adequação.")
+        st.caption("Trens = informações do conjunto fixo de 15 destinos e "
+                   "atributos das ligações. Passeios = acesso às atrações e "
+                   "necessidade real de retorno ou pernoite. Países = diversidade "
+                   "internacional demonstrada, sem repetir a mesma vantagem "
+                   "como nota ferroviária.")
+
+    only=st.checkbox("Priorizar as 12 finalistas",value=True,
+                     key="ux_30_only_finalists")
+    filtered=[r for r in rows if r["shortlist"]] if only else rows
+    st.markdown("**Matriz de evidências**")
+    st.dataframe(_evidence_table(filtered),hide_index=True,width="stretch",
+                 height=405)
+    st.caption("Cada linha reflete as mesmas regras documentais. Uma cidade sem "
+               "ligação pesquisada está como 'Não pesquisado', não como "
+               "'Sem ligação'. O índice de documentação não compara a qualidade "
+               "dos anúncios ou destinos.")
+    lookup={r["id"]:r for r in filtered}
+    selected=st.selectbox("Analisar uma cidade",list(lookup),
+                          key="ux_30_city_detail",
+                          format_func=lambda key:lookup[key]["name"])
+    if selected:
+        _city_detail(lookup[selected])
+    _side_by_side(rows)
+    st.markdown("#### Próximos dados que farão diferença")
+    st.caption("Prioridade: confirmar, na mesma cesta de 15 destinos, horários "
+               "de ida e volta, conexões/última milha, tarifas normais para "
+               "duas pessoas; e apartamentos inteiros para 56–60 noites com "
+               "internet, taxas, caução e distância à estação. "
+               "Coberturas dos outros 18 municípios permanecem visíveis quando "
+               "o filtro de finalistas é desativado.")
+    st.caption("Fontes legadas: GitHub (JSONs versionados); governança histórica: "
+               "Drive Living Europe. Nenhuma decisão de cidade-base foi aplicada.")

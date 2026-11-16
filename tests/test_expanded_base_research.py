@@ -65,7 +65,15 @@ class ExpandedBaseResearchModelTests(unittest.TestCase):
             normalized_score({"outing_cost":-1},"explorer")
 
     def test_rail_sources_mean_vs_min_are_distinct_and_not_2027(self):
-        self.assertEqual(len(self.rail["segments"]),6)
+        self.assertEqual(len(self.rail["segments"]),11)
+        new={(r["from"],r["to"]) for r in self.rail["segments"]}
+        self.assertTrue({
+            ("nancy","luxembourg_city"),("dijon","beaune"),
+            ("strasbourg","mulhouse"),("karlsruhe","strasbourg"),
+            ("aachen","cologne")
+        } <= new)
+        self.assertTrue(all(not r.get("return_verified_2027",False)
+                            for r in self.rail["segments"]))
         off=next(r for r in self.rail["segments"] if r["from"]=="offenburg")
         self.assertEqual(off["fastest_minutes"],25)
         self.assertEqual(off["representative_regional_minutes"],29)
