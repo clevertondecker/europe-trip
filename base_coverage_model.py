@@ -170,17 +170,22 @@ def _finish(key,flags):
     # Evidence-depth ratio is a checklist, not suitability and not a market
     # confidence interval. Each requirement contributes exactly one boolean.
     n=len(REQUIREMENTS[key])
-    filled=sum(bool(x) for x in flags)
     if len(flags)!=n:
         raise ValueError("Contagem documental incompatível com metodologia")
+    fractions=[float(x) for x in flags]
+    if any(not 0<=v<=1 for v in fractions):
+        raise ValueError("Cobertura precisa estar no intervalo 0–1")
+    filled=sum(v>0 for v in fractions)
+    depth=sum(fractions)
     return {
         "criterion":key,"label":LABELS[key],
         "documented_count":filled,"requirements_count":n,
-        "documentary_percent":_safe_ratio(filled,n),
+        "documentary_percent":_safe_ratio(depth,n),
         "status":UNRESEARCHED if filled==0 else
-                 (DOCUMENTED if filled==n else PARTIAL),
-        "checks":[{"requirement":r,"documented":bool(value)}
-                  for r,value in zip(REQUIREMENTS[key],flags)],
+                 (DOCUMENTED if depth==n else PARTIAL),
+        "checks":[{"requirement":r,"documented":v>0,
+                   "coverage_percent":round(v*100,1)}
+                  for r,v in zip(REQUIREMENTS[key],fractions)],
         "comparable_score":None,
         "scoring_status":"Dados insuficientes para nota comparável",
         "scoring_gap":COMPARABLE_REQUIREMENTS[key],
@@ -231,9 +236,10 @@ def city_evidence(city,*,study=None,rail=None,exploration=None,
     common=len(basket)
     # A criterion counts as "documented" only with a real sourced item. For
     # basket-coverage checklist flags, the actual fraction is separately shown.
-    rflags=[bool(timed),bool(freq),bool(turns),bool(verified_returns)]
-    vflags=[bool(timed),bool(verified_returns),False]
-    cflags=[bool(fares),False,False]
+    rflags=[len(timed)/common,len(freq)/common,
+            len(turns)/common,len(verified_returns)/common]
+    vflags=[len(timed)/common,len(verified_returns)/common,0]
+    cflags=[len(fares)/common,0,0]
     cowork=everyday.get("coworking") or {}
     dailyflags=[
         everyday.get("restaurant_two_midrange_eur") is not None and
@@ -243,7 +249,9 @@ def city_evidence(city,*,study=None,rail=None,exploration=None,
         everyday.get("urban_transport_researched") is True,
         cowork.get("late_work_compatible") is True,
     ]
-    pflags=[bool(countries),False]
+    country_choices={place["country"] for place in basket.values()
+                     if place["country"]!=city["country"]}
+    pflags=[len(countries)/len(country_choices) if country_choices else 0,0]
     flags=[hflags,rflags,vflags,cflags,dailyflags,pflags]
     criterion={k:_finish(k,flags[i]) for i,k in enumerate(CRITERIA)}
     evidence=[]
