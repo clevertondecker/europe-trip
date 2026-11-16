@@ -26,7 +26,7 @@ from travel_dashboard_ui import render_trip_dashboard
 from itinerary_flow_ui import render_itinerary_workbench
 from smart_calendar_ui import render_smart_calendar
 from continuity_ui import (apply_pending_restore,render_continuity_panel,
-                           restore_private_on_start,autosave_private_if_requested)
+                           restore_private_on_start,autosave_private_if_requested,private_status_label)
 from planning_context_ui import (render_context,render_home_continue,
                                  render_breadcrumb,return_to_edit,show_settings)
 from base_explorer_ui import render_base_explorer, _comparison as render_route_comparison, _split_stay as render_split_stay
@@ -465,9 +465,9 @@ if page == "Visão geral":
     # Main call to action sits inside the home dashboard, after the hero.
     st.button("Explorar cidades-base →",key="home_continue_bases",
               on_click=_ux_next_task,args=("Explorar","Cidades-base"))
-    status_label,status_hint=save_label(
+    status_label,status_hint=private_status_label(save_label(
         current_plan,st.session_state.get("advisor_saved_snapshot"),
-        _owner_signed_in())
+        _owner_signed_in()))
     trip_stats=planning_summary(current_plan)
     st.markdown("<div class='page-section'>Continuar nosso planejamento</div>",
                 unsafe_allow_html=True)
