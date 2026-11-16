@@ -26,7 +26,7 @@ class ResearchPackModelTests(unittest.TestCase):
         self.assertEqual(stats["historical_housing_observations"],35)
         self.assertEqual(stats["restaurant_city_count"],4)
         self.assertEqual(stats["coworking_city_count"],4)
-        self.assertEqual(stats["neighborhood_references"],26)
+        self.assertEqual(stats["neighborhood_references"],30)
         self.assertEqual(stats["rail_operator_references"],5)
         self.assertEqual(stats["comparable_climate_cities"],6)
         self.assertEqual(stats["housing_confirmed_2027"],0)
