@@ -25,7 +25,7 @@ class CityProfilesTest(unittest.TestCase):
             for ev in row["evidence"]:
                 self.assertTrue(ev["source_url"].startswith("https://"))
                 self.assertTrue(ev["limitations"])
-        self.assertEqual(sum(len(r["evidence"]) for r in self.data["cities"] if r["shortlist"]),12)
+        self.assertEqual(sum(len(r["evidence"]) for r in self.data["cities"] if r["shortlist"]),24)
 
     def test_comparison_without_unsupported_ranking(self):
         rows=compact_comparison(self.data,["mulhouse","strasbourg","freiburg"])
