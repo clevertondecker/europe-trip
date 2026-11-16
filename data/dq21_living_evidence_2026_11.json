@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "checked_at": "2026-11-16",
+  "freiburg_climate": {
+    "station_id": "01443",
+    "station_name": "Freiburg",
+    "normal_period": "1991-2020",
+    "monthly_mean_temperature_c": {
+      "9": 15.9,
+      "10": 11.4,
+      "11": 6.6
+    },
+    "monthly_rainfall_mm": null,
+    "temperature_source_url": "https://wetteratlas.de/stationen/freiburg",
+    "primary_dwd_index": "https://opendata.dwd.de/climate_environment/CDC/observations_germany/climate/multi_annual/mean_91-20/",
+    "source_quality": "secondary_republication_of_DWD_station",
+    "official_station_series_independently_extracted": false,
+    "methodological_equivalence_to_french_stations": false,
+    "conflicting_republication": {
+      "monthly_mean_temperature_c": {
+        "9": 15.4,
+        "10": 10.9,
+        "11": 6.1
+      },
+      "monthly_rainfall_mm": {
+        "9": 77.4,
+        "10": 78.5,
+        "11": 66.2
+      },
+      "url": "https://freiburgtravelguide.com/",
+      "note": "Site also labels station as DWD Freiburg 01443 but means differ by approximately 0.5°C; do not silently mix or treat precipitations as fully reconciled."
+    },
+    "note": "1991–2020 DWD-labelled figures reported by secondary providers; obtain primary station monthly means and metadata before declaring fully comparable."
+  },
+  "city_review_scope": [
+    {
+      "city_id": "mulhouse",
+      "urban_provider_url": "https://www.solea.info/les-lignes-tram-1-et-2-evoluent-en-soiree-pour-mieux-vous-accompagner",
+      "late_service_citywide_without_housing_address": true,
+      "walkable_life_rentals_tested": 0,
+      "verified_home_internet": false
+    },
+    {
+      "city_id": "strasbourg",
+      "urban_provider_url": "https://www.cts-strasbourg.eu/fr/nous-connaitre/notre-reseau/lignes-de-nuit-et-soirees/",
+      "late_service_citywide_without_housing_address": true,
+      "walkable_life_rentals_tested": 0,
+      "verified_home_internet": false
+    },
+    {
+      "city_id": "freiburg",
+      "urban_provider_url": "https://www.vag-freiburg.de/fahrplan/nachtverkehr/mit-bus-und-bahn",
+      "late_service_citywide_without_housing_address": true,
+      "walkable_life_rentals_tested": 0,
+      "verified_home_internet": false
+    }
+  ],
+  "comparability_gaps": [
+    "Actual property address and transit after shift",
+    "Fiber/WiFi measured in furnished rental",
+    "Night access rules and coworking membership",
+    "Nearby grocery/pharmacy/gym walking time by property",
+    "Comparable official crime denominators and boundaries",
+    "DWD primary monthly precipitation/temperature reconciled for Freiburg"
+  ]
+}
