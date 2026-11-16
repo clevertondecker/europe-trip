@@ -8,7 +8,7 @@
 - `data/five_base_comparison_evidence_2026_11.json` já continha evidências de outras rotas, mas não as dez combinações pedidas. Nele o identificador de Luxemburgo é `luxembourg_city`; no explorador e no catálogo de atrações é `luxembourg`.
 - `data/exploration_bases_2027.json` já reconhecia `brussels`, `bruges_be` (Bruges, Bélgica) e `rotterdam`; não tinha rotas para Mulhouse e Strasbourg. `Bruges (France)` é outra cidade e **não** foi incorporada.
 - `known_route()` procurava o identificador literal; agora resolve explicitamente o alias do Luxemburgo antes de consultar as fontes. Nunca soma trechos intermediários de outras pesquisas para gerar rota artificial.
-- Evidência nova de seis pares foi incorporada à **matriz existente de cinco bases**, dois pares ao dataset canônico das quatro bases e dois pares ao explorador. Não criamos arquivo JSON paralelo de rotas.
+- Quatro pares oficiais (Luxemburgo e Bruxelas) foram incorporados à **matriz existente de cinco bases**, dois pares oficiais (Rotterdam) e dois secundários (Brugge) ao dataset de exploração e dois secundários (Interlaken Ost) ao dataset canônico das quatro bases. Não criamos arquivo JSON paralelo de rotas.
 
 ## Dez rotas investigadas (somente ida estação–estação)
 
