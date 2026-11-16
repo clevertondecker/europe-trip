@@ -97,8 +97,8 @@ class CoverageModelTests(unittest.TestCase):
 
     def test_research_update_sources_do_not_change_comparability(self):
         row=self.by_id["trier"]
-        self.assertTrue(any("CFL" in x["indicator"] or
-                            "Luxembourg" in str(x["scope"])
+        self.assertTrue(any("CFL" in str(x["scope"]) or
+                            "Luxembourg" in str(x["indicator"])
                             for x in row["evidence"]))
         self.assertIsNone(row["score_0_100"])
         self.assertEqual(row["scoring_weight_percent"],0)
