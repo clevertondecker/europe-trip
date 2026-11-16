@@ -166,6 +166,7 @@ def preview_restore(current:dict,archive:dict,catalog:dict)->dict:
     return {
         "current_plan_id":current["plan_id"],
         "expected_current_fingerprint":plan_fingerprint(current),
+        "expected_archive_fingerprint":sha256(_json_bytes(incoming)).hexdigest(),
         "incoming_plan_id":other["plan_id"],
         "incoming_revision":other["revision"],
         "current_revision":current["revision"],
@@ -189,6 +190,8 @@ def confirm_restore(current:dict,archive:dict,review:dict,catalog:dict,
         review.get("current_plan_id")!=current["plan_id"]):
         raise ValueError("Seu plano mudou desde a revisão. Confira novamente")
     incoming=validate_archive(archive,catalog)
+    if sha256(_json_bytes(incoming)).hexdigest()!=review.get("expected_archive_fingerprint"):
+        raise ValueError("O arquivo foi alterado após a revisão; valide novamente")
     plan=incoming["plan"]
     if (plan["plan_id"]!=review.get("incoming_plan_id") or
         plan["revision"]!=review.get("incoming_revision")):
