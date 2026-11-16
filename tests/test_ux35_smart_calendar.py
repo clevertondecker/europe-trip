@@ -139,7 +139,10 @@ class SmartCalendarModelTests(unittest.TestCase):
         p=france_plan()
         pr=suggest_calendar(p,self.catalog,self.routes)[0]
         malicious=deepcopy(pr)
-        malicious["assignments"]["2027-10-09"]="colmar"
+        extra=next(r["date"] for r in availability_matrix(p)
+                   if r["stage"]=="França" and r["open_full_day"]
+                   and r["date"] not in pr["assignments"])
+        malicious["assignments"][extra]="colmar"
         with self.assertRaises(ValueError):
             review_calendar_change(p,malicious,self.catalog)
         malicious=deepcopy(pr)
