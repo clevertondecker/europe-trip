@@ -8,7 +8,7 @@ Data de pesquisa: **16/11/2026**. Base: `main` pós-PRs #55/#58/#59. Plano: `doc
 |---|---|---|
 | Vida cotidiana | Referências históricas de refeição intermediária para casal em 4/12 finalistas; coworking com fonte, preço e ressalvas em 4/12 (reutilização de `data/city_research_round2_2026.json`) | Índice colaborativo não permite comparação de cesta inteira; coworking não significa internet do imóvel |
 | Clima | Normais 1991–2020 de **6 estações francesas**: temperatura média e precipitação de set/out/nov, com nome da estação e URL | Não representam microclima do centro ou previsão 2027; 6 finalistas da Alemanha/Bélgica ainda sem série equivalente |
-| Bairros | **26 bairros citados por fontes** para 10/12 finalistas; Offenburg e Aachen ainda sem fonte municipal específica registrada nesta rodada | Não constituem recomendação de aluguel, segurança ou distância verificada a estação |
+| Bairros | **30 bairros citados por fontes** para 12/12 finalistas; qualidade habitacional e distância por imóvel continuam não verificadas | Não constituem recomendação de aluguel, segurança ou distância verificada a estação |
 | Moradia | **35 observações históricas de anúncios** preservadas, incluindo URLs diretas onde existentes e distinção de páginas de catálogo | **Zero** apartamentos confirmados para duas pessoas por 56–60 noites após 04/09/2027, com taxas e internet |
 | Mobilidade | **5 referências oficiais ferroviárias** contextualizadas (Mulhouse↔Strasbourg, Metz↔Strasbourg, Nancy→Metz) com tempos publicados e limite de frequência | Nenhum retorno de fim de semana em datas da viagem foi confirmado; 15 destinos da cesta principal não estão completos |
 | Reutilização | Catálogo permanente `docs/CITY_RESEARCH_SOURCE_REGISTRY.md` atualizado; novo dataset `data/city_research_packs_2026_11.json` | Novas pesquisas devem ter fonte, período, unidade e limites; proibição de scraping sem licença permanece |
@@ -43,7 +43,7 @@ A ficha ganha três seções de interesse prático com evidências e pendências
 2. Normais climáticas para as seis finalistas da Alemanha/Bélgica com método análogo, sem misturar cidade e estação sem indicação.
 3. Moradias mobiliadas reserváveis no período real de 2027 (datas ainda não estabelecidas, portanto não afirmar disponibilidade).
 4. Retorno de sábado/domingo e última milha das 15 rotas da cesta, não apenas duração de ida.
-5. Fontes municipais próprias para bairros em Offenburg e Aachen.
+5. Bairros de Offenburg e Aachen identificados com fonte; falta comparar efetivamente imóveis, transporte e adequação dos endereços.
 6. Testes visuais reais 375/768/1280 px, teclado, validação de links e revisão independente UX.
 
 **Conclusão rigorosa:** execução **incremental concreta dos três pacotes**, não enriquecimento absoluto de todas as seis dimensões para todas as cidades. Lacunas mantidas como `null` ou pendentes.
