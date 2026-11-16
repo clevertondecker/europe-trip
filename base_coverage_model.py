@@ -161,7 +161,8 @@ def _dataset_routes(city_id,rail,exploration,five,base_routes):
             "source_url":item["source_url"],"date":rail["basis_date"],
             "scope":"segunda-feira de referência, estação–estação",
             "frequency":item.get("services_on_sample_day"),
-            "transfers":None,"return_verified":False,
+            "transfers":item.get("transfers_for_fastest"),
+            "return_verified":False,
         }
     return basket,rows
 
