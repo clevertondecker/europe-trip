@@ -42,15 +42,15 @@ def _pack_details(pack:dict)->None:
             st.caption(n["reason_to_investigate"])
         if not pack["neighborhoods"]:
             st.caption("Bairros para alugar: ainda sem referência municipal específica registrada.")
-        with st.expander("Amostras históricas de imóveis (não cotadas para 2027)"):
-            for listing in h["historical_listings"]:
-                st.markdown("**"+listing["observed_title_or_address"]+"** — "+
-                            _eur(listing["monthly_eur_2026"])+"/mês histórico · "+
-                            str(listing["size_m2"])+" m² · "+
-                            "[Fonte]("+listing["source_url"]+")")
-                st.caption("Anúncio individual rastreável" if listing["source_is_direct_listing"]
-                           else "Referência de catálogo, anúncio individual não identificado")
-            st.warning("Nenhum anúncio tem confirmados 56–60 noites, ocupação, taxas completas, internet e disponibilidade em 2027.")
+        st.markdown("**Amostras históricas de imóveis (não cotadas para 2027)**")
+        for listing in h["historical_listings"]:
+            st.markdown("**"+listing["observed_title_or_address"]+"** — "+
+                        _eur(listing["monthly_eur_2026"])+"/mês histórico · "+
+                        str(listing["size_m2"])+" m² · "+
+                        "[Fonte]("+listing["source_url"]+")")
+            st.caption("Anúncio individual rastreável" if listing["source_is_direct_listing"]
+                       else "Referência de catálogo, anúncio individual não identificado")
+        st.warning("Nenhum anúncio tem confirmados 56–60 noites, ocupação, taxas completas, internet e disponibilidade em 2027.")
     with st.expander("Trem e viagens de fim de semana",expanded=False):
         if not pack["weekend_rail_references"]:
             st.caption("Novas referências de horário não pesquisadas nesta rodada; consulte a matriz ferroviária histórica existente.")
