@@ -12,6 +12,7 @@ from math import isfinite
 
 from attractions_model import load_attractions, load_base_routes
 from base_explorer_model import load_exploration
+from five_base_comparison_model import load_five_base_evidence
 from base_research_expanded_model import load_rail
 from base_scenario_model import base_options
 from data_model import get_scenario
@@ -43,13 +44,26 @@ def known_route(base_id:str,dest_id:str)->dict:
         data=load_base_routes()
         route=next((r for r in data["routes"] if
                     r["base_id"]==base_id and r["destination_id"]==dest_id),None)
-        if route is not None:
+        if route is not None and route["train_minutes_one_way"] is not None:
             return {"minutes":route["train_minutes_one_way"],
                     "fare":route["fare_eur_person_oneway"],
                     "source":route["source_url"],
                     "fare_condition":route["fare_type"],
                     "basis":route.get("retrieved_at","2026"),
                     "note":route["notes"],"return_verified":False}
+    # Five-base study has dated operator evidence for routes absent from the
+    # original four-base itinerary matrix. Prefer an observed station time
+    # over a legacy placeholder with None, never infer a train connection.
+    study=load_five_base_evidence()
+    verified=next((r for r in study["verified_time_routes"]
+                   if r["base_id"]==base_id and r["destination_id"]==dest_id),None)
+    if verified is not None:
+        return {"minutes":verified["fastest_train_oneway_min"],
+                "fare":verified.get("advertised_from_eur_person_oneway"),
+                "source":verified["source_url"],
+                "fare_condition":"advertised_from_not_normal_verified",
+                "basis":verified["checked_at"],"note":verified["notes"],
+                "return_verified":False}
     rail=load_rail()
     sample=next((r for r in rail["segments"] if
                  r["from"]==base_id and r["to"]==dest_id),None)
