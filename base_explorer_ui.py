@@ -390,30 +390,51 @@ def render_base_explorer(plan:dict,trip_data:dict,finance_live:bool,
                          eurfx:float=6.3,focused:bool=False)->None:
     data=load_exploration()
     if focused:
-        # One primary task per tab: research a candidate here, compare changes
-        # in Explorar → Comparar. Keep the old four study modes accessible
-        # from historical/advanced routes rather than stacking them here.
-        options=base_options(data)
-        names={item["id"]:_base_name(data,item["id"]) for item in options}
+        # UX 4.2: one task selector, while all legacy research tools remain reachable.
+        from base_research_expanded_ui import render_expanded_research
+        from ux42_city_navigation import ACTIVITIES, normalize_activity
+        study_options=base_options(data)
         official=plan["base_city"]
-        candidate=st.session_state.get("scenario_base_selected",official)
-        if candidate not in names:
-            candidate=official
-        evidence=next(item for item in options if item["id"]==candidate)
-        st.markdown("### "+names[candidate])
-        st.caption("Base do planejamento: "+names[official]+
-                   " · Situação da pesquisa: "+evidence["research_status"]+
-                   " · Nenhuma seleção nesta tela altera o roteiro oficial.")
-        a,b,c=st.columns(3)
-        a.metric("Trechos pesquisados",evidence["routes"])
-        b.metric("Com tempo de trem",evidence["time_coverage"])
-        c.metric("Com tarifa histórica",evidence["fare_coverage"])
-        st.info("Para descobrir se essa cidade facilita seus passeios e como "
-                "afeta o orçamento, use **Explorar → Comparar**.")
-        with st.expander("Passeios e evidências ferroviárias",expanded=False):
-            _nearby(data,candidate)
-        _choose_base(data,plan,candidate)
-        _scenario_backups(plan,options)
+        names={item["id"]:_base_name(data,item["id"]) for item in study_options}
+        current=normalize_activity(st.session_state.get("ux42_city_activity"))
+        st.session_state["ux42_city_activity"]=current
+        st.caption("Base oficial: "+names.get(official,official)+
+                   " · 30 cidades cadastradas · explorar não muda seu plano.")
+        st.segmented_control("O que você deseja fazer?",list(ACTIVITIES),
+                             key="ux42_city_activity")
+        activity=st.session_state["ux42_city_activity"]
+        if activity==ACTIVITIES[0]:
+            render_expanded_research(activity_override="Explorar uma cidade",
+                                     compact=True)
+        elif activity==ACTIVITIES[1]:
+            render_expanded_research(activity_override="Comparar cidades",
+                                     compact=True)
+        else:
+            candidate=st.session_state.get("scenario_base_selected",official)
+            if candidate not in names:
+                candidate=official
+            sync_city_widget("base_explorer_city",list(names))
+            selected=st.selectbox("Cidade de partida",list(names),
+                                  index=list(names).index(candidate),
+                                  format_func=lambda key:names[key],
+                                  key="base_explorer_city",
+                                  on_change=set_city_from_widget,
+                                  args=("base_explorer_city",))
+            st.session_state["scenario_base_selected"]=choose_exploratory_base(
+                selected,study_options)
+            _nearby(data,selected)
+            st.caption("Os tempos e tarifas são referências históricas; retornos e "
+                       "custos completos para 2027 ainda não foram validados.")
+            with st.expander("Comparar os mesmos passeios entre bases"):
+                _comparison(data)
+            with st.expander("Estudar uma ou duas bases"):
+                _split_stay(data,plan,trip_data,finance_live,eurfx)
+        with st.expander("Ferramentas avançadas e cenários"):
+            _scenario_backups(plan,study_options)
+            st.caption("As ferramentas históricas continuam disponíveis sem "
+                       "alterar a cidade-base oficial.")
+            _choose_base(data,plan,st.session_state.get(
+                "scenario_base_selected",official))
         return
     st.markdown("## Explorar cidades-base")
     st.caption("Compare corredores de viagem e cidades francesas antes de decidir. "
