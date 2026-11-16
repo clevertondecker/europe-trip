@@ -40,6 +40,7 @@ def _save_widget(widget_key:str,saved_key:str):
 def _open_city(city_id:str)->None:
     """Only UX local widgets; never set scenario_base_selected or TripPlan."""
     st.session_state["ux40_research_activity"]="Explorar uma cidade"
+    st.session_state["ux42_city_activity"]="Explorar cidades"
     st.session_state["ux40_selected_city"]=city_id
     st.session_state["expanded_bases_detail_city"]=city_id
 
@@ -210,7 +211,8 @@ def _explore_city(study,rail,five)->None:
             st.info(city["screening_notes"])
     st.button("Voltar à comparação das cinco bases",
               key="ux40_back_compare",on_click=lambda:
-              st.session_state.update({"ux40_research_activity":"Comparar cidades"}))
+              st.session_state.update({"ux40_research_activity":"Comparar cidades",
+                                       "ux42_city_activity":"Comparar favoritas"}))
 
 
 def _all_candidates(study)->None:
@@ -262,23 +264,32 @@ def _all_candidates(study)->None:
                   on_click=_open_city,args=(key,))
 
 
-def render_expanded_research()->None:
+def render_expanded_research(*,activity_override:str|None=None,compact:bool=False)->None:
     study=load_research()
     rail=load_rail()
     five=load_five_base_evidence()
     summary=research_overview(study)
-    st.markdown("### Onde vale mais a pena morar?")
-    st.caption("Compare cidades pelo custo de moradia, conexões ferroviárias "
-               "e acesso aos passeios que vocês desejam realizar.")
-    a,b,c=st.columns(3)
-    a.metric("Candidatas",summary["candidate_count"])
-    b.metric("Finalistas",summary["shortlist_count"])
-    c.metric("Aprofundadas",len(BASE_IDS))
-    st.caption("Pesquisa preliminar baseada em referências históricas. "
-               "Hospedagens e tarifas de 2027 ainda não confirmadas.")
-    st.segmented_control("O que você deseja fazer?",ACTIVITIES,
-                         default=ACTIVITIES[0],key="ux40_research_activity")
-    activity=st.session_state["ux40_research_activity"]
+    if compact:
+        activity=activity_override or "Explorar uma cidade"
+        if activity=="Explorar uma cidade":
+            st.markdown("### Explorar cidades")
+            with st.expander("Ver todas as candidatas e filtrar por país ou região"):
+                _all_candidates(study)
+        else:
+            st.markdown("### Comparar favoritas")
+    else:
+        st.markdown("### Onde vale mais a pena morar?")
+        st.caption("Compare cidades pelo custo de moradia, conexões ferroviárias "
+                   "e acesso aos passeios que vocês desejam realizar.")
+        a,b,c=st.columns(3)
+        a.metric("Candidatas",summary["candidate_count"])
+        b.metric("Finalistas",summary["shortlist_count"])
+        c.metric("Aprofundadas",len(BASE_IDS))
+        st.caption("Pesquisa preliminar baseada em referências históricas. "
+                   "Hospedagens e tarifas de 2027 ainda não confirmadas.")
+        st.segmented_control("O que você deseja fazer?",ACTIVITIES,
+                             default=ACTIVITIES[0],key="ux40_research_activity")
+        activity=st.session_state["ux40_research_activity"]
     if activity=="Comparar cidades":
         render_favorite_comparison(study,five)
         with st.expander("Referência: as cinco bases aprofundadas"):
