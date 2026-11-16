@@ -36,6 +36,7 @@ def open_detailed_impact()->None:
     base=state.get("workflow_alt_base",plan["base_city"])
     state["scenario_base_selected"]=base
     state["ux_last_candidate"]=base
+    state["ux34_candidates"]=[base] if base!=plan["base_city"] else []
     state["ux_mode"]="Simulação"
     state["ux_mode_value"]="Simulação"
     state["ux_days_value"]=(
