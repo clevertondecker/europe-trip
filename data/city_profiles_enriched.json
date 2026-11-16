@@ -1143,6 +1143,17 @@
           "scope": "local/serviço citado",
           "kind": "primary_public_context",
           "limitations": "Fato institucional de contexto, não preço ou confirmação de acessibilidade/horário em 2027"
+        },
+        {
+          "id": "freiburg-citypopulation-2025",
+          "section": "quality_of_life",
+          "summary": "População publicada para 2025: 234.565 habitantes (municipal resident register, 31/12/2025).",
+          "source_url": "https://fritz.freiburg.de/asw/asw.dll?aw=Bevoelkerung%2FBESTAND_UEBERSICHT",
+          "observed_at": "2026-11-16",
+          "reference_period": "2025",
+          "scope": "municipal resident register, 31/12/2025",
+          "kind": "municipal_population_official",
+          "limitations": "O conceito municipal alemão/registro de residentes difere do recenseamento INSEE da França; não usar para taxa/densidade comparável entre países."
         }
       ],
       "advantages": [
@@ -1160,11 +1171,11 @@
       ],
       "last_reviewed_at": "2026-11-16",
       "demographics": {
-        "population_municipal": null,
+        "population_municipal": 234565,
         "density_per_km2": null,
-        "reference_year": null,
-        "geographic_scope": "municipality",
-        "source_url": null
+        "reference_year": 2025,
+        "geographic_scope": "municipal resident register, 31/12/2025",
+        "source_url": "https://fritz.freiburg.de/asw/asw.dll?aw=Bevoelkerung%2FBESTAND_UEBERSICHT"
       }
     },
     {
@@ -1224,6 +1235,17 @@
           "scope": "local/serviço citado",
           "kind": "primary_public_context",
           "limitations": "Fato institucional de contexto, não preço ou confirmação de acessibilidade/horário em 2027"
+        },
+        {
+          "id": "offenburg-citypopulation-2025",
+          "section": "quality_of_life",
+          "summary": "População publicada para 2025: 63.523 habitantes (municipal resident register, 31/12/2025).",
+          "source_url": "https://www.offenburg.de/de/leben-in-offenburg/buergerservice/kommunalstatistik/",
+          "observed_at": "2026-11-16",
+          "reference_period": "2025",
+          "scope": "municipal resident register, 31/12/2025",
+          "kind": "municipal_population_official",
+          "limitations": "O conceito municipal alemão/registro de residentes difere do recenseamento INSEE da França; não usar para taxa/densidade comparável entre países."
         }
       ],
       "advantages": [
@@ -1241,11 +1263,11 @@
       ],
       "last_reviewed_at": "2026-11-16",
       "demographics": {
-        "population_municipal": null,
+        "population_municipal": 63523,
         "density_per_km2": null,
-        "reference_year": null,
-        "geographic_scope": "municipality",
-        "source_url": null
+        "reference_year": 2025,
+        "geographic_scope": "municipal resident register, 31/12/2025",
+        "source_url": "https://www.offenburg.de/de/leben-in-offenburg/buergerservice/kommunalstatistik/"
       }
     },
     {
@@ -1358,6 +1380,17 @@
           "scope": "local/serviço citado",
           "kind": "primary_public_context",
           "limitations": "Fato institucional de contexto, não preço ou confirmação de acessibilidade/horário em 2027"
+        },
+        {
+          "id": "karlsruhe-citypopulation-2025",
+          "section": "quality_of_life",
+          "summary": "População publicada para 2025: 301.087 habitantes (municipal main-residence register, 31/12/2025).",
+          "source_url": "https://www.karlsruhe.de/mobilitaet-stadtbild/stadtentwicklung/statistik-und-zensus",
+          "observed_at": "2026-11-16",
+          "reference_period": "2025",
+          "scope": "municipal main-residence register, 31/12/2025",
+          "kind": "municipal_population_official",
+          "limitations": "O conceito municipal alemão/registro de residentes difere do recenseamento INSEE da França; não usar para taxa/densidade comparável entre países."
         }
       ],
       "advantages": [
@@ -1375,11 +1408,11 @@
       ],
       "last_reviewed_at": "2026-11-16",
       "demographics": {
-        "population_municipal": null,
+        "population_municipal": 301087,
         "density_per_km2": null,
-        "reference_year": null,
-        "geographic_scope": "municipality",
-        "source_url": null
+        "reference_year": 2025,
+        "geographic_scope": "municipal main-residence register, 31/12/2025",
+        "source_url": "https://www.karlsruhe.de/mobilitaet-stadtbild/stadtentwicklung/statistik-und-zensus"
       }
     },
     {
@@ -1545,6 +1578,17 @@
           "scope": "local/serviço citado",
           "kind": "primary_public_context",
           "limitations": "Fato institucional de contexto, não preço ou confirmação de acessibilidade/horário em 2027"
+        },
+        {
+          "id": "trier-citypopulation-2025",
+          "section": "quality_of_life",
+          "summary": "População publicada para 2025: 113.577 habitantes (municipal resident register, 31/12/2025).",
+          "source_url": "https://www.trier.de/aktuelles/nachrichten/18606.Bevoelkerungsbericht-2025-Zuwanderung-als-Wachstumsmotor.html",
+          "observed_at": "2026-11-16",
+          "reference_period": "2025",
+          "scope": "municipal resident register, 31/12/2025",
+          "kind": "municipal_population_official",
+          "limitations": "O conceito municipal alemão/registro de residentes difere do recenseamento INSEE da França; não usar para taxa/densidade comparável entre países."
         }
       ],
       "advantages": [
@@ -1562,11 +1606,11 @@
       ],
       "last_reviewed_at": "2026-11-16",
       "demographics": {
-        "population_municipal": null,
+        "population_municipal": 113577,
         "density_per_km2": null,
-        "reference_year": null,
-        "geographic_scope": "municipality",
-        "source_url": null
+        "reference_year": 2025,
+        "geographic_scope": "municipal resident register, 31/12/2025",
+        "source_url": "https://www.trier.de/aktuelles/nachrichten/18606.Bevoelkerungsbericht-2025-Zuwanderung-als-Wachstumsmotor.html"
       }
     },
     {
@@ -1679,6 +1723,17 @@
           "scope": "local/serviço citado",
           "kind": "primary_public_context",
           "limitations": "Fato institucional de contexto, não preço ou confirmação de acessibilidade/horário em 2027"
+        },
+        {
+          "id": "aachen-citypopulation-2025",
+          "section": "quality_of_life",
+          "summary": "População publicada para 2025: 262.765 habitantes (municipal total population reported for 2025).",
+          "source_url": "https://www.aachen.de/aachen-entdecken/typisch-aachen/statistische-daten/aachen-in-zahlen-2026/",
+          "observed_at": "2026-11-16",
+          "reference_period": "2025",
+          "scope": "municipal total population reported for 2025",
+          "kind": "municipal_population_official",
+          "limitations": "O conceito municipal alemão/registro de residentes difere do recenseamento INSEE da França; não usar para taxa/densidade comparável entre países."
         }
       ],
       "advantages": [
@@ -1696,11 +1751,11 @@
       ],
       "last_reviewed_at": "2026-11-16",
       "demographics": {
-        "population_municipal": null,
+        "population_municipal": 262765,
         "density_per_km2": null,
-        "reference_year": null,
-        "geographic_scope": "municipality",
-        "source_url": null
+        "reference_year": 2025,
+        "geographic_scope": "municipal total population reported for 2025",
+        "source_url": "https://www.aachen.de/aachen-entdecken/typisch-aachen/statistische-daten/aachen-in-zahlen-2026/"
       }
     },
     {
