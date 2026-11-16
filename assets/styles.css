@@ -1,15 +1,19 @@
 
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap');
-:root {--petrol:#163A4D;--green:#2E7668;--sand:#EEE7DB;--muted:#687A84;}
-html, body, [class*="css"], [data-testid="stMarkdownContainer"]{font-family:'DM Sans',sans-serif;}
-[data-testid="stAppViewContainer"]{background: #F8F6F1;}
-[data-testid="stSidebar"]{background:#F1ECE3;border-right:1px solid #E1D8CA;}
-[data-testid="stMetricValue"]{font-size:1.7rem; color:#163A4D;}
+/* CSS 1.0 — tokens únicos. Valores preservados da cascata já publicada.
+   --petrol/--green/--sand/--muted continuam por compatibilidade com componentes antigos. */
+:root {
+  --petrol:#163A4D; --green:#2E7668; --sand:#EEE7DB; --muted:#687A84;
+  --ui-navy:#132B3D; --ui-blue:#168AC6; --ui-mint:#0B967E;
+  --ui-bg:#F8FBFE; --ui-border:#E3EBF2;
+  --ui-heading:#16364B; --ui-selected:#153C53;
+  --ui-page-bg:#FAFCFE; --ui-link:#1684B2; --ui-focus:#177A9B;
+}
+/* Base: keep the effective modern styles in one place, not an override
+   of the obsolete Fase 1 global theme. See CSS10 audit. */
+[data-testid="stMetricValue"]{font-size:1.7rem;}
 [data-testid="stMetricLabel"]{color:#586F7B;}
-h1,h2,h3{color:#163A4D !important;letter-spacing:-.025em;}
-h1{font-family:'Playfair Display',serif !important;font-size:2.65rem !important;}
-a{color:#286F69 !important;}
-.block-container{padding-top:2rem;padding-bottom:3rem;max-width:1500px;}
+h1{font-size:2.65rem !important;}
 .banner{background:linear-gradient(90deg,rgba(15,51,65,.94) 0%,rgba(15,51,65,.69) 55%,rgba(15,51,65,.3) 100%), url('https://upload.wikimedia.org/wikipedia/commons/4/4d/Maiori_Amalfi_coast.jpg') center 55% / cover;
   border-radius:22px; min-height:270px; display:flex;align-items:center;padding:42px; color:white;margin:5px 0 19px;}
 .banner h2{color:white !important;font-family:'Playfair Display',serif;font-size:2.5rem;max-width:720px;line-height:1.2;margin:7px 0;}
@@ -29,7 +33,7 @@ a{color:#286F69 !important;}
 .source-footer{font-size:.78rem;color:#60757E;border-top:1px solid #E3DED3;padding-top:14px;margin-top:24px;}
 [data-testid="stDataFrame"]{border-radius:12px;}
 
-/* FASE 1: visual editorial para home, sem alterar lógica de dados. */
+/* Home: original editorial components. Fase 1B overrides below intentionally retained. */
 .home-hero{display:flex;align-items:center;min-height:300px;padding:clamp(26px,4vw,54px);
   overflow:hidden;border-radius:23px;margin:7px 0 22px;
   box-shadow:0 14px 37px rgba(19,53,64,.10);
@@ -77,10 +81,9 @@ a{color:#286F69 !important;}
   .home-kpi{min-height:102px;padding:15px;}.home-stage{min-height:0;}
   .block-container{padding-left:1rem;padding-right:1rem;}}
 
-/* FASE 1B — modern travel app / minimal A+B approved by user */
-:root {--ui-navy:#132B3D;--ui-blue:#168AC6;--ui-mint:#0B967E;--ui-bg:#F8FBFE;--ui-border:#E3EBF2;}
+/* Active travel-app theme and component refinements. */
 html,body,[class*="css"],[data-testid="stMarkdownContainer"]{font-family:'DM Sans',system-ui,sans-serif !important;}
-[data-testid="stAppViewContainer"]{background:#FAFCFE !important;}
+[data-testid="stAppViewContainer"]{background:var(--ui-page-bg) !important;}
 [data-testid="stSidebar"]{background:#FFFFFF !important;border-right:1px solid #E9EFF5 !important;}
 [data-testid="stSidebar"] .stRadio [role="radiogroup"] > label{border-radius:10px;padding:8px 10px;margin:0 0 2px;transition:background .15s;}
 [data-testid="stSidebar"] .stRadio [role="radiogroup"] > label:hover{background:#EFF8FF;}
@@ -88,8 +91,8 @@ html,body,[class*="css"],[data-testid="stMarkdownContainer"]{font-family:'DM San
 [data-testid="stSidebar"] .stRadio [role="radiogroup"] > label p{color:#17354A !important;font-weight:600;}
 [data-testid="stSidebar"] [data-testid="stInfo"]{background:#EDF7FC;border:1px solid #E0EBF3;color:#2C5870;}
 .block-container{max-width:1520px;padding-top:1.25rem;padding-bottom:3rem;}
-h1,h2,h3{font-family:'DM Sans',system-ui,sans-serif !important;color:#16364B !important;letter-spacing:-.035em;}
-a{color:#1684B2 !important;}
+h1,h2,h3{font-family:'DM Sans',system-ui,sans-serif !important;color:var(--ui-heading) !important;letter-spacing:-.035em;}
+a{color:var(--ui-link) !important;}
 .sidebar-brand{margin-bottom:14px;border-bottom:1px solid #E9EFF4;padding:4px 0 20px;}
 .sidebar-brand small{color:#078F88;}
 .sidebar-brand strong{font-family:'DM Sans',system-ui,sans-serif !important;font-size:1.55rem;font-weight:800;letter-spacing:-.045em;}
@@ -141,10 +144,10 @@ a{color:#1684B2 !important;}
 .home-overview-copy{padding:0 0 9px;}}
 
 
-/* Remaining screens: shared light travel-app design system */
+/* Shared screen components — panels, tasks, budgets and forms. */
 .page-eyebrow{font-size:.7rem;letter-spacing:.13em;font-weight:800;color:#0A9889;text-transform:uppercase;margin:10px 0 7px;}
 .page-title{font-family:'DM Sans',system-ui,sans-serif;font-size:clamp(1.75rem,2.7vw,2.55rem);
-  font-weight:800;color:#16364B;letter-spacing:-.045em;line-height:1.16;margin:0 0 9px;}
+  font-weight:800;color:var(--ui-heading);letter-spacing:-.045em;line-height:1.16;margin:0 0 9px;}
 .page-subtitle{color:#647E90;font-size:.94rem;line-height:1.55;max-width:760px;margin:0 0 18px;}
 .page-stat{background:#fff;border:1px solid #E3EBF2;border-radius:15px;padding:15px 17px;
   min-height:108px;box-shadow:0 4px 18px rgba(29,68,93,.028);margin-bottom:9px;}
@@ -156,7 +159,7 @@ a{color:#1684B2 !important;}
 .page-stat--cream{background:#FCF8F3;border-color:#F4EBE1;}
 .page-panel{background:#fff;border:1px solid #E2EBF2;border-radius:16px;padding:18px 20px;
   box-shadow:0 6px 18px rgba(23,59,80,.025);margin-bottom:12px;}
-.page-panel__title{font-weight:800;color:#16364B;font-size:1rem;line-height:1.35;}
+.page-panel__title{font-weight:800;color:var(--ui-heading);font-size:1rem;line-height:1.35;}
 .page-panel__desc{color:#667E8C;font-size:.85rem;line-height:1.6;margin:9px 0 10px;}
 .page-panel__meta{color:#758998;font-size:.75rem;}
 .page-chip{display:inline-block;background:#EAF6FD;color:#1777A4;border-radius:99px;
@@ -209,7 +212,7 @@ a{color:#1684B2 !important;}
 }
 
 
-/* Evolução 1 — painel de comparação, reutilizando o design A+B existente */
+/* Comparison workspace — cards and comparative evidence. */
 .city-score{background:#fff;border:1px solid #E4EBF3;border-radius:18px;padding:20px;
   margin-bottom:12px;box-shadow:0 5px 20px rgba(24,65,90,.035);}
 .city-score__top{display:flex;align-items:center;justify-content:space-between;gap:8px;}
@@ -225,7 +228,7 @@ a{color:#1684B2 !important;}
 .city-compare-source{font-size:.8rem;color:#627D8F;line-height:1.55;}
 
 
-/* Comparative decision UX — visual hierarchy without overstating evidence */
+/* Decision comparison — labels, metrics and layout. */
 .city-digest{background:#fff;border:1px solid #E1E9F1;border-radius:17px;padding:19px 21px;
 box-shadow:0 4px 18px rgba(31,69,91,.03);margin:0 0 14px;}
 .city-digest__top,.city-digest__foot{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center;}
@@ -259,7 +262,7 @@ padding:17px 20px;margin:0 0 10px;}
 .city-side__sample{color:#2E6D60;}
 .city-side small{font-size:.73rem;color:#698194;font-weight:500;}
 .city-side p{font-size:.84rem;color:#658093;line-height:1.6;margin:12px 0 0;}
-/* Subnavegação: abas em formato de seletor, com contraste claro do estado ativo */
+/* Streamlit tabs — accessible active/focus states; following media rule is responsive. */
 [data-testid="stTabs"] [data-baseweb="tab-list"]{
   display:flex;gap:8px;align-items:stretch;padding:8px !important;
   background:#EBF3F9;border:1px solid #DCE9F1;border-radius:16px;
@@ -276,7 +279,7 @@ padding:17px 20px;margin:0 0 10px;}
   background:#FFFFFF !important;color:#17465F !important;
 }
 [data-testid="stTabs"] button[role="tab"][aria-selected="true"]{
-  background:#153C53 !important;color:#FFFFFF !important;
+  background:var(--ui-selected) !important;color:#FFFFFF !important;
   box-shadow:0 3px 11px rgba(20,58,78,.20);
 }
 [data-testid="stTabs"] button[role="tab"][aria-selected="true"] *{
@@ -296,7 +299,7 @@ padding:17px 20px;margin:0 0 10px;}
 @media(max-width:800px){.city-digest__metrics{grid-template-columns:1fr 1fr;}.city-digest{padding:15px;}}
 
 
-/* Comparador navigation: native Streamlit segmented control, prominent selection. */
+/* Streamlit segmented control — one desktop base and responsive override. */
 [data-testid="stSegmentedControl"]{
   background:#E8F3FB !important;
   border:1px solid #CFDFEB !important;
@@ -319,9 +322,9 @@ padding:17px 20px;margin:0 0 10px;}
 [data-testid="stSegmentedControl"] button[aria-checked="true"],
 [data-testid="stSegmentedControl"] button[aria-pressed="true"],
 [data-testid="stSegmentedControl"] [data-state="checked"]{
-  background:#153C53 !important;
+  background:var(--ui-selected) !important;
   color:white !important;
-  border-color:#153C53 !important;
+  border-color:var(--ui-selected) !important;
   box-shadow:0 4px 12px rgba(15,57,80,.18) !important;
 }
 [data-testid="stSegmentedControl"] button:focus-visible{
@@ -331,7 +334,7 @@ padding:17px 20px;margin:0 0 10px;}
 
 
 
-/* Adaptive attractions explorer — editorial travel cards and accessible imagery */
+/* Attractions cards and images. */
 .attraction-photo {
   display:block;
   width:100%;
@@ -360,8 +363,7 @@ padding:17px 20px;margin:0 0 10px;}
  .attraction-photo,.attraction-no-photo {height:175px;min-height:175px;}
 }
 
-/* Roteiro workspace: compact task navigation and mobile-friendly controls.
-   Native Streamlit primitives remain keyboard-accessible. */
+/* Responsive workspace overrides — native Streamlit keyboard semantics preserved. */
 @media (max-width: 680px) {
   [data-testid="stSegmentedControl"] {
     padding: 5px !important;
@@ -384,7 +386,7 @@ padding:17px 20px;margin:0 0 10px;}
 }
 
 
-/* Travel dashboard — editorial travel app on top of native Streamlit widgets. */
+/* Travel dashboard components. */
 .trip-dash-hero {
   border-radius:22px;
   min-height:245px;
@@ -416,7 +418,7 @@ padding:17px 20px;margin:0 0 10px;}
 }
 
 
-/* Scenario comparison: compact travel-editorial cards; retain native focus states. */
+/* Scenario comparison components. */
 .scenario-style-card{
  background:linear-gradient(145deg,#fff,#F1F6F3);
  border:1px solid #DCE8E5;border-radius:16px;padding:18px;
@@ -432,10 +434,9 @@ padding:17px 20px;margin:0 0 10px;}
 @media(max-width:780px){.scenario-style-card{min-height:0;margin-top:4px;padding:14px;}}
 
 
-/* UX 3.9 — minimal mobile/accessibility polish, native Streamlit widgets.
-   No new navigation, no global column overrides. */
+/* Shared accessibility — focus, tap targets and reduced motion. */
 :where([data-testid="stAppViewContainer"]) :is(button,input,textarea):focus-visible {
-  outline: 3px solid #177A9B !important;
+  outline: 3px solid var(--ui-focus) !important;
   outline-offset: 2px;
 }
 @media (max-width: 680px) {
