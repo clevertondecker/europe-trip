@@ -56,7 +56,7 @@ def render_private_studies(comparison:dict,load_draft):
         try:
             from city_decision_store import make_city_draft
             draft=make_city_draft(fresh_name,comparison)
-            proposed,_=add_study(records,draft)
+            proposed,_=add_study(records,draft,comparison["plan_id"])
             generation=cloud_commit(store,proposed,state.get("ux34_cloud_generation"))
             state["ux34_cloud_records"]=proposed
             state["ux34_cloud_generation"]=generation
@@ -72,6 +72,9 @@ def render_private_studies(comparison:dict,load_draft):
                            key="ux34_cloud_selected")
     selected=next(x for x in studies if x["id"]==chosen_id)
     old=selected["draft"]
+    if selected.get("base_plan_id") not in (None,comparison["plan_id"]):
+        st.warning("Este estudo pertence a outro planejamento. Reabrir apenas "
+                   "restaura as premissas; não modifica o plano oficial.")
     if old["plan_revision_at_creation"]!=comparison["plan_revision"]:
         st.warning("Este estudo foi criado em outra revisão do planejamento. "
                    "Reabrir só restaura as hipóteses e exige recalcular a comparação.")
