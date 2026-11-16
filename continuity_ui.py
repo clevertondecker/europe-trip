@@ -175,16 +175,38 @@ def save_private_now(plan, catalog):
     state["ux36_saved_plan_fingerprint"] = plan_fingerprint(plan)
     state["ux36_saved_archive_fingerprint"] = _archive_fingerprint(import_archive(raw,catalog))
     state["ux36_cloud_dirty"] = False
+    state.pop("ux36_autosave_failed_fingerprint", None)
 
 
 def autosave_private_if_requested(catalog):
+    """Keep pending edits until the remote generation is acknowledged.
+
+    Failed snapshots are not retried on every Streamlit rerun. A changed
+    snapshot (or explicit manual retry) is allowed to try again.
+    """
     state = st.session_state
-    if not (state.get("ux36_private_autosave") and state.pop("ux36_cloud_dirty", False)):
+    if not state.get("ux36_private_autosave") or not state.get("ux36_cloud_dirty"):
+        return
+    try:
+        pending = _archive_fingerprint(_private_archive(state["advisor_plan"], catalog))
+    except (ValueError, TypeError, KeyError):
+        state["ux36_cloud_status"] = "Erro ao preparar; alterações apenas nesta sessão"
+        state["ux36_cloud_dirty"] = True
+        return
+    if state.get("ux36_autosave_failed_fingerprint") == pending:
         return
     try:
         save_private_now(state["advisor_plan"], catalog)
-    except (ValueError, TypeError, KeyError, StorageConflict, StorageUnavailable):
+    except StorageConflict:
+        state["ux36_cloud_dirty"] = True
+        state["ux36_autosave_failed_fingerprint"] = pending
+        state["ux36_cloud_status"] = "Conflito de versão; alterações apenas nesta sessão"
+    except (ValueError, TypeError, KeyError, StorageUnavailable):
+        state["ux36_cloud_dirty"] = True
+        state["ux36_autosave_failed_fingerprint"] = pending
         state["ux36_cloud_status"] = "Erro ao salvar; alterações apenas nesta sessão"
+    else:
+        state.pop("ux36_autosave_failed_fingerprint", None)
 
 
 def render_private_controls(plan, catalog):
@@ -204,14 +226,22 @@ def render_private_controls(plan, catalog):
     if state.get("ux36_cloud_dirty") and status == "Salvo em espaço privado":
         status = "Alterações não salvas"
     st.caption("**Status privado:** " + status)
+    if state.get("ux36_autosave_failed_fingerprint"):
+        st.info("O salvamento automático não foi confirmado. Seus dados continuam nesta sessão. "
+                "Use Salvar cópia privada agora para tentar novamente, sem substituir conflitos.")
     st.checkbox("Salvar automaticamente minhas alterações do roteiro", key="ux36_private_autosave")
     if st.button("Salvar cópia privada agora", key="ux36_cloud_save"):
+        state.pop("ux36_autosave_failed_fingerprint", None)
         try:
             save_private_now(plan, catalog)
             st.success("Cópia privada confirmada. Ela estará disponível na próxima sessão.")
         except StorageConflict:
+            state["ux36_cloud_dirty"] = True
+            state["ux36_cloud_status"] = "Conflito de versão; alterações apenas nesta sessão"
             st.error("Outra sessão alterou o planejamento. Baixe o backup local, reabra e compare antes de substituir.")
         except (StorageUnavailable, ValueError, KeyError, TypeError):
+            state["ux36_cloud_dirty"] = True
+            state["ux36_cloud_status"] = "Erro ao salvar; alterações apenas nesta sessão"
             st.error("Falha no armazenamento privado. Baixe uma cópia local.")
 
 
@@ -222,7 +252,7 @@ def private_status_label(fallback):
             and not state.get("ux36_cloud_dirty")
             and state.get("ux36_saved_plan_fingerprint") == plan_fingerprint(bootstrap())):
         return ("Salvo em espaço privado", "Recuperável após entrar com a conta autorizada")
-    if state.get("ux36_cloud_status", "").startswith("Erro"):
+    if state.get("ux36_cloud_status", "").startswith(("Erro","Conflito")):
         return ("Alterações apenas nesta sessão", "Salve uma cópia privada ou baixe o backup")
     return fallback
 
