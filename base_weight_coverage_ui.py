@@ -8,6 +8,7 @@ from base_coverage_model import (
     LABELS,REQUIREMENTS,coverage_matrix,coverage_summary,UNRESEARCHED,PARTIAL,
 )
 from five_base_comparison_model import load_five_base_evidence
+from city_profiles_ui import render_enriched_city_profiles
 
 PROFILE_IDS={"Geral":"general","Economia":"economy","Explorador":"explorer"}
 CRITERIA_KEYS=list(LABELS)
@@ -179,6 +180,8 @@ def render_weight_coverage()->None:
     only=st.checkbox("Priorizar as 12 finalistas",value=True,
                      key="ux_30_only_finalists")
     filtered=[r for r in rows if r["shortlist"]] if only else rows
+    render_enriched_city_profiles(rows,only_finalists=only)
+    st.markdown("### Matriz documental detalhada")
     st.markdown("**Matriz de evidências**")
     st.dataframe(_evidence_table(filtered),hide_index=True,width="stretch",
                  height=405)
