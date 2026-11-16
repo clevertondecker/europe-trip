@@ -75,6 +75,7 @@ def _calendar_overview(plan,catalog,preferences):
     d.metric("Fins de semana livres",weekend)
     stage=st.segmented_control("Etapa",
                               [ITALY_STAGE,FRANCE_STAGE],
+                              default=ITALY_STAGE,
                               format_func=lambda x:"Temporada europeia" if x==FRANCE_STAGE else x,
                               key="ux35_stage")
     filtered=[r for r in days if r["stage"]==stage]
@@ -256,7 +257,7 @@ def _manual(plan,catalog):
             try:
                 proposal=manual_calendar_move(
                     plan,catalog,chosen,row["stage"],target or None,
-                    from_day=old or None)
+                    from_day=old or "")
                 st.session_state["ux35_review_proposal"]=proposal
                 st.rerun()
             except (ValueError,KeyError) as exc:
