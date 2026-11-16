@@ -95,6 +95,14 @@ class CoverageModelTests(unittest.TestCase):
         self.assertTrue(any("Resultados do portal incluem Strasbourg" in
                             item["limitation"] for item in row["evidence"]))
 
+    def test_outside_basket_network_sources_are_documented_not_15_times(self):
+        for city in ("freiburg","dijon","liege"):
+            row=self.by_id[city]
+            self.assertEqual(row["route_basket_with_time"],0)
+            self.assertGreater(row["criteria"]["rail_connectivity"]["documented_count"],0)
+            self.assertIsNone(row["criteria"]["rail_connectivity"]["comparable_score"])
+            self.assertEqual(row["route_time_coverage_percent"],0)
+
     def test_research_update_sources_do_not_change_comparability(self):
         row=self.by_id["trier"]
         self.assertTrue(any("CFL" in str(x["scope"]) or
