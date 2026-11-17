@@ -148,8 +148,6 @@ def licensed_commons_info(files: dict[str, str]):
         "iiurlwidth": 960, "titles": "|".join(dict.fromkeys(files.values())),
     })
     pages = {key(p["title"]): p for p in payload["query"]["pages"]}
-    for p in list(payload["query"]["pages"])[:2]:
-        print("COMMONS_DEBUG",p["title"],str((p.get("imageinfo") or [{}])[0])[:950],flush=True)
     chosen, failures = {}, {}
     for destination_id, filename in files.items():
         page = pages.get(key(filename), {})
@@ -174,7 +172,8 @@ def licensed_commons_info(files: dict[str, str]):
             else:
                 license_link = "https://commons.wikimedia.org/wiki/" + filename.replace(" ", "_")
         url = info.get("thumburl") or info.get("url")
-        if not url or not url.startswith("https://upload.wikimedia.org/"):
+        if not url or not url.startswith(("https://upload.wikimedia.org/",
+                                              "https://thumb.wikimedia.org/")):
             failures[destination_id] = "Commons did not supply a direct photo URL"
             continue
         width, height = info.get("width", 0), info.get("height", 0)
