@@ -111,8 +111,6 @@ class JourneyAppTests(unittest.TestCase):
         self.assertEqual(app.session_state["ux_area"],"Meu roteiro")
         app.button(key="ux504_itinerary_to_dates").click().run()
         self.assertEqual(app.session_state["ux_section"],"Organizar viagem")
-        app.button(key="ux504_step_budget") if "ux504_step_budget" in [
-            b.key for b in app.button] else None
         # Return through the ordinary task navigation and go to budget.
         app.segmented_control(key="ux_section").set_value("Meu planejamento").run()
         app.button(key="ux504_itinerary_to_budget").click().run()
