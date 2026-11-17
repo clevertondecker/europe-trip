@@ -90,3 +90,27 @@ bruges = attraction_access("bruges_markt")
 5. Verificação visual da interface e inclusão de mapas não fazem parte deste pacote.
 
 **Conclusão:** o Pacote 2 entrega dados reais e um inventário validável, mas o objetivo completo de mobilidade pedestre P0 segue **parcialmente atendido**. Não apresentar como completo nem atribuir desempenho fictício à caminhada.
+
+
+## P1 corrigidos no PR #86: contratos de evidência e pontos públicos de acesso
+
+### Tipos de evidência de caminhada
+
+O validador agora diferencia:
+
+| Status | Uso | Requisitos |
+|---|---|---|
+| `pending_verification` | Rota ainda sem dados comprovados | Distância e tempo `null`, sem geometria comprovada |
+| `official_published` | Tempo/distância publicados por turismo/operador | Fonte HTTPS, data, método oficial; geometria não é obrigatória |
+| `pedestrian_routed` | Resultado de Valhalla/ORS/GraphHopper com perfil pedestre | Motor e versão, data do cálculo, fonte e referência da geometria roteada, perfil e método pedestres, coordenadas públicas de **saída da estação e entrada da atração** verificadas e referenciadas por IDs |
+
+Os status históricos `operator_published_walk_duration` e `pending_verified_pedestrian_route` continuam aceitos sem migração. O validador rejeita atribuição de um tempo de caminhada derivado de Haversine ou de perfil automotivo. **Nenhuma rota de motor foi fabricada ou acrescentada a este PR.**
+
+### Precisão das estações
+
+Cada estação possui uma coordenada geográfica **representativa**, marcada `station_point_not_entrance`, e uma lista independente `pedestrian_access_points`. Cada novo acesso público deverá ter ID estável, coordenada própria, vínculo à estação, URL, data e classificação `public_entrance` ou `public_exit` com `verification_status=verified_public_access`.
+
+Até que haja evidências, essas listas permanecem vazias. Os resultados de motor pedestre ficam bloqueados sem um acesso validado na origem e outro na atração. `brugge_station` tem `coordinate_conflict_unresolved=true`, bloqueando roteamento até a reconciliação das fontes. A informação **oficialmente publicada** de 20 minutos a pé entre Brugge Station e Markt continua como referência de tempo, sem alegar geometria ou origem em uma saída exata.
+
+Os testes geram acessos **sintéticos exclusivamente em memória** para provar que o contrato aceita futura evidência roteada de verdade. Nenhum destes pontos sintéticos é publicado como fato geográfico.
+
