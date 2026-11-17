@@ -98,7 +98,8 @@ def render_attraction_dialog(destination_id: str, base: str, catalog: dict, rout
                 if no.button("Cancelar",key="ux45_explore_remove_cancel_"+destination_id):
                     st.session_state.pop("ux45_explore_removing",None)
                     st.rerun()
-            with st.expander("Preferências", expanded=False):
+            with st.expander("Preferências (não adicionam ao roteiro)", expanded=False):
+                st.caption("Quero visitar marca interesse exploratório; Adicionar ao roteiro é uma ação separada.")
                 for attr in here:
                     k = "explore_mark_" + attr["id"]
                     marks = ["Quero visitar", "Opcional", "Descartar"]
@@ -108,7 +109,7 @@ def render_attraction_dialog(destination_id: str, base: str, catalog: dict, rout
                     if st.button("Aplicar preferência", key="explore_mark_apply_" + attr["id"]):
                         try:
                             change_interest(base, mode, attr["id"], st.session_state[k])
-                            st.success("Preferência salva no roteiro.")
+                            st.success("Interesse exploratório registrado; nenhum passeio foi adicionado.")
                         except SimulationWriteBlocked as exc:
                             st.error(str(exc))
         if st.button("Fechar e continuar explorando", key="explore_close_" + destination_id):
