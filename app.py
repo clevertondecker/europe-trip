@@ -1245,7 +1245,8 @@ elif page == "Roteiro":
         # UX 5.0.1: destination-first discovery, no base choice required.
         render_independent_destination_discovery()
         st.divider()
-        with st.expander("Pesquisa de passeios por cidade-base · opcional", expanded=False):
+        if st.checkbox("Mostrar pesquisa de passeios por cidade-base · opcional",
+                       value=False, key="ux501_show_legacy_explorer"):
             st.caption("Ferramenta anterior preservada para investigar alternativas de cidade-base.")
             render_explorer(data,sync_sources,map_view)
 
