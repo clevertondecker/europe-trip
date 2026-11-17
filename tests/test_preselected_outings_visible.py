@@ -12,7 +12,8 @@ class PreselectedOutingsVisibleTests(unittest.TestCase):
     def test_styles_show_destinations_and_attractions_without_extra_click(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=95).run()
         app.radio(key="main_navigation").set_value("Roteiro").run()
-        app.segmented_control(key="itinerary_section").set_value("Simular roteiros").run()
+        app.segmented_control(key="ux_section").set_value("Melhorar meu roteiro").run()
+        app.selectbox(key="ux_improve_view").set_value("Simular roteiros").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
         catalog=load_attractions()
         names={d["id"]:d["name"] for d in catalog["destinations"]}
