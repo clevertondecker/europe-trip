@@ -53,8 +53,20 @@ def render_wishlist(discovery) -> bool:
         return False
     by_id = {row["id"]: row for row in discovery["destinations"]}
     st.markdown("### Lugares que queremos conhecer")
+    def remember_discovery_filters():
+        keys = ("ux501_country", "ux501_categories", "ux501_search", "ux501_page")
+        # Streamlit removes keys for controls not mounted in the alternate view.
+        snapshot = st.session_state.get("ux502_discovery_filters", {}).copy()
+        snapshot.update({key: st.session_state[key] for key in keys if key in st.session_state})
+        st.session_state["ux502_discovery_filters"] = snapshot
+
     view = st.radio("Visualização", ("Descobrir lugares", "Minha lista"),
-                    horizontal=True, key="ux502_view")
+                    horizontal=True, key="ux502_view",
+                    on_change=remember_discovery_filters)
+    if view == "Descobrir lugares":
+        for key, value in st.session_state.get("ux502_discovery_filters", {}).items():
+            if key not in st.session_state:
+                st.session_state[key] = value
     items = ordered_interests(current, discovery)
     active = [r for r in items if r["priority"] != "discarded"]
     a, b, c, d = st.columns(4)
