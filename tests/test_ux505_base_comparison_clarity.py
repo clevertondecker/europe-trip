@@ -78,7 +78,7 @@ class InterpretiveComparisonTests(TestCase):
         self.assertEqual(matrix_cell(result["rows"][2]),
                          "Pesquisa parcial · tempo não identificado · fontes divergentes")
         self.assertEqual(matrix_cell(result["rows"][3]),"Tempo não pesquisado")
-        self.assertIn("fontes divergentes"," ".join(missing_research(result)))
+        self.assertIn("tempos divergentes"," ".join(missing_research(result)))
         self.assertIn("acesso local"," ".join(missing_research(result)).lower())
 
     def test_findings_describe_observations_without_electing_base(self):
@@ -102,7 +102,7 @@ class ComparisonPresentationAppTests(TestCase):
 
     def test_empty_list_explains_need_for_destinations_and_preserves_plan(self):
         app,plan=self._open(empty_interests())
-        self.assertTrue(any("Sua lista está vazia" in i.message for i in app.info))
+        self.assertTrue(any("Sua lista está vazia" in i.value for i in app.info))
         self.assertEqual(app.session_state["advisor_plan"],plan)
 
     def test_selected_wishes_summary_matrix_and_navigation(self):
