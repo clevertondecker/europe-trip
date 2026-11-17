@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 from html import escape
+from dataclasses import asdict
+from ux45_outing_contract import preview_outing
 import streamlit as st
 
 from attractions_model import package_cost, route_for
@@ -19,7 +21,8 @@ def render_attraction_dialog(destination_id: str, base: str, catalog: dict, rout
     def editor() -> None:
         mode = st.session_state.get("ux_mode", "Oficial")
         editable = can_edit(base, active_plan(), mode)
-        previous = active_plan()["packages"].get(destination_id, [])
+        current=preview_outing(active_plan(),catalog,destination_id)
+        previous = current["selected_attractions"]
         if not editable:
             st.info("Simulação: seleções temporárias não modificam seu roteiro oficial.")
         elif previous:
@@ -60,25 +63,43 @@ def render_attraction_dialog(destination_id: str, base: str, catalog: dict, rout
             st.session_state.setdefault("explore_simulated_choices", {})[destination_id] = list(picked)
             st.caption("Prévia local somente. Não será aplicada automaticamente.")
         else:
+            st.caption("Resumo da alteração: "+str(len(picked))+" atração(ões) · "+
+                       ("período "+current["period"] if current["period"]!="Ainda não definido" else "período ainda não definido")+
+                       " · datas existentes serão preservadas · somente nesta sessão.")
             if st.button("Atualizar passeio" if previous else "Adicionar ao meu roteiro",
                          key="explore_save_" + destination_id, disabled=not picked,
                          use_container_width=True):
                 try:
-                    save_outing(base, mode, destination_id, picked)
-                    st.session_state["explore_feedback"] = "Passeio salvo no Meu roteiro."
+                    result=save_outing(base, mode, destination_id, picked)
+                    st.session_state["ux45_explore_result"]=asdict(result)
                     st.session_state.pop("explore_selected_destination", None)
                     st.rerun()
                 except (ValueError, SimulationWriteBlocked) as exc:
                     st.error(str(exc))
             if previous and st.button("Remover passeio", key="explore_remove_" + destination_id):
-                try:
-                    remove_outing(base, mode, destination_id)
-                    st.session_state["explore_feedback"] = "Passeio removido do Meu roteiro."
-                    st.session_state.pop("explore_selected_destination", None)
+                st.session_state["ux45_explore_removing"]=destination_id
+                st.rerun()
+            if st.session_state.get("ux45_explore_removing")==destination_id:
+                assigned=current["dates"]
+                st.warning("Remover "+dest["name"]+" do roteiro? "+
+                           (str(len(assigned))+" data(s) associada(s) serão removidas. "
+                            if assigned else "Não há datas associadas. ")+
+                           "As atrações e o período flexível serão removidos.")
+                yes,no=st.columns(2)
+                if yes.button("Confirmar remoção",key="ux45_explore_remove_confirm_"+destination_id):
+                    try:
+                        result=remove_outing(base,mode,destination_id,confirmed=True)
+                        st.session_state["ux45_explore_result"]=asdict(result)
+                        st.session_state.pop("ux45_explore_removing",None)
+                        st.session_state.pop("explore_selected_destination",None)
+                        st.rerun()
+                    except (ValueError,SimulationWriteBlocked) as exc:
+                        st.error(str(exc))
+                if no.button("Cancelar",key="ux45_explore_remove_cancel_"+destination_id):
+                    st.session_state.pop("ux45_explore_removing",None)
                     st.rerun()
-                except (ValueError, SimulationWriteBlocked) as exc:
-                    st.error(str(exc))
-            with st.expander("Preferências", expanded=False):
+            with st.expander("Preferências (não adicionam ao roteiro)", expanded=False):
+                st.caption("Quero visitar marca interesse exploratório; Adicionar ao roteiro é uma ação separada.")
                 for attr in here:
                     k = "explore_mark_" + attr["id"]
                     marks = ["Quero visitar", "Opcional", "Descartar"]
@@ -88,7 +109,7 @@ def render_attraction_dialog(destination_id: str, base: str, catalog: dict, rout
                     if st.button("Aplicar preferência", key="explore_mark_apply_" + attr["id"]):
                         try:
                             change_interest(base, mode, attr["id"], st.session_state[k])
-                            st.success("Preferência salva no roteiro.")
+                            st.success("Interesse exploratório registrado; nenhum passeio foi adicionado.")
                         except SimulationWriteBlocked as exc:
                             st.error(str(exc))
         if st.button("Fechar e continuar explorando", key="explore_close_" + destination_id):

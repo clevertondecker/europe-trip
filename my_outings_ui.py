@@ -6,7 +6,7 @@ from html import escape
 
 import streamlit as st
 
-from planning_session import select_package, delete_package
+from planning_session import commit_outing,delete_outing
 from attractions_model import package_cost
 from advisor_finance import advisor_projection
 from destination_labels import place_label
@@ -53,7 +53,7 @@ def _commit_selection(dest_id: str, selected: list[str], valid: set[str]) -> Non
         raise ValueError("Selecione de uma a cinco atrações diferentes.")
     if not set(selected) <= valid:
         raise ValueError("Atração não pertence ao destino.")
-    select_package(dest_id, selected)
+    commit_outing(dest_id, selected, confirmed=True)
 
 
 def _photo(dest: dict) -> None:
@@ -221,7 +221,7 @@ def render_my_outings(plan: dict, catalog: dict, *, routes: dict | None = None,
                     if st.button("Confirmar remoção", type="primary",
                                  key="outing_confirm_remove_" + dest_id,
                                  width="stretch"):
-                        delete_package(dest_id)
+                        delete_outing(dest_id,confirmed=True)
                         st.session_state["outing_remove_pending"] = None
                         st.success("Passeio removido do planejamento. Salve online para manter a alteração.")
                         st.rerun()

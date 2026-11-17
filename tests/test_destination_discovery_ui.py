@@ -15,10 +15,14 @@ class DiscoveryUISmoke(unittest.TestCase):
         self.assertIn("advisor_discover_add_colmar",{b.key for b in app.button})
         app.button(key="advisor_discover_add_colmar").click().run()
         self.assertEqual(len(app.exception),0,[e.message for e in app.exception])
+        self.assertNotIn("colmar",app.session_state["advisor_plan"]["packages"])
+        self.assertIn("ux45_discovery_confirm_colmar",{b.key for b in app.button})
+        app.button(key="ux45_discovery_confirm_colmar").click().run()
+        self.assertEqual(len(app.exception),0,[e.message for e in app.exception])
         self.assertIn("colmar",app.session_state["advisor_plan"]["packages"])
         self.assertIn("colmar",app.session_state["explore_packages"])
         self.assertIn("discovery_go_my_outings",{b.key for b in app.button})
-        self.assertTrue(any("Colmar" in item.value and "Meus passeios" in item.value
+        self.assertTrue(any("Colmar" in item.value and "Meu planejamento" in item.value
                             for item in app.success))
         self.assertTrue(any("Projeção recalculada" in item.value for item in app.caption))
         app.button(key="discovery_go_my_outings").click().run()
@@ -26,6 +30,7 @@ class DiscoveryUISmoke(unittest.TestCase):
         self.assertEqual(app.session_state["flow_active_destination"],"colmar")
         self.assertEqual(app.session_state["flow_active_stage"],"França")
         self.assertIn("flow_edit_save_colmar",{b.key for b in app.button})
+        self.assertIn("ux45_back_to_origin",{b.key for b in app.button})
         self.assertIsNone(app.session_state.get("advisor_github_sha"))
         self.assertFalse(app.session_state.get("advisor_autosave_pending",False))
         app.segmented_control(key="ux_section").set_value("Organizar viagem").run()

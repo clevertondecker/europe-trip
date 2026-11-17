@@ -5,7 +5,9 @@ import streamlit as st
 from destination_recommender import recommend_destinations
 from travel_profile_scenarios import build_profile_scenarios
 from recommended_itineraries import approve_destination,reject_destination,approve_profile_scenario
-from planning_session import accept_approved_plan
+from planning_session import accept_approved_plan,commit_outing,active_plan
+from ux45_outing_contract import preview_outing
+from itinerary_flow_model import period_options,FRANCE_STAGE,UNASSIGNED
 from destination_labels import place_label, country_flag
 from attractions_model import package_cost
 from advisor_finance import advisor_projection
@@ -29,14 +31,11 @@ def _financial_snapshot(plan,catalog,routes,trip_data,live,eurfx,chffx,use_city_
 
 
 def _go_to_my_outings():
-    from ux_navigation import set_task
-    state=st.session_state
-    destination=state.get("discovery_last_destination")
-    state["flow_active_stage"]="França"
-    state["flow_stage"]="França"
+    from ux45_navigation_context import handoff
+    destination=st.session_state.get("discovery_last_destination")
     if destination:
-        state["flow_active_destination"]=destination
-    set_task(state,"Meu roteiro","Meu planejamento")
+        handoff(st.session_state,area="Meu roteiro",
+                section="Melhorar meu roteiro",destination_id=destination)
 
 
 def _render_suggestion(rec,plan,catalog,routes,trip_data,live,eurfx,chffx,use_city_rent):
@@ -89,28 +88,73 @@ def _render_suggestion(rec,plan,catalog,routes,trip_data,live,eurfx,chffx,use_ci
                 for missing in rec["missing"]:st.caption("• "+missing)
             a,b=st.columns(2)
             with a:
-                if st.button("Quero visitar",key="advisor_discover_add_"+rec["destination_id"],
+                if st.button("Revisar inclusão no roteiro",
+                             key="advisor_discover_add_"+rec["destination_id"],
                              use_container_width=True):
-                    try:
-                        updated=approve_destination(plan,rec,approved=True)
-                        before=_financial_snapshot(plan,catalog,routes,trip_data,
-                                                   live,eurfx,chffx,use_city_rent)
-                        after=_financial_snapshot(updated,catalog,routes,trip_data,
-                                                  live,eurfx,chffx,use_city_rent)
-                        accept_approved_plan(updated)
-                        st.session_state["discovery_last_added"]={
-                            "name":rec["name"],"destination_id":rec["destination_id"],
-                            "before":before,"after":after}
-                        st.session_state["discovery_last_destination"]=rec["destination_id"]
-                        st.rerun()
-                    except ValueError as exc:
-                        st.error("Não foi possível adicionar o passeio: "+str(exc))
+                    st.session_state["ux45_discovery_review"]=rec["destination_id"]
+                    st.session_state["ux45_discovery_revision"]=plan["revision"]
+                    st.rerun()
             with b:
                 if st.button("Descartar",key="advisor_discover_dismiss_"+rec["destination_id"],
                              use_container_width=True):
                     updated=reject_destination(plan,rec["destination_id"],approved=True)
                     accept_approved_plan(updated)
                     st.rerun()
+            if st.session_state.get("ux45_discovery_review")==rec["destination_id"]:
+                st.markdown("**Revisar antes de adicionar ao roteiro**")
+                if st.session_state.get("ux45_discovery_revision")!=active_plan()["revision"]:
+                    st.warning("O planejamento mudou. Reabra a sugestão para revisar a versão atual.")
+                else:
+                    info=preview_outing(plan,catalog,rec["destination_id"])
+                    options={a["id"]:a["name"] for a in catalog["attractions"]
+                             if a["destination_id"]==rec["destination_id"]}
+                    default=[a for a in (info["selected_attractions"] or
+                                         rec["selected_attractions"]) if a in options]
+                    key="ux45_discovery_attrs_"+rec["destination_id"]
+                    if key not in st.session_state:
+                        st.session_state[key]=default
+                    picked=st.multiselect("Atrações a incluir ou atualizar",
+                                           list(options),key=key,max_selections=5,
+                                           format_func=lambda k:options[k])
+                    periods=period_options(FRANCE_STAGE)
+                    period=st.selectbox("Período flexível (opcional)",periods,
+                                        index=periods.index(info["period"])
+                                              if info["period"] in periods else 0,
+                                        key="ux45_discovery_period_"+rec["destination_id"])
+                    st.caption(("Atualizar destino já incluído" if info["already_exists"]
+                                else "Adicionar novo destino")+" · "+
+                               str(len(picked))+" atração(ões) · "+
+                               ("sem data definida" if not info["dates"]
+                                else str(len(info["dates"]))+" data(s) preservada(s)")+
+                               " · retorno ferroviário a confirmar · alteração apenas na sessão.")
+                    confirm,cancel=st.columns(2)
+                    if confirm.button("Confirmar "+("atualização" if info["already_exists"]
+                                                   else "inclusão"),
+                                      key="ux45_discovery_confirm_"+rec["destination_id"],
+                                      disabled=not picked):
+                        try:
+                            before=_financial_snapshot(plan,catalog,routes,trip_data,
+                                                       live,eurfx,chffx,use_city_rent)
+                            result=commit_outing(rec["destination_id"],picked,period,
+                                                 confirmed=True)
+                            after=_financial_snapshot(active_plan(),catalog,routes,trip_data,
+                                                      live,eurfx,chffx,use_city_rent)
+                            st.session_state["discovery_last_added"]={
+                                "name":result.name,"destination_id":result.destination_id,
+                                "attraction_count":result.attraction_count,
+                                "period":result.period,"dates":list(result.dates),
+                                "action":result.action,"before":before,"after":after}
+                            st.session_state["discovery_last_destination"]=rec["destination_id"]
+                            st.session_state.pop("ux45_discovery_review",None)
+                            st.session_state.pop("ux45_discovery_revision",None)
+                            st.rerun()
+                        except (ValueError,KeyError) as exc:
+                            st.error("Não foi possível confirmar a alteração: "+str(exc))
+                    if cancel.button("Cancelar revisão",
+                                      key="ux45_discovery_cancel_"+rec["destination_id"]):
+                        st.session_state.pop("ux45_discovery_review",None)
+                        st.session_state.pop("ux45_discovery_revision",None)
+                        st.rerun()
 
 def render_discovery(plan,catalog,routes,trip_data,sync_sources,eurfx,chffx,use_city_rent,
                      *,view="discover"):
@@ -131,13 +175,21 @@ def render_discovery(plan,catalog,routes,trip_data,sync_sources,eurfx,chffx,use_
     st.info("Cidade-base: **"+base_name+"** · A pesquisa usa tarifas e tempos "
             "da matriz específica dessa base (revisão "+str(routes.get("checked_at","não informada"))+
             "). Não são preços ao vivo nem horários confirmados de 2027.")
-    st.caption("Clique em **Quero visitar** para incluir imediatamente o destino em **Meus passeios**. "
-               "O orçamento da sessão é recalculado automaticamente; a gravação online depende do salvamento.")
+    st.caption("Revise atrações e período antes de confirmar a inclusão em Meu planejamento. "
+               "A projeção financeira será atualizada apenas após sua confirmação; "
+               "o salvamento remoto é separado.")
     live=sync_sources["finance"]["status"]=="live"
     current=_financial_snapshot(plan,catalog,routes,trip_data,live,eurfx,chffx,use_city_rent)
     notice=st.session_state.pop("discovery_last_added",None)
     if notice:
-        st.success("✓ "+notice["name"]+" foi adicionado a Meus passeios.")
+        st.success("✓ "+notice["name"]+(" foi atualizado" if notice.get("action")=="updated"
+                   else " foi adicionado")+" em Meu planejamento.")
+        st.caption(str(notice.get("attraction_count",0))+" atração(ões) · "+
+                   ("sem período definido" if notice.get("period",UNASSIGNED)==UNASSIGNED
+                    else "período "+notice["period"])+
+                   (" · "+str(len(notice.get("dates",[])))+" data(s) preservada(s)"
+                    if notice.get("dates") else " · sem data definida")+
+                   " · retorno ferroviário pendente · alteração somente na sessão.")
         before,after=notice["before"],notice["after"]
         delta=after["total"]-before["total"]
         st.caption("Projeção recalculada: "+money(before["total"])+" → "+
@@ -146,8 +198,12 @@ def render_discovery(plan,catalog,routes,trip_data,sync_sources,eurfx,chffx,use_
         if abs(delta)<0.005:
             st.caption("O total não mudou porque os gastos conhecidos ainda cabem na "
                        "verba de passeios já prevista, ou não há valores novos cotados.")
-        st.button("Ver em Meus passeios →",key="discovery_go_my_outings",
-                  on_click=_go_to_my_outings,width="stretch")
+        continue_col,go_col=st.columns(2)
+        if continue_col.button("Continuar descobrindo",key="ux45_discovery_continue"):
+            st.session_state.pop("discovery_last_added",None)
+            st.rerun()
+        go_col.button("Ver no meu roteiro",key="discovery_go_my_outings",
+                      on_click=_go_to_my_outings,width="stretch")
     a,b,c=st.columns(3)
     a.metric("Passeios no meu roteiro",len(plan["packages"]))
     b.metric("Projeção do casal",money(current["total"]))

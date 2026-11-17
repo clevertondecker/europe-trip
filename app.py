@@ -258,12 +258,19 @@ def _select_scenario_sidebar() -> None:
 
 
 def _ux_area_changed() -> None:
+    st.session_state.pop("ux45_origin",None)
+    st.session_state.pop("flow_edit_target",None)
     set_ux_area(st.session_state,st.session_state["ux_area"])
 
 
 def _ux_section_changed() -> None:
-    set_ux_task(st.session_state,st.session_state["ux_area"],
-                st.session_state["ux_section"])
+    # A repeated click may yield None in Streamlit. Preserve the return
+    # handoff unless the user actually selects a different task.
+    requested=st.session_state["ux_section"]
+    if requested is not None and requested!=st.session_state.get("_ux_last_section"):
+        st.session_state.pop("ux45_origin",None)
+        st.session_state.pop("flow_edit_target",None)
+    set_ux_task(st.session_state,st.session_state["ux_area"],requested)
 
 
 def _ux_aux_changed() -> None:
