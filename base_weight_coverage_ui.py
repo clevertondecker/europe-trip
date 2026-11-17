@@ -63,7 +63,7 @@ def _render_dq32_macro_coverage(rows):
     st.caption(
         "Atrações canônicas e novas são contadas separadamente; equivalências "
         "semânticas são reconciliadas sem perder IDs e fontes. "
-        "O mesmo universo de destinos é considerado para todas as bases. 
+        "O mesmo universo de destinos é considerado para todas as bases. "
         "Ausência de tempo não é ausência de conexão. "
         "Preservados os pesos exploratórios de logística/custo/praticidade "
         "e as exigências estritas da decisão definitiva.")
