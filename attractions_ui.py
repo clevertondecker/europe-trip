@@ -50,6 +50,14 @@ def _selected_packages() -> dict[str,list[str]]:
     return active_plan()["packages"]
 
 
+def _ux45_open_planner(destination_id: str) -> None:
+    """Button callback runs before Streamlit instantiates navigation widgets."""
+    from ux45_navigation_context import handoff
+    handoff(st.session_state,area="Explorar",section="Passeios",
+            destination_id=destination_id)
+    st.session_state.pop("ux45_explore_result",None)
+
+
 def render_explorer(trip_data: dict, sync_sources: dict, map_view) -> None:
     attractions=load_attractions()
     routes=load_base_routes()
@@ -196,13 +204,10 @@ def render_explorer(trip_data: dict, sync_sources: dict, map_view) -> None:
         if next_col.button("Continuar explorando",key="ux45_explore_continue"):
             st.session_state.pop("ux45_explore_result",None)
             st.rerun()
-        if outcome["action"]!="removed" and view_col.button(
-                "Ver no meu roteiro",key="ux45_explore_to_planner"):
-            from ux45_navigation_context import handoff
-            handoff(st.session_state,area="Explorar",section="Passeios",
-                    destination_id=outcome["destination_id"])
-            st.session_state.pop("ux45_explore_result",None)
-            st.rerun()
+        if outcome["action"]!="removed":
+            view_col.button("Ver no meu roteiro",key="ux45_explore_to_planner",
+                            on_click=_ux45_open_planner,
+                            args=(outcome["destination_id"],))
     for start in range(0,len(filtered),2):
         for col,item in zip(st.columns(2,gap="medium"),filtered[start:start+2]):
             d=item["destination"]
