@@ -55,3 +55,10 @@ Este é um documento de instruções. O diff desta PR **não implementa a funcio
 - **Contratos reutilizados:** `build_destination_discovery()`, `reconcile_attractions()`, `canonical_place()`, `selected_destinations_for_comparison()` e estados ferroviários de #109.
 - **Dependências:** leitura do levantamento 2A **para expansão regional**, mas o piloto de melhorias do comparador/corredores não precisa esperar este estudo; baseline #108.
 - **Aceite:** máximo cinco propostas e dois corredores, cada uma com fonte e estado, zero aliases duplicados e zero alteração em TripPlan/wishlist/cesta fixa. Com `new_opportunities_by_region` oculto, a saída da comparação permanece idêntica. Implementação em PR separado.
+
+
+## Rastreabilidade da implementação — revisão final 17/11/2026
+
+- PR de implementação separado para revisão: [#118](https://github.com/clevertondecker/europe-trip/pull/118).
+- Implementação independente: piloto de quatro propostas turísticas em dois corredores, fontes oficiais, sem nova wishlist nem afirmação de viabilidade.
+- Este PR permanece **somente especificação**. Nenhum merge/deploy de implementação está autorizado até revisão do conjunto. Os testes de CI no PR de implementação validam contratos/código, não substituem confirmação de horários, aluguéis e acesso para datas de 2027.
