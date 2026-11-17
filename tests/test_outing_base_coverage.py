@@ -133,7 +133,7 @@ class OutingExplorerNavigationTests(unittest.TestCase):
         app.selectbox(key="attractions_scenario_base").set_value("lille").run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
         self.assertTrue(any("Catálogo geral" in x.value for x in app.info))
-        self.assertTrue(any("menor tempo histórico publicado" in x.value.lower()
+        self.assertTrue(any("menores tempos históricos publicados" in x.value.lower()
                             for x in app.caption))
         self.assertEqual(app.session_state["advisor_plan"],original)
 
