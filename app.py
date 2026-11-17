@@ -1217,18 +1217,10 @@ elif page == "Roteiro":
 
     render_scenario_impact(active_plan(),data,
                            sync_sources["finance"]["status"]=="live")
-    # The old nine-tab navigation remains available only as a collapsed
-    # compatibility control; UX 3.0 exposes the current task above.
-    with st.expander("Acesso a ferramentas antigas deste roteiro",expanded=False):
-        st.segmented_control("Navegação anterior do roteiro",
-                             list(LEGACY_ITINERARY),key="itinerary_section",
-                             on_change=_ux_legacy_itinerary_changed,
-                             selection_mode="single")
-        if st.session_state.get("itinerary_section")=="Guias e pesquisas":
-            st.selectbox("Guia ou pesquisa",[
-                "Explorar atrações","Itália e Costa Amalfitana","França e escapadas",
-                "Transportes e custos","Calendário de pesquisa","Cronograma oficial"],
-                key="guide_section",on_change=_ux_legacy_guide_changed)
+    # UX 4.8: only task-based navigation is user-visible. Keep legacy routing
+    # adapter internally for old deep links and session-state compatibility.
+    # The modern task selector resolves guide/research access without a second
+    # competing nine-item navigation menu.
     itinerary_section=itinerary_target or st.session_state.get("itinerary_section","Meus passeios")
     if itinerary_section=="Guias e pesquisas":
         itinerary_section=guide_target or st.session_state.get("guide_section","Explorar atrações")
