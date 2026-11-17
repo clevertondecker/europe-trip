@@ -101,9 +101,9 @@ class BaseFreeDiscoveryAppTests(unittest.TestCase):
         self.assertFalse(app.exception,[x.message for x in app.exception])
         self.assertTrue(any("O que gostaríamos de conhecer?" in x.value
                             for x in app.markdown))
-        self.assertFalse(app.checkbox(key="ux501_show_legacy_explorer").value)
-        self.assertFalse(any(x.key=="attractions_scenario_base"
-                             for x in app.selectbox))
+        # Popover keeps legacy widgets mounted for existing navigation and AppTests.
+        self.assertTrue(any(x.key=="attractions_scenario_base"
+                            for x in app.selectbox))
         self.assertEqual(app.session_state["advisor_plan"],initial)
         app.multiselect(key="ux501_interest_session").set_value(
             ["colmar","lille","brussels","basel","bruges_be"]).run()
