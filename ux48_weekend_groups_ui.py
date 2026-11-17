@@ -94,6 +94,23 @@ def render_weekend_planner(plan,catalog):
             st.caption("Roteiro completo de ida, ligações entre destinos, retorno, hotel e custos: a confirmar.")
             if group["notes"]:st.write(group["notes"])
             with st.expander("Editar viagem · "+group["name"]):
+                if len(group["destinations"])>1:
+                    to_move=st.selectbox("Destino para reordenar",
+                        group["destinations"],format_func=lambda x:byid[x]["name"],
+                        key="ux48_move_choice_"+group["id"])
+                    left,right=st.columns(2)
+                    for col,offset,label in ((left,-1,"Mover para cima"),
+                                             (right,1,"Mover para baixo")):
+                        with col:
+                            if st.button(label,key="ux48_move_"+str(offset)+"_"+group["id"]):
+                                ordered=list(group["destinations"])
+                                idx=ordered.index(to_move)
+                                target=idx+offset
+                                if 0<=target<len(ordered):
+                                    ordered[idx],ordered[target]=ordered[target],ordered[idx]
+                                    _save(update_group(groups,plan,catalog,group["id"],
+                                                       destinations=ordered))
+                                    st.rerun()
                 with st.form("ux48_edit_"+group["id"]):
                     name=st.text_input("Nome",value=group["name"])
                     existing=[x for x in group["destinations"] if x in byid]
@@ -103,7 +120,7 @@ def render_weekend_planner(plan,catalog):
                                       for other in groups["groups"] if other["id"]!=group["id"])]
                     selected=st.multiselect("Destinos (ordem de seleção)",options,
                          default=existing,format_func=lambda x:byid[x]["name"])
-                    st.caption("Para reordenar, remova e selecione novamente os destinos na ordem desejada.")
+                    st.caption("Use os botões acima para reordenar destinos existentes.")
                     period=st.selectbox("Período",PERIODS,
                         index=PERIODS.index(group["period"]))
                     dates=[r["start"] for r in available_weekends(groups,plan,catalog)
