@@ -45,6 +45,7 @@ def validate_groups(state,plan,catalog):
     season=_season_days(plan)
     occupied={}
     used=set()
+    assigned_to_group=set()
     for group in groups:
         keys={"id","name","destinations","period","start_date","nights",
               "base_city","notes","status"}
@@ -58,6 +59,9 @@ def validate_groups(state,plan,catalog):
         if (not isinstance(dests,list) or not 1<=len(dests)<=6 or
             len(dests)!=len(set(dests)) or any(d not in chosen for d in dests)):
             raise ValueError("Grupo contém destino não escolhido")
+        if assigned_to_group.intersection(dests):
+            raise ValueError("Passeio já associado a outra viagem")
+        assigned_to_group.update(dests)
         if not isinstance(group["name"],str) or not 1<=len(group["name"].strip())<=100:
             raise ValueError("Nome de viagem inválido")
         if (group["period"] not in PERIODS or group["status"] not in STATUS or
