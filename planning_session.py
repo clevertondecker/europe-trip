@@ -10,6 +10,7 @@ from planning_store import (create_from_legacy,change_plan,set_package,
                             remove_package,add_assignment,remove_assignment,
                             sync_legacy_view,summary)
 from trip_plan_model import new_plan
+from plan_read_models import legacy_plan_projection, read_plan_view
 from attractions_model import load_attractions
 from catalog_plan_validation import allowed_attractions
 
@@ -22,17 +23,11 @@ def bootstrap()->dict:
             plan=new_plan()
         st.session_state["advisor_plan"]=plan
     plan=st.session_state["advisor_plan"]
-    # Missing keys only; canonical always wins for loaded session state.
-    if "explore_packages" not in st.session_state:
-        st.session_state["explore_packages"]=deepcopy(plan["packages"])
-    if "explore_calendar" not in st.session_state:
-        st.session_state["explore_calendar"]=deepcopy(plan["assignments"])
-    if "explore_base" not in st.session_state:
-        st.session_state["explore_base"]=plan["base_city"]
-    if "unified_city" not in st.session_state:
-        st.session_state["unified_city"]=plan["base_city"].capitalize()
-    if "unified_scenario" not in st.session_state:
-        st.session_state["unified_scenario"]=plan["budget_scenario"]
+    # Initialize compatibility keys only before widget instantiation.
+    # Existing widget keys must not be overwritten during reruns.
+    for key,value in legacy_plan_projection(plan).items():
+        if key not in st.session_state:
+            st.session_state[key]=deepcopy(value)
     return plan
 
 def active_plan()->dict:
@@ -143,3 +138,8 @@ def update_interest(attraction_id:str,preference:str)->dict:
 
 def statistics()->dict:
     return summary(bootstrap())
+
+
+def active_plan_view()->dict:
+    """Independent read-only snapshot; cannot accidentally mutate TripPlan."""
+    return read_plan_view(bootstrap())
