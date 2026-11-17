@@ -15,7 +15,7 @@
 Ampliar a cobertura ferroviária com **qualidade e reutilização**, não transformar 1.271 pares sem evidência em milhares de tempos especulativos. Priorizar desejos reais e diversidade de países.
 
 ## Dependências
-Contratos do PR 1; levantamento geográfico do 2A e oportunidades do 2B; usar estrutura de retorno (3) e última milha (4) quando implementadas. A auditoria #108 define o baseline. Garantir base fixa de comparação antes de comparar alternativas.
+Contratos do PR 1; **piloto de cesta pública e fixa com cidades-base/destinos já cadastrados NÃO depende dos estudos 2A e 2B**; usar estrutura de retorno (3) e última milha (4) quando implementadas. Após validar o piloto, o estudo 2A e as descobertas 2B poderão orientar a expansão. A auditoria #108 define o baseline. Garantir base fixa de comparação antes de comparar alternativas.
 
 ## Lotes propostos (pesquisa, não rankings)
 - **A: Alto Reno/Alsácia:** Mulhouse, Strasbourg, Freiburg, Basel (Basel como nova candidata se não cadastrada); conexões com destinos já registrados em França, Alemanha e Suíça.
@@ -46,3 +46,10 @@ Pesquisa de todos os pares, alteração do comparador visual, geração de reser
 
 ## Parecer solicitado ao revisor
 Comentários diretamente no PR: P0/P1/P2; contratos/adaptadores que devem ser reutilizados; dados concretos impossíveis de inferir; testes mínimos; ordem de execução/dependências e recomendação de ajuste ou implementação. Nada é executado automaticamente.
+
+
+## Rastreabilidade da implementação — revisão final 17/11/2026
+
+- PR de implementação separado para revisão: [#121](https://github.com/clevertondecker/europe-trip/pull/121).
+- Implementação independente: iniciar piloto fixo público 3 bases × 3 destinos cadastrados; não depende do estudo #110/#111. Referências de páginas de operadores sem duração não confirmam horário, retorno ou 2027.
+- Este PR permanece **somente especificação**. Nenhum merge/deploy de implementação está autorizado até revisão do conjunto. Os testes de CI no PR de implementação validam contratos/código, não substituem confirmação de horários, aluguéis e acesso para datas de 2027.
