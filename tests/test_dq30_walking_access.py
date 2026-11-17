@@ -205,6 +205,22 @@ class WalkingAccessTests(unittest.TestCase):
         self.assertFalse(any(r["distance_m"] is not None for r in self.data["walking_routes"]))
         self.assertEqual(sum(r["duration_min"] is not None for r in self.data["walking_routes"]),1)
 
+    def test_official_7km_loop_does_not_create_segment_distances(self):
+        walks=self.data["published_walking_itineraries"]
+        self.assertEqual(len(walks),1)
+        self.assertEqual(walks[0]["distance_m"],7000)
+        self.assertEqual(walks[0]["route_scope"],"entire_loop_not_individual_segments")
+        self.assertIsNone(walks[0]["duration_min"])
+        self.assertFalse(any(x["distance_m"] is not None for x in self.data["walking_routes"]))
+
+    def test_official_itinerary_rejects_incompatible_scopes_and_ids(self):
+        self.reject(lambda d: d["published_walking_itineraries"][0].update(distance_m=-7000))
+        self.reject(lambda d: d["published_walking_itineraries"][0].update(route_scope="single_segment"))
+        self.reject(lambda d: d["published_walking_itineraries"][0].update(source_url=None))
+        self.reject(lambda d: d["published_walking_itineraries"][0].update(included_attraction_ids=["colmar_heads"]))
+        self.reject(lambda d: d["published_walking_itineraries"].append(
+            deepcopy(d["published_walking_itineraries"][0])))
+
     def test_read_only_and_trip_plan_unchanged(self):
         plan = new_plan()
         before = deepcopy(plan)
