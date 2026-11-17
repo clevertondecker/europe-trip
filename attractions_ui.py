@@ -58,6 +58,68 @@ def _ux45_open_planner(destination_id: str) -> None:
     st.session_state.pop("ux45_explore_result",None)
 
 
+def _render_research_only_outings(base_id: str, catalog: dict) -> None:
+    """Read-only attraction discovery; never use another city's fare matrix."""
+    from outing_base_coverage_model import preview_for_base
+
+    coverage = preview_for_base(base_id, catalog=catalog)
+    st.info(
+        "Pesquisa exploratória de " + coverage["base_name"] +
+        ": as atrações abaixo já pertencem ao catálogo, mas esta cidade ainda "
+        "não possui uma matriz completa de deslocamentos, custos ou retornos. "
+        "Nada nesta tela altera os passeios do roteiro oficial.")
+    a,b,c = st.columns(3)
+    a.metric("Destinos com atrações", coverage["catalog_destinations"])
+    b.metric("Atrações existentes", coverage["catalog_attractions"])
+    c.metric("Destinos com tempo ferroviário histórico", coverage["timed_destination_count"])
+    st.caption(
+        "Os tempos disponíveis são apenas referências históricas de ida, estação a estação. "
+        "Não comprovam retorno no fim de semana, última milha nem preço total do casal. "
+        "Sem tempo pesquisado não significa que não haja trem.")
+
+    rows = []
+    for item in coverage["destinations"]:
+        if item["local"]:
+            transport = "Local · deslocamento a verificar"
+        elif item["train_oneway_min"] is not None:
+            transport = str(item["train_oneway_min"]) + " min · ida histórica"
+        else:
+            transport = "Rota ainda não pesquisada"
+        rows.append({
+            "Destino": item["name"],
+            "Atrações": item["attraction_count"],
+            "Transporte": transport,
+            "Faltam": "Última milha e custos" if item["train_oneway_min"] is not None
+                     else "Tempo, tarifa, retorno e acesso",
+        })
+    st.markdown("#### Destinos e passeios disponíveis para pesquisa")
+    st.dataframe(pd.DataFrame(rows),hide_index=True,use_container_width=True)
+    st.markdown("#### Consultar atrações de um destino")
+    names={row["destination_id"]:row["name"] for row in coverage["destinations"]}
+    chosen=st.selectbox(
+        "Destino a explorar",list(names),
+        format_func=lambda key:names[key],key="explore_readonly_destination")
+    selected=next(row for row in coverage["destinations"]
+                  if row["destination_id"]==chosen)
+    if selected["train_oneway_min"] is not None:
+        st.write("**Trem (ida histórica):** "+
+                 str(selected["train_oneway_min"])+" minutos, estação a estação")
+        st.markdown("[Consultar fonte ferroviária]("+
+                    selected["train_evidence_url"]+")")
+    elif selected["local"]:
+        st.caption("O deslocamento urbano até as atrações ainda não foi documentado.")
+    else:
+        st.caption("Ainda não há duração verificada desta base até este destino.")
+    for attr in selected["attractions"]:
+        st.markdown("- **"+escape(attr["name"])+"** · "+
+                    "[Fonte da atração]("+attr["source_url"]+")")
+    st.warning(
+        "Pesquisa de viagem incompleta: retorno, acesso às atrações, "
+        "bilhetes normais e datas de 2027 ainda não confirmados. "
+        "Para planejar e salvar passeios oficiais, utilize a base atualmente "
+        "aprovada. Nenhuma tarifa é transferida de outra cidade.")
+
+
 def render_explorer(trip_data: dict, sync_sources: dict, map_view) -> None:
     attractions=load_attractions()
     routes=load_base_routes()
@@ -94,12 +156,7 @@ def render_explorer(trip_data: dict, sync_sources: dict, map_view) -> None:
                 ". As seleções de passeios oficiais não podem ser alteradas "
                 "por engano ao avaliar outra cidade.")
     if base not in {"mulhouse","strasbourg","metz","nancy"}:
-        st.warning("A matriz detalhada de atrações ainda não possui rotas "
-                   "verificadas desde esta base. Não é correto reutilizar as "
-                   "tarifas de outra cidade nem considerar viagem gratuita.")
-        st.caption("Para analisar hospedagem, localização e pesquisas disponíveis, "
-                   "abra Roteiro → Explorar bases → Pesquisa ampliada. "
-                   "A lista e o calendário oficiais permanecem preservados.")
+        _render_research_only_outings(base,attractions)
         return
     available=places_for_base(attractions,routes,base)
     country_options=sorted({p["destination"]["country"] for p in available})
