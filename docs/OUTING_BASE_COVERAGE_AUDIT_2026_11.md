@@ -15,15 +15,15 @@ Há três níveis de dados, que NÃO devem ser equiparados:
 
 | Cidade-base | Na matriz de passeios | Algum tempo ferroviário histórico | Destinos do catálogo com tempo (de 14) | Diagnóstico |
 |---|---|---|---:|---|
-| Mulhouse | Sim | Sim | 7 | Matriz parcial; faltam muitos retornos e última milha |
-| Strasbourg | Sim | Sim | 10 | Matriz parcial; referências adicionais dispersas |
+| Mulhouse | Sim | Sim | 8 | Matriz parcial; faltam muitos retornos e última milha |
+| Strasbourg | Sim | Sim | 11 | Matriz parcial; referências adicionais dispersas |
 | Metz | Sim | Sim | 4 | Matriz parcial |
 | Nancy | Sim | Sim | 4 | Matriz parcial |
 | Lille | Não | Sim | 4 | **P1**: 8 trechos amostrados, tela ocultava dados |
 | Offenburg | Não | Sim | 2 | **P1**: há referência Strasbourg/Freiburg |
 | Karlsruhe | Não | Sim | 1 | **P1**: há referência Strasbourg |
 | Dijon | Não | Sim | 0 | **P1/P2**: rotas para Beaune/Lausanne/Lyon fora dos 14 destinos canônicos |
-| Trier | Não | Sim | 0 | **P1/P2**: dados Luxembourg City, ID diferente do catálogo `luxembourg`; reconciliar evidência com cuidado |
+| Trier | Não | Sim | 1 | **P1/P2**: o adaptador concilia `luxembourg_city` com o destino `luxembourg`; ainda requer retorno e acesso |
 | Aachen | Não | Sim | 0 | **P2**: dado Cologne fora do catálogo |
 | Reims | Não | Sim | 0 | **P2**: dado Amsterdam fora do catálogo |
 | Arras | Não | Sim | 0 | **P2**: dado Lille fora do catálogo |
@@ -46,7 +46,7 @@ Há três níveis de dados, que NÃO devem ser equiparados:
 | Luxembourg City | Não | Não | 0 | Base `luxembourg_city`, destino turístico `luxembourg`; falta tabela de saída |
 | Esch-sur-Alzette | Não | Não | 0 | Falta pesquisa de saída |
 
-> Nota: a coluna `Algum tempo` considera todos os destinos das amostras, inclusive os que não existem nos 14 destinos do catálogo de atrações. Não concluir que as 18 bases sem tempo observado são mal conectadas — só não pesquisadas nos dados analisados.
+> Nota: a coluna `Algum tempo` considera todos os destinos das amostras, inclusive os que não existem nos 14 destinos do catálogo de atrações. Não concluir que as 17 bases sem tempo observado são mal conectadas — só não pesquisadas nos dados analisados.
 
 ## O que o PR melhora imediatamente
 
