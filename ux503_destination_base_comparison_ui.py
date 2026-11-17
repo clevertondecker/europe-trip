@@ -165,8 +165,9 @@ def render_wishlist_base_comparison(*, plan, discovery=None, research=None):
                         destination["priority_label"])
             for base_id in selected:
                 route = indexed[(base_id, detail)]
-                with st.expander(cities[base_id]["name"] + " · " +
-                                 route["status"], expanded=False):
+                with st.container(border=True):
+                    st.markdown("**" + cities[base_id]["name"] + "** · " +
+                                route["status"])
                     st.write(matrix_cell(route))
                     if route["typical_oneway_min"] is not None:
                         st.caption("Tempo típico observado: " +
@@ -191,8 +192,9 @@ def render_wishlist_base_comparison(*, plan, discovery=None, research=None):
                                         source + ")")
         st.markdown("##### Moradia e pendências por cidade-base")
         for summary in result["summaries"]:
-            with st.expander(summary["base_name"] +
-                             " · condições e pesquisas pendentes"):
+            with st.container(border=True):
+                st.markdown("**" + summary["base_name"] +
+                            "** · condições e pesquisas pendentes")
                 st.caption(
                     f'{summary["documented_time_count"]} trajetos com tempo '
                     f'pesquisado; {summary["missing_time_count"]} sem tempo; '
