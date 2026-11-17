@@ -22,7 +22,8 @@
       "return_verified": false,
       "last_mile_min": null,
       "valid_for_2027": false,
-      "notes": "Serviço regional distinto do TGV de 25 min, também apresentado pela DB. €13,20 é tarifa desde, não tarifa normal comprovada."
+      "notes": "Serviço regional distinto do TGV de 25 min, também apresentado pela DB. €13,20 é tarifa desde, não tarifa normal comprovada.",
+      "service_status": "published_future_timetable_not_operated"
     },
     {
       "origin_id": "offenburg",
@@ -43,7 +44,8 @@
       "return_verified": false,
       "last_mile_min": null,
       "valid_for_2027": false,
-      "notes": "Não inferir elegibilidade a bilhete regional nem retorno de fim de semana."
+      "notes": "Não inferir elegibilidade a bilhete regional nem retorno de fim de semana.",
+      "service_status": "published_future_timetable_not_operated"
     }
   ],
   "operator_route_summaries": [
@@ -87,14 +89,14 @@
       "coordinates": null,
       "coordinate_precision": "not_verified",
       "recommended_arrival_station": null,
-      "urban_stop": null,
-      "urban_mode": null,
+      "urban_stop": "Langstross Grand'Rue",
+      "urban_mode": "tram A/D",
       "walk_distance_m": null,
       "walk_duration_min": null,
       "source_url": "https://www.visitstrasbourg.fr/en/fiche-sit/F223007269_the-cathedral-of-notre-dame-strasbourg/",
       "checked_at": "2026-11-17",
       "status": "official_address_verified_geolocation_pending",
-      "notes": "Praça é referência de localização, não coordenada da porta."
+      "notes": "Endereço e parada de bonde referenciados pelo escritório de turismo. Sem tempo de caminhada calculado."
     },
     {
       "attraction_id": "brussels_grand_place",
@@ -131,11 +133,12 @@
         "8"
       ],
       "walk_distance_m": null,
-      "walk_duration_min": null,
+      "walk_duration_min": 15,
       "coordinates": null,
       "source_url": "https://www.musee-unterlinden.com/en/visit-and-activities/informations/access/",
       "checked_at": "2026-11-17",
-      "notes": "Fonte oficial de acesso urbano, mas não é uma das atrações canônicas do catálogo atual; não inserir automaticamente."
+      "notes": "Museu fora do catálogo canônico. O próprio museu informa 15 min a pé desde a estação de Colmar; distância não publicada.",
+      "walk_method": "official_attraction_access_page"
     }
   ],
   "2027_return_verified": false
