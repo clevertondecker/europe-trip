@@ -11,8 +11,8 @@ from ux_navigation import set_task
 
 
 def _return_to_wishlist():
-    set_task(st.session_state, "Explorar", "Passeios")
-    st.session_state["ux502_view"] = "Minha lista"
+    # Request a pre-widget navigation update on the next Streamlit run.
+    st.session_state["ux503_pending_return_to_wishlist"] = True
 
 
 def render_wishlist_base_comparison(*, plan, discovery=None, research=None):
