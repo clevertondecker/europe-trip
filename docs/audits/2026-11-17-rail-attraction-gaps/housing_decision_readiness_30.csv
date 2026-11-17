@@ -1,0 +1,31 @@
+base_id,base_name,country,shortlist,historical_offers,direct_listing_reference_count,two_adults_confirmed_count,stay_56_to_60_nights_confirmed_count,available_autumn_2027_count,all_fees_known_count,internet_verified_count,near_station_verified_count,workplace_verified_count,kitchen_verified_count,laundry_verified_count,total_56_to_60_night_quote_count,eligible_2027_quotes,decision_ready,research_priority
+mulhouse,Mulhouse,França,yes,3,0,0,0,0,0,0,0,0,0,0,0,0,no,P1_if_in_selected_base_shortlist_else_P2
+strasbourg,Strasbourg,França,yes,3,0,0,0,0,0,0,0,0,0,0,0,0,no,P1_if_in_selected_base_shortlist_else_P2
+metz,Metz,França,yes,3,2,0,0,0,0,0,0,0,0,0,0,0,no,P1_if_in_selected_base_shortlist_else_P2
+nancy,Nancy,França,yes,3,1,0,0,0,0,0,0,0,0,0,0,0,no,P1_if_in_selected_base_shortlist_else_P2
+colmar,Colmar,França,no,0,0,0,0,0,0,0,0,0,0,0,0,0,no,P1_if_in_selected_base_shortlist_else_P2
+selestat,Sélestat,França,no,0,0,0,0,0,0,0,0,0,0,0,0,0,no,P1_if_in_selected_base_shortlist_else_P2
+saint_louis,Saint-Louis,França,no,0,0,0,0,0,0,0,0,0,0,0,0,0,no,P1_if_in_selected_base_shortlist_else_P2
+belfort,Belfort,França,no,0,0,0,0,0,0,0,0,0,0,0,0,0,no,P1_if_in_selected_base_shortlist_else_P2
+besancon,Besançon,França,no,0,0,0,0,0,0,0,0,0,0,0,0,0,no,P1_if_in_selected_base_shortlist_else_P2
+thionville,Thionville,França,no,0,0,0,0,0,0,0,0,0,0,0,0,0,no,P1_if_in_selected_base_shortlist_else_P2
+haguenau,Haguenau,França,no,0,0,0,0,0,0,0,0,0,0,0,0,0,no,P1_if_in_selected_base_shortlist_else_P2
+saverne,Saverne,França,no,0,0,0,0,0,0,0,0,0,0,0,0,0,no,P1_if_in_selected_base_shortlist_else_P2
+reims,Reims,França,no,0,0,0,0,0,0,0,0,0,0,0,0,0,no,P1_if_in_selected_base_shortlist_else_P2
+lille,Lille,França,yes,2,1,0,0,0,0,0,0,0,0,0,0,0,no,P1_if_in_selected_base_shortlist_else_P2
+arras,Arras,França,no,0,0,0,0,0,0,0,0,0,0,0,0,0,no,P1_if_in_selected_base_shortlist_else_P2
+dijon,Dijon,França,yes,3,0,0,0,0,0,0,0,0,0,0,0,0,no,P1_if_in_selected_base_shortlist_else_P2
+freiburg,Freiburg im Breisgau,Alemanha,yes,3,0,0,0,0,0,0,0,0,0,0,0,0,no,P1_if_in_selected_base_shortlist_else_P2
+offenburg,Offenburg,Alemanha,yes,3,2,0,0,0,0,0,0,0,0,0,0,0,no,P1_if_in_selected_base_shortlist_else_P2
+kehl,Kehl,Alemanha,no,0,0,0,0,0,0,0,0,0,0,0,0,0,no,P1_if_in_selected_base_shortlist_else_P2
+karlsruhe,Karlsruhe,Alemanha,yes,3,0,3,0,0,0,0,0,0,0,0,0,0,no,P1_if_in_selected_base_shortlist_else_P2
+baden_baden,Baden-Baden,Alemanha,no,0,0,0,0,0,0,0,0,0,0,0,0,0,no,P1_if_in_selected_base_shortlist_else_P2
+saarbrucken,Saarbrücken,Alemanha,no,0,0,0,0,0,0,0,0,0,0,0,0,0,no,P1_if_in_selected_base_shortlist_else_P2
+trier,Trier,Alemanha,yes,3,0,3,0,0,0,0,0,0,0,0,0,0,no,P1_if_in_selected_base_shortlist_else_P2
+lorrach,Lörrach,Alemanha,no,0,0,0,0,0,0,0,0,0,0,0,0,0,no,P1_if_in_selected_base_shortlist_else_P2
+aachen,Aachen,Alemanha,yes,3,0,3,0,0,0,0,0,0,0,0,0,0,no,P1_if_in_selected_base_shortlist_else_P2
+arlon,Arlon,Bélgica,no,0,0,0,0,0,0,0,0,0,0,0,0,0,no,P1_if_in_selected_base_shortlist_else_P2
+liege,Liège,Bélgica,yes,3,0,0,0,0,0,0,0,0,0,0,0,0,no,P1_if_in_selected_base_shortlist_else_P2
+namur,Namur,Bélgica,no,0,0,0,0,0,0,0,0,0,0,0,0,0,no,P1_if_in_selected_base_shortlist_else_P2
+luxembourg_city,Luxembourg City,Luxemburgo,no,0,0,0,0,0,0,0,0,0,0,0,0,0,no,P1_if_in_selected_base_shortlist_else_P2
+esch,Esch-sur-Alzette,Luxemburgo,no,0,0,0,0,0,0,0,0,0,0,0,0,0,no,P1_if_in_selected_base_shortlist_else_P2

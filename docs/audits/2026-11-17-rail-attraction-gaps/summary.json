@@ -1,0 +1,26 @@
+{
+  "date": "2026-11-17",
+  "scope": "Existing source registry and historical 2026 observations, no external route lookup",
+  "city_bases": 30,
+  "destinations": 46,
+  "distinct_attractions": 94,
+  "base_destination_pairs": 1380,
+  "base_attraction_pairs": 2820,
+  "rail_status_counts": {
+    "not_researched": 1271,
+    "partial": 25,
+    "historical_time": 54,
+    "local": 30
+  },
+  "divergent_sources_pairs": 5,
+  "historical_typical_time_pairs": 7,
+  "historical_transfer_count_pairs": 6,
+  "canon_attractions_with_access_reference": 2,
+  "canon_attractions_with_station_walk_minutes": 0,
+  "base_to_attraction_verified_total_minutes": 0,
+  "historic_rental_observations": 35,
+  "rentals_verified_for_2027": 0,
+  "complete_2027_weekend_returns": 0,
+  "secondary_note": "Musée Unterlinden, Colmar: 15-min station walk from museum source, but not a canonical catalog attraction.",
+  "read_only": true
+}
