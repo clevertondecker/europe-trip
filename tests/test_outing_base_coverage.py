@@ -67,6 +67,14 @@ class AlternateBaseOutingCoverageTests(unittest.TestCase):
         self.assertIsNone(local["full_couple_cost_eur"])
         self.assertEqual(local["train_status"],"local_transport_unverified")
 
+    def test_luxembourg_city_alias_is_local_without_zero_cost(self):
+        view=self.get("luxembourg_city")
+        local=next(r for r in view["destinations"] if r["destination_id"]=="luxembourg")
+        self.assertTrue(local["local"])
+        self.assertEqual(local["train_status"],"local_transport_unverified")
+        self.assertIsNone(local["train_oneway_min"])
+        self.assertIsNone(local["full_couple_cost_eur"])
+
     def test_no_canonical_input_mutation_and_defensive_return(self):
         original=deepcopy(self.catalog)
         result=self.get("lille")
