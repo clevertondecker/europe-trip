@@ -57,6 +57,70 @@ class RailQueryContractTests(unittest.TestCase):
         self.assertEqual(chosen["selection_reason"],
                          "exploration_fallback_no_unified_time")
         self.assertFalse(chosen["return_2027_verified"])
+        self.assertEqual(len(chosen["observations"]),1)
+        selected=chosen["observations"][0]
+        self.assertEqual(selected["selection_role"],"selected_fallback")
+        self.assertEqual(selected["source_dataset"],"exploration_bases_2027")
+        self.assertEqual(selected["evidence_date"],"2026-11-15")
+        self.assertEqual(selected["minimum_oneway_min"],148)
+        self.assertEqual(selected["source_url"],chosen["source_url"])
+        self.assertFalse(selected["return_2027_verified"])
+
+    def test_partial_unified_observation_is_preserved_alongside_fallback(self):
+        original={
+            "origin_id":"lille","destination_id":"rotterdam",
+            "source_dataset":"incomplete_rail_research_2026",
+            "minimum_oneway_min":None,
+            "typical_oneway_min":None,
+            "source_url":"https://rail.example/incomplete",
+            "evidence_date":"2026-11-12",
+        }
+        rail={"by_pair":{("lille","rotterdam"):[deepcopy(original)]}}
+        exploratory={
+            "routes":[{
+                "base_id":"lille","destination_id":"rotterdam",
+                "train_minutes_oneway_min":148,
+                "source_url":"https://rail.example/valid",
+                "retrieved_at":"2026-11-15",
+            }]
+        }
+        snapshot=deepcopy(rail)
+        chosen=get_rail_evidence("lille","rotterdam",rail=rail,
+                                 exploration=exploratory)
+        self.assertEqual(chosen["status"],"historical_time")
+        self.assertEqual(chosen["minimum_oneway_min"],148)
+        self.assertEqual(chosen["selection_reason"],
+                         "exploration_fallback_no_unified_time")
+        self.assertEqual(len(chosen["observations"]),2)
+        self.assertEqual(chosen["observations"][0],original)
+        self.assertEqual(chosen["observations"][1]["selection_role"],
+                         "selected_fallback")
+        self.assertEqual(chosen["observations"][1]["source_url"],
+                         "https://rail.example/valid")
+        chosen["observations"][0]["source_url"]="mutated"
+        self.assertEqual(rail,snapshot)
+
+    def test_exploration_minutes_match_loader_int_contract(self):
+        rail={"by_pair":{}}
+        for invalid in (144.0, 144.5, True, "144", 0, -1, None):
+            with self.subTest(invalid=invalid):
+                exploratory={"routes":[{
+                    "base_id":"lille","destination_id":"rotterdam",
+                    "train_minutes_oneway_min":invalid,
+                    "source_url":"https://rail.example/route",
+                    "retrieved_at":"2026-11-15",
+                }]}
+                result=get_rail_evidence("lille","rotterdam",rail=rail,
+                                         exploration=exploratory)
+                self.assertIsNone(result["minimum_oneway_min"])
+                self.assertEqual(result["observations"],[])
+        valid=get_rail_evidence("lille","rotterdam",rail=rail,
+            exploration={"routes":[{
+                "base_id":"lille","destination_id":"rotterdam",
+                "train_minutes_oneway_min":144,
+                "source_url":"https://rail.example/route",
+            }]})
+        self.assertIs(type(valid["minimum_oneway_min"]),int)
 
     def test_unknown_and_local_do_not_become_zero_or_impossible(self):
         empty_rail={"by_pair":{}}
