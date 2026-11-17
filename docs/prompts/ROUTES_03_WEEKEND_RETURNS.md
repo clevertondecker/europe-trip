@@ -15,7 +15,7 @@
 Transformar **tempos históricos de ida isolados** em informação útil sobre possibilidades de deslocamento aos sábados/domingos, SEM afirmar bate-volta confirmado para setembro–novembro de 2027 antes de existir horário oficial correspondente.
 
 ## Recorte
-Após os PRs 1 e 2A, investigar em primeira onda os pares da cesta comum (Aachen, Baden-Baden, Colônia) frente às bases de referência Mulhouse, Strasbourg, Lille, e, quando houver dados comparáveis, Metz, Liège e Freiburg. Basel, Maastricht e Amsterdam permanecem `exploratory_candidate` enquanto não aprovadas e registradas como base oficial.
+Após o contrato do PR 1, sem depender do estudo 2A, investigar em primeira onda os pares da cesta comum (Aachen, Baden-Baden, Colônia) frente às bases de referência Mulhouse, Strasbourg, Lille, e, quando houver dados comparáveis, Metz, Liège e Freiburg. Basel, Maastricht e Amsterdam permanecem `exploratory_candidate` enquanto não aprovadas e registradas como base oficial.
 
 ## Método com evidências oficiais
 1. Ler `data/dq21_weekend_evidence_2026_11.json`, `dq30_mobility_evidence_model.py` e `get_rail_evidence()`. Reusar chaves de rota e contratos definidos no PR 1; não sobrescrever dados de ida anteriores.
@@ -39,3 +39,10 @@ Reservas, tarifas futuras, otimização, roteiro definitivo, alteração da inte
 
 ## Parecer solicitado ao revisor
 Comentários diretamente no PR: P0/P1/P2; contratos/adaptadores que devem ser reutilizados; dados concretos impossíveis de inferir; testes mínimos; ordem de execução/dependências e recomendação de ajuste ou implementação. Nada é executado automaticamente.
+
+
+## Rastreabilidade da implementação — revisão final 17/11/2026
+
+- PR de implementação separado para revisão: [#119](https://github.com/clevertondecker/europe-trip/pull/119).
+- Implementação independente: exigir data concreta no calendário, direção, estação, transferências em ordem, abertura da atração e acesso compatível; duas viagens nunca bastam para afirmar passeio viável.
+- Este PR permanece **somente especificação**. Nenhum merge/deploy de implementação está autorizado até revisão do conjunto. Os testes de CI no PR de implementação validam contratos/código, não substituem confirmação de horários, aluguéis e acesso para datas de 2027.
