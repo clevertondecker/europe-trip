@@ -112,8 +112,10 @@ def evaluate_short_stay_quote(quote: dict) -> dict:
         "refundable_deposit_separate": q.get("refundable_deposit"),
         "upfront_cash_exposure": upfront,
         "research_missing": missing,
-        "decision_ready_for_dates": not missing,
-        # Pure structural checks do not confirm the URL still offers this unit.
+        "structurally_complete": not missing,
+        # User-supplied flags are not independently verified by this pure model.
+        # A human/live source check remains required before a housing decision.
+        "decision_ready_for_dates": False,
         "requires_live_listing_recheck": True,
         "official_plan_modified": False,
     }
