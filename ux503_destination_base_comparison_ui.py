@@ -116,7 +116,7 @@ def render_wishlist_base_comparison(*, plan, discovery=None, research=None):
     st.write(overview["description"])
     c1, c2, c3 = st.columns(3)
     c1.metric("Trajetos com tempo pesquisado", overview["documented"])
-    c2.metric("Tempo ainda não pesquisado", overview["missing"])
+    c2.metric("Trajetos sem tempo identificado", overview["missing"])
     c3.metric("Deslocamentos locais", overview["local"])
     st.caption(f'{overview["total"]} combinações ('
                f'{len(result["base_ids"])} cidades-base × '
