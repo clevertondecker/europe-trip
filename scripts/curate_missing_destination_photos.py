@@ -106,7 +106,7 @@ def audit_inventory():
     manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
     already = set(manifest["assets"])
     missing = [d for d in inventory if not d.get("photo") and d["id"] not in already]
-    unknown = set(TITLES) - {d["id"] for d in missing}
+    unknown = set(TITLES) - {d["id"] for d in inventory}
     uncovered = {d["id"] for d in missing} - set(TITLES)
     if unknown or uncovered:
         raise RuntimeError(f"Title mapping mismatch: unknown={unknown}; unmapped={uncovered}")
@@ -169,8 +169,11 @@ def licensed_commons_info(files: dict[str, str]):
                 license_link = "https://creativecommons.org/licenses/by/" + license_name.split()[-1] + "/"
             elif license_name.startswith("CC0"):
                 license_link = "https://creativecommons.org/publicdomain/zero/1.0/"
+            elif license_name.startswith(("Public domain", "PD-")):
+                license_link = "https://creativecommons.org/publicdomain/mark/1.0/"
             else:
-                license_link = "https://commons.wikimedia.org/wiki/" + filename.replace(" ", "_")
+                failures[destination_id] = "Open license lacks verifiable URL"
+                continue
         url = info.get("thumburl") or info.get("url")
         if not url or not url.startswith(("https://upload.wikimedia.org/",
                                               "https://thumb.wikimedia.org/")):
