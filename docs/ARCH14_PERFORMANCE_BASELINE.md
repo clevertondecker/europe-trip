@@ -22,3 +22,10 @@ sem observabilidade em runtime.
 Sem exclusão de código legado, alterações em dados, TripPlan, CSS,
 rede, login ou deploy. Investigação de outros gargalos (mapas, fluxo
 Drive, cache de índices) fica para um pacote posterior com métricas.
+
+
+## Invalidação e medições
+
+`st.cache_data(ttl=300)` expira automaticamente cada resultado aproximadamente 300 segundos depois de criado. Além disso, a chave inclui a tupla ordenada de cidades; alterações nessa entrada obtêm outro valor. `cached_macro_coverage_rows.clear()` força invalidação manual (testada). Após um novo deploy de código, o cache de função pode ser invalidado; **não depende disso como única garantia**. A ausência de mudanças no código não invalida imediatamente um arquivo JSON alterado em disco antes do TTL; esse é um limite explícito do contrato.
+
+O teste `test_cache_cold_warm_and_explicit_invalidation` emite `ARCH14_CACHE_BENCHMARK` com três durações em milissegundos para as 30 cidades (cache frio, cache quente e após `clear`). São amostras de CI, não latência em produção nem SLA. Registrar os valores verificados no relatório após o CI.
