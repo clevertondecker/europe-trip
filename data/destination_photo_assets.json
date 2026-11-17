@@ -12,13 +12,13 @@
       "alt": "Catedral de Aachen e centro histórico"
     },
     "amsterdam": {
-      "filename": "Imagen_de_los_canales_concéntricos_en_Ámsterdam.png",
+      "filename": "Amsterdam Canals - July 2006.jpg",
       "file": "assets/destinations/amsterdam.webp",
-      "author": "Andrés Barrios",
-      "license": "CC BY-SA 4.0",
-      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
-      "source_page": "https://commons.wikimedia.org/wiki/File:Imagen_de_los_canales_concéntricos_en_Ámsterdam.png",
-      "alt": "Fotografia ilustrativa de Amsterdam, Países Baixos"
+      "author": "Diliff",
+      "license": "CC BY 2.5",
+      "license_url": "https://creativecommons.org/licenses/by/2.5",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Amsterdam_Canals_-_July_2006.jpg",
+      "alt": "Canais e casas históricas de Amsterdam, Países Baixos"
     },
     "arlon": {
       "filename": "Arlon_E2aJPG.jpg",
@@ -61,7 +61,7 @@
       "file": "assets/destinations/belfort.webp",
       "author": "KBWEi at German Wikipedia",
       "license": "Public domain",
-      "license_url": "https://commons.wikimedia.org/wiki/File:Belfort2.jpg",
+      "license_url": "https://creativecommons.org/publicdomain/mark/1.0/",
       "source_page": "https://commons.wikimedia.org/wiki/File:Belfort2.jpg",
       "alt": "Fotografia ilustrativa de Belfort, França"
     },
@@ -271,6 +271,15 @@
       "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
       "source_page": "https://commons.wikimedia.org/wiki/File:Saarland_Rathaus_Saarbrücken_01.jpg",
       "alt": "Fotografia ilustrativa de Saarbrücken, Alemanha"
+    },
+    "saint_louis": {
+      "filename": "Ancienne Mairie Saint-Louis (Haut-Rhin).jpg",
+      "file": "assets/destinations/saint_louis.webp",
+      "author": "Stecha",
+      "license": "CC BY-SA 3.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Ancienne_Mairie_Saint-Louis_(Haut-Rhin).jpg",
+      "alt": "Antiga prefeitura de Saint-Louis, Alto Reno, França"
     },
     "saverne": {
       "filename": "Chateau_Rohan_Saverne_01.jpg",
