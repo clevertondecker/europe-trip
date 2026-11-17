@@ -121,9 +121,13 @@ def render_wishlist(discovery) -> bool:
                 try:
                     save_private_now(st.session_state["advisor_plan"], load_attractions())
                 except StorageConflict:
+                    st.session_state["ux36_cloud_dirty"] = True
+                    st.session_state["ux502_status"] = "Conflito de versão; alterações não salvas"
                     st.error("Conflito de versão: outra sessão modificou o arquivo privado. "
                              "Exporte suas alterações e reconcilie antes de salvar.")
                 except (StorageUnavailable, ValueError, KeyError, TypeError):
+                    st.session_state["ux36_cloud_dirty"] = True
+                    st.session_state["ux502_status"] = "Falha de salvamento; alterações não salvas"
                     st.error("Falha de salvamento. Seus interesses continuam nesta sessão.")
                 else:
                     st.session_state["ux502_private_saved_revision"] = current["revision"]
