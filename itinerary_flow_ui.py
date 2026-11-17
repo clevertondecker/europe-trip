@@ -44,6 +44,12 @@ def _navigate(area:str,task:str)->None:
     set_task(state,area,task)
 
 
+def _ux45_return_to_research()->None:
+    """Return from editor via callback, before task selector is instantiated."""
+    from ux45_navigation_context import return_to_origin
+    return_to_origin(st.session_state)
+
+
 def _stage_changed()->None:
     st.session_state["flow_active_stage"]=st.session_state["flow_stage"]
 
@@ -530,10 +536,8 @@ def render_itinerary_workbench(plan:dict,catalog:dict,
         st.info("Você veio de "+("Explorar passeios" if origin["area"]=="Explorar"
                 else "Descobrir sugestões")+
                 ". Pode editar aqui e voltar sem perder sua pesquisa.")
-        if st.button("Voltar à pesquisa de origem",key="ux45_back_to_origin"):
-            from ux45_navigation_context import return_to_origin
-            return_to_origin(st.session_state)
-            st.rerun()
+        st.button("Voltar à pesquisa de origem",key="ux45_back_to_origin",
+                  on_click=_ux45_return_to_research)
     _render_add(active_plan(),catalog)
     _render_organize(active_plan(),catalog)
     _save_panel(active_plan(),catalog)
