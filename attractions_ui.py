@@ -175,10 +175,11 @@ def _render_dq32_macro_opportunities(base_id: str) -> None:
         "Primeiro conhecer destinos e atrações; depois verificar transportes e "
         "passeios. Estas oportunidades são exploratórias, sem garantia de "
         "bate-volta e sem alterar o roteiro oficial.")
-    a,b,c=st.columns(3)
+    a,b,c,d=st.columns(4)
     a.metric("Destinos no universo exploratório",overview["registry_destinations"])
-    b.metric("Atrações locais documentadas",overview["known_local_attractions"])
-    c.metric("Destinos com trem histórico publicado",overview["rail_time_documented_count"])
+    b.metric("Atrações canônicas locais",overview["canonical_local_attractions"])
+    c.metric("Novas atrações locais",overview["new_local_attractions"])
+    d.metric("Destinos com trem histórico publicado",overview["rail_time_documented_count"])
     st.caption(
         "O universo reúne pesquisa ampliada, catálogo histórico e fontes de "
         "turismo. Não representa quantidade de passeios viáveis. A ausência de "

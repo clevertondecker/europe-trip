@@ -53,13 +53,16 @@ def _render_dq32_macro_coverage(rows):
             research=research,options=options,rail=rail)
         data.append({
             "Cidade-base":result["base_name"],
-            "Atrações locais identificadas":result["known_local_attractions"],
+            "Atrações canônicas locais":result["canonical_local_attractions"],
+            "Novas atrações locais":result["new_local_attractions"],
             "Destinos com trem histórico":result["rail_time_documented_count"],
             "Destinos sem tempo de trem":result["unresearched_count"],
             "Passeios viáveis comprovados":"Não avaliados",
         })
     st.dataframe(data,hide_index=True,width="stretch")
     st.caption(
+        "Atrações canônicas e novas são contadas separadamente; equivalências "
+        "semânticas são reconciliadas sem perder IDs e fontes. "
         "O mesmo universo de destinos é considerado para todas as bases. "
         "Ausência de tempo não é ausência de conexão. "
         "Preservados os pesos exploratórios de logística/custo/praticidade "

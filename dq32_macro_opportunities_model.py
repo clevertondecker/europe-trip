@@ -8,6 +8,8 @@ from __future__ import annotations
 
 from copy import deepcopy
 import json
+import re
+import unicodedata
 from pathlib import Path
 
 from attractions_model import load_attractions
@@ -45,6 +47,74 @@ def validate_macro_tourism(data):
                     "station_access_min","availability_2027"):
             if row[key] is not None:
                 raise ValueError("Dado não coletado não pode ser preenchido")
+
+
+def _identity_key(name):
+    """Conservative exact-name key; other semantic aliases require declaration."""
+    normalized=unicodedata.normalize("NFKD", name.casefold())
+    without_accents="".join(x for x in normalized if not unicodedata.combining(x))
+    return re.sub(r"[^a-z0-9]+"," ",without_accents).strip()
+
+
+def reconcile_attractions(catalog, macro):
+    """Deduplicate documented equivalences without rewriting original IDs.
+
+    Exact normalized titles within the same canonical city match automatically.
+    Non-exact semantic matches require `canonical_attraction_id` in the
+    source row. Ambiguous matches fail validation instead of silently merging.
+    """
+    originals={}
+    keys={}
+    for row in catalog["attractions"]:
+        city=canonical_place(row["destination_id"])
+        originals[row["id"]]=row
+        k=(city,_identity_key(row["name"]))
+        if k in keys:
+            raise ValueError("Nome canônico ambíguo na mesma cidade")
+        keys[k]=row["id"]
+    canonical_by_city={}
+    for row in catalog["attractions"]:
+        city=canonical_place(row["destination_id"])
+        canonical_by_city.setdefault(city,[]).append({
+            "id":row["id"],"name":row["name"],
+            "source_url":row["source_urls"][0],
+            "kind":"legacy_catalog","additional_sources":[],
+            "reconciled_source_ids":[],
+        })
+    new_by_city={}
+    seen_keys=set()
+    reconciled=[]
+    for row in macro["attractions"]:
+        city=canonical_place(row["city_id"])
+        name_key=(city,_identity_key(row["name"]))
+        if name_key in seen_keys:
+            raise ValueError("Atrações DQ3.2 duplicadas semanticamente na mesma cidade")
+        seen_keys.add(name_key)
+        exact=keys.get(name_key)
+        declared=row.get("canonical_attraction_id")
+        if declared is not None and (
+                declared not in originals or
+                canonical_place(originals[declared]["destination_id"])!=city):
+            raise ValueError("Equivalência canônica desconhecida ou de outra cidade")
+        if declared is not None and exact is not None and declared != exact:
+            raise ValueError("Equivalência semântica contradiz correspondência exata")
+        match=declared or exact
+        if match is not None:
+            item=next(item for item in canonical_by_city[city] if item["id"]==match)
+            item["reconciled_source_ids"].append(row["id"])
+            if row["source_url"] != item["source_url"] and (
+                    row["source_url"] not in item["additional_sources"]):
+                item["additional_sources"].append(row["source_url"])
+            reconciled.append({"source_id":row["id"],"canonical_id":match,
+                               "reason":"explicit_alias" if declared else "exact_name"})
+        else:
+            new_by_city.setdefault(city,[]).append({
+                "id":row["id"],"name":row["name"],
+                "source_url":row["source_url"],"kind":"dq32_sourced_local",
+                "additional_sources":[],"reconciled_source_ids":[],
+            })
+    return {"canonical_by_city":canonical_by_city,"new_by_city":new_by_city,
+            "reconciled":reconciled}
 
 
 def _registry(catalog, exploration, research, macro):
@@ -99,18 +169,9 @@ def opportunity_overview(base_id, *, macro=None,catalog=None,exploration=None,
     if origin not in valid_bases:
         raise ValueError("Cidade-base desconhecida")
     destinations=_registry(catalog,exploration,research,macro)
-    catalog_attractions={}
-    for row in catalog["attractions"]:
-        key=canonical_place(row["destination_id"])
-        catalog_attractions.setdefault(key,[]).append({
-            "id":row["id"],"name":row["name"],"source_url":row["source_urls"][0],
-            "kind":"legacy_catalog"})
-    local_new={}
-    for row in macro["attractions"]:
-        key=canonical_place(row["city_id"])
-        local_new.setdefault(key,[]).append({
-            "id":row["id"],"name":row["name"],"source_url":row["source_url"],
-            "kind":"dq32_sourced_local"})
+    reconciled=reconcile_attractions(catalog,macro)
+    catalog_attractions=reconciled["canonical_by_city"]
+    local_new=reconciled["new_by_city"]
     entries=[]
     for dest_id,meta in destinations.items():
         local=dest_id==origin
@@ -129,12 +190,16 @@ def opportunity_overview(base_id, *, macro=None,catalog=None,exploration=None,
                     fallback["source_url"],fallback["checked_at"],
                     fallback["source_dataset"])
         attrs=local_new.get(dest_id,[])+catalog_attractions.get(dest_id,[])
+        canonical_count=len(catalog_attractions.get(dest_id,[]))
+        new_count=len(local_new.get(dest_id,[]))
         status=("local_access_unresearched" if local else
                 "historical_train_time_only" if minutes is not None else
                 "unresearched_from_base")
         entries.append({
             **deepcopy(meta),"local":local,
             "attractions":deepcopy(attrs),"attraction_count":len(attrs),
+            "canonical_attraction_count":canonical_count,
+            "new_attraction_count":new_count,
             "minimum_train_oneway_min":minutes,
             "typical_train_oneway_min":typical,
             "train_source_url":source,"train_checked_at":checked,
@@ -156,6 +221,10 @@ def opportunity_overview(base_id, *, macro=None,catalog=None,exploration=None,
         "base_id":origin,"base_name":valid_bases[origin]["name"],
         "registry_destinations":len(entries),
         "known_local_attractions":sum(x["attraction_count"] for x in local_rows),
+        "canonical_local_attractions":sum(x["canonical_attraction_count"] for x in local_rows),
+        "new_local_attractions":sum(x["new_attraction_count"] for x in local_rows),
+        "reconciled_duplicate_count":len(reconciled["reconciled"]),
+        "semantic_equivalences":deepcopy(reconciled["reconciled"]),
         "local_destinations":deepcopy(local_rows),
         "historical_rail_destinations":deepcopy(observed),
         "unresearched_destinations":deepcopy(unknown),

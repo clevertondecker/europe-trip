@@ -12,6 +12,7 @@ from base_scenario_model import base_options
 from rail_evidence_unified_model import load_rail_evidence
 from dq32_macro_opportunities_model import (
     load_macro_tourism,validate_macro_tourism,opportunity_overview,
+    reconcile_attractions,
 )
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -80,6 +81,48 @@ class MacroOpportunityTests(unittest.TestCase):
         self.assertTrue(all(r["status"]=="unresearched_from_base"
                             for r in city["unresearched_destinations"]))
 
+    def test_semantic_overlap_is_one_attraction_with_both_source_ids(self):
+        result=self.get("luxembourg_city")
+        local=result["local_destinations"][0]
+        bock=[x for x in local["attractions"] if x["id"]=="lux_bock"]
+        self.assertEqual(len(bock),1)
+        self.assertEqual(bock[0]["reconciled_source_ids"],
+                         ["dq32_luxembourg_city_22"])
+        self.assertEqual(result["reconciled_duplicate_count"],1)
+        self.assertEqual(result["known_local_attractions"],
+                         result["canonical_local_attractions"]+
+                         result["new_local_attractions"])
+        self.assertEqual(result["canonical_local_attractions"],4)
+        self.assertEqual(result["new_local_attractions"],0)
+
+    def test_exact_collision_and_invalid_semantic_match(self):
+        added=deepcopy(self.macro)
+        candidate=deepcopy(added["attractions"][0])
+        candidate["id"]="dq32_test_collision"
+        candidate["city_id"]="mulhouse"
+        candidate["name"]="Place de la Reunion"
+        added["attractions"].append(candidate)
+        view=reconcile_attractions(self.catalog,added)
+        self.assertIn("dq32_test_collision",
+                      next(a for a in view["canonical_by_city"]["mulhouse"]
+                           if a["id"]=="mulhouse_reunion")["reconciled_source_ids"])
+        wrong=deepcopy(added)
+        wrong["attractions"][-1]["canonical_attraction_id"]="lux_bock"
+        with self.assertRaises(ValueError):
+            reconcile_attractions(self.catalog,wrong)
+        repeated=deepcopy(self.macro)
+        repeated["attractions"].append({**deepcopy(repeated["attractions"][0]),
+                                        "id":"dq32_another_id"})
+        with self.assertRaises(ValueError):
+            reconcile_attractions(self.catalog,repeated)
+
+    def test_unique_counts_preserve_canonical_and_new_records(self):
+        result=self.get("lille")
+        self.assertEqual(result["canonical_local_attractions"],0)
+        self.assertEqual(result["new_local_attractions"],2)
+        self.assertEqual(result["known_local_attractions"],2)
+        self.assertEqual(len(self.macro["attractions"]),30)
+
     def test_no_duplicate_luxembourg_identity(self):
         row=self.get("luxembourg_city")
         self.assertEqual(sum(x["destination_id"]=="luxembourg_city"
@@ -129,7 +172,7 @@ class MacroOpportunityUXTests(unittest.TestCase):
         at.selectbox(key="attractions_scenario_base").set_value("lille").run()
         self.assertFalse(at.exception,[x.message for x in at.exception])
         self.assertTrue(any("Descoberta ampliada" in x.value for x in at.markdown))
-        self.assertTrue(any("Atrações locais documentadas" == x.label for x in at.metric))
+        self.assertTrue(any("Novas atrações locais" == x.label for x in at.metric))
         at.selectbox(key="ux_dq32_opportunity_group").set_value(
             "Trem histórico documentado").run()
         self.assertFalse(at.exception,[x.message for x in at.exception])
