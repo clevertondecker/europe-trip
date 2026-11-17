@@ -12,7 +12,7 @@ from datetime import date,timedelta
 import streamlit as st
 
 from itinerary_flow_model import (
-    destinations,get_choice,selected_rows,choice_counts,is_selected,
+    destinations,get_choice,selected_rows,selected_rows_for_stage,choice_counts,is_selected,
     period_options,UNASSIGNED,ITALY_STAGE,FRANCE_STAGE,EUROPE_STAGE_LABEL,
     validate_flow_backup
 )
@@ -78,6 +78,9 @@ def _active_stage_changed()->None:
     state["flow_stage"]=state["flow_active_stage"]
     state["flow_active_destination"]=None
     state.pop("flow_edit_target",None)
+    # Reconcile stage-dependent organizer widgets before they are rendered.
+    state.pop("flow_organize_destination",None)
+    state.pop("flow_organize_period",None)
 
 
 
@@ -301,8 +304,6 @@ def _selected_stage(rows:list[dict],stage:str,catalog:dict)->None:
     focus=st.session_state.get("flow_edit_target")
     if focus:
         stage_rows.sort(key=lambda row:row["id"]!=focus)
-    st.markdown("#### Etapa "+("1 · Lua de mel na Itália" if stage==ITALY_STAGE
-                              else "2 · Temporada europeia"))
     if stage==ITALY_STAGE:
         proposal=active_plan().get("italy_proposal")
         if proposal:
@@ -385,7 +386,33 @@ def _compact_budget(plan:dict,catalog:dict,trip_data:dict,
               on_click=_navigate,args=("Orçamento","Detalhamento"))
 
 
-def _render_organize(plan:dict,catalog:dict)->None:
+def _reconcile_organize_state(state,rows:list[dict],stage:str)->None:
+    """Invalidate only incompatible widget state; never mutate TripPlan."""
+    by_id={r["id"]:r for r in rows}
+    selected=state.get("flow_organize_destination")
+    if selected not in by_id:
+        selected=next(iter(by_id),None)
+        state.pop("flow_organize_period",None)
+        if selected is None:
+            state.pop("flow_organize_destination",None)
+        else:
+            state["flow_organize_destination"]=selected
+    if selected is None:
+        return
+    row=by_id[selected]
+    allowed=period_options(stage)
+    if state.get("flow_organize_period") not in allowed:
+        state["flow_organize_period"]=(
+            row["period"] if row["period"] in allowed else UNASSIGNED)
+
+
+def _assert_organize_stage(catalog:dict,destination_id:str,stage:str)->None:
+    """Defense in depth for organization writes, including stale callbacks."""
+    if get_choice(catalog,destination_id)["stage"]!=stage:
+        raise ValueError("Este passeio não pertence à etapa selecionada")
+
+
+def _render_organize(plan:dict,catalog:dict,stage:str)->None:
     """Organize by flexible period or precise day without leaving this editor."""
     if not st.session_state.get("flow_organize_open",False):
         return
@@ -393,9 +420,11 @@ def _render_organize(plan:dict,catalog:dict)->None:
         st.markdown("#### Organizar os passeios")
         st.caption("Escolha primeiro um período flexível ou, se já souber, "
                    "uma data. Nenhuma das opções cria reservas.")
-        rows=selected_rows(plan,catalog)
+        rows=selected_rows_for_stage(plan,catalog,stage)
+        _reconcile_organize_state(st.session_state,rows,stage)
         if not rows:
-            st.info("Adicione um lugar antes de organizar.")
+            st.info("Nenhum passeio italiano foi incluído ainda. Revise a proposta italiana para adicionar passeios." if stage==ITALY_STAGE
+                    else "Nenhum passeio selecionado na temporada europeia. Adicione lugares antes de organizar.")
         else:
             by_id={r["id"]:r for r in rows}
             dest_id=st.selectbox("Lugar do meu roteiro",list(by_id),
@@ -408,15 +437,21 @@ def _render_organize(plan:dict,catalog:dict)->None:
                 selection_mode="single")
             if mode!="Definir data":
                 options=period_options(row["stage"])
+                if st.session_state.get("flow_organize_period") not in options:
+                    st.session_state["flow_organize_period"]=row["period"] if row["period"] in options else UNASSIGNED
                 value=st.selectbox("Período sugerido",options,
                     index=options.index(row["period"]) if row["period"] in options else 0,
                     key="flow_organize_period",format_func=_period_label)
                 if st.button("Guardar período",key="flow_organize_save_period",
                              type="primary"):
-                    outcome=commit_outing(dest_id,row["attractions"],value,confirmed=True)
-                    st.session_state["ux45_flow_result"]=asdict(outcome)
-                    st.session_state["flow_notice"]="Período de "+row["name"]+" atualizado."
-                    st.rerun()
+                    try:
+                        _assert_organize_stage(catalog,dest_id,stage)
+                        outcome=commit_outing(dest_id,row["attractions"],value,confirmed=True)
+                        st.session_state["ux45_flow_result"]=asdict(outcome)
+                        st.session_state["flow_notice"]="Período de "+row["name"]+" atualizado."
+                        st.rerun()
+                    except (ValueError,KeyError) as exc:
+                        st.error(str(exc))
             else:
                 start=date.fromisoformat(plan["departure_date"])
                 if row["stage"]==FRANCE_STAGE:
@@ -427,14 +462,21 @@ def _render_organize(plan:dict,catalog:dict)->None:
                     end=start+timedelta(days=plan["italy_days"]-1)
                 previous=next((date.fromisoformat(d) for d in row["exact_dates"]
                                if start<=date.fromisoformat(d)<=end),start)
+                date_key="flow_organize_date_"+row["stage"]
+                existing_date=st.session_state.get(date_key)
+                if isinstance(existing_date,date) and not start<=existing_date<=end:
+                    st.session_state[date_key]=previous
                 chosen=st.date_input("Data proposta",value=previous,
                     min_value=start,max_value=end,
-                    key="flow_organize_date_"+row["stage"])
+                    key=date_key)
                 st.caption("Datas baseadas na partida planejada; sujeitas a alterações. "
                            "A data deve permanecer dentro da etapa selecionada.")
                 if st.button("Definir data",key="flow_organize_save_date",
                              type="primary"):
                     try:
+                        _assert_organize_stage(catalog,dest_id,stage)
+                        if not start<=chosen<=end:
+                            raise ValueError("Data fora da etapa selecionada")
                         if row["stage"]==ITALY_STAGE:
                             schedule_italy_visit(dest_id,chosen.isoformat())
                         else:
@@ -579,11 +621,15 @@ def render_itinerary_workbench(plan:dict,catalog:dict,
                 ". Pode editar aqui e voltar sem perder sua pesquisa.")
         st.button("Voltar à pesquisa de origem",key="ux45_back_to_origin",
                   on_click=_ux45_return_to_research)
-    _render_add(active_plan(),catalog)
-    _render_organize(active_plan(),catalog)
-    _save_panel(active_plan(),catalog)
     rows=selected_rows(active_plan(),catalog)
-    _selected_stage(rows,stage,catalog)
+    st.markdown("#### Etapa "+("1 · Lua de mel na Itália" if stage==ITALY_STAGE
+                              else "2 · Temporada europeia"))
+    st.caption(str(len(selected_rows_for_stage(active_plan(),catalog,stage)))+
+               " passeio(s) selecionado(s) nesta etapa")
+    _render_add(active_plan(),catalog)
+    _render_organize(active_plan(),catalog,stage)
+    _save_panel(active_plan(),catalog)
+    _selected_stage(selected_rows(active_plan(),catalog),stage,catalog)
     other=FRANCE_STAGE if stage==ITALY_STAGE else ITALY_STAGE
     other_count=sum(x["stage"]==other for x in rows)
     st.caption(str(other_count)+" lugar(es) na etapa "+_stage_label(other)+
