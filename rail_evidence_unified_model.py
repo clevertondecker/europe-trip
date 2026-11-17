@@ -112,7 +112,8 @@ def load_rail_evidence()->dict:
     for row in rows:
         by_pair[(row["origin_id"],row["destination_id"])].append(row)
     return {"observations":rows,"by_pair":dict(by_pair),"sources":(
-        "five_base_operator_2026","expanded_rail_sample_2026","four_base_routes_2026",\n        "dq30_dated_operator_2026","dq30_operator_overview_2026")}
+        "five_base_operator_2026","expanded_rail_sample_2026","four_base_routes_2026",
+        "dq30_dated_operator_2026","dq30_operator_overview_2026")}
 
 def route_evidence(data:dict,origin:str,destination:str)->dict:
     origin,destination=canonical_place(origin),canonical_place(destination)
@@ -133,7 +134,8 @@ def route_evidence(data:dict,origin:str,destination:str)->dict:
                 "return_2027_verified":False}
     # Stable source preference is for display ONLY, not taking the minimum
     # across dissimilar evidence. The complete provenance is returned.
-    priority=("five_base_operator_2026","expanded_rail_sample_2026","four_base_routes_2026",\n              "dq30_dated_operator_2026","dq30_operator_overview_2026")
+    priority=("five_base_operator_2026","expanded_rail_sample_2026","four_base_routes_2026",
+              "dq30_dated_operator_2026","dq30_operator_overview_2026")
     best=sorted(timed,key=lambda x:priority.index(x["source_dataset"]))[0]
     return {"status":"historical_time","minimum_oneway_min":best["minimum_oneway_min"],
             "typical_oneway_min":best["typical_oneway_min"],
