@@ -336,7 +336,8 @@
       "walk_distance_m": null,
       "station_access_min": null,
       "availability_2027": null,
-      "notes": "Atração identificada na fonte; acesso, custo e datas não verificados"
+      "notes": "Atração identificada na fonte; acesso, custo e datas não verificados Equivalente semântico ao registro canônico lux_bock; conservar a fonte adicional sem contar duas atrações.",
+      "canonical_attraction_id": "lux_bock"
     },
     {
       "id": "dq32_esch_23",
