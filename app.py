@@ -50,6 +50,8 @@ from ux_navigation import (AREAS as UX_AREAS, SECTIONS as UX_SECTIONS, DESCRIPTI
                            set_from_legacy as set_ux_legacy, route as ux_route)
 from planning_session import bootstrap as bootstrap_trip, active_plan, update_fields
 from planning_store import summary as planning_summary
+from ux504_guided_journey_model import apply_navigation_request
+from ux504_guided_journey_ui import render_guided_home, render_contextual_shortcuts
 from planning_status import save_label
 from attractions_model import load_attractions, load_base_routes, places_for_base, excursions_overage_brl, package_cost
 
@@ -72,6 +74,7 @@ if restored_days is not None:
     st.session_state["ux_days"]=max(40,min(80,int(restored_days)))
     st.session_state["unified_stay"]=st.session_state["ux_days"]
 bootstrap_ux(st.session_state)
+apply_navigation_request(st.session_state)
 if st.session_state.pop("ux503_pending_return_to_wishlist", False):
     set_ux_task(st.session_state, "Explorar", "Passeios")
     st.session_state["ux502_view"] = "Minha lista"
@@ -404,6 +407,12 @@ if ux_area!="Minha viagem" or ux_section!="Resumo":
     st.segmented_control("Atividade" if ux_area=="Meu roteiro" else "Área: "+ux_area,
                          list(UX_SECTIONS[ux_area]),
                          key="ux_section",on_change=_ux_section_changed,
+                         format_func=(lambda value: {
+                             "Passeios":"Descobrir lugares / Minha lista",
+                             "Comparar":"Comparar cidades-base",
+                             "Cidades-base":"Pesquisas avançadas",
+                             "Mapa":"Mapa",
+                         }.get(value,value)) if ux_area=="Explorar" else None,
                          selection_mode="single")
 if ux_area=="Meu roteiro" and ux_section=="Organizar viagem":
     st.segmented_control("Como organizar?",
@@ -449,182 +458,186 @@ if (ux_area=="Meu roteiro" and ux_section=="Melhorar meu roteiro" and
 if page != "Visão geral":
     render_return_to_summary()
 if page == "Visão geral":
-    render_home_continue(active_plan())
-    render_next_actions(active_plan(),load_attractions())
-    render_continuity_panel(active_plan(),load_attractions())
-    st.markdown("""<div class="home-hero" role="region" aria-label="Apresentação da viagem">
-      <div class="home-hero__content"><div class="home-hero__eyebrow">ITÁLIA → FRANÇA · 2027</div>
-      <h1>Uma viagem para viver,<br>não só visitar.</h1>
-      <p>Uma lua de mel entre cidades históricas, costa italiana e semanas vivendo como moradores na França.</p>
-      <div class="home-hero__chips"><span>♡ Dois viajantes</span>
-      <span>✧ Sem reservas confirmadas</span><span>◷ Longa temporada em estudo</span></div>
-      </div></div>""", unsafe_allow_html=True)
+    render_guided_home(active_plan(),st.session_state.get("ux502_interests"))
+    with st.expander("Painéis anteriores, mapa, fontes e detalhes · avançado", expanded=False):
+        st.divider()
+        st.markdown("#### Informações e painéis complementares")
+        render_home_continue(active_plan())
+        render_next_actions(active_plan(),load_attractions())
+        render_continuity_panel(active_plan(),load_attractions())
+        st.markdown("""<div class="home-hero" role="region" aria-label="Apresentação da viagem">
+          <div class="home-hero__content"><div class="home-hero__eyebrow">ITÁLIA → FRANÇA · 2027</div>
+          <h1>Uma viagem para viver,<br>não só visitar.</h1>
+          <p>Uma lua de mel entre cidades históricas, costa italiana e semanas vivendo como moradores na França.</p>
+          <div class="home-hero__chips"><span>♡ Dois viajantes</span>
+          <span>✧ Sem reservas confirmadas</span><span>◷ Longa temporada em estudo</span></div>
+          </div></div>""", unsafe_allow_html=True)
 
-    current_plan=active_plan()
-    # Main call to action sits inside the home dashboard, after the hero.
-    st.button("Explorar cidades-base →",key="home_continue_bases",
-              on_click=_ux_next_task,args=("Explorar","Cidades-base"))
-    status_label,status_hint=private_status_label(save_label(
-        current_plan,st.session_state.get("advisor_saved_snapshot"),
-        _owner_signed_in()))
-    trip_stats=planning_summary(current_plan)
-    st.markdown("<div class='page-section'>Continuar nosso planejamento</div>",
-                unsafe_allow_html=True)
-    for col,(label,value,hint) in zip(st.columns(3,gap="small"),[
-        ("Atrações escolhidas",str(trip_stats["attractions"]),
-         "Passeios desejados"),
-        ("Dias organizados",str(trip_stats["scheduled_days"]),
-         "Sem reservas confirmadas"),
-        ("Planejamento",status_label,status_hint)]):
-        with col:
-            st.markdown("<div class='page-stat page-stat--mint'>"
-                        f"<div class='page-stat__label'>{escape(label)}</div>"
-                        f"<div class='page-stat__value'>{escape(value)}</div>"
-                        f"<div class='page-stat__hint'>{escape(hint)}</div></div>",
-                        unsafe_allow_html=True)
-    if not trip_stats["attractions"]:
-        st.info("Você ainda não escolheu atrações. Explore os destinos para começar a montar o roteiro.")
-    else:
-        st.caption("O roteiro está em construção. Preços e horários para 2027 precisam de confirmação.")
-    b1,b2,b3=st.columns(3,gap="small")
-    with b1:
-        st.button("Escolher atrações",key="home_choose_attractions",
-                  on_click=navigate_to_attractions,use_container_width=True)
-    with b2:
-        st.button("Melhorar meu roteiro",key="home_open_consultor",
-                  on_click=navigate_to_consultor,use_container_width=True)
-    with b3:
-        st.button("Ver orçamento",key="home_open_budget",
-                  on_click=navigate_page,args=("Orçamento",),use_container_width=True)
-
-    from datetime import date
-    wedding = date.fromisoformat(data["wedding_date"])
-    departure = date.fromisoformat(data["departure_candidate"])
-    departure_label = departure.strftime("%d/%m/%Y") if departure > wedding else "A definir"
-    cap_values = sorted({int(item["cap_brl"] / 1000) for item in data["budget_scenarios"]})
-    cap_label = f"R$ {cap_values[0]} mil / R$ {cap_values[-1]} mil" if len(cap_values) > 1 else f"R$ {cap_values[0]} mil"
-    cards = [
-        ("Casamento", wedding.strftime("%d/%m/%Y"), "Data fixa do casal", "♡", "wedding"),
-        ("Partida em estudo", departure_label, "Hipótese, sem bilhete emitido", "▦", "departure"),
-        ("Permanência proposta", f"{data['duration_min_days']}–{data['duration_max_days']} dias", "Para dois viajantes", "✈", "duration"),
-        ("Orçamento", cap_label, "Tetos de planejamento, não cotações", "◎", "budget"),
-    ]
-    for col, (label, value, detail, glyph, tone) in zip(st.columns(4, gap="small"), cards):
-        with col:
-            st.markdown(f"<div class='home-kpi home-kpi--{tone}'>"
-                        f"<span class='home-kpi__icon' aria-hidden='true'>{glyph}</span>"
-                        f"<div class='home-kpi__label'>{escape(label)}</div>"
-                        f"<div class='home-kpi__value'>{escape(value)}</div>"
-                        f"<div class='home-kpi__detail'>{escape(detail)}</div></div>",
-                        unsafe_allow_html=True)
-
-    st.markdown("<div class='page-section'>Situação atual do planejamento</div>",unsafe_allow_html=True)
-    tasks_done=sum(t.get("status")=="concluído" for t in data["tasks"])
-    tasks_total=len(data["tasks"])
-    open_decisions=sum(d["status"].casefold() in {"aberta","não decidida","nao decidida"}
-                       for d in data["decisions"])
-    sources_live=sum(v["status"]=="live" for v in sync_sources.values())
-    progress_cards=[
-        ("Pesquisas concluídas",f"{tasks_done}/{tasks_total}","Registro de tarefas no Drive"),
-        ("Decisões ainda abertas",str(open_decisions),"Aguardando definição"),
-        ("Fontes sincronizadas",f"{sources_live}/3","Docs e planilha do Drive"),
-        ("Reservas confirmadas","0","Nenhum compromisso registrado")
-    ]
-    for col,(label,value,detail) in zip(st.columns(4,gap="small"),progress_cards):
-        with col:
-            st.markdown("<div class='page-stat'>"
-                        f"<div class='page-stat__label'>{escape(label)}</div>"
-                        f"<div class='page-stat__value'>{escape(value)}</div>"
-                        f"<div class='page-stat__hint'>{escape(detail)}</div></div>",
-                        unsafe_allow_html=True)
-    action1,action2=st.columns(2,gap="medium")
-    with action1:
-        st.button("Continuar pelo orçamento →",use_container_width=True,
-                  key="home_next_budget",on_click=navigate_page,args=("Orçamento",))
-    with action2:
-        st.button("Ver pesquisas prioritárias →",use_container_width=True,
-                  key="home_next_tasks",on_click=navigate_page,args=("Pesquisas & decisões",))
-
-    overview_left, overview_map, overview_budget = st.columns([1.06, 1.42, 1.08], gap="medium")
-    with overview_left:
-        st.markdown("<div class='home-overview-copy'><div class='home-section-label'>VISÃO DA VIAGEM</div>"
-                    "<h2>O que estamos construindo</h2>"
-                    "<p>Destinos, orçamento e escolhas do casal em um só lugar. "
-                    "Os pontos do mapa são referências, não reservas.</p></div>", unsafe_allow_html=True)
-        st.button("Explorar destinos →", use_container_width=True,
-                  on_click=navigate_page, args=("Mapa & destinos",), key="home_go_map")
-
-    with overview_map:
-        # The map displays real reference coordinates but no invented connecting route.
-        map_view([p for p in build_catalog(data["places"],load_itinerary())
-                  if p["id"] in {"rome","maiori","mulhouse","strasbourg"}],190)
-        st.caption("Mapa de referência · cidades ainda em avaliação")
-
-    with overview_budget:
-        selected = st.radio("Cenário em estudo", ["60k", "70k"],
-                            format_func=lambda x: f"R$ {x[:-1]} mil",
-                            horizontal=True, key="home_budget_choice")
-        scenario = get_scenario(data, selected)
-        calc = calculate_scenario(scenario)
-        used_pct = max(0, min(100, 100 * calc["total"] / scenario["cap_brl"]))
-        st.markdown(
-            "<div class='home-mini-budget'><div class='home-mini-budget__eyebrow'>◉ Resumo do orçamento</div>"
-            f"<div class='home-mini-budget__amount'>{escape(money_brl(calc['total']))}</div>"
-            f"<div class='home-mini-budget__track'><div class='home-mini-budget__fill' style='width:{used_pct:.1f}%'></div></div>"
-            f"<div class='home-mini-budget__foot'>Margem: {escape(money_brl(calc['balance']))} · {'premissas do Drive' if sync_sources['finance']['status']=='live' else 'snapshot histórico'}</div></div>",
-            unsafe_allow_html=True)
-        st.button("Ver orçamento completo →", use_container_width=True,
-                  on_click=navigate_page, args=("Orçamento",), key="home_go_budget")
-
-    left, right = st.columns([2.3, 1], vertical_alignment="center")
-    with left:
-        st.markdown("<div class='home-section-label'>DECISÕES EM ABERTO</div>", unsafe_allow_html=True)
-    with right:
-        st.button("Ver todas as decisões →", use_container_width=True,
-                  on_click=navigate_page, args=("Pesquisas & decisões",),
-                  key="home_go_decisions")
-
-    outstanding = [d for d in data["decisions"] if d["status"].casefold() in {"aberta", "não decidida", "nao decidida"}]
-    if outstanding:
-        for col, decision in zip(st.columns(min(3, len(outstanding)), gap="small"), outstanding[:3]):
+        current_plan=active_plan()
+        # Main call to action sits inside the home dashboard, after the hero.
+        st.button("Explorar cidades-base →",key="home_continue_bases",
+                  on_click=_ux_next_task,args=("Explorar","Cidades-base"))
+        status_label,status_hint=private_status_label(save_label(
+            current_plan,st.session_state.get("advisor_saved_snapshot"),
+            _owner_signed_in()))
+        trip_stats=planning_summary(current_plan)
+        st.markdown("<div class='page-section'>Continuar nosso planejamento</div>",
+                    unsafe_allow_html=True)
+        for col,(label,value,hint) in zip(st.columns(3,gap="small"),[
+            ("Atrações escolhidas",str(trip_stats["attractions"]),
+             "Passeios desejados"),
+            ("Dias organizados",str(trip_stats["scheduled_days"]),
+             "Sem reservas confirmadas"),
+            ("Planejamento",status_label,status_hint)]):
             with col:
-                detail = decision.get("note", "").strip()
-                if not detail or detail.rstrip(".") == decision["title"].strip().rstrip("."):
-                    detail = "Aguardando definição no Drive."
-                st.markdown(
-                    f"<div class='home-decision'><strong>{escape(decision['title'])}</strong>"
-                    f"<p>{escape(detail)}</p></div>", unsafe_allow_html=True)
-    else:
-        st.caption("Nenhuma decisão pendente identificada no documento sincronizado.")
+                st.markdown("<div class='page-stat page-stat--mint'>"
+                            f"<div class='page-stat__label'>{escape(label)}</div>"
+                            f"<div class='page-stat__value'>{escape(value)}</div>"
+                            f"<div class='page-stat__hint'>{escape(hint)}</div></div>",
+                            unsafe_allow_html=True)
+        if not trip_stats["attractions"]:
+            st.info("Você ainda não escolheu atrações. Explore os destinos para começar a montar o roteiro.")
+        else:
+            st.caption("O roteiro está em construção. Preços e horários para 2027 precisam de confirmação.")
+        b1,b2,b3=st.columns(3,gap="small")
+        with b1:
+            st.button("Escolher atrações",key="home_choose_attractions",
+                      on_click=navigate_to_attractions,use_container_width=True)
+        with b2:
+            st.button("Melhorar meu roteiro",key="home_open_consultor",
+                      on_click=navigate_to_consultor,use_container_width=True)
+        with b3:
+            st.button("Ver orçamento",key="home_open_budget",
+                      on_click=navigate_page,args=("Orçamento",),use_container_width=True)
 
-    st.markdown("<div class='home-section-label'>TRÊS MOMENTOS</div>", unsafe_allow_html=True)
-    st.markdown("<div class='home-section-title'>Da lua de mel à vida francesa</div>", unsafe_allow_html=True)
-    stages = [
-        ("01 · NOSSA CHEGADA", "Itália",
-         f"Cerca de {data['italy_days_approx']} dias entre Roma e uma base a escolher na Costa Amalfitana.",
-         "https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=1000&auto=format&fit=crop&q=85", "Roteiro"),
-        ("02 · NOSSA BASE", "Instalação",
-         "Cerca de 3–5 dias para organizar moradia, internet e rotina na França.",
-         "https://images.unsplash.com/photo-1449844908441-8829872d2607?w=1000&auto=format&fit=crop&q=85", "Roteiro"),
-        ("03 · NOSSO COTIDIANO", "França",
-         f"{data['france_days_estimate']} no total, incluindo férias e trabalho remoto.",
-         "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=1000&auto=format&fit=crop&q=85", "Roteiro"),
-    ]
-    for idx, (col, (number, title, description, photo, dest)) in enumerate(zip(st.columns(3, gap="medium"), stages)):
-        with col:
+        from datetime import date
+        wedding = date.fromisoformat(data["wedding_date"])
+        departure = date.fromisoformat(data["departure_candidate"])
+        departure_label = departure.strftime("%d/%m/%Y") if departure > wedding else "A definir"
+        cap_values = sorted({int(item["cap_brl"] / 1000) for item in data["budget_scenarios"]})
+        cap_label = f"R$ {cap_values[0]} mil / R$ {cap_values[-1]} mil" if len(cap_values) > 1 else f"R$ {cap_values[0]} mil"
+        cards = [
+            ("Casamento", wedding.strftime("%d/%m/%Y"), "Data fixa do casal", "♡", "wedding"),
+            ("Partida em estudo", departure_label, "Hipótese, sem bilhete emitido", "▦", "departure"),
+            ("Permanência proposta", f"{data['duration_min_days']}–{data['duration_max_days']} dias", "Para dois viajantes", "✈", "duration"),
+            ("Orçamento", cap_label, "Tetos de planejamento, não cotações", "◎", "budget"),
+        ]
+        for col, (label, value, detail, glyph, tone) in zip(st.columns(4, gap="small"), cards):
+            with col:
+                st.markdown(f"<div class='home-kpi home-kpi--{tone}'>"
+                            f"<span class='home-kpi__icon' aria-hidden='true'>{glyph}</span>"
+                            f"<div class='home-kpi__label'>{escape(label)}</div>"
+                            f"<div class='home-kpi__value'>{escape(value)}</div>"
+                            f"<div class='home-kpi__detail'>{escape(detail)}</div></div>",
+                            unsafe_allow_html=True)
+
+        st.markdown("<div class='page-section'>Situação atual do planejamento</div>",unsafe_allow_html=True)
+        tasks_done=sum(t.get("status")=="concluído" for t in data["tasks"])
+        tasks_total=len(data["tasks"])
+        open_decisions=sum(d["status"].casefold() in {"aberta","não decidida","nao decidida"}
+                           for d in data["decisions"])
+        sources_live=sum(v["status"]=="live" for v in sync_sources.values())
+        progress_cards=[
+            ("Pesquisas concluídas",f"{tasks_done}/{tasks_total}","Registro de tarefas no Drive"),
+            ("Decisões ainda abertas",str(open_decisions),"Aguardando definição"),
+            ("Fontes sincronizadas",f"{sources_live}/3","Docs e planilha do Drive"),
+            ("Reservas confirmadas","0","Nenhum compromisso registrado")
+        ]
+        for col,(label,value,detail) in zip(st.columns(4,gap="small"),progress_cards):
+            with col:
+                st.markdown("<div class='page-stat'>"
+                            f"<div class='page-stat__label'>{escape(label)}</div>"
+                            f"<div class='page-stat__value'>{escape(value)}</div>"
+                            f"<div class='page-stat__hint'>{escape(detail)}</div></div>",
+                            unsafe_allow_html=True)
+        action1,action2=st.columns(2,gap="medium")
+        with action1:
+            st.button("Continuar pelo orçamento →",use_container_width=True,
+                      key="home_next_budget",on_click=navigate_page,args=("Orçamento",))
+        with action2:
+            st.button("Ver pesquisas prioritárias →",use_container_width=True,
+                      key="home_next_tasks",on_click=navigate_page,args=("Pesquisas & decisões",))
+
+        overview_left, overview_map, overview_budget = st.columns([1.06, 1.42, 1.08], gap="medium")
+        with overview_left:
+            st.markdown("<div class='home-overview-copy'><div class='home-section-label'>VISÃO DA VIAGEM</div>"
+                        "<h2>O que estamos construindo</h2>"
+                        "<p>Destinos, orçamento e escolhas do casal em um só lugar. "
+                        "Os pontos do mapa são referências, não reservas.</p></div>", unsafe_allow_html=True)
+            st.button("Explorar destinos →", use_container_width=True,
+                      on_click=navigate_page, args=("Mapa & destinos",), key="home_go_map")
+
+        with overview_map:
+            # The map displays real reference coordinates but no invented connecting route.
+            map_view([p for p in build_catalog(data["places"],load_itinerary())
+                      if p["id"] in {"rome","maiori","mulhouse","strasbourg"}],190)
+            st.caption("Mapa de referência · cidades ainda em avaliação")
+
+        with overview_budget:
+            selected = st.radio("Cenário em estudo", ["60k", "70k"],
+                                format_func=lambda x: f"R$ {x[:-1]} mil",
+                                horizontal=True, key="home_budget_choice")
+            scenario = get_scenario(data, selected)
+            calc = calculate_scenario(scenario)
+            used_pct = max(0, min(100, 100 * calc["total"] / scenario["cap_brl"]))
             st.markdown(
-                f"<div class='home-stage'><div class='home-stage__image' role='img' aria-label='Imagem ilustrativa: {escape(title)}' "
-                f"style='background-image:url({photo})'></div>"
-                f"<div class='home-stage__inside'><div class='home-stage__no'>{escape(number)}</div>"
-                f"<div class='home-stage__name'>{escape(title)}</div>"
-                f"<div class='home-stage__desc'>{escape(description)}</div></div></div>",
+                "<div class='home-mini-budget'><div class='home-mini-budget__eyebrow'>◉ Resumo do orçamento</div>"
+                f"<div class='home-mini-budget__amount'>{escape(money_brl(calc['total']))}</div>"
+                f"<div class='home-mini-budget__track'><div class='home-mini-budget__fill' style='width:{used_pct:.1f}%'></div></div>"
+                f"<div class='home-mini-budget__foot'>Margem: {escape(money_brl(calc['balance']))} · {'premissas do Drive' if sync_sources['finance']['status']=='live' else 'snapshot histórico'}</div></div>",
                 unsafe_allow_html=True)
-            st.button(f"Ver etapa: {title} →", key=f"home_stage_{idx}", use_container_width=True,
-                      on_click=navigate_page, args=(dest,))
+            st.button("Ver orçamento completo →", use_container_width=True,
+                      on_click=navigate_page, args=("Orçamento",), key="home_go_budget")
 
-    st.markdown("<div class='home-disclaimer'>Planejamento em desenvolvimento: voos, imóveis e passeios ainda não reservados. "
-                "As estimativas históricas não substituem cotações reais. Imagens ilustrativas: Wikimedia Commons e Unsplash.</div>",
-                unsafe_allow_html=True)
+        left, right = st.columns([2.3, 1], vertical_alignment="center")
+        with left:
+            st.markdown("<div class='home-section-label'>DECISÕES EM ABERTO</div>", unsafe_allow_html=True)
+        with right:
+            st.button("Ver todas as decisões →", use_container_width=True,
+                      on_click=navigate_page, args=("Pesquisas & decisões",),
+                      key="home_go_decisions")
+
+        outstanding = [d for d in data["decisions"] if d["status"].casefold() in {"aberta", "não decidida", "nao decidida"}]
+        if outstanding:
+            for col, decision in zip(st.columns(min(3, len(outstanding)), gap="small"), outstanding[:3]):
+                with col:
+                    detail = decision.get("note", "").strip()
+                    if not detail or detail.rstrip(".") == decision["title"].strip().rstrip("."):
+                        detail = "Aguardando definição no Drive."
+                    st.markdown(
+                        f"<div class='home-decision'><strong>{escape(decision['title'])}</strong>"
+                        f"<p>{escape(detail)}</p></div>", unsafe_allow_html=True)
+        else:
+            st.caption("Nenhuma decisão pendente identificada no documento sincronizado.")
+
+        st.markdown("<div class='home-section-label'>TRÊS MOMENTOS</div>", unsafe_allow_html=True)
+        st.markdown("<div class='home-section-title'>Da lua de mel à vida francesa</div>", unsafe_allow_html=True)
+        stages = [
+            ("01 · NOSSA CHEGADA", "Itália",
+             f"Cerca de {data['italy_days_approx']} dias entre Roma e uma base a escolher na Costa Amalfitana.",
+             "https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=1000&auto=format&fit=crop&q=85", "Roteiro"),
+            ("02 · NOSSA BASE", "Instalação",
+             "Cerca de 3–5 dias para organizar moradia, internet e rotina na França.",
+             "https://images.unsplash.com/photo-1449844908441-8829872d2607?w=1000&auto=format&fit=crop&q=85", "Roteiro"),
+            ("03 · NOSSO COTIDIANO", "França",
+             f"{data['france_days_estimate']} no total, incluindo férias e trabalho remoto.",
+             "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=1000&auto=format&fit=crop&q=85", "Roteiro"),
+        ]
+        for idx, (col, (number, title, description, photo, dest)) in enumerate(zip(st.columns(3, gap="medium"), stages)):
+            with col:
+                st.markdown(
+                    f"<div class='home-stage'><div class='home-stage__image' role='img' aria-label='Imagem ilustrativa: {escape(title)}' "
+                    f"style='background-image:url({photo})'></div>"
+                    f"<div class='home-stage__inside'><div class='home-stage__no'>{escape(number)}</div>"
+                    f"<div class='home-stage__name'>{escape(title)}</div>"
+                    f"<div class='home-stage__desc'>{escape(description)}</div></div></div>",
+                    unsafe_allow_html=True)
+                st.button(f"Ver etapa: {title} →", key=f"home_stage_{idx}", use_container_width=True,
+                          on_click=navigate_page, args=(dest,))
+
+        st.markdown("<div class='home-disclaimer'>Planejamento em desenvolvimento: voos, imóveis e passeios ainda não reservados. "
+                    "As estimativas históricas não substituem cotações reais. Imagens ilustrativas: Wikimedia Commons e Unsplash.</div>",
+                    unsafe_allow_html=True)
 
 elif page == "Mapa & destinos":
     st.markdown("<div class='page-eyebrow'>EXPLORAR · EUROPA 2027</div>"
@@ -701,6 +714,7 @@ elif page == "Mapa & destinos":
 elif page == "Comparar cidades":
     st.markdown("## Comparar cidades-base")
     render_wishlist_base_comparison(plan=active_plan())
+    render_contextual_shortcuts("comparison")
     with st.expander("Análises antigas de cidades-base · avançado", expanded=False):
         st.caption("Ferramentas anteriores preservadas para consultas adicionais.")
         compare_mode=st.segmented_control(
@@ -1232,6 +1246,8 @@ elif page == "Roteiro":
         map_view(markers,height=height,show_labels=False,zoom=zoom,center=center)
 
     if itinerary_section == "Visão geral":
+        if (ux_area,ux_section)==("Meu roteiro","Meu planejamento"):
+            render_contextual_shortcuts("itinerary")
         if (ux_area,ux_section)==("Meu roteiro","Organizar viagem") and (
             st.session_state.get("ux_organize_view")=="Calendário inteligente"):
             render_smart_calendar(
@@ -1250,6 +1266,8 @@ elif page == "Roteiro":
     elif itinerary_section == "Explorar atrações":
         # UX 5.0.1: destination-first discovery, no base choice required.
         render_independent_destination_discovery()
+        if st.session_state.get("ux502_view","Descobrir lugares")=="Descobrir lugares":
+            render_contextual_shortcuts("discovery")
         st.divider()
         with st.popover("Pesquisar por cidade-base · opcional", use_container_width=True):
             st.caption("Ferramenta anterior preservada para investigar alternativas de cidade-base.")
