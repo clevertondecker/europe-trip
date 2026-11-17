@@ -200,7 +200,7 @@ class PrivateWishlistPersistenceTests(unittest.TestCase):
         self.assertFalse(app.exception,[x.message for x in app.exception])
         self.assertEqual(app.session_state["ux502_private_saved_revision"],self.interests["revision"])
         self.assertFalse(app.session_state["ux36_cloud_dirty"])
-        self.assertTrue(any("Salvo" in x.value for x in app.success))
+        self.assertEqual(app.session_state["ux502_status"], "Salvo no armazenamento privado")
 
 
 if __name__=="__main__":
