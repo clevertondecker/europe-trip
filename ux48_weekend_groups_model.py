@@ -10,7 +10,7 @@ import json
 from uuid import uuid4
 from calendar_model import calendar_plan
 from itinerary_flow_model import selected_rows,FRANCE_STAGE
-from trip_plan_model import validate_plan
+from trip_plan_model import validate_plan,BASES
 
 SCHEMA=1
 STATUS=("estudo","planejado")
@@ -65,7 +65,7 @@ def validate_groups(state,plan,catalog):
         if not isinstance(group["name"],str) or not 1<=len(group["name"].strip())<=100:
             raise ValueError("Nome de viagem inválido")
         if (group["period"] not in PERIODS or group["status"] not in STATUS or
-            group["base_city"] not in {plan["base_city"]} or
+            group["base_city"] not in BASES or
             type(group["nights"]) is not int or not 0<=group["nights"]<=3 or
             not isinstance(group["notes"],str) or len(group["notes"])>700):
             raise ValueError("Premissas inválidas do grupo")
@@ -94,8 +94,10 @@ def validate_groups(state,plan,catalog):
     if not isinstance(rests,list) or len(rests)!=len(set(rests)):
         raise ValueError("Descansos duplicados")
     for start in rests:
-        if not isinstance(start,str) or start not in season or date.fromisoformat(start).weekday()!=5:
-            raise ValueError("Descanso fora da temporada")
+        if (not isinstance(start,str) or start not in season or
+            date.fromisoformat(start).weekday()!=5 or season[start]["stage"]!=FRANCE_STAGE or
+            season[start]["activity"]=="Instalação"):
+            raise ValueError("Descanso fora da temporada europeia")
         if start in occupied:raise ValueError("Descanso e passeio no mesmo fim de semana")
     return deepcopy(state)
 
@@ -142,7 +144,9 @@ def reconcile_removed_outings(state,plan,catalog):
     # Changing the trip date invalidates old explicit rest markers.
     season=_season_days(plan)
     result["rest_weekends"]=[d for d in result["rest_weekends"]
-                             if d in season and date.fromisoformat(d).weekday()==5]
+                             if d in season and date.fromisoformat(d).weekday()==5
+                             and season[d]["stage"]==FRANCE_STAGE
+                             and season[d]["activity"]!="Instalação"]
     if any(g["start_date"] in result["rest_weekends"] for g in kept):
         result["rest_weekends"]=[d for d in result["rest_weekends"]
                                  if all(g["start_date"]!=d for g in kept)]
