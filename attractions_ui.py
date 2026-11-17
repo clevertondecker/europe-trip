@@ -59,65 +59,110 @@ def _ux45_open_planner(destination_id: str) -> None:
 
 
 def _render_research_only_outings(base_id: str, catalog: dict) -> None:
-    """Read-only attraction discovery; never use another city's fare matrix."""
+    """Read-only general catalog; no undocumented journey is called feasible."""
     from outing_base_coverage_model import preview_for_base
 
     coverage = preview_for_base(base_id, catalog=catalog)
     st.info(
-        "Pesquisa exploratória de " + coverage["base_name"] +
-        ": as atrações abaixo já pertencem ao catálogo, mas esta cidade ainda "
-        "não possui uma matriz completa de deslocamentos, custos ou retornos. "
-        "Nada nesta tela altera os passeios do roteiro oficial.")
-    a,b,c = st.columns(3)
-    a.metric("Destinos com atrações", coverage["catalog_destinations"])
-    b.metric("Atrações existentes", coverage["catalog_attractions"])
-    c.metric("Destinos com tempo ferroviário histórico", coverage["timed_destination_count"])
+        "Catálogo geral: os 14 destinos e 65 atrações não foram pesquisados "
+        "individualmente como passeios viáveis saindo de " +
+        coverage["base_name"] + ". Esta consulta é exploratória e não "
+        "altera as escolhas do roteiro oficial.")
+    a, b, c = st.columns(3)
+    a.metric("Destinos no catálogo geral", coverage["catalog_destinations"])
+    b.metric("Atrações no catálogo geral", coverage["catalog_attractions"])
+    c.metric("Destinos com trem histórico documentado",
+             coverage["timed_destination_count"])
     st.caption(
-        "Os tempos disponíveis são apenas referências históricas de ida, estação a estação. "
-        "Não comprovam retorno no fim de semana, última milha nem preço total do casal. "
-        "Sem tempo pesquisado não significa que não haja trem.")
+        "Os tempos de trem são os menores tempos históricos publicados "
+        "para UM trecho, estação a estação. Se houver duração típica da "
+        "mesma fonte, ela aparece separadamente. Retorno, última milha, "
+        "tarifas completas e datas de 2027 permanecem a verificar.")
 
+    a, b = st.columns(2)
+    with a:
+        st.markdown("#### Com referência ferroviária")
+        st.caption(str(coverage["timed_destination_count"]) +
+                   " destino(s) com tempo histórico de ida registrado; "
+                   "não significa bate-volta viável.")
+    with b:
+        st.markdown("#### Sem tempo ferroviário pesquisado")
+        st.caption(str(coverage["unknown_destination_count"]) +
+                   " destino(s) sem duração histórica neste estudo. "
+                   "Não significa ausência de ligação.")
+    selected_group = st.selectbox(
+        "Cobertura ferroviária",
+        ["Todos", "Com referência ferroviária", "Sem tempo pesquisado",
+         "Destino local"],
+        key="explore_readonly_rail_group")
+    available = [
+        row for row in coverage["destinations"]
+        if (selected_group == "Todos"
+            or selected_group == "Com referência ferroviária"
+            and row["train_oneway_min"] is not None
+            or selected_group == "Sem tempo pesquisado"
+            and not row["local"] and row["train_oneway_min"] is None
+            or selected_group == "Destino local" and row["local"])
+    ]
+    countries = sorted({x["country"] for x in coverage["destinations"]})
+    chosen_countries = st.multiselect(
+        "Filtrar países do catálogo", countries,
+        default=countries, key="explore_readonly_countries")
+    available = [x for x in available if x["country"] in chosen_countries]
     rows = []
-    for item in coverage["destinations"]:
+    for item in available:
         if item["local"]:
-            transport = "Local · deslocamento a verificar"
+            transport = "Local · acesso urbano desconhecido"
         elif item["train_oneway_min"] is not None:
-            transport = str(item["train_oneway_min"]) + " min · ida histórica"
+            transport = (str(item["train_oneway_min"]) +
+                         " min · menor tempo histórico publicado")
+            if item["train_typical_historical_min"] is not None:
+                transport += ("; típico " +
+                              str(item["train_typical_historical_min"]) + " min")
         else:
-            transport = "Rota ainda não pesquisada"
+            transport = "Tempo ferroviário ainda não pesquisado"
         rows.append({
-            "Destino": item["name"],
-            "Atrações": item["attraction_count"],
-            "Transporte": transport,
-            "Faltam": "Última milha e custos" if item["train_oneway_min"] is not None
-                     else "Tempo, tarifa, retorno e acesso",
+            "Destino do catálogo": item["name"],
+            "Atrações catalogadas": item["attraction_count"],
+            "Referência de transporte": transport,
+            "Viabilidade desde a base": "Não confirmada",
         })
-    st.markdown("#### Destinos e passeios disponíveis para pesquisa")
-    st.dataframe(pd.DataFrame(rows),hide_index=True,use_container_width=True)
-    st.markdown("#### Consultar atrações de um destino")
-    names={row["destination_id"]:row["name"] for row in coverage["destinations"]}
-    chosen=st.selectbox(
-        "Destino a explorar",list(names),
-        format_func=lambda key:names[key],key="explore_readonly_destination")
-    selected=next(row for row in coverage["destinations"]
-                  if row["destination_id"]==chosen)
+    st.markdown("#### Destinos para consulta exploratória")
+    if not available:
+        st.info("Nenhum destino corresponde aos filtros escolhidos.")
+        return
+    st.dataframe(pd.DataFrame(rows), hide_index=True,
+                 use_container_width=True)
+    names = {row["destination_id"]: row["name"] for row in available}
+    current = st.session_state.get("explore_readonly_destination")
+    if current not in names:
+        st.session_state["explore_readonly_destination"] = next(iter(names))
+    chosen = st.selectbox(
+        "Destino a explorar", list(names),
+        format_func=lambda key: names[key],
+        key="explore_readonly_destination")
+    selected = next(row for row in available
+                    if row["destination_id"] == chosen)
     if selected["train_oneway_min"] is not None:
-        st.write("**Trem (ida histórica):** "+
-                 str(selected["train_oneway_min"])+" minutos, estação a estação")
-        st.markdown("[Consultar fonte ferroviária]("+
-                    selected["train_evidence_url"]+")")
+        st.write("**Menor tempo histórico publicado (somente ida):** " +
+                 str(selected["train_oneway_min"]) +
+                 " min, estação a estação.")
+        if selected["train_typical_historical_min"] is not None:
+            st.write("**Tempo típico da mesma fonte:** " +
+                     str(selected["train_typical_historical_min"]) + " min.")
+        st.markdown("[Fonte ferroviária histórica](" +
+                    selected["train_evidence_url"] + ")")
     elif selected["local"]:
-        st.caption("O deslocamento urbano até as atrações ainda não foi documentado.")
+        st.caption("Transporte local até as atrações ainda não documentado.")
     else:
-        st.caption("Ainda não há duração verificada desta base até este destino.")
+        st.caption("Tempo de trem desde esta base ainda não pesquisado.")
     for attr in selected["attractions"]:
-        st.markdown("- **"+escape(attr["name"])+"** · "+
-                    "[Fonte da atração]("+attr["source_url"]+")")
+        st.markdown("- **" + escape(attr["name"]) + "** · " +
+                    "[Fonte da atração](" + attr["source_url"] + ")")
     st.warning(
-        "Pesquisa de viagem incompleta: retorno, acesso às atrações, "
-        "bilhetes normais e datas de 2027 ainda não confirmados. "
-        "Para planejar e salvar passeios oficiais, utilize a base atualmente "
-        "aprovada. Nenhuma tarifa é transferida de outra cidade.")
+        "O catálogo geral não comprova a viabilidade deste passeio. "
+        "Retorno, acessos, tarifa normal do casal e horários em 2027 "
+        "não estão confirmados. Nenhuma tarifa ou escolha oficial foi alterada.")
 
 
 def render_explorer(trip_data: dict, sync_sources: dict, map_view) -> None:

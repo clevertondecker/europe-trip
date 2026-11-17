@@ -55,17 +55,19 @@ def preview_for_base(base_id: str, *, catalog: dict | None = None,
         local = canonical_place(did) == canonical_place(base_id)
         rail_row = route_evidence(rail, base_id, did)
         minutes = rail_row["minimum_oneway_min"] if rail_row["status"] == "historical_time" else None
+        typical = rail_row.get("typical_oneway_min") if minutes is not None else None
         source = rail_row.get("source_url") if minutes is not None else None
         dataset = rail_row.get("source_dataset") if minutes is not None else None
         checked = rail_row.get("source_date") if minutes is not None else None
         if minutes is None and not local:
             extra = _exploratory_evidence(exploration, base_id, did)
             if extra:
+                typical = None  # The exploratory record offers no comparable typical value.
                 minutes, source, dataset, checked = (
                     extra["minutes"], extra["source_url"],
                     extra["source_dataset"], extra["evidence_date"])
         if local:
-            minutes, source, dataset, checked = None, None, None, None
+            minutes, typical, source, dataset, checked = None, None, None, None, None
         destinations.append({
             "destination_id": did,
             "name": place["name"],
@@ -74,7 +76,11 @@ def preview_for_base(base_id: str, *, catalog: dict | None = None,
             "attractions": [{"id": a["id"], "name": a["name"],
                              "source_url": a["source_urls"][0]} for a in items],
             "local": local,
-            "train_oneway_min": minutes,
+            "train_oneway_min": minutes,  # Backward-compatible minimum historical time.
+            "train_minimum_historical_min": minutes,
+            "train_typical_historical_min": typical,
+            "train_duration_semantics": ("minimum_published_historical_oneway" if minutes is not None
+                                         else "not_available"),
             "train_evidence_url": source,
             "train_evidence_dataset": dataset,
             "train_evidence_date": checked,
@@ -90,13 +96,17 @@ def preview_for_base(base_id: str, *, catalog: dict | None = None,
         x["train_oneway_min"] if x["train_oneway_min"] is not None else 999999,
         x["name"]))
     known = sum(x["train_oneway_min"] is not None for x in destinations)
+    local_count = sum(x["local"] for x in destinations)
     return {
         "base_id": base_id,
         "base_name": labels[base_id]["name"],
         "catalog_destinations": len(destinations),
         "catalog_attractions": sum(x["attraction_count"] for x in destinations),
         "timed_destination_count": known,
-        "unknown_destination_count": len(destinations) - known - sum(x["local"] for x in destinations),
+        "unknown_destination_count": len(destinations) - known - local_count,
+        "local_destination_count": local_count,
+        "known_destinations": deepcopy([x for x in destinations if x["train_oneway_min"] is not None]),
+        "unresearched_destinations": deepcopy([x for x in destinations if not x["local"] and x["train_oneway_min"] is None]),
         "status": "historical_partial" if known else "attractions_only",
         "destinations": deepcopy(destinations),
         "advisory_only": True,

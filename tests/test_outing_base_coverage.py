@@ -1,6 +1,10 @@
 """Regression tests for all exploratory home-base outing previews."""
 import unittest
 from copy import deepcopy
+from pathlib import Path
+from streamlit.testing.v1 import AppTest
+
+ROOT = Path(__file__).resolve().parents[1]
 
 from attractions_model import load_attractions
 from base_explorer_model import load_exploration
@@ -46,6 +50,35 @@ class AlternateBaseOutingCoverageTests(unittest.TestCase):
         self.assertIsNone(brussels["full_couple_cost_eur"])
         self.assertFalse(brussels["weekend_return_verified_2027"])
 
+    def test_minimum_vs_typical_semantics_from_same_evidence(self):
+        view=self.get("offenburg")
+        item=next(x for x in view["destinations"]
+                  if x["destination_id"]=="strasbourg")
+        self.assertEqual(item["train_oneway_min"],
+                         item["train_minimum_historical_min"])
+        self.assertEqual(item["train_duration_semantics"],
+                         "minimum_published_historical_oneway")
+        if item["train_typical_historical_min"] is not None:
+            self.assertGreaterEqual(item["train_typical_historical_min"],
+                                    item["train_minimum_historical_min"])
+        self.assertTrue(item["train_evidence_url"].startswith("https://"))
+
+    def test_catalog_is_not_automatically_viable_for_alternative_base(self):
+        view=self.get("lille")
+        self.assertEqual(view["catalog_destinations"],14)
+        self.assertEqual(view["catalog_attractions"],65)
+        self.assertEqual(view["timed_destination_count"],
+                         len(view["known_destinations"]))
+        self.assertEqual(view["unknown_destination_count"],
+                         len(view["unresearched_destinations"]))
+        self.assertTrue(all(x["train_oneway_min"] is not None
+                            for x in view["known_destinations"]))
+        self.assertTrue(all(x["train_oneway_min"] is None and not x["local"]
+                            for x in view["unresearched_destinations"]))
+        self.assertTrue(all(x["full_couple_cost_eur"] is None
+                            and not x["weekend_return_verified_2027"]
+                            for x in view["destinations"]))
+
     def test_offenburg_and_karlsruhe_can_show_documented_train(self):
         for city in ("offenburg","karlsruhe"):
             with self.subTest(city=city):
@@ -86,6 +119,37 @@ class AlternateBaseOutingCoverageTests(unittest.TestCase):
     def test_unknown_base_rejected(self):
         with self.assertRaises(ValueError):
             self.get("not_a_real_city")
+
+
+class OutingExplorerNavigationTests(unittest.TestCase):
+    def test_alternate_then_official_then_alternate_preserves_tripplan(self):
+        app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
+        self.assertFalse(app.exception,[x.message for x in app.exception])
+        original=deepcopy(app.session_state["advisor_plan"])
+        app.radio(key="ux_area").set_value("Explorar").run()
+        app.segmented_control(key="ux_section").set_value("Passeios").run()
+        self.assertFalse(app.exception,[x.message for x in app.exception])
+
+        app.selectbox(key="attractions_scenario_base").set_value("lille").run()
+        self.assertFalse(app.exception,[x.message for x in app.exception])
+        self.assertTrue(any("Catálogo geral" in x.value for x in app.info))
+        self.assertTrue(any("menores tempos históricos publicados" in x.value.lower()
+                            for x in app.caption))
+        self.assertEqual(app.session_state["advisor_plan"],original)
+
+        app.selectbox(key="explore_readonly_rail_group").set_value(
+            "Com referência ferroviária").run()
+        self.assertFalse(app.exception,[x.message for x in app.exception])
+
+        app.selectbox(key="attractions_scenario_base").set_value("mulhouse").run()
+        self.assertFalse(app.exception,[x.message for x in app.exception])
+        self.assertFalse(any("Catálogo geral: os 14 destinos" in x.value
+                             for x in app.info))
+        self.assertEqual(app.session_state["advisor_plan"],original)
+
+        app.selectbox(key="attractions_scenario_base").set_value("lille").run()
+        self.assertFalse(app.exception,[x.message for x in app.exception])
+        self.assertEqual(app.session_state["advisor_plan"],original)
 
 
 if __name__=="__main__":
