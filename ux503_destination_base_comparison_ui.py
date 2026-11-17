@@ -82,10 +82,10 @@ def render_wishlist_base_comparison(*, plan, discovery=None, research=None):
     for destination in result["destinations"]:
         with st.container(border=True):
             st.markdown("**"+destination["name"]+"** · "+destination["priority_label"])
-            cols=st.columns(len(selected))
-            for col,base_id in zip(cols,selected):
+            # Vertical per-base records remain readable on narrow mobile screens.
+            for base_id in selected:
                 route=indexed[(base_id,destination["id"])]
-                with col:
+                with st.container(border=True):
                     st.markdown("**"+cities[base_id]["name"]+"**")
                     minimum=route["minimum_oneway_min"]
                     st.write((str(minimum)+" min · ida histórica") if minimum is not None
