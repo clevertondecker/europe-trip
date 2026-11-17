@@ -129,9 +129,11 @@ class DestinationPhotoAppTests(TestCase):
             app.segmented_control(key="ux_section").set_value("Passeios").run()
             self.assertFalse(app.exception,[x.message for x in app.exception])
             markup=" ".join(x.value for x in app.markdown)
-            self.assertIn('alt="Fotografia de Aachen"',markup)
-            self.assertIn("Jane Photographer",markup)
+            # Local WebP is now served through st.image rather than an
+            # externally hosted HTML <img>. The remote mock cannot override it.
+            self.assertIn("Vitold Muratov",markup)
+            self.assertNotIn("Jane Photographer",markup)
             self.assertIn("Foto a pesquisar",markup)
-            self.assertIn("aspect-ratio:16/9",markup)
+            self.assertIn("recortada para 16:9",markup)
             self.assertEqual(app.session_state["advisor_plan"],initial)
             self.assertFalse(app.session_state.get("advisor_autosave_pending",False))
