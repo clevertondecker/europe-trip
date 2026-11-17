@@ -259,6 +259,45 @@ def _edit_destination(row:dict,catalog:dict)->None:
                     st.rerun()
 
 
+def _render_integrated_destination(row:dict,item:dict,catalog:dict,
+                                   plan:dict,routes:dict)->None:
+    """One photo + facts + existing editor in the same canonical destination card."""
+    from ux47_destination_card_model import destination_card_view
+    view=destination_card_view(plan,catalog,routes,row)
+    with st.container(border=True):
+        image_col,details_col=st.columns([1,2],gap="large",
+                                          vertical_alignment="top")
+        with image_col:
+            photo=view["photo"]
+            if photo and photo.get("url"):
+                # Fixed maximum image width prevents tall Wikimedia portraits
+                # from dominating large screens; native columns stack on mobile.
+                st.image(photo["url"],width=260)
+                author=photo.get("author") or "Autor não informado"
+                license_name=photo.get("license") or "Licença não informada"
+                source=photo.get("source_page")
+                caption="Foto: "+author+" · "+license_name
+                if source:
+                    st.caption("["+caption+"]("+source+")")
+                else:
+                    st.caption(caption)
+        with details_col:
+            title,status=st.columns([3,1],gap="small")
+            with title:
+                st.markdown("##### "+escape(view["name"])+" · "+escape(view["country"]))
+            with status:
+                st.caption("Organizado" if view["organized"] else "Escolhido")
+            st.caption("Período: "+(_period_label(view["period"]) if view["period"]
+                       else "a definir"))
+            if view["dates"]:
+                st.caption("Data(s): "+", ".join(view["dates"]))
+            st.markdown("**"+str(view["attraction_count"])+" atração(ões) escolhida(s)**")
+            st.write(" · ".join(view["attractions"]))
+            st.caption("🚆 "+view["transport"])
+            st.caption("💳 "+view["cost"])
+            _edit_destination(row,catalog)
+
+
 def _selected_stage(rows:list[dict],stage:str,catalog:dict)->None:
     stage_rows=[r for r in rows if r["stage"]==stage]
     focus=st.session_state.get("flow_edit_target")
@@ -291,24 +330,28 @@ def _selected_stage(rows:list[dict],stage:str,catalog:dict)->None:
                     "Você pode adicionar passeios mesmo sem decidir a cidade-base.")
         return
     count=st.session_state.get("flow_visible_"+stage,4)
+    routes=load_base_routes() if stage==FRANCE_STAGE else None
     for row in stage_rows[:count]:
         item=get_choice(catalog,row["id"])
-        with st.container(border=True):
-            name_col,status_col=st.columns([3,1],gap="small")
-            with name_col:
-                st.markdown("**"+escape(row["name"])+"**")
-                names={a["id"]:a["name"] for a in item["attractions"]}
-                st.caption(" · ".join(names.get(x,x) for x in row["attractions"]))
-                period=row["period"]
-                if row["exact_dates"]:
-                    st.caption("Organizado em "+", ".join(row["exact_dates"]))
-                else:
-                    st.caption(_period_label(period) if period!=UNASSIGNED
-                               else "Sem período definido — pode organizar depois")
-            with status_col:
-                st.caption("Organizado" if row["period"]!=UNASSIGNED
-                           or row["exact_dates"] else "No meu roteiro")
-            _edit_destination(row,catalog)
+        if stage==FRANCE_STAGE:
+            _render_integrated_destination(row,item,catalog,active_plan(),routes)
+        else:
+            with st.container(border=True):
+                name_col,status_col=st.columns([3,1],gap="small")
+                with name_col:
+                    st.markdown("**"+escape(row["name"])+"**")
+                    names={a["id"]:a["name"] for a in item["attractions"]}
+                    st.caption(" · ".join(names.get(x,x) for x in row["attractions"]))
+                    period=row["period"]
+                    if row["exact_dates"]:
+                        st.caption("Organizado em "+", ".join(row["exact_dates"]))
+                    else:
+                        st.caption(_period_label(period) if period!=UNASSIGNED
+                                   else "Sem período definido — pode organizar depois")
+                with status_col:
+                    st.caption("Organizado" if row["period"]!=UNASSIGNED
+                               or row["exact_dates"] else "No meu roteiro")
+                _edit_destination(row,catalog)
     if len(stage_rows)>count:
         if st.button("Ver mais lugares ("+str(len(stage_rows)-count)+")",
                      key="flow_more_"+stage):
@@ -543,11 +586,6 @@ def render_itinerary_workbench(plan:dict,catalog:dict,
     _save_panel(active_plan(),catalog)
     rows=selected_rows(active_plan(),catalog)
     _selected_stage(rows,stage,catalog)
-    # Keep the photographic cards from the old dashboard, now natively
-    # integrated in Meu planejamento without any legacy toggle.
-    if stage==FRANCE_STAGE:
-        from travel_dashboard_ui import render_chosen_places_cards
-        render_chosen_places_cards(active_plan(),catalog,load_base_routes())
     other=FRANCE_STAGE if stage==ITALY_STAGE else ITALY_STAGE
     other_count=sum(x["stage"]==other for x in rows)
     st.caption(str(other_count)+" lugar(es) na etapa "+_stage_label(other)+
