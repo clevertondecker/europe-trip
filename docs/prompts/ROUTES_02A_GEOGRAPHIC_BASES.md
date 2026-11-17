@@ -1,6 +1,6 @@
 # PROMPT 2A/7 — Cidades-base alternativas e cobertura geográfica
 
-> STATUS: **SOMENTE PROPOSTA PARA REVISÃO POR OUTRA IA.** Este PR contém apenas este prompt, não código funcional nem pesquisa nova. Não executar implementação, merge ou deploy antes de avaliação/autorizações explícitas. Depois de aprovado, executar na mesma branch ou conforme coordenação dos agentes.
+> STATUS: **SOMENTE PROPOSTA PARA REVISÃO POR OUTRA IA.** Este PR contém apenas este prompt, não código funcional nem pesquisa nova. Não executar implementação, merge ou deploy antes de avaliação/autorizações explícitas. Após aprovação, abrir PRs de implementação **novos e separados**; esta branch permanece somente especificação.
 >
 > Projeto: Nossa Europa 2027 — `clevertondecker/europe-trip`. Referência obrigatória: auditoria de cobertura **PR #108** (30 bases, 46 destinos, 94 atrações; 1.380 pares base–destino, dos quais 54 com tempo histórico, 25 parciais, 1.271 não pesquisados e 30 locais). Como #108 pode ainda não estar na main, consultar o PR/branch e não presumir integração.
 >
@@ -42,3 +42,24 @@ Promoção automática de novas bases ao app, expansão da wishlist, novos cálc
 
 ## Contrato de revisão
 Este é um documento de instruções. O diff desta PR **não implementa a funcionalidade**. Comentários de outra IA devem ser publicados neste PR, preferencialmente organizados por P0/P1/P2 e com mudanças propostas ao texto; só após aceite será autorizada a implementação.
+
+## Revisão de alinhamento — 17/11/2026
+
+### Dois universos de cidades-base (não equivalentes)
+Snapshot de `data/base_city_research_expanded_2026_11.json` (`schema_version=1` em 17/11/2026):
+- **Já cadastradas:** `mulhouse`, `strasbourg`, `lille`, `metz`, `liege`, `freiburg`. Estas podem participar da comparação existente, dentro dos limites de 2–5 cidades por visualização.
+- **Ainda fora desse catálogo:** Maastricht, Basel e Amsterdam. São **exploratory_candidate** e não podem ser exibidas como `registered_but_unresearched`. Primeiro validar ID, país, aliases, fontes e condições de cadastro; NÃO incluí-las implicitamente na shortlist oficial ou no `compare_wishlist_bases()`.
+- **Estados obrigatórios e diferentes:** `registered_with_evidence`, `registered_without_rail_evidence`, `exploratory_not_registered`, `identity_unresolved`. `exploratory_not_registered` não entra nos mesmos denominadores de cobertura ferroviária do catálogo atual. Base cadastrada sem pesquisa continua no catálogo, com `not_researched`.
+
+### Sequência mínima e comparação justa
+1. **Primeiro** executar comparação apenas das cidades cadastradas e destinos existentes, com uma **cesta fixa e declarada** (ou snapshot consentido do wishlist, somente leitura). Escolher 2–5 bases por tela; matriz exploratória offline de seis bases pode existir sem forçar o seletor.
+2. Documentar para cada par um estado de pesquisa e fonte de proveniência. Quando não houver tempo, mostrar `unknown`; não inferir zero ou pior qualidade logística. Critérios e cestas idênticos por base, sem “vencedora” automático.
+3. **Depois** produzir um quadro **separado** de candidatas não cadastradas com hipóteses e lacunas, sem fingir equivalência com as seis cadastradas. Promoção ao catálogo depende de PR de implementação diferente e aprovado.
+4. A cesta inicial não cresce silenciosamente com descobertas do 2B. Aceite expresso do usuário gera um novo snapshot de desejos, nunca reescreve o original. Pesquisa de moradia/orçamento é filtro posterior, não critério oculto de cobertura.
+
+### Riscos, contratos, dependências e aceite
+- **P1:** confusão entre ausência de cadastro e ausência de pesquisa; exigir campo de `registration_status` derivado de `load_research()`, não do nome encontrado em `build_destination_discovery()`.
+- **P2:** duplicação de cidades/aliases, viés por cobertura de fontes e aumento indiscriminado da matriz; exigir IDs canônicos, ordenação estável e publicação de lacunas.
+- **Contratos reutilizados:** `load_research()`, `canonical_place()`, `build_destination_discovery()`, `get_rail_evidence()`, `compare_wishlist_bases()`, `selected_destinations_for_comparison()`.
+- **Dependências:** baseline #108 e critérios de fonte/identidade #109 para pesquisa futura. A comparação inicial das cidades existentes **não** depende de #111; candidatas novas só após análise de cadastro.
+- **Aceite:** seis bases reconhecidas pelo ID correto, três exploratórias nunca tratadas como registradas, matriz de cesta idêntica, desconhecidos preservados, não mutação de shortlist, TripPlan, wishlist ou cidade-base oficial; testes de alias e de mudança do snapshot da cesta. Implementação em PR distinto.
