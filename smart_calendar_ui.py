@@ -10,7 +10,7 @@ import json
 import streamlit as st
 
 from planning_session import active_plan,accept_approved_plan
-from itinerary_flow_model import selected_rows,ITALY_STAGE,FRANCE_STAGE
+from itinerary_flow_model import selected_rows,selected_rows_for_stage,ITALY_STAGE,FRANCE_STAGE
 from smart_calendar_model import (
     availability_matrix,validate_calendar_preferences,suggest_calendar,
     manual_calendar_move,review_calendar_change,apply_calendar_change,
@@ -73,6 +73,8 @@ def _calendar_overview(plan,catalog,preferences):
     b.metric("Instalação",setup)
     c.metric("Dias de trabalho",work)
     d.metric("Fins de semana livres",weekend)
+    if "ux35_stage" not in st.session_state:
+        st.session_state["ux35_stage"]=st.session_state.get("flow_active_stage",ITALY_STAGE)
     stage=st.segmented_control("Etapa",
                               [ITALY_STAGE,FRANCE_STAGE],
                               default=ITALY_STAGE,
@@ -97,7 +99,7 @@ def _calendar_overview(plan,catalog,preferences):
     st.caption("Datas **aprovadas no roteiro** não são reservas. A grade mostra "
                "um período ilustrativo segundo as premissas atuais. "
                "Horários de 2027, ingressos e transportes precisam de confirmação.")
-    unscheduled=[r for r in selected if not r["exact_dates"]]
+    unscheduled=[r for r in selected if r["stage"]==stage and not r["exact_dates"]]
     st.caption(str(len(unscheduled))+" lugar(es) selecionado(s) sem dia definido. "
                "Podem continuar organizados só por período flexível.")
     return bydate,selected
@@ -231,23 +233,30 @@ def _suggest(plan,catalog,routes,preferences):
 
 def _manual(plan,catalog):
     with st.expander("Mover um passeio ou retirar a data",expanded=False):
-        rows=selected_rows(plan,catalog)
+        stage=st.session_state.get("ux35_stage",ITALY_STAGE)
+        rows=selected_rows_for_stage(plan,catalog,stage)
         if not rows:
             st.caption("Escolha um passeio em Meu planejamento antes de marcar dias.")
             return
         lookup={r["id"]:r for r in rows}
+        if st.session_state.get("ux35_destination") not in lookup:
+            st.session_state.pop("ux35_destination",None)
+            st.session_state.pop("ux35_from_date",None)
+            st.session_state.pop("ux35_to_date",None)
         chosen=st.selectbox("Passeio",list(lookup),
                             format_func=lambda key:lookup[key]["name"],
                             key="ux35_destination")
         row=lookup[chosen]
         existing=row["exact_dates"]
+        if st.session_state.get("ux35_from_date","") not in [""]+existing:
+            st.session_state["ux35_from_date"]=""
         old=st.selectbox("Visita a reorganizar",
                          [""]+existing,key="ux35_from_date",
                          format_func=lambda key:key or "Sem data / nova visita")
         valid=[r for r in availability_matrix(plan)
                if r["stage"]==row["stage"]]
         choices=[""]+[r["date"] for r in valid]
-        if not existing and "ux35_to_date" not in st.session_state:
+        if st.session_state.get("ux35_to_date","") not in choices:
             st.session_state["ux35_to_date"]=""
         target=st.selectbox("Nova data",choices,key="ux35_to_date",
                             format_func=lambda key:key or "Sem data / retirar dia")
@@ -284,15 +293,14 @@ def render_smart_calendar(plan:dict,catalog:dict,routes:dict,
                  on_click=_jump,args=("Orçamento","Resumo financeiro"))
         b.button("Pesquisar passeios",key="ux35_go_research",
                  on_click=_jump,args=("Explorar","Passeios"))
-    # UX 4.8: optional, sidecar-only weekend grouping; keeps all canonical dates,
-    # outings, calendar proposals and remote persistence unchanged.
-    from ux48_weekend_groups_ui import render_weekend_planner
-    render_weekend_planner(active_plan(),catalog)
     try:
         preferences=_preferences()
     except (ValueError,KeyError,TypeError) as exc:
         st.warning(str(exc));return
     _calendar_overview(plan,catalog,preferences)
+    if st.session_state.get("ux35_stage")==FRANCE_STAGE:
+        from ux48_weekend_groups_ui import render_weekend_planner
+        render_weekend_planner(active_plan(),catalog)
     _suggest(plan,catalog,routes,preferences)
     _manual(plan,catalog)
     _review_panel(active_plan(),catalog)
