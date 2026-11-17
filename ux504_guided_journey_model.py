@@ -5,6 +5,8 @@ confirmed costs, bookings, or comparisons simply from visiting a page.
 """
 from __future__ import annotations
 
+from itinerary_flow_model import UNASSIGNED
+
 STEPS = (
     ("discover", "Descobrir lugares",
      "Conhecer destinos e atrações antes de escolher onde ficar",
@@ -39,7 +41,7 @@ def project_journey(plan: dict, interests: dict | None = None) -> dict:
     flexible_dates = {v["destination_id"] for v in flexible if v.get("exact_date")}
     with_date = destinations & (assignments | flexible_dates)
     with_period = {v["destination_id"] for v in flexible
-                   if v.get("period") and str(v["period"]).strip()}
+                   if v.get("period") and v["period"] != UNASSIGNED}
     organized = destinations & (with_date | with_period)
     pending = destinations - organized
     outing_count = len(destinations)
