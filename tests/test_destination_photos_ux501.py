@@ -133,7 +133,7 @@ class DestinationPhotoAppTests(TestCase):
             # externally hosted HTML <img>. The remote mock cannot override it.
             self.assertIn("Vitold Muratov",markup)
             self.assertNotIn("Jane Photographer",markup)
-            self.assertIn("Foto a pesquisar",markup)
+            self.assertNotIn("Foto a pesquisar",markup)
             self.assertIn("recortada para 16:9",markup)
             self.assertEqual(app.session_state["advisor_plan"],initial)
             self.assertFalse(app.session_state.get("advisor_autosave_pending",False))

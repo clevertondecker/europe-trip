@@ -21,7 +21,8 @@ FIVE={"aachen","baden_baden","cologne","karlsruhe","kehl"}
 class LocalDestinationPhotosTests(unittest.TestCase):
     def test_real_binary_assets_are_complete_and_independent(self):
         records=_manifest()
-        self.assertEqual(set(records),FIVE)
+        self.assertTrue(FIVE.issubset(set(records)))
+        self.assertEqual(len(records),36)
         hashes=[]
         for destination_id,record in records.items():
             with self.subTest(city=destination_id):
@@ -40,10 +41,13 @@ class LocalDestinationPhotosTests(unittest.TestCase):
                 self.assertEqual(photo["license"],record["license"])
                 self.assertTrue(photo["source_page"].startswith(
                     "https://commons.wikimedia.org/wiki/File:"))
-                self.assertTrue(photo["license_url"].startswith(
-                    "https://creativecommons.org/licenses/by-sa/"))
+                self.assertTrue(photo["license_url"].startswith((
+                    "https://creativecommons.org/licenses/",
+                    "https://creativecommons.org/publicdomain/")),
+                    f"{destination_id}: missing recognized license URL")
                 self.assertTrue(photo["edited"])
-        self.assertEqual(len(set(hashes)),5,"Different cities must not share a photo")
+        self.assertEqual(len(set(hashes)),len(records),
+                         "Different cities must not share a photo")
 
     def test_editorial_photo_then_local_then_dynamic_fallback(self):
         city={"id":"aachen","photo":None}

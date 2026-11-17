@@ -1,0 +1,330 @@
+{
+  "catalog_destinations": 46,
+  "with_editorial_photo": 10,
+  "with_local_photo": 36,
+  "still_missing": 0,
+  "destinations": [
+    {
+      "destination_id": "aachen",
+      "name": "Aachen",
+      "country": "Alemanha",
+      "status": "local",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Cathedral_in_Aachen.jpg"
+    },
+    {
+      "destination_id": "baden_baden",
+      "name": "Baden-Baden",
+      "country": "Alemanha",
+      "status": "local",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Baden_Baden_-_Lichtentaler_Allee_-_View_SE.jpg"
+    },
+    {
+      "destination_id": "cologne",
+      "name": "Colônia",
+      "country": "Alemanha",
+      "status": "local",
+      "source_page": "https://commons.wikimedia.org/wiki/File:K%C3%B6ln_Cathedral,_Germany.jpg"
+    },
+    {
+      "destination_id": "freiburg",
+      "name": "Freiburg im Breisgau",
+      "country": "Alemanha",
+      "status": "editorial",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Freiburg_im_Breisgau_M%C3%BCnster.jpg"
+    },
+    {
+      "destination_id": "karlsruhe",
+      "name": "Karlsruhe",
+      "country": "Alemanha",
+      "status": "local",
+      "source_page": "https://commons.wikimedia.org/wiki/File:MKa_0553_Schloss_Karlsruhe.jpg"
+    },
+    {
+      "destination_id": "kehl",
+      "name": "Kehl",
+      "country": "Alemanha",
+      "status": "local",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Passerelle_des_Deux_Rives_Kehl.jpg"
+    },
+    {
+      "destination_id": "lorrach",
+      "name": "Lörrach",
+      "country": "Alemanha",
+      "status": "local",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Aerial_View_-_Lörrach.jpg"
+    },
+    {
+      "destination_id": "offenburg",
+      "name": "Offenburg",
+      "country": "Alemanha",
+      "status": "local",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Burda_Media_Tower_in_Offenburg_mit_Sonnenaufgang.jpg"
+    },
+    {
+      "destination_id": "saarbrucken",
+      "name": "Saarbrücken",
+      "country": "Alemanha",
+      "status": "local",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Saarland_Rathaus_Saarbrücken_01.jpg"
+    },
+    {
+      "destination_id": "stuttgart",
+      "name": "Stuttgart",
+      "country": "Alemanha",
+      "status": "local",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Neues_Schloss_Schlossplatzspringbrunnen_Schlossplatz_Stuttgart_2015_01.jpg"
+    },
+    {
+      "destination_id": "trier",
+      "name": "Trier",
+      "country": "Alemanha",
+      "status": "local",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Trier-Blick-vom_Weishaus.JPG"
+    },
+    {
+      "destination_id": "arlon",
+      "name": "Arlon",
+      "country": "Bélgica",
+      "status": "local",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Arlon_E2aJPG.jpg"
+    },
+    {
+      "destination_id": "bruges_be",
+      "name": "Bruges",
+      "country": "Bélgica",
+      "status": "local",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Brügge_Blick_vom_Belfried_4.jpg"
+    },
+    {
+      "destination_id": "brussels",
+      "name": "Bruxelas",
+      "country": "Bélgica",
+      "status": "local",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Grand_Place_Bruselas_2.jpg"
+    },
+    {
+      "destination_id": "ghent",
+      "name": "Gand",
+      "country": "Bélgica",
+      "status": "local",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Gent,_de_Graslei_vanaf_de_Korenlei_met_oeg24758tm61+25159_IMG_0447_2021-08-13_18.37.jpg"
+    },
+    {
+      "destination_id": "liege",
+      "name": "Liège",
+      "country": "Bélgica",
+      "status": "local",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Liege_View_03.jpg"
+    },
+    {
+      "destination_id": "namur",
+      "name": "Namur",
+      "country": "Bélgica",
+      "status": "local",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Namur_Belgium_Old-town-01.jpg"
+    },
+    {
+      "destination_id": "arras",
+      "name": "Arras",
+      "country": "França",
+      "status": "local",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Le_palais_des_Etats_d'Artois_et_le_Beffroi_-_Arras.jpg"
+    },
+    {
+      "destination_id": "beaune",
+      "name": "Beaune",
+      "country": "França",
+      "status": "local",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Beaune_-_Hôtel-Dieu_-_Cour_-_02.jpg"
+    },
+    {
+      "destination_id": "belfort",
+      "name": "Belfort",
+      "country": "França",
+      "status": "local",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Belfort2.jpg"
+    },
+    {
+      "destination_id": "besancon",
+      "name": "Besançon",
+      "country": "França",
+      "status": "local",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Besançon,_la_rue_de_la_Convention.jpg"
+    },
+    {
+      "destination_id": "colmar",
+      "name": "Colmar",
+      "country": "França",
+      "status": "editorial",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Petite_Venise_Colmar.jpg"
+    },
+    {
+      "destination_id": "dijon",
+      "name": "Dijon",
+      "country": "França",
+      "status": "local",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Dijon_-_Puits_de_Moïse_-_02.jpg"
+    },
+    {
+      "destination_id": "haguenau",
+      "name": "Haguenau",
+      "country": "França",
+      "status": "local",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Town_hall_of_Haguenau_(3).jpg"
+    },
+    {
+      "destination_id": "lille",
+      "name": "Lille",
+      "country": "França",
+      "status": "local",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Lille_Collage.jpg"
+    },
+    {
+      "destination_id": "lyon",
+      "name": "Lyon",
+      "country": "França",
+      "status": "local",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Lyon-part-dieu-2023.jpg"
+    },
+    {
+      "destination_id": "metz",
+      "name": "Metz",
+      "country": "França",
+      "status": "editorial",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Centre_Pompidou_%C3%A0_Metz.jpg"
+    },
+    {
+      "destination_id": "mulhouse",
+      "name": "Mulhouse",
+      "country": "França",
+      "status": "editorial",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Mulhouse-Place_de_la_R%C3%A9union_(1).jpg"
+    },
+    {
+      "destination_id": "nancy",
+      "name": "Nancy",
+      "country": "França",
+      "status": "editorial",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Nancy_Place_Stanislas_1.jpg"
+    },
+    {
+      "destination_id": "paris",
+      "name": "Paris",
+      "country": "França",
+      "status": "local",
+      "source_page": "https://commons.wikimedia.org/wiki/File:La_Tour_Eiffel_vue_de_la_Tour_Saint-Jacques,_Paris_août_2014_(2).jpg"
+    },
+    {
+      "destination_id": "reims",
+      "name": "Reims",
+      "country": "França",
+      "status": "local",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Subé_Fountain,_Reims,_France.jpg"
+    },
+    {
+      "destination_id": "saint_louis",
+      "name": "Saint-Louis",
+      "country": "França",
+      "status": "local",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Ancienne_Mairie_Saint-Louis_(Haut-Rhin).jpg"
+    },
+    {
+      "destination_id": "saverne",
+      "name": "Saverne",
+      "country": "França",
+      "status": "local",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Chateau_Rohan_Saverne_01.jpg"
+    },
+    {
+      "destination_id": "strasbourg",
+      "name": "Strasbourg",
+      "country": "França",
+      "status": "editorial",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Cathedrale-strasbourg.jpg"
+    },
+    {
+      "destination_id": "selestat",
+      "name": "Sélestat",
+      "country": "França",
+      "status": "local",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Selestat_Tour_de_l’horloge.jpg"
+    },
+    {
+      "destination_id": "thionville",
+      "name": "Thionville",
+      "country": "França",
+      "status": "local",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Thionville_-_Beffroi_20131008-01.JPG"
+    },
+    {
+      "destination_id": "epernay",
+      "name": "Épernay",
+      "country": "França",
+      "status": "local",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Vineyards_near_Epernay.jpg"
+    },
+    {
+      "destination_id": "esch",
+      "name": "Esch-sur-Alzette",
+      "country": "Luxemburgo",
+      "status": "local",
+      "source_page": "https://commons.wikimedia.org/wiki/File:View_of_Esch-sur-Alzette_2025-04_--2_(cropped).jpg"
+    },
+    {
+      "destination_id": "luxembourg_city",
+      "name": "Luxemburgo",
+      "country": "Luxemburgo",
+      "status": "editorial",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Luxembourg_Grund.jpg"
+    },
+    {
+      "destination_id": "amsterdam",
+      "name": "Amsterdam",
+      "country": "Países Baixos",
+      "status": "local",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Amsterdam_Canals_-_July_2006.jpg"
+    },
+    {
+      "destination_id": "rotterdam",
+      "name": "Rotterdam",
+      "country": "Países Baixos",
+      "status": "local",
+      "source_page": "https://commons.wikimedia.org/wiki/File:A_view_of_Rotterdam,_taken_from_the_roof_of_the_Maassilo,_Rotterdam,_The_Netherlands.jpg"
+    },
+    {
+      "destination_id": "basel",
+      "name": "Basel",
+      "country": "Suíça",
+      "status": "editorial",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Basler_Munster.jpg"
+    },
+    {
+      "destination_id": "interlaken",
+      "name": "Interlaken",
+      "country": "Suíça",
+      "status": "editorial",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Interlaken.jpg"
+    },
+    {
+      "destination_id": "lausanne",
+      "name": "Lausanne",
+      "country": "Suíça",
+      "status": "local",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Lausanne_Wiki.jpg"
+    },
+    {
+      "destination_id": "lauterbrunnen",
+      "name": "Lauterbrunnen",
+      "country": "Suíça",
+      "status": "local",
+      "source_page": "https://commons.wikimedia.org/wiki/File:1_lauterbrunnen_valley_wengen_2022.jpg"
+    },
+    {
+      "destination_id": "oeschinen",
+      "name": "Oeschinensee / Kandersteg",
+      "country": "Suíça",
+      "status": "editorial",
+      "source_page": "https://commons.wikimedia.org/wiki/File:0x-oeschinensee.jpg"
+    }
+  ]
+}

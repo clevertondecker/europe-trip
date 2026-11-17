@@ -77,5 +77,6 @@ def build_assets() -> list[Path]:
 
 if __name__=="__main__":
     result=build_assets()
-    if len(result)!=5:
-        raise SystemExit("Expected five local destination photos")
+    total=len(json.loads(MANIFEST.read_text(encoding="utf-8"))["assets"])
+    if len(result)!=total:
+        raise SystemExit(f"Expected {total} local destination photos, got {len(result)}")
