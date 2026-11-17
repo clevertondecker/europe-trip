@@ -29,3 +29,22 @@ Drive, cache de índices) fica para um pacote posterior com métricas.
 `st.cache_data(ttl=300)` expira automaticamente cada resultado aproximadamente 300 segundos depois de criado. Além disso, a chave inclui a tupla ordenada de cidades; alterações nessa entrada obtêm outro valor. `cached_macro_coverage_rows.clear()` força invalidação manual (testada). Após um novo deploy de código, o cache de função pode ser invalidado; **não depende disso como única garantia**. A ausência de mudanças no código não invalida imediatamente um arquivo JSON alterado em disco antes do TTL; esse é um limite explícito do contrato.
 
 O teste `test_cache_cold_warm_and_explicit_invalidation` emite `ARCH14_CACHE_BENCHMARK` com três durações em milissegundos para as 30 cidades (cache frio, cache quente e após `clear`). São amostras de CI, não latência em produção nem SLA. Registrar os valores verificados no relatório após o CI.
+
+## Medição observada em CI — 30 cidades, 17/11/2026
+
+Execução do teste `test_cache_cold_warm_and_explicit_invalidation`
+na pipeline GitHub Actions do PR #98:
+
+| Execução | Duração observada |
+|---|---:|
+| Cache frio | **92,301 ms** |
+| Cache quente (mesma chave) | **0,248 ms** |
+| Após invalidação manual com `.clear()` | **90,808 ms** |
+
+São **três medições pontuais** no ambiente do GitHub Actions, sem
+repetições estatísticas e sem comparação com tráfego real. Não constituem
+SLA ou promessa de ganho de velocidade para todas as telas.
+
+Para invalidar: aguardar TTL de 300 segundos, mudar a tupla de IDs das
+cidades ou chamar `cached_macro_coverage_rows.clear()`. Dados de
+fontes alterados fora do deploy podem ficar até o TTL no cache.
