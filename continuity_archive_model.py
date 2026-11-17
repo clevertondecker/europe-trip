@@ -18,6 +18,7 @@ from smart_calendar_model import review_calendar_change
 from ux_navigation import AREAS,SECTIONS
 from base_research_expanded_model import load_research
 from ux41_favorites_model import validate_favorites
+from ux48_weekend_groups_model import validate_groups,empty_groups
 
 ARCHIVE_SCHEMA=1
 ARCHIVE_KIND="nossa-europa-local-archive"
@@ -78,7 +79,8 @@ def validate_continuation(context:dict,plan:dict,catalog:dict)->dict:
 def make_archive(plan:dict,catalog:dict,context:dict|None=None,
                  city_studies:list[dict]|None=None,
                  calendar_drafts:list[dict]|None=None,
-                 city_favorites:list[str]|None=None)->dict:
+                 city_favorites:list[str]|None=None,
+                 weekend_groups:dict|None=None)->dict:
     validate_flow_backup(plan,catalog)
     continuation=validate_continuation(context or {},plan,catalog)
     studies=city_studies or []
@@ -101,6 +103,8 @@ def make_archive(plan:dict,catalog:dict,context:dict|None=None,
         "city_studies":verified_studies,
         "calendar_drafts":verified_calendars,
         "city_favorites":validate_favorites(city_favorites or [],load_research()),
+        "weekend_groups":validate_groups(
+            weekend_groups if weekend_groups is not None else empty_groups(plan),plan,catalog),
     }
     if len(_json_bytes(result))>MAX_FILE_BYTES:
         raise ValueError("Backup grande demais")
@@ -112,7 +116,7 @@ def validate_archive(document:dict,catalog:dict)->dict:
               "continuation","city_studies","calendar_drafts"}
     if (not isinstance(document,dict) or
         not required<=set(document) or
-        set(document)-required-{"city_favorites"}):
+        set(document)-required-{"city_favorites","weekend_groups"}):
         raise ValueError("Formato do arquivo desconhecido")
     if document["schema_version"]!=ARCHIVE_SCHEMA or document["kind"]!=ARCHIVE_KIND:
         raise ValueError("Versão incompatível do arquivo de continuidade")
@@ -134,10 +138,12 @@ def validate_archive(document:dict,catalog:dict)->dict:
     for study in studies:validate_city_draft(study)
     for draft in calendars:review_calendar_change(plan,draft,catalog)
     fav=validate_favorites(document.get("city_favorites",[]),load_research())
+    weekends=validate_groups(document.get("weekend_groups",empty_groups(plan)),plan,catalog)
     return {**document,"plan":plan,"continuation":context,
             "city_studies":deepcopy(studies),
             "calendar_drafts":deepcopy(calendars),
-            "city_favorites":fav}
+            "city_favorites":fav,
+            "weekend_groups":weekends}
 
 
 def export_archive(archive:dict,catalog:dict)->bytes:
