@@ -24,6 +24,48 @@ LOGISTICS_WEIGHT_CHOICES = {
 }
 
 
+def _render_dq32_macro_coverage(rows):
+    """Opportunity discovery counts, not a quality or reachability ranking."""
+    from dq32_macro_opportunities_model import (
+        load_macro_tourism, opportunity_overview,
+    )
+    from attractions_model import load_attractions
+    from base_explorer_model import load_exploration
+    from base_research_expanded_model import load_research
+    from base_scenario_model import base_options
+    from rail_evidence_unified_model import load_rail_evidence
+
+    macro=load_macro_tourism()
+    catalog=load_attractions()
+    exploration=load_exploration()
+    research=load_research()
+    options=base_options()
+    rail=load_rail_evidence()
+    st.markdown("### DQ 3.2 · Cobertura ampliada de oportunidades")
+    st.caption(
+        "Atrações locais identificadas e conexões ferroviárias históricas, "
+        "independentemente do nível de detalhamento pedestre. "
+        "Contagens medem pesquisa, NÃO qualidade nem passeios viáveis.")
+    data=[]
+    for item in rows:
+        result=opportunity_overview(
+            item["id"],macro=macro,catalog=catalog,exploration=exploration,
+            research=research,options=options,rail=rail)
+        data.append({
+            "Cidade-base":result["base_name"],
+            "Atrações locais identificadas":result["known_local_attractions"],
+            "Destinos com trem histórico":result["rail_time_documented_count"],
+            "Destinos sem tempo de trem":result["unresearched_count"],
+            "Passeios viáveis comprovados":"Não avaliados",
+        })
+    st.dataframe(data,hide_index=True,width="stretch")
+    st.caption(
+        "O mesmo universo de destinos é considerado para todas as bases. "
+        "Ausência de tempo não é ausência de conexão. "
+        "Preservados os pesos exploratórios de logística/custo/praticidade "
+        "e as exigências estritas da decisão definitiva.")
+
+
 def _render_dq31_logistics(rows):
     """Same-basket exploratory facts, without inventing a maturity score."""
     from five_base_comparison_model import load_five_base_evidence
@@ -268,6 +310,7 @@ def render_weight_coverage()->None:
     only=st.checkbox("Priorizar as 12 finalistas",value=True,
                      key="ux_30_only_finalists")
     filtered=[r for r in rows if r["shortlist"]] if only else rows
+    _render_dq32_macro_coverage(filtered)
     _render_dq31_logistics(filtered)
 
     with st.expander("Entenda os seis critérios e seus pesos",expanded=False):

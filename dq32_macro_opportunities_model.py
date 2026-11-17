@@ -1,0 +1,171 @@
+"""DQ 3.2: broad, read-only tourism discovery for all 30 candidate bases.
+
+Sources are kept separate: verified local tourist POIs, existing destination
+catalogs, and historical railway observations. A place's existence never
+establishes that it can be reached from a particular base.
+"""
+from __future__ import annotations
+
+from copy import deepcopy
+import json
+from pathlib import Path
+
+from attractions_model import load_attractions
+from base_explorer_model import load_exploration
+from base_research_expanded_model import load_research
+from base_scenario_model import base_options
+from rail_evidence_unified_model import (
+    canonical_place, load_rail_evidence, route_evidence,
+)
+
+DEFAULT=Path(__file__).resolve().parent/"data"/"dq32_macro_tourism_2026_11.json"
+
+
+def load_macro_tourism(path=DEFAULT):
+    data=json.loads(Path(path).read_text(encoding="utf-8"))
+    validate_macro_tourism(data)
+    return deepcopy(data)
+
+
+def validate_macro_tourism(data):
+    if data.get("schema_version") != 1 or not data.get("checked_at"):
+        raise ValueError("Versão ou data de pesquisa inválida")
+    seen=set()
+    valid={"heritage","museum","urban_walk","nature"}
+    for row in data.get("attractions",[]):
+        if row["id"] in seen or not row["id"].startswith("dq32_"):
+            raise ValueError("ID duplicado ou inválido")
+        seen.add(row["id"])
+        if (not row.get("city_id") or not row.get("name")
+                or row["category"] not in valid
+                or not row.get("source_url","").startswith("https://")
+                or row["source_kind"]!="official_tourism_or_city"):
+            raise ValueError("Atração sem prova turística individual")
+        for key in ("ticket_eur","visit_duration_min","walk_distance_m",
+                    "station_access_min","availability_2027"):
+            if row[key] is not None:
+                raise ValueError("Dado não coletado não pode ser preenchido")
+
+
+def _registry(catalog, exploration, research, macro):
+    """Canonical IDs avoid creating parallel entries for Luxembourg/Bruges."""
+    destinations={}
+    def add(row,source):
+        id=canonical_place(row["id"])
+        if id not in destinations:
+            destinations[id]={"destination_id":id,"name":row["name"],
+                              "country":row["country"],"registry_sources":[source]}
+        elif source not in destinations[id]["registry_sources"]:
+            destinations[id]["registry_sources"].append(source)
+    for row in catalog["destinations"]:
+        add(row,"attractions_2027")
+    for row in exploration["destinations"]:
+        add(row,"exploration_bases_2027")
+    for row in research["cities"]:
+        add(row,"base_city_research_2026")
+    # Some exploration destinations have no local-POI evidence yet.
+    for row in macro["attractions"]:
+        id=canonical_place(row["city_id"])
+        if id not in destinations:
+            raise ValueError("Atração sem cidade cadastrada: "+id)
+    return destinations
+
+
+def _exploration_time(exploration,origin,destination):
+    for row in exploration["routes"]:
+        if (canonical_place(row["base_id"])==origin
+                and canonical_place(row["destination_id"])==destination
+                and type(row.get("train_minutes_oneway_min")) is int
+                and row["train_minutes_oneway_min"]>0
+                and row.get("source_url","").startswith("https://")):
+            return {"minutes":row["train_minutes_oneway_min"],
+                    "typical_minutes":None,"source_url":row["source_url"],
+                    "checked_at":row.get("retrieved_at"),
+                    "source_dataset":"exploration_bases_2027"}
+    return None
+
+
+def opportunity_overview(base_id, *, macro=None,catalog=None,exploration=None,
+                         research=None,rail=None,options=None):
+    """Independent broad-screening view; NO ranking, return, fare or reachability claims."""
+    macro=macro if macro is not None else load_macro_tourism()
+    catalog=catalog if catalog is not None else load_attractions()
+    exploration=exploration if exploration is not None else load_exploration()
+    research=research if research is not None else load_research()
+    rail=rail if rail is not None else load_rail_evidence()
+    options=options if options is not None else base_options()
+    valid_bases={canonical_place(row["id"]):row for row in options}
+    origin=canonical_place(base_id)
+    if origin not in valid_bases:
+        raise ValueError("Cidade-base desconhecida")
+    destinations=_registry(catalog,exploration,research,macro)
+    catalog_attractions={}
+    for row in catalog["attractions"]:
+        key=canonical_place(row["destination_id"])
+        catalog_attractions.setdefault(key,[]).append({
+            "id":row["id"],"name":row["name"],"source_url":row["source_urls"][0],
+            "kind":"legacy_catalog"})
+    local_new={}
+    for row in macro["attractions"]:
+        key=canonical_place(row["city_id"])
+        local_new.setdefault(key,[]).append({
+            "id":row["id"],"name":row["name"],"source_url":row["source_url"],
+            "kind":"dq32_sourced_local"})
+    entries=[]
+    for dest_id,meta in destinations.items():
+        local=dest_id==origin
+        detail=route_evidence(rail,origin,dest_id)
+        minutes=(detail.get("minimum_oneway_min")
+                 if detail["status"]=="historical_time" and not local else None)
+        typical=(detail.get("typical_oneway_min") if minutes is not None else None)
+        source=(detail.get("source_url") if minutes is not None else None)
+        checked=(detail.get("source_date") if minutes is not None else None)
+        dataset=(detail.get("source_dataset") if minutes is not None else None)
+        if minutes is None and not local:
+            fallback=_exploration_time(exploration,origin,dest_id)
+            if fallback:
+                minutes,typical,source,checked,dataset=(
+                    fallback["minutes"],fallback["typical_minutes"],
+                    fallback["source_url"],fallback["checked_at"],
+                    fallback["source_dataset"])
+        attrs=local_new.get(dest_id,[])+catalog_attractions.get(dest_id,[])
+        status=("local_access_unresearched" if local else
+                "historical_train_time_only" if minutes is not None else
+                "unresearched_from_base")
+        entries.append({
+            **deepcopy(meta),"local":local,
+            "attractions":deepcopy(attrs),"attraction_count":len(attrs),
+            "minimum_train_oneway_min":minutes,
+            "typical_train_oneway_min":typical,
+            "train_source_url":source,"train_checked_at":checked,
+            "train_source_dataset":dataset,
+            "status":status,"reachable_confirmed":False,
+            "weekend_return_verified":False,"full_trip_cost_eur":None,
+            "walk_between_attractions_m":None,
+            "journey_scope":"historical_minimum_station_to_station_only" if minutes is not None
+                            else "not_available",
+        })
+    entries.sort(key=lambda item:(
+        0 if item["local"] else 1 if item["minimum_train_oneway_min"] is not None else 2,
+        item["minimum_train_oneway_min"] if item["minimum_train_oneway_min"] is not None else 999999,
+        item["name"]))
+    local_rows=[x for x in entries if x["local"]]
+    observed=[x for x in entries if x["minimum_train_oneway_min"] is not None]
+    unknown=[x for x in entries if not x["local"] and x["minimum_train_oneway_min"] is None]
+    return {
+        "base_id":origin,"base_name":valid_bases[origin]["name"],
+        "registry_destinations":len(entries),
+        "known_local_attractions":sum(x["attraction_count"] for x in local_rows),
+        "local_destinations":deepcopy(local_rows),
+        "historical_rail_destinations":deepcopy(observed),
+        "unresearched_destinations":deepcopy(unknown),
+        "rail_time_documented_count":len(observed),
+        "unresearched_count":len(unknown),
+        "destinations":deepcopy(entries),
+        "feasible_destinations_count":None,
+        "comparison_score":None,
+        "read_only":True,
+        "official_plan_modified":False,
+        "limits":"Atrações catalogadas e ligações históricas não comprovam passeio viável; "
+                 "sem dados não significa inacessível",
+    }
