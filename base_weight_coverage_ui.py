@@ -10,7 +10,111 @@ from base_coverage_model import (
 from five_base_comparison_model import load_five_base_evidence
 from city_profiles_ui import render_enriched_city_profiles
 
+from dq31_logistics_evaluation_model import (
+    DEFAULT_WEIGHTS, FALLBACK_BASKET, logistics_comparison,
+)
+from planning_session import active_plan
+
 PROFILE_IDS={"Geral":"general","Economia":"economy","Explorador":"explorer"}
+
+LOGISTICS_WEIGHT_CHOICES = {
+    "Logística prioritária · 65/30/5": {"logistics":65,"living_cost":30,"daily_practicality":5},
+    "Mais passeios · 75/20/5": {"logistics":75,"living_cost":20,"daily_practicality":5},
+    "Mais economia · 50/45/5": {"logistics":50,"living_cost":45,"daily_practicality":5},
+}
+
+
+def _render_dq31_logistics(rows):
+    """Same-basket exploratory facts, without inventing a maturity score."""
+    from five_base_comparison_model import load_five_base_evidence
+
+    st.markdown("### Comparação exploratória · logística e custo de vida")
+    st.caption(
+        "A documentação completa continua necessária para a decisão final, "
+        "não para explorar alternativas. Prioridade sugerida: 65% logística, "
+        "30% custo de vida e deslocamentos, 5% praticidade cotidiana. "
+        "Os pesos orientam a pesquisa; NÃO viram uma nota sem dados comparáveis.")
+    preset=st.selectbox("Prioridades da comparação",list(LOGISTICS_WEIGHT_CHOICES),
+                        key="ux_dq31_logistics_weights")
+    all_destinations=load_five_base_evidence()["common_destinations"]
+    names={d["id"]:d["name"] for d in all_destinations}
+    selected_from_plan=[key for key in active_plan().get("packages",{})
+                        if key in names]
+    default=selected_from_plan or [x for x in FALLBACK_BASKET if x in names]
+    chosen=st.multiselect(
+        "Mesmos destinos para comparar as cidades-base",
+        options=list(names),default=default,
+        format_func=lambda key:names[key],key="ux_dq31_basket",
+        help="Se não houver passeios oficiais nesta cesta, usamos uma seleção "
+             "exploratória, sem alterar o planejamento.")
+    if not chosen:
+        st.info("Selecione ao menos um destino para a comparação.")
+        return
+    comparison=logistics_comparison(
+        [x["id"] for x in rows],
+        selected_destinations=chosen,
+        weights=LOGISTICS_WEIGHT_CHOICES[preset],
+        coverage=rows)
+    st.caption("Mesma cesta para todas as cidades: "+
+               ", ".join(names[x] for x in comparison["basket"]["ids"])+
+               ". Sem retorno de 2027 comprovado, não declaramos bate-volta garantido.")
+
+    summaries=[]
+    for row in comparison["rows"]:
+        maturity=row["maturity"]["current"]
+        stage={"pesquisa_inicial":"Pesquisa inicial",
+               "triagem_exploratoria":"Triagem com evidências",
+               "comparacao_fundamentada":"Cobertura de triagem ampliada",
+               "decisao_definitiva":"Pronta para decisão"}[maturity]
+        rent=row["housing_historical_median_eur_month"]
+        summaries.append({
+            "Cidade-base":row["name"],
+            "Maturidade":stage,
+            "Trens conhecidos":str(row["train_time_coverage"])+"/"+str(row["basket_size"]),
+            "Rotas completas":str(row["complete_itineraries"])+"/"+str(row["basket_size"]),
+            "Aluguel histórico (€ / mês)":round(rent) if rent is not None else None,
+            "Amostras moradia":row["housing_sample_count"],
+            "Vida cotidiana":"Parcial" if row["daily_researched"] else "Pendente",
+            "Documentação":f'{row["documentary_weighted_percent"]:.1f}%',
+            "Próxima pesquisa":row["missing"][0] if row["missing"] else "Revisão final",
+        })
+    st.dataframe(summaries,hide_index=True,width="stretch",height=360)
+    st.caption("Aluguel: mediana de anúncios históricos não comparáveis, "
+               "não cotação de 2027. Uma cidade com 0 rotas conhecidas não "
+               "significa que não há trem. 'Rotas completas' exige retorno e "
+               "última milha; nenhum tempo de ida foi duplicado.")
+    keyed={x["id"]:x for x in comparison["rows"]}
+    inspect=st.selectbox("Examinar logística e lacunas da cidade",
+                         list(keyed),format_func=lambda i:keyed[i]["name"],
+                         key="ux_dq31_city_detail")
+    if inspect:
+        city=keyed[inspect]
+        destrows=[]
+        for item in city["routes"]:
+            walks=item["station_to_attraction_evidence"]
+            destrows.append({
+                "Destino":names[item["destination_id"]],
+                "Trem (ida histórica, min)":item["oneway_train_min"],
+                "Estação → atração": (
+                    str(walks[0]["minutes"])+" min · publicado"
+                    if walks else "Não pesquisado"),
+                "Retorno":"Não verificado",
+                "Tempo porta a porta":"Não disponível",
+            })
+        st.dataframe(destrows,hide_index=True,width="stretch")
+        st.caption("Duração publicada de uma caminhada é informação do DESTINO "
+                   "e não cria vantagem para uma base. São trajetos incompletos: "
+                   "faltam acesso inicial, retorno e conexões.")
+        with st.expander("Consultar fontes ferroviárias e bloqueios"):
+            for item in city["routes"]:
+                if item["train_source_url"]:
+                    st.markdown("**"+names[item["destination_id"]]+"** · "+
+                                str(item["oneway_train_min"])+" min (ida) · "+
+                                "[Fonte]("+item["train_source_url"]+")")
+            st.write("**Próximas verificações:** "+"; ".join(city["missing"]))
+    st.caption("Não há ranking final neste estágio. O nível C continua exigindo "
+               "dados específicos da viagem e hospedagem confirmada.")
+
 CRITERIA_KEYS=list(LABELS)
 
 
@@ -161,6 +265,11 @@ def render_weight_coverage()->None:
             "avaliação de um dicionário vazio para todas as cidades. "
             "A cobertura para pontuação e a nota final continuam indisponíveis "
             "até existirem métricas completas e comparáveis.")
+    only=st.checkbox("Priorizar as 12 finalistas",value=True,
+                     key="ux_30_only_finalists")
+    filtered=[r for r in rows if r["shortlist"]] if only else rows
+    _render_dq31_logistics(filtered)
+
     with st.expander("Entenda os seis critérios e seus pesos",expanded=False):
         st.dataframe([{"Critério":LABELS[key],
                        "Peso no perfil (%)":weight,
@@ -177,9 +286,6 @@ def render_weight_coverage()->None:
                    "internacional demonstrada, sem repetir a mesma vantagem "
                    "como nota ferroviária.")
 
-    only=st.checkbox("Priorizar as 12 finalistas",value=True,
-                     key="ux_30_only_finalists")
-    filtered=[r for r in rows if r["shortlist"]] if only else rows
     render_enriched_city_profiles(rows,only_finalists=only)
     st.markdown("### Matriz documental detalhada")
     st.markdown("**Matriz de evidências**")
