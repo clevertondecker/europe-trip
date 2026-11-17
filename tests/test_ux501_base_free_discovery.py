@@ -116,6 +116,7 @@ class BaseFreeDiscoveryAppTests(unittest.TestCase):
         app.selectbox(key="ux501_country").set_value("Bélgica").run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
         self.assertEqual(app.session_state["advisor_plan"],initial)
+        app.checkbox(key="ux501_show_legacy_explorer").check().run()
         app.selectbox(key="attractions_scenario_base").set_value("lille").run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
         self.assertEqual(app.session_state["advisor_plan"],initial)
