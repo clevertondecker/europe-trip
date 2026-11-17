@@ -186,8 +186,16 @@ class WeekendGroupUITests(unittest.TestCase):
         self.assertFalse(app.exception,[e.message for e in app.exception])
         self.assertFalse(any("Acesso a ferramentas antigas" in e.label
                              for e in app.expander))
+        # Italy is the initial stage: the European weekend tool must be hidden.
+        self.assertFalse(any("Organizar viagens de fim de semana" in m.value
+                              for m in app.markdown))
+        app.segmented_control(key="flow_active_stage").set_value("França").run()
+        self.assertFalse(app.exception,[e.message for e in app.exception])
         self.assertTrue(any("Organizar viagens de fim de semana" in m.value
                              for m in app.markdown))
+        app.segmented_control(key="flow_active_stage").set_value("Itália").run()
+        self.assertFalse(any("Organizar viagens de fim de semana" in m.value
+                              for m in app.markdown))
 
 if __name__=="__main__":
     unittest.main()
