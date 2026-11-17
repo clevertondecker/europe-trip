@@ -17,8 +17,11 @@ Cada linha identifica origem, destino, prioridade, mínimo histórico, tempo tí
 - Sem registro ferroviário: **Sem evidência ferroviária catalogada** não quer dizer sem conexão.
 - Tempos e tarifas de 2027 permanecem desconhecidos. Não há vencedora automática, nota artificial, otimização, alteração da cidade-base nem alteração do TripPlan.
 - Moradia histórica não garante oferta mobiliada/56–60 noites em 2027; amostras não comparáveis são expressamente identificadas.
-- Visualização por destino e cartões verticais para leitura em telas estreitas, com expanders para as fontes.
+- Matriz resumida destino × base como leitura principal, com rolagem horizontal nas telas estreitas. Só um destino de cada vez abre detalhes em expanders de fontes e transferências; o multiselect da tela seleciona um subconjunto inicial de até cinco destinos, sem modificar a lista persistida.
 - `Minha lista` navega para a comparação usando a mesma cesta; o retorno não altera desejos. Escolhas de bases ficam apenas em `ux503_bases` na sessão.
 
 ## Testes e limitações
 Testes puros verificam basket igual, prioridade, exclusão, 2–5 bases, local sem tempo, lacunas, divergências e imutabilidade. AppTest cobre navegação, atualização das preferências, favoritos e proteção do TripPlan. A verificação visual em navegador real não está atestada por essa suíte; validar antes de considerar concluída a responsividade.
+
+## Churn e extrator legado
+A seção antiga de comparação contém ferramentas acopladas às variáveis de contexto de `app.py`. Extrair mecanicamente seu corpo de aproximadamente 30 mil caracteres para outro módulo criaria risco de regressão e dependências circulares. Nesta etapa, ela permanece integralmente montada em uma seção avançada; a extração, se desejável, requer PR de refatoração separado e testes específicos, sem mudar os contratos da UX 5.0.3.
