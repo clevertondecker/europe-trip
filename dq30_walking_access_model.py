@@ -210,7 +210,7 @@ def validate_walking_access(data, catalog):
             raise ValueError("Roteiro pedestre duplicado ou sem ID")
         seen_itineraries.add(ident)
         start=itinerary.get("origin_id")
-        end=itinerary.get("destination_id")
+        end=itinerary.get("end_station_id")
         if start not in stations or end not in stations:
             raise ValueError("Roteiro oficial sem estação canônica")
         if (stations[start]["destination_id"] != itinerary.get("destination_id")
