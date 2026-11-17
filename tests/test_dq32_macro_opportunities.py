@@ -45,11 +45,12 @@ class MacroOpportunityTests(unittest.TestCase):
                 self.assertEqual(len(row["destinations"]),row["registry_destinations"])
 
     def test_sourced_local_expansion_and_all_source_links(self):
-        self.assertEqual(len(self.macro["attractions"]),23)
-        self.assertGreaterEqual(len({x["city_id"] for x in self.macro["attractions"]}),15)
+        self.assertEqual(len(self.macro["attractions"]),30)
+        self.assertGreaterEqual(len({x["city_id"] for x in self.macro["attractions"]}),23)
         for city in ("lille","dijon","trier","aachen","liege","offenburg",
                      "karlsruhe","reims","arras","besancon","selestat",
-                     "saverne","namur","esch"):
+                     "saverne","namur","esch","saint_louis","belfort",
+                     "thionville","baden_baden","saarbrucken","lorrach","kehl"):
             with self.subTest(city=city):
                 row=self.get(city)
                 self.assertGreater(row["known_local_attractions"],0)
