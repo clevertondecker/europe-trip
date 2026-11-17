@@ -63,3 +63,10 @@ Snapshot de `data/base_city_research_expanded_2026_11.json` (`schema_version=1` 
 - **Contratos reutilizados:** `load_research()`, `canonical_place()`, `build_destination_discovery()`, `get_rail_evidence()`, `compare_wishlist_bases()`, `selected_destinations_for_comparison()`.
 - **Dependências:** baseline #108 e critérios de fonte/identidade #109 para pesquisa futura. A comparação inicial das cidades existentes **não** depende de #111; candidatas novas só após análise de cadastro.
 - **Aceite:** seis bases reconhecidas pelo ID correto, três exploratórias nunca tratadas como registradas, matriz de cesta idêntica, desconhecidos preservados, não mutação de shortlist, TripPlan, wishlist ou cidade-base oficial; testes de alias e de mudança do snapshot da cesta. Implementação em PR distinto.
+
+
+## Rastreabilidade da implementação — revisão final 17/11/2026
+
+- PR de implementação separado para revisão: [#117](https://github.com/clevertondecker/europe-trip/pull/117).
+- Implementação independente: seis cidades já cadastradas comparadas sobre cesta fixa; três outras candidatas não registradas não entram no denominador da pesquisa.
+- Este PR permanece **somente especificação**. Nenhum merge/deploy de implementação está autorizado até revisão do conjunto. Os testes de CI no PR de implementação validam contratos/código, não substituem confirmação de horários, aluguéis e acesso para datas de 2027.
