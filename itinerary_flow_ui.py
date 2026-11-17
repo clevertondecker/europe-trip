@@ -406,6 +406,11 @@ def _reconcile_organize_state(state,rows:list[dict],stage:str)->None:
             row["period"] if row["period"] in allowed else UNASSIGNED)
 
 
+def _organize_destination_changed()->None:
+    # A destination change invalidates its old period and proposed day.
+    st.session_state.pop("flow_organize_period",None)
+
+
 def _assert_organize_stage(catalog:dict,destination_id:str,stage:str)->None:
     """Defense in depth for organization writes, including stale callbacks."""
     if get_choice(catalog,destination_id)["stage"]!=stage:
@@ -429,7 +434,8 @@ def _render_organize(plan:dict,catalog:dict,stage:str)->None:
             by_id={r["id"]:r for r in rows}
             dest_id=st.selectbox("Lugar do meu roteiro",list(by_id),
                                  format_func=lambda key:by_id[key]["name"],
-                                 key="flow_organize_destination")
+                                 key="flow_organize_destination",
+                                 on_change=_organize_destination_changed)
             row=by_id[dest_id]
             mode=st.segmented_control(
                 "Como organizar?",["Por período","Definir data"],
@@ -487,12 +493,16 @@ def _render_organize(plan:dict,catalog:dict,stage:str)->None:
                         st.error(str(exc))
                 if row["exact_dates"]:
                     if st.button("Retirar data definida",key="flow_organize_remove_date"):
-                        if row["stage"]==ITALY_STAGE:
-                            schedule_italy_visit(dest_id,None)
-                        else:
-                            unschedule_package(row["exact_dates"][0])
-                        st.session_state["flow_notice"]="Data removida; o lugar permanece escolhido."
-                        st.rerun()
+                        try:
+                            _assert_organize_stage(catalog,dest_id,stage)
+                            if row["stage"]==ITALY_STAGE:
+                                schedule_italy_visit(dest_id,None)
+                            else:
+                                unschedule_package(row["exact_dates"][0])
+                            st.session_state["flow_notice"]="Data removida; o lugar permanece escolhido."
+                            st.rerun()
+                        except (ValueError,KeyError) as exc:
+                            st.error(str(exc))
         st.button("Abrir calendário completo",key="flow_organize_full_calendar",
                   on_click=_navigate,args=("Meu roteiro","Calendário"))
         if st.button("Concluir organização",key="flow_organize_close"):
