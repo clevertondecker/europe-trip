@@ -39,7 +39,7 @@ class JourneyProjectionTests(unittest.TestCase):
         changed["assignments"]={"2027-10-06":"colmar"}
         result=project_journey(changed,wished())
         self.assertEqual(result["next"]["id"],"budget")
-        self.assertIn("1 data(s)",result["steps"][3]["status"])
+        self.assertIn("1 com data",result["steps"][3]["status"])
         self.assertFalse(result["base_decision_confirmed"])
 
     def test_two_paths_without_implicit_comparison_completion(self):
