@@ -193,6 +193,12 @@ class WeekendGroupUITests(unittest.TestCase):
         self.assertFalse(app.exception,[e.message for e in app.exception])
         self.assertTrue(any("Organizar viagens de fim de semana" in m.value
                              for m in app.markdown))
+        headings=[m.value for m in app.markdown]
+        stage_pos=next(i for i,v in enumerate(headings)
+                       if "Etapa 2 · Temporada europeia" in v)
+        weekend_pos=next(i for i,v in enumerate(headings)
+                         if "Organizar viagens de fim de semana" in v)
+        self.assertLess(stage_pos,weekend_pos)
         app.segmented_control(key="flow_active_stage").set_value("Itália").run()
         self.assertFalse(any("Organizar viagens de fim de semana" in m.value
                               for m in app.markdown))
