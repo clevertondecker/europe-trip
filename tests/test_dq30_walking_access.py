@@ -223,6 +223,31 @@ class WalkingAccessTests(unittest.TestCase):
         self.reject(lambda d: d["published_walking_itineraries"].append(
             deepcopy(d["published_walking_itineraries"][0])))
 
+    def test_destination_access_exposes_only_destination_official_itineraries(self):
+        rotterdam = destination_access("rotterdam", evidence=self.data)
+        walks = rotterdam["published_walking_itineraries"]
+        self.assertEqual(len(walks), 1)
+        self.assertEqual(walks[0]["id"], "rotterdam_official_city_walk_7km")
+        self.assertEqual(walks[0]["distance_m"], 7000)
+        self.assertIsNone(walks[0]["duration_min"])
+        self.assertEqual(walks[0]["route_scope"], "entire_loop_not_individual_segments")
+        self.assertEqual(walks[0]["source_url"],
+                         "https://www.rotterdam.info/en/visit/good-to-know/city-walking-tour")
+        self.assertEqual(destination_access("bruges_be", evidence=self.data)
+                         ["published_walking_itineraries"], [])
+        self.assertEqual(destination_access("strasbourg", evidence=self.data)
+                         ["published_walking_itineraries"], [])
+        self.assertIsNone(destination_access("unknown_city", evidence=self.data))
+
+    def test_destination_access_official_itineraries_are_read_only_copies(self):
+        original = deepcopy(self.data)
+        result = destination_access("rotterdam", evidence=self.data)
+        result["published_walking_itineraries"][0]["distance_m"] = 123
+        result["published_walking_itineraries"].clear()
+        self.assertEqual(self.data, original)
+        self.assertEqual(destination_access("rotterdam", evidence=self.data)
+                         ["published_walking_itineraries"][0]["distance_m"], 7000)
+
     def test_read_only_and_trip_plan_unchanged(self):
         plan = new_plan()
         before = deepcopy(plan)
