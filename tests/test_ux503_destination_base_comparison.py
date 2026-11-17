@@ -171,7 +171,7 @@ class DestinationBaseComparisonAppTests(unittest.TestCase):
         self.assertTrue(any("duas e cinco" in str(w.value).lower() for w in app.warning))
         app.multiselect(key="ux503_bases").set_value([
             "mulhouse","strasbourg","lille","metz","nancy","basel"]).run()
-        self.assertTrue(any("duas e cinco" in str(w.message).lower() for w in app.warning))
+        self.assertTrue(any("duas e cinco" in str(w.value).lower() for w in app.warning))
         self.assertEqual(app.session_state["advisor_plan"],original)
 
     def test_display_filter_and_priority_updates_matrix(self):
