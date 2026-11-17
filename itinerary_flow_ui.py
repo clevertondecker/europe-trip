@@ -543,6 +543,11 @@ def render_itinerary_workbench(plan:dict,catalog:dict,
     _save_panel(active_plan(),catalog)
     rows=selected_rows(active_plan(),catalog)
     _selected_stage(rows,stage,catalog)
+    # Keep the photographic cards from the old dashboard, now natively
+    # integrated in Meu planejamento without any legacy toggle.
+    if stage==FRANCE_STAGE:
+        from travel_dashboard_ui import render_chosen_places_cards
+        render_chosen_places_cards(active_plan(),catalog,load_base_routes())
     other=FRANCE_STAGE if stage==ITALY_STAGE else ITALY_STAGE
     other_count=sum(x["stage"]==other for x in rows)
     st.caption(str(other_count)+" lugar(es) na etapa "+_stage_label(other)+
