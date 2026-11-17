@@ -274,6 +274,8 @@ def _ux_section_changed() -> None:
 
 
 def _ux_aux_changed() -> None:
+    if st.session_state.get("ux_organize_view")=="Calendário inteligente":
+        st.session_state["ux35_stage"]=st.session_state.get("flow_active_stage","Itália")
     apply_ux(st.session_state)
 
 
@@ -434,6 +436,11 @@ elif ux_area=="Orçamento" and ux_section=="Simulações":
     st.segmented_control("Ferramenta de simulação",
                          ["Simulação geral","Consultor de passeios"],
                          key="ux_budget_view",on_change=_ux_aux_changed)
+# Initialize the organizer on navigation entry, never on each Streamlit rerun.
+_organize_activity=(ux_area,ux_section)==("Meu roteiro","Organizar viagem")
+if _organize_activity and not st.session_state.get("_flow_organize_activity",False):
+    st.session_state["flow_organize_open"]=True
+st.session_state["_flow_organize_activity"]=_organize_activity
 page,itinerary_target,guide_target,base_target=ux_route(
     ux_area,ux_section,
     research=("Calendário completo" if
@@ -1243,9 +1250,8 @@ elif page == "Roteiro":
             render_smart_calendar(
                 active_plan(),load_attractions(),load_base_routes(),data,sync_sources)
         else:
-            if ux_section=="Organizar viagem":
-                st.session_state["flow_organize_open"]=True
-            if (ux_area,ux_section)==("Meu roteiro","Organizar viagem"):
+            if (ux_area,ux_section)==("Meu roteiro","Organizar viagem") and (
+                st.session_state.get("flow_active_stage",st.session_state.get("flow_stage","Itália"))=="França"):
                 from ux48_weekend_groups_ui import render_weekend_planner
                 render_weekend_planner(active_plan(),load_attractions())
             render_itinerary_workbench(

@@ -80,6 +80,13 @@ def selected_rows(plan:dict,catalog:dict)->list[dict]:
     return sorted(rows.values(),key=lambda x:(x["stage"]!=ITALY_STAGE,x["name"]))
 
 
+def selected_rows_for_stage(plan:dict,catalog:dict,stage:str)->list[dict]:
+    """Canonical selected outings, scoped to one valid trip stage."""
+    if stage not in (ITALY_STAGE,FRANCE_STAGE):
+        raise ValueError("Etapa inválida")
+    return [row for row in selected_rows(plan,catalog) if row["stage"]==stage]
+
+
 def choice_counts(plan:dict,catalog:dict)->dict:
     rows=selected_rows(plan,catalog)
     return {"destinations":len(rows),
