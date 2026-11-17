@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from html import unescape
 from html.parser import HTMLParser
+import re
 import json
 from urllib.parse import urlencode, quote
 from urllib.request import Request, urlopen
@@ -77,7 +78,8 @@ def _key(title: str) -> str:
 
 def _license_allowed(name: str) -> bool:
     value = name.strip().casefold().replace("-", " ")
-    return value.startswith(("cc by ", "cc0", "public domain", "pd ", "cc by sa"))
+    return bool(re.match(r"^cc by(?: sa)? \\d", value) or
+                value.startswith(("cc0", "public domain", "pd ")))
 
 
 def _image_metadata(page: dict) -> dict | None:
@@ -150,10 +152,10 @@ def lookup_destination_photos(destinations: list[dict], fetch_json=None) -> dict
             "prop":"imageinfo","iiprop":"url|extmetadata",
             "iiurlwidth":720,"titles":"|".join(filenames),
         })
-        licensed = {p["title"]:_image_metadata(p) for p in
+        licensed = {_key(p["title"]):_image_metadata(p) for p in
                     metadata.get("query", {}).get("pages", [])}
-        return {key: licensed[title] for key,title in chosen.items()
-                if licensed.get(title) is not None}
+        return {key: licensed[_key(title)] for key,title in chosen.items()
+                if licensed.get(_key(title)) is not None}
     except (OSError, ValueError, KeyError, TypeError):
         # Network or incomplete metadata: no pretend photo / invented credit.
         return {}
