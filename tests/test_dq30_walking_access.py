@@ -209,6 +209,8 @@ class WalkingAccessTests(unittest.TestCase):
         walks=self.data["published_walking_itineraries"]
         self.assertEqual(len(walks),1)
         self.assertEqual(walks[0]["distance_m"],7000)
+        self.assertEqual(walks[0]["destination_id"],"rotterdam")
+        self.assertEqual(walks[0]["end_station_id"],"rotterdam_centraal_station")
         self.assertEqual(walks[0]["route_scope"],"entire_loop_not_individual_segments")
         self.assertIsNone(walks[0]["duration_min"])
         self.assertFalse(any(x["distance_m"] is not None for x in self.data["walking_routes"]))
