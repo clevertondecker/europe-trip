@@ -276,4 +276,6 @@ def destination_access(destination_id, *, evidence=None):
             "attractions":[attraction_access(x["attraction_id"], evidence=source)
                            for x in source["attractions"] if x["destination_id"] == destination_id],
             "stations":deepcopy([x for x in source["stations"] if x["destination_id"] == destination_id]),
-            "candidate_sequences":deepcopy([x for x in source["candidate_sequences"] if x["destination_id"] == destination_id])}
+            "candidate_sequences":deepcopy([x for x in source["candidate_sequences"] if x["destination_id"] == destination_id]),
+            "published_walking_itineraries":deepcopy([x for x in source.get("published_walking_itineraries", [])
+                                                       if x["destination_id"] == destination_id])}
