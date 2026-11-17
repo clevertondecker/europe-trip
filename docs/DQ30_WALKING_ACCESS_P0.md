@@ -1,7 +1,7 @@
 # DQ 3.0 / Pacote 2 — Auditoria geoespacial P0 (17/11/2026)
 
 ## Escopo / limitações
-Esta entrega foi construída a partir do catálogo canônico e fontes públicas rastreáveis para os seis destinos P0. O arquivo complementar não altera `data/attractions_2027.json`, `TripPlan`, os agrupamentos, a UX ou o piloto histórico DQ 3.0 P1. Não foi disponibilizado um serviço de roteamento pedestre autorizado para todos os seis destinos, portanto **nenhuma distância caminhável numérica foi inferida**. O objetivo de pesquisar/verificar individualmente todas as 30 atrações não está completamente atendido: seis têm ponto representativo confirmado; as demais aguardam geocodificação e conferência de acesso.
+Esta entrega foi construída a partir do catálogo canônico e fontes públicas rastreáveis para os seis destinos P0. O arquivo complementar não altera `data/attractions_2027.json`, `TripPlan`, os agrupamentos, a UX ou o piloto histórico DQ 3.0 P1. Não foi disponibilizado um serviço de roteamento pedestre autorizado para todos os seis destinos, portanto **nenhuma distância caminhável numérica foi inferida**. O objetivo de pesquisar/verificar individualmente todas as 30 atrações não está completamente atendido: treze têm ponto representativo confirmado; as demais aguardam geocodificação e conferência de acesso.
 
 ### Antes / depois
 
@@ -9,7 +9,7 @@ Esta entrega foi construída a partir do catálogo canônico e fontes públicas 
 |---|---:|---:|---|
 | Atrações canônicas totais | 65 | 65 | catálogo original intacto |
 | Atrações nos destinos P0 | 30 | 30 inventariadas | 6 Strasbourg, 5 Colmar, 4 Basel, 5 Bruxelles, 5 Bruges, 5 Rotterdam |
-| Atrações P0 com coordenada individual | 0 | 6 | **nenhuma** representa entrada pública verificada |
+| Atrações P0 com coordenada individual | 0 | 13 | **nenhuma** representa entrada pública verificada |
 | Atrações P0 com entrada identificada geograficamente | 0 | 0 | pontos representativos e centroides não são entradas |
 | Atrações P0 com endereço/documentação associada | 2 (piloto P1) | 3 (datasets complementares) | Catedral e Grand-Place já existiam; Basel Münster é novo |
 | Estações P0 com coordenada de estação | 0 | 6 | fonte e precisão documentadas; não são plataformas nem saídas |
@@ -29,6 +29,11 @@ Esta entrega foi construída a partir do catálogo canônico e fontes públicas 
 | `brussels_grand_place` | 50.8467078 | 4.3525382 | centroide da praça | [Wikidata Q21771859](https://www.wikidata.org/wiki/Q21771859) |
 | `bruges_markt` | 51.2085000 | 3.2243889 | centroide da praça | [Wikidata Q1108938](https://www.wikidata.org/wiki/Q1108938) |
 | `rotterdam_markthal` | 51.9201111 | 4.4869500 | ponto do edifício | [Wikidata Q3327230](https://www.wikidata.org/wiki/Q3327230) |
+
+
+### Georreferências complementares verificadas
+
+Além dos seis pontos iniciais, sete registros do Wikidata foram reconciliados diretamente com os IDs existentes: `strasbourg_petite` ([Q965606](https://www.wikidata.org/wiki/Q965606), centroide de bairro), `strasbourg_ponts` ([Q3397780](https://www.wikidata.org/wiki/Q3397780)), `strasbourg_vauban` ([Q2885001](https://www.wikidata.org/wiki/Q2885001)), `colmar_pfister` ([Q2350639](https://www.wikidata.org/wiki/Q2350639)), `basel_townhall` ([Q688984](https://www.wikidata.org/wiki/Q688984)), `brussels_atomium` ([Q180901](https://www.wikidata.org/wiki/Q180901)) e `rotterdam_cube_houses` ([Q42153772](https://www.wikidata.org/wiki/Q42153772)). A precisão permanece **ponto representativo ou centroide**, não entrada pública verificada.
 
 ### Estações documentadas
 
@@ -78,7 +83,7 @@ bruges = attraction_access("bruges_markt")
 
 ### Bloqueios e trabalho não concluído
 
-1. As 24 atrações restantes P0 precisam de geocodificação por identificadores OSM/Wikidata e confirmação individual da natureza do ponto; os 30 acessos principais e suas entradas exigem pesquisa mais ampla.
+1. As 17 atrações restantes P0 precisam de geocodificação por identificadores OSM/Wikidata e confirmação individual da natureza do ponto; os 30 acessos principais e suas entradas exigem pesquisa mais ampla.
 2. Um serviço autorizado (Valhalla/GraphHopper/ORS com perfil pedestrian, ou instruções oficiais específicas) é necessário para metros e tempos dos outros pares. Não foi acessado no pacote.
 3. Percursos atração→atração e última atração→estação ainda são apenas sequências candidatas, com distância e duração desconhecidas.
 4. Coordenadas de Brugge Station têm conflito de registros no Wikidata: validar a coordenada exata/entrada antes de fornecer rota navegável.
