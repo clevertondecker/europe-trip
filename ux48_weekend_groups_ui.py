@@ -26,7 +26,10 @@ def _state(plan,catalog):
 
 def _save(new):
     st.session_state["ux48_weekend_groups"]=new
-    st.session_state["ux48_weekend_message"]="Agrupamentos atualizados apenas nesta sessão. Exporte o rascunho para guardar uma cópia."
+    st.session_state["ux36_cloud_dirty"]=True
+    st.session_state["ux48_weekend_message"]=(
+        "Agrupamentos atualizados. Salve uma cópia privada ou exporte "
+        "um backup para preservar as alterações.")
 
 def render_weekend_planner(plan,catalog):
     st.markdown("### Organizar viagens de fim de semana")
@@ -151,9 +154,10 @@ def render_weekend_planner(plan,catalog):
                   mark not in groups["rest_weekends"]))
             st.rerun()
     st.divider()
-    st.caption("**Persistência:** esses agrupamentos são rascunhos da sessão, "
-               "não são gravados no TripPlan nem automaticamente na nuvem. "
-               "Exporte/importa o arquivo para recuperar entre sessões.")
+    st.caption("**Persistência:** os agrupamentos integram o backup e o "
+               "salvamento privado do planejamento, quando configurado. "
+               "Não são publicados no GitHub nem incluídos no TripPlan. "
+               "Sem armazenamento privado, exporte o backup antes de sair.")
     st.download_button("Exportar rascunho de fins de semana",
         data=export_groups(groups,plan,catalog),
         file_name="nossa-europa-fins-de-semana.json",
