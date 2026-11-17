@@ -29,7 +29,7 @@ class WalkingAccessTests(unittest.TestCase):
                     if x["destination_id"] in self.data["destinations"]}
         self.assertEqual({x["attraction_id"] for x in self.data["attractions"]}, expected)
         self.assertEqual(len(expected), 30)
-        self.assertEqual(sum(x["coordinates"] is not None for x in self.data["attractions"]),13)
+        self.assertEqual(sum(x["coordinates"] is not None for x in self.data["attractions"]),26)
         self.assertEqual(len(self.data["stations"]),6)
         self.assertFalse(any(x["entrance_verified"] for x in self.data["attractions"]))
 
@@ -152,7 +152,9 @@ class WalkingAccessTests(unittest.TestCase):
 
     def test_station_conflict_and_access_data_do_not_claim_routing_ready(self):
         brugge=next(s for s in self.data["stations"] if s["id"]=="brugge_station")
-        self.assertTrue(brugge["coordinate_conflict_unresolved"])
+        self.assertFalse(brugge["coordinate_conflict_unresolved"])
+        self.assertEqual(brugge["coordinate_reconciliation"]["status"],
+                         "representative_station_location_reconciled_only")
         self.assertFalse(brugge["pedestrian_access_points"])
         for row in self.data["walking_routes"]:
             self.assertIsNone(row["origin_access_id"])
@@ -172,6 +174,36 @@ class WalkingAccessTests(unittest.TestCase):
         self.assertIsNotNone(attraction_access("strasbourg_cathedral",evidence=self.data)["historical_access"])
         self.assertIsNotNone(load_mobility_pilot())
         self.assertIsNone(attraction_access("missing",evidence=self.data))
+
+    def test_reconciliation_requires_source_and_is_not_entrance(self):
+        self.reject(lambda d: d["stations"][4].update(
+            coordinate_reconciliation={"status":"representative_station_location_reconciled_only",
+                                       "sources":[],"checked_at":"2026-11-17",
+                                       "reason":"not verified"}))
+        self.reject(lambda d: d["stations"][4].update(
+            pedestrian_routing_ready=True))
+        station=next(x for x in self.data["stations"] if x["id"]=="brugge_station")
+        self.assertFalse(station["pedestrian_access_points"])
+        self.assertFalse(station["pedestrian_routing_ready"])
+
+    def test_researched_attractions_keep_precision_and_provenance(self):
+        confirmed=[x for x in self.data["attractions"] if x["coordinates"]]
+        self.assertEqual(len(confirmed),26)
+        self.assertTrue(all(x["coordinate_source_url"].startswith("https://")
+                            and x["coordinate_precision"] in ("area_centroid","attraction_point")
+                            for x in confirmed))
+        self.assertFalse(any(x["entrance_verified"] for x in self.data["attractions"]))
+        self.assertEqual({x["attraction_id"] for x in self.data["attractions"] if not x["coordinates"]},
+                         {x["attraction_id"] for x in self.data["research_attempts"]})
+        self.assertEqual(len(self.data["candidate_sequences"]),6)
+        self.assertTrue(all(x["research_source_url"].startswith("https://")
+                            for x in self.data["candidate_sequences"]))
+
+    def test_no_engine_result_inferred_from_station_representatives(self):
+        self.assertEqual(self.data["routing_provider_assessment"]["status"],"not_run")
+        self.assertFalse(any(r["status"]=="pedestrian_routed" for r in self.data["walking_routes"]))
+        self.assertFalse(any(r["distance_m"] is not None for r in self.data["walking_routes"]))
+        self.assertEqual(sum(r["duration_min"] is not None for r in self.data["walking_routes"]),1)
 
     def test_read_only_and_trip_plan_unchanged(self):
         plan = new_plan()
