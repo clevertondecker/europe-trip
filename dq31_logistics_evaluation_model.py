@@ -11,7 +11,8 @@ from math import isfinite
 
 from base_coverage_model import coverage_matrix
 from five_base_comparison_model import load_five_base_evidence
-from rail_evidence_unified_model import load_rail_evidence, route_evidence, canonical_place
+from rail_evidence_unified_model import load_rail_evidence, canonical_place
+from evidence_query_model import get_rail_evidence
 from base_explorer_model import load_exploration
 from dq30_walking_access_model import load_walking_access
 
@@ -45,20 +46,6 @@ def select_common_basket(study: dict, *, selected_destinations=()) -> dict:
     return {"ids": selected, "names": {i: items[i]["name"] for i in selected},
             "type": kind, "reference_basket_size": len(items),
             "same_basket_required": True}
-
-
-def _exploration_reference(data, base_id, destination_id):
-    for row in data["routes"]:
-        if (canonical_place(row["base_id"]) == canonical_place(base_id)
-                and canonical_place(row["destination_id"]) == destination_id
-                and type(row["train_minutes_oneway_min"]) is int
-                and row["train_minutes_oneway_min"] > 0
-                and str(row.get("source_url", "")).startswith("https://")):
-            return {"minutes": row["train_minutes_oneway_min"],
-                    "source_url": row["source_url"],
-                    "source_date": row.get("retrieved_at"),
-                    "source_dataset": "exploration_bases_2027"}
-    return None
 
 
 def _known_access(destination_id, geo):
@@ -125,18 +112,12 @@ def logistics_comparison(base_ids, *, selected_destinations=(), weights=None,
         routes = []
         for destination_id in basket["ids"]:
             local = canonical_place(base_id) == destination_id
-            evidence = route_evidence(rail, base_id, destination_id)
-            minutes = (evidence.get("minimum_oneway_min")
-                       if evidence["status"] == "historical_time" and not local else None)
-            source = evidence.get("source_url") if minutes is not None else None
-            src_date = evidence.get("source_date") if minutes is not None else None
-            source_dataset = evidence.get("source_dataset") if minutes is not None else None
-            if minutes is None and not local:
-                extra = _exploration_reference(exploration, base_id, destination_id)
-                if extra:
-                    minutes, source, src_date, source_dataset = (
-                        extra["minutes"], extra["source_url"],
-                        extra["source_date"], extra["source_dataset"])
+            evidence = get_rail_evidence(
+                base_id, destination_id, rail=rail, exploration=exploration)
+            minutes = evidence["minimum_oneway_min"]
+            source = evidence["source_url"]
+            src_date = evidence["source_date"]
+            source_dataset = evidence["source_dataset"]
             routes.append({
                 "destination_id": destination_id,
                 "local": local,

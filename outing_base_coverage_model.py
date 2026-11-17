@@ -10,27 +10,10 @@ from copy import deepcopy
 from attractions_model import load_attractions
 from base_explorer_model import load_exploration
 from base_scenario_model import base_options
-from rail_evidence_unified_model import (load_rail_evidence, route_evidence,
-                                         canonical_place)
+from rail_evidence_unified_model import (load_rail_evidence, canonical_place)
+from evidence_query_model import get_rail_evidence
 
 OFFICIAL_FARE_BASES = frozenset({"mulhouse", "strasbourg", "metz", "nancy"})
-
-
-def _exploratory_evidence(exploration: dict, base_id: str, dest_id: str) -> dict | None:
-    # The existing exploration study contains additional genuine operator
-    # excerpts (e.g. Lille -> Rotterdam), absent from the rail adapter.
-    matches = [r for r in exploration["routes"]
-               if r["base_id"] == base_id and r["destination_id"] == dest_id
-               and r["train_minutes_oneway_min"] is not None]
-    if not matches:
-        return None
-    row = matches[0]
-    return {
-        "minutes": row["train_minutes_oneway_min"],
-        "source_url": row["source_url"],
-        "source_dataset": "exploration_bases_2027",
-        "evidence_date": row.get("retrieved_at"),
-    }
 
 
 def preview_for_base(base_id: str, *, catalog: dict | None = None,
@@ -53,21 +36,13 @@ def preview_for_base(base_id: str, *, catalog: dict | None = None,
         did = place["id"]
         items = [a for a in catalog["attractions"] if a["destination_id"] == did]
         local = canonical_place(did) == canonical_place(base_id)
-        rail_row = route_evidence(rail, base_id, did)
-        minutes = rail_row["minimum_oneway_min"] if rail_row["status"] == "historical_time" else None
-        typical = rail_row.get("typical_oneway_min") if minutes is not None else None
-        source = rail_row.get("source_url") if minutes is not None else None
-        dataset = rail_row.get("source_dataset") if minutes is not None else None
-        checked = rail_row.get("source_date") if minutes is not None else None
-        if minutes is None and not local:
-            extra = _exploratory_evidence(exploration, base_id, did)
-            if extra:
-                typical = None  # The exploratory record offers no comparable typical value.
-                minutes, source, dataset, checked = (
-                    extra["minutes"], extra["source_url"],
-                    extra["source_dataset"], extra["evidence_date"])
-        if local:
-            minutes, typical, source, dataset, checked = None, None, None, None, None
+        evidence = get_rail_evidence(
+            base_id, did, rail=rail, exploration=exploration)
+        minutes = evidence["minimum_oneway_min"]
+        typical = evidence["typical_oneway_min"]
+        source = evidence["source_url"]
+        dataset = evidence["source_dataset"]
+        checked = evidence["source_date"]
         destinations.append({
             "destination_id": did,
             "name": place["name"],

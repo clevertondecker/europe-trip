@@ -17,8 +17,9 @@ from base_explorer_model import load_exploration
 from base_research_expanded_model import load_research
 from base_scenario_model import base_options
 from rail_evidence_unified_model import (
-    canonical_place, load_rail_evidence, route_evidence,
+    canonical_place, load_rail_evidence,
 )
+from evidence_query_model import get_rail_evidence
 
 DEFAULT=Path(__file__).resolve().parent/"data"/"dq32_macro_tourism_2026_11.json"
 
@@ -141,20 +142,6 @@ def _registry(catalog, exploration, research, macro):
     return destinations
 
 
-def _exploration_time(exploration,origin,destination):
-    for row in exploration["routes"]:
-        if (canonical_place(row["base_id"])==origin
-                and canonical_place(row["destination_id"])==destination
-                and type(row.get("train_minutes_oneway_min")) is int
-                and row["train_minutes_oneway_min"]>0
-                and row.get("source_url","").startswith("https://")):
-            return {"minutes":row["train_minutes_oneway_min"],
-                    "typical_minutes":None,"source_url":row["source_url"],
-                    "checked_at":row.get("retrieved_at"),
-                    "source_dataset":"exploration_bases_2027"}
-    return None
-
-
 def opportunity_overview(base_id, *, macro=None,catalog=None,exploration=None,
                          research=None,rail=None,options=None):
     """Independent broad-screening view; NO ranking, return, fare or reachability claims."""
@@ -175,20 +162,13 @@ def opportunity_overview(base_id, *, macro=None,catalog=None,exploration=None,
     entries=[]
     for dest_id,meta in destinations.items():
         local=dest_id==origin
-        detail=route_evidence(rail,origin,dest_id)
-        minutes=(detail.get("minimum_oneway_min")
-                 if detail["status"]=="historical_time" and not local else None)
-        typical=(detail.get("typical_oneway_min") if minutes is not None else None)
-        source=(detail.get("source_url") if minutes is not None else None)
-        checked=(detail.get("source_date") if minutes is not None else None)
-        dataset=(detail.get("source_dataset") if minutes is not None else None)
-        if minutes is None and not local:
-            fallback=_exploration_time(exploration,origin,dest_id)
-            if fallback:
-                minutes,typical,source,checked,dataset=(
-                    fallback["minutes"],fallback["typical_minutes"],
-                    fallback["source_url"],fallback["checked_at"],
-                    fallback["source_dataset"])
+        evidence=get_rail_evidence(
+            origin,dest_id,rail=rail,exploration=exploration)
+        minutes=evidence["minimum_oneway_min"]
+        typical=evidence["typical_oneway_min"]
+        source=evidence["source_url"]
+        checked=evidence["source_date"]
+        dataset=evidence["source_dataset"]
         attrs=local_new.get(dest_id,[])+catalog_attractions.get(dest_id,[])
         canonical_count=len(catalog_attractions.get(dest_id,[]))
         new_count=len(local_new.get(dest_id,[]))
