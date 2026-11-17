@@ -30,19 +30,29 @@ def project_journey(plan: dict, interests: dict | None = None) -> dict:
     active = [x for x in items if x.get("priority") in
               ("must_visit", "interested", "maybe")]
     wishes = len(active)
+    # Project itinerary completion by destination rather than comparing
+    # unrelated counts of dates and selected outings.
     packages = plan.get("packages", {})
     flexible = plan.get("flexible_visits", [])
-    attraction_count = sum(len(x) for x in packages.values())
-    outing_count = len(packages) + len({v["destination_id"] for v in flexible
-                                         if v.get("destination_id") not in packages})
-    dated_flexible = sum(bool(v.get("exact_date")) for v in flexible)
-    dates = len(plan.get("assignments", {})) + dated_flexible
+    destinations = set(packages) | {v["destination_id"] for v in flexible}
+    assignments = set(plan.get("assignments", {}).values())
+    flexible_dates = {v["destination_id"] for v in flexible if v.get("exact_date")}
+    with_date = destinations & (assignments | flexible_dates)
+    with_period = {v["destination_id"] for v in flexible
+                   if v.get("period") and str(v["period"]).strip()}
+    organized = destinations & (with_date | with_period)
+    pending = destinations - organized
+    outing_count = len(destinations)
+    dated_count = len(with_date)
+    organized_count = len(organized)
+    pending_count = len(pending)
     statuses = (
         "Pronto para explorar — sem decisão necessária",
         f"{wishes} destino(s) desejado(s)" if wishes else "Nenhum destino na lista",
         "Comparação disponível — base ainda em avaliação" if wishes else
         "Adicione destinos antes de comparar",
-        (f"{outing_count} lugar(es) no roteiro · {dates} data(s) definida(s)"
+        (f"{outing_count} lugar(es) · {organized_count} organizado(s) "
+         f"({dated_count} com data) · {pending_count} pendente(s)"
          if outing_count else "Nenhum passeio selecionado"),
         "Cenário de orçamento disponível — custos não confirmados",
     )
@@ -54,15 +64,22 @@ def project_journey(plan: dict, interests: dict | None = None) -> dict:
     ]
     if not wishes:
         next_step = {"label":"Começar pelos destinos","id":"discover"}
+        alternative_actions = []
     elif not outing_count:
         next_step = {"label":"Comparar cidades-base","id":"compare"}
-    elif dates < outing_count:
+        # Both paths are useful. Opening Compare is not a recorded decision.
+        alternative_actions = [{"label":"Começar a montar roteiro","id":"itinerary"}]
+    elif pending_count or organized_count > dated_count:
         next_step = {"label":"Continuar organizando passeios","id":"itinerary"}
+        alternative_actions = []
     else:
         next_step = {"label":"Revisar custos e informações faltantes","id":"budget"}
+        alternative_actions = []
     return {
-        "steps":steps,"next":next_step,
-        "wishes":wishes,"outings":outing_count,"dated_visits":dates,
+        "steps":steps,"next":next_step,"alternatives":alternative_actions,
+        "wishes":wishes,"outings":outing_count,"dated_visits":dated_count,
+        "organized_destinations":organized_count,
+        "pending_destinations":pending_count,
         "base_decision_confirmed":False,
         "comparison_concluded":False,"budget_confirmed":False,
     }
