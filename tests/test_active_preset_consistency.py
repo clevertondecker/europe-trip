@@ -90,7 +90,8 @@ class ActivePresetConsistency(unittest.TestCase):
         # The photographic gallery is scoped to the France stage.
         app.segmented_control(key="flow_active_stage").set_value("França").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
-        self.assertTrue(any("Lugares que escolhemos" in x.value for x in app.markdown))
+        self.assertFalse(any("Lugares que escolhemos" in x.value for x in app.markdown))
+        self.assertTrue(any("Temporada europeia" in x.value for x in app.markdown))
         self.assertEqual(app.session_state["advisor_plan"]["packages"],{})
 
 
