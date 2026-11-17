@@ -10,7 +10,8 @@ class ScenarioBoardUITests(unittest.TestCase):
     def test_board_removal_is_draft_and_cost_is_recomputed(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=75).run()
         app.radio(key="main_navigation").set_value("Roteiro").run()
-        app.segmented_control(key="itinerary_section").set_value("Simular roteiros").run()
+        app.segmented_control(key="ux_section").set_value("Melhorar meu roteiro").run()
+        app.selectbox(key="ux_improve_view").set_value("Simular roteiros").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
         before=deepcopy(app.session_state["advisor_plan"])
         board=deepcopy(app.session_state["scenario_edit_balanced"])
