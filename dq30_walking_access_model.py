@@ -148,6 +148,18 @@ def validate_walking_access(data, catalog):
             raise ValueError("Estação não deve ser descrita como entrada verificada")
         if not isinstance(station.get("coordinate_conflict_unresolved", False), bool):
             raise ValueError("Marcador de conflito inválido")
+        reconciliation = station.get("coordinate_reconciliation")
+        if reconciliation is not None:
+            if (reconciliation.get("status") != "representative_station_location_reconciled_only"
+                    or len(reconciliation.get("sources", [])) < 2
+                    or not all(isinstance(u,str) and u.startswith("https://")
+                               for u in reconciliation["sources"])
+                    or not reconciliation.get("reason")
+                    or station.get("coordinate_conflict_unresolved", False)):
+                raise ValueError("Conciliação da posição de estação sem proveniência")
+            date.fromisoformat(reconciliation["checked_at"])
+        if station.get("pedestrian_routing_ready", False) and not station.get("pedestrian_access_points"):
+            raise ValueError("Estação sem saída pública não pode estar pronta para roteamento")
         station_access[sid] = _access_points(
             station.get("pedestrian_access_points", []),
             parent_id=sid, kind="station")
