@@ -103,10 +103,21 @@
       "wikidata_id": "Q800580",
       "checked_at": "2026-11-17",
       "notes": "Wikidata contém segunda coordenada conflitante: 51°11'2N 3°13'30E; validar antes de navegação precisa.",
-      "coordinate_conflict_unresolved": true,
+      "coordinate_conflict_unresolved": false,
       "pedestrian_access_points": [],
       "pedestrian_routing_ready": false,
-      "access_verification_notes": "Duas coordenadas de estação relatadas; nenhuma entrada/saída pública verificada."
+      "access_verification_notes": "Ponto geral conciliado: Wikidata Q800580 51.1976219/3.2179192 e OSM/Mapcarta 51.19738/3.21736 referem-se ao mesmo complexo; antiga alternativa 51°11′2N 3°13′30E foi descartada como posição de estação por divergência geográfica. Nenhuma saída pública validada; NÃO autoriza roteamento.",
+      "coordinate_reconciliation": {
+        "status": "representative_station_location_reconciled_only",
+        "checked_at": "2026-11-17",
+        "sources": [
+          "https://www.wikidata.org/wiki/Q800580",
+          "https://mapcarta.com/29355084",
+          "https://be.geoview.info/station_brugge%2C20217215117w"
+        ],
+        "discarded_alternative": "51°11′2N, 3°13′30E",
+        "reason": "Duas fontes independentes OSM/Wikidata situam o complexo da estação próximo de 51.1974N, 3.2174E; alternativa fica deslocada para sul. Acesso pedestre permanece sem verificação."
+      }
     },
     {
       "id": "rotterdam_centraal_station",
@@ -181,11 +192,14 @@
       "attraction_id": "strasbourg_grande",
       "destination_id": "strasbourg",
       "name": "Grande Île",
-      "coordinates": null,
-      "coordinate_precision": "unknown",
-      "coordinate_source_url": null,
-      "wikidata_id": null,
-      "location_status": "not_verified",
+      "coordinates": {
+        "lat": 48.5830556,
+        "lon": 7.7480556
+      },
+      "coordinate_precision": "area_centroid",
+      "coordinate_source_url": "https://www.wikidata.org/wiki/Q1895943",
+      "wikidata_id": "Q1895943",
+      "location_status": "verified_representative",
       "address": null,
       "address_source_url": null,
       "entrance_verified": false,
@@ -195,7 +209,7 @@
       "walking_from_station_m": null,
       "checked_at": "2026-11-17",
       "existing_catalog_source_url": "https://www.visitstrasbourg.fr/en/discover/must-see-attractions/",
-      "notes": "Atração inventariada; coordenadas específicas não verificadas e não inferidas do centro da cidade.",
+      "notes": "Centroide da ilha/bairro, não entrada",
       "pedestrian_access_points": []
     },
     {
@@ -340,11 +354,14 @@
       "attraction_id": "colmar_stmartin",
       "destination_id": "colmar",
       "name": "Collégiale Saint-Martin",
-      "coordinates": null,
-      "coordinate_precision": "unknown",
-      "coordinate_source_url": null,
-      "wikidata_id": null,
-      "location_status": "not_verified",
+      "coordinates": {
+        "lat": 48.0772222,
+        "lon": 7.3583333
+      },
+      "coordinate_precision": "attraction_point",
+      "coordinate_source_url": "https://www.wikidata.org/wiki/Q1581390",
+      "wikidata_id": "Q1581390",
+      "location_status": "verified_representative",
       "address": null,
       "address_source_url": null,
       "entrance_verified": false,
@@ -354,18 +371,21 @@
       "walking_from_station_m": null,
       "checked_at": "2026-11-17",
       "existing_catalog_source_url": "https://tourisme-colmar.com/en/visit/presentation/discover",
-      "notes": "Atração inventariada; coordenadas específicas não verificadas e não inferidas do centro da cidade.",
+      "notes": "Ponto da igreja, não sua entrada",
       "pedestrian_access_points": []
     },
     {
       "attraction_id": "colmar_heads",
       "destination_id": "colmar",
       "name": "Maison des Têtes",
-      "coordinates": null,
-      "coordinate_precision": "unknown",
-      "coordinate_source_url": null,
-      "wikidata_id": null,
-      "location_status": "not_verified",
+      "coordinates": {
+        "lat": 48.0786111,
+        "lon": 7.3555
+      },
+      "coordinate_precision": "attraction_point",
+      "coordinate_source_url": "https://www.wikidata.org/wiki/Q3279905",
+      "wikidata_id": "Q3279905",
+      "location_status": "verified_representative",
       "address": null,
       "address_source_url": null,
       "entrance_verified": false,
@@ -375,7 +395,7 @@
       "walking_from_station_m": null,
       "checked_at": "2026-11-17",
       "existing_catalog_source_url": "https://tourisme-colmar.com/en/visit/presentation/discover",
-      "notes": "Atração inventariada; coordenadas específicas não verificadas e não inferidas do centro da cidade.",
+      "notes": "Ponto de prédio; Wikidata indica rue des Têtes 19",
       "pedestrian_access_points": []
     },
     {
@@ -430,11 +450,14 @@
       "attraction_id": "basel_mittlere",
       "destination_id": "basel",
       "name": "Mittlere Brücke",
-      "coordinates": null,
-      "coordinate_precision": "unknown",
-      "coordinate_source_url": null,
+      "coordinates": {
+        "lat": 47.56,
+        "lon": 7.5897222
+      },
+      "coordinate_precision": "attraction_point",
+      "coordinate_source_url": "https://en.wikipedia.org/wiki/Middle_Bridge%2C_Basel",
       "wikidata_id": null,
-      "location_status": "not_verified",
+      "location_status": "verified_representative",
       "address": null,
       "address_source_url": null,
       "entrance_verified": false,
@@ -444,18 +467,21 @@
       "walking_from_station_m": null,
       "checked_at": "2026-11-17",
       "existing_catalog_source_url": "https://www.basel.com/en/places-of-interest",
-      "notes": "Atração inventariada; coordenadas específicas não verificadas e não inferidas do centro da cidade.",
+      "notes": "Ponto de referência da ponte, não acesso de pedestres",
       "pedestrian_access_points": []
     },
     {
       "attraction_id": "basel_oldtown",
       "destination_id": "basel",
       "name": "Centro histórico",
-      "coordinates": null,
-      "coordinate_precision": "unknown",
-      "coordinate_source_url": null,
-      "wikidata_id": null,
-      "location_status": "not_verified",
+      "coordinates": {
+        "lat": 47.5577778,
+        "lon": 7.5880556
+      },
+      "coordinate_precision": "area_centroid",
+      "coordinate_source_url": "https://www.wikidata.org/wiki/Q445565",
+      "wikidata_id": "Q445565",
+      "location_status": "verified_representative",
       "address": null,
       "address_source_url": null,
       "entrance_verified": false,
@@ -465,7 +491,7 @@
       "walking_from_station_m": null,
       "checked_at": "2026-11-17",
       "existing_catalog_source_url": "https://www.basel.com/en/places-of-interest",
-      "notes": "Atração inventariada; coordenadas específicas não verificadas e não inferidas do centro da cidade.",
+      "notes": "Centroide do bairro Altstadt Grossbasel, não todo o centro histórico de Basel",
       "pedestrian_access_points": []
     },
     {
@@ -496,11 +522,14 @@
       "attraction_id": "brussels_royal_galleries",
       "destination_id": "brussels",
       "name": "Galeries Royales Saint-Hubert",
-      "coordinates": null,
-      "coordinate_precision": "unknown",
-      "coordinate_source_url": null,
-      "wikidata_id": null,
-      "location_status": "not_verified",
+      "coordinates": {
+        "lat": 50.8478056,
+        "lon": 4.355
+      },
+      "coordinate_precision": "attraction_point",
+      "coordinate_source_url": "https://www.wikidata.org/wiki/Q1491935",
+      "wikidata_id": "Q1491935",
+      "location_status": "verified_representative",
       "address": null,
       "address_source_url": null,
       "entrance_verified": false,
@@ -510,18 +539,21 @@
       "walking_from_station_m": null,
       "checked_at": "2026-11-17",
       "existing_catalog_source_url": "https://www.visit.brussels/en/visitors/what-to-do/must-see-attractions",
-      "notes": "Atração inventariada; coordenadas específicas não verificadas e não inferidas do centro da cidade.",
+      "notes": "Galerias cobertas, ponto representativo não entrada específica",
       "pedestrian_access_points": []
     },
     {
       "attraction_id": "brussels_mont_arts",
       "destination_id": "brussels",
       "name": "Mont des Arts",
-      "coordinates": null,
-      "coordinate_precision": "unknown",
-      "coordinate_source_url": null,
-      "wikidata_id": null,
-      "location_status": "not_verified",
+      "coordinates": {
+        "lat": 50.8442119,
+        "lon": 4.3576059
+      },
+      "coordinate_precision": "area_centroid",
+      "coordinate_source_url": "https://www.wikidata.org/wiki/Q1865794",
+      "wikidata_id": "Q1865794",
+      "location_status": "verified_representative",
       "address": null,
       "address_source_url": null,
       "entrance_verified": false,
@@ -531,7 +563,7 @@
       "walking_from_station_m": null,
       "checked_at": "2026-11-17",
       "existing_catalog_source_url": "https://www.visit.brussels/en/visitors/what-to-do/must-see-attractions",
-      "notes": "Atração inventariada; coordenadas específicas não verificadas e não inferidas do centro da cidade.",
+      "notes": "Centroide da praça do Mont des Arts, OSM way 144502478",
       "pedestrian_access_points": []
     },
     {
@@ -607,11 +639,14 @@
       "attraction_id": "bruges_belfry",
       "destination_id": "bruges_be",
       "name": "Belfort (exterior)",
-      "coordinates": null,
-      "coordinate_precision": "unknown",
-      "coordinate_source_url": null,
+      "coordinates": {
+        "lat": 51.2083333,
+        "lon": 3.2247222
+      },
+      "coordinate_precision": "attraction_point",
+      "coordinate_source_url": "https://en.wikipedia.org/wiki/Belfry_of_Bruges",
       "wikidata_id": null,
-      "location_status": "not_verified",
+      "location_status": "verified_representative",
       "address": null,
       "address_source_url": null,
       "entrance_verified": false,
@@ -621,18 +656,21 @@
       "walking_from_station_m": null,
       "checked_at": "2026-11-17",
       "existing_catalog_source_url": "https://www.visitbruges.be/en/things-to-do/culture-and-heritage/belfort-belfry",
-      "notes": "Atração inventariada; coordenadas específicas não verificadas e não inferidas do centro da cidade.",
+      "notes": "Ponto da torre, entrada real a verificar",
       "pedestrian_access_points": []
     },
     {
       "attraction_id": "bruges_rosary_quay",
       "destination_id": "bruges_be",
       "name": "Rozenhoedkaai",
-      "coordinates": null,
-      "coordinate_precision": "unknown",
-      "coordinate_source_url": null,
+      "coordinates": {
+        "lat": 51.20737,
+        "lon": 3.22784
+      },
+      "coordinate_precision": "attraction_point",
+      "coordinate_source_url": "https://mapcarta.com/N4170360237",
       "wikidata_id": null,
-      "location_status": "not_verified",
+      "location_status": "verified_representative",
       "address": null,
       "address_source_url": null,
       "entrance_verified": false,
@@ -642,18 +680,21 @@
       "walking_from_station_m": null,
       "checked_at": "2026-11-17",
       "existing_catalog_source_url": "https://www.visitbruges.be/en/things-to-do/sights",
-      "notes": "Atração inventariada; coordenadas específicas não verificadas e não inferidas do centro da cidade.",
+      "notes": "OSM node 4170360237 tourism=viewpoint, não rota pedestre",
       "pedestrian_access_points": []
     },
     {
       "attraction_id": "bruges_minnewater",
       "destination_id": "bruges_be",
       "name": "Minnewaterpark",
-      "coordinates": null,
-      "coordinate_precision": "unknown",
-      "coordinate_source_url": null,
-      "wikidata_id": null,
-      "location_status": "not_verified",
+      "coordinates": {
+        "lat": 51.19944,
+        "lon": 3.22542
+      },
+      "coordinate_precision": "area_centroid",
+      "coordinate_source_url": "https://mapcarta.com/W3516686",
+      "wikidata_id": "Q2165420",
+      "location_status": "verified_representative",
       "address": null,
       "address_source_url": null,
       "entrance_verified": false,
@@ -663,7 +704,7 @@
       "walking_from_station_m": null,
       "checked_at": "2026-11-17",
       "existing_catalog_source_url": "https://www.visitbruges.be/en",
-      "notes": "Atração inventariada; coordenadas específicas não verificadas e não inferidas do centro da cidade.",
+      "notes": "OSM way 3516686 leisure=park, centroide não entrada",
       "pedestrian_access_points": []
     },
     {
@@ -739,11 +780,14 @@
       "attraction_id": "rotterdam_erasmus_bridge",
       "destination_id": "rotterdam",
       "name": "Erasmusbrug",
-      "coordinates": null,
-      "coordinate_precision": "unknown",
-      "coordinate_source_url": null,
+      "coordinates": {
+        "lat": 51.9091667,
+        "lon": 4.4866667
+      },
+      "coordinate_precision": "attraction_point",
+      "coordinate_source_url": "https://en.wikipedia.org/wiki/Erasmusbrug",
       "wikidata_id": null,
-      "location_status": "not_verified",
+      "location_status": "verified_representative",
       "address": null,
       "address_source_url": null,
       "entrance_verified": false,
@@ -753,18 +797,21 @@
       "walking_from_station_m": null,
       "checked_at": "2026-11-17",
       "existing_catalog_source_url": "https://visitrotterdam.com/things-to-do-in-rotterdam.html",
-      "notes": "Atração inventariada; coordenadas específicas não verificadas e não inferidas do centro da cidade.",
+      "notes": "Ponto representativo da ponte, não extremidade de acesso",
       "pedestrian_access_points": []
     },
     {
       "attraction_id": "rotterdam_old_harbour",
       "destination_id": "rotterdam",
       "name": "Oude Haven",
-      "coordinates": null,
-      "coordinate_precision": "unknown",
-      "coordinate_source_url": null,
-      "wikidata_id": null,
-      "location_status": "not_verified",
+      "coordinates": {
+        "lat": 51.9191694,
+        "lon": 4.4916694
+      },
+      "coordinate_precision": "area_centroid",
+      "coordinate_source_url": "https://www.wikidata.org/wiki/Q2398977",
+      "wikidata_id": "Q2398977",
+      "location_status": "verified_representative",
       "address": null,
       "address_source_url": null,
       "entrance_verified": false,
@@ -774,18 +821,21 @@
       "walking_from_station_m": null,
       "checked_at": "2026-11-17",
       "existing_catalog_source_url": "https://visitrotterdam.com/things-to-do-in-rotterdam.html",
-      "notes": "Atração inventariada; coordenadas específicas não verificadas e não inferidas do centro da cidade.",
+      "notes": "Centroide do porto Oude Haven, não entrada pública",
       "pedestrian_access_points": []
     },
     {
       "attraction_id": "rotterdam_centraal",
       "destination_id": "rotterdam",
       "name": "Rotterdam Centraal (arquitetura)",
-      "coordinates": null,
-      "coordinate_precision": "unknown",
-      "coordinate_source_url": null,
-      "wikidata_id": null,
-      "location_status": "not_verified",
+      "coordinates": {
+        "lat": 51.925,
+        "lon": 4.4694389
+      },
+      "coordinate_precision": "attraction_point",
+      "coordinate_source_url": "https://www.wikidata.org/wiki/Q801388",
+      "wikidata_id": "Q801388",
+      "location_status": "verified_representative",
       "address": null,
       "address_source_url": null,
       "entrance_verified": false,
@@ -795,7 +845,7 @@
       "walking_from_station_m": null,
       "checked_at": "2026-11-17",
       "existing_catalog_source_url": "https://visitrotterdam.com/rotterdam-architecture.html",
-      "notes": "Atração inventariada; coordenadas específicas não verificadas e não inferidas do centro da cidade.",
+      "notes": "A atração é o edifício da estação; coordenada da própria estação, não entrada pública",
       "pedestrian_access_points": []
     }
   ],
@@ -901,14 +951,14 @@
       "profile": "pedestrian",
       "source_url": "https://www.visitbruges.be/en/plan-your-visit/mobility",
       "checked_at": "2026-11-17",
-      "notes": "Visit Bruges informa caminhada de 20 minutos da estação à Markt, sem distância ou geometria.",
+      "notes": "Visit Bruges informa caminhada de 20 minutos da estação à Markt, sem distância ou geometria. Posição geral da estação reconciliada; saída pública e geometria ainda não confirmadas.",
       "origin_access_id": null,
       "destination_access_id": null,
       "engine": null,
       "engine_version": null,
       "geometry_source_url": null,
       "routing_observed_at": null,
-      "coordinate_conflict_unresolved": true
+      "coordinate_conflict_unresolved": false
     },
     {
       "origin_id": "rotterdam_centraal_station",
@@ -944,7 +994,10 @@
       "role": "candidate_sequence_only",
       "walking_geometry_verified": false,
       "inter_attraction_durations_min": null,
-      "notes": "Ordem sugerida para futura verificação; proximidade e duração não comprovadas como percurso pedestre."
+      "notes": "Sequência de atrações canônicas investigada com guia turístico; fonte não publica distância/duração de todos os trechos. NÃO equivale a rota pedestre medida.",
+      "research_source_url": "https://www.visitstrasbourg.fr/en/fiche-sit/F223007633_mini-train-saat-strasbourg/",
+      "research_checked_at": "2026-11-17",
+      "research_status": "attractions_related_but_no_segment_metrics"
     },
     {
       "destination_id": "colmar",
@@ -956,7 +1009,10 @@
       "role": "candidate_sequence_only",
       "walking_geometry_verified": false,
       "inter_attraction_durations_min": null,
-      "notes": "Ordem sugerida para futura verificação; proximidade e duração não comprovadas como percurso pedestre."
+      "notes": "Sequência de atrações canônicas investigada com guia turístico; fonte não publica distância/duração de todos os trechos. NÃO equivale a rota pedestre medida.",
+      "research_source_url": "https://tourisme-colmar.com/en/visit/presentation/discover",
+      "research_checked_at": "2026-11-17",
+      "research_status": "attractions_related_but_no_segment_metrics"
     },
     {
       "destination_id": "basel",
@@ -968,7 +1024,10 @@
       "role": "candidate_sequence_only",
       "walking_geometry_verified": false,
       "inter_attraction_durations_min": null,
-      "notes": "Ordem sugerida para futura verificação; proximidade e duração não comprovadas como percurso pedestre."
+      "notes": "Sequência de atrações canônicas investigada com guia turístico; fonte não publica distância/duração de todos os trechos. NÃO equivale a rota pedestre medida.",
+      "research_source_url": "https://www.basel.com/en/places-of-interest",
+      "research_checked_at": "2026-11-17",
+      "research_status": "attractions_related_but_no_segment_metrics"
     },
     {
       "destination_id": "brussels",
@@ -980,7 +1039,10 @@
       "role": "candidate_sequence_only",
       "walking_geometry_verified": false,
       "inter_attraction_durations_min": null,
-      "notes": "Ordem sugerida para futura verificação; proximidade e duração não comprovadas como percurso pedestre."
+      "notes": "Sequência de atrações canônicas investigada com guia turístico; fonte não publica distância/duração de todos os trechos. NÃO equivale a rota pedestre medida.",
+      "research_source_url": "https://www.visit.brussels/en/visitors/what-to-do/must-see-attractions",
+      "research_checked_at": "2026-11-17",
+      "research_status": "attractions_related_but_no_segment_metrics"
     },
     {
       "destination_id": "bruges_be",
@@ -992,7 +1054,10 @@
       "role": "candidate_sequence_only",
       "walking_geometry_verified": false,
       "inter_attraction_durations_min": null,
-      "notes": "Ordem sugerida para futura verificação; proximidade e duração não comprovadas como percurso pedestre."
+      "notes": "Sequência de atrações canônicas investigada com guia turístico; fonte não publica distância/duração de todos os trechos. NÃO equivale a rota pedestre medida.",
+      "research_source_url": "https://www.visitbruges.be/en/things-to-do/sights",
+      "research_checked_at": "2026-11-17",
+      "research_status": "attractions_related_but_no_segment_metrics"
     },
     {
       "destination_id": "rotterdam",
@@ -1004,7 +1069,82 @@
       "role": "candidate_sequence_only",
       "walking_geometry_verified": false,
       "inter_attraction_durations_min": null,
-      "notes": "Ordem sugerida para futura verificação; proximidade e duração não comprovadas como percurso pedestre."
+      "notes": "Sequência de atrações canônicas investigada com guia turístico; fonte não publica distância/duração de todos os trechos. NÃO equivale a rota pedestre medida.",
+      "research_source_url": "https://www.rotterdam.info/en/visit/guide/walking-in-rotterdam",
+      "research_checked_at": "2026-11-17",
+      "research_status": "attractions_related_but_no_segment_metrics"
+    }
+  ],
+  "research_attempts": [
+    {
+      "attraction_id": "strasbourg_europe",
+      "source_url": "https://www.citadineseurometropolestrasbourg.com/en/places/european-quarter/",
+      "outcome": "district_no_single_pedestrian_access_or_representative_point_verified",
+      "checked_at": "2026-11-17"
+    },
+    {
+      "attraction_id": "colmar_tanners",
+      "source_url": "https://www.wikidata.org/wiki/Q3413256",
+      "outcome": "wikidata_point_refers_to_buildings_rue_des_tanneurs_not_confirmed_quarter_centroid",
+      "checked_at": "2026-11-17"
+    },
+    {
+      "attraction_id": "brussels_eu_quarter",
+      "source_url": "https://www.visit.brussels/en/visitors/plan-your-trip/neighbourhood-walk--the-european-quarter",
+      "outcome": "quarter_without_single_verified_attraction_coordinate",
+      "checked_at": "2026-11-17"
+    },
+    {
+      "attraction_id": "bruges_canals",
+      "source_url": "https://www.visitbruges.be/en/things-to-do/sights",
+      "outcome": "linear_multi_segment_activity_cannot_be_one_coordinate",
+      "checked_at": "2026-11-17"
+    }
+  ],
+  "routing_provider_assessment": {
+    "checked_at": "2026-11-17",
+    "status": "not_run",
+    "reason": "No verified public station exits AND attraction entrances in repository. Hosted providers require valid credentials or demo fair-use constraints. No pedestrian route geometry/distance can be certified from station centroids.",
+    "providers": [
+      {
+        "name": "openrouteservice",
+        "url": "https://api.openrouteservice.org/",
+        "access": "account_api_key_required"
+      },
+      {
+        "name": "GraphHopper",
+        "url": "https://www.graphhopper.com/faq/create-an-api-key/",
+        "access": "account_api_key_required"
+      },
+      {
+        "name": "Valhalla FOSSGIS",
+        "url": "https://valhalla.github.io/valhalla/",
+        "access": "fair_use_demo_not_bulk_or_permanent_service"
+      }
+    ]
+  },
+  "published_walking_itineraries": [
+    {
+      "id": "rotterdam_official_city_walk_7km",
+      "destination_id": "rotterdam",
+      "origin_id": "rotterdam_centraal_station",
+      "mode": "walking",
+      "distance_kind": "walking_route",
+      "distance_m": 7000,
+      "duration_min": null,
+      "geometry_status": "official_tourism_route_map_link",
+      "status": "official_published",
+      "method": "official_tourism_walking_itinerary",
+      "source_url": "https://www.rotterdam.info/en/visit/good-to-know/city-walking-tour",
+      "checked_at": "2026-11-17",
+      "route_scope": "entire_loop_not_individual_segments",
+      "included_attraction_ids": [
+        "rotterdam_markthal",
+        "rotterdam_cube_houses",
+        "rotterdam_centraal"
+      ],
+      "notes": "Roteiro circular de 7 km oferecido pelo turismo de Rotterdam, inicia e termina na estação central; NÃO informa distância estação→Markthal ou Markthal→Cube Houses. Não calcular duração com ritmo presumido.",
+      "end_station_id": "rotterdam_centraal_station"
     }
   ]
 }
