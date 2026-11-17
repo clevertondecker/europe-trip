@@ -165,6 +165,73 @@ def _render_research_only_outings(base_id: str, catalog: dict) -> None:
         "não estão confirmados. Nenhuma tarifa ou escolha oficial foi alterada.")
 
 
+def _render_dq32_macro_opportunities(base_id: str) -> None:
+    """Broad travel discovery is not itinerary viability or an official edit."""
+    from dq32_macro_opportunities_model import opportunity_overview
+
+    overview=opportunity_overview(base_id)
+    st.markdown("### Descoberta ampliada · DQ 3.2")
+    st.caption(
+        "Primeiro conhecer destinos e atrações; depois verificar transportes e "
+        "passeios. Estas oportunidades são exploratórias, sem garantia de "
+        "bate-volta e sem alterar o roteiro oficial.")
+    a,b,c=st.columns(3)
+    a.metric("Destinos no universo exploratório",overview["registry_destinations"])
+    b.metric("Atrações locais documentadas",overview["known_local_attractions"])
+    c.metric("Destinos com trem histórico publicado",overview["rail_time_documented_count"])
+    st.caption(
+        "O universo reúne pesquisa ampliada, catálogo histórico e fontes de "
+        "turismo. Não representa quantidade de passeios viáveis. A ausência de "
+        "uma ligação pesquisada não significa que a cidade seja inacessível.")
+    kind=st.selectbox(
+        "Oportunidades para investigar",
+        ["Atrações da própria base", "Trem histórico documentado",
+         "Outros destinos, transporte não pesquisado"],
+        key="ux_dq32_opportunity_group")
+    groups={
+        "Atrações da própria base":overview["local_destinations"],
+        "Trem histórico documentado":overview["historical_rail_destinations"],
+        "Outros destinos, transporte não pesquisado":overview["unresearched_destinations"],
+    }
+    shown=groups[kind]
+    if not shown:
+        st.info("Ainda não temos evidências desta categoria para a base. "
+                "Isso é uma lacuna de pesquisa, não uma avaliação negativa.")
+        return
+    items=[]
+    for place in shown:
+        duration=("Menor tempo histórico: "+
+                  str(place["minimum_train_oneway_min"])+" min (ida)"
+                  if place["minimum_train_oneway_min"] is not None
+                  else "Local · acesso a verificar" if place["local"]
+                  else "Transporte não pesquisado")
+        items.append({"Destino":place["name"],
+                      "Atrações identificadas":place["attraction_count"],
+                      "Transporte":duration,
+                      "Passeio confirmado":"Não"})
+    st.dataframe(pd.DataFrame(items),hide_index=True,width="stretch")
+    labels={place["destination_id"]:place["name"] for place in shown}
+    key=st.session_state.get("ux_dq32_selected_destination")
+    if key not in labels:
+        st.session_state["ux_dq32_selected_destination"]=next(iter(labels))
+    chosen=st.selectbox(
+        "Ver fontes e atrações desta oportunidade",list(labels),
+        format_func=lambda k:labels[k],key="ux_dq32_selected_destination")
+    dest=next(place for place in shown if place["destination_id"]==chosen)
+    if dest["train_source_url"]:
+        st.markdown("[Fonte do menor tempo ferroviário histórico]("+
+                    dest["train_source_url"]+")")
+    if dest["attractions"]:
+        for attraction in dest["attractions"]:
+            st.markdown("- **"+escape(attraction["name"])+"** · "+
+                        "[Fonte turística]("+attraction["source_url"]+")")
+    else:
+        st.caption("Destino identificado no universo de pesquisas, mas ainda "
+                   "sem atrações individuais cadastradas nesta camada.")
+    st.caption("Tempo de retorno, frequência, acessos, tarifas e disponibilidade "
+               "em 2027 permanecem a pesquisar. Sem Haversine ou roteamento presumido.")
+
+
 def render_explorer(trip_data: dict, sync_sources: dict, map_view) -> None:
     attractions=load_attractions()
     routes=load_base_routes()
@@ -200,6 +267,7 @@ def render_explorer(trip_data: dict, sync_sources: dict, map_view) -> None:
                 by_id[official_base]["name"]+
                 ". As seleções de passeios oficiais não podem ser alteradas "
                 "por engano ao avaliar outra cidade.")
+    _render_dq32_macro_opportunities(base)
     if base not in {"mulhouse","strasbourg","metz","nancy"}:
         _render_research_only_outings(base,attractions)
         return
