@@ -47,6 +47,7 @@ def build_destination_discovery(*, catalog=None, exploration=None,
 
     destinations = _registry(catalog, exploration, research, macro)
     identities = reconcile_attractions(catalog, macro)
+    source_names = {row["id"]: row["name"] for row in macro["attractions"]}
     photos = {canonical_place(row["id"]): deepcopy(row.get("photo"))
               for row in catalog["destinations"] if row.get("photo")}
     details = []
@@ -73,6 +74,8 @@ def build_destination_discovery(*, catalog=None, exploration=None,
                     attr.get("reconciled_source_ids", [])),
                 "additional_sources": deepcopy(
                     attr.get("additional_sources", [])),
+                "alias_names": [source_names[key] for key in
+                                attr.get("reconciled_source_ids", [])],
             })
         details.append({
             "id": destination_id,
@@ -127,6 +130,8 @@ def filter_destinations(discovery: dict, *, country=None, categories=(),
         haystack = normalize("NFKD", " ".join([
             destination["name"], destination["country"],
             *[attr["name"] for attr in destination["attractions"]],
+            *[name for attr in destination["attractions"]
+              for name in attr["alias_names"]],
         ]).casefold())
         haystack = "".join(x for x in haystack if not (0x300 <= ord(x) <= 0x36F))
         if country is not None and destination["country"] != country:
