@@ -15,7 +15,14 @@ DEFAULT = Path(__file__).resolve().parent / "data" / "dq30_walking_access_2026_1
 VALID_PRECISION = {"unknown", "attraction_point", "area_centroid", "entrance"}
 VALID_DISTANCE_KINDS = {"walking_route", "straight_line", "rail_distance"}
 VALID_MODES = {"walking", "rail", "public_transport"}
-VALID_STATUS = {"operator_published_walk_duration", "pending_verified_pedestrian_route"}
+# Legacy values remain accepted; new evidence types have distinct contracts.
+VALID_STATUS = {
+    "operator_published_walk_duration", "pending_verified_pedestrian_route",
+    "official_published", "pedestrian_routed", "pending_verification",
+}
+OFFICIAL_STATUSES = {"operator_published_walk_duration", "official_published"}
+PENDING_STATUSES = {"pending_verified_pedestrian_route", "pending_verification"}
+PEDESTRIAN_PROFILES = {"pedestrian", "foot", "walking", "wheelchair"}
 
 
 def _geo(coordinates, precision, source_url, checked_at):
@@ -37,6 +44,89 @@ def _geo(coordinates, precision, source_url, checked_at):
     date.fromisoformat(checked_at)
 
 
+def _access_points(points, *, parent_id, kind):
+    """Access points must be actual evidenced pedestrian entrances/exits."""
+    if not isinstance(points, list):
+        raise ValueError("Pontos de acesso precisam ser lista")
+    indexed = {}
+    for point in points:
+        pid = point.get("id")
+        if not isinstance(pid, str) or not pid or pid in indexed:
+            raise ValueError("Ponto de acesso ausente ou duplicado")
+        if point.get("parent_id") != parent_id or point.get("kind") not in (
+                {"public_entrance", "public_exit"} if kind == "station"
+                else {"public_entrance"}):
+            raise ValueError("Tipo ou vínculo de acesso inválido")
+        _geo(point.get("coordinates"), "entrance",
+             point.get("source_url"), point.get("checked_at"))
+        if point.get("coordinates") is None:
+            raise ValueError("Ponto de acesso sem coordenada verificada")
+        if point.get("verification_status") != "verified_public_access":
+            raise ValueError("Acesso não comprovado")
+        indexed[pid] = point
+    return indexed
+
+
+def _walking_route(route, stations, attractions, station_access, attraction_access):
+    status = route["status"]
+    if status not in VALID_STATUS:
+        raise ValueError("Status de evidência inválido")
+    if route["mode"] != "walking" or route["distance_kind"] != "walking_route":
+        raise ValueError("Trecho ferroviário/linha reta não é caminhada")
+    distance, minutes = route["distance_m"], route["duration_min"]
+    if distance is not None and (type(distance) not in (int, float)
+            or not isfinite(distance) or distance <= 0):
+        raise ValueError("Distância caminhável inválida")
+    if minutes is not None and (type(minutes) not in (int, float)
+            or not isfinite(minutes) or minutes <= 0):
+        raise ValueError("Duração caminhável inválida")
+    measured = distance is not None or minutes is not None
+    source = route.get("source_url")
+    method = route.get("method")
+    checked = route.get("checked_at")
+    if measured:
+        if not isinstance(source, str) or not source.startswith("https://") or not method:
+            raise ValueError("Evidência de caminhada exige fonte e método")
+        date.fromisoformat(checked)
+    if status in PENDING_STATUSES:
+        if measured or route.get("geometry_status") == "verified_pedestrian_routing":
+            raise ValueError("Rota pendente não pode possuir resultados")
+        return
+    if not measured:
+        raise ValueError("Evidência confirmada não pode ser vazia")
+    if status in OFFICIAL_STATUSES:
+        if method != "official_tourism_access_statement" and method != "official_published_access":
+            raise ValueError("Tempo oficial exige método de publicação oficial")
+        if distance is not None and route.get("geometry_status") == "verified_pedestrian_routing":
+            raise ValueError("Geometria roteada deve usar evidência de motor pedestre")
+        if route.get("engine") is not None:
+            raise ValueError("Publicação oficial não pode mascarar motor de rotas")
+        return
+    # A pedestrian engine result requires real PUBLIC access coordinates on
+    # both ends, never a station centroid or a generic attraction point.
+    if route.get("geometry_status") != "verified_pedestrian_routing":
+        raise ValueError("Motor pedestre exige geometria validada")
+    if not isinstance(route.get("engine"), str) or not route["engine"].strip():
+        raise ValueError("Motor de roteamento não identificado")
+    if route.get("profile") not in PEDESTRIAN_PROFILES or route.get("method") != "pedestrian_routing_engine":
+        raise ValueError("Perfil ou método pedestre inválido")
+    origin_access = route.get("origin_access_id")
+    destination_access = route.get("destination_access_id")
+    if origin_access not in station_access.get(route["origin_id"], {}):
+        raise ValueError("Entrada/saída pública da estação não verificada")
+    if destination_access not in attraction_access.get(route["destination_id"], {}):
+        raise ValueError("Entrada da atração não verificada")
+    if not isinstance(route.get("geometry_source_url"), str) or not route["geometry_source_url"].startswith("https://"):
+        raise ValueError("Sem referência auditável à geometria do percurso")
+    if not isinstance(route.get("engine_version"), str) or not route["engine_version"].strip():
+        raise ValueError("Versão do motor pedestre ausente")
+    if not isinstance(route.get("routing_observed_at"), str):
+        raise ValueError("Data do roteamento ausente")
+    date.fromisoformat(route["routing_observed_at"])
+    if route.get("coordinate_conflict_unresolved") is True or stations[route["origin_id"]].get("coordinate_conflict_unresolved", False):
+        raise ValueError("Conflito de localização não resolvido")
+
+
 def validate_walking_access(data, catalog):
     if data.get("schema_version") != 1:
         raise ValueError("Schema geográfico incompatível")
@@ -47,6 +137,7 @@ def validate_walking_access(data, catalog):
     catalog_items = {x["id"]: x for x in catalog["attractions"]}
     expected = {a["id"] for a in catalog["attractions"] if a["destination_id"] in destinations}
     stations = {}
+    station_access = {}
     for station in data["stations"]:
         sid = station["id"]
         if sid in stations or station["destination_id"] not in destinations:
@@ -55,10 +146,18 @@ def validate_walking_access(data, catalog):
              station["source_url"], station["checked_at"])
         if station["coordinate_precision"] != "station_point_not_entrance":
             raise ValueError("Estação não deve ser descrita como entrada verificada")
+        if not isinstance(station.get("coordinate_conflict_unresolved", False), bool):
+            raise ValueError("Marcador de conflito inválido")
+        station_access[sid] = _access_points(
+            station.get("pedestrian_access_points", []),
+            parent_id=sid, kind="station")
+        if station.get("coordinate_conflict_unresolved", False) and station_access[sid]:
+            raise ValueError("Resolver conflito geográfico antes de validar acessos")
         stations[sid] = station
     if {x["destination_id"] for x in stations.values()} != set(destinations):
         raise ValueError("P0 sem estação representativa")
     indexed = {}
+    attraction_access_points = {}
     for item in data["attractions"]:
         aid = item["attraction_id"]
         if aid in indexed or aid not in expected or item["destination_id"] != catalog_items[aid]["destination_id"]:
@@ -74,6 +173,9 @@ def validate_walking_access(data, catalog):
             raise ValueError("Endereço sem fonte")
         if item["walking_from_station_min"] is not None or item["walking_from_station_m"] is not None:
             raise ValueError("Duração de caminhada pertence a evidência de percurso")
+        attraction_access_points[aid] = _access_points(
+            item.get("pedestrian_access_points", []),
+            parent_id=aid, kind="attraction")
         indexed[aid] = item
     if set(indexed) != expected:
         raise ValueError("Inventário das atrações P0 está incompleto")
@@ -85,28 +187,8 @@ def validate_walking_access(data, catalog):
         seen.add(key)
         if stations[route["origin_id"]]["destination_id"] != indexed[route["destination_id"]]["destination_id"]:
             raise ValueError("Percurso entre destinos incompatíveis")
-        if route["mode"] not in VALID_MODES or route["distance_kind"] not in VALID_DISTANCE_KINDS:
-            raise ValueError("Modal ou natureza da distância inválidos")
-        if route["mode"] != "walking" or route["distance_kind"] != "walking_route":
-            raise ValueError("Percurso pedestre não pode ser reclassificado")
-        if route["status"] not in VALID_STATUS:
-            raise ValueError("Status de evidência inválido")
-        distance, minutes = route["distance_m"], route["duration_min"]
-        if distance is not None and (type(distance) not in (int, float) or distance <= 0):
-            raise ValueError("Distância caminhável inválida")
-        if minutes is not None and (type(minutes) not in (int, float) or minutes < 0):
-            raise ValueError("Tempo caminhável inválido")
-        if distance is not None or minutes is not None:
-            if (not route["source_url"] or not route["source_url"].startswith("https://")
-                    or not route["method"] or not route["checked_at"]):
-                raise ValueError("Distância ou tempo exige método, fonte e data")
-            date.fromisoformat(route["checked_at"])
-        if distance is not None and route["geometry_status"] != "verified_pedestrian_routing":
-            raise ValueError("Distância pedestre exige geometria roteada")
-        if route["status"] == "pending_verified_pedestrian_route" and (distance is not None or minutes is not None):
-            raise ValueError("Percurso pendente não pode ter duração")
-        if minutes is not None and route["status"] != "operator_published_walk_duration":
-            raise ValueError("Tempo sem evidência direta")
+        _walking_route(route, stations, indexed,
+                       station_access, attraction_access_points)
     for seq in data["candidate_sequences"]:
         ids = seq["attraction_ids"]
         if (seq["destination_id"] not in destinations or not 2 <= len(ids) <= 10
