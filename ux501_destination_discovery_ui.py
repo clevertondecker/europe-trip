@@ -13,6 +13,16 @@ from ux501_destination_discovery_model import (
 )
 
 
+def _toggle_interest(destination_id: str) -> None:
+    """Pre-widget Streamlit callback: intentionally session-only."""
+    selected = list(st.session_state.get("ux501_interest_session", []))
+    if destination_id in selected:
+        selected.remove(destination_id)
+    else:
+        selected.append(destination_id)
+    st.session_state["ux501_interest_session"] = selected
+
+
 @st.cache_data(show_spinner=False)
 def _cached_discovery():
     return build_destination_discovery()
@@ -95,6 +105,8 @@ def render_independent_destination_discovery(*, discovery=None) -> None:
 
     page_size = 12
     pages = (len(matches)+page_size-1)//page_size
+    if st.session_state.get("ux501_page") not in range(1, pages+1):
+        st.session_state["ux501_page"] = 1
     page = st.selectbox(
         "Página de destinos", list(range(1, pages+1)),
         key="ux501_page", format_func=lambda p: f"{p} de {pages}")
@@ -137,15 +149,9 @@ def render_independent_destination_discovery(*, discovery=None) -> None:
                                 attraction["category"])
                     label = ("Retirar do interesse" if item["id"] in selected
                              else "Tenho interesse")
-                    if st.button(label, key="ux501_interest_"+item["id"],
-                                 use_container_width=True):
-                        next_selection = list(st.session_state["ux501_interest_session"])
-                        if item["id"] in next_selection:
-                            next_selection.remove(item["id"])
-                        else:
-                            next_selection.append(item["id"])
-                        st.session_state["ux501_interest_session"] = next_selection
-                        st.rerun()
+                    st.button(label, key="ux501_interest_"+item["id"],
+                              use_container_width=True,
+                              on_click=_toggle_interest, args=(item["id"],))
     st.caption(
         "Acesso ferroviário, retorno de fim de semana, última milha e custo "
         "total não foram determinados por esta visualização. "
