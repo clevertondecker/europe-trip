@@ -82,6 +82,12 @@ def render_weekend_planner(plan,catalog):
                         else "Data ainda não definida")+" · "+group["period"]+" · "+
                        str(group["nights"])+" pernoite(s) hipotético(s) · "+
                        ("Em estudo" if group["status"]=="estudo" else "Planejado, não reservado"))
+            st.caption("Cidade-base de referência: "+group["base_city"].capitalize())
+            if {"brussels","bruges_be"}.issubset(set(group["destinations"])):
+                st.caption("Trecho ferroviário interno Bruxelas ↔ Bruges: média histórica de "
+                           "1h04 segundo a SNCB. Isso NÃO confirma o roteiro completo "
+                           "desde a cidade-base, nem o retorno em 2027.")
+                st.markdown("[Ver horários na SNCB](https://www.belgiantrain.be/en/travel-info/origin-destination/brussels-bruges)")
             st.caption("Roteiro completo de ida, ligações entre destinos, retorno, hotel e custos: a confirmar.")
             if group["notes"]:st.write(group["notes"])
             with st.expander("Editar viagem · "+group["name"]):
