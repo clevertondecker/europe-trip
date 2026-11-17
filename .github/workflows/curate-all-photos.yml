@@ -5,6 +5,7 @@ on:
       - feature/ux-all-destination-local-photos
     paths:
       - .github/workflows/curate-all-photos.yml
+      - scripts/curate_missing_destination_photos.py
 permissions:
   contents: write
 jobs:
