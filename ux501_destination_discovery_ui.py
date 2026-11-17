@@ -62,6 +62,11 @@ def render_independent_destination_discovery(*, discovery=None) -> None:
     elif selected != st.session_state["ux501_interest_session"]:
         st.session_state["ux501_interest_session"] = selected
 
+    st.info(
+        "**Seleção temporária — não salva.** O botão **Tenho interesse** apenas "
+        "marca um destino durante esta sessão. As classificações e o salvamento "
+        "serão implementados na UX 5.0.2; nada é adicionado ao roteiro oficial."
+    )
     st.multiselect(
         "Lugares que despertaram interesse nesta exploração",
         options=valid,
