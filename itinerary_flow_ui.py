@@ -264,29 +264,24 @@ def _render_integrated_destination(row:dict,item:dict,catalog:dict,
     """One photo + facts + existing editor in the same canonical destination card."""
     from ux47_destination_card_model import destination_card_view
     view=destination_card_view(plan,catalog,routes,row)
+    from ux47_photo_ui import photo_markup,photo_credit
     with st.container(border=True):
-        image_col,details_col=st.columns([1,2],gap="large",
+        image_col,details_col=st.columns([1,2],gap="medium",
                                           vertical_alignment="top")
         with image_col:
-            photo=view["photo"]
-            if photo and photo.get("url"):
-                # Fixed maximum image width prevents tall Wikimedia portraits
-                # from dominating large screens; native columns stack on mobile.
-                st.image(photo["url"],width=260)
-                author=photo.get("author") or "Autor não informado"
-                license_name=photo.get("license") or "Licença não informada"
-                source=photo.get("source_page")
-                caption="Foto: "+author+" · "+license_name
-                if source:
-                    st.caption("["+caption+"]("+source+")")
-                else:
-                    st.caption(caption)
+            # Locally scoped photo surface: fixed 4:5 aspect, neutral browser
+            # fallback if Wikimedia redirects fail. No server HTTP per rerun.
+            st.html(photo_markup(view["photo"],view["name"]))
+            credit=photo_credit(view["photo"])
+            if credit:
+                st.caption(credit)
         with details_col:
             title,status=st.columns([3,1],gap="small")
             with title:
                 st.markdown("##### "+escape(view["name"])+" · "+escape(view["country"]))
             with status:
-                st.caption("Organizado" if view["organized"] else "Escolhido")
+                st.caption("Data definida" if view["dates"] else
+                           "Período definido" if view["period"] else "Escolhido")
             st.caption("Período: "+(_period_label(view["period"]) if view["period"]
                        else "a definir"))
             if view["dates"]:
@@ -295,7 +290,10 @@ def _render_integrated_destination(row:dict,item:dict,catalog:dict,
             st.write(" · ".join(view["attractions"]))
             st.caption("🚆 "+view["transport"])
             st.caption("💳 "+view["cost"])
-            _edit_destination(row,catalog)
+        # Existing canonical editor fills the full card width, not the
+        # narrow text column. Italy branch stays unchanged.
+        st.divider()
+        _edit_destination(row,catalog)
 
 
 def _selected_stage(rows:list[dict],stage:str,catalog:dict)->None:
