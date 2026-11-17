@@ -1250,15 +1250,12 @@ elif page == "Roteiro":
             render_smart_calendar(
                 active_plan(),load_attractions(),load_base_routes(),data,sync_sources)
         else:
-            if (ux_area,ux_section)==("Meu roteiro","Organizar viagem") and (
-                st.session_state.get("flow_active_stage",st.session_state.get("flow_stage","Itália"))=="França"):
-                from ux48_weekend_groups_ui import render_weekend_planner
-                render_weekend_planner(active_plan(),load_attractions())
             render_itinerary_workbench(
                 active_plan(),load_attractions(),data,
                 sync_sources["finance"]["status"]=="live",
                 st.session_state.get("advisor_eurfx",6.3),
-                st.session_state.get("advisor_chffx",7.1))
+                st.session_state.get("advisor_chffx",7.1),
+                show_weekend_planner=(ux_area,ux_section)==("Meu roteiro","Organizar viagem"))
 
     elif itinerary_section == "Itália":
         render_italy_honeymoon()

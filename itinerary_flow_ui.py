@@ -81,6 +81,8 @@ def _active_stage_changed()->None:
     # Reconcile stage-dependent organizer widgets before they are rendered.
     state.pop("flow_organize_destination",None)
     state.pop("flow_organize_period",None)
+    _clear_organize_date_draft(state,ITALY_STAGE)
+    _clear_organize_date_draft(state,FRANCE_STAGE)
 
 
 
@@ -386,6 +388,11 @@ def _compact_budget(plan:dict,catalog:dict,trip_data:dict,
               on_click=_navigate,args=("Orçamento","Detalhamento"))
 
 
+def _clear_organize_date_draft(state,stage:str)->None:
+    """Forget the staged date, not the confirmed date in TripPlan."""
+    state.pop("flow_organize_date_"+stage,None)
+
+
 def _reconcile_organize_state(state,rows:list[dict],stage:str)->None:
     """Invalidate only incompatible widget state; never mutate TripPlan."""
     by_id={r["id"]:r for r in rows}
@@ -393,6 +400,7 @@ def _reconcile_organize_state(state,rows:list[dict],stage:str)->None:
     if selected not in by_id:
         selected=next(iter(by_id),None)
         state.pop("flow_organize_period",None)
+        _clear_organize_date_draft(state,stage)
         if selected is None:
             state.pop("flow_organize_destination",None)
         else:
@@ -407,8 +415,11 @@ def _reconcile_organize_state(state,rows:list[dict],stage:str)->None:
 
 
 def _organize_destination_changed()->None:
-    # A destination change invalidates its old period and proposed day.
-    st.session_state.pop("flow_organize_period",None)
+    # Reset only transient widget values; confirmed dates remain per destination.
+    state=st.session_state
+    state.pop("flow_organize_period",None)
+    _clear_organize_date_draft(state,ITALY_STAGE)
+    _clear_organize_date_draft(state,FRANCE_STAGE)
 
 
 def _assert_organize_stage(catalog:dict,destination_id:str,stage:str)->None:
@@ -573,7 +584,8 @@ def _save_panel(plan:dict,catalog:dict)->None:
 
 def render_itinerary_workbench(plan:dict,catalog:dict,
                                trip_data:dict|None=None,finance_live:bool=False,
-                               eurfx:float=6.3,chffx:float=7.1)->None:
+                               eurfx:float=6.3,chffx:float=7.1,
+                               show_weekend_planner:bool=False)->None:
     """Continuously edit a single TripPlan, with no automatic remote write."""
     stats=choice_counts(plan,catalog)
     saved=st.session_state.get("advisor_saved_snapshot")
@@ -640,6 +652,10 @@ def render_itinerary_workbench(plan:dict,catalog:dict,
     _render_organize(active_plan(),catalog,stage)
     _save_panel(active_plan(),catalog)
     _selected_stage(selected_rows(active_plan(),catalog),stage,catalog)
+    # Render the optional European planner AFTER the stage heading and outings.
+    if show_weekend_planner and stage==FRANCE_STAGE:
+        from ux48_weekend_groups_ui import render_weekend_planner
+        render_weekend_planner(active_plan(),catalog)
     other=FRANCE_STAGE if stage==ITALY_STAGE else ITALY_STAGE
     other_count=sum(x["stage"]==other for x in rows)
     st.caption(str(other_count)+" lugar(es) na etapa "+_stage_label(other)+
