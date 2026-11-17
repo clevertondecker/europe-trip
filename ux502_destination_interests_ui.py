@@ -161,6 +161,13 @@ def render_wishlist(discovery) -> bool:
 
     if view != "Minha lista":
         return False
+    if active:
+        def open_comparison():
+            st.session_state["ux_area"] = "Explorar"
+            st.session_state["ux_section"] = "Comparar"
+        st.button("Comparar cidades-base para nossos destinos",
+                  key="ux503_open_from_wishlist", on_click=open_comparison)
+
     if not items:
         st.info("Nenhum destino na lista. Use Descobrir lugares para adicionar.")
     # The widget identity is derived from the canonical document snapshot.
