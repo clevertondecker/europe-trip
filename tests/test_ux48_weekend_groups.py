@@ -117,6 +117,48 @@ class WeekendGroupModelTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             import_groups(json.dumps(corrupted),self.plan,self.catalog)
 
+    def test_rest_rejects_official_sunday_assignment(self):
+        saturday=next(r["start"] for r in
+                      available_weekends(self.draft,self.plan,self.catalog)
+                      if r["status"]=="livre · não reservado")
+        from datetime import date,timedelta
+        sunday=(date.fromisoformat(saturday)+timedelta(days=1)).isoformat()
+        plan=deepcopy(self.plan)
+        plan["assignments"][sunday]="rotterdam"
+        with self.assertRaises(ValueError):
+            set_rest_weekend(self.draft,plan,self.catalog,saturday,True)
+
+    def test_three_nights_occupy_following_weekdays(self):
+        saturday=next(r["start"] for r in
+                      available_weekends(self.draft,self.plan,self.catalog)
+                      if r["status"]=="livre · não reservado")
+        group=create_group(self.draft,self.plan,self.catalog,name="Bélgica",
+                           destinations=["brussels"],start_date=saturday,nights=3)
+        from datetime import date,timedelta
+        monday=(date.fromisoformat(saturday)+timedelta(days=2)).isoformat()
+        plan=deepcopy(self.plan)
+        plan["assignments"][monday]="rotterdam"
+        with self.assertRaises(ValueError):
+            from ux48_weekend_groups_model import validate_groups
+            validate_groups(group,plan,self.catalog)
+
+    def test_reconciliation_preserves_groups_when_old_dates_conflict(self):
+        saturday=next(r["start"] for r in
+                      available_weekends(self.draft,self.plan,self.catalog)
+                      if r["status"]=="livre · não reservado")
+        group=create_group(self.draft,self.plan,self.catalog,name="Bélgica",
+                           destinations=["brussels"],start_date=saturday)
+        other=create_group(group,self.plan,self.catalog,name="Holanda",
+                           destinations=["rotterdam"])
+        from ux48_weekend_groups_model import validate_groups
+        changed=deepcopy(other)
+        changed["groups"][1]["start_date"]=saturday
+        corrected=reconcile_removed_outings(changed,self.plan,self.catalog)
+        self.assertEqual(len(corrected["groups"]),2)
+        self.assertEqual(corrected["groups"][0]["start_date"],saturday)
+        self.assertIsNone(corrected["groups"][1]["start_date"])
+        validate_groups(corrected,self.plan,self.catalog)
+
 class WeekendGroupUITests(unittest.TestCase):
     def test_workflow_uses_current_navigation_without_legacy_menu(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
