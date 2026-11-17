@@ -5,10 +5,13 @@ tourism claims or the real-time validity of historical train observations.
 """
 from __future__ import annotations
 import json
+import sys
 from pathlib import Path
 
 
 ROOT=Path(__file__).resolve().parents[1]/"data"
+# Executable as python tools/validate_research_data.py from the repository root.
+sys.path.insert(0,str(ROOT.parent))
 
 
 def validate_research_contracts(canonical: dict, expanded: dict,
