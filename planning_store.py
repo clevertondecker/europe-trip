@@ -7,6 +7,7 @@ from __future__ import annotations
 from copy import deepcopy
 from datetime import date
 from trip_plan_model import new_plan,validate_plan,with_revision,BASES
+from plan_read_models import legacy_plan_projection
 from calendar_assignment_validation import validate_new_assignments
 
 def create_from_legacy(values:dict)->dict:
@@ -103,8 +104,9 @@ def is_dirty(plan:dict,persisted_plan:dict|None)->bool:
 
 def sync_legacy_view(plan:dict,values:dict,*,include_controls:bool=False)->None:
     """Compatibility bridge: canonical -> legacy, never legacy -> canonical."""
-    values["explore_packages"]=deepcopy(plan["packages"])
-    values["explore_calendar"]=deepcopy(plan["assignments"])
+    projection=legacy_plan_projection(plan)
+    values["explore_packages"]=projection["explore_packages"]
+    values["explore_calendar"]=projection["explore_calendar"]
     if include_controls:
         # Caller must invoke before those Streamlit widgets are instantiated.
-        values["explore_base"]=plan["base_city"]
+        values["explore_base"]=projection["explore_base"]
