@@ -114,6 +114,63 @@ def _navigate(section: str) -> None:
     st.session_state["itinerary_section"] = section
 
 
+def render_chosen_places_cards(plan:dict,catalog:dict,routes:dict)->None:
+    """Photo cards for the canonical, already-chosen outings (read-only).
+
+    Shared by the modern planner and the historical dashboard. Never creates a
+    second itinerary or adds expenses to the official budget.
+    """
+    destinations={d["id"]:d for d in catalog["destinations"]}
+    attractions={a["id"]:a for a in catalog["attractions"]}
+    chosen=[]
+    for destination_id, ids in plan["packages"].items():
+        place=destinations.get(destination_id)
+        if not place:
+            continue
+        chosen.append({
+            "id":destination_id,"name":place["name"],"country":place["country"],
+            "photo":place.get("photo"),
+            "attractions":[attractions[a]["name"] for a in ids if a in attractions],
+            "dates":sorted(day for day,d in plan["assignments"].items()
+                           if d==destination_id),
+            "attraction_ids":list(ids),
+        })
+
+    st.markdown("### Lugares que escolhemos")
+    if not chosen:
+        st.caption("Seus passeios escolhidos aparecerão aqui com fotos depois de adicioná-los.")
+        return
+    for start in range(0,len(chosen),3):
+        for col,item in zip(st.columns(3,gap="medium"),chosen[start:start+3]):
+            with col:
+                with st.container(border=True):
+                    photo=item["photo"]
+                    if photo and photo.get("url"):
+                        st.image(photo["url"],use_container_width=True)
+                        author=photo.get("author") or "Autor não informado"
+                        license_name=photo.get("license") or "Licença não informada"
+                        st.caption("Foto: "+author+" · "+license_name)
+                    st.markdown("**"+place_label(item["name"],item["country"],
+                                                 show_country=True)+"**")
+                    st.caption(str(len(item["attractions"]))+" atração(ões) · "+
+                               (", ".join(item["dates"]) if item["dates"]
+                                else "Data ainda não definida"))
+                    if item["attractions"]:
+                        st.write(" · ".join(item["attractions"][:2]))
+                    guide=build_outing_guide(plan,catalog,routes,item["id"],
+                                             item["attraction_ids"])
+                    minutes=guide["train_minutes_one_way"]
+                    st.caption("De "+guide["base_name"]+" · "+
+                               (str(minutes)+" min de trem por trecho" if minutes is not None
+                                else "Visita local" if guide["local"]
+                                else "Tempo de transporte pendente")+
+                               " · custo histórico parcial do casal: "+
+                               f"€ {guide['known_cost']['EUR']:.2f} / "+
+                               f"CHF {guide['known_cost']['CHF']:.2f}")
+    st.caption("Referências de 2026; horários, preços e condições de 2027 "
+               "ainda precisam de confirmação.")
+
+
 def render_trip_dashboard(plan: dict, trip_data: dict, finance_live: bool,
                           saved_snapshot: dict | None, signed_in: bool,
                           eurfx: float = 6.3, chffx: float = 7.1,
@@ -195,42 +252,4 @@ def render_trip_dashboard(plan: dict, trip_data: dict, finance_live: bool,
         st.button("Ajustar orçamento →", key="dashboard_go_budget",
                   use_container_width=True,on_click=_navigate,args=("Orçamento",))
 
-    st.markdown("### Lugares que escolhemos")
-    if not model["destinations"]:
-        st.info("Nenhum passeio confirmado. O roteiro pré-definido do perfil "
-                "já aparece acima e pode ser adotado em Meus passeios.")
-        st.button("Descobrir destinos →",key="dashboard_go_discover",
-                  on_click=_navigate,args=("Descobrir",))
-    else:
-        cards = model["destinations"][:6]
-        for index in range(0, len(cards), 3):
-            for col, item in zip(st.columns(3, gap="medium"), cards[index:index+3]):
-                with col:
-                    with st.container(border=True):
-                        photo = item["photo"]
-                        if photo and photo.get("url"):
-                            st.image(photo["url"], use_container_width=True)
-                            st.caption("Foto: " + photo["author"] + " · " + photo["license"])
-                        st.markdown("**" + place_label(item["name"],item["country"],show_country=True) + "**")
-                        count = len(item["attractions"])
-                        st.caption(f"{count} atração(ões) · " +
-                                   (", ".join(item["dates"]) if item["dates"]
-                                    else "Data ainda não definida"))
-                        if item["attractions"]:
-                            st.write(" · ".join(item["attractions"][:2]))
-                        guide=build_outing_guide(plan,catalog,routes,item["id"],
-                                                 plan["packages"][item["id"]])
-                        mins=guide["train_minutes_one_way"]
-                        st.caption("De "+guide["base_name"]+" · "+
-                                   (f"{mins} min de trem por trecho" if mins is not None
-                                    else "Visita local" if guide["local"]
-                                    else "Tempo de transporte pendente")+
-                                   " · custo histórico parcial do casal: "+
-                                   f"€ {guide['known_cost']['EUR']:.2f} / "+
-                                   f"CHF {guide['known_cost']['CHF']:.2f}")
-        if len(model["destinations"]) > len(cards):
-            st.caption(f"+ {len(model['destinations'])-len(cards)} destinos no planejamento")
-        st.button("Editar meus passeios →",key="dashboard_go_outings",
-                  use_container_width=True,on_click=_navigate,args=("Meus passeios",))
-    st.caption("Informações do catálogo pesquisado em 2026. Disponibilidade, "
-               "tarifas e condições de 2027 precisam de confirmação.")
+    render_chosen_places_cards(plan,catalog,routes)
