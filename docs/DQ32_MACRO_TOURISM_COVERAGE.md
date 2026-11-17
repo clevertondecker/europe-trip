@@ -13,7 +13,7 @@
 
 ## Nova entrega
 
-1. `data/dq32_macro_tourism_2026_11.json` — **23 atrações locais documentadas em 16 cidades**, com nome, categoria, cidade canônica, data e URL da página oficial de turismo/município. Preços, durações, ingressos, acessos e datas de 2027 ficam **null**.
+1. `data/dq32_macro_tourism_2026_11.json` — **30 atrações locais documentadas em 16 cidades**, com nome, categoria, cidade canônica, data e URL da página oficial de turismo/município. Preços, durações, ingressos, acessos e datas de 2027 ficam **null**.
 2. `dq32_macro_opportunities_model.py` — combina, sem editar os originais, as 30 cidades-base, o catálogo de 14 destinos, a descoberta histórica de 21 destinos e as novas atrações locais. Usa o adaptador ferroviário existente para **tempos mínimos históricos de ida, com fonte**, e o estudo exploratório como complemento. Reconcilia aliases como `luxembourg`/`luxembourg_city`.
 3. `attractions_ui.py` — nova seção **Descoberta ampliada · DQ 3.2** para qualquer cidade-base. Três modos de consulta: atrações da própria cidade, destinos com evidência ferroviária histórica e destinos ainda sem duração pesquisada. Os blocos originais de passeios permanecem no lugar.
 4. `base_weight_coverage_ui.py` — tabela adicional em **Explorar → Comparar → Pesos das 30 cidades** apresentando atrações locais identificadas e números de destinos com/sem tempo ferroviário observado, sem transformar quantidade de pesquisa em nota de qualidade.
@@ -26,17 +26,17 @@
 | Cidades-base consultáveis | 30 | 30 |
 | Destinos operacionais com atrações, preservados | 14 | 14 |
 | Atrações canônicas inalteradas | 65 | 65 |
-| Complemento de atrações locais verificadas | 0 nesta camada | 23 em 16 cidades |
+| Complemento de atrações locais verificadas | 0 nesta camada | 30 em 23 cidades |
 | Universo de destinos do estudo exploratório | 21 (separado) | Integrado à leitura com catálogo e cidades-base; deduplicado |
 | Caminhadas exigidas para inclusão | Não era requisito técnico | **Não é requisito** |
 | Viabilidade de bate-volta inferida | Não | Não |
 | Nota artificial por quantidade de pontos turísticos | Não | Não |
 
-**Importante:** as 23 atrações ampliam a descoberta, não substituem as 65 atrações canônicas; uma localidade pode ter outras atrações ainda não pesquisadas. As 14 cidades-base sem novos POIs documentados nesta onda **não são excluídas** e permanecem selecionáveis na análise macro. Não se alega que os 30 centros sejam todos turísticos nem que 30x30 conexões estejam pesquisadas.
+**Importante:** as 30 atrações ampliam a descoberta, não substituem as 65 atrações canônicas; uma localidade pode ter outras atrações ainda não pesquisadas. As 7 cidades-base sem novos POIs documentados nesta onda **não são excluídas** e permanecem selecionáveis na análise macro. Não se alega que os 30 centros sejam todos turísticos nem que 30x30 conexões estejam pesquisadas.
 
 ## Evidências de turismo utilizadas
 
-Todas as 23 linhas incluem uma página de origem individual, com exemplos:
+Todas as 30 linhas incluem uma página de origem individual, com exemplos:
 
 - Lille — Ville de Lille e Lille Tourism (Grand'Place / Palais des Beaux-Arts).
 - Dijon — Dijon Métropole (Palais des Ducs / Parcours de la Chouette).
@@ -49,6 +49,9 @@ Todas as 23 linhas incluem uma página de origem individual, com exemplos:
 - Besançon — Office de Tourisme (Citadelle); Sélestat — Mairie (Bibliothèque Humaniste).
 - Saverne — Visit Alsace (Château des Rohan); Haguenau — Visit Alsace (Floresta).
 - Namur — Visit Namur (Citadelle); Luxembourg City / Esch — Visit Luxembourg (Casemates / Belval).
+- Saint-Louis — Visit Alsace (Petite Camargue); Belfort — Belfort Tourisme (Citadelle / Lion).
+- Thionville — Pays Thionvillois (Beffroi); Baden-Baden — Baden-Baden Tourism (Lichtentaler Allee).
+- Saarbrücken — Saarbrücken Tourismus (Ludwigskirche); Lörrach — Stadt Lörrach (Burg Rötteln); Kehl — Stadt Kehl (Jardin des Deux Rives).
 
 URLs e data de pesquisa ficam junto de cada registro; não reutilizar apenas uma URL genérica para inventar atrações ou horários.
 
