@@ -33,7 +33,9 @@ def render_wishlist_base_comparison(*, plan, discovery=None, research=None):
     if len(defaults) < 2:
         defaults = choices[:2]
     if "ux503_bases" not in st.session_state:
-        st.session_state["ux503_bases"] = defaults
+        candidate = st.session_state.get("ux504_bases_shadow", defaults)
+        st.session_state["ux503_bases"] = ([x for x in candidate if x in choices]
+                                          if isinstance(candidate, list) else defaults)
 
     def label(city_id):
         tags = []
@@ -48,6 +50,7 @@ def render_wishlist_base_comparison(*, plan, discovery=None, research=None):
         "Cidades-base para comparar (2 a 5)",choices,
         format_func=label,key="ux503_bases",
         help="Seleção apenas para pesquisa; não altera a base oficial.")
+    st.session_state["ux504_bases_shadow"] = list(selected)
     st.caption("Base do roteiro oficial: **" + label(official) + "**. "
                "Removê-la desta comparação não altera a viagem.")
     if st.button("Voltar à minha lista", key="ux503_back_to_wishes"):
@@ -73,12 +76,16 @@ def render_wishlist_base_comparison(*, plan, discovery=None, research=None):
     priorities = {row["destination_id"]:LABELS[row["priority"]] for row in ordered}
     # View-only projection. The UX 5.0.2 document is never filtered or overwritten.
     if "ux503_visible_destinations" not in st.session_state:
-        st.session_state["ux503_visible_destinations"] = active[:5]
+        previous = st.session_state.get("ux504_visible_destinations_shadow")
+        st.session_state["ux503_visible_destinations"] = (
+            [x for x in previous if x in active] if isinstance(previous,list)
+            else active[:5])
     selected_view = st.multiselect(
         "Destinos para exibir nesta comparação", active,
         format_func=lambda x: names[x]["name"] + " · " + priorities[x],
         key="ux503_visible_destinations",
         help="Filtra apenas esta tela. Não altera ou remove destinos da lista salva.")
+    st.session_state["ux504_visible_destinations_shadow"] = list(selected_view)
     visible = [x for x in active if x in selected_view]
     st.caption(f"Exibindo {len(visible)} de {len(active)} destinos ativos. "
                "As prioridades da lista continuam intactas.")
