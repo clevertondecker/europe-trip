@@ -10,7 +10,8 @@ from copy import deepcopy
 from attractions_model import load_attractions
 from base_explorer_model import load_exploration
 from base_scenario_model import base_options
-from rail_evidence_unified_model import load_rail_evidence, route_evidence
+from rail_evidence_unified_model import (load_rail_evidence, route_evidence,
+                                         canonical_place)
 
 OFFICIAL_FARE_BASES = frozenset({"mulhouse", "strasbourg", "metz", "nancy"})
 
@@ -51,7 +52,7 @@ def preview_for_base(base_id: str, *, catalog: dict | None = None,
     for place in catalog["destinations"]:
         did = place["id"]
         items = [a for a in catalog["attractions"] if a["destination_id"] == did]
-        local = did == base_id
+        local = canonical_place(did) == canonical_place(base_id)
         rail_row = route_evidence(rail, base_id, did)
         minutes = rail_row["minimum_oneway_min"] if rail_row["status"] == "historical_time" else None
         source = rail_row.get("source_url") if minutes is not None else None
