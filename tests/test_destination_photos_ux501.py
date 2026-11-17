@@ -71,7 +71,7 @@ class DestinationPhotosTests(TestCase):
 
     def test_no_unlicensed_or_unattributed_images(self):
         for lic,author in (("All rights reserved","John"),
-                           ("CC BY-SA 4.0",""),("Unknown","John")):
+                           ("CC BY-SA 4.0",""),("CC BY-NC 4.0","John"),("Unknown","John")):
             with self.subTest(license=lic,author=author):
                 self.assertIsNone(_image_metadata(_image_info(
                     "Aachen.jpg",license=lic,author=author)))
