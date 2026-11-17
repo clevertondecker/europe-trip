@@ -47,7 +47,8 @@ class RouteBaseDiscoveryTests(unittest.TestCase):
     def test_ui_switching_base_recomputes_visible_fares(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=90).run()
         app.radio(key="main_navigation").set_value("Roteiro").run()
-        app.segmented_control(key="itinerary_section").set_value("Descobrir").run()
+        app.segmented_control(key="ux_section").set_value("Melhorar meu roteiro").run()
+        app.selectbox(key="ux_improve_view").set_value("Descobrir").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
         app.text_input(key="workspace_destination_search").set_value("Colmar").run()
         text=" ".join(x.value for x in list(app.caption)+list(app.info))
