@@ -1,0 +1,10 @@
+base_id,base_name,destination_id,destination_name,evidence_status,historical_oneway_min,rail_source_url,source_date,next_check
+mulhouse,Mulhouse,aachen,Aachen,not_researched,,,,Pesquisar tempo historico com fonte; depois retorno e ultima milha
+mulhouse,Mulhouse,baden_baden,Baden-Baden,not_researched,,,,Pesquisar tempo historico com fonte; depois retorno e ultima milha
+mulhouse,Mulhouse,cologne,Colônia,not_researched,,,,Pesquisar tempo historico com fonte; depois retorno e ultima milha
+strasbourg,Strasbourg,aachen,Aachen,not_researched,,,,Pesquisar tempo historico com fonte; depois retorno e ultima milha
+strasbourg,Strasbourg,baden_baden,Baden-Baden,historical_time,35,https://www.sncf-connect.com/en-en/train/timetables/strasbourg/baden-baden,2026-11-15,Confirmar ida e retorno no fim de semana; transferencias; chegada a atracoes
+strasbourg,Strasbourg,cologne,Colônia,not_researched,,,,Pesquisar tempo historico com fonte; depois retorno e ultima milha
+lille,Lille,aachen,Aachen,not_researched,,,,Pesquisar tempo historico com fonte; depois retorno e ultima milha
+lille,Lille,baden_baden,Baden-Baden,not_researched,,,,Pesquisar tempo historico com fonte; depois retorno e ultima milha
+lille,Lille,cologne,Colônia,historical_time,168,https://www.sncf-connect.com/en-en/train/timetables/lille/cologne,2026-11-15,Confirmar ida e retorno no fim de semana; transferencias; chegada a atracoes
