@@ -42,6 +42,41 @@ class JourneyProjectionTests(unittest.TestCase):
         self.assertIn("1 data(s)",result["steps"][3]["status"])
         self.assertFalse(result["base_decision_confirmed"])
 
+    def test_two_paths_without_implicit_comparison_completion(self):
+        view=project_journey(new_plan(),wished())
+        self.assertEqual(view["next"],{"label":"Comparar cidades-base","id":"compare"})
+        self.assertEqual(view["alternatives"],[
+            {"label":"Começar a montar roteiro","id":"itinerary"}])
+        self.assertFalse(view["comparison_concluded"])
+        self.assertFalse(view["base_decision_confirmed"])
+
+    def test_per_destination_organization_not_raw_date_count(self):
+        from itinerary_flow_model import UNASSIGNED
+        plan=new_plan()
+        plan["packages"]={"colmar":["colmar_little_venice"],
+                          "strasbourg":["strasbourg_cathedral"]}
+        plan["assignments"]={"2027-10-05":"colmar","2027-10-06":"colmar"}
+        view=project_journey(plan,wished())
+        self.assertEqual(view["outings"],2)
+        self.assertEqual(view["dated_visits"],1)
+        self.assertEqual(view["organized_destinations"],1)
+        self.assertEqual(view["pending_destinations"],1)
+        self.assertEqual(view["next"]["id"],"itinerary")
+
+        plan["flexible_visits"]=[{
+            "destination_id":"strasbourg","stage":"França",
+            "attractions":["strasbourg_cathedral"],"period":UNASSIGNED,
+        }]
+        not_organized=project_journey(plan,wished())
+        self.assertEqual(not_organized["pending_destinations"],1)
+        plan["flexible_visits"][0]["period"]="Férias restantes"
+        with_period=project_journey(plan,wished())
+        self.assertEqual(with_period["organized_destinations"],2)
+        self.assertEqual(with_period["pending_destinations"],0)
+        # A chosen period is not a confirmed exact date.
+        self.assertEqual(with_period["dated_visits"],1)
+        self.assertEqual(with_period["next"]["id"],"itinerary")
+
     def test_navigation_intent_only_changes_view_keys(self):
         state={"ux_area":"Minha viagem","ux_section":"Resumo","ux502_view":"Descobrir lugares",
                "advisor_plan":new_plan(),"ux503_bases":["mulhouse","lille"],
@@ -118,6 +153,58 @@ class JourneyAppTests(unittest.TestCase):
                          ("Orçamento","Resumo financeiro"))
         self.assertEqual(app.session_state["advisor_plan"],plan)
         self.assertFalse(app.session_state.get("advisor_autosave_pending",False))
+
+    def test_full_journey_preserves_filters_bases_and_plan(self):
+        app=self._home()
+        plan=deepcopy(app.session_state["advisor_plan"])
+        wishes=wished()
+        # Descobrir -> Minha lista, preserving filters before widgets unmount.
+        app.button(key="ux504_step_discover").click().run()
+        app.text_input(key="ux501_search").set_value("Colmar").run()
+        app.button(key="ux504_discovery_to_wishlist").click().run()
+        self.assertEqual(app.session_state["ux502_view"],"Minha lista")
+        self.assertEqual(
+            app.session_state["ux502_discovery_filters"]["ux501_search"],"Colmar")
+        app.session_state["ux502_interests"]=wishes
+        app.run()
+        # Minha lista -> Comparar, then customize bases and the visible basket.
+        app.button(key="ux503_open_from_wishlist").click().run()
+        app.multiselect(key="ux503_bases").set_value(["lille","metz"]).run()
+        app.multiselect(key="ux503_visible_destinations").set_value(["colmar"]).run()
+        self.assertEqual(app.session_state["ux504_bases_shadow"],["lille","metz"])
+        self.assertFalse(app.exception,[e.message for e in app.exception])
+        # Comparar -> Montar roteiro -> Organizar datas -> Orçamento.
+        app.button(key="ux504_compare_to_itinerary").click().run()
+        app.button(key="ux504_itinerary_to_dates").click().run()
+        app.segmented_control(key="ux_section").set_value("Meu planejamento").run()
+        app.button(key="ux504_itinerary_to_budget").click().run()
+        self.assertEqual(app.session_state["ux_area"],"Orçamento")
+        # Back to comparison. Streamlit removes unmounted widget keys; the
+        # view-only shadow must rehydrate the previously selected bases.
+        app.radio(key="ux_area").set_value("Explorar").run()
+        app.segmented_control(key="ux_section").set_value("Comparar").run()
+        self.assertEqual(app.multiselect(key="ux503_bases").value,["lille","metz"])
+        self.assertEqual(
+            app.multiselect(key="ux503_visible_destinations").value,["colmar"])
+        app.button(key="ux503_back_to_wishes").click().run()
+        self.assertEqual(app.session_state["ux502_view"],"Minha lista")
+        app.radio(key="ux502_view").set_value("Descobrir lugares").run()
+        self.assertEqual(app.text_input(key="ux501_search").value,"Colmar")
+        self.assertEqual(app.session_state["ux502_interests"],wishes)
+        self.assertEqual(app.session_state["advisor_plan"],plan)
+        self.assertFalse(app.session_state.get("advisor_autosave_pending",False))
+        self.assertFalse(app.exception,[e.message for e in app.exception])
+
+    def test_wishlist_alternative_action_opens_itinerary(self):
+        app=self._home()
+        plan=deepcopy(app.session_state["advisor_plan"])
+        app.session_state["ux502_interests"]=wished()
+        app.run()
+        app.button(key="ux504_next_alternative_itinerary").click().run()
+        self.assertEqual(
+            (app.session_state["ux_area"],app.session_state["ux_section"]),
+            ("Meu roteiro","Meu planejamento"))
+        self.assertEqual(app.session_state["advisor_plan"],plan)
 
     def test_existing_plan_state_remains_authoritative(self):
         app=self._home()
