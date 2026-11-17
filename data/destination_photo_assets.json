@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "checked_at": "2026-11-17",
+  "assets": {
+    "aachen": {
+      "filename": "Cathedral in Aachen.jpg",
+      "file": "assets/destinations/aachen.webp",
+      "author": "Vitold Muratov",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Cathedral_in_Aachen.jpg",
+      "alt": "Catedral de Aachen e centro histórico"
+    },
+    "baden_baden": {
+      "filename": "Baden Baden - Lichtentaler Allee - View SE.jpg",
+      "file": "assets/destinations/baden_baden.webp",
+      "author": "Txllxt TxllxT",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Baden_Baden_-_Lichtentaler_Allee_-_View_SE.jpg",
+      "alt": "Alameda arborizada Lichtentaler Allee em Baden-Baden"
+    },
+    "cologne": {
+      "filename": "Köln Cathedral, Germany.jpg",
+      "file": "assets/destinations/cologne.webp",
+      "author": "AtmikaPaul",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "source_page": "https://commons.wikimedia.org/wiki/File:K%C3%B6ln_Cathedral,_Germany.jpg",
+      "alt": "Fachada da Catedral de Colônia"
+    },
+    "karlsruhe": {
+      "filename": "MKa 0553 Schloss Karlsruhe.jpg",
+      "file": "assets/destinations/karlsruhe.webp",
+      "author": "Martin Kraft",
+      "license": "CC BY-SA 3.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/3.0/",
+      "source_page": "https://commons.wikimedia.org/wiki/File:MKa_0553_Schloss_Karlsruhe.jpg",
+      "alt": "Palácio de Karlsruhe"
+    },
+    "kehl": {
+      "filename": "Passerelle des Deux Rives Kehl.jpg",
+      "file": "assets/destinations/kehl.webp",
+      "author": "H.Helmlechner",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Passerelle_des_Deux_Rives_Kehl.jpg",
+      "alt": "Passarela dos Dois Rios entre Kehl e Estrasburgo"
+    }
+  }
+}
