@@ -13,7 +13,7 @@
 
 ## Nova entrega
 
-1. `data/dq32_macro_tourism_2026_11.json` — **30 atrações locais documentadas em 16 cidades**, com nome, categoria, cidade canônica, data e URL da página oficial de turismo/município. Preços, durações, ingressos, acessos e datas de 2027 ficam **null**.
+1. `data/dq32_macro_tourism_2026_11.json` — **30 registros de atrações locais pesquisadas em 23 cidades**, com nome, categoria, cidade canônica, data e URL da página oficial de turismo/município. Preços, durações, ingressos, acessos e datas de 2027 ficam **null**.
 2. `dq32_macro_opportunities_model.py` — combina, sem editar os originais, as 30 cidades-base, o catálogo de 14 destinos, a descoberta histórica de 21 destinos e as novas atrações locais. Usa o adaptador ferroviário existente para **tempos mínimos históricos de ida, com fonte**, e o estudo exploratório como complemento. Reconcilia aliases como `luxembourg`/`luxembourg_city`.
 3. `attractions_ui.py` — nova seção **Descoberta ampliada · DQ 3.2** para qualquer cidade-base. Três modos de consulta: atrações da própria cidade, destinos com evidência ferroviária histórica e destinos ainda sem duração pesquisada. Os blocos originais de passeios permanecem no lugar.
 4. `base_weight_coverage_ui.py` — tabela adicional em **Explorar → Comparar → Pesos das 30 cidades** apresentando atrações locais identificadas e números de destinos com/sem tempo ferroviário observado, sem transformar quantidade de pesquisa em nota de qualidade.
@@ -32,7 +32,7 @@
 | Viabilidade de bate-volta inferida | Não | Não |
 | Nota artificial por quantidade de pontos turísticos | Não | Não |
 
-**Importante:** as 30 atrações ampliam a descoberta, não substituem as 65 atrações canônicas; uma localidade pode ter outras atrações ainda não pesquisadas. As 7 cidades-base sem novos POIs documentados nesta onda **não são excluídas** e permanecem selecionáveis na análise macro. Não se alega que os 30 centros sejam todos turísticos nem que 30x30 conexões estejam pesquisadas.
+**Importante:** os 30 registros ampliam a descoberta, não substituem as 65 atrações canônicas; uma localidade pode ter outras atrações ainda não pesquisadas. As 7 cidades-base sem novos POIs documentados nesta onda **não são excluídas** e permanecem selecionáveis na análise macro. Não se alega que os 30 centros sejam todos turísticos nem que 30x30 conexões estejam pesquisadas.
 
 ## Evidências de turismo utilizadas
 
@@ -79,3 +79,14 @@ Nunca calcular `reachable_destinations` a partir da união de nomes. O valor de 
 Não altera: `TripPlan`, reservas, `app.py`, orçamento oficial, `attractions_2027.json`, adaptador ferroviário, CSS, dados históricos ou decisões de cidade-base. Não adiciona motor de roteamento pedestre, Haversine, tarifas ou tempos de retorno fabricados. Toda a nova pesquisa fica numa camada consultiva versionada.
 
 Testes obrigatórios: `python -m unittest discover -s tests`, incluindo `AppTest`; conferir CI antes do merge. Não fazer merge/deploy sem autorização.
+
+
+## Pós-revisão — identidade, métricas e fontes
+
+A identidade das atrações é resolvida por `reconcile_attractions()`: o conjunto canônico mantém seus IDs; títulos idênticos normalizados dentro da mesma cidade convergem automaticamente e sinônimos sem coincidência literal requerem `canonical_attraction_id` explícito na evidência DQ3.2. Uma equivalência de outra cidade, ambígua ou contraditória gera erro. O registro `dq32_luxembourg_city_22` (Casemates do Bock) referencia `lux_bock` (Casamatas do Bock), preservando a URL e o ID original como evidência alternativa, sem dobrar a contagem da atração.
+
+A resposta retorna `canonical_local_attractions`, `new_local_attractions`, `known_local_attractions` (soma deduplicada), `reconciled_duplicate_count` e `semantic_equivalences`. O total de 30 é **número de registros de pesquisa**, não número garantido de 30 atrações novas e únicas. A interface mostra canônicas e novas em colunas distintas.
+
+### Precedência ferroviária pré-ARCH 1.0
+
+A seleção primeiro consulta `rail_evidence_unified_model.route_evidence()` sobre os registros históricos, cuja prioridade de apresentação é `five_base_operator_2026` → `expanded_rail_sample_2026` → `four_base_routes_2026` → `dq30_dated_operator_2026` → `dq30_operator_overview_2026`. Quando não há tempo publicado, a camada DQ3.2 usa `exploration_bases_2027` com data/fonte, sem completar retorno ou custo. `outing_base_coverage_model` e `dq31_logistics_evaluation_model` repetem parte desse fallback. Sua centralização é tratada **no ARCH 1.0, PR separado**, e não nesta correção de identidade.
