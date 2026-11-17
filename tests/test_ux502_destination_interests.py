@@ -189,9 +189,9 @@ class PrivateWishlistPersistenceTests(unittest.TestCase):
         fake.save.side_effect=StorageConflict("stale")
         with patch.object(continuity_ui,"_private_store",return_value=fake):
             app.run()
-            self.assertFalse(any("Lista salva no armazenamento privado" in x.message for x in app.success))
+            self.assertFalse(any("Lista salva no armazenamento privado" in x.value for x in app.success))
             app.button(key="ux502_cloud_save").click().run()
-        self.assertFalse(any("Lista salva no armazenamento privado" in x.message for x in app.success))
+        self.assertFalse(any("Lista salva no armazenamento privado" in x.value for x in app.success))
         self.assertTrue(app.session_state.get("ux36_cloud_dirty",False))
         fake.save.side_effect=None
         fake.save.return_value=8
@@ -200,7 +200,7 @@ class PrivateWishlistPersistenceTests(unittest.TestCase):
         self.assertFalse(app.exception,[x.message for x in app.exception])
         self.assertEqual(app.session_state["ux502_private_saved_revision"],self.interests["revision"])
         self.assertFalse(app.session_state["ux36_cloud_dirty"])
-        self.assertTrue(any("Salvo" in x.message for x in app.success))
+        self.assertTrue(any("Salvo" in x.value for x in app.success))
 
 
 if __name__=="__main__":
