@@ -65,16 +65,28 @@ def get_rail_evidence(base_id: str, destination_id: str, *,
     for row in exploration["routes"]:
         if (canonical_place(row["base_id"]) == origin
                 and canonical_place(row["destination_id"]) == destination
-                and type(row.get("train_minutes_oneway_min")) in (int, float)
+                and type(row.get("train_minutes_oneway_min")) is int
                 and row["train_minutes_oneway_min"] > 0
                 and isinstance(row.get("source_url"), str)
                 and row["source_url"].startswith("https://")):
+            fallback_observation = {
+                "origin_id": origin,
+                "destination_id": destination,
+                "minimum_oneway_min": row["train_minutes_oneway_min"],
+                "typical_oneway_min": None,
+                "source_url": row["source_url"],
+                "evidence_date": row.get("retrieved_at"),
+                "source_dataset": "exploration_bases_2027",
+                "observation_type": "exploratory_operator_reference_2026",
+                "selection_role": "selected_fallback",
+                "return_2027_verified": False,
+            }
             return result(
                 "historical_time",
                 minimum=row["train_minutes_oneway_min"], typical=None,
                 source=row["source_url"], date=row.get("retrieved_at"),
                 dataset="exploration_bases_2027",
-                observations=observations,
+                observations=[*observations, fallback_observation],
                 reason="exploration_fallback_no_unified_time",
             )
 
