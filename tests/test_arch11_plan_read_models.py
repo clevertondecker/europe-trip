@@ -58,3 +58,31 @@ class CanonicalProjectionTests(unittest.TestCase):
         updated=change_plan(self.plan,{"budget_scenario":"60k"})
         self.assertEqual(updated["revision"],before["revision"]+1)
         self.assertEqual(self.plan,before)
+
+    def test_legacy_restore_does_not_modify_original_backup(self):
+        legacy={
+            "explore_base":"metz","unified_scenario":"60k",
+            "explore_packages":{"strasbourg":["strasbourg_cathedral"]},
+            "explore_calendar":{"2027-09-24":"strasbourg"},
+            "itinerary_total_days":70,"itinerary_italy_days":10,
+            "itinerary_vacation_days":25,"itinerary_setup_days":4,
+            "itinerary_departure":"2027-09-09",
+        }
+        original=deepcopy(legacy)
+        restored=create_from_legacy(legacy)
+        self.assertEqual(legacy,original)
+        self.assertEqual(restored["base_city"],"metz")
+        self.assertEqual(restored["packages"],legacy["explore_packages"])
+        self.assertEqual(restored["assignments"],legacy["explore_calendar"])
+        restored["packages"]["strasbourg"].append("mutated")
+        self.assertEqual(legacy,original)
+
+    def test_missing_legacy_keys_preserve_defaults_and_existing_controls(self):
+        restored=create_from_legacy({})
+        self.assertEqual(restored["budget_scenario"],"70k")
+        self.assertEqual(restored["base_city"],"mulhouse")
+        session={"explore_base":"strasbourg","unified_scenario":"60k"}
+        sync_legacy_view(restored,session,include_controls=False)
+        self.assertEqual(session["explore_base"],"strasbourg")
+        self.assertEqual(session["unified_scenario"],"60k")
+        self.assertEqual(session["explore_packages"],{})
