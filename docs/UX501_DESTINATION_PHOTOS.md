@@ -19,3 +19,18 @@ Em Explorar → Passeios → Descobrir lugares, os destinos originados das pesqu
 
 ## Escopo de arquivos
 `ux501_destination_photo_service.py`, `ux501_destination_discovery_ui.py`, `tests/test_destination_photos_ux501.py`. Este documento. Sem mudanças de `TripPlan`, persistência, navegação, ranking ou pesquisas ferroviárias.
+
+## Correção após validação na interface (17/11/2026)
+A captura do Streamlit em produção mostrou fotografias para destinos do catálogo editorial (ex.: Freiburg), mas placeholders para Aachen, Baden-Baden, Colônia, Karlsruhe e Kehl. A primeira solução consultava as APIs Wikipédia + Commons no tempo da renderização e retornava um dicionário vazio em caso de falha HTTP ou metadados ausentes. Os mocks de CI não provavam conectividade do ambiente hospedado.
+
+Agora as cinco cidades da captura possuem uma **seleção estática individualmente verificada** de arquivos públicos do Wikimedia Commons, com nome real do arquivo, autor, licença e URL da página de origem. Cada imagem usa `Special:FilePath` (redirecionamento direto para o arquivo), sem dependência de chamadas à Action API. A consulta dinâmica permanece apenas para destinos não cobertos e suas falhas não apagam as cinco imagens verificadas.
+
+| Destino | Foto identificada / crédito | Licença |
+| --- | --- | --- |
+| Aachen | Cathedral in Aachen.jpg — Vitold Muratov | CC BY-SA 4.0 |
+| Baden-Baden | Baden Baden - Lichtentaler Allee - View SE.jpg — Txllxt TxllxT | CC BY-SA 4.0 |
+| Colônia | Köln Cathedral, Germany.jpg — AtmikaPaul | CC BY-SA 4.0 |
+| Karlsruhe | MKa 0553 Schloss Karlsruhe.jpg — Martin Kraft | CC BY-SA 3.0 |
+| Kehl | Passerelle des Deux Rives Kehl.jpg — H.Helmlechner | CC BY-SA 4.0 |
+
+As páginas do Commons foram consultadas para confirmar autoria e licença antes de cadastrar. Não foi feita inspeção visual no Streamlit Cloud após a correção; bloqueios de imagens pelo navegador ainda podem ser investigados separadamente.
