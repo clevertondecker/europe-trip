@@ -26,3 +26,18 @@ class MapPresentationTests(unittest.TestCase):
         self.assertEqual(len(deck.layers),1)
         self.assertEqual(kwargs["height"],350)
         self.assertEqual(kwargs["width"],"stretch")
+
+    def test_map_with_labels_keeps_two_layers_and_original_data(self):
+        from copy import deepcopy
+        from data_model import STATUS_COLORS
+        place={"name":"Metz","country":"França","role":"Base",
+               "status":next(iter(STATUS_COLORS)),"lat":49.1193,"lon":6.1757}
+        original=deepcopy(place)
+        with patch("map_presentation_ui.st.pydeck_chart") as chart:
+            render_map_view([place],show_labels=True)
+        chart.assert_called_once()
+        deck=chart.call_args.args[0]
+        self.assertEqual(len(deck.layers),2)
+        self.assertIn("name",str(deck.layers[1].get_text))
+        self.assertIn("name",str(deck.tooltip["html"]))
+        self.assertEqual(place,original)
