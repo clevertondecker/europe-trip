@@ -72,6 +72,9 @@ if restored_days is not None:
     st.session_state["ux_days"]=max(40,min(80,int(restored_days)))
     st.session_state["unified_stay"]=st.session_state["ux_days"]
 bootstrap_ux(st.session_state)
+if st.session_state.pop("ux503_pending_return_to_wishlist", False):
+    set_ux_task(st.session_state, "Explorar", "Passeios")
+    st.session_state["ux502_view"] = "Minha lista"
 # One global exploratory base, separate from the approved TripPlan.
 _all_bases=base_options()
 _base_details={item["id"]:item for item in _all_bases}
