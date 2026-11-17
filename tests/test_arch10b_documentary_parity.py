@@ -11,6 +11,15 @@ class DocumentaryParityTests(unittest.TestCase):
         before=coverage_matrix("general")
         result=documentary_rail_parity()
         self.assertEqual(result["pairs"],450)
+        # Source-backed 2026-11-17 audit baseline; changed data needs re-review.
+        self.assertEqual(result["identical_pairs"],449)
+        self.assertEqual(result["time_differences"],1)
+        self.assertEqual(result["source_differences"],1)
+        differing=[x for x in result["rows"] if not x["same_evidence"]]
+        self.assertEqual([(x["base_id"],x["destination_id"]) for x in differing],
+                         [("lille","luxembourg_city")])
+        self.assertIsNone(differing[0]["legacy_documentary_minutes"])
+        self.assertEqual(differing[0]["shared_display_minutes"],231)
         self.assertEqual(len(result["rows"]),450)
         self.assertEqual(result["pairs"],result["identical_pairs"]+
                          sum(not row["same_evidence"] for row in result["rows"]))
