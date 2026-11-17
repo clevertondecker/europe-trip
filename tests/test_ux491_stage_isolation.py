@@ -9,7 +9,8 @@ from itinerary_flow_model import (
     italy_starter_preview, adopt_italy_starter, period_options,
 )
 from trip_plan_model import new_plan
-from itinerary_flow_ui import _reconcile_organize_state, _assert_organize_stage
+from itinerary_flow_ui import (_reconcile_organize_state, _assert_organize_stage,
+                               _clear_organize_date_draft, _organize_destination_changed)
 
 
 class StageIsolationTests(unittest.TestCase):
@@ -69,6 +70,43 @@ class StageIsolationTests(unittest.TestCase):
         self.assertTrue(selected_rows_for_stage(applied, self.catalog, ITALY_STAGE))
         self.assertEqual([r["id"] for r in selected_rows_for_stage(applied, self.catalog,
                          FRANCE_STAGE)], ["colmar"])
+
+
+    def test_same_stage_switch_discards_date_draft_and_keeps_saved_dates(self):
+        from datetime import date
+        from unittest.mock import patch
+        import streamlit as st
+        plan=self.french_only()
+        a=next(x["id"] for x in self.catalog["attractions"]
+               if x["destination_id"]=="basel")
+        plan=upsert_choice(plan,self.catalog,"basel",[a],"Férias restantes")
+        original=deepcopy(plan)
+        state={"flow_organize_destination":"colmar",
+               "flow_organize_period":"Férias restantes",
+               "flow_organize_date_França":date(2027,10,10),
+               "ux48_weekend_groups":{"groups":[{"name":"preservar"}]}}
+        with patch.object(st,"session_state",state):
+            _organize_destination_changed()
+        self.assertNotIn("flow_organize_date_França",state)
+        self.assertNotIn("flow_organize_period",state)
+        self.assertEqual(state["ux48_weekend_groups"]["groups"][0]["name"],"preservar")
+        state["flow_organize_destination"]="basel"
+        state["flow_organize_date_França"]=date(2027,10,11)
+        _reconcile_organize_state(
+            state,selected_rows_for_stage(plan,self.catalog,ITALY_STAGE),ITALY_STAGE)
+        self.assertNotIn("flow_organize_destination",state)
+        self.assertEqual(plan,original)
+
+    def test_date_drafts_are_isolated_from_canonical_plan(self):
+        from datetime import date
+        plan=self.french_only()
+        original=deepcopy(plan)
+        state={"flow_organize_date_França":date(2027,10,10),
+               "flow_organize_date_Itália":date(2027,9,10)}
+        _clear_organize_date_draft(state,FRANCE_STAGE)
+        self.assertNotIn("flow_organize_date_França",state)
+        self.assertEqual(state["flow_organize_date_Itália"],date(2027,9,10))
+        self.assertEqual(plan,original)
 
     def test_apptest_switch_preserves_plan_and_filters(self):
         source = """
