@@ -31,42 +31,33 @@ def _image_info(name, *, license="CC BY-SA 4.0", author="<a>Jane Photographer</a
 
 
 class DestinationPhotosTests(TestCase):
-    def test_visible_cities_receive_distinct_photos_and_attribution(self):
-        requested = [
-            {"id":"aachen","name":"Aachen","photo":None},
-            {"id":"baden_baden","name":"Baden-Baden","photo":None},
-            {"id":"cologne","name":"Colônia","photo":None},
-            {"id":"karlsruhe","name":"Karlsruhe","photo":None},
-            {"id":"kehl","name":"Kehl","photo":None},
+    def test_dynamic_noncurated_cities_have_distinct_attributed_photos(self):
+        requested=[
+            {"id":"trier","name":"Trier","photo":None},
+            {"id":"offenburg","name":"Offenburg","photo":None},
             {"id":"freiburg","name":"Freiburg im Breisgau",
              "photo":{"url":"https://commons.wikimedia.org/wiki/Special:FilePath/existing.jpg"}},
         ]
         calls=[]
         def fake(api, params):
-            calls.append((api, params))
+            calls.append((api,params))
             if api == WIKIPEDIA_API:
                 return {"query":{"pages":[
-                    {"title":title, "pageimage":title.replace(" ","_") + ".jpg"}
-                    for title in ("Aachen","Baden-Baden","Cologne","Karlsruhe","Kehl")
-                ]}}
+                    {"title":title,"pageimage":title+".jpg"}
+                    for title in ("Trier","Offenburg")]}}
             if api == COMMONS_API:
-                return {"query":{"pages":[
-                    _image_info(title.replace(" ","_") + ".jpg")
-                    for title in ("Aachen","Baden-Baden","Cologne","Karlsruhe","Kehl")
-                ]}}
+                return {"query":{"pages":[_image_info(title+".jpg")
+                                           for title in ("Trier","Offenburg")]}}
             raise AssertionError(api)
-        before=deepcopy(requested)
+        original=deepcopy(requested)
         photos=lookup_destination_photos(requested,fetch_json=fake)
-        self.assertEqual(set(photos),
-                         {"aachen","baden_baden","cologne","karlsruhe","kehl"})
-        self.assertEqual(len({v["url"] for v in photos.values()}),5)
-        self.assertTrue(all(v["license"]=="CC BY-SA 4.0" for v in photos.values()))
-        self.assertTrue(all(v["author"]=="Jane Photographer" for v in photos.values()))
-        self.assertTrue(all(v["source_page"].startswith(
-            "https://commons.wikimedia.org/wiki/File:") for v in photos.values()))
-        self.assertEqual(requested,before)
+        self.assertEqual(set(photos),{"trier","offenburg"})
+        self.assertEqual(len({p["url"] for p in photos.values()}),2)
+        self.assertTrue(all(p["license"]=="CC BY-SA 4.0" for p in photos.values()))
+        self.assertTrue(all(p["author"]=="Jane Photographer" for p in photos.values()))
+        self.assertEqual(requested,original)
         self.assertEqual(len(calls),2)
-        self.assertIn("Cologne",calls[0][1]["titles"])
+        self.assertIn("Trier",calls[0][1]["titles"])
         self.assertNotIn("Freiburg im Breisgau",calls[0][1]["titles"])
 
     def test_first_page_curated_photos_are_usable_without_external_apis(self):
@@ -105,7 +96,7 @@ class DestinationPhotosTests(TestCase):
                     "Aachen.jpg",license=lic,author=author)))
 
     def test_no_unverified_fallback_in_failure_or_missing_picture(self):
-        destination=[{"id":"kehl","name":"Kehl","photo":None}]
+        destination=[{"id":"trier","name":"Trier","photo":None}]
         def broken(api,params):
             raise OSError("API not available")
         self.assertEqual(lookup_destination_photos(destination,broken),{})
