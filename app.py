@@ -1245,9 +1245,9 @@ elif page == "Roteiro":
         # UX 5.0.1: destination-first discovery, no base choice required.
         render_independent_destination_discovery()
         st.divider()
-        st.markdown("### Pesquisa de passeios por cidade-base · opcional")
-        st.caption("Ferramentas existentes preservadas para investigar as alternativas.")
-        render_explorer(data,sync_sources,map_view)
+        with st.expander("Pesquisa de passeios por cidade-base · opcional", expanded=False):
+            st.caption("Ferramenta anterior preservada para investigar alternativas de cidade-base.")
+            render_explorer(data,sync_sources,map_view)
 
     elif itinerary_section == "Explorar bases":
         render_base_explorer(active_plan(),data,sync_sources["finance"]["status"]=="live",
