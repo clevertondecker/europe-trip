@@ -81,8 +81,9 @@ def apply_navigation_request(state: dict) -> bool:
     request = state.pop("_ux504_navigation_request", None)
     if request is None:
         return False
-    if (not isinstance(request, dict) or
-            request not in [navigation_request(x[0]) for x in STEPS]):
+    valid_requests = [navigation_request(x[0]) for x in STEPS] + [
+        {"area":"Meu roteiro","section":"Organizar viagem","view":None}]
+    if (not isinstance(request, dict) or request not in valid_requests):
         raise ValueError("Solicitação de navegação inválida")
     from ux_navigation import set_task
     set_task(state, request["area"], request["section"])
