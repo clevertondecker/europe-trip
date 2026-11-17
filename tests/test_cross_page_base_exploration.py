@@ -18,7 +18,8 @@ class CrossPageExplorationTests(unittest.TestCase):
         self.assertEqual(app.session_state["advisor_plan"],original)
 
         app.radio(key="main_navigation").set_value("Roteiro").run()
-        app.segmented_control(key="itinerary_section").set_value("Explorar bases").run()
+        app.radio(key="ux_area").set_value("Explorar").run()
+        app.segmented_control(key="ux_section").set_value("Cidades-base").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
         self.assertEqual(app.session_state["advisor_plan"],original)
 
@@ -28,7 +29,8 @@ class CrossPageExplorationTests(unittest.TestCase):
         self.assertEqual(app.session_state["advisor_plan"]["base_city"],original["base_city"])
 
         app.radio(key="main_navigation").set_value("Roteiro").run()
-        app.segmented_control(key="itinerary_section").set_value("Guias e pesquisas").run()
+        app.radio(key="ux_area").set_value("Explorar").run()
+        app.segmented_control(key="ux_section").set_value("Passeios").run()
         app.selectbox(key="attractions_scenario_base").set_value("offenburg").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
         self.assertEqual(app.session_state["advisor_plan"]["base_city"],original["base_city"])

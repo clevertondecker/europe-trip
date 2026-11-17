@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "checked_at": "2026-11-14",
+  "checked_at": "2026-11-16",
   "travelers": 2,
   "source_policy": "Destino e existência da atração: fonte oficial consultada; duração: hipótese editorial; ingresso: número só quando fonte oficial publica; sem reservas para 2027. Fotos apenas Wikimedia Commons com licença e crédito.",
   "destinations": [
@@ -195,6 +195,42 @@
       "source_url": "https://lauterbrunnen.swiss/en/destination/discover-the-lauterbrunnen-valley.html",
       "coordinates_precision": "city_area",
       "checked_at": "2026-11-14"
+    },
+    {
+      "id": "brussels",
+      "name": "Bruxelas",
+      "country": "Bélgica",
+      "lat": 50.8503,
+      "lon": 4.3517,
+      "kind": "overnight",
+      "source_url": "https://www.visit.brussels/en/visitors/what-to-do/must-see-attractions",
+      "photo": null,
+      "coordinates_precision": "city_area",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "id": "bruges_be",
+      "name": "Bruges",
+      "country": "Bélgica",
+      "lat": 51.2093,
+      "lon": 3.2247,
+      "kind": "overnight",
+      "source_url": "https://www.visitbruges.be/en/things-to-do/sights",
+      "photo": null,
+      "coordinates_precision": "city_area",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "id": "rotterdam",
+      "name": "Rotterdam",
+      "country": "Países Baixos",
+      "lat": 51.9244,
+      "lon": 4.4777,
+      "kind": "overnight",
+      "source_url": "https://visitrotterdam.com/things-to-do-in-rotterdam.html",
+      "photo": null,
+      "coordinates_precision": "city_area",
+      "checked_at": "2026-11-16"
     }
   ],
   "attractions": [
@@ -1647,6 +1683,441 @@
       "confidence": "operator_destination_guide",
       "reservation_required": null,
       "notes": "Passeio de espaço público externo; atividades ou acessos internos podem ser pagos"
+    },
+    {
+      "id": "brussels_grand_place",
+      "destination_id": "brussels",
+      "name": "Grand-Place",
+      "category": "história",
+      "summary": "Praça central histórica e arquitetura do centro de Bruxelas.",
+      "visit_minutes": 80,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "adult",
+        "status": "unknown",
+        "validity": null,
+        "notes": "Sem tarifa confirmada para a atividade em 2027; visitas externas podem ser livres, mas despesas associadas permanecem não pesquisadas"
+      },
+      "source_urls": [
+        "https://www.visit.brussels/en/visitors/what-to-do/must-see-attractions"
+      ],
+      "checked_at": "2026-11-16",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "A duração é hipótese editorial; verificar acesso, abertura e custo quando houver datas"
+    },
+    {
+      "id": "brussels_royal_galleries",
+      "destination_id": "brussels",
+      "name": "Galeries Royales Saint-Hubert",
+      "category": "arquitetura",
+      "summary": "Galerias cobertas históricas no centro de Bruxelas.",
+      "visit_minutes": 50,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "adult",
+        "status": "unknown",
+        "validity": null,
+        "notes": "Sem tarifa confirmada para a atividade em 2027; visitas externas podem ser livres, mas despesas associadas permanecem não pesquisadas"
+      },
+      "source_urls": [
+        "https://www.visit.brussels/en/visitors/what-to-do/must-see-attractions"
+      ],
+      "checked_at": "2026-11-16",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "A duração é hipótese editorial; verificar acesso, abertura e custo quando houver datas"
+    },
+    {
+      "id": "brussels_mont_arts",
+      "destination_id": "brussels",
+      "name": "Mont des Arts",
+      "category": "cultura",
+      "summary": "Jardins, mirante e entorno dos museus no centro.",
+      "visit_minutes": 60,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "adult",
+        "status": "unknown",
+        "validity": null,
+        "notes": "Sem tarifa confirmada para a atividade em 2027; visitas externas podem ser livres, mas despesas associadas permanecem não pesquisadas"
+      },
+      "source_urls": [
+        "https://www.visit.brussels/en/visitors/what-to-do/must-see-attractions"
+      ],
+      "checked_at": "2026-11-16",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "A duração é hipótese editorial; verificar acesso, abertura e custo quando houver datas"
+    },
+    {
+      "id": "brussels_atomium",
+      "destination_id": "brussels",
+      "name": "Atomium (exterior)",
+      "category": "arquitetura",
+      "summary": "Visita exterior; entrada para exposição interna não cotada.",
+      "visit_minutes": 75,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "adult",
+        "status": "unknown",
+        "validity": null,
+        "notes": "Sem tarifa confirmada para a atividade em 2027; visitas externas podem ser livres, mas despesas associadas permanecem não pesquisadas"
+      },
+      "source_urls": [
+        "https://www.visit.brussels/en/visitors/what-to-do/must-see-attractions"
+      ],
+      "checked_at": "2026-11-16",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "A duração é hipótese editorial; verificar acesso, abertura e custo quando houver datas"
+    },
+    {
+      "id": "brussels_eu_quarter",
+      "destination_id": "brussels",
+      "name": "Bairro Europeu",
+      "category": "cultura",
+      "summary": "Passeio pelo entorno das instituições europeias.",
+      "visit_minutes": 90,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "adult",
+        "status": "unknown",
+        "validity": null,
+        "notes": "Sem tarifa confirmada para a atividade em 2027; visitas externas podem ser livres, mas despesas associadas permanecem não pesquisadas"
+      },
+      "source_urls": [
+        "https://www.visit.brussels/en/visitors/what-to-do/must-see-attractions"
+      ],
+      "checked_at": "2026-11-16",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "A duração é hipótese editorial; verificar acesso, abertura e custo quando houver datas"
+    },
+    {
+      "id": "bruges_markt",
+      "destination_id": "bruges_be",
+      "name": "Markt, praça central",
+      "category": "história",
+      "summary": "Praça principal de Bruges, com vista do Belfort.",
+      "visit_minutes": 60,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "adult",
+        "status": "unknown",
+        "validity": null,
+        "notes": "Sem tarifa confirmada para a atividade em 2027; visitas externas podem ser livres, mas despesas associadas permanecem não pesquisadas"
+      },
+      "source_urls": [
+        "https://www.visitbruges.be/en/things-to-do/sights"
+      ],
+      "checked_at": "2026-11-16",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "A duração é hipótese editorial; verificar acesso, abertura e custo quando houver datas"
+    },
+    {
+      "id": "bruges_belfry",
+      "destination_id": "bruges_be",
+      "name": "Belfort (exterior)",
+      "category": "história",
+      "summary": "Belfort histórico. A entrada na torre requer verificação de bilhete.",
+      "visit_minutes": 45,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "adult",
+        "status": "unknown",
+        "validity": null,
+        "notes": "Sem tarifa confirmada para a atividade em 2027; visitas externas podem ser livres, mas despesas associadas permanecem não pesquisadas"
+      },
+      "source_urls": [
+        "https://www.visitbruges.be/en/things-to-do/culture-and-heritage/belfort-belfry"
+      ],
+      "checked_at": "2026-11-16",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "A duração é hipótese editorial; verificar acesso, abertura e custo quando houver datas"
+    },
+    {
+      "id": "bruges_rosary_quay",
+      "destination_id": "bruges_be",
+      "name": "Rozenhoedkaai",
+      "category": "arquitetura",
+      "summary": "Cais histórico e ponto panorâmico junto aos canais.",
+      "visit_minutes": 35,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "adult",
+        "status": "unknown",
+        "validity": null,
+        "notes": "Sem tarifa confirmada para a atividade em 2027; visitas externas podem ser livres, mas despesas associadas permanecem não pesquisadas"
+      },
+      "source_urls": [
+        "https://www.visitbruges.be/en/things-to-do/sights"
+      ],
+      "checked_at": "2026-11-16",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "A duração é hipótese editorial; verificar acesso, abertura e custo quando houver datas"
+    },
+    {
+      "id": "bruges_minnewater",
+      "destination_id": "bruges_be",
+      "name": "Minnewaterpark",
+      "category": "natureza",
+      "summary": "Parque junto ao Lago do Amor.",
+      "visit_minutes": 70,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "adult",
+        "status": "unknown",
+        "validity": null,
+        "notes": "Sem tarifa confirmada para a atividade em 2027; visitas externas podem ser livres, mas despesas associadas permanecem não pesquisadas"
+      },
+      "source_urls": [
+        "https://www.visitbruges.be/en"
+      ],
+      "checked_at": "2026-11-16",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "A duração é hipótese editorial; verificar acesso, abertura e custo quando houver datas"
+    },
+    {
+      "id": "bruges_canals",
+      "destination_id": "bruges_be",
+      "name": "Canais de Bruges (caminhada)",
+      "category": "cultura",
+      "summary": "Caminhada pelos canais; passeio de barco é atividade distinta e não cotada.",
+      "visit_minutes": 90,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "adult",
+        "status": "unknown",
+        "validity": null,
+        "notes": "Sem tarifa confirmada para a atividade em 2027; visitas externas podem ser livres, mas despesas associadas permanecem não pesquisadas"
+      },
+      "source_urls": [
+        "https://www.visitbruges.be/en"
+      ],
+      "checked_at": "2026-11-16",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "A duração é hipótese editorial; verificar acesso, abertura e custo quando houver datas"
+    },
+    {
+      "id": "rotterdam_markthal",
+      "destination_id": "rotterdam",
+      "name": "Markthal",
+      "category": "arquitetura",
+      "summary": "Mercado coberto e ponto arquitetônico. Consumo não incluído.",
+      "visit_minutes": 60,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "adult",
+        "status": "unknown",
+        "validity": null,
+        "notes": "Sem tarifa confirmada para a atividade em 2027; visitas externas podem ser livres, mas despesas associadas permanecem não pesquisadas"
+      },
+      "source_urls": [
+        "https://visitrotterdam.com/things-to-do-in-rotterdam.html"
+      ],
+      "checked_at": "2026-11-16",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "A duração é hipótese editorial; verificar acesso, abertura e custo quando houver datas"
+    },
+    {
+      "id": "rotterdam_cube_houses",
+      "destination_id": "rotterdam",
+      "name": "Cube Houses (exterior)",
+      "category": "arquitetura",
+      "summary": "Casas cúbicas de Piet Blom; museu interno não cotado.",
+      "visit_minutes": 45,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "adult",
+        "status": "unknown",
+        "validity": null,
+        "notes": "Sem tarifa confirmada para a atividade em 2027; visitas externas podem ser livres, mas despesas associadas permanecem não pesquisadas"
+      },
+      "source_urls": [
+        "https://visitrotterdam.com/rotterdam-architecture.html"
+      ],
+      "checked_at": "2026-11-16",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "A duração é hipótese editorial; verificar acesso, abertura e custo quando houver datas"
+    },
+    {
+      "id": "rotterdam_erasmus_bridge",
+      "destination_id": "rotterdam",
+      "name": "Erasmusbrug",
+      "category": "arquitetura",
+      "summary": "Travessia e vistas da ponte sobre o Nieuwe Maas.",
+      "visit_minutes": 50,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "adult",
+        "status": "unknown",
+        "validity": null,
+        "notes": "Sem tarifa confirmada para a atividade em 2027; visitas externas podem ser livres, mas despesas associadas permanecem não pesquisadas"
+      },
+      "source_urls": [
+        "https://visitrotterdam.com/things-to-do-in-rotterdam.html"
+      ],
+      "checked_at": "2026-11-16",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "A duração é hipótese editorial; verificar acesso, abertura e custo quando houver datas"
+    },
+    {
+      "id": "rotterdam_old_harbour",
+      "destination_id": "rotterdam",
+      "name": "Oude Haven",
+      "category": "história",
+      "summary": "Porto antigo, embarcações e cafés no entorno.",
+      "visit_minutes": 60,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "adult",
+        "status": "unknown",
+        "validity": null,
+        "notes": "Sem tarifa confirmada para a atividade em 2027; visitas externas podem ser livres, mas despesas associadas permanecem não pesquisadas"
+      },
+      "source_urls": [
+        "https://visitrotterdam.com/things-to-do-in-rotterdam.html"
+      ],
+      "checked_at": "2026-11-16",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "A duração é hipótese editorial; verificar acesso, abertura e custo quando houver datas"
+    },
+    {
+      "id": "rotterdam_centraal",
+      "destination_id": "rotterdam",
+      "name": "Rotterdam Centraal (arquitetura)",
+      "category": "arquitetura",
+      "summary": "Estação central e arquitetura contemporânea.",
+      "visit_minutes": 40,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "adult",
+        "status": "unknown",
+        "validity": null,
+        "notes": "Sem tarifa confirmada para a atividade em 2027; visitas externas podem ser livres, mas despesas associadas permanecem não pesquisadas"
+      },
+      "source_urls": [
+        "https://visitrotterdam.com/rotterdam-architecture.html"
+      ],
+      "checked_at": "2026-11-16",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "A duração é hipótese editorial; verificar acesso, abertura e custo quando houver datas"
     }
   ]
 }

@@ -284,6 +284,10 @@ def render_smart_calendar(plan:dict,catalog:dict,routes:dict,
                  on_click=_jump,args=("Orçamento","Resumo financeiro"))
         b.button("Pesquisar passeios",key="ux35_go_research",
                  on_click=_jump,args=("Explorar","Passeios"))
+    # UX 4.8: optional, sidecar-only weekend grouping; keeps all canonical dates,
+    # outings, calendar proposals and remote persistence unchanged.
+    from ux48_weekend_groups_ui import render_weekend_planner
+    render_weekend_planner(active_plan(),catalog)
     try:
         preferences=_preferences()
     except (ValueError,KeyError,TypeError) as exc:

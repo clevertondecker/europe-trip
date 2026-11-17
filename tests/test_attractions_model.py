@@ -14,13 +14,13 @@ class AdaptiveAttractionsTests(unittest.TestCase):
         cls.routes=load_base_routes()
 
     def test_four_base_coverage_and_attraction_count(self):
-        self.assertEqual(len(self.attractions["destinations"]),11)
+        self.assertEqual(len(self.attractions["destinations"]),14)
         self.assertGreaterEqual(len(self.attractions["attractions"]),50)
-        self.assertEqual(len(self.routes["routes"]),44)
+        self.assertEqual(len(self.routes["routes"]),56)
         for base in ["mulhouse","strasbourg","metz","nancy"]:
             self.assertGreaterEqual(sum(a["destination_id"]==base
                 for a in self.attractions["attractions"]),5)
-            self.assertEqual(len(places_for_base(self.attractions,self.routes,base)),11)
+            self.assertEqual(len(places_for_base(self.attractions,self.routes,base)),14)
 
     def test_colmar_depends_on_selected_base(self):
         mul=route_for(self.routes,"mulhouse","colmar")

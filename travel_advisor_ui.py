@@ -377,11 +377,21 @@ def render_advisor(trip_data:dict,sync_sources:dict,workspace_area:str='Meus pas
                     with col1:
                         if st.button("Salvar planejamento",key="advisor_save",use_container_width=True,
                                      disabled=not (st.session_state.get("advisor_saved_snapshot") is None
-                                                   or st.session_state["advisor_saved_snapshot"]!=p)):
+                                                   or st.session_state["advisor_saved_snapshot"]!=p
+                                                   or st.session_state.get("ux36_cloud_dirty",False))):
                             try:
-                                _secure_save(p)
-                                st.session_state.pop("advisor_saved_plans",None)
-                                st.success("Planejamento salvo! Você poderá continuar de onde parou.")
+                                from continuity_ui import _private_store, save_private_now
+                                changed_plan=(st.session_state.get("advisor_saved_snapshot")!=p)
+                                if changed_plan:
+                                    _secure_save(p)
+                                    st.session_state.pop("advisor_saved_plans",None)
+                                    st.success("Roteiro oficial salvo no GitHub.")
+                                if _private_store() is not None:
+                                    save_private_now(p,catalog)
+                                    st.success("Agrupamentos e estudos salvos na cópia privada.")
+                                elif st.session_state.get("ux36_cloud_dirty"):
+                                    st.warning("Agrupamentos não salvos na nuvem: configure "
+                                               "o espaço privado ou baixe a cópia de segurança.")
                             except Exception as exc:
                                 if isinstance(exc,HTTPError) and exc.code in (401,403):
                                     st.error(explain_storage_error(exc))

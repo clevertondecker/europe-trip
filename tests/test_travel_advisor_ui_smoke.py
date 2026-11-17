@@ -8,7 +8,8 @@ class AdvisorUISmoke(unittest.TestCase):
     def test_advisor_review_and_approval_gate(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=60).run()
         app.radio(key="main_navigation").set_value("Roteiro").run()
-        app.segmented_control(key="itinerary_section").set_value("Descobrir").run()
+        app.segmented_control(key="ux_section").set_value("Melhorar meu roteiro").run()
+        app.selectbox(key="ux_improve_view").set_value("Descobrir").run()
         self.assertEqual(len(app.exception),0,[x.message for x in app.exception])
         original=app.session_state["advisor_plan"]["revision"]
         # A plan without selected attractions must show discovery, not fake options.

@@ -75,6 +75,7 @@ def apply_pending_restore(catalog:dict)->None:
                              in pending["archive"]["city_studies"]}
         state["ux35_proposals"]=deepcopy(pending["archive"]["calendar_drafts"])
         state["ux41_favorites"]=list(pending["archive"].get("city_favorites",[]))
+        state["ux48_weekend_groups"]=deepcopy(pending["archive"]["weekend_groups"])
         state.pop("ux35_review_proposal",None)
         state.pop("ux36_review",None)
         sync_legacy_view(plan,state,include_controls=True)
@@ -111,10 +112,19 @@ def _archive_fingerprint(archive:dict)->str:
 
 def _private_archive(plan, catalog):
     state = st.session_state
+    from ux48_weekend_groups_model import reconcile_removed_outings
+    weekends=state.get("ux48_weekend_groups")
+    if weekends is not None:
+        reconciled=reconcile_removed_outings(weekends,plan,catalog)
+        if reconciled!=weekends:
+            state["ux48_weekend_groups"]=reconciled
+            state["ux36_cloud_dirty"]=True
+        weekends=reconciled
     return make_archive(plan, catalog, _safe_context(plan, catalog),
                         list(state.get("ux34_drafts", {}).values()),
                         list(state.get("ux35_proposals", [])),
-                        city_favorites=list(state.get("ux41_favorites",[])))
+                        city_favorites=list(state.get("ux41_favorites",[])),
+                        weekend_groups=weekends)
 
 
 def restore_private_on_start(catalog):
@@ -161,6 +171,7 @@ def restore_private_on_start(catalog):
         state["ux34_drafts"] = {d["name"]: deepcopy(d) for d in archive["city_studies"]}
         state["ux35_proposals"] = deepcopy(archive["calendar_drafts"])
         state["ux41_favorites"] = list(archive.get("city_favorites",[]))
+        state["ux48_weekend_groups"] = deepcopy(archive["weekend_groups"])
         sync_legacy_view(plan, state, include_controls=True)
     except (ValueError, KeyError, TypeError, StorageConflict, StorageUnavailable):
         state["ux36_cloud_status"] = "Erro ao recuperar; use um backup local"
@@ -279,7 +290,8 @@ def render_continuity_panel(plan:dict,catalog:dict)->None:
             calendars=list(st.session_state.get("ux35_proposals",[]))
         try:
             archive=make_archive(plan,catalog,_safe_context(plan,catalog),city,calendars,
-                                 city_favorites=list(st.session_state.get("ux41_favorites",[])))
+                                 city_favorites=list(st.session_state.get("ux41_favorites",[])),
+                                  weekend_groups=st.session_state.get("ux48_weekend_groups"))
             raw=export_archive(archive,catalog)
         except (ValueError,TypeError,KeyError) as exc:
             st.warning("Não foi possível incluir esse contexto. "
