@@ -78,7 +78,7 @@ def _key(title: str) -> str:
 
 def _license_allowed(name: str) -> bool:
     value = name.strip().casefold().replace("-", " ")
-    return bool(re.match(r"^cc by(?: sa)? \\d", value) or
+    return bool(re.match(r"^cc by(?: sa)? \d", value) or
                 value.startswith(("cc0", "public domain", "pd ")))
 
 
