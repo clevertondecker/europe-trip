@@ -127,7 +127,8 @@ def _private_archive(plan, catalog):
                         list(state.get("ux34_drafts", {}).values()),
                         list(state.get("ux35_proposals", [])),
                         city_favorites=list(state.get("ux41_favorites",[])),
-                        weekend_groups=weekends)
+                        weekend_groups=weekends,
+                        destination_interests=state.get("ux502_interests",empty_interests()))
 
 
 def restore_private_on_start(catalog):
