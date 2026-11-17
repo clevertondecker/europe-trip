@@ -20,6 +20,11 @@ def _current(discovery):
         return None
 
 
+def _mark_exported(revision):
+    st.session_state["ux502_local_exported_revision"] = revision
+    st.session_state["ux502_status"] = "Arquivo local exportado; nuvem não confirmada"
+
+
 def _change(document):
     st.session_state["ux502_interests"] = document
     st.session_state["ux36_cloud_dirty"] = True
@@ -126,7 +131,7 @@ def render_wishlist(discovery) -> bool:
         raw = export_interests(current, discovery)
         st.download_button("Exportar lista JSON", raw, "nossa-europa-destinos-desejados.json",
                            "application/json", key="ux502_download",
-                           on_click="ignore")
+                           on_click=_mark_exported, args=(current["revision"],))
         st.caption("O arquivo exportado não significa que a nuvem foi atualizada.")
         uploaded = st.file_uploader("Importar lista JSON", type=["json"],
                                     key="ux502_upload")
