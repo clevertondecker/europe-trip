@@ -29,7 +29,7 @@ class WalkingAccessTests(unittest.TestCase):
                     if x["destination_id"] in self.data["destinations"]}
         self.assertEqual({x["attraction_id"] for x in self.data["attractions"]}, expected)
         self.assertEqual(len(expected), 30)
-        self.assertEqual(sum(x["coordinates"] is not None for x in self.data["attractions"]),6)
+        self.assertEqual(sum(x["coordinates"] is not None for x in self.data["attractions"]),13)
         self.assertEqual(len(self.data["stations"]),6)
         self.assertFalse(any(x["entrance_verified"] for x in self.data["attractions"]))
 
