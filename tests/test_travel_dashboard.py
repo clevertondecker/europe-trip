@@ -38,21 +38,28 @@ class TravelDashboardTests(unittest.TestCase):
         self.assertEqual(model["destinations"][0]["name"],"Strasbourg")
         self.assertEqual(model["destinations"][0]["dates"],["2027-09-26"])
 
-    def test_overview_and_navigation(self):
-        app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=90).run()
-        app.radio(key="main_navigation").set_value("Roteiro").run()
-        app.segmented_control(key="itinerary_section").set_value("Visão geral").run()
+    def test_modern_planner_keeps_cards_without_legacy_toggle(self):
+        app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
+        app.radio(key="ux_area").set_value("Meu roteiro").run()
+        app.segmented_control(key="ux_section").set_value("Meu planejamento").run()
+        app.segmented_control(key="flow_active_stage").set_value("França").run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
-        self.assertIn("flow_add_open_button",{button.key for button in app.button})
-        self.assertIn("flow_go_budget",{button.key for button in app.button})
-        app.toggle(key="flow_show_legacy_dashboard").set_value(True).run()
+        self.assertNotIn("flow_show_legacy_dashboard",
+                         {toggle.key for toggle in app.toggle})
+        self.assertIn("flow_add_open_button",{b.key for b in app.button})
+        catalog=load_attractions()
+        chosen=next(a for a in catalog["attractions"] if a["destination_id"]=="colmar")
+        plan=app.session_state["advisor_plan"].copy()
+        plan["packages"]={"colmar":[chosen["id"]]}
+        plan["assignments"]={}
+        app.session_state["advisor_plan"]=plan
+        app.run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
-        self.assertIn("dashboard_go_budget",{button.key for button in app.button})
-        self.assertIn("dashboard_go_discover",{button.key for button in app.button})
-        plan_id=app.session_state["advisor_plan"]["plan_id"]
-        app.button(key="dashboard_go_budget").click().run()
-        self.assertFalse(app.exception,[x.message for x in app.exception])
-        self.assertEqual(app.session_state["advisor_plan"]["plan_id"],plan_id)
+        self.assertTrue(any("Lugares que escolhemos" in x.value
+                            for x in app.markdown))
+        self.assertTrue(any("Colmar" in x.value for x in app.markdown))
+        self.assertIn("flow_add_open_button",{b.key for b in app.button})
+
 
 
 if __name__=="__main__":
