@@ -4,164 +4,255 @@
   "editorial_photo_count": 10,
   "previously_local_count": 5,
   "initial_missing": 31,
-  "newly_bundled": 0,
-  "remaining_missing": 31,
-  "new_assets": [],
-  "unresolved": [
+  "newly_bundled": 30,
+  "remaining_missing": 1,
+  "new_assets": [
     {
       "destination_id": "amsterdam",
       "name": "Amsterdam",
-      "reason": "Commons did not supply a direct photo URL"
+      "filename": "Imagen_de_los_canales_concéntricos_en_Ámsterdam.png",
+      "license": "CC BY-SA 4.0",
+      "source": "https://commons.wikimedia.org/wiki/File:Imagen_de_los_canales_concéntricos_en_Ámsterdam.png",
+      "bytes": 146594
     },
     {
       "destination_id": "arlon",
       "name": "Arlon",
-      "reason": "Commons did not supply a direct photo URL"
+      "filename": "Arlon_E2aJPG.jpg",
+      "license": "CC BY 3.0",
+      "source": "https://commons.wikimedia.org/wiki/File:Arlon_E2aJPG.jpg",
+      "bytes": 40794
     },
     {
       "destination_id": "arras",
       "name": "Arras",
-      "reason": "Commons did not supply a direct photo URL"
+      "filename": "Le_palais_des_Etats_d'Artois_et_le_Beffroi_-_Arras.jpg",
+      "license": "CC BY-SA 4.0",
+      "source": "https://commons.wikimedia.org/wiki/File:Le_palais_des_Etats_d'Artois_et_le_Beffroi_-_Arras.jpg",
+      "bytes": 80912
     },
     {
       "destination_id": "beaune",
       "name": "Beaune",
-      "reason": "Commons did not supply a direct photo URL"
+      "filename": "Beaune_-_Hôtel-Dieu_-_Cour_-_02.jpg",
+      "license": "CC BY-SA 4.0",
+      "source": "https://commons.wikimedia.org/wiki/File:Beaune_-_Hôtel-Dieu_-_Cour_-_02.jpg",
+      "bytes": 102400
     },
     {
       "destination_id": "belfort",
       "name": "Belfort",
-      "reason": "Commons did not supply a direct photo URL"
+      "filename": "Belfort2.jpg",
+      "license": "Public domain",
+      "source": "https://commons.wikimedia.org/wiki/File:Belfort2.jpg",
+      "bytes": 127522
     },
     {
       "destination_id": "besancon",
       "name": "Besançon",
-      "reason": "Commons did not supply a direct photo URL"
+      "filename": "Besançon,_la_rue_de_la_Convention.jpg",
+      "license": "CC BY-SA 4.0",
+      "source": "https://commons.wikimedia.org/wiki/File:Besançon,_la_rue_de_la_Convention.jpg",
+      "bytes": 84944
     },
     {
       "destination_id": "bruges_be",
       "name": "Bruges",
-      "reason": "Commons did not supply a direct photo URL"
+      "filename": "Brügge_Blick_vom_Belfried_4.jpg",
+      "license": "CC BY-SA 4.0",
+      "source": "https://commons.wikimedia.org/wiki/File:Brügge_Blick_vom_Belfried_4.jpg",
+      "bytes": 79688
     },
     {
       "destination_id": "brussels",
       "name": "Bruxelas",
-      "reason": "Commons did not supply a direct photo URL"
+      "filename": "Grand_Place_Bruselas_2.jpg",
+      "license": "CC BY-SA 3.0",
+      "source": "https://commons.wikimedia.org/wiki/File:Grand_Place_Bruselas_2.jpg",
+      "bytes": 67502
     },
     {
       "destination_id": "dijon",
       "name": "Dijon",
-      "reason": "Commons did not supply a direct photo URL"
+      "filename": "Dijon_-_Puits_de_Moïse_-_02.jpg",
+      "license": "CC BY-SA 4.0",
+      "source": "https://commons.wikimedia.org/wiki/File:Dijon_-_Puits_de_Moïse_-_02.jpg",
+      "bytes": 110576
     },
     {
       "destination_id": "epernay",
       "name": "Épernay",
-      "reason": "Commons did not supply a direct photo URL"
+      "filename": "Vineyards_near_Epernay.jpg",
+      "license": "CC BY-SA 2.0 uk",
+      "source": "https://commons.wikimedia.org/wiki/File:Vineyards_near_Epernay.jpg",
+      "bytes": 48566
     },
     {
       "destination_id": "esch",
       "name": "Esch-sur-Alzette",
-      "reason": "Commons did not supply a direct photo URL"
+      "filename": "View_of_Esch-sur-Alzette_2025-04_--2_(cropped).jpg",
+      "license": "CC BY-SA 4.0",
+      "source": "https://commons.wikimedia.org/wiki/File:View_of_Esch-sur-Alzette_2025-04_--2_(cropped).jpg",
+      "bytes": 95020
     },
     {
       "destination_id": "ghent",
       "name": "Gand",
-      "reason": "Commons did not supply a direct photo URL"
+      "filename": "Gent,_de_Graslei_vanaf_de_Korenlei_met_oeg24758tm61+25159_IMG_0447_2021-08-13_18.37.jpg",
+      "license": "CC BY-SA 4.0",
+      "source": "https://commons.wikimedia.org/wiki/File:Gent,_de_Graslei_vanaf_de_Korenlei_met_oeg24758tm61+25159_IMG_0447_2021-08-13_18.37.jpg",
+      "bytes": 73760
     },
     {
       "destination_id": "haguenau",
       "name": "Haguenau",
-      "reason": "Commons did not supply a direct photo URL"
+      "filename": "Town_hall_of_Haguenau_(3).jpg",
+      "license": "CC BY 4.0",
+      "source": "https://commons.wikimedia.org/wiki/File:Town_hall_of_Haguenau_(3).jpg",
+      "bytes": 79662
     },
     {
       "destination_id": "lausanne",
       "name": "Lausanne",
-      "reason": "Commons did not supply a direct photo URL"
+      "filename": "Lausanne_Wiki.jpg",
+      "license": "CC BY-SA 3.0",
+      "source": "https://commons.wikimedia.org/wiki/File:Lausanne_Wiki.jpg",
+      "bytes": 98040
     },
     {
       "destination_id": "lauterbrunnen",
       "name": "Lauterbrunnen",
-      "reason": "Commons did not supply a direct photo URL"
+      "filename": "1_lauterbrunnen_valley_wengen_2022.jpg",
+      "license": "CC BY-SA 4.0",
+      "source": "https://commons.wikimedia.org/wiki/File:1_lauterbrunnen_valley_wengen_2022.jpg",
+      "bytes": 88070
     },
     {
       "destination_id": "liege",
       "name": "Liège",
-      "reason": "Commons did not supply a direct photo URL"
+      "filename": "Liege_View_03.jpg",
+      "license": "CC BY-SA 3.0",
+      "source": "https://commons.wikimedia.org/wiki/File:Liege_View_03.jpg",
+      "bytes": 60824
     },
     {
       "destination_id": "lille",
       "name": "Lille",
-      "reason": "Commons did not supply a direct photo URL"
+      "filename": "Lille_Collage.jpg",
+      "license": "CC BY-SA 4.0",
+      "source": "https://commons.wikimedia.org/wiki/File:Lille_Collage.jpg",
+      "bytes": 75348
     },
     {
       "destination_id": "lorrach",
       "name": "Lörrach",
-      "reason": "Commons did not supply a direct photo URL"
+      "filename": "Aerial_View_-_Lörrach.jpg",
+      "license": "CC BY 3.0",
+      "source": "https://commons.wikimedia.org/wiki/File:Aerial_View_-_Lörrach.jpg",
+      "bytes": 77268
     },
     {
       "destination_id": "lyon",
       "name": "Lyon",
-      "reason": "Commons did not supply a direct photo URL"
+      "filename": "Lyon-part-dieu-2023.jpg",
+      "license": "CC BY-SA 4.0",
+      "source": "https://commons.wikimedia.org/wiki/File:Lyon-part-dieu-2023.jpg",
+      "bytes": 85822
     },
     {
       "destination_id": "namur",
       "name": "Namur",
-      "reason": "Commons did not supply a direct photo URL"
+      "filename": "Namur_Belgium_Old-town-01.jpg",
+      "license": "CC BY-SA 3.0",
+      "source": "https://commons.wikimedia.org/wiki/File:Namur_Belgium_Old-town-01.jpg",
+      "bytes": 135400
     },
     {
       "destination_id": "offenburg",
       "name": "Offenburg",
-      "reason": "Commons did not supply a direct photo URL"
+      "filename": "Burda_Media_Tower_in_Offenburg_mit_Sonnenaufgang.jpg",
+      "license": "CC BY-SA 3.0",
+      "source": "https://commons.wikimedia.org/wiki/File:Burda_Media_Tower_in_Offenburg_mit_Sonnenaufgang.jpg",
+      "bytes": 42700
     },
     {
       "destination_id": "paris",
       "name": "Paris",
-      "reason": "Commons did not supply a direct photo URL"
+      "filename": "La_Tour_Eiffel_vue_de_la_Tour_Saint-Jacques,_Paris_août_2014_(2).jpg",
+      "license": "CC BY-SA 2.0",
+      "source": "https://commons.wikimedia.org/wiki/File:La_Tour_Eiffel_vue_de_la_Tour_Saint-Jacques,_Paris_août_2014_(2).jpg",
+      "bytes": 78250
     },
     {
       "destination_id": "reims",
       "name": "Reims",
-      "reason": "Commons did not supply a direct photo URL"
+      "filename": "Subé_Fountain,_Reims,_France.jpg",
+      "license": "CC BY-SA 4.0",
+      "source": "https://commons.wikimedia.org/wiki/File:Subé_Fountain,_Reims,_France.jpg",
+      "bytes": 75012
     },
     {
       "destination_id": "rotterdam",
       "name": "Rotterdam",
-      "reason": "Commons did not supply a direct photo URL"
+      "filename": "A_view_of_Rotterdam,_taken_from_the_roof_of_the_Maassilo,_Rotterdam,_The_Netherlands.jpg",
+      "license": "CC BY 2.0",
+      "source": "https://commons.wikimedia.org/wiki/File:A_view_of_Rotterdam,_taken_from_the_roof_of_the_Maassilo,_Rotterdam,_The_Netherlands.jpg",
+      "bytes": 58652
     },
     {
       "destination_id": "saarbrucken",
       "name": "Saarbrücken",
-      "reason": "Commons did not supply a direct photo URL"
-    },
-    {
-      "destination_id": "saint_louis",
-      "name": "Saint-Louis",
-      "reason": "Source image too small: 520x390"
+      "filename": "Saarland_Rathaus_Saarbrücken_01.jpg",
+      "license": "CC BY-SA 3.0",
+      "source": "https://commons.wikimedia.org/wiki/File:Saarland_Rathaus_Saarbrücken_01.jpg",
+      "bytes": 60782
     },
     {
       "destination_id": "saverne",
       "name": "Saverne",
-      "reason": "Commons did not supply a direct photo URL"
+      "filename": "Chateau_Rohan_Saverne_01.jpg",
+      "license": "CC BY 4.0",
+      "source": "https://commons.wikimedia.org/wiki/File:Chateau_Rohan_Saverne_01.jpg",
+      "bytes": 55282
     },
     {
       "destination_id": "selestat",
       "name": "Sélestat",
-      "reason": "Commons did not supply a direct photo URL"
+      "filename": "Selestat_Tour_de_l’horloge.jpg",
+      "license": "CC BY 3.0",
+      "source": "https://commons.wikimedia.org/wiki/File:Selestat_Tour_de_l’horloge.jpg",
+      "bytes": 62416
     },
     {
       "destination_id": "stuttgart",
       "name": "Stuttgart",
-      "reason": "Commons did not supply a direct photo URL"
+      "filename": "Neues_Schloss_Schlossplatzspringbrunnen_Schlossplatz_Stuttgart_2015_01.jpg",
+      "license": "CC BY 4.0",
+      "source": "https://commons.wikimedia.org/wiki/File:Neues_Schloss_Schlossplatzspringbrunnen_Schlossplatz_Stuttgart_2015_01.jpg",
+      "bytes": 56588
     },
     {
       "destination_id": "thionville",
       "name": "Thionville",
-      "reason": "Commons did not supply a direct photo URL"
+      "filename": "Thionville_-_Beffroi_20131008-01.JPG",
+      "license": "CC BY-SA 3.0",
+      "source": "https://commons.wikimedia.org/wiki/File:Thionville_-_Beffroi_20131008-01.JPG",
+      "bytes": 40300
     },
     {
       "destination_id": "trier",
       "name": "Trier",
-      "reason": "Commons did not supply a direct photo URL"
+      "filename": "Trier-Blick-vom_Weishaus.JPG",
+      "license": "CC BY-SA 3.0",
+      "source": "https://commons.wikimedia.org/wiki/File:Trier-Blick-vom_Weishaus.JPG",
+      "bytes": 94860
+    }
+  ],
+  "unresolved": [
+    {
+      "destination_id": "saint_louis",
+      "name": "Saint-Louis",
+      "reason": "Source image too small: 520x390"
     }
   ]
 }

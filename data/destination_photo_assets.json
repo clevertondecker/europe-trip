@@ -11,6 +11,33 @@
       "source_page": "https://commons.wikimedia.org/wiki/File:Cathedral_in_Aachen.jpg",
       "alt": "Catedral de Aachen e centro histórico"
     },
+    "amsterdam": {
+      "filename": "Imagen_de_los_canales_concéntricos_en_Ámsterdam.png",
+      "file": "assets/destinations/amsterdam.webp",
+      "author": "Andrés Barrios",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Imagen_de_los_canales_concéntricos_en_Ámsterdam.png",
+      "alt": "Fotografia ilustrativa de Amsterdam, Países Baixos"
+    },
+    "arlon": {
+      "filename": "Arlon_E2aJPG.jpg",
+      "file": "assets/destinations/arlon.webp",
+      "author": "Jean-Pol GRANDMONT",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Arlon_E2aJPG.jpg",
+      "alt": "Fotografia ilustrativa de Arlon, Bélgica"
+    },
+    "arras": {
+      "filename": "Le_palais_des_Etats_d'Artois_et_le_Beffroi_-_Arras.jpg",
+      "file": "assets/destinations/arras.webp",
+      "author": "JackyM59",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Le_palais_des_Etats_d'Artois_et_le_Beffroi_-_Arras.jpg",
+      "alt": "Fotografia ilustrativa de Arras, França"
+    },
     "baden_baden": {
       "filename": "Baden Baden - Lichtentaler Allee - View SE.jpg",
       "file": "assets/destinations/baden_baden.webp",
@@ -20,6 +47,51 @@
       "source_page": "https://commons.wikimedia.org/wiki/File:Baden_Baden_-_Lichtentaler_Allee_-_View_SE.jpg",
       "alt": "Alameda arborizada Lichtentaler Allee em Baden-Baden"
     },
+    "beaune": {
+      "filename": "Beaune_-_Hôtel-Dieu_-_Cour_-_02.jpg",
+      "file": "assets/destinations/beaune.webp",
+      "author": "Benjamin Smith",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Beaune_-_Hôtel-Dieu_-_Cour_-_02.jpg",
+      "alt": "Fotografia ilustrativa de Beaune, França"
+    },
+    "belfort": {
+      "filename": "Belfort2.jpg",
+      "file": "assets/destinations/belfort.webp",
+      "author": "KBWEi at German Wikipedia",
+      "license": "Public domain",
+      "license_url": "https://commons.wikimedia.org/wiki/File:Belfort2.jpg",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Belfort2.jpg",
+      "alt": "Fotografia ilustrativa de Belfort, França"
+    },
+    "besancon": {
+      "filename": "Besançon,_la_rue_de_la_Convention.jpg",
+      "file": "assets/destinations/besancon.webp",
+      "author": "Wikipedro",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Besançon,_la_rue_de_la_Convention.jpg",
+      "alt": "Fotografia ilustrativa de Besançon, França"
+    },
+    "bruges_be": {
+      "filename": "Brügge_Blick_vom_Belfried_4.jpg",
+      "file": "assets/destinations/bruges_be.webp",
+      "author": "Zairon",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Brügge_Blick_vom_Belfried_4.jpg",
+      "alt": "Fotografia ilustrativa de Bruges, Bélgica"
+    },
+    "brussels": {
+      "filename": "Grand_Place_Bruselas_2.jpg",
+      "file": "assets/destinations/brussels.webp",
+      "author": "Francisco Conde Sánchez",
+      "license": "CC BY-SA 3.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Grand_Place_Bruselas_2.jpg",
+      "alt": "Fotografia ilustrativa de Bruxelas, Bélgica"
+    },
     "cologne": {
       "filename": "Köln Cathedral, Germany.jpg",
       "file": "assets/destinations/cologne.webp",
@@ -28,6 +100,51 @@
       "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
       "source_page": "https://commons.wikimedia.org/wiki/File:K%C3%B6ln_Cathedral,_Germany.jpg",
       "alt": "Fachada da Catedral de Colônia"
+    },
+    "dijon": {
+      "filename": "Dijon_-_Puits_de_Moïse_-_02.jpg",
+      "file": "assets/destinations/dijon.webp",
+      "author": "Benjamin Smith",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Dijon_-_Puits_de_Moïse_-_02.jpg",
+      "alt": "Fotografia ilustrativa de Dijon, França"
+    },
+    "epernay": {
+      "filename": "Vineyards_near_Epernay.jpg",
+      "file": "assets/destinations/epernay.webp",
+      "author": "Tom Corser",
+      "license": "CC BY-SA 2.0 uk",
+      "license_url": "https://creativecommons.org/licenses/by-sa/2.0/uk/deed.en",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Vineyards_near_Epernay.jpg",
+      "alt": "Fotografia ilustrativa de Épernay, França"
+    },
+    "esch": {
+      "filename": "View_of_Esch-sur-Alzette_2025-04_--2_(cropped).jpg",
+      "file": "assets/destinations/esch.webp",
+      "author": "Zinneke",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "source_page": "https://commons.wikimedia.org/wiki/File:View_of_Esch-sur-Alzette_2025-04_--2_(cropped).jpg",
+      "alt": "Fotografia ilustrativa de Esch-sur-Alzette, Luxemburgo"
+    },
+    "ghent": {
+      "filename": "Gent,_de_Graslei_vanaf_de_Korenlei_met_oeg24758tm61+25159_IMG_0447_2021-08-13_18.37.jpg",
+      "file": "assets/destinations/ghent.webp",
+      "author": "Michielverbeek",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Gent,_de_Graslei_vanaf_de_Korenlei_met_oeg24758tm61+25159_IMG_0447_2021-08-13_18.37.jpg",
+      "alt": "Fotografia ilustrativa de Gand, Bélgica"
+    },
+    "haguenau": {
+      "filename": "Town_hall_of_Haguenau_(3).jpg",
+      "file": "assets/destinations/haguenau.webp",
+      "author": "Tournasol7",
+      "license": "CC BY 4.0",
+      "license_url": "https://creativecommons.org/licenses/by/4.0",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Town_hall_of_Haguenau_(3).jpg",
+      "alt": "Fotografia ilustrativa de Haguenau, França"
     },
     "karlsruhe": {
       "filename": "MKa 0553 Schloss Karlsruhe.jpg",
@@ -46,6 +163,159 @@
       "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
       "source_page": "https://commons.wikimedia.org/wiki/File:Passerelle_des_Deux_Rives_Kehl.jpg",
       "alt": "Passarela dos Dois Rios entre Kehl e Estrasburgo"
+    },
+    "lausanne": {
+      "filename": "Lausanne_Wiki.jpg",
+      "file": "assets/destinations/lausanne.webp",
+      "author": "File:Musee olympique.jpg: Arnaud Gaillard (arnaud () amarys.com) File:Cathédrale de Lausanne depuis le Champ de l'Air.JPG: Gzzz File:Federal Supreme Court of Switzerland.jpg: Rolan",
+      "license": "CC BY-SA 3.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Lausanne_Wiki.jpg",
+      "alt": "Fotografia ilustrativa de Lausanne, Suíça"
+    },
+    "lauterbrunnen": {
+      "filename": "1_lauterbrunnen_valley_wengen_2022.jpg",
+      "file": "assets/destinations/lauterbrunnen.webp",
+      "author": "Chensiyuan",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "source_page": "https://commons.wikimedia.org/wiki/File:1_lauterbrunnen_valley_wengen_2022.jpg",
+      "alt": "Fotografia ilustrativa de Lauterbrunnen, Suíça"
+    },
+    "liege": {
+      "filename": "Liege_View_03.jpg",
+      "file": "assets/destinations/liege.webp",
+      "author": "A.Savin",
+      "license": "CC BY-SA 3.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Liege_View_03.jpg",
+      "alt": "Fotografia ilustrativa de Liège, Bélgica"
+    },
+    "lille": {
+      "filename": "Lille_Collage.jpg",
+      "file": "assets/destinations/lille.webp",
+      "author": "Cereol89, Velvet",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Lille_Collage.jpg",
+      "alt": "Fotografia ilustrativa de Lille, França"
+    },
+    "lorrach": {
+      "filename": "Aerial_View_-_Lörrach.jpg",
+      "file": "assets/destinations/lorrach.webp",
+      "author": "Wladyslaw Sojka",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Aerial_View_-_Lörrach.jpg",
+      "alt": "Fotografia ilustrativa de Lörrach, Alemanha"
+    },
+    "lyon": {
+      "filename": "Lyon-part-dieu-2023.jpg",
+      "file": "assets/destinations/lyon.webp",
+      "author": "Aldg692VX",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Lyon-part-dieu-2023.jpg",
+      "alt": "Fotografia ilustrativa de Lyon, França"
+    },
+    "namur": {
+      "filename": "Namur_Belgium_Old-town-01.jpg",
+      "file": "assets/destinations/namur.webp",
+      "author": "CEphoto, Uwe Aranas",
+      "license": "CC BY-SA 3.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Namur_Belgium_Old-town-01.jpg",
+      "alt": "Fotografia ilustrativa de Namur, Bélgica"
+    },
+    "offenburg": {
+      "filename": "Burda_Media_Tower_in_Offenburg_mit_Sonnenaufgang.jpg",
+      "file": "assets/destinations/offenburg.webp",
+      "author": "Pascal-Oliver Horn",
+      "license": "CC BY-SA 3.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Burda_Media_Tower_in_Offenburg_mit_Sonnenaufgang.jpg",
+      "alt": "Fotografia ilustrativa de Offenburg, Alemanha"
+    },
+    "paris": {
+      "filename": "La_Tour_Eiffel_vue_de_la_Tour_Saint-Jacques,_Paris_août_2014_(2).jpg",
+      "file": "assets/destinations/paris.webp",
+      "author": "Yann Caradec from Paris, France",
+      "license": "CC BY-SA 2.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/2.0",
+      "source_page": "https://commons.wikimedia.org/wiki/File:La_Tour_Eiffel_vue_de_la_Tour_Saint-Jacques,_Paris_août_2014_(2).jpg",
+      "alt": "Fotografia ilustrativa de Paris, França"
+    },
+    "reims": {
+      "filename": "Subé_Fountain,_Reims,_France.jpg",
+      "file": "assets/destinations/reims.webp",
+      "author": "The Crazy Tourist (thecrazytourist.com)",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Subé_Fountain,_Reims,_France.jpg",
+      "alt": "Fotografia ilustrativa de Reims, França"
+    },
+    "rotterdam": {
+      "filename": "A_view_of_Rotterdam,_taken_from_the_roof_of_the_Maassilo,_Rotterdam,_The_Netherlands.jpg",
+      "file": "assets/destinations/rotterdam.webp",
+      "author": "Rob Oo",
+      "license": "CC BY 2.0",
+      "license_url": "https://creativecommons.org/licenses/by/2.0",
+      "source_page": "https://commons.wikimedia.org/wiki/File:A_view_of_Rotterdam,_taken_from_the_roof_of_the_Maassilo,_Rotterdam,_The_Netherlands.jpg",
+      "alt": "Fotografia ilustrativa de Rotterdam, Países Baixos"
+    },
+    "saarbrucken": {
+      "filename": "Saarland_Rathaus_Saarbrücken_01.jpg",
+      "file": "assets/destinations/saarbrucken.webp",
+      "author": "Calips",
+      "license": "CC BY-SA 3.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Saarland_Rathaus_Saarbrücken_01.jpg",
+      "alt": "Fotografia ilustrativa de Saarbrücken, Alemanha"
+    },
+    "saverne": {
+      "filename": "Chateau_Rohan_Saverne_01.jpg",
+      "file": "assets/destinations/saverne.webp",
+      "author": "Rolf Krahl (Rotkraut)",
+      "license": "CC BY 4.0",
+      "license_url": "https://creativecommons.org/licenses/by/4.0",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Chateau_Rohan_Saverne_01.jpg",
+      "alt": "Fotografia ilustrativa de Saverne, França"
+    },
+    "selestat": {
+      "filename": "Selestat_Tour_de_l’horloge.jpg",
+      "file": "assets/destinations/selestat.webp",
+      "author": "Poudou99",
+      "license": "CC BY 3.0",
+      "license_url": "https://creativecommons.org/licenses/by/3.0",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Selestat_Tour_de_l’horloge.jpg",
+      "alt": "Fotografia ilustrativa de Sélestat, França"
+    },
+    "stuttgart": {
+      "filename": "Neues_Schloss_Schlossplatzspringbrunnen_Schlossplatz_Stuttgart_2015_01.jpg",
+      "file": "assets/destinations/stuttgart.webp",
+      "author": "Julian Herzog (Website)",
+      "license": "CC BY 4.0",
+      "license_url": "https://creativecommons.org/licenses/by/4.0",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Neues_Schloss_Schlossplatzspringbrunnen_Schlossplatz_Stuttgart_2015_01.jpg",
+      "alt": "Fotografia ilustrativa de Stuttgart, Alemanha"
+    },
+    "thionville": {
+      "filename": "Thionville_-_Beffroi_20131008-01.JPG",
+      "file": "assets/destinations/thionville.webp",
+      "author": "Pymouss",
+      "license": "CC BY-SA 3.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Thionville_-_Beffroi_20131008-01.JPG",
+      "alt": "Fotografia ilustrativa de Thionville, França"
+    },
+    "trier": {
+      "filename": "Trier-Blick-vom_Weishaus.JPG",
+      "file": "assets/destinations/trier.webp",
+      "author": "CTHOE",
+      "license": "CC BY-SA 3.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Trier-Blick-vom_Weishaus.JPG",
+      "alt": "Fotografia ilustrativa de Trier, Alemanha"
     }
   }
 }
