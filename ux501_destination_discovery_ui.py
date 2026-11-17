@@ -7,6 +7,8 @@ to UX 5.0.2 / 5.0.3, avoiding a second source of truth.
 from __future__ import annotations
 
 import streamlit as st
+from html import escape
+from ux501_destination_photo_service import lookup_destination_photos
 
 from ux501_destination_discovery_model import (
     build_destination_discovery, filter_destinations,
@@ -18,6 +20,51 @@ from ux502_destination_interests_ui import render_wishlist,add_destination
 @st.cache_data(show_spinner=False)
 def _cached_discovery():
     return build_destination_discovery()
+
+
+
+
+@st.cache_data(ttl=21600, show_spinner=False)
+def _cached_visible_photos(identity: tuple[tuple[str, str], ...]) -> dict:
+    # Fetch only the current page, once per cache TTL. No catalog writes.
+    return lookup_destination_photos(
+        [{"id":destination_id,"name":name} for destination_id,name in identity])
+
+
+def _render_destination_media(destination: dict, photo: dict | None) -> None:
+    """Same size for every card, licensed provenance or honest fallback."""
+    if photo and photo.get("url"):
+        url = escape(photo["url"], quote=True)
+        name = escape(destination["name"], quote=True)
+        st.markdown(
+            '<div style="width:100%;aspect-ratio:16/9;overflow:hidden;'
+            'border-radius:9px;background:#e7ebe9">'
+            f'<img src="{url}" alt="Fotografia de {name}" loading="lazy" '
+            'style="width:100%;height:100%;object-fit:cover;display:block">'
+            '</div>',unsafe_allow_html=True)
+        author = escape(photo.get("author") or "Autor não identificado")
+        license_label = escape(photo.get("license") or "Licença não identificada")
+        source_page = photo.get("source_page", "")
+        if source_page.startswith("https://commons.wikimedia.org/"):
+            st.markdown(
+                '<div style="font-size:0.75rem;opacity:0.78;margin-top:5px">'
+                f'Foto: {author} · {license_label} · '
+                f'<a href="{escape(source_page,quote=True)}" target="_blank" '
+                'rel="noopener noreferrer">Fonte e licença</a></div>',
+                unsafe_allow_html=True)
+        else:
+            st.caption(f"Foto: {author} · {license_label}")
+    else:
+        name = escape(destination["name"])
+        st.markdown(
+            '<div role="img" aria-label="Foto deste destino ainda não disponível" '
+            'style="aspect-ratio:16/9;border-radius:9px;background:#eef2ef;'
+            'border:1px solid #dce5e1;display:flex;flex-direction:column;'
+            'align-items:center;justify-content:center;text-align:center;'
+            'padding:12px;color:#586e70">'
+            '<span style="font-size:1.8rem" aria-hidden="true">⌖</span>'
+            f'<span style="font-weight:600">{name}</span>'
+            '<small>Foto a pesquisar</small></div>',unsafe_allow_html=True)
 
 
 def render_independent_destination_discovery(*, discovery=None) -> None:
@@ -108,16 +155,17 @@ def render_independent_destination_discovery(*, discovery=None) -> None:
         "Página de destinos", list(range(1, pages+1)),
         key="ux501_page", format_func=lambda p: f"{p} de {pages}")
     subset = matches[(page-1)*page_size:page*page_size]
+    missing_on_page = tuple((item["id"],item["name"]) for item in subset
+                            if not item.get("photo"))
+    fallback_photos = (_cached_visible_photos(missing_on_page)
+                       if missing_on_page else {})
     for idx in range(0, len(subset), 3):
         columns = st.columns(3)
         for column, item in zip(columns, subset[idx:idx+3]):
             with column:
                 with st.container(border=True):
-                    photo = item.get("photo")
-                    if photo and photo.get("url"):
-                        st.image(photo["url"], use_container_width=True)
-                        st.caption("Foto: "+photo["author"]+" · "+
-                                   photo["license"])
+                    photo = item.get("photo") or fallback_photos.get(item["id"])
+                    _render_destination_media(item,photo)
                     st.markdown("**"+item["name"]+"** · "+item["country"])
                     if item["attraction_count"]:
                         names = [attr["name"] for attr in item["attractions"][:3]]
