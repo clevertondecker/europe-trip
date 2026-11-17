@@ -58,3 +58,10 @@ Este é um documento de instruções. O diff desta PR **não implementa a funcio
 - **P2 resolvido em especificação:** ausência de dados e amostra de 2026 não viram indisponibilidade ou garantia para 2027; aliases normalizados não criam duplicatas.
 - **Dependência:** auditoria #108 revisada para estabelecer snapshot/proveniência. Contrato 1 deve estar aprovado antes de **publicar** observações estruturadas novas; pesquisa exploratória independente pode levantar lacunas sem escrever no adaptador.
 - **Critérios verificáveis:** testes para colisão de alias, duas estações da mesma cidade, direções opostas, dois serviços no mesmo dia, resumo sem horário, fonte repetida idempotente, divergências mantidas, amostra 2026, validade 2027 não inferida e projeção backward-compatible byte a byte dos campos legados. Nenhuma escrita em TripPlan/wishlist/base oficial.
+
+
+## Rastreabilidade da implementação — revisão final 17/11/2026
+
+- PR de implementação separado para revisão: [#116](https://github.com/clevertondecker/europe-trip/pull/116).
+- Implementação independente: três eixos source_nature / evidence_state / temporal_validity, identidade direcional de serviço/estação/data, preservação de conflitos; adaptador legado inalterado.
+- Este PR permanece **somente especificação**. Nenhum merge/deploy de implementação está autorizado até revisão do conjunto. Os testes de CI no PR de implementação validam contratos/código, não substituem confirmação de horários, aluguéis e acesso para datas de 2027.
