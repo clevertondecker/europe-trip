@@ -274,6 +274,8 @@ def _ux_section_changed() -> None:
 
 
 def _ux_aux_changed() -> None:
+    if st.session_state.get("ux_organize_view")=="Calendário inteligente":
+        st.session_state["ux35_stage"]=st.session_state.get("flow_active_stage","Itália")
     apply_ux(st.session_state)
 
 
