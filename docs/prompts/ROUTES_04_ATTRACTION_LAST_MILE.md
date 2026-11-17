@@ -12,7 +12,7 @@
 
 
 ## Objetivo
-Pesquisar **uma única vez por estação de chegada e atração** o acesso real (caminhada/transporte urbano) para que múltiplas bases possam reutilizá-lo. O comparador tem 94 atrações canônicas/reconciliadas e 2 referências de acesso ainda sem duração verificada (auditoria #108).
+Pesquisar **uma vez por combinação compatível de estação de chegada, entrada, atração, modo e condições** o acesso real (caminhada/transporte urbano) para que múltiplas bases possam reutilizá-lo. O comparador tem 94 atrações canônicas/reconciliadas e 2 referências de acesso ainda sem duração verificada (auditoria #108).
 
 ## Fontes e IDs
 Inspecionar `ux501_destination_discovery_model.py`, `attractions_model.py`, `dq32_macro_opportunities_model.py`, `dq30_mobility_evidence_model.py`, `data/dq30_mobility_pilot_2026_11.json` e possíveis fontes oficiais de estações, transportes municipais e locais turísticos. Respeitar identidade por ID da atração, cidade, país e estação; conservar sinônimos reconciliados sem criar atrações duplicadas.
@@ -21,7 +21,7 @@ Inspecionar `ux501_destination_discovery_model.py`, `attractions_model.py`, `dq3
 Concentrar em Aachen (Catedral), Baden-Baden (Lichtentaler Allee) e Colônia (Catedral), com demais atrações **do catálogo dessas cidades** se houver fontes claras. Não inventar que uma atração ausente do catálogo é automaticamente canônica. A referência de 15 minutos da estação ao Musée Unterlinden/Colmar é um exemplo isolado e não deve ser aplicado a outras atrações nem virar ID fictício.
 
 ## Método
-1. Criar evidências por `arrival_station_id + attraction_id`: origem exata da caminhada/linha, ponto de acesso oficial, modo, tempo e distância (quando **pesquisados**, não derivados), fonte, data, condições de acessibilidade e ressalvas de último trecho.
+1. Criar observações independentes por `arrival_station_id + attraction_id + entrance_id + mode + observation_scope`: origem exata da caminhada/linha, ponto de acesso oficial, modo, tempo e distância (quando **pesquisados**, não derivados), fonte, data, condições de acessibilidade e ressalvas de último trecho.
 2. Escolher estação pela rota realmente observada; não supor que todo trem chega à estação central, e não fundir homônimos.
 3. Registrar `station_to_attraction_walk`, `urban_transit`, `unknown`, `local_unknown` e `partial`. Se só houver endereço, manter `duration_min = null`.
 4. Reutilizar evidência para diferentes cidades-base que chegam à **mesma estação**; NÃO criar 2.820 tempos distintos, nem somar durações de 2026 e horários futuros não compatíveis.
@@ -41,3 +41,10 @@ Geocodificação automática, roteamento por latitude/longitude, agendamento, ma
 
 ## Parecer solicitado ao revisor
 Comentários diretamente no PR: P0/P1/P2; contratos/adaptadores que devem ser reutilizados; dados concretos impossíveis de inferir; testes mínimos; ordem de execução/dependências e recomendação de ajuste ou implementação. Nada é executado automaticamente.
+
+
+## Rastreabilidade da implementação — revisão final 17/11/2026
+
+- PR de implementação separado para revisão: [#120](https://github.com/clevertondecker/europe-trip/pull/120).
+- Implementação independente: chave estação + entrada + atração + modo + data/fonte; manter alternativas, não somar trechos incompatíveis, não criar ID canônico inexistente.
+- Este PR permanece **somente especificação**. Nenhum merge/deploy de implementação está autorizado até revisão do conjunto. Os testes de CI no PR de implementação validam contratos/código, não substituem confirmação de horários, aluguéis e acesso para datas de 2027.
