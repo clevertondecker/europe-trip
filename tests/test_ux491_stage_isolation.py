@@ -81,7 +81,7 @@ if "plan" not in st.session_state:
     plan=new_plan()
     a=next(x["id"] for x in catalog["attractions"] if x["destination_id"]=="colmar")
     st.session_state.plan=upsert_choice(plan,catalog,"colmar",[a],"Férias restantes")
-stage=st.segmented_control("Etapa",[ITALY_STAGE,FRANCE_STAGE],key="stage")
+stage=st.segmented_control("Etapa",[ITALY_STAGE,FRANCE_STAGE],default=ITALY_STAGE,key="stage")
 rows=selected_rows_for_stage(st.session_state.plan,catalog,stage)
 st.write("Destinos da etapa: "+str(len(rows)))
 """
