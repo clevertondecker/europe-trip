@@ -282,7 +282,8 @@ def render_continuity_panel(plan:dict,catalog:dict)->None:
             calendars=list(st.session_state.get("ux35_proposals",[]))
         try:
             archive=make_archive(plan,catalog,_safe_context(plan,catalog),city,calendars,
-                                 city_favorites=list(st.session_state.get("ux41_favorites",[])))
+                                 city_favorites=list(st.session_state.get("ux41_favorites",[])),
+                                  weekend_groups=st.session_state.get("ux48_weekend_groups"))
             raw=export_archive(archive,catalog)
         except (ValueError,TypeError,KeyError) as exc:
             st.warning("Não foi possível incluir esse contexto. "
