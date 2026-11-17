@@ -35,7 +35,8 @@ class HousingShortStayTests(unittest.TestCase):
         self.assertEqual(output["expense_total"], 2350.0)
         self.assertEqual(output["refundable_deposit_separate"], 500.0)
         self.assertEqual(output["upfront_cash_exposure"], 2850.0)
-        self.assertTrue(output["decision_ready_for_dates"])
+        self.assertTrue(output["structurally_complete"])
+        self.assertFalse(output["decision_ready_for_dates"])
         self.assertTrue(output["requires_live_listing_recheck"])
 
     def test_missing_internet_or_fee_does_not_become_zero(self):
