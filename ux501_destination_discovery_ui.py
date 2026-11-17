@@ -9,6 +9,7 @@ from __future__ import annotations
 import streamlit as st
 from html import escape
 from ux501_destination_photo_service import lookup_destination_photos
+from destination_photo_assets import local_destination_photo, preferred_destination_photo
 
 from ux501_destination_discovery_model import (
     build_destination_discovery, filter_destinations,
@@ -33,6 +34,20 @@ def _cached_visible_photos(identity: tuple[tuple[str, str], ...]) -> dict:
 
 def _render_destination_media(destination: dict, photo: dict | None) -> None:
     """Same size for every card, licensed provenance or honest fallback."""
+    if photo and photo.get("local_path"):
+        st.image(photo["local_path"], caption=None, use_container_width=True)
+        author = escape(photo["author"])
+        license_label = escape(photo["license"])
+        source = escape(photo["source_page"], quote=True)
+        license_url = escape(photo["license_url"], quote=True)
+        st.markdown(
+            '<div style="font-size:0.75rem;opacity:0.78;margin-top:5px">'
+            f'Foto: {author} · <a href="{license_url}" target="_blank" '
+            f'rel="noopener noreferrer">{license_label}</a> · '
+            f'<a href="{source}" target="_blank" rel="noopener noreferrer">'
+            'Fonte original</a> · recortada para 16:9</div>',
+            unsafe_allow_html=True)
+        return
     if photo and photo.get("url"):
         url = escape(photo["url"], quote=True)
         name = escape(destination["name"], quote=True)
@@ -155,8 +170,13 @@ def render_independent_destination_discovery(*, discovery=None) -> None:
         "Página de destinos", list(range(1, pages+1)),
         key="ux501_page", format_func=lambda p: f"{p} de {pages}")
     subset = matches[(page-1)*page_size:page*page_size]
+    # Bundled images require no HTTP request. Query Wikimedia only when
+    # neither editorial nor local files cover a destination on this page.
+    local_photos = {item["id"]: local_destination_photo(item["id"])
+                    for item in subset if not item.get("photo")}
     missing_on_page = tuple((item["id"],item["name"]) for item in subset
-                            if not item.get("photo"))
+                            if not item.get("photo") and
+                            not local_photos.get(item["id"]))
     fallback_photos = (_cached_visible_photos(missing_on_page)
                        if missing_on_page else {})
     for idx in range(0, len(subset), 3):
@@ -164,7 +184,7 @@ def render_independent_destination_discovery(*, discovery=None) -> None:
         for column, item in zip(columns, subset[idx:idx+3]):
             with column:
                 with st.container(border=True):
-                    photo = item.get("photo") or fallback_photos.get(item["id"])
+                    photo = preferred_destination_photo(item, fallback_photos.get(item["id"]))
                     _render_destination_media(item,photo)
                     st.markdown("**"+item["name"]+"** · "+item["country"])
                     if item["attraction_count"]:
