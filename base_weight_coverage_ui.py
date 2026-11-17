@@ -26,39 +26,14 @@ LOGISTICS_WEIGHT_CHOICES = {
 
 def _render_dq32_macro_coverage(rows):
     """Opportunity discovery counts, not a quality or reachability ranking."""
-    from dq32_macro_opportunities_model import (
-        load_macro_tourism, opportunity_overview,
-    )
-    from attractions_model import load_attractions
-    from base_explorer_model import load_exploration
-    from base_research_expanded_model import load_research
-    from base_scenario_model import base_options
-    from rail_evidence_unified_model import load_rail_evidence
+    from arch14_macro_coverage_cache import cached_macro_coverage_rows
 
-    macro=load_macro_tourism()
-    catalog=load_attractions()
-    exploration=load_exploration()
-    research=load_research()
-    options=base_options()
-    rail=load_rail_evidence()
     st.markdown("### DQ 3.2 · Cobertura ampliada de oportunidades")
     st.caption(
         "Atrações locais identificadas e conexões ferroviárias históricas, "
         "independentemente do nível de detalhamento pedestre. "
         "Contagens medem pesquisa, NÃO qualidade nem passeios viáveis.")
-    data=[]
-    for item in rows:
-        result=opportunity_overview(
-            item["id"],macro=macro,catalog=catalog,exploration=exploration,
-            research=research,options=options,rail=rail)
-        data.append({
-            "Cidade-base":result["base_name"],
-            "Atrações canônicas locais":result["canonical_local_attractions"],
-            "Novas atrações locais":result["new_local_attractions"],
-            "Destinos com trem histórico":result["rail_time_documented_count"],
-            "Destinos sem tempo de trem":result["unresearched_count"],
-            "Passeios viáveis comprovados":"Não avaliados",
-        })
+    data=cached_macro_coverage_rows(tuple(row["id"] for row in rows))
     st.dataframe(data,hide_index=True,width="stretch")
     st.caption(
         "Atrações canônicas e novas são contadas separadamente; equivalências "
