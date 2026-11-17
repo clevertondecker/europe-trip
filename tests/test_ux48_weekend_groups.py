@@ -160,6 +160,24 @@ class WeekendGroupModelTests(unittest.TestCase):
         validate_groups(corrected,self.plan,self.catalog)
 
 class WeekendGroupUITests(unittest.TestCase):
+    def test_private_archive_roundtrip_includes_weekend_groups(self):
+        from continuity_archive_model import make_archive,export_archive,import_archive
+        from ux48_weekend_groups_model import empty_groups,create_group
+        plan=new_plan()
+        catalog=load_attractions()
+        ids=[a["id"] for a in catalog["attractions"]
+             if a["destination_id"]=="brussels"][:2]
+        plan,_=apply_outing(plan,catalog,"brussels",ids,confirmed=True)
+        groups=create_group(empty_groups(plan),plan,catalog,name="Bruxelas",
+                            destinations=["brussels"],nights=1)
+        archive=make_archive(plan,catalog,weekend_groups=groups)
+        restored=import_archive(export_archive(archive,catalog),catalog)
+        self.assertEqual(restored["weekend_groups"],groups)
+        legacy=deepcopy(archive)
+        del legacy["weekend_groups"]
+        self.assertEqual(import_archive(export_archive(legacy,catalog),catalog)
+                         ["weekend_groups"],empty_groups(plan))
+
     def test_workflow_uses_current_navigation_without_legacy_menu(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
