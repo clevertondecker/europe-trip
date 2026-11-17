@@ -27,6 +27,15 @@ def _season_days(plan):
         date.fromisoformat(plan["departure_date"]),plan["total_days"],
         plan["italy_days"],plan["vacation_days"],plan["setup_days"])}
 
+def _trip_days(start, nights):
+    """Saturday/Sunday minimum; additional nights extend the occupied interval."""
+    first=date.fromisoformat(start)
+    return [(first+timedelta(days=n)).isoformat()
+            for n in range(max(2,nights+1))]
+
+def _rest_days(start):
+    return _trip_days(start,1)
+
 def empty_groups(plan):
     validate_plan(plan)
     return {"schema_version":SCHEMA,"plan_id":plan["plan_id"],
@@ -73,8 +82,7 @@ def validate_groups(state,plan,catalog):
         if start is None:continue
         if not isinstance(start,str) or start not in season or date.fromisoformat(start).weekday()!=5:
             raise ValueError("Fim de semana inválido ou fora da temporada")
-        days=[(date.fromisoformat(start)+timedelta(days=n)).isoformat()
-              for n in range(2)]
+        days=_trip_days(start,group["nights"])
         if any(day not in season or season[day]["stage"]!=FRANCE_STAGE or
                season[day]["activity"]=="Instalação" for day in days):
             raise ValueError("Fim de semana coincide com Itália ou instalação")
@@ -94,11 +102,14 @@ def validate_groups(state,plan,catalog):
     if not isinstance(rests,list) or len(rests)!=len(set(rests)):
         raise ValueError("Descansos duplicados")
     for start in rests:
-        if (not isinstance(start,str) or start not in season or
-            date.fromisoformat(start).weekday()!=5 or season[start]["stage"]!=FRANCE_STAGE or
-            season[start]["activity"]=="Instalação"):
+        if not isinstance(start,str) or start not in season or date.fromisoformat(start).weekday()!=5:
             raise ValueError("Descanso fora da temporada europeia")
-        if start in occupied:raise ValueError("Descanso e passeio no mesmo fim de semana")
+        days=_rest_days(start)
+        if any(day not in season or season[day]["stage"]!=FRANCE_STAGE
+               or season[day]["activity"]=="Instalação" for day in days):
+            raise ValueError("Descanso fora da temporada europeia")
+        if any(day in occupied or day in plan["assignments"] for day in days):
+            raise ValueError("Descanso conflita com passeio ou compromisso oficial")
     return deepcopy(state)
 
 def create_group(state,plan,catalog,*,name,destinations,period="Ainda não definido",
@@ -125,31 +136,35 @@ def remove_group(state,plan,catalog,group_id):
     return validate_groups(draft,plan,catalog)
 
 def reconcile_removed_outings(state,plan,catalog):
-    """Policy: unlink deleted outings; drop an empty group; never touch TripPlan."""
+    """Keep all valid groups; clear outdated dates instead of losing itineraries."""
     if state["plan_id"]!=plan["plan_id"]:return empty_groups(plan)
     result=deepcopy(state)
     choices=_selected(plan,catalog)
+    season=_season_days(plan)
     kept=[]
     for group in result["groups"]:
         group["destinations"]=[x for x in group["destinations"] if x in choices]
-        if group["destinations"]:
-            # If exact dates changed, drop only draft scheduling, not the group.
-            try:
-                single={**result,"groups":[group],"rest_weekends":[]}
-                validate_groups(single,plan,catalog)
-            except ValueError:
-                group["start_date"]=None
-            kept.append(group)
+        if group["destinations"]:kept.append(group)
     result["groups"]=kept
-    # Changing the trip date invalidates old explicit rest markers.
-    season=_season_days(plan)
-    result["rest_weekends"]=[d for d in result["rest_weekends"]
-                             if d in season and date.fromisoformat(d).weekday()==5
-                             and season[d]["stage"]==FRANCE_STAGE
-                             and season[d]["activity"]!="Instalação"]
-    if any(g["start_date"] in result["rest_weekends"] for g in kept):
-        result["rest_weekends"]=[d for d in result["rest_weekends"]
-                                 if all(g["start_date"]!=d for g in kept)]
+    result["rest_weekends"]=[start for start in result["rest_weekends"]
+         if isinstance(start,str) and start in season and
+         date.fromisoformat(start).weekday()==5 and
+         all(day in season and season[day]["stage"]==FRANCE_STAGE and
+             season[day]["activity"]!="Instalação" and
+             day not in plan["assignments"] for day in _rest_days(start))]
+    # Validate the aggregate after each reconciliation so overlaps are resolved
+    # deterministically; all destinations/notes remain intact.
+    accepted=[]
+    for group in kept:
+        candidate=deepcopy(group)
+        partial={**result,"groups":accepted+[candidate]}
+        try:
+            validate_groups(partial,plan,catalog)
+        except ValueError:
+            candidate["start_date"]=None
+            validate_groups({**result,"groups":accepted+[candidate]},plan,catalog)
+        accepted.append(candidate)
+    result["groups"]=accepted
     return validate_groups(result,plan,catalog)
 
 def ungrouped_outings(state,plan,catalog):
@@ -159,15 +174,17 @@ def ungrouped_outings(state,plan,catalog):
 def available_weekends(state,plan,catalog):
     validate_groups(state,plan,catalog)
     days=_season_days(plan)
-    scheduled={g["start_date"]:g for g in state["groups"] if g["start_date"]}
+    scheduled={day:g for g in state["groups"] if g["start_date"]
+               for day in _trip_days(g["start_date"],g["nights"])}
     slots=[]
     for day,row in sorted(days.items()):
         dt=date.fromisoformat(day)
         if dt.weekday()!=5 or row["stage"]!=FRANCE_STAGE:continue
         sunday=(dt+timedelta(days=1)).isoformat()
         if sunday not in days or days[sunday]["stage"]!=FRANCE_STAGE:continue
-        if day in scheduled:
-            status="pernoite possível" if scheduled[day]["nights"] else "viagem planejada"
+        if day in scheduled or sunday in scheduled:
+            trip=scheduled.get(day) or scheduled[sunday]
+            status="pernoite possível" if trip["nights"] else "viagem planejada"
         elif day in state["rest_weekends"]:status="descanso escolhido"
         elif row["activity"]=="Instalação" or days[sunday]["activity"]=="Instalação":
             status="indisponível · instalação"
@@ -175,7 +192,7 @@ def available_weekends(state,plan,catalog):
             status="passeio com data no TripPlan"
         else:status="livre · não reservado"
         slots.append({"start":day,"end":sunday,"status":status,
-                      "group":scheduled.get(day,{}).get("name")})
+                      "group":(scheduled.get(day) or scheduled.get(sunday) or {}).get("name")})
     return slots
 
 def set_rest_weekend(state,plan,catalog,start,rest:bool):
