@@ -1122,5 +1122,28 @@
         "access": "fair_use_demo_not_bulk_or_permanent_service"
       }
     ]
-  }
+  },
+  "published_walking_itineraries": [
+    {
+      "id": "rotterdam_official_city_walk_7km",
+      "destination_id": "rotterdam_centraal_station",
+      "origin_id": "rotterdam_centraal_station",
+      "mode": "walking",
+      "distance_kind": "walking_route",
+      "distance_m": 7000,
+      "duration_min": null,
+      "geometry_status": "official_tourism_route_map_link",
+      "status": "official_published",
+      "method": "official_tourism_walking_itinerary",
+      "source_url": "https://www.rotterdam.info/en/visit/good-to-know/city-walking-tour",
+      "checked_at": "2026-11-17",
+      "route_scope": "entire_loop_not_individual_segments",
+      "included_attraction_ids": [
+        "rotterdam_markthal",
+        "rotterdam_cube_houses",
+        "rotterdam_centraal"
+      ],
+      "notes": "Roteiro circular de 7 km oferecido pelo turismo de Rotterdam, inicia e termina na estação central; NÃO informa distância estação→Markthal ou Markthal→Cube Houses. Não calcular duração com ritmo presumido."
+    }
+  ]
 }
