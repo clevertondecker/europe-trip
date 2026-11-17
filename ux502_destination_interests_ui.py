@@ -1,6 +1,7 @@
 """UX 5.0.2 — wishlist UI; single session authority projected into private archive."""
 from __future__ import annotations
 import streamlit as st
+from hashlib import sha256
 from ux502_destination_interests_model import (
     PRIORITIES, LABELS, empty_interests, validate_interests, set_interest,
     remove_interest, ordered_interests, reconcile_transient, export_interests,
@@ -158,13 +159,17 @@ def render_wishlist(discovery) -> bool:
         return False
     if not items:
         st.info("Nenhum destino na lista. Use Descobrir lugares para adicionar.")
+    # The widget identity is derived from the canonical document snapshot.
+    # Import/restore may replace values even if revision numbers coincide.
+    # Never reuse a stale selectbox key from a previous document.
+    fingerprint = sha256(export_interests(current, discovery)).hexdigest()[:16]
     for row in items:
         destination_id = row["destination_id"]
         destination = by_id[destination_id]
         with st.container(border=True):
             cols = st.columns([3, 2, 1])
             cols[0].markdown("**" + destination["name"] + "** · " + destination["country"])
-            widget_key = "ux502_priority_" + destination_id
+            widget_key = "ux502_priority_" + destination_id + "_" + fingerprint
             cols[1].selectbox("Prioridade", PRIORITIES,
                                index=PRIORITIES.index(row["priority"]),
                                format_func=lambda p: LABELS[p], key=widget_key,
