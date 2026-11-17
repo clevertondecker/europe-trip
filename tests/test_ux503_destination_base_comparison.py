@@ -47,6 +47,27 @@ class DestinationBaseComparisonTests(unittest.TestCase):
             self.assertFalse(result["official_plan_modified"])
         self.assertEqual(wishes,snapshot)
 
+    def test_visual_subset_does_not_modify_active_wishlist(self):
+        original=sample_wishes()
+        before=deepcopy(original)
+        result=compare_wishlist_bases(
+            original,["mulhouse","lille"],
+            discovery=self.discovery,research=self.research,
+            visible_destination_ids=["bruges_be","colmar"],
+            rail={"by_pair":{}},exploration={"routes":[]})
+        self.assertEqual([d["id"] for d in result["destinations"]],
+                         ["colmar","bruges_be"])
+        self.assertEqual(result["active_destination_count"],4)
+        self.assertEqual(result["discarded_count"],1)
+        self.assertEqual(len(result["rows"]),4)
+        self.assertEqual(original,before)
+        with self.assertRaises(ValueError):
+            compare_wishlist_bases(
+                original,["mulhouse","lille"],
+                discovery=self.discovery,research=self.research,
+                visible_destination_ids=["lille"],
+                rail={"by_pair":{}},exploration={"routes":[]})
+
     def test_reject_invalid_base_count_and_duplicates(self):
         for bases in ([],["mulhouse"],["mulhouse"]*2,
                       ["mulhouse","unknown"],
@@ -122,11 +143,59 @@ class DestinationBaseComparisonAppTests(unittest.TestCase):
         self.assertEqual(app.session_state["ux_section"],"Comparar")
         self.assertEqual(app.session_state["advisor_plan"],original)
         self.assertFalse(app.exception,[e.message for e in app.exception])
-        self.assertEqual(len(app.multiselect(key="ux503_bases").value),4)
+        self.assertTrue(2 <= len(app.multiselect(key="ux503_bases").value) <= 5)
         app.button(key="ux503_back_to_wishes").click().run()
         self.assertEqual(app.session_state["ux_section"],"Passeios")
         self.assertEqual(app.session_state["ux502_interests"],sample_wishes())
         self.assertEqual(app.session_state["advisor_plan"],original)
+
+    def test_base_switch_limits_and_remove_official(self):
+        app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
+        app.radio(key="ux_area").set_value("Explorar").run()
+        app.segmented_control(key="ux_section").set_value("Comparar").run()
+        original=deepcopy(app.session_state["advisor_plan"])
+        official=original["base_city"]
+        app.session_state["ux502_interests"]=sample_wishes()
+        app.run()
+        app.multiselect(key="ux503_bases").set_value(["lille","metz"]).run()
+        self.assertEqual(app.session_state["ux503_bases"],["lille","metz"])
+        self.assertNotIn(official,app.session_state["ux503_bases"])
+        self.assertFalse(app.exception,[e.message for e in app.exception])
+        self.assertEqual(app.session_state["advisor_plan"],original)
+        matrix=next(f.value for f in app.dataframe
+                    if "Destino · prioridade" in f.value.columns)
+        self.assertIn("Lille",matrix.columns)
+        self.assertIn("Metz",matrix.columns)
+        self.assertNotIn("Mulhouse",matrix.columns)
+        app.multiselect(key="ux503_bases").set_value(["lille"]).run()
+        self.assertTrue(any("duas e cinco" in str(w.message).lower() for w in app.warning))
+        app.multiselect(key="ux503_bases").set_value([
+            "mulhouse","strasbourg","lille","metz","nancy","basel"]).run()
+        self.assertTrue(any("duas e cinco" in str(w.message).lower() for w in app.warning))
+        self.assertEqual(app.session_state["advisor_plan"],original)
+
+    def test_display_filter_and_priority_updates_matrix(self):
+        app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
+        app.radio(key="ux_area").set_value("Explorar").run()
+        app.segmented_control(key="ux_section").set_value("Comparar").run()
+        original=deepcopy(app.session_state["advisor_plan"])
+        wish=sample_wishes()
+        app.session_state["ux502_interests"]=wish
+        app.run()
+        app.multiselect(key="ux503_visible_destinations").set_value(["bruges_be","colmar"]).run()
+        matrix=next(f.value for f in app.dataframe
+                    if "Destino · prioridade" in f.value.columns)
+        self.assertEqual(len(matrix),2)
+        self.assertIn("Colmar · Imperdível",list(matrix["Destino · prioridade"]))
+        self.assertEqual(app.session_state["ux502_interests"],wish)
+        revised=set_interest(wish,"bruges_be","must_visit")
+        app.session_state["ux502_interests"]=revised
+        app.run()
+        matrix=next(f.value for f in app.dataframe
+                    if "Destino · prioridade" in f.value.columns)
+        self.assertIn("Bruges · Imperdível",list(matrix["Destino · prioridade"]))
+        self.assertEqual(app.session_state["advisor_plan"],original)
+        self.assertEqual(app.session_state["ux502_interests"],revised)
 
     def test_compare_reflects_changed_priorities_and_favorites(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
