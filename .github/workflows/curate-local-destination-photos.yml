@@ -1,0 +1,35 @@
+name: Curate local destination photos (one-time PR preparation)
+
+on:
+  push:
+    branches:
+      - feature/ux-local-curated-destination-photos
+    paths:
+      - .github/workflows/curate-local-destination-photos.yml
+
+permissions:
+  contents: write
+
+jobs:
+  download-and-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install photo optimizer
+        run: python -m pip install --disable-pip-version-check Pillow requests
+      - name: Download five licensed images and convert to local WebP files
+        run: python scripts/curate_destination_photos.py
+      - name: Commit local imagery to this PR branch only
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/destinations/*.webp
+          if ! git diff --cached --quiet; then
+            git commit -m "Add five locally bundled licensed destination photographs"
+            git push origin HEAD:refs/heads/feature/ux-local-curated-destination-photos
+          fi
