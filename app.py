@@ -22,6 +22,7 @@ from calendar_model import calendar_plan
 from route_preview import route_endpoints
 from attractions_ui import render_explorer
 from ux501_destination_discovery_ui import render_independent_destination_discovery
+from ux503_destination_base_comparison_ui import render_wishlist_base_comparison
 from travel_advisor_ui import render_advisor, _recover_saved_plan, _secure_save, _owner_signed_in
 from travel_dashboard_ui import render_trip_dashboard
 from itinerary_flow_ui import render_itinerary_workbench
@@ -696,475 +697,477 @@ elif page == "Mapa & destinos":
 
 elif page == "Comparar cidades":
     st.markdown("## Comparar cidades-base")
-    st.caption("Primeiro compare o impacto da troca, depois consulte as pesquisas históricas.")
-    compare_mode=st.segmented_control(
+    render_wishlist_base_comparison(plan=active_plan())
+    with st.expander("Análises antigas de cidades-base · avançado", expanded=False):
+        st.caption("Ferramentas anteriores preservadas para consultas adicionais.")
+        compare_mode=st.segmented_control(
         "Tipo de análise",["Impacto da troca","Pesos das 30 cidades",
         "Comparar mesmas viagens","Uma ou duas bases","Estudo histórico"],
         key="ux_compare_mode",selection_mode="single")
-    if compare_mode in ("Impacto da troca",None):
-        render_city_decision(active_plan(),data,
-                             sync_sources["finance"]["status"]=="live",
-                             int(st.session_state.get("ux_days_value",60)))
-    elif compare_mode=="Pesos das 30 cidades":
-        render_weight_coverage()
-    elif compare_mode=="Comparar mesmas viagens":
-        render_route_comparison(load_exploration())
-    elif compare_mode=="Uma ou duas bases":
-        render_split_stay(load_exploration(),active_plan(),data,
-                          sync_sources["finance"]["status"]=="live",
-                          st.session_state.get("advisor_eurfx",6.3))
-    else:
+        if compare_mode in ("Impacto da troca",None):
+            render_city_decision(active_plan(),data,
+                                 sync_sources["finance"]["status"]=="live",
+                                 int(st.session_state.get("ux_days_value",60)))
+        elif compare_mode=="Pesos das 30 cidades":
+            render_weight_coverage()
+        elif compare_mode=="Comparar mesmas viagens":
+            render_route_comparison(load_exploration())
+        elif compare_mode=="Uma ou duas bases":
+            render_split_stay(load_exploration(),active_plan(),data,
+                              sync_sources["finance"]["status"]=="live",
+                              st.session_state.get("advisor_eurfx",6.3))
+        else:
 
-        import pandas as pd
-        city_data = load_cities()
-        all_exploratory_bases=base_options()
-        compare_names={item["id"]:item["name"] for item in all_exploratory_bases}
-        current_candidate=st.session_state.get("scenario_base_selected",active_plan()["base_city"])
-        if current_candidate not in compare_names:
-            current_candidate=active_plan()["base_city"]
-        sync_city_widget("compare_exploratory_base",list(compare_names))
-        selected_candidate=st.selectbox(
-            "Cidade-base hipotética compartilhada", list(compare_names),
-            index=list(compare_names).index(current_candidate),
-            format_func=lambda k:compare_names[k],key="compare_exploratory_base",
-            on_change=set_city_from_widget,args=("compare_exploratory_base",))
-        st.caption("Seleção exploratória compartilhada com Explorar bases e Orçamento. "
-                   "As quatro cidades do comparador histórico continuam com métricas "
-                   "mais detalhadas; outras cidades podem não ter cotações equivalentes.")
-        st.button("Abrir passeios e rotas desta base",
-                  key="compare_open_base",on_click=navigate_to_base_explorer)
-        if selected_candidate not in {"mulhouse","strasbourg","metz","nancy"}:
-            research=find_city(load_research(),selected_candidate)
-            observed=observed_housing(research)
-            rails=expanded_rail_routes(selected_candidate)
-            with st.expander("Pesquisa da candidata · "+
-                             compare_names[selected_candidate],expanded=True):
-                st.caption("Região: "+research["corridor"]+
-                           " · "+str(observed["count"])+" anúncios observados em 2026"
-                           " · 0 cotações completas de 2027.")
-                if observed["minimum_eur_month"] is not None:
-                    st.caption("Menor anúncio histórico: € "+
-                               f'{observed["minimum_eur_month"]:,.0f}'+
-                               "/mês. Sem contrato e taxas verificados; NÃO é "
-                               "preço para 56–60 noites.")
-                if rails:
-                    st.dataframe([{
-                        "Destino":line["destination_name"],
-                        "Trem mais rápido (min)":line["oneway_minutes"],
-                        "Tarifa publicada desde (€ / pessoa / trecho)":
-                            line["fare_eur_person_oneway"] if line["fare_eur_person_oneway"]
-                            is not None else "Não cotada",
-                        "Retorno 2027":"Não verificado",
-                    } for line in rails],hide_index=True,width="stretch")
-                else:
-                    st.caption("Rotas base → destino ainda não pesquisadas no "
-                               "mesmo padrão do comparador histórico.")
-                st.warning("Esta cidade não possui dados suficientes para o ranking "
-                           "histórico das quatro bases. Não comparar totais parciais "
-                           "como economias garantidas.")
-        city_audit = load_audit()
-        market = load_market()
-        round2 = load_round2()
-        market_by_name = {city["name"]: city for city in market["cities"]}
-        audit_by_name = {city["name"]: city for city in city_audit["cities"]}
-        criteria_ids = [criterion["id"] for criterion in city_data["criteria"]]
+            import pandas as pd
+            city_data = load_cities()
+            all_exploratory_bases=base_options()
+            compare_names={item["id"]:item["name"] for item in all_exploratory_bases}
+            current_candidate=st.session_state.get("scenario_base_selected",active_plan()["base_city"])
+            if current_candidate not in compare_names:
+                current_candidate=active_plan()["base_city"]
+            sync_city_widget("compare_exploratory_base",list(compare_names))
+            selected_candidate=st.selectbox(
+                "Cidade-base hipotética compartilhada", list(compare_names),
+                index=list(compare_names).index(current_candidate),
+                format_func=lambda k:compare_names[k],key="compare_exploratory_base",
+                on_change=set_city_from_widget,args=("compare_exploratory_base",))
+            st.caption("Seleção exploratória compartilhada com Explorar bases e Orçamento. "
+                       "As quatro cidades do comparador histórico continuam com métricas "
+                       "mais detalhadas; outras cidades podem não ter cotações equivalentes.")
+            st.button("Abrir passeios e rotas desta base",
+                      key="compare_open_base",on_click=navigate_to_base_explorer)
+            if selected_candidate not in {"mulhouse","strasbourg","metz","nancy"}:
+                research=find_city(load_research(),selected_candidate)
+                observed=observed_housing(research)
+                rails=expanded_rail_routes(selected_candidate)
+                with st.expander("Pesquisa da candidata · "+
+                                 compare_names[selected_candidate],expanded=True):
+                    st.caption("Região: "+research["corridor"]+
+                               " · "+str(observed["count"])+" anúncios observados em 2026"
+                               " · 0 cotações completas de 2027.")
+                    if observed["minimum_eur_month"] is not None:
+                        st.caption("Menor anúncio histórico: € "+
+                                   f'{observed["minimum_eur_month"]:,.0f}'+
+                                   "/mês. Sem contrato e taxas verificados; NÃO é "
+                                   "preço para 56–60 noites.")
+                    if rails:
+                        st.dataframe([{
+                            "Destino":line["destination_name"],
+                            "Trem mais rápido (min)":line["oneway_minutes"],
+                            "Tarifa publicada desde (€ / pessoa / trecho)":
+                                line["fare_eur_person_oneway"] if line["fare_eur_person_oneway"]
+                                is not None else "Não cotada",
+                            "Retorno 2027":"Não verificado",
+                        } for line in rails],hide_index=True,width="stretch")
+                    else:
+                        st.caption("Rotas base → destino ainda não pesquisadas no "
+                                   "mesmo padrão do comparador histórico.")
+                    st.warning("Esta cidade não possui dados suficientes para o ranking "
+                               "histórico das quatro bases. Não comparar totais parciais "
+                               "como economias garantidas.")
+            city_audit = load_audit()
+            market = load_market()
+            round2 = load_round2()
+            market_by_name = {city["name"]: city for city in market["cities"]}
+            audit_by_name = {city["name"]: city for city in city_audit["cities"]}
+            criteria_ids = [criterion["id"] for criterion in city_data["criteria"]]
 
-        st.markdown(
-            "<div class='page-eyebrow'>PLANEJAMENTO 2027 · FRANÇA</div>"
-            "<div class='page-title'>Qual cidade combina mais com a nossa viagem?</div>"
-            "<div class='page-subtitle'>Um resumo claro de quatro opções, com moradia, deslocamentos e "
-            "preferências separados. Os dados históricos ajudam a pesquisar, mas não autorizam reservas.</div>",
-            unsafe_allow_html=True,
-        )
-        total_observed = sum(len(city["offers"]) for city in market["cities"])
-        for col, title, value, info, tone in zip(
-            st.columns(4, gap="small"),
-            ["Cidades pesquisadas", "Anúncios observados", "Cotações válidas para 2027", "Última coleta"],
-            [str(len(market["cities"])), str(total_observed),
-             str(sum(city["rental_quote_eligible_2027"] for city in market["cities"])), "14/11/2026"],
-            ["Todas usam o mesmo padrão", "Apenas amostra de catálogo",
-             "Imóvel, datas e contrato não verificados", "Fotografia histórica do mercado"],
-            ["blue", "mint", "cream", "blue"],
-        ):
-            with col:
-                st.markdown(
-                    f"<div class='page-stat page-stat--{tone}'>"
-                    f"<div class='page-stat__label'>{escape(title)}</div>"
-                    f"<div class='page-stat__value'>{escape(value)}</div>"
-                    f"<div class='page-stat__hint'>{escape(info)}</div></div>",
-                    unsafe_allow_html=True,
-                )
-        # Native segmented control has its own selected-state visual; it does not rely
-        # on fragile CSS selectors for Streamlit tab internals.
-        sections = ["Visão rápida", "Moradia", "Transporte e custos", "Comparar e ajustar"]
-        active_section = st.segmented_control(
-            "Seção do comparador", sections, default="Visão rápida",
-            selection_mode="single", key="city_compare_section",
-            label_visibility="collapsed",
-            format_func=lambda section: {
-                "Visão rápida": "◉  Visão rápida",
-                "Moradia": "⌂  Moradia",
-                "Transporte e custos": "⇄  Transporte e custos",
-                "Comparar e ajustar": "⚖  Comparar e ajustar",
-            }[section],
-        )
-        if active_section is None:
-            active_section = "Visão rápida"
-
-        if active_section == "Visão rápida":
-            st.markdown("<div class='page-section'>Quatro cidades, principais indicadores</div>",
-                        unsafe_allow_html=True)
-            st.caption("Aluguel: mediana de somente três anúncios observados em 2026, não média de mercado "
-                       "nem custo para dois meses. Passe: tarifa publicada de 2025–26 por pessoa/mês.")
-            # Cards are informative; no rank or “winner” is inferred from a non-representative sample.
-            for group_start in range(0, len(market["cities"]), 2):
-                for col, city in zip(st.columns(2, gap="medium"),
-                                     market["cities"][group_start:group_start + 2]):
-                    summary = observed_rent_summary(city)
-                    audit = audit_by_name[city["name"]]
-                    risks = audit["risks"]
-                    with col:
-                        st.markdown(
-                            "<div class='city-digest'>"
-                            "<div class='city-digest__top'>"
-                            f"<span class='city-digest__name'>{escape(city['name'])}</span>"
-                            "<span class='city-digest__status'>● 2027 pendente</span></div>"
-                            "<div class='city-digest__metrics'>"
-                            "<div><div class='city-digest__label'>Mediana de 3 anúncios</div>"
-                            f"<div class='city-digest__big'>€ {summary['sample_median_eur_month']:,.0f}"
-                            "<small>/mês</small></div></div>"
-                            "<div><div class='city-digest__label'>Passe urbano publicado</div>"
-                            f"<div class='city-digest__big'>€ {city['urban_pass']['fare_eur_month_person']:.2f}"
-                            "<small>/pessoa</small></div></div></div>"
-                            "<div class='city-digest__foot'>"
-                            f"<span>Faixa da amostra: € {summary['min_eur_month']:,.0f}–"
-                            f"{summary['max_eur_month']:,.0f}/mês</span>"
-                            f"<span>{len(city['offers'])} anúncios observados</span></div>"
-                            f"<div class='city-digest__alert'><strong>A verificar</strong> · "
-                            f"{escape(risks[0])}</div></div>",
-                            unsafe_allow_html=True,
-                        )
-
-
-            st.markdown("<div class='page-section'>Custos ilustrativos do mesmo estilo de vida</div>",
-                        unsafe_allow_html=True)
-            st.caption("Cenário de R$70 mil, casal, 60 dias na França, duas saídas de €60 por semana "
-                       "e câmbio hipotético R$6,30/€. Substitui apenas o aluguel e a verba de restaurantes "
-                       "pelas hipóteses indicadas; não inclui taxas adicionais de locação nem comprova disponibilidade.")
-            example_scenario=get_scenario(data,"70k")
-            example_split=resolve_french_budget(example_scenario,sync_sources["finance"]["status"]=="live")
-            quick=[]
-            for city in city_data["cities"]:
-                guess=scenario_total(example_scenario,example_split,french_days=example_split["french_days"],
-                        outings_weekly=2,outing_couple_eur=60,fx_brl_per_eur=6.3,
-                        rent_override_eur_month=city["reference_rent_eur"])
-                quick.append({"Cidade":city["name"],
-                              "Aluguel hipotético €/mês":city["reference_rent_eur"],
-                              "Viagem simulada (R$)":guess["total"],
-                              "Margem até o teto (R$)":guess["margin"],
-                              "Confiabilidade":"Referência histórica — não cotada"})
-            st.dataframe(pd.DataFrame(quick),hide_index=True,use_container_width=True,
-                         column_config={
-                            "Aluguel hipotético €/mês":st.column_config.NumberColumn(format="€ %.0f"),
-                            "Viagem simulada (R$)":st.column_config.NumberColumn(format="R$ %.0f"),
-                            "Margem até o teto (R$)":st.column_config.NumberColumn(format="R$ %.0f"),
-                         })
-            st.caption("Esta comparação é uma análise de sensibilidade, não uma previsão verificável do "
-                       "custo completo. O indicador de confiabilidade para reserva continua insuficiente.")
-
-            st.markdown("<div class='page-section'>O que já sabemos — e o que não sabemos</div>",
-                        unsafe_allow_html=True)
-            known, unknown = st.columns(2, gap="medium")
-            with known:
-                st.markdown(
-                    "<div class='city-fact city-fact--good'>"
-                    "<strong>✓ Evidências já coletadas</strong>"
-                    "<p>Três anúncios de catálogo por cidade, exemplos ferroviários e tarifas de "
-                    "transporte local publicadas. O ranking editorial histórico permanece disponível.</p>"
-                    "</div>", unsafe_allow_html=True)
-            with unknown:
-                st.markdown(
-                    "<div class='city-fact city-fact--warn'>"
-                    "<strong>! Ainda não é uma cotação de viagem</strong>"
-                    "<p>Faltam preços totais para 55–65 noites, contas, casal permitido, internet, "
-                    "contrato adequado e deslocamentos completos. Nenhuma cidade foi escolhida.</p>"
-                    "</div>", unsafe_allow_html=True)
-            st.caption("Use Moradia e Transporte para examinar evidências. "
-                       "Use Comparar e ajustar para recalcular somente as notas editoriais de 2026.")
-
-        elif active_section == "Moradia":
-            st.markdown("<div class='page-section'>Aluguéis observados por cidade</div>",
-                        unsafe_allow_html=True)
             st.markdown(
-                "<div class='city-fact city-fact--warn'><strong>! Preço anunciado ≠ cotação elegível</strong>"
-                "<p>Estes 12 registros são observações de catálogos de novembro/2026, não links únicos "
-                "de imóveis confirmados para duas pessoas. Contas variam; nenhuma estadia para "
-                "setembro–novembro/2027 foi confirmada.</p></div>",
+                "<div class='page-eyebrow'>PLANEJAMENTO 2027 · FRANÇA</div>"
+                "<div class='page-title'>Qual cidade combina mais com a nossa viagem?</div>"
+                "<div class='page-subtitle'>Um resumo claro de quatro opções, com moradia, deslocamentos e "
+                "preferências separados. Os dados históricos ajudam a pesquisar, mas não autorizam reservas.</div>",
                 unsafe_allow_html=True,
             )
-            hcity = st.selectbox("Cidade", ["Todas"] + [c["name"] for c in market["cities"]],
-                                 key="city_housing_filter")
-            housing_rows = []
-            for city in market["cities"]:
-                if hcity != "Todas" and city["name"] != hcity:
-                    continue
-                for offer in city["offers"]:
-                    utilities = {"included": "Incluídas (anúncio)",
-                                 "excluded": "Não incluídas",
-                                 "partial": "Parciais"}.get(offer["utilities"], "Não informado")
-                    housing_rows.append({
-                        "Cidade": city["name"], "Local / rua": offer["street"],
-                        "Área (m²)": offer["size_m2"], "€/mês": offer["observed_eur_month"],
-                        "Contas": utilities, "Fonte": city["housing_catalogue"],
-                    })
-            st.dataframe(pd.DataFrame(housing_rows), hide_index=True, use_container_width=True,
-                         column_config={
-                             "€/mês": st.column_config.NumberColumn(format="€ %.0f"),
-                             "Área (m²)": st.column_config.NumberColumn(format="%d m²"),
-                             "Fonte": st.column_config.LinkColumn("Catálogo", display_text="Abrir"),
-                         })
-            st.caption("Uma URL de catálogo pode mudar ou deixar de mostrar o anúncio. "
-                       "A mediana apresentada na Visão rápida resume apenas os três itens coletados.")
-            with st.expander("O que precisamos confirmar em cada imóvel", expanded=False):
-                st.markdown(
-                    "Para duas pessoas e 55–65 noites: datas, disponibilidade, preço total, "
-                    "taxas, contas, limpeza e caução; ocupação autorizada, modalidade contratual, "
-                    "internet e local para home office. O aluguel mensal observado não pode "
-                    "ser multiplicado por dois e apresentado como oferta real.")
-            with st.expander("Divergências das referências financeiras originais", expanded=False):
-                for audit in city_audit["cities"]:
-                    st.markdown(f"**{escape(audit['name'])}**")
-                    st.caption(
-                        f"Modelo editorial: €{audit['historic_reference_rent_eur']}/mês · "
-                        f"Premissa logística: €{audit['alternative_logistics_rent_eur']}/mês. "
-                        "São parâmetros diferentes, não duas cotações equivalentes.")
+            total_observed = sum(len(city["offers"]) for city in market["cities"])
+            for col, title, value, info, tone in zip(
+                st.columns(4, gap="small"),
+                ["Cidades pesquisadas", "Anúncios observados", "Cotações válidas para 2027", "Última coleta"],
+                [str(len(market["cities"])), str(total_observed),
+                 str(sum(city["rental_quote_eligible_2027"] for city in market["cities"])), "14/11/2026"],
+                ["Todas usam o mesmo padrão", "Apenas amostra de catálogo",
+                 "Imóvel, datas e contrato não verificados", "Fotografia histórica do mercado"],
+                ["blue", "mint", "cream", "blue"],
+            ):
+                with col:
+                    st.markdown(
+                        f"<div class='page-stat page-stat--{tone}'>"
+                        f"<div class='page-stat__label'>{escape(title)}</div>"
+                        f"<div class='page-stat__value'>{escape(value)}</div>"
+                        f"<div class='page-stat__hint'>{escape(info)}</div></div>",
+                        unsafe_allow_html=True,
+                    )
+            # Native segmented control has its own selected-state visual; it does not rely
+            # on fragile CSS selectors for Streamlit tab internals.
+            sections = ["Visão rápida", "Moradia", "Transporte e custos", "Comparar e ajustar"]
+            active_section = st.segmented_control(
+                "Seção do comparador", sections, default="Visão rápida",
+                selection_mode="single", key="city_compare_section",
+                label_visibility="collapsed",
+                format_func=lambda section: {
+                    "Visão rápida": "◉  Visão rápida",
+                    "Moradia": "⌂  Moradia",
+                    "Transporte e custos": "⇄  Transporte e custos",
+                    "Comparar e ajustar": "⚖  Comparar e ajustar",
+                }[section],
+            )
+            if active_section is None:
+                active_section = "Visão rápida"
 
-        elif active_section == "Transporte e custos":
-            st.markdown("<div class='page-section'>Passes urbanos publicados</div>",
-                        unsafe_allow_html=True)
-            pass_rows = [
-                {"Cidade": city["name"],
-                 "€/pessoa/mês": city["urban_pass"]["fare_eur_month_person"],
-                 "Período": city["urban_pass"]["price_period"],
-                 "Operadora": city["urban_pass"]["source_url"]}
-                for city in market["cities"]
-            ]
-            st.dataframe(pd.DataFrame(pass_rows), hide_index=True, use_container_width=True,
-                         column_config={
-                             "€/pessoa/mês": st.column_config.NumberColumn(format="€ %.2f"),
-                             "Operadora": st.column_config.LinkColumn("Fonte oficial", display_text="Consultar"),
-                         })
-            st.caption("Tarifas nominais de 2025–26: verificar requisitos de acesso e quantidade "
-                       "de meses cobrados para dois adultos; valores não confirmados para 2027.")
-            st.markdown("<div class='page-section'>Trem: duração e tarifa ilustrativa</div>",
-                        unsafe_allow_html=True)
-            rail_rows = []
-            for city in market["cities"]:
-                for route in city["rail"]:
-                    rail_rows.append({
-                        "Origem": city["name"], "Destino": route["destination"],
-                        "Trem (min)": route["train_minutes"],
-                        "€/pessoa/trecho*": route["discounted_eur_leg_person"],
-                        "Fonte": route["source_url"],
-                    })
-            st.dataframe(pd.DataFrame(rail_rows), hide_index=True, use_container_width=True,
-                         column_config={
-                             "Trem (min)": st.column_config.NumberColumn(format="%d min"),
-                             "€/pessoa/trecho*": st.column_config.NumberColumn(format="€ %.2f"),
-                             "Fonte": st.column_config.LinkColumn("Fonte TER", display_text="Consultar"),
-                         })
-            st.markdown(
-                "<div class='city-fact city-fact--info'><strong>* Tarifa reduzida Carte Fluo</strong>"
-                "<p>É uma referência de preço por pessoa e por trecho, que pode exigir cartão. "
-                "Os minutos são de estação a estação, sem conexões locais. Faltam horários, "
-                "tarifas e retornos efetivos para a viagem de 2027.</p></div>",
-                unsafe_allow_html=True)
-            st.markdown("<div class='page-section'>Supermercado e lazer</div>",
-                        unsafe_allow_html=True)
-            basket = market["common_costs"]
-            st.markdown(
-                "<div class='city-fact city-fact--info'>"
-                "<strong>Hipótese compartilhada para as quatro cidades</strong>"
-                f"<div class='city-cost-highlight'>€ {basket['groceries_eur_week_couple']:.2f}"
-                "<span> / semana para duas pessoas</span></div>"
-                "<p>Cesta histórica ilustrativa do projeto, não quatro pesquisas locais. "
-                "Restaurantes, academia e lazer ainda precisam de levantamento equivalente "
-                "por bairro. Evitar somar essa referência novamente ao orçamento oficial.</p>"
-                "</div>", unsafe_allow_html=True)
-            st.link_button("Consultar origem da cesta no Drive", basket["source_url"])
-
-            st.markdown("<div class='page-section'>Novas evidências de custo de vida</div>",unsafe_allow_html=True)
-            st.markdown(
-                "<div class='city-fact city-fact--info'><strong>Leitura correta dos preços</strong>"
-                "<p>Os aluguéis abaixo são estimativas de contratos residenciais comuns em €/m²/mês "
-                "(não hospedagem de temporada). O jantar para dois é um dado colaborativo do Numbeo, "
-                "não preço de reserva ou média estatisticamente comprovada.</p></div>",
-                unsafe_allow_html=True)
-            economic_rows = []
-            for rec in round2["cities"]:
-                economic_rows.append({
-                    "Cidade":rec["name"],
-                    "Aluguel residencial €/m²/mês":rec["residential_rent_eur_sqm_month"],
-                    "Jantar para dois €":rec["restaurant_two_midrange_eur"],
-                    "Fonte jantar":rec["restaurant_source_url"]
-                })
-            st.dataframe(pd.DataFrame(economic_rows), hide_index=True, use_container_width=True,
-                         column_config={
-                             "Aluguel residencial €/m²/mês":st.column_config.NumberColumn(format="€ %.2f"),
-                             "Jantar para dois €":st.column_config.NumberColumn(format="€ %.2f"),
-                             "Fonte jantar":st.column_config.LinkColumn("Numbeo", display_text="Consultar"),
-                         })
-            st.link_button("Metodologia e dados do aluguel residencial",
-                           round2["common_sources"][0]["url"])
-            st.caption("Indicador de aluguel do MeilleursAgents em 01/11/2026, apartamento residencial "
-                       "comum; o jantar é um item comparável nas páginas consultadas em novembro/2026. "
-                       "Metz possui lacunas de amostra em vários produtos. Não converter esses valores "
-                       "em custo real da viagem.")
-
-            st.markdown("<div class='page-section'>Plano B para o trabalho remoto</div>",unsafe_allow_html=True)
-            st.markdown("<div class='page-subtitle'>Opções de coworking publicadas: preços, modalidades "
-                        "e horários não equivalentes. Não garantem videoconferências até o fim "
-                        "do expediente brasileiro.</div>", unsafe_allow_html=True)
-            coworking_rows = []
-            for rec in round2["cities"]:
-                office = rec["coworking"]
-                coworking_rows.append({
-                    "Cidade":rec["name"], "Espaço":office["name"],
-                    "Preço publicado €":office["price_eur"],
-                    "Modalidade":office["price_basis"],
-                    "Compatível até 22–23h":("Não" if office["late_work_compatible"] is False else "A confirmar"),
-                    "Fonte":office["source_url"]
-                })
-            st.dataframe(pd.DataFrame(coworking_rows), hide_index=True, use_container_width=True,
-                         column_config={
-                             "Preço publicado €":st.column_config.NumberColumn(format="€ %.2f"),
-                             "Fonte":st.column_config.LinkColumn("Fonte", display_text="Consultar")
-                         })
-            with st.expander("Horários, disponibilidade e condições de cada coworking"):
-                for rec in round2["cities"]:
-                    office = rec["coworking"]
-                    st.markdown(f"**{escape(rec['name'])} — {escape(office['name'])}**")
-                    st.caption("Horário: " + (office["schedule"] or "não verificado") +
-                               " · " + office["note"])
-            st.markdown("<div class='city-fact city-fact--warn'><strong>Alojamento e contrato continuam bloqueantes</strong>"
-                        "<p>O bail mobilité francês pode servir para contratos temporários, "
-                        "mas depende de uma situação legal qualificadora. Não assumir que "
-                        "trabalhar remotamente para uma empresa brasileira seja suficiente. "
-                        "Nenhuma oferta foi confirmada para a janela de 2027.</p></div>",
-                        unsafe_allow_html=True)
-            st.link_button("Ver regras de contrato no Service-Public",
-                           round2["common_sources"][1]["url"])
-
-
-        elif active_section == "Comparar e ajustar":
-            st.markdown("<div class='page-section'>Ranking de preferências históricas</div>",
-                        unsafe_allow_html=True)
-            st.caption("A pontuação de 0 a 5 vem de avaliações editoriais de 2026. "
-                       "Não mede disponibilidade de imóveis ou custos de 2027.")
-            profile = st.selectbox(
-                "Perfil de comparação", city_data["presets"],
-                format_func=lambda item: item["label"], key="city_compare_profile",
-                help="Pesos extraídos da matriz histórica do projeto.")
-            initialize_weight_state(st.session_state, profile["id"],
-                                    get_preset(city_data, profile["id"]))
-            weights = {}
-            for idx, criterion in enumerate(city_data["criteria"]):
-                # Three well-balanced columns instead of a long vertical list.
-                if idx % 3 == 0:
-                    slider_cols = st.columns(3, gap="medium")
-                with slider_cols[idx % 3]:
-                    weights[criterion["id"]] = st.slider(
-                        criterion["label"], min_value=0, max_value=100, step=5,
-                        key=f"city_weight_{criterion['id']}", help=criterion["explanation"])
-            total_weights = sum(weights.values())
-            if total_weights == 0:
-                st.warning("Ajuste pelo menos um critério acima de zero.")
-            else:
-                actual_weights = normalized_weights(weights, criteria_ids)
-                st.caption("Pesos normalizados: " + " · ".join(
-                    f"{crit['label']}: {actual_weights[crit['id']]*100:.0f}%"
-                    for crit in city_data["criteria"]))
-                ranking = rank_cities(city_data["cities"], weights, criteria_ids)
-                for group_start in range(0, len(ranking), 2):
-                    for col, (position, result) in zip(
-                        st.columns(2, gap="medium"),
-                        list(enumerate(ranking, start=1))[group_start:group_start + 2]
-                    ):
-                        city = result["city"]
-                        pct = max(0.0, min(100.0, result["score"] * 20))
+            if active_section == "Visão rápida":
+                st.markdown("<div class='page-section'>Quatro cidades, principais indicadores</div>",
+                            unsafe_allow_html=True)
+                st.caption("Aluguel: mediana de somente três anúncios observados em 2026, não média de mercado "
+                           "nem custo para dois meses. Passe: tarifa publicada de 2025–26 por pessoa/mês.")
+                # Cards are informative; no rank or “winner” is inferred from a non-representative sample.
+                for group_start in range(0, len(market["cities"]), 2):
+                    for col, city in zip(st.columns(2, gap="medium"),
+                                         market["cities"][group_start:group_start + 2]):
+                        summary = observed_rent_summary(city)
+                        audit = audit_by_name[city["name"]]
+                        risks = audit["risks"]
                         with col:
                             st.markdown(
-                                "<div class='city-ranking-card'>"
-                                f"<span>#{position} · Preferência simulada</span>"
-                                f"<strong>{escape(city['name'])}</strong>"
-                                f"<div class='city-ranking-number'>{result['score']:.3f}"
-                                "<small> / 5</small></div>"
-                                f"<div class='city-score__bar'><span style='width:{pct:.2f}%'></span></div>"
-                                "</div>", unsafe_allow_html=True)
-                score_rows = [
-                    {"Cidade": result["city"]["name"],
-                     "Score ponderado": round(result["score"], 3),
-                     **{criterion["label"]: result["city"]["scores"][criterion["id"]]
-                        for criterion in city_data["criteria"]}}
-                    for result in ranking
-                ]
-                with st.expander("Ver notas de cada critério", expanded=False):
-                    st.dataframe(pd.DataFrame(score_rows), hide_index=True,
-                                 use_container_width=True,
-                                 column_config={
-                                     "Score ponderado": st.column_config.NumberColumn(format="%.3f")
-                                 })
-                st.markdown("<div class='page-section'>Duas cidades, lado a lado</div>",
+                                "<div class='city-digest'>"
+                                "<div class='city-digest__top'>"
+                                f"<span class='city-digest__name'>{escape(city['name'])}</span>"
+                                "<span class='city-digest__status'>● 2027 pendente</span></div>"
+                                "<div class='city-digest__metrics'>"
+                                "<div><div class='city-digest__label'>Mediana de 3 anúncios</div>"
+                                f"<div class='city-digest__big'>€ {summary['sample_median_eur_month']:,.0f}"
+                                "<small>/mês</small></div></div>"
+                                "<div><div class='city-digest__label'>Passe urbano publicado</div>"
+                                f"<div class='city-digest__big'>€ {city['urban_pass']['fare_eur_month_person']:.2f}"
+                                "<small>/pessoa</small></div></div></div>"
+                                "<div class='city-digest__foot'>"
+                                f"<span>Faixa da amostra: € {summary['min_eur_month']:,.0f}–"
+                                f"{summary['max_eur_month']:,.0f}/mês</span>"
+                                f"<span>{len(city['offers'])} anúncios observados</span></div>"
+                                f"<div class='city-digest__alert'><strong>A verificar</strong> · "
+                                f"{escape(risks[0])}</div></div>",
+                                unsafe_allow_html=True,
+                            )
+
+
+                st.markdown("<div class='page-section'>Custos ilustrativos do mesmo estilo de vida</div>",
                             unsafe_allow_html=True)
-                selections = st.multiselect("Escolha até duas cidades",
-                                            [c["name"] for c in city_data["cities"]],
-                                            default=["Mulhouse", "Strasbourg"],
-                                            max_selections=2, key="city_compare_pair")
-                results_by_name = {item["city"]["name"]: item for item in ranking}
-                if not selections:
-                    st.info("Escolha uma ou duas cidades para comparar os detalhes.")
-                for col, city_name in zip(st.columns(2, gap="medium"), selections):
-                    city = results_by_name[city_name]["city"]
-                    market_city = market_by_name[city_name]
-                    sample = observed_rent_summary(market_city)
-                    with col:
-                        st.markdown(
-                            "<div class='city-side'>"
-                            f"<div class='city-side__name'>{escape(city_name)}</div>"
-                            f"<div class='city-side__score'>{results_by_name[city_name]['score']:.3f}/5"
-                            " <small>nota editorial</small></div>"
-                            f"<div class='city-side__sample'>€ {sample['sample_median_eur_month']:,.0f}"
-                            " <small>/mês · mediana de 3 anúncios</small></div>"
-                            f"<p>{escape(city['summary'])}</p>"
-                            "</div>", unsafe_allow_html=True)
-                        st.markdown(
-                            "<div class='city-fact city-fact--good'><strong>✓ Pontos favoráveis "
-                            "(avaliação histórica)</strong><ul>" +
-                            "".join(f"<li>{escape(value)}</li>" for value in city["advantages"]) +
-                            "</ul></div>", unsafe_allow_html=True)
-                        st.markdown(
-                            "<div class='city-fact city-fact--warn'><strong>! Riscos e verificações</strong>"
-                            "<ul>" + "".join(f"<li>{escape(value)}</li>" for value in
-                                            (city["risks"] + audit_by_name[city_name]["risks"][:1])) +
-                            "</ul></div>", unsafe_allow_html=True)
-                        st.button(f"Simular {city_name} no orçamento →",key=f"city_budget_{city_name}",
-                                  use_container_width=True,on_click=simulate_city_in_budget,
-                                  args=(city_name,))
-                        with st.expander(f"Exemplos históricos em {city_name}"):
-                            for ad in city["sample_ads"]:
-                                st.link_button(ad["label"], ad["url"], use_container_width=True)
-            with st.expander("Metodologia, requisitos e documentos", expanded=False):
-                st.markdown("**Amostra observada ≠ preço de mercado ≠ nota editorial ≠ cotação para 2027.**")
-                st.caption("Todos os valores de mercado são registros de novembro de 2026. "
-                           "Uma cidade só estará pronta quando houver imóveis elegíveis para as datas "
-                           "reais, custo completo e os oito requisitos de auditoria comprovados.")
-                for gate in city_audit["standards"]:
-                    st.markdown(f"**{escape(gate['label'])}**")
-                    st.caption(gate["gate"])
-                st.link_button("Ver relatório e lacunas", 
-                    "https://github.com/clevertondecker/europe-trip/blob/main/RELATORIO_PRIMEIRA_COMPARACAO_REAL.md")
-                st.link_button("Abrir matriz original no Drive", city_data["source"]["url"])
-                st.link_button("Decisão D-004 no Drive", data["sources"]["decisions"])
+                st.caption("Cenário de R$70 mil, casal, 60 dias na França, duas saídas de €60 por semana "
+                           "e câmbio hipotético R$6,30/€. Substitui apenas o aluguel e a verba de restaurantes "
+                           "pelas hipóteses indicadas; não inclui taxas adicionais de locação nem comprova disponibilidade.")
+                example_scenario=get_scenario(data,"70k")
+                example_split=resolve_french_budget(example_scenario,sync_sources["finance"]["status"]=="live")
+                quick=[]
+                for city in city_data["cities"]:
+                    guess=scenario_total(example_scenario,example_split,french_days=example_split["french_days"],
+                            outings_weekly=2,outing_couple_eur=60,fx_brl_per_eur=6.3,
+                            rent_override_eur_month=city["reference_rent_eur"])
+                    quick.append({"Cidade":city["name"],
+                                  "Aluguel hipotético €/mês":city["reference_rent_eur"],
+                                  "Viagem simulada (R$)":guess["total"],
+                                  "Margem até o teto (R$)":guess["margin"],
+                                  "Confiabilidade":"Referência histórica — não cotada"})
+                st.dataframe(pd.DataFrame(quick),hide_index=True,use_container_width=True,
+                             column_config={
+                                "Aluguel hipotético €/mês":st.column_config.NumberColumn(format="€ %.0f"),
+                                "Viagem simulada (R$)":st.column_config.NumberColumn(format="R$ %.0f"),
+                                "Margem até o teto (R$)":st.column_config.NumberColumn(format="R$ %.0f"),
+                             })
+                st.caption("Esta comparação é uma análise de sensibilidade, não uma previsão verificável do "
+                           "custo completo. O indicador de confiabilidade para reserva continua insuficiente.")
+
+                st.markdown("<div class='page-section'>O que já sabemos — e o que não sabemos</div>",
+                            unsafe_allow_html=True)
+                known, unknown = st.columns(2, gap="medium")
+                with known:
+                    st.markdown(
+                        "<div class='city-fact city-fact--good'>"
+                        "<strong>✓ Evidências já coletadas</strong>"
+                        "<p>Três anúncios de catálogo por cidade, exemplos ferroviários e tarifas de "
+                        "transporte local publicadas. O ranking editorial histórico permanece disponível.</p>"
+                        "</div>", unsafe_allow_html=True)
+                with unknown:
+                    st.markdown(
+                        "<div class='city-fact city-fact--warn'>"
+                        "<strong>! Ainda não é uma cotação de viagem</strong>"
+                        "<p>Faltam preços totais para 55–65 noites, contas, casal permitido, internet, "
+                        "contrato adequado e deslocamentos completos. Nenhuma cidade foi escolhida.</p>"
+                        "</div>", unsafe_allow_html=True)
+                st.caption("Use Moradia e Transporte para examinar evidências. "
+                           "Use Comparar e ajustar para recalcular somente as notas editoriais de 2026.")
+
+            elif active_section == "Moradia":
+                st.markdown("<div class='page-section'>Aluguéis observados por cidade</div>",
+                            unsafe_allow_html=True)
+                st.markdown(
+                    "<div class='city-fact city-fact--warn'><strong>! Preço anunciado ≠ cotação elegível</strong>"
+                    "<p>Estes 12 registros são observações de catálogos de novembro/2026, não links únicos "
+                    "de imóveis confirmados para duas pessoas. Contas variam; nenhuma estadia para "
+                    "setembro–novembro/2027 foi confirmada.</p></div>",
+                    unsafe_allow_html=True,
+                )
+                hcity = st.selectbox("Cidade", ["Todas"] + [c["name"] for c in market["cities"]],
+                                     key="city_housing_filter")
+                housing_rows = []
+                for city in market["cities"]:
+                    if hcity != "Todas" and city["name"] != hcity:
+                        continue
+                    for offer in city["offers"]:
+                        utilities = {"included": "Incluídas (anúncio)",
+                                     "excluded": "Não incluídas",
+                                     "partial": "Parciais"}.get(offer["utilities"], "Não informado")
+                        housing_rows.append({
+                            "Cidade": city["name"], "Local / rua": offer["street"],
+                            "Área (m²)": offer["size_m2"], "€/mês": offer["observed_eur_month"],
+                            "Contas": utilities, "Fonte": city["housing_catalogue"],
+                        })
+                st.dataframe(pd.DataFrame(housing_rows), hide_index=True, use_container_width=True,
+                             column_config={
+                                 "€/mês": st.column_config.NumberColumn(format="€ %.0f"),
+                                 "Área (m²)": st.column_config.NumberColumn(format="%d m²"),
+                                 "Fonte": st.column_config.LinkColumn("Catálogo", display_text="Abrir"),
+                             })
+                st.caption("Uma URL de catálogo pode mudar ou deixar de mostrar o anúncio. "
+                           "A mediana apresentada na Visão rápida resume apenas os três itens coletados.")
+                with st.expander("O que precisamos confirmar em cada imóvel", expanded=False):
+                    st.markdown(
+                        "Para duas pessoas e 55–65 noites: datas, disponibilidade, preço total, "
+                        "taxas, contas, limpeza e caução; ocupação autorizada, modalidade contratual, "
+                        "internet e local para home office. O aluguel mensal observado não pode "
+                        "ser multiplicado por dois e apresentado como oferta real.")
+                with st.expander("Divergências das referências financeiras originais", expanded=False):
+                    for audit in city_audit["cities"]:
+                        st.markdown(f"**{escape(audit['name'])}**")
+                        st.caption(
+                            f"Modelo editorial: €{audit['historic_reference_rent_eur']}/mês · "
+                            f"Premissa logística: €{audit['alternative_logistics_rent_eur']}/mês. "
+                            "São parâmetros diferentes, não duas cotações equivalentes.")
+
+            elif active_section == "Transporte e custos":
+                st.markdown("<div class='page-section'>Passes urbanos publicados</div>",
+                            unsafe_allow_html=True)
+                pass_rows = [
+                    {"Cidade": city["name"],
+                     "€/pessoa/mês": city["urban_pass"]["fare_eur_month_person"],
+                     "Período": city["urban_pass"]["price_period"],
+                     "Operadora": city["urban_pass"]["source_url"]}
+                    for city in market["cities"]
+                ]
+                st.dataframe(pd.DataFrame(pass_rows), hide_index=True, use_container_width=True,
+                             column_config={
+                                 "€/pessoa/mês": st.column_config.NumberColumn(format="€ %.2f"),
+                                 "Operadora": st.column_config.LinkColumn("Fonte oficial", display_text="Consultar"),
+                             })
+                st.caption("Tarifas nominais de 2025–26: verificar requisitos de acesso e quantidade "
+                           "de meses cobrados para dois adultos; valores não confirmados para 2027.")
+                st.markdown("<div class='page-section'>Trem: duração e tarifa ilustrativa</div>",
+                            unsafe_allow_html=True)
+                rail_rows = []
+                for city in market["cities"]:
+                    for route in city["rail"]:
+                        rail_rows.append({
+                            "Origem": city["name"], "Destino": route["destination"],
+                            "Trem (min)": route["train_minutes"],
+                            "€/pessoa/trecho*": route["discounted_eur_leg_person"],
+                            "Fonte": route["source_url"],
+                        })
+                st.dataframe(pd.DataFrame(rail_rows), hide_index=True, use_container_width=True,
+                             column_config={
+                                 "Trem (min)": st.column_config.NumberColumn(format="%d min"),
+                                 "€/pessoa/trecho*": st.column_config.NumberColumn(format="€ %.2f"),
+                                 "Fonte": st.column_config.LinkColumn("Fonte TER", display_text="Consultar"),
+                             })
+                st.markdown(
+                    "<div class='city-fact city-fact--info'><strong>* Tarifa reduzida Carte Fluo</strong>"
+                    "<p>É uma referência de preço por pessoa e por trecho, que pode exigir cartão. "
+                    "Os minutos são de estação a estação, sem conexões locais. Faltam horários, "
+                    "tarifas e retornos efetivos para a viagem de 2027.</p></div>",
+                    unsafe_allow_html=True)
+                st.markdown("<div class='page-section'>Supermercado e lazer</div>",
+                            unsafe_allow_html=True)
+                basket = market["common_costs"]
+                st.markdown(
+                    "<div class='city-fact city-fact--info'>"
+                    "<strong>Hipótese compartilhada para as quatro cidades</strong>"
+                    f"<div class='city-cost-highlight'>€ {basket['groceries_eur_week_couple']:.2f}"
+                    "<span> / semana para duas pessoas</span></div>"
+                    "<p>Cesta histórica ilustrativa do projeto, não quatro pesquisas locais. "
+                    "Restaurantes, academia e lazer ainda precisam de levantamento equivalente "
+                    "por bairro. Evitar somar essa referência novamente ao orçamento oficial.</p>"
+                    "</div>", unsafe_allow_html=True)
+                st.link_button("Consultar origem da cesta no Drive", basket["source_url"])
+
+                st.markdown("<div class='page-section'>Novas evidências de custo de vida</div>",unsafe_allow_html=True)
+                st.markdown(
+                    "<div class='city-fact city-fact--info'><strong>Leitura correta dos preços</strong>"
+                    "<p>Os aluguéis abaixo são estimativas de contratos residenciais comuns em €/m²/mês "
+                    "(não hospedagem de temporada). O jantar para dois é um dado colaborativo do Numbeo, "
+                    "não preço de reserva ou média estatisticamente comprovada.</p></div>",
+                    unsafe_allow_html=True)
+                economic_rows = []
+                for rec in round2["cities"]:
+                    economic_rows.append({
+                        "Cidade":rec["name"],
+                        "Aluguel residencial €/m²/mês":rec["residential_rent_eur_sqm_month"],
+                        "Jantar para dois €":rec["restaurant_two_midrange_eur"],
+                        "Fonte jantar":rec["restaurant_source_url"]
+                    })
+                st.dataframe(pd.DataFrame(economic_rows), hide_index=True, use_container_width=True,
+                             column_config={
+                                 "Aluguel residencial €/m²/mês":st.column_config.NumberColumn(format="€ %.2f"),
+                                 "Jantar para dois €":st.column_config.NumberColumn(format="€ %.2f"),
+                                 "Fonte jantar":st.column_config.LinkColumn("Numbeo", display_text="Consultar"),
+                             })
+                st.link_button("Metodologia e dados do aluguel residencial",
+                               round2["common_sources"][0]["url"])
+                st.caption("Indicador de aluguel do MeilleursAgents em 01/11/2026, apartamento residencial "
+                           "comum; o jantar é um item comparável nas páginas consultadas em novembro/2026. "
+                           "Metz possui lacunas de amostra em vários produtos. Não converter esses valores "
+                           "em custo real da viagem.")
+
+                st.markdown("<div class='page-section'>Plano B para o trabalho remoto</div>",unsafe_allow_html=True)
+                st.markdown("<div class='page-subtitle'>Opções de coworking publicadas: preços, modalidades "
+                            "e horários não equivalentes. Não garantem videoconferências até o fim "
+                            "do expediente brasileiro.</div>", unsafe_allow_html=True)
+                coworking_rows = []
+                for rec in round2["cities"]:
+                    office = rec["coworking"]
+                    coworking_rows.append({
+                        "Cidade":rec["name"], "Espaço":office["name"],
+                        "Preço publicado €":office["price_eur"],
+                        "Modalidade":office["price_basis"],
+                        "Compatível até 22–23h":("Não" if office["late_work_compatible"] is False else "A confirmar"),
+                        "Fonte":office["source_url"]
+                    })
+                st.dataframe(pd.DataFrame(coworking_rows), hide_index=True, use_container_width=True,
+                             column_config={
+                                 "Preço publicado €":st.column_config.NumberColumn(format="€ %.2f"),
+                                 "Fonte":st.column_config.LinkColumn("Fonte", display_text="Consultar")
+                             })
+                with st.expander("Horários, disponibilidade e condições de cada coworking"):
+                    for rec in round2["cities"]:
+                        office = rec["coworking"]
+                        st.markdown(f"**{escape(rec['name'])} — {escape(office['name'])}**")
+                        st.caption("Horário: " + (office["schedule"] or "não verificado") +
+                                   " · " + office["note"])
+                st.markdown("<div class='city-fact city-fact--warn'><strong>Alojamento e contrato continuam bloqueantes</strong>"
+                            "<p>O bail mobilité francês pode servir para contratos temporários, "
+                            "mas depende de uma situação legal qualificadora. Não assumir que "
+                            "trabalhar remotamente para uma empresa brasileira seja suficiente. "
+                            "Nenhuma oferta foi confirmada para a janela de 2027.</p></div>",
+                            unsafe_allow_html=True)
+                st.link_button("Ver regras de contrato no Service-Public",
+                               round2["common_sources"][1]["url"])
+
+
+            elif active_section == "Comparar e ajustar":
+                st.markdown("<div class='page-section'>Ranking de preferências históricas</div>",
+                            unsafe_allow_html=True)
+                st.caption("A pontuação de 0 a 5 vem de avaliações editoriais de 2026. "
+                           "Não mede disponibilidade de imóveis ou custos de 2027.")
+                profile = st.selectbox(
+                    "Perfil de comparação", city_data["presets"],
+                    format_func=lambda item: item["label"], key="city_compare_profile",
+                    help="Pesos extraídos da matriz histórica do projeto.")
+                initialize_weight_state(st.session_state, profile["id"],
+                                        get_preset(city_data, profile["id"]))
+                weights = {}
+                for idx, criterion in enumerate(city_data["criteria"]):
+                    # Three well-balanced columns instead of a long vertical list.
+                    if idx % 3 == 0:
+                        slider_cols = st.columns(3, gap="medium")
+                    with slider_cols[idx % 3]:
+                        weights[criterion["id"]] = st.slider(
+                            criterion["label"], min_value=0, max_value=100, step=5,
+                            key=f"city_weight_{criterion['id']}", help=criterion["explanation"])
+                total_weights = sum(weights.values())
+                if total_weights == 0:
+                    st.warning("Ajuste pelo menos um critério acima de zero.")
+                else:
+                    actual_weights = normalized_weights(weights, criteria_ids)
+                    st.caption("Pesos normalizados: " + " · ".join(
+                        f"{crit['label']}: {actual_weights[crit['id']]*100:.0f}%"
+                        for crit in city_data["criteria"]))
+                    ranking = rank_cities(city_data["cities"], weights, criteria_ids)
+                    for group_start in range(0, len(ranking), 2):
+                        for col, (position, result) in zip(
+                            st.columns(2, gap="medium"),
+                            list(enumerate(ranking, start=1))[group_start:group_start + 2]
+                        ):
+                            city = result["city"]
+                            pct = max(0.0, min(100.0, result["score"] * 20))
+                            with col:
+                                st.markdown(
+                                    "<div class='city-ranking-card'>"
+                                    f"<span>#{position} · Preferência simulada</span>"
+                                    f"<strong>{escape(city['name'])}</strong>"
+                                    f"<div class='city-ranking-number'>{result['score']:.3f}"
+                                    "<small> / 5</small></div>"
+                                    f"<div class='city-score__bar'><span style='width:{pct:.2f}%'></span></div>"
+                                    "</div>", unsafe_allow_html=True)
+                    score_rows = [
+                        {"Cidade": result["city"]["name"],
+                         "Score ponderado": round(result["score"], 3),
+                         **{criterion["label"]: result["city"]["scores"][criterion["id"]]
+                            for criterion in city_data["criteria"]}}
+                        for result in ranking
+                    ]
+                    with st.expander("Ver notas de cada critério", expanded=False):
+                        st.dataframe(pd.DataFrame(score_rows), hide_index=True,
+                                     use_container_width=True,
+                                     column_config={
+                                         "Score ponderado": st.column_config.NumberColumn(format="%.3f")
+                                     })
+                    st.markdown("<div class='page-section'>Duas cidades, lado a lado</div>",
+                                unsafe_allow_html=True)
+                    selections = st.multiselect("Escolha até duas cidades",
+                                                [c["name"] for c in city_data["cities"]],
+                                                default=["Mulhouse", "Strasbourg"],
+                                                max_selections=2, key="city_compare_pair")
+                    results_by_name = {item["city"]["name"]: item for item in ranking}
+                    if not selections:
+                        st.info("Escolha uma ou duas cidades para comparar os detalhes.")
+                    for col, city_name in zip(st.columns(2, gap="medium"), selections):
+                        city = results_by_name[city_name]["city"]
+                        market_city = market_by_name[city_name]
+                        sample = observed_rent_summary(market_city)
+                        with col:
+                            st.markdown(
+                                "<div class='city-side'>"
+                                f"<div class='city-side__name'>{escape(city_name)}</div>"
+                                f"<div class='city-side__score'>{results_by_name[city_name]['score']:.3f}/5"
+                                " <small>nota editorial</small></div>"
+                                f"<div class='city-side__sample'>€ {sample['sample_median_eur_month']:,.0f}"
+                                " <small>/mês · mediana de 3 anúncios</small></div>"
+                                f"<p>{escape(city['summary'])}</p>"
+                                "</div>", unsafe_allow_html=True)
+                            st.markdown(
+                                "<div class='city-fact city-fact--good'><strong>✓ Pontos favoráveis "
+                                "(avaliação histórica)</strong><ul>" +
+                                "".join(f"<li>{escape(value)}</li>" for value in city["advantages"]) +
+                                "</ul></div>", unsafe_allow_html=True)
+                            st.markdown(
+                                "<div class='city-fact city-fact--warn'><strong>! Riscos e verificações</strong>"
+                                "<ul>" + "".join(f"<li>{escape(value)}</li>" for value in
+                                                (city["risks"] + audit_by_name[city_name]["risks"][:1])) +
+                                "</ul></div>", unsafe_allow_html=True)
+                            st.button(f"Simular {city_name} no orçamento →",key=f"city_budget_{city_name}",
+                                      use_container_width=True,on_click=simulate_city_in_budget,
+                                      args=(city_name,))
+                            with st.expander(f"Exemplos históricos em {city_name}"):
+                                for ad in city["sample_ads"]:
+                                    st.link_button(ad["label"], ad["url"], use_container_width=True)
+                with st.expander("Metodologia, requisitos e documentos", expanded=False):
+                    st.markdown("**Amostra observada ≠ preço de mercado ≠ nota editorial ≠ cotação para 2027.**")
+                    st.caption("Todos os valores de mercado são registros de novembro de 2026. "
+                               "Uma cidade só estará pronta quando houver imóveis elegíveis para as datas "
+                               "reais, custo completo e os oito requisitos de auditoria comprovados.")
+                    for gate in city_audit["standards"]:
+                        st.markdown(f"**{escape(gate['label'])}**")
+                        st.caption(gate["gate"])
+                    st.link_button("Ver relatório e lacunas", 
+                        "https://github.com/clevertondecker/europe-trip/blob/main/RELATORIO_PRIMEIRA_COMPARACAO_REAL.md")
+                    st.link_button("Abrir matriz original no Drive", city_data["source"]["url"])
+                    st.link_button("Decisão D-004 no Drive", data["sources"]["decisions"])
 
 elif page == "Roteiro":
     itinerary = load_itinerary()
