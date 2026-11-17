@@ -34,13 +34,30 @@ class MacroCoverageCacheTests(unittest.TestCase):
             with self.subTest(bad=bad),self.assertRaises(ValueError):
                 macro_coverage_rows(bad)
 
-    def test_lightweight_repeatable_profile_without_speed_assertions(self):
+    def test_cache_cold_warm_and_explicit_invalidation(self):
+        ids=self.ids
+        cached_macro_coverage_rows.clear()
         start=perf_counter()
-        baseline=macro_coverage_rows(("mulhouse","strasbourg"))
-        full_duration=perf_counter()-start
+        cold=cached_macro_coverage_rows(ids)
+        cold_seconds=perf_counter()-start
         start=perf_counter()
-        cached_macro_coverage_rows(("mulhouse","strasbourg"))
-        cached_duration=perf_counter()-start
-        self.assertEqual(len(baseline),2)
-        self.assertGreaterEqual(full_duration,0)
-        self.assertGreaterEqual(cached_duration,0)
+        warm=cached_macro_coverage_rows(ids)
+        warm_seconds=perf_counter()-start
+        self.assertEqual(cold,warm)
+        cached_macro_coverage_rows.clear()
+        start=perf_counter()
+        after_clear=cached_macro_coverage_rows(ids)
+        refreshed_seconds=perf_counter()-start
+        self.assertEqual(after_clear,cold)
+        print("ARCH14_CACHE_BENCHMARK="+str({
+            "cities":len(ids),
+            "cold_ms":round(cold_seconds*1000,3),
+            "warm_ms":round(warm_seconds*1000,3),
+            "after_clear_ms":round(refreshed_seconds*1000,3),
+            "environment":"github_actions_CI",
+            "note":"diagnostic_sample_not_performance_SLA",
+        }))
+        self.assertGreaterEqual(cold_seconds,0)
+        self.assertGreaterEqual(warm_seconds,0)
+        self.assertGreaterEqual(refreshed_seconds,0)
+
