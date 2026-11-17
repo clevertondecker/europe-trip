@@ -39,5 +39,5 @@ class MapPresentationTests(unittest.TestCase):
         deck=chart.call_args.args[0]
         self.assertEqual(len(deck.layers),2)
         self.assertIn("name",str(deck.layers[1].get_text))
-        self.assertIn("name",str(deck.tooltip["html"]))
+        self.assertIn("name",deck.to_json())
         self.assertEqual(place,original)
