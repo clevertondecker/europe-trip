@@ -17,4 +17,4 @@ jobs:
       - name: Install app dependencies
         run: pip install -r requirements.txt
       - name: Audit all destinations and probe Wikimedia endpoints
-        run: python scripts/probe_all_destination_photos.py
+        run: PYTHONPATH=. python scripts/probe_all_destination_photos.py
