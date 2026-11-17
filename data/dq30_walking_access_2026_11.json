@@ -132,11 +132,14 @@
       "attraction_id": "strasbourg_petite",
       "destination_id": "strasbourg",
       "name": "Petite France",
-      "coordinates": null,
-      "coordinate_precision": "unknown",
-      "coordinate_source_url": null,
-      "wikidata_id": null,
-      "location_status": "not_verified",
+      "coordinates": {
+        "lat": 48.5809222,
+        "lon": 7.7406306
+      },
+      "coordinate_precision": "area_centroid",
+      "coordinate_source_url": "https://www.wikidata.org/wiki/Q965606",
+      "wikidata_id": "Q965606",
+      "location_status": "verified_representative",
       "address": null,
       "address_source_url": null,
       "entrance_verified": false,
@@ -146,7 +149,7 @@
       "walking_from_station_m": null,
       "checked_at": "2026-11-17",
       "existing_catalog_source_url": "https://www.visitstrasbourg.fr/en/discover/strasbourg-and-its-surrounding-area/petite-france/",
-      "notes": "Atração inventariada; coordenadas específicas não verificadas e não inferidas do centro da cidade."
+      "notes": "Coordenada de elemento/área do Wikidata, não entrada pública identificada."
     },
     {
       "attraction_id": "strasbourg_grande",
@@ -172,11 +175,14 @@
       "attraction_id": "strasbourg_ponts",
       "destination_id": "strasbourg",
       "name": "Ponts Couverts",
-      "coordinates": null,
-      "coordinate_precision": "unknown",
-      "coordinate_source_url": null,
-      "wikidata_id": null,
-      "location_status": "not_verified",
+      "coordinates": {
+        "lat": 48.5798889,
+        "lon": 7.7395278
+      },
+      "coordinate_precision": "attraction_point",
+      "coordinate_source_url": "https://www.wikidata.org/wiki/Q3397780",
+      "wikidata_id": "Q3397780",
+      "location_status": "verified_representative",
       "address": null,
       "address_source_url": null,
       "entrance_verified": false,
@@ -186,17 +192,20 @@
       "walking_from_station_m": null,
       "checked_at": "2026-11-17",
       "existing_catalog_source_url": "https://www.visitstrasbourg.fr/en/discover/strasbourg-and-its-surrounding-area/petite-france/",
-      "notes": "Atração inventariada; coordenadas específicas não verificadas e não inferidas do centro da cidade."
+      "notes": "Coordenada de elemento/área do Wikidata, não entrada pública identificada."
     },
     {
       "attraction_id": "strasbourg_vauban",
       "destination_id": "strasbourg",
       "name": "Barrage Vauban",
-      "coordinates": null,
-      "coordinate_precision": "unknown",
-      "coordinate_source_url": null,
-      "wikidata_id": null,
-      "location_status": "not_verified",
+      "coordinates": {
+        "lat": 48.5794444,
+        "lon": 7.7380556
+      },
+      "coordinate_precision": "attraction_point",
+      "coordinate_source_url": "https://www.wikidata.org/wiki/Q2885001",
+      "wikidata_id": "Q2885001",
+      "location_status": "verified_representative",
       "address": null,
       "address_source_url": null,
       "entrance_verified": false,
@@ -206,7 +215,7 @@
       "walking_from_station_m": null,
       "checked_at": "2026-11-17",
       "existing_catalog_source_url": "https://www.visitstrasbourg.fr/en/discover/strasbourg-and-its-surrounding-area/petite-france/",
-      "notes": "Atração inventariada; coordenadas específicas não verificadas e não inferidas do centro da cidade."
+      "notes": "Coordenada de elemento/área do Wikidata, não entrada pública identificada."
     },
     {
       "attraction_id": "strasbourg_europe",
@@ -275,11 +284,14 @@
       "attraction_id": "colmar_pfister",
       "destination_id": "colmar",
       "name": "Maison Pfister",
-      "coordinates": null,
-      "coordinate_precision": "unknown",
-      "coordinate_source_url": null,
-      "wikidata_id": null,
-      "location_status": "not_verified",
+      "coordinates": {
+        "lat": 48.0766667,
+        "lon": 7.3583333
+      },
+      "coordinate_precision": "attraction_point",
+      "coordinate_source_url": "https://www.wikidata.org/wiki/Q2350639",
+      "wikidata_id": "Q2350639",
+      "location_status": "verified_representative",
       "address": null,
       "address_source_url": null,
       "entrance_verified": false,
@@ -289,7 +301,7 @@
       "walking_from_station_m": null,
       "checked_at": "2026-11-17",
       "existing_catalog_source_url": "https://tourisme-colmar.com/en/visit/presentation/discover",
-      "notes": "Atração inventariada; coordenadas específicas não verificadas e não inferidas do centro da cidade."
+      "notes": "Coordenada de elemento/área do Wikidata, não entrada pública identificada."
     },
     {
       "attraction_id": "colmar_stmartin",
@@ -358,11 +370,14 @@
       "attraction_id": "basel_townhall",
       "destination_id": "basel",
       "name": "Rathaus e Marktplatz",
-      "coordinates": null,
-      "coordinate_precision": "unknown",
-      "coordinate_source_url": null,
-      "wikidata_id": null,
-      "location_status": "not_verified",
+      "coordinates": {
+        "lat": 47.5583056,
+        "lon": 7.5883056
+      },
+      "coordinate_precision": "attraction_point",
+      "coordinate_source_url": "https://www.wikidata.org/wiki/Q688984",
+      "wikidata_id": "Q688984",
+      "location_status": "verified_representative",
       "address": null,
       "address_source_url": null,
       "entrance_verified": false,
@@ -372,7 +387,7 @@
       "walking_from_station_m": null,
       "checked_at": "2026-11-17",
       "existing_catalog_source_url": "https://www.basel.com/en/places-of-interest",
-      "notes": "Atração inventariada; coordenadas específicas não verificadas e não inferidas do centro da cidade."
+      "notes": "Coordenada de elemento/área do Wikidata, não entrada pública identificada."
     },
     {
       "attraction_id": "basel_mittlere",
@@ -481,11 +496,14 @@
       "attraction_id": "brussels_atomium",
       "destination_id": "brussels",
       "name": "Atomium (exterior)",
-      "coordinates": null,
-      "coordinate_precision": "unknown",
-      "coordinate_source_url": null,
-      "wikidata_id": null,
-      "location_status": "not_verified",
+      "coordinates": {
+        "lat": 50.895,
+        "lon": 4.3413889
+      },
+      "coordinate_precision": "attraction_point",
+      "coordinate_source_url": "https://www.wikidata.org/wiki/Q180901",
+      "wikidata_id": "Q180901",
+      "location_status": "verified_representative",
       "address": null,
       "address_source_url": null,
       "entrance_verified": false,
@@ -495,7 +513,7 @@
       "walking_from_station_m": null,
       "checked_at": "2026-11-17",
       "existing_catalog_source_url": "https://www.visit.brussels/en/visitors/what-to-do/must-see-attractions",
-      "notes": "Atração inventariada; coordenadas específicas não verificadas e não inferidas do centro da cidade."
+      "notes": "Coordenada de elemento/área do Wikidata, não entrada pública identificada."
     },
     {
       "attraction_id": "brussels_eu_quarter",
@@ -647,11 +665,14 @@
       "attraction_id": "rotterdam_cube_houses",
       "destination_id": "rotterdam",
       "name": "Cube Houses (exterior)",
-      "coordinates": null,
-      "coordinate_precision": "unknown",
-      "coordinate_source_url": null,
-      "wikidata_id": null,
-      "location_status": "not_verified",
+      "coordinates": {
+        "lat": 51.920208,
+        "lon": 4.490482
+      },
+      "coordinate_precision": "attraction_point",
+      "coordinate_source_url": "https://www.wikidata.org/wiki/Q42153772",
+      "wikidata_id": "Q42153772",
+      "location_status": "verified_representative",
       "address": null,
       "address_source_url": null,
       "entrance_verified": false,
@@ -661,7 +682,7 @@
       "walking_from_station_m": null,
       "checked_at": "2026-11-17",
       "existing_catalog_source_url": "https://visitrotterdam.com/rotterdam-architecture.html",
-      "notes": "Atração inventariada; coordenadas específicas não verificadas e não inferidas do centro da cidade."
+      "notes": "Coordenada de elemento/área do Wikidata, não entrada pública identificada."
     },
     {
       "attraction_id": "rotterdam_erasmus_bridge",
