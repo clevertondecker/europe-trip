@@ -50,6 +50,8 @@ from ux_navigation import (AREAS as UX_AREAS, SECTIONS as UX_SECTIONS, DESCRIPTI
                            set_from_legacy as set_ux_legacy, route as ux_route)
 from planning_session import bootstrap as bootstrap_trip, active_plan, update_fields
 from planning_store import summary as planning_summary
+from ux504_guided_journey_model import apply_navigation_request
+from ux504_guided_journey_ui import render_guided_home, render_contextual_shortcuts
 from planning_status import save_label
 from attractions_model import load_attractions, load_base_routes, places_for_base, excursions_overage_brl, package_cost
 
@@ -72,6 +74,7 @@ if restored_days is not None:
     st.session_state["ux_days"]=max(40,min(80,int(restored_days)))
     st.session_state["unified_stay"]=st.session_state["ux_days"]
 bootstrap_ux(st.session_state)
+apply_navigation_request(st.session_state)
 if st.session_state.pop("ux503_pending_return_to_wishlist", False):
     set_ux_task(st.session_state, "Explorar", "Passeios")
     st.session_state["ux502_view"] = "Minha lista"
@@ -404,6 +407,12 @@ if ux_area!="Minha viagem" or ux_section!="Resumo":
     st.segmented_control("Atividade" if ux_area=="Meu roteiro" else "Área: "+ux_area,
                          list(UX_SECTIONS[ux_area]),
                          key="ux_section",on_change=_ux_section_changed,
+                         format_func=(lambda value: {
+                             "Passeios":"Descobrir lugares / Minha lista",
+                             "Comparar":"Comparar cidades-base",
+                             "Cidades-base":"Pesquisas avançadas",
+                             "Mapa":"Mapa",
+                         }.get(value,value)) if ux_area=="Explorar" else None,
                          selection_mode="single")
 if ux_area=="Meu roteiro" and ux_section=="Organizar viagem":
     st.segmented_control("Como organizar?",
@@ -449,6 +458,9 @@ if (ux_area=="Meu roteiro" and ux_section=="Melhorar meu roteiro" and
 if page != "Visão geral":
     render_return_to_summary()
 if page == "Visão geral":
+    render_guided_home(active_plan(),st.session_state.get("ux502_interests"))
+    st.divider()
+    st.markdown("#### Informações e painéis complementares")
     render_home_continue(active_plan())
     render_next_actions(active_plan(),load_attractions())
     render_continuity_panel(active_plan(),load_attractions())
@@ -701,6 +713,7 @@ elif page == "Mapa & destinos":
 elif page == "Comparar cidades":
     st.markdown("## Comparar cidades-base")
     render_wishlist_base_comparison(plan=active_plan())
+    render_contextual_shortcuts("comparison")
     with st.expander("Análises antigas de cidades-base · avançado", expanded=False):
         st.caption("Ferramentas anteriores preservadas para consultas adicionais.")
         compare_mode=st.segmented_control(
@@ -1232,6 +1245,8 @@ elif page == "Roteiro":
         map_view(markers,height=height,show_labels=False,zoom=zoom,center=center)
 
     if itinerary_section == "Visão geral":
+        if (ux_area,ux_section)==("Meu roteiro","Meu planejamento"):
+            render_contextual_shortcuts("itinerary")
         if (ux_area,ux_section)==("Meu roteiro","Organizar viagem") and (
             st.session_state.get("ux_organize_view")=="Calendário inteligente"):
             render_smart_calendar(
@@ -1250,6 +1265,8 @@ elif page == "Roteiro":
     elif itinerary_section == "Explorar atrações":
         # UX 5.0.1: destination-first discovery, no base choice required.
         render_independent_destination_discovery()
+        if st.session_state.get("ux502_view","Descobrir lugares")=="Descobrir lugares":
+            render_contextual_shortcuts("discovery")
         st.divider()
         with st.popover("Pesquisar por cidade-base · opcional", use_container_width=True):
             st.caption("Ferramenta anterior preservada para investigar alternativas de cidade-base.")
