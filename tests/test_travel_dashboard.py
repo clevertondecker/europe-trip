@@ -55,8 +55,11 @@ class TravelDashboardTests(unittest.TestCase):
         app.session_state["advisor_plan"]=plan
         app.run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
-        self.assertTrue(any("Lugares que escolhemos" in x.value
-                            for x in app.markdown))
+        # The old, separate gallery is gone; the destination card itself
+        # carries its photo, logistics and existing edit control.
+        self.assertFalse(any("Lugares que escolhemos" in x.value
+                             for x in app.markdown))
+        self.assertIn("flow_edit_save_colmar",{b.key for b in app.button})
         self.assertTrue(any("Colmar" in x.value for x in app.markdown))
         self.assertIn("flow_add_open_button",{b.key for b in app.button})
 
