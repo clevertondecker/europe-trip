@@ -18,7 +18,8 @@ MISSING = ("Retorno de fim de semana não confirmado",
 
 
 def compare_wishlist_bases(interests: dict, base_ids: list[str], *,
-                           discovery=None, research=None, rail=None, exploration=None) -> dict:
+                           discovery=None, research=None, rail=None, exploration=None,
+                           visible_destination_ids=None) -> dict:
     """Compare exactly the same active wishlist across 2–5 researched bases."""
     discovery = discovery if discovery is not None else build_destination_discovery()
     research = research if research is not None else load_research()
@@ -30,11 +31,19 @@ def compare_wishlist_bases(interests: dict, base_ids: list[str], *,
     ordered = ordered_interests(interests, discovery)
     active = selected_destinations_for_comparison(interests, discovery)
     names = {x["id"]: x for x in discovery["destinations"]}
+    if visible_destination_ids is not None:
+        if (not isinstance(visible_destination_ids, (list, tuple)) or
+                len(set(visible_destination_ids)) != len(visible_destination_ids) or
+                any(x not in active for x in visible_destination_ids)):
+            raise ValueError("Filtro visual contém destino inválido ou descartado")
+        visible = set(visible_destination_ids)
+    else:
+        visible = set(active)
     wanted = [
         {"id":x["destination_id"], "name":names[x["destination_id"]]["name"],
          "country":names[x["destination_id"]]["country"],
          "priority":x["priority"], "priority_label":LABELS[x["priority"]]}
-        for x in ordered if x["priority"] != "discarded"
+        for x in ordered if x["destination_id"] in visible
     ]
     rail = rail if rail is not None else load_rail_evidence()
     exploration = exploration if exploration is not None else load_exploration()
@@ -108,7 +117,8 @@ def compare_wishlist_bases(interests: dict, base_ids: list[str], *,
         })
     return {"destinations":deepcopy(wanted),"base_ids":list(base_ids),
             "rows":rows,"summaries":summaries,
-            "discarded_count":len(ordered)-len(wanted),
+            "discarded_count":len(ordered)-len(active),
+            "active_destination_count":len(active),
             "comparison_ready":bool(wanted),
             "quality_ranking_available":False,
             "official_plan_modified":False}
