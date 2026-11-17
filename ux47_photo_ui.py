@@ -39,7 +39,7 @@ def photo_markup(photo:dict|None,name:str)->str:
         '<div aria-hidden="true" style="position:absolute;inset:0;'
         'border-radius:inherit;background-position:center center;'
         'background-size:cover;background-repeat:no-repeat;'
-        "background-image:url(&quot;"+escape(url,quote=True)+"&quot;)"></div>"
+        'background-image:url(&quot;'+escape(url,quote=True)+'&quot;);"></div>'
         if url else "")
     return (
         '<div role="img" aria-label="Fotografia de '+name_html+
