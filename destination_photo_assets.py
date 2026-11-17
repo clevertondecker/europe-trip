@@ -31,7 +31,8 @@ def local_destination_photo(destination_id: str) -> dict | None:
     if not path.is_file() or path.stat().st_size < 5000:
         return None
     if not (record["source_page"].startswith("https://commons.wikimedia.org/wiki/File:") and
-            record["license_url"].startswith("https://creativecommons.org/licenses/") and
+            record["license_url"].startswith(("https://creativecommons.org/licenses/",
+                                              "https://creativecommons.org/publicdomain/")) and
             record["author"] and record["license"] and record["alt"]):
         raise ValueError("Destination photo without valid attribution")
     return {
