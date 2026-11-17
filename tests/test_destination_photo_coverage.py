@@ -27,7 +27,7 @@ class FullDestinationImageCoverageTests(unittest.TestCase):
         self.assertEqual(report["with_local_photo"], 36)
         self.assertEqual(report["still_missing"], 0)
         self.assertEqual(len(assets), 36)
-        self.assertEqual({d["id"] for d in report["destinations"]},
+        self.assertEqual({d["destination_id"] for d in report["destinations"]},
                          {d["id"] for d in catalog["destinations"]})
 
         for destination in catalog["destinations"]:
