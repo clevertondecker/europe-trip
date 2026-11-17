@@ -58,12 +58,16 @@ def render_wishlist(discovery) -> bool:
         # Streamlit removes keys for controls not mounted in the alternate view.
         snapshot = st.session_state.get("ux502_discovery_filters", {}).copy()
         snapshot.update({key: st.session_state[key] for key in keys if key in st.session_state})
+        if "ux501_interest_session" in st.session_state:
+            st.session_state["ux502_transient_shadow"] = list(st.session_state["ux501_interest_session"])
         st.session_state["ux502_discovery_filters"] = snapshot
 
     view = st.radio("Visualização", ("Descobrir lugares", "Minha lista"),
                     horizontal=True, key="ux502_view",
                     on_change=remember_discovery_filters)
     if view == "Descobrir lugares":
+        if "ux501_interest_session" not in st.session_state and "ux502_transient_shadow" in st.session_state:
+            st.session_state["ux501_interest_session"] = list(st.session_state["ux502_transient_shadow"])
         for key, value in st.session_state.get("ux502_discovery_filters", {}).items():
             if key not in st.session_state:
                 st.session_state[key] = value
@@ -76,7 +80,8 @@ def render_wishlist(discovery) -> bool:
     d.metric("Talvez", sum(r["priority"] == "maybe" for r in items))
     st.caption("São preferências de pesquisa, não passeios, reservas ou trajetos confirmados. "
                "A cidade-base oficial e o TripPlan não são alterados.")
-    transient = st.session_state.get("ux501_interest_session", [])
+    transient = st.session_state.get("ux501_interest_session",
+                                     st.session_state.get("ux502_transient_shadow", []))
     try:
         _, pending = reconcile_transient(current, transient, discovery)
     except ValueError:
