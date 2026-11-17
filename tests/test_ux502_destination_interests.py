@@ -128,7 +128,7 @@ class PrivateWishlistPersistenceTests(unittest.TestCase):
                "ux36_cloud_generation":7,"ux36_cloud_dirty":True}
         storage=Mock()
         storage.save.return_value=8
-        with patch.object(continuity_ui.st,"session_state",state), \\
+        with patch.object(continuity_ui.st,"session_state",state), \
              patch.object(continuity_ui,"_private_store",return_value=storage):
             continuity_ui.save_private_now(self.plan,self.catalog)
         args=storage.save.call_args.args
@@ -151,7 +151,7 @@ class PrivateWishlistPersistenceTests(unittest.TestCase):
                        "ux36_cloud_generation":7,"ux36_cloud_dirty":True}
                 storage=Mock()
                 storage.save.side_effect=failure
-                with patch.object(continuity_ui.st,"session_state",state), \\
+                with patch.object(continuity_ui.st,"session_state",state), \
                      patch.object(continuity_ui,"_private_store",return_value=storage):
                     with self.assertRaises(type(failure)):
                         continuity_ui.save_private_now(self.plan,self.catalog)
@@ -167,8 +167,8 @@ class PrivateWishlistPersistenceTests(unittest.TestCase):
         storage=Mock()
         storage.load.return_value=(export_archive(archive,self.catalog),23)
         state={}
-        with patch.object(continuity_ui.st,"session_state",state), \\
-             patch.object(continuity_ui,"_private_store",return_value=storage), \\
+        with patch.object(continuity_ui.st,"session_state",state), \
+             patch.object(continuity_ui,"_private_store",return_value=storage), \
              patch.object(continuity_ui,"sync_legacy_view"):
             continuity_ui.restore_private_on_start(self.catalog)
         self.assertEqual(state["ux502_interests"],self.interests)
