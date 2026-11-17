@@ -92,3 +92,17 @@ Mais importante: **nenhuma das seis estações possui uma saída pública com co
 5. Exibir no aplicativo somente depois de testar a renderização e a consistência com os passeios reais.
 
 **Estado do PR:** pesquisa geográfica útil e contrato de dados mais rico; entrega pedestre integral **ainda pendente**. Sem merge ou deploy.
+
+### Contrato de consumo — `destination_access()`
+
+O adaptador `destination_access(destination_id, *, evidence=None)` agora retorna, além das chaves existentes `destination_id`, `attractions`, `stations` e `candidate_sequences`, a chave `published_walking_itineraries`, **filtrada pelo destino e copiada em profundidade**. Isso permite consumir o circuito oficial sem consultar o JSON bruto, preservando a imutabilidade do dataset e os campos desconhecidos.
+
+```python
+from dq30_walking_access_model import destination_access
+rotterdam = destination_access("rotterdam")
+assert rotterdam["published_walking_itineraries"][0]["distance_m"] == 7000
+assert rotterdam["published_walking_itineraries"][0]["duration_min"] is None
+assert destination_access("bruges_be")["published_walking_itineraries"] == []
+```
+
+Essa distância representa somente o **circuito completo**, não segmentos estação–atração ou atração–atração. As pendências relativas a entradas e saídas públicas, rotas reais por trecho e tipos adicionais de origem/destino permanecem para pacote futuro.
