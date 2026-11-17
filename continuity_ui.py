@@ -18,6 +18,7 @@ from planning_status import save_label
 from itinerary_flow_model import selected_rows
 from planning_store import sync_legacy_view
 from planning_session import bootstrap
+from ux502_destination_interests_model import empty_interests
 from ux_navigation import AREAS,SECTIONS
 
 
@@ -75,6 +76,8 @@ def apply_pending_restore(catalog:dict)->None:
                              in pending["archive"]["city_studies"]}
         state["ux35_proposals"]=deepcopy(pending["archive"]["calendar_drafts"])
         state["ux41_favorites"]=list(pending["archive"].get("city_favorites",[]))
+        state["ux502_interests"]=deepcopy(pending["archive"].get("destination_interests",empty_interests()))
+        state["ux502_private_saved_revision"]=None
         state["ux48_weekend_groups"]=deepcopy(pending["archive"]["weekend_groups"])
         state.pop("ux35_review_proposal",None)
         state.pop("ux36_review",None)
@@ -171,6 +174,8 @@ def restore_private_on_start(catalog):
         state["ux34_drafts"] = {d["name"]: deepcopy(d) for d in archive["city_studies"]}
         state["ux35_proposals"] = deepcopy(archive["calendar_drafts"])
         state["ux41_favorites"] = list(archive.get("city_favorites",[]))
+        state["ux502_interests"] = deepcopy(archive.get("destination_interests",empty_interests()))
+        state["ux502_private_saved_revision"] = state["ux502_interests"]["revision"]
         state["ux48_weekend_groups"] = deepcopy(archive["weekend_groups"])
         sync_legacy_view(plan, state, include_controls=True)
     except (ValueError, KeyError, TypeError, StorageConflict, StorageUnavailable):
@@ -189,6 +194,7 @@ def save_private_now(plan, catalog):
     state["ux36_saved_plan_fingerprint"] = plan_fingerprint(plan)
     state["ux36_saved_archive_fingerprint"] = _archive_fingerprint(import_archive(raw,catalog))
     state["ux36_cloud_dirty"] = False
+    state["ux502_private_saved_revision"] = state.get("ux502_interests",empty_interests())["revision"]
     state.pop("ux36_autosave_failed_fingerprint", None)
 
 
@@ -291,7 +297,8 @@ def render_continuity_panel(plan:dict,catalog:dict)->None:
         try:
             archive=make_archive(plan,catalog,_safe_context(plan,catalog),city,calendars,
                                  city_favorites=list(st.session_state.get("ux41_favorites",[])),
-                                  weekend_groups=st.session_state.get("ux48_weekend_groups"))
+                                  weekend_groups=st.session_state.get("ux48_weekend_groups"),
+                                  destination_interests=st.session_state.get("ux502_interests",empty_interests()))
             raw=export_archive(archive,catalog)
         except (ValueError,TypeError,KeyError) as exc:
             st.warning("Não foi possível incluir esse contexto. "
