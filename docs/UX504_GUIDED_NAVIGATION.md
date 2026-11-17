@@ -31,3 +31,11 @@ A chave `ux_section` é um widget do Streamlit montado em `app.py`, após o side
 
 ## Validação
 Testes unitários de projeção e intenção de navegação, AppTest com vazio/desejos/passeios/datas, round-trip e isolamento do TripPlan. Teste visual real somente se um browser/ambiente gráfico estiver acessível; em caso contrário não declarar validado.
+
+
+## Refinamentos pós-revisão do HEAD 02236d69
+- Com destinos desejados e nenhum passeio no roteiro, a página oferece **Comparar cidades-base** e **Começar a montar roteiro** simultaneamente; não inventa estado de comparação concluída nem obriga a escolher uma base antes de planejar.
+- Estado do roteiro por **ID de destino**: união de destinos com pacotes e visitas flexíveis; destinos organizados têm ao menos uma data atribuída ou período flexível diferente de `Ainda não definido`. Múltiplas datas no mesmo destino contam uma vez para a classificação; uma indicação de período não vira uma data confirmada. Etapas pendentes continuam explícitas.
+- Os painéis da página inicial anterior são preservados num único expander **Painéis anteriores, mapa, fontes e detalhes · avançado**, mantendo detalhes técnicos disponíveis sem disputar a atenção com as cinco etapas.
+- A seleção temporária de bases e destinos visíveis da UX 5.0.3 passa a ter uma sombra **somente de sessão** para sobreviver à remoção automática de chaves de widgets do Streamlit entre rotas; o documento da UX 5.0.2 e o TripPlan não são modificados. O filtro de descoberta também é preservado ao usar a ação contextual.
+- AppTests incluem navegação ponta a ponta, mudanças de bases, preservação dos filtros e da lista, além de verificação de ausência de mutação do plano ou solicitação de autosave.
