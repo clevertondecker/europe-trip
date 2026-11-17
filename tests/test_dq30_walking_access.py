@@ -66,6 +66,98 @@ class WalkingAccessTests(unittest.TestCase):
         self.assertEqual(sum(r["duration_min"] is not None for r in self.data["walking_routes"]),1)
         self.assertFalse(any(r["distance_m"] is not None for r in self.data["walking_routes"]))
 
+    def _routed_fixture(self, *, station_id="strasbourg_gare",
+                       attraction_id="strasbourg_cathedral"):
+        """Synthetic verified public access points; never persisted as real evidence."""
+        data=deepcopy(self.data)
+        station=next(x for x in data["stations"] if x["id"]==station_id)
+        attraction=next(x for x in data["attractions"] if x["attraction_id"]==attraction_id)
+        station["pedestrian_access_points"]=[{
+            "id":"station_public_exit_test","parent_id":station_id,
+            "kind":"public_exit",
+            "coordinates":{"lat":48.5851,"lon":7.7342},
+            "source_url":"https://example.org/official-station-exit",
+            "checked_at":"2026-11-17",
+            "verification_status":"verified_public_access",
+        }]
+        attraction["pedestrian_access_points"]=[{
+            "id":"attraction_entrance_test","parent_id":attraction_id,
+            "kind":"public_entrance",
+            "coordinates":{"lat":48.5818,"lon":7.7511},
+            "source_url":"https://example.org/official-attraction-entrance",
+            "checked_at":"2026-11-17",
+            "verification_status":"verified_public_access",
+        }]
+        route=next(x for x in data["walking_routes"]
+                   if x["origin_id"]==station_id)
+        route.update(status="pedestrian_routed",distance_m=1100,
+                     duration_min=15,geometry_status="verified_pedestrian_routing",
+                     method="pedestrian_routing_engine",profile="pedestrian",
+                     source_url="https://example.org/routing-request",
+                     checked_at="2026-11-17",origin_access_id="station_public_exit_test",
+                     destination_access_id="attraction_entrance_test",
+                     engine="Valhalla",engine_version="3.6.0",
+                     geometry_source_url="https://example.org/routing-geometry",
+                     routing_observed_at="2026-11-17",
+                     coordinate_conflict_unresolved=False)
+        return data,route
+
+    def test_routed_evidence_supported_only_with_verified_public_access(self):
+        fixture,route=self._routed_fixture()
+        validate_walking_access(fixture,self.catalog)
+        route["origin_access_id"]=None
+        with self.assertRaises(ValueError):
+            validate_walking_access(fixture,self.catalog)
+
+    def test_routing_requires_provenance_profile_geometry_and_version(self):
+        for field,bad in [
+            ("engine",None),("engine_version",None),
+            ("profile","driving"),("method","haversine"),
+            ("geometry_source_url",None),("routing_observed_at",None),
+            ("geometry_status","not_available")]:
+            data,route=self._routed_fixture()
+            route[field]=bad
+            with self.subTest(field=field),self.assertRaises((ValueError,TypeError)):
+                validate_walking_access(data,self.catalog)
+
+    def test_station_centroid_does_not_count_as_public_exit(self):
+        fixture,route=self._routed_fixture()
+        station=fixture["stations"][0]
+        station["pedestrian_access_points"]=[]
+        with self.assertRaises(ValueError):
+            validate_walking_access(fixture,self.catalog)
+
+    def test_unresolved_station_conflict_blocks_routed_trip(self):
+        fixture,route=self._routed_fixture()
+        fixture["stations"][0]["coordinate_conflict_unresolved"]=True
+        with self.assertRaises(ValueError):
+            validate_walking_access(fixture,self.catalog)
+
+    def test_official_and_pending_state_are_backwards_compatible(self):
+        data=deepcopy(self.data)
+        official=next(r for r in data["walking_routes"]
+                      if r["status"]=="operator_published_walk_duration")
+        self.assertEqual(official["duration_min"],20)
+        official["status"]="official_published"
+        validate_walking_access(data,self.catalog)
+        official["status"]="pending_verification"
+        official["duration_min"]=None
+        official["method"]=None
+        official["source_url"]=None
+        official["checked_at"]=None
+        validate_walking_access(data,self.catalog)
+        official["duration_min"]=20
+        with self.assertRaises(ValueError):
+            validate_walking_access(data,self.catalog)
+
+    def test_station_conflict_and_access_data_do_not_claim_routing_ready(self):
+        brugge=next(s for s in self.data["stations"] if s["id"]=="brugge_station")
+        self.assertTrue(brugge["coordinate_conflict_unresolved"])
+        self.assertFalse(brugge["pedestrian_access_points"])
+        for row in self.data["walking_routes"]:
+            self.assertIsNone(row["origin_access_id"])
+            self.assertIsNone(row["destination_access_id"])
+
     def test_three_requested_consumer_examples_and_legacy(self):
         mapping = [
             ("strasbourg_cathedral", "strasbourg_gare", None),
