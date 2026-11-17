@@ -82,12 +82,37 @@ def load_rail_evidence()->dict:
                             mode=x.get("mode","rail_candidate"),
                             kind=x.get("status","historical"),
                             notes=x.get("notes",""),missing=x.get("missing",[])))
+    # DQ3.0 adds dated observations as provenance, not a competing route system.
+    # Existing display precedence remains stable and no second fare is summed.
+    from dq30_mobility_evidence_model import load_mobility_pilot
+    pilot=load_mobility_pilot()
+    for x in pilot["rail_service_observations"]:
+        rows.append(_record(
+            x["origin_id"],x["destination_id"],"dq30_dated_operator_2026",
+            x["source_snapshot_at"],minimum=x["duration_min"],
+            transfers=x["transfers"],fare=x["fare_from_eur_person_oneway"],
+            fare_conditions=x["fare_kind"],url=x["source_url"],
+            origin_station=x["origin_station"],
+            destination_station=x["destination_station"],
+            kind="dated_weekday_service_2026",
+            notes=x["notes"]+" Observado: "+x["observation_date"]+
+                  " "+x["departure_local"]+"–"+x["arrival_local"],
+            missing=("weekend_return","last_mile","2027_schedule")))
+    for x in pilot["operator_route_summaries"]:
+        rows.append(_record(
+            x["origin_id"],x["destination_id"],"dq30_operator_overview_2026",
+            x["checked_at"],minimum=x["minimum_oneway_min"],
+            typical=x["typical_oneway_min"],
+            fare=x["fare_from_eur_person_oneway"],
+            fare_conditions=x["fare_kind"],url=x["source_url"],
+            kind="operator_overview_not_date_specific",notes=x["notes"],
+            missing=("dated_weekend_return","last_mile","2027_schedule")))
     # Only records containing a documented time count as a researched journey.
     by_pair=defaultdict(list)
     for row in rows:
         by_pair[(row["origin_id"],row["destination_id"])].append(row)
     return {"observations":rows,"by_pair":dict(by_pair),"sources":(
-        "five_base_operator_2026","expanded_rail_sample_2026","four_base_routes_2026")}
+        "five_base_operator_2026","expanded_rail_sample_2026","four_base_routes_2026",\n        "dq30_dated_operator_2026","dq30_operator_overview_2026")}
 
 def route_evidence(data:dict,origin:str,destination:str)->dict:
     origin,destination=canonical_place(origin),canonical_place(destination)
@@ -108,7 +133,7 @@ def route_evidence(data:dict,origin:str,destination:str)->dict:
                 "return_2027_verified":False}
     # Stable source preference is for display ONLY, not taking the minimum
     # across dissimilar evidence. The complete provenance is returned.
-    priority=("five_base_operator_2026","expanded_rail_sample_2026","four_base_routes_2026")
+    priority=("five_base_operator_2026","expanded_rail_sample_2026","four_base_routes_2026",\n              "dq30_dated_operator_2026","dq30_operator_overview_2026")
     best=sorted(timed,key=lambda x:priority.index(x["source_dataset"]))[0]
     return {"status":"historical_time","minimum_oneway_min":best["minimum_oneway_min"],
             "typical_oneway_min":best["typical_oneway_min"],
