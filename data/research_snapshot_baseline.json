@@ -1,0 +1,12 @@
+{
+  "baseline_id": "ARCH13-reviewed-2026-11-17",
+  "description": "Explicit reviewed catalog sizes; update only with approved source expansion and tests",
+  "expected_counts": {
+    "bases": 30,
+    "canonical_destinations": 14,
+    "canonical_attractions": 65,
+    "dq32_source_records": 30,
+    "dq32_cities": 23,
+    "historical_exploration_routes": 34
+  }
+}
