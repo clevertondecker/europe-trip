@@ -1,6 +1,6 @@
 # PROMPT 1/7 — Contratos e validação de evidências ferroviárias
 
-> STATUS: **SOMENTE PROPOSTA PARA REVISÃO POR OUTRA IA.** Este PR contém apenas este prompt, não código funcional nem pesquisa nova. Não executar implementação, merge ou deploy antes de avaliação/autorizações explícitas. Depois de aprovado, executar na mesma branch ou conforme coordenação dos agentes.
+> STATUS: **SOMENTE PROPOSTA PARA REVISÃO POR OUTRA IA.** Este PR contém apenas este prompt, não código funcional nem pesquisa nova. Não executar implementação, merge ou deploy antes de avaliação/autorizações explícitas. Após aprovação, abrir PRs de implementação **novos e separados**; esta branch permanece somente especificação.
 >
 > Projeto: Nossa Europa 2027 — `clevertondecker/europe-trip`. Referência obrigatória: auditoria de cobertura **PR #108** (30 bases, 46 destinos, 94 atrações; 1.380 pares base–destino, dos quais 54 com tempo histórico, 25 parciais, 1.271 não pesquisados e 30 locais). Como #108 pode ainda não estar na main, consultar o PR/branch e não presumir integração.
 >
@@ -36,3 +36,25 @@ Coletar tempos, recomendar cidade-base, calcular notas, automatizar itinerário,
 
 ## Contrato de revisão
 Este é um documento de instruções. O diff desta PR **não implementa a funcionalidade**. Comentários de outra IA devem ser publicados neste PR, preferencialmente organizados por P0/P1/P2 e com mudanças propostas ao texto; só após aceite será autorizada a implementação.
+
+## Revisão de alinhamento — 17/11/2026
+
+**Escopo deste PR: somente especificação.** Implementações futuras terão PR próprio, após aprovação. A auditoria #108 é baseline histórico, não a definição do catálogo de 2027.
+
+### Contrato proposto (dimensões independentes)
+1. `source_nature` (o **que** a fonte é): `operator_date_specific_schedule | operator_route_summary | verified_secondary_reference | manual_editorial_note`. O tipo editorial jamais vira duração ferroviária comprovada.
+2. `evidence_state` (o **que** foi efetivamente comprovado): `timed_observation | partial | unknown | conflict | local_access_unknown`. `conflict` representa **coleção de observações divergentes**, não fonte descartada. `unknown` não significa transporte inexistente.
+3. `temporal_validity` (para **quando** vale): `historical_sample | future_date_explicitly_verified | validity_unknown | not_applicable`, sempre acompanhado dos campos independentes `sample_travel_date`, `checked_at`, `published_at` quando conhecidos e `valid_from/valid_until` quando comprovados. Nomes de arquivo com “2027” não constituem validade temporal.
+4. Separar claramente `observation_id` único e estável de `journey_identity`: normalizar origem/destino **direcionais**, país, estação e identificador real de serviço quando disponível, modo, data e horário local da partida (incluindo fuso); compor `observation_id` com a origem documental/versão da fonte, preservando múltiplas observações do mesmo serviço. Para resumos sem serviço ou horário, usar uma identidade de observação de escopo **não específica** (não inventar valores). Coleta repetida idêntica deve ser idempotente; fontes distintas e horários/data distintos não colapsam.
+5. Um par de cidades não é chave suficiente para horário/retorno. Guardar origem/chegada de estação e referências canônicas, `direction`, transfers com estações intermediárias quando documentados, duração positiva quando conhecida e proveniência. Campos não verificados devem ser `null`, não 0 ou aproximações.
+
+### Compatibilidade e precedência
+- **Reutilizar** `rail_evidence_unified_model.canonical_place`, `load_rail_evidence()`, `route_evidence()`, `evidence_query_model.get_rail_evidence()`, `dq30_mobility_evidence_model.validate_mobility_pilot()` e `ux503_destination_base_comparison_model.compare_wishlist_bases()`.
+- O adaptador atual escolhe uma evidência **apenas para exibição**, preservando `observations` e prioridade de fontes. Nenhum contrato novo pode alterar implicitamente `status`, `minimum_oneway_min`, `source_url`, `source_dataset`, `return_2027_verified`, `comparable` ou a precedência existente.
+- Propor uma projeção opt-in e puramente de leitura com versionamento explícito; preservar a coleção de conflitos e detalhes de proveniência mesmo quando a UI exibir um registro prioritário. **Não** somar observações de viagens diferentes.
+
+### Riscos e aceite para PR de implementação futuro
+- **P1 resolvido em especificação:** fonte, grau de evidência e validade temporal não são a mesma dimensão; conflito não é sobrescrito; identidade inclui direção/estação/serviço/data.
+- **P2 resolvido em especificação:** ausência de dados e amostra de 2026 não viram indisponibilidade ou garantia para 2027; aliases normalizados não criam duplicatas.
+- **Dependência:** auditoria #108 revisada para estabelecer snapshot/proveniência. Contrato 1 deve estar aprovado antes de **publicar** observações estruturadas novas; pesquisa exploratória independente pode levantar lacunas sem escrever no adaptador.
+- **Critérios verificáveis:** testes para colisão de alias, duas estações da mesma cidade, direções opostas, dois serviços no mesmo dia, resumo sem horário, fonte repetida idempotente, divergências mantidas, amostra 2026, validade 2027 não inferida e projeção backward-compatible byte a byte dos campos legados. Nenhuma escrita em TripPlan/wishlist/base oficial.
