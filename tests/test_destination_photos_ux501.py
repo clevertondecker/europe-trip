@@ -8,7 +8,7 @@ from streamlit.testing.v1 import AppTest
 
 from ux501_destination_photo_service import (
     ARTICLE_TITLES, COMMONS_API, WIKIPEDIA_API, _image_metadata,
-    lookup_destination_photos,
+    lookup_destination_photos, curated_destination_photo, CURATED_COMMONS_FILES,
 )
 from ux501_destination_discovery_model import build_destination_discovery
 
@@ -68,6 +68,34 @@ class DestinationPhotosTests(TestCase):
         self.assertEqual(len(calls),2)
         self.assertIn("Cologne",calls[0][1]["titles"])
         self.assertNotIn("Freiburg im Breisgau",calls[0][1]["titles"])
+
+    def test_first_page_curated_photos_are_usable_without_external_apis(self):
+        ids=["aachen","baden_baden","cologne","karlsruhe","kehl"]
+        self.assertEqual(set(ids),set(CURATED_COMMONS_FILES))
+        rows=[{"id":key,"name":key,"photo":None} for key in ids]
+        def offline(api,params):
+            raise OSError("Wikimedia Actions are blocked on the server")
+        photos=lookup_destination_photos(rows,fetch_json=offline)
+        self.assertEqual(set(photos),set(ids))
+        self.assertEqual(len({x["url"] for x in photos.values()}),5)
+        for key in ids:
+            photo=curated_destination_photo(key)
+            self.assertEqual(photos[key],photo)
+            self.assertTrue(photo["url"].startswith(
+                "https://commons.wikimedia.org/wiki/Special:FilePath/"))
+            self.assertTrue(photo["source_page"].startswith(
+                "https://commons.wikimedia.org/wiki/File:"))
+            self.assertTrue(photo["author"])
+            self.assertTrue(photo["license"].startswith("CC BY-SA"))
+        self.assertIsNone(curated_destination_photo("nonexistent"))
+
+    def test_verified_images_survive_partial_dynamic_failure(self):
+        rows=[{"id":"aachen","name":"Aachen","photo":None},
+              {"id":"bruges_be","name":"Bruges","photo":None}]
+        photos=lookup_destination_photos(
+            rows,fetch_json=lambda *_:{"query":{"pages":[]}})
+        self.assertIn("aachen",photos)
+        self.assertNotIn("bruges_be",photos)
 
     def test_no_unlicensed_or_unattributed_images(self):
         for lic,author in (("All rights reserved","John"),
