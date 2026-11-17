@@ -101,7 +101,8 @@ class ItalyHoneymoonAppTests(unittest.TestCase):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=100).run()
         app.radio(key="main_navigation").set_value("Roteiro").run()
         initial=deepcopy(app.session_state["advisor_plan"])
-        app.segmented_control(key="itinerary_section").set_value("Itália").run()
+        app.segmented_control(key="ux_section").set_value("Melhorar meu roteiro").run()
+        app.selectbox(key="ux_improve_view").set_value("Itália").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
         self.assertIn("italy_honeymoon_variant",
                       {x.key for x in app.segmented_control})
