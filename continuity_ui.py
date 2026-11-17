@@ -75,6 +75,7 @@ def apply_pending_restore(catalog:dict)->None:
                              in pending["archive"]["city_studies"]}
         state["ux35_proposals"]=deepcopy(pending["archive"]["calendar_drafts"])
         state["ux41_favorites"]=list(pending["archive"].get("city_favorites",[]))
+        state["ux48_weekend_groups"]=deepcopy(pending["archive"]["weekend_groups"])
         state.pop("ux35_review_proposal",None)
         state.pop("ux36_review",None)
         sync_legacy_view(plan,state,include_controls=True)
@@ -114,7 +115,8 @@ def _private_archive(plan, catalog):
     return make_archive(plan, catalog, _safe_context(plan, catalog),
                         list(state.get("ux34_drafts", {}).values()),
                         list(state.get("ux35_proposals", [])),
-                        city_favorites=list(state.get("ux41_favorites",[])))
+                        city_favorites=list(state.get("ux41_favorites",[])),
+                        weekend_groups=state.get("ux48_weekend_groups"))
 
 
 def restore_private_on_start(catalog):
@@ -161,6 +163,7 @@ def restore_private_on_start(catalog):
         state["ux34_drafts"] = {d["name"]: deepcopy(d) for d in archive["city_studies"]}
         state["ux35_proposals"] = deepcopy(archive["calendar_drafts"])
         state["ux41_favorites"] = list(archive.get("city_favorites",[]))
+        state["ux48_weekend_groups"] = deepcopy(archive["weekend_groups"])
         sync_legacy_view(plan, state, include_controls=True)
     except (ValueError, KeyError, TypeError, StorageConflict, StorageUnavailable):
         state["ux36_cloud_status"] = "Erro ao recuperar; use um backup local"
