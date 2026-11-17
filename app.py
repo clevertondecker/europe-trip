@@ -1245,14 +1245,14 @@ elif page == "Roteiro":
         else:
             if ux_section=="Organizar viagem":
                 st.session_state["flow_organize_open"]=True
+            if (ux_area,ux_section)==("Meu roteiro","Organizar viagem"):
+                from ux48_weekend_groups_ui import render_weekend_planner
+                render_weekend_planner(active_plan(),load_attractions())
             render_itinerary_workbench(
                 active_plan(),load_attractions(),data,
                 sync_sources["finance"]["status"]=="live",
                 st.session_state.get("advisor_eurfx",6.3),
                 st.session_state.get("advisor_chffx",7.1))
-            if (ux_area,ux_section)==("Meu roteiro","Organizar viagem"):
-                from ux48_weekend_groups_ui import render_weekend_planner
-                render_weekend_planner(active_plan(),load_attractions())
 
     elif itinerary_section == "Itália":
         render_italy_honeymoon()
