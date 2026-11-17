@@ -1258,44 +1258,6 @@ elif page == "Roteiro":
                 sync_sources["finance"]["status"]=="live",
                 st.session_state.get("advisor_eurfx",6.3),
                 st.session_state.get("advisor_chffx",7.1))
-        if st.session_state.get("ux_organize_view")=="Calendário inteligente" and (
-                ux_area,ux_section)==("Meu roteiro","Organizar viagem"):
-            pass
-        elif st.toggle("Mostrar painel detalhado e mapas antigos",
-                     value=False,key="flow_show_legacy_dashboard"):
-            dashboard_plan=active_plan()
-            render_trip_dashboard(
-                dashboard_plan,data,sync_sources["finance"]["status"]=="live",
-                st.session_state.get("advisor_saved_snapshot"),_owner_signed_in(),
-                st.session_state.get("advisor_eurfx",6.3),
-                st.session_state.get("advisor_chffx",7.1),
-                st.session_state.get("advisor_use_city_rent",True),
-            )
-            with st.expander("Ver etapas e mapas de referência do roteiro original"):
-                st.markdown("<div class='page-section'>A viagem em quatro momentos</div>",unsafe_allow_html=True)
-                steps=[
-                    ("01","Lua de mel na Itália","~10 dias","Roma e Costa Amalfitana, bases em avaliação."),
-                    ("02","Mudança para França","Deslocamento a cotar","Saída via Nápoles/Roma até a cidade francesa a decidir."),
-                    ("03","Instalação e férias","3–5 dias + passeios","Apartamento, internet e passeios de férias."),
-                    ("04","Rotina francesa e retorno","Últimas semanas","Trabalho remoto e lazer nos fins de semana.")
-                ]
-                for num,title,duration,detail in steps:
-                    st.markdown(
-                        "<div class='page-timeline'>"
-                        f"<div class='page-timeline__number'>{num}</div>"
-                        "<div class='page-timeline__content'>"
-                        f"<div class='page-timeline__period'>{escape(duration.upper())}</div>"
-                        f"<div class='page-timeline__stage'>{escape(title)}</div>"
-                        f"<div class='page-timeline__desc'>{escape(detail)}</div></div></div>",
-                        unsafe_allow_html=True)
-                italy_map,france_map=st.columns(2,gap="large")
-                with italy_map:
-                    st.markdown("**Itália · referências**")
-                    itinerary_map("italy",6.5,(40.98,13.7),290)
-                with france_map:
-                    st.markdown("**França · referências**")
-                    itinerary_map("france",5.6,(48.05,7.1),290)
-                st.caption("Mapas de pesquisa, não trajetos contratados.")
 
     elif itinerary_section == "Itália":
         render_italy_honeymoon()

@@ -85,11 +85,13 @@ class ActivePresetConsistency(unittest.TestCase):
         app.segmented_control(key="ux_section").set_value("Meu planejamento").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
         self.assertIn("flow_add_open_button",{b.key for b in app.button})
-        # Old read-only advisor is still available by an explicit toggle.
-        app.toggle(key="flow_show_legacy_dashboard").set_value(True).run()
+        # Modern planner remains available; deprecated duplicate dashboard is gone.
+        self.assertNotIn("flow_show_legacy_dashboard",{t.key for t in app.toggle})
+        # The photographic gallery is scoped to the France stage.
+        app.segmented_control(key="flow_active_stage").set_value("França").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
-        self.assertTrue(any("Roteiro Econômico sugerido" in x.value for x in app.info))
-        self.assertIn("dashboard_go_preset",{b.key for b in app.button})
+        self.assertTrue(any("Lugares que escolhemos" in x.value for x in app.markdown))
+        self.assertEqual(app.session_state["advisor_plan"]["packages"],{})
 
 
 if __name__=="__main__":
