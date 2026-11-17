@@ -11,16 +11,8 @@ import streamlit as st
 from ux501_destination_discovery_model import (
     build_destination_discovery, filter_destinations,
 )
+from ux502_destination_interests_ui import render_wishlist,add_destination
 
-
-def _toggle_interest(destination_id: str) -> None:
-    """Pre-widget Streamlit callback: intentionally session-only."""
-    selected = list(st.session_state.get("ux501_interest_session", []))
-    if destination_id in selected:
-        selected.remove(destination_id)
-    else:
-        selected.append(destination_id)
-    st.session_state["ux501_interest_session"] = selected
 
 
 @st.cache_data(show_spinner=False)
@@ -32,6 +24,9 @@ def render_independent_destination_discovery(*, discovery=None) -> None:
     discovery = discovery if discovery is not None else _cached_discovery()
     destinations = discovery["destinations"]
     by_id = {item["id"]: item for item in destinations}
+    show_list = render_wishlist(discovery)
+    if show_list:
+        return
 
     st.markdown("### O que gostaríamos de conhecer?")
     st.write(
@@ -62,11 +57,8 @@ def render_independent_destination_discovery(*, discovery=None) -> None:
     elif selected != st.session_state["ux501_interest_session"]:
         st.session_state["ux501_interest_session"] = selected
 
-    st.info(
-        "**Seleção temporária — não salva.** O botão **Tenho interesse** apenas "
-        "marca um destino durante esta sessão. As classificações e o salvamento "
-        "serão implementados na UX 5.0.2; nada é adicionado ao roteiro oficial."
-    )
+    st.caption("A seleção temporária da versão anterior pode ser incorporada "
+               "explicitamente em Minha lista; ela não é salva automaticamente.")
     st.multiselect(
         "Lugares que despertaram interesse nesta exploração",
         options=valid,
@@ -152,11 +144,16 @@ def render_independent_destination_discovery(*, discovery=None) -> None:
                                 "- ["+attraction["name"]+"]("+
                                 attraction["source_url"]+") · "+
                                 attraction["category"])
-                    label = ("Retirar do interesse" if item["id"] in selected
-                             else "Tenho interesse")
-                    st.button(label, key="ux501_interest_"+item["id"],
-                              use_container_width=True,
-                              on_click=_toggle_interest, args=(item["id"],))
+                    saved = {r["destination_id"]: r["priority"] for r in
+                             st.session_state.get("ux502_interests",{}).get("items",[])}
+                    if item["id"] in saved:
+                        st.caption("Na minha lista: " + saved[item["id"]].replace("_"," "))
+                    else:
+                        st.button("Adicionar à minha lista",
+                                  key="ux502_add_"+item["id"],
+                                  use_container_width=True,
+                                  on_click=add_destination, args=(item["id"], discovery))
+
     st.caption(
         "Acesso ferroviário, retorno de fim de semana, última milha e custo "
         "total não foram determinados por esta visualização. "
