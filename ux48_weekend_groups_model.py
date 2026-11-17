@@ -210,3 +210,35 @@ def import_groups(text,plan,catalog):
     if not isinstance(text,str) or len(text)>100_000:
         raise ValueError("Arquivo inválido ou grande demais")
     return validate_groups(json.loads(text),plan,catalog)
+
+
+def eligible_weekends(state, plan, catalog, *, destinations, nights=0,
+                      period="Ainda não definido", group_id=None):
+    """Preview dates through the same validator used by saves, without mutation."""
+    season = _season_days(plan)
+    results = []
+    for start, row in sorted(season.items()):
+        if date.fromisoformat(start).weekday() != 5 or row["stage"] != FRANCE_STAGE:
+            continue
+        changes = dict(name="Prévia", destinations=destinations, nights=nights,
+                       period=period, start_date=start)
+        reason = None
+        try:
+            if group_id is None:
+                create_group(state, plan, catalog, **changes)
+            else:
+                update_group(state, plan, catalog, group_id, **changes)
+            activities = [season[day]["activity"] for day in _trip_days(start, nights)]
+            if period == "Férias restantes" and any(
+                    activity != "Férias · excursões possíveis" for activity in activities):
+                reason = "A viagem ultrapassa o período de férias escolhido."
+            if period == "Trabalho remoto · fim de semana" and any(
+                    activity == "Férias · excursões possíveis" for activity in activities):
+                reason = "A viagem começa antes do período de trabalho remoto."
+            if period == "Instalação na França":
+                reason = "Os dias de instalação estão protegidos no calendário."
+        except ValueError as exc:
+            reason = str(exc)
+        results.append({"start": start, "end": _trip_days(start, nights)[-1],
+                        "eligible": reason is None, "reason": reason})
+    return results
