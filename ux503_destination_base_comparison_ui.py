@@ -7,11 +7,11 @@ from ux502_destination_interests_model import (
     empty_interests, ordered_interests, selected_destinations_for_comparison, LABELS,
 )
 from ux503_destination_base_comparison_model import compare_wishlist_bases
+from ux_navigation import set_task
 
 
 def _return_to_wishlist():
-    st.session_state["ux_area"] = "Explorar"
-    st.session_state["ux_section"] = "Passeios"
+    set_task(st.session_state, "Explorar", "Passeios")
     st.session_state["ux502_view"] = "Minha lista"
 
 
