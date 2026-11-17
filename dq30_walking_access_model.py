@@ -97,7 +97,7 @@ def _walking_route(route, stations, attractions, station_access, attraction_acce
     if status in OFFICIAL_STATUSES:
         if method != "official_tourism_access_statement" and method != "official_published_access":
             raise ValueError("Tempo oficial exige método de publicação oficial")
-        if distance is not None and route.get("geometry_status") == "verified_pedestrian_routing":
+        if route.get("geometry_status") == "verified_pedestrian_routing":
             raise ValueError("Geometria roteada deve usar evidência de motor pedestre")
         if route.get("engine") is not None:
             raise ValueError("Publicação oficial não pode mascarar motor de rotas")
