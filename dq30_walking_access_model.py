@@ -201,6 +201,41 @@ def validate_walking_access(data, catalog):
             raise ValueError("Percurso entre destinos incompatíveis")
         _walking_route(route, stations, indexed,
                        station_access, attraction_access_points)
+    # Distances for official complete itineraries are not distances between
+    # any two of their individual highlights.
+    seen_itineraries = set()
+    for itinerary in data.get("published_walking_itineraries", []):
+        ident=itinerary.get("id")
+        if not isinstance(ident,str) or not ident or ident in seen_itineraries:
+            raise ValueError("Roteiro pedestre duplicado ou sem ID")
+        seen_itineraries.add(ident)
+        start=itinerary.get("origin_id")
+        end=itinerary.get("destination_id")
+        if start not in stations or end not in stations:
+            raise ValueError("Roteiro oficial sem estação canônica")
+        if (stations[start]["destination_id"] != itinerary.get("destination_id")
+                or stations[end]["destination_id"] != itinerary.get("destination_id")):
+            raise ValueError("Roteiro oficial em destino incompatível")
+        if (itinerary.get("status") != "official_published"
+                or itinerary.get("method") != "official_tourism_walking_itinerary"
+                or itinerary.get("mode") != "walking"
+                or itinerary.get("distance_kind") != "walking_route"
+                or itinerary.get("route_scope") != "entire_loop_not_individual_segments"
+                or itinerary.get("geometry_status") != "official_tourism_route_map_link"):
+            raise ValueError("Roteiro total não pode ser disfarçado de trecho")
+        if (type(itinerary.get("distance_m")) not in (int,float)
+                or not isfinite(itinerary["distance_m"]) or itinerary["distance_m"] <= 0
+                or itinerary.get("duration_min") is not None):
+            raise ValueError("Distância total publicada ou duração inválida")
+        if not isinstance(itinerary.get("source_url"),str) or not itinerary["source_url"].startswith("https://"):
+            raise ValueError("Roteiro oficial sem fonte")
+        date.fromisoformat(itinerary["checked_at"])
+        ids=itinerary.get("included_attraction_ids",[])
+        if not ids or len(ids)!=len(set(ids)) or any(
+                x not in indexed or indexed[x]["destination_id"]!=itinerary["destination_id"]
+                for x in ids):
+            raise ValueError("Destaques do roteiro inexistentes ou incompatíveis")
+
     for seq in data["candidate_sequences"]:
         ids = seq["attraction_ids"]
         if (seq["destination_id"] not in destinations or not 2 <= len(ids) <= 10
