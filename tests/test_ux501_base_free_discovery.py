@@ -119,6 +119,31 @@ class BaseFreeDiscoveryAppTests(unittest.TestCase):
         self.assertFalse(app.exception,[x.message for x in app.exception])
         self.assertEqual(app.session_state["advisor_plan"],initial)
 
+    def test_interests_survive_pagination_and_filters(self):
+        app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
+        initial=deepcopy(app.session_state["advisor_plan"])
+        app.radio(key="ux_area").set_value("Explorar").run()
+        app.segmented_control(key="ux_section").set_value("Passeios").run()
+        chosen=["colmar","lille","brussels","basel","bruges_be"]
+        app.multiselect(key="ux501_interest_session").set_value(chosen).run()
+        self.assertFalse(app.exception,[x.message for x in app.exception])
+        self.assertGreater(len(app.selectbox(key="ux501_page").options),1)
+        app.selectbox(key="ux501_page").set_value(2).run()
+        self.assertFalse(app.exception,[x.message for x in app.exception])
+        self.assertEqual(app.session_state["ux501_interest_session"],chosen)
+        app.selectbox(key="ux501_country").set_value("Bélgica").run()
+        self.assertFalse(app.exception,[x.message for x in app.exception])
+        self.assertEqual(app.session_state["ux501_page"],1)
+        self.assertEqual(app.session_state["ux501_interest_session"],chosen)
+        app.selectbox(key="ux501_country").set_value("Todos os países").run()
+        app.text_input(key="ux501_search").set_value("casemates").run()
+        self.assertFalse(app.exception,[x.message for x in app.exception])
+        self.assertEqual(app.session_state["ux501_interest_session"],chosen)
+        app.text_input(key="ux501_search").set_value("").run()
+        self.assertEqual(app.session_state["ux501_interest_session"],chosen)
+        self.assertEqual(app.session_state["advisor_plan"],initial)
+        self.assertFalse(app.session_state.get("advisor_autosave_pending",False))
+
     def test_first_discovery_does_not_require_exploratory_base(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
         app.radio(key="ux_area").set_value("Explorar").run()
