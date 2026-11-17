@@ -3,7 +3,9 @@ from __future__ import annotations
 import streamlit as st
 from base_research_expanded_model import load_research
 from ux501_destination_discovery_model import build_destination_discovery
-from ux502_destination_interests_model import empty_interests
+from ux502_destination_interests_model import (
+    empty_interests, ordered_interests, selected_destinations_for_comparison, LABELS,
+)
 from ux503_destination_base_comparison_model import compare_wishlist_bases
 
 
@@ -55,58 +57,93 @@ def render_wishlist_base_comparison(*, plan, discovery=None, research=None):
         st.warning("Selecione entre duas e cinco cidades-base para comparar.")
         return
     try:
-        result = compare_wishlist_bases(interests, list(selected),
-                                        discovery=discovery, research=research)
+        active = selected_destinations_for_comparison(interests, discovery)
+        ordered = ordered_interests(interests, discovery)
     except ValueError as exc:
-        st.error("Não foi possível validar a lista: " + str(exc))
-        st.caption("Confira IDs removidos ou renomeados antes de continuar. "
-                   "Nenhuma preferência ou base foi alterada.")
+        st.error("Lista de destinos incompatível: " + str(exc))
         return
-    if not result["destinations"]:
-        if result["discarded_count"]:
-            st.info("Todos os destinos estão descartados. "
-                    "Reclassifique um lugar em Minha lista antes de comparar.")
+    if not active:
+        if ordered:
+            st.info("Todos os destinos estão descartados. Reclassifique um em Minha lista.")
         else:
             st.info("Sua lista está vazia. Adicione destinos em Explorar → Passeios.")
         return
-    st.markdown("#### Nossos destinos")
-    st.write(" · ".join(x["name"]+" ("+x["priority_label"]+")"
-                         for x in result["destinations"]))
-    st.caption("Destinos descartados não participam; alterações na lista são "
-               "refletidas ao retornar a esta comparação.")
-    st.markdown("#### Logística conhecida por destino")
-    st.caption("Os tempos são históricos, de ida e entre estações. "
-               "Dados ausentes não significam falta de conexão.")
-    indexed={(r["base_id"],r["destination_id"]):r for r in result["rows"]}
-    # One destination per block: readable on small screens; 2–5 columns when space allows.
+
+    names = {row["id"]: row for row in discovery["destinations"]}
+    priorities = {row["destination_id"]:LABELS[row["priority"]] for row in ordered}
+    # View-only projection. The UX 5.0.2 document is never filtered or overwritten.
+    if "ux503_visible_destinations" not in st.session_state:
+        st.session_state["ux503_visible_destinations"] = active[:5]
+    selected_view = st.multiselect(
+        "Destinos para exibir nesta comparação", active,
+        format_func=lambda x: names[x]["name"] + " · " + priorities[x],
+        key="ux503_visible_destinations",
+        help="Filtra apenas esta tela. Não altera ou remove destinos da lista salva.")
+    visible = [x for x in active if x in selected_view]
+    st.caption(f"Exibindo {len(visible)} de {len(active)} destinos ativos. "
+               "As prioridades da lista continuam intactas.")
+    if not visible:
+        st.info("Selecione pelo menos um destino para visualizar a matriz.")
+        return
+    try:
+        result = compare_wishlist_bases(
+            interests, list(selected), discovery=discovery, research=research,
+            visible_destination_ids=visible)
+    except ValueError as exc:
+        st.error("Não foi possível montar a comparação: " + str(exc))
+        return
+
+    st.markdown("#### Matriz resumida — destino × cidade-base")
+    st.caption("Cada célula mostra um tempo histórico de ida, um trajeto local pendente "
+               "ou a ausência de pesquisa. Os dados NÃO confirmam retorno, "
+               "última milha nem viabilidade em 2027.")
+    indexed = {(r["base_id"],r["destination_id"]):r for r in result["rows"]}
+    matrix = []
     for destination in result["destinations"]:
-        with st.container(border=True):
-            st.markdown("**"+destination["name"]+"** · "+destination["priority_label"])
-            # Vertical per-base records remain readable on narrow mobile screens.
-            for base_id in selected:
-                route=indexed[(base_id,destination["id"])]
-                with st.container(border=True):
-                    st.markdown("**"+cities[base_id]["name"]+"**")
-                    minimum=route["minimum_oneway_min"]
-                    st.write((str(minimum)+" min · ida histórica") if minimum is not None
-                             else route["status"])
-                    if route["typical_oneway_min"] is not None:
-                        st.caption("Típico observado: "+str(route["typical_oneway_min"])+" min")
-                    st.caption("Retorno: não verificado · última milha: pendente")
-                    if route["divergent_sources"]:
-                        st.warning("Fontes com tempos divergentes")
-                    with st.expander("Fontes e detalhes", expanded=False):
-                        st.write("Transferências: "+(str(route["transfers"])
-                                 if route["transfers"] is not None else "Não pesquisadas"))
-                        st.write("Observação: "+str(route["source_date"] or "Data não informada"))
-                        if route["source_url"]:
-                            st.link_button("Fonte selecionada",route["source_url"])
-                        for observation in route["observations"]:
-                            source=observation.get("source_url")
-                            if source and source != route["source_url"]:
-                                st.markdown("[Outra observação]("+source+")")
-                        st.caption("Fontes históricas não garantem retorno nem "
-                                   "condições equivalentes em 2027.")
+        line = {"Destino · prioridade": destination["name"] + " · " + destination["priority_label"]}
+        for base_id in selected:
+            route = indexed[(base_id,destination["id"])]
+            minimum = route["minimum_oneway_min"]
+            line[cities[base_id]["name"]] = (
+                str(minimum) + " min · ida histórica" if minimum is not None
+                else "Local · verificar" if route["evidence_status"] == "local"
+                else "Sem tempo documentado")
+            if route["divergent_sources"]:
+                line[cities[base_id]["name"]] += " · fontes divergentes"
+        matrix.append(line)
+    st.dataframe(matrix, hide_index=True, width="stretch")
+    st.caption("Role a matriz horizontalmente em telas estreitas. "
+               "Escolha um destino abaixo para consultar fontes, datas e transferências.")
+
+    st.markdown("#### Detalhes ferroviários")
+    detail = st.selectbox(
+        "Examinar um destino", visible,
+        format_func=lambda x: names[x]["name"] + " · " + priorities[x],
+        key="ux503_detail_destination")
+    if detail:
+        destination = next(x for x in result["destinations"] if x["id"] == detail)
+        st.markdown("**" + destination["name"] + "** · " + destination["priority_label"])
+        for base_id in selected:
+            route = indexed[(base_id, detail)]
+            with st.expander(cities[base_id]["name"] + " · " + route["status"], expanded=False):
+                minimum = route["minimum_oneway_min"]
+                st.write((str(minimum) + " min · ida histórica") if minimum is not None
+                         else route["status"])
+                if route["typical_oneway_min"] is not None:
+                    st.caption("Típico observado: " + str(route["typical_oneway_min"]) + " min")
+                st.write("Transferências: " + (str(route["transfers"])
+                         if route["transfers"] is not None else "Não pesquisadas"))
+                st.caption("Data da observação: " + str(route["source_date"] or "Não informada"))
+                st.caption("Retorno de fim de semana e última milha não verificados.")
+                if route["divergent_sources"]:
+                    st.warning("Fontes com tempos divergentes; verificar as condições.")
+                if route["source_url"]:
+                    st.link_button("Fonte selecionada", route["source_url"])
+                for observation in route["observations"]:
+                    source = observation.get("source_url")
+                    if source and source != route["source_url"]:
+                        st.markdown("[Observação alternativa](" + source + ")")
+
     st.markdown("#### O que sabemos — e o que falta pesquisar")
     st.caption("Cobertura de pesquisa não é qualidade logística. "
                "Nenhuma base recebe ranking ou pontuação automática.")
