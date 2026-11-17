@@ -18,6 +18,10 @@ def render_guided_home(plan: dict, interests: dict | None = None) -> None:
     st.button(view["next"]["label"] + " →", type="primary",
               key="ux504_next_step", on_click=request_step,
               args=(view["next"]["id"],))
+    for alternative in view["alternatives"]:
+        st.button(alternative["label"] + " →",
+                  key="ux504_next_alternative_"+alternative["id"],
+                  on_click=request_step,args=(alternative["id"],))
     st.caption("A base oficial permanece como referência de trabalho; "
                "comparar alternativas não significa decidir onde morar.")
     st.markdown("#### Nosso caminho")
