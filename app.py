@@ -21,6 +21,7 @@ from unified_budget import resolve_french_budget, scenario_total
 from calendar_model import calendar_plan
 from route_preview import route_endpoints
 from attractions_ui import render_explorer
+from ux501_destination_discovery_ui import render_independent_destination_discovery
 from travel_advisor_ui import render_advisor, _recover_saved_plan, _secure_save, _owner_signed_in
 from travel_dashboard_ui import render_trip_dashboard
 from itinerary_flow_ui import render_itinerary_workbench
@@ -1241,6 +1242,11 @@ elif page == "Roteiro":
         render_italy_honeymoon()
 
     elif itinerary_section == "Explorar atrações":
+        # UX 5.0.1: destination-first discovery, no base choice required.
+        render_independent_destination_discovery()
+        st.divider()
+        st.markdown("### Pesquisa de passeios por cidade-base · opcional")
+        st.caption("Ferramentas existentes preservadas para investigar as alternativas.")
         render_explorer(data,sync_sources,map_view)
 
     elif itinerary_section == "Explorar bases":
