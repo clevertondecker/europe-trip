@@ -30,7 +30,7 @@ class HomeContextTests(unittest.TestCase):
         at.segmented_control(key="ux_mode").set_value("Simulação").run()
         at.selectbox(key="scenario_sidebar").set_value("offenburg").run()
         at.number_input(key="ux_days").set_value(65).run()
-        at.radio(key="ux_area").set_value("Minha viagem").run()
+        at.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Minha viagem"))).click().run()
         self.assertFalse(at.exception,[x.message for x in at.exception])
         self.assertNotIn("scenario_sidebar",{x.key for x in at.selectbox})
         self.assertNotIn("ux_days",{x.key for x in at.number_input})
@@ -43,7 +43,7 @@ class HomeContextTests(unittest.TestCase):
         self.assertEqual(at.session_state["ux_mode_value"],"Oficial")
         self.assertEqual(at.session_state["scenario_base_selected"],initial)
         self.assertEqual(at.session_state["advisor_plan"]["base_city"],initial)
-        at.radio(key="ux_area").set_value("Orçamento").run()
+        at.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Orçamento"))).click().run()
         self.assertFalse(at.exception,[x.message for x in at.exception])
         # The budget reuses scenario context instead of duplicating controls.
         self.assertNotIn("ux_mode",{x.key for x in at.segmented_control})
