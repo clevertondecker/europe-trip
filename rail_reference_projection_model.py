@@ -10,6 +10,7 @@ from functools import lru_cache
 from rail_gap_enrichment_model import load_gap_enrichment
 from data10_connectivity_model import load_connectivity_references
 from data11_priority_connectivity_model import load_priority_connectivity
+from data12_lille_connectivity_model import load_lille_connectivity
 
 
 def format_minutes(value):
@@ -34,8 +35,14 @@ def _cached_priority_connectivity():
     return load_priority_connectivity()
 
 
+@lru_cache(maxsize=1)
+def _cached_lille_connectivity():
+    return load_lille_connectivity()
+
+
 def decorate_comparison(result, *, references=None, gap_overlay=None,
-                        connectivity_overlay=None, priority_overlay=None):
+                        connectivity_overlay=None, priority_overlay=None,
+                        lille_overlay=None):
     """All matrix categories are mutually exclusive, including custom baskets."""
     refs = references if references is not None else load_route_references()
     gaps = gap_overlay if gap_overlay is not None else _cached_route_gaps()
@@ -43,6 +50,7 @@ def decorate_comparison(result, *, references=None, gap_overlay=None,
                     else _cached_connectivity())
     priority = (priority_overlay if priority_overlay is not None
                 else _cached_priority_connectivity())
+    lille = lille_overlay if lille_overlay is not None else _cached_lille_connectivity()
     cells = {}
     categories = {
         "historical": 0, "reference_only": 0, "local": 0, "no_time": 0,
@@ -117,6 +125,24 @@ def decorate_comparison(result, *, references=None, gap_overlay=None,
                 "weekend_return_known": False,
                 "valid_for_2027": False,
             }
+        # DATA12 is the last-resort sourced Lille overlay, never a return route.
+        lille_row = lille["by_pair"].get(key)
+        if (lille_row is not None and evidence.get("display_min") is None
+                and row["evidence_status"] != "local"):
+            evidence = {
+                **evidence,
+                "display_basis": "data12_reference",
+                "display_min": lille_row["minimum_oneway_min"],
+                "source_url": lille_row["source_url"],
+                "reference_source_url": lille_row["source_url"],
+                "gap_checked_at": lille_row["source_checked_at"],
+                "confidence": lille_row["confidence"],
+                "source_kind": lille_row["reference_kind"],
+                "station_comparability": "city_level_ambiguous",
+                "comparability": "indicative_only_not_station_comparable",
+                "weekend_return_known": False,
+                "valid_for_2027": False,
+            }
         basis = evidence["display_basis"]
         if basis == "local_not_rail":
             category = "local"
@@ -144,6 +170,12 @@ def decorate_comparison(result, *, references=None, gap_overlay=None,
                          else "referência secundária · mínimo divulgado")
             label = f'~{format_minutes(evidence["display_min"])} · {qualifier}'
         elif basis == "data11_reference":
+            category = "reference_only"
+            qualifier = ("mínimo publicado · operadora"
+                         if evidence.get("source_kind") == "official_operator_minimum"
+                         else "referência secundária · mínimo divulgado")
+            label = f'~{format_minutes(evidence["display_min"])} · {qualifier}'
+        elif basis == "data12_reference":
             category = "reference_only"
             qualifier = ("mínimo publicado · operadora"
                          if evidence.get("source_kind") == "official_operator_minimum"
@@ -178,6 +210,7 @@ def decorate_comparison(result, *, references=None, gap_overlay=None,
             "gap_applied": basis == "gap_reference",
             "connectivity_applied": basis == "data10_reference",
             "priority_connectivity_applied": basis == "data11_reference",
+            "lille_connectivity_applied": basis == "data12_reference",
             "station_caveat": (
                 "Referência por cidade; estação de embarque/chegada não reconciliada."
                 if evidence.get("station_comparability") == "city_level_ambiguous"
