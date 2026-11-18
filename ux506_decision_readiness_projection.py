@@ -32,7 +32,8 @@ def _https(value):
 
 def build_decision_readiness(comparison: dict, *, discovery=None,
                              catalog=None, research=None,
-                             tourism_overlay=None, housing_overlay=None) -> dict:
+                             tourism_overlay=None, housing_overlay=None,
+                             access_overlay=None) -> dict:
     """Enhance the same manually selected basket with versioned research coverage.
 
     Explicit injections allow integration tests without merging all branches.
@@ -47,6 +48,9 @@ def build_decision_readiness(comparison: dict, *, discovery=None,
     if housing_overlay is None:
         housing_overlay = _optional_research(
             "housing_short_stay_research_model", "housing_research_overview")
+    if access_overlay is None:
+        access_overlay = _optional_research(
+            "attraction_last_mile_model", "load_access_pilot")
 
     attrs = {x["id"]: x for x in catalog["attractions"]}
     destinations = {x["id"]: x for x in discovery["destinations"]}
@@ -88,6 +92,13 @@ def build_decision_readiness(comparison: dict, *, discovery=None,
                 raise ValueError("Overlay de moradia duplicado ou cidade não cadastrada")
             housing_lookup[key] = row
 
+    access_by_attraction = {}
+    for record in (access_overlay or {}).get("observations", []):
+        aid = record.get("attraction_id")
+        if attr_to_destination.get(aid) != record.get("destination_id"):
+            raise ValueError("Acesso não corresponde à atração canônica")
+        access_by_attraction.setdefault(aid, []).append(record)
+    attraction_details = []
     tourism = []
     for dest in selected_destinations:
         d = destinations[dest]
@@ -95,6 +106,27 @@ def build_decision_readiness(comparison: dict, *, discovery=None,
         enriched_here = [enriched[a["id"]] for a in d["attractions"] if a["id"] in enriched]
         legacy_hours_ids = {x["id"] for x in observed if x.get("opening_hours")}
         current_rule_ids = {x["attraction_id"] for x in enriched_here}
+        for attraction in d["attractions"]:
+            canonical = attrs.get(attraction["id"], {})
+            extra = enriched.get(attraction["id"], {})
+            attraction_details.append({
+                "attraction_id": attraction["id"], "destination_id": dest,
+                "name": attraction["name"], "category": attraction.get("category"),
+                "description": canonical.get("summary"),
+                "why_visit": extra.get("experience_reason"),
+                "opening_rule": extra.get("opening_rule"),
+                "opening_schedule": extra.get("opening_schedule"),
+                "opening_source_url": extra.get("source_url"),
+                "opening_checked_at": extra.get("checked_at"),
+                "opening_verified_for_2027": False,
+                "ticket_main": extra.get("entry_ticket", canonical.get("ticket")),
+                "additional_activity": extra.get("additional_activity"),
+                "visit_minutes": canonical.get("visit_minutes"),
+                "visit_duration_status": canonical.get("visit_minutes_status", "unknown"),
+                "last_mile_observations": access_by_attraction.get(attraction["id"], []),
+                "station_access_time": None,
+                "decision_ready": False,
+            })
         tourism.append({
             "destination_id": dest, "destination_name": d["name"],
             "catalog_attraction_count": len(d["attractions"]),
@@ -125,24 +157,41 @@ def build_decision_readiness(comparison: dict, *, discovery=None,
             "remote_work_internet_verified_count": sum(
                 x.get("internet_verified") is True for x in offers),
             "total_stay_price_2027": None,
+            "cleaning_fee_2027": None,
+            "refundable_deposit_2027": None,
+            "work_space_verified": False,
+            "station_access_verified": False,
             "decision_ready": False,
             "housing_contract_loaded": overlay is not None,
             "live_listing_recheck_pending": True,
         })
     journeys = []
     for row in comparison["rows"]:
+        observations = row.get("observations", [])
+        primary = next((x for x in observations
+                        if x.get("source_url") == row.get("source_url")), {})
+        association = compatible_evidence_association(
+            row.get("outbound_service"), row.get("return_service"),
+            row.get("bidirectional_last_mile"),
+            attraction_window=row.get("attraction_window"))
         journeys.append({
             "base_id": row["base_id"], "destination_id": row["destination_id"],
             "historical_rail_oneway_min": row["minimum_oneway_min"],
-            "weekend_return_verified": bool(row["return_weekend_verified"]),
-            "last_mile_verified": bool(row["local_access_verified"]),
+            "origin_station_id": primary.get("origin_station"),
+            "destination_station_id": primary.get("destination_station"),
+            "transfers": row.get("transfers"),
+            "weekend_return_verified": False,
+            "last_mile_verified": False,
+            "temporal_association_status": association["temporal_status"],
+            "association_reasons": association["reasons"],
             "full_door_to_door_min": None,
             "couple_2027_outing_total": None,
             "complete_trip_ready": False,
         })
     return {
-        "destinations": tourism, "base_housing": housing,
-        "journeys": journeys, "base_ids": list(comparison["base_ids"]),
+        "destinations": tourism, "attraction_details": attraction_details,
+        "base_housing": housing, "journeys": journeys,
+        "base_ids": list(comparison["base_ids"]),
         "basket_ids": selected_destinations, "winner_id": None,
         "tourism_source_scope": "pilot_overlay_and_legacy_catalog"
             if tourism_overlay is not None else "legacy_catalog_only",
