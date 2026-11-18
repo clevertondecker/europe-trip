@@ -15,6 +15,7 @@ from ux501_destination_discovery_model import (
     build_destination_discovery, filter_destinations,
 )
 from ux502_destination_interests_ui import render_wishlist,add_destination
+from data8_tourism_ui import render_data8_destination_preview
 
 
 
@@ -212,6 +213,9 @@ def render_independent_destination_discovery(*, discovery=None) -> None:
                                 "- ["+attraction["name"]+"]("+
                                 attraction["source_url"]+") · "+
                                 attraction["category"])
+                        render_data8_destination_preview(
+                            item["id"], attraction_names={
+                                a["id"]: a["name"] for a in item["attractions"]})
                     saved = {r["destination_id"]: r["priority"] for r in
                              st.session_state.get("ux502_interests",{}).get("items",[])}
                     if item["id"] in saved:
