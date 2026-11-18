@@ -70,6 +70,16 @@ class Route7ProvenanceTests(unittest.TestCase):
             self.assertIsNone(row["transfer_count"])
             self.assertEqual(row["weekend_return_status"], "unknown")
 
+    def test_duplicate_original_csv_rejected(self):
+        original = SNAPSHOT.read_text(encoding="utf-8-sig")
+        with tempfile.TemporaryDirectory() as folder:
+            file = Path(folder) / "duplicate.csv"
+            rows = original.strip().splitlines()
+            file.write_text(original.rstrip() + "\n" + rows[1] + "\n",
+                            encoding="utf-8")
+            with self.assertRaises(ValueError):
+                load_route_references(snapshot_path=file)
+
     def test_cross_field_negative_cases(self):
         original = json.loads(DATA.read_text(encoding="utf-8"))
         changes = []
