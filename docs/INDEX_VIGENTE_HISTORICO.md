@@ -11,13 +11,25 @@ Este índice distingue **documentação operacional vigente**, **snapshots de pe
 | Como executar e navegar | [README.md](../README.md) e `app.py` | Vigente; comportamento do código prevalece |
 | Roteiro aprovado e estado da sessão | `trip_plan_model.py`, `planning_session.py`, `planning_store.py` | Contrato vigente; não modificar por leitura exploratória |
 | Evidência histórica ferroviária | `evidence_query_model.py`, `rail_evidence_unified_model.py`, `routes7_reference_model.py` | Vigente, sujeito à proveniência documentada |
-| Apresentação ferroviária comparativa | `routes7_comparison_projection.py` e `dq32_macro_opportunities_model.py` | Vigente; ainda sujeito a consolidação arquitetural |
+| Seletor da evidência histórica | `evidence_query_model.py` → `rail_evidence_unified_model.py` | Seleção e proveniência de observações de ida, não viabilidade |
+| Projeção ferroviária compartilhada | `rail_reference_projection_model.py` | Projeção canônica; categorias históricas, indicativas, locais e desconhecidas |
+| Compatibilidade da apresentação antiga | `routes7_comparison_projection.py` | Fachada dos imports anteriores; não é segunda implementação |
+| DQ 3.2 e UX503 | `dq32_macro_opportunities_model.py`, `ux503_destination_base_comparison_model.py` | Consumidores da projeção sem modificar wishlist/TripPlan |
+| Inventário documental | `rail_gap_coverage_audit_model.py` e `rail_component_contract.py` | Cobertura e pendências por componente, **não** motor de viabilidade |
 | Pesquisa ampliada DATA 9 | [DATA9_RAIL_GAPS_2026_11.md](research/DATA9_RAIL_GAPS_2026_11.md) | Snapshot histórico de 2026, não horários 2027 |
 | Inventário 30×46 | [DATA9_1_COVERAGE_AUDIT_2026_11.md](research/DATA9_1_COVERAGE_AUDIT_2026_11.md) | Auditoria do snapshot 18/11/2026 |
 | Retorno, fuso, conexões | `rail_temporal_contract.py`, `rail_transfer_contract.py`, `weekend_return_validation_model.py` | Contratos vigentes: data e horário devem ser comprovados |
 | Acesso urbano e caminhada | `dq30_walking_access_model.py`, `data8_local_access_model.py` | Evidências distintas: documentada ≠ hipótese editorial |
 | Validação automatizada | [validate.yml](../.github/workflows/validate.yml) | Workflow vigente, Python 3.11 |
 | Segurança de publicação de planos | `public_plan_safety.py` e `private_continuity_store.py` | Separar repositório público de dados privados |
+
+## Estado da integração dos PRs (auditado por branch)
+
+- **DATA 9.1 / PR #136** já foi incorporado à `main` e fornece 30 bases × 46 destinos no snapshot histórico, sem horários futuros garantidos.
+- **PR #139** introduz a projeção compartilhada e mantém a fachada legada. Sua efetividade na `main` depende do merge, e o comportamento da tela continua baseado no mesmo contrato.
+- **PR #138** propõe apenas um inventário de evidências por componente, sem mudar fontes ou provar retorno; consulte `docs/LOGISTICS_COMPONENT_BACKLOG_CONTRACT.md` após a integração.
+- **A PoC do avaliador temporal/multicritério permanece externa ao repositório**, sem API pública nem integração à interface.
+- O estado de integração deste texto corresponde à proposta de documentação no PR #140. Para verificar merges e CI posteriores, prevalecem os commits da `main` e os checks do GitHub.
 
 ## Documentação histórica, preservar sem reescrever
 
