@@ -19,7 +19,10 @@
       "distance_m": null,
       "journey_date": null,
       "joinable_to_rail_service": false,
-      "valid_for_2027": false
+      "valid_for_2027": false,
+      "source_scope": "tourism_context_only",
+      "duration_basis": "editorial_assumption",
+      "route_evidence_source_url": null
     },
     {
       "attraction_id": "dq32_aachen_07",
@@ -37,7 +40,10 @@
       "distance_m": null,
       "journey_date": null,
       "joinable_to_rail_service": false,
-      "valid_for_2027": false
+      "valid_for_2027": false,
+      "source_scope": "tourism_context_only",
+      "duration_basis": "editorial_assumption",
+      "route_evidence_source_url": null
     },
     {
       "attraction_id": "dq32_aachen_08",
@@ -55,7 +61,10 @@
       "distance_m": null,
       "journey_date": null,
       "joinable_to_rail_service": false,
-      "valid_for_2027": false
+      "valid_for_2027": false,
+      "source_scope": "tourism_context_only",
+      "duration_basis": "editorial_assumption",
+      "route_evidence_source_url": null
     },
     {
       "attraction_id": "dq32_aachen_08",
@@ -73,7 +82,10 @@
       "distance_m": null,
       "journey_date": null,
       "joinable_to_rail_service": false,
-      "valid_for_2027": false
+      "valid_for_2027": false,
+      "source_scope": "tourism_context_only",
+      "duration_basis": "editorial_assumption",
+      "route_evidence_source_url": null
     },
     {
       "attraction_id": "strasbourg_cathedral",
@@ -91,7 +103,10 @@
       "distance_m": null,
       "journey_date": null,
       "joinable_to_rail_service": false,
-      "valid_for_2027": false
+      "valid_for_2027": false,
+      "source_scope": "tourism_context_only",
+      "duration_basis": "editorial_assumption",
+      "route_evidence_source_url": null
     },
     {
       "attraction_id": "strasbourg_cathedral",
@@ -109,7 +124,10 @@
       "distance_m": null,
       "journey_date": null,
       "joinable_to_rail_service": false,
-      "valid_for_2027": false
+      "valid_for_2027": false,
+      "source_scope": "tourism_context_only",
+      "duration_basis": "editorial_assumption",
+      "route_evidence_source_url": null
     },
     {
       "attraction_id": "strasbourg_petite",
@@ -127,7 +145,10 @@
       "distance_m": null,
       "journey_date": null,
       "joinable_to_rail_service": false,
-      "valid_for_2027": false
+      "valid_for_2027": false,
+      "source_scope": "tourism_context_only",
+      "duration_basis": "editorial_assumption",
+      "route_evidence_source_url": null
     },
     {
       "attraction_id": "strasbourg_petite",
@@ -145,7 +166,10 @@
       "distance_m": null,
       "journey_date": null,
       "joinable_to_rail_service": false,
-      "valid_for_2027": false
+      "valid_for_2027": false,
+      "source_scope": "tourism_context_only",
+      "duration_basis": "editorial_assumption",
+      "route_evidence_source_url": null
     },
     {
       "attraction_id": "brussels_grand_place",
@@ -163,7 +187,10 @@
       "distance_m": null,
       "journey_date": null,
       "joinable_to_rail_service": false,
-      "valid_for_2027": false
+      "valid_for_2027": false,
+      "source_scope": "tourism_context_only",
+      "duration_basis": "editorial_assumption",
+      "route_evidence_source_url": null
     },
     {
       "attraction_id": "brussels_grand_place",
@@ -181,7 +208,10 @@
       "distance_m": null,
       "journey_date": null,
       "joinable_to_rail_service": false,
-      "valid_for_2027": false
+      "valid_for_2027": false,
+      "source_scope": "tourism_context_only",
+      "duration_basis": "editorial_assumption",
+      "route_evidence_source_url": null
     },
     {
       "attraction_id": "dq32_lille_01",
@@ -199,7 +229,10 @@
       "distance_m": null,
       "journey_date": null,
       "joinable_to_rail_service": false,
-      "valid_for_2027": false
+      "valid_for_2027": false,
+      "source_scope": "tourism_context_only",
+      "duration_basis": "editorial_assumption",
+      "route_evidence_source_url": null
     },
     {
       "attraction_id": "dq32_lille_01",
@@ -217,7 +250,10 @@
       "distance_m": null,
       "journey_date": null,
       "joinable_to_rail_service": false,
-      "valid_for_2027": false
+      "valid_for_2027": false,
+      "source_scope": "tourism_context_only",
+      "duration_basis": "editorial_assumption",
+      "route_evidence_source_url": null
     },
     {
       "attraction_id": "dq32_lille_02",
@@ -235,7 +271,10 @@
       "distance_m": null,
       "journey_date": null,
       "joinable_to_rail_service": false,
-      "valid_for_2027": false
+      "valid_for_2027": false,
+      "source_scope": "tourism_context_only",
+      "duration_basis": "editorial_assumption",
+      "route_evidence_source_url": null
     },
     {
       "attraction_id": "dq32_lille_02",
@@ -253,9 +292,12 @@
       "distance_m": null,
       "journey_date": null,
       "joinable_to_rail_service": false,
-      "valid_for_2027": false
+      "valid_for_2027": false,
+      "source_scope": "tourism_context_only",
+      "duration_basis": "editorial_assumption",
+      "route_evidence_source_url": null
     }
   ],
   "stations_are": "research labels only; not a verified arrival station of specific train service",
-  "caveat": "No operator-published walk durations: all ranges editorial and independently recorded for forward/reverse directions."
+  "caveat": "No operator-published walk durations: all ranges editorial and independently recorded for forward/reverse directions. A fonte turística não mede o trajeto estação↔entrada; todas as durações são hipóteses editoriais independentes da oferta ferroviária."
 }
