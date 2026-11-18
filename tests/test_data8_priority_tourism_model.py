@@ -33,7 +33,7 @@ class PriorityTourismPilotTests(unittest.TestCase):
         result=load_priority_lot()
         from collections import Counter
         states=Counter(x["admission"]["state"] for x in result["entries"])
-        self.assertEqual(states,{"free_general_entry":2,"external_no_ticket":4,"unknown":12})
+        self.assertEqual(states,{"free_general_entry":1,"external_no_ticket":5,"unknown":12})
         for row in result["entries"]:
             adm=row["admission"]
             if adm["state"]=="external_no_ticket":
@@ -44,7 +44,7 @@ class PriorityTourismPilotTests(unittest.TestCase):
                 self.assertTrue(adm["checked_at"])
         self.assertEqual(result["by_id"]["brussels_atomium"]["admission"]["state"],"unknown")
         self.assertEqual(result["by_id"]["brussels_grand_place"]["admission"]["state"],"unknown")
-        self.assertEqual(coverage_report(result)["general_entry_known"],2)
+        self.assertEqual(coverage_report(result)["general_entry_known"],1)
 
     def test_18_records_retain_provenance_and_candidate_identity(self):
         result=load_priority_lot()

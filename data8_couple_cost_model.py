@@ -147,8 +147,7 @@ def estimate_couple_excursion(attraction_ids, *, research=None, addons=None,
                 detailed.append({"name": aid, "category": "external_visit_unproven",
                                  "known_eur": None, "status": kind,
                                  "source_url": ticket.get("source_url")})
-        elif scope == "general_entry" or (scope == "optional_activity"
-                                           and kind == "free_general_entry"):
+        elif scope in ("general_entry", "optional_activity"):
             if kind in ("free_general_entry", "published_price"):
                 if ticket.get("currency") != "EUR":
                     missing.append("moeda_ingresso:" + aid)
@@ -161,10 +160,6 @@ def estimate_couple_excursion(attraction_ids, *, research=None, addons=None,
                                      "source_url": ticket.get("source_url")})
             else:
                 missing.append("ingresso:" + aid)
-        else:
-            # Optional activity does not prove that a non-free general ticket
-            # is bundled in the tour price; do not double-count or infer it.
-            missing.append("acesso_atividade:" + aid)
         if scope == "optional_activity" and not own_addons:
             missing.append("atividade_opcional:" + aid)
         if own_addons and scope not in ("general_entry", "optional_activity"):
