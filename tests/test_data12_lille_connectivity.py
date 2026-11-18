@@ -15,8 +15,8 @@ class LilleCoverageTests(unittest.TestCase):
 
     def test_records_are_sourced_oneway_and_not_fabricated_2027(self):
         records=self.data["records"]
-        self.assertEqual(len(records),24)
-        self.assertEqual(len({r["destination_id"] for r in records}),24)
+        self.assertEqual(len(records),26)
+        self.assertEqual(len({r["destination_id"] for r in records}),26)
         for r in records:
             self.assertEqual(r["origin_id"],"lille")
             self.assertEqual(r["direction"],"outbound_only")
@@ -66,7 +66,7 @@ class LilleCoverageTests(unittest.TestCase):
         self.assertGreaterEqual(view["rail_reference_total_count"],28)
         cities={row["destination_id"]:row for row in view["destinations"]}
         for dest in ("strasbourg","reims","saverne","colmar",
-                     "metz","nancy","thionville","rotterdam","ghent"):
+                     "metz","nancy","thionville","rotterdam","ghent","offenburg","freiburg"):
             with self.subTest(dest=dest):
                 row=cities[dest]
                 self.assertNotEqual(row["status"],"unresearched_from_base")
