@@ -2812,6 +2812,71 @@
       "confidence": "low",
       "return_2027_verified": false,
       "valid_for_2027": false
+    },
+    {
+      "origin_id": "trier",
+      "destination_id": "luxembourg_city",
+      "minimum_oneway_min": 46,
+      "mode": "rail",
+      "reference_kind": "secondary_route_minimum",
+      "source_url": "https://www.thetrainline.com/en/train-times/trier-hbf-to-luxembourg",
+      "source_checked_at": "2026-11-18",
+      "direction": "outbound_only",
+      "confidence": "low",
+      "return_2027_verified": false,
+      "valid_for_2027": false
+    },
+    {
+      "origin_id": "trier",
+      "destination_id": "metz",
+      "minimum_oneway_min": 104,
+      "mode": "rail",
+      "reference_kind": "secondary_route_minimum",
+      "source_url": "https://www.thetrainline.com/en/train-times/trier-hbf-to-metz",
+      "source_checked_at": "2026-11-18",
+      "direction": "outbound_only",
+      "confidence": "low",
+      "return_2027_verified": false,
+      "valid_for_2027": false
+    },
+    {
+      "origin_id": "trier",
+      "destination_id": "aachen",
+      "minimum_oneway_min": 118,
+      "mode": "rail",
+      "reference_kind": "secondary_route_minimum",
+      "source_url": "https://www.thetrainline.com/en/train-times/trier-hbf-to-aachen",
+      "source_checked_at": "2026-11-18",
+      "direction": "outbound_only",
+      "confidence": "low",
+      "return_2027_verified": false,
+      "valid_for_2027": false
+    },
+    {
+      "origin_id": "trier",
+      "destination_id": "liege",
+      "minimum_oneway_min": 154,
+      "mode": "rail",
+      "reference_kind": "secondary_route_minimum",
+      "source_url": "https://www.thetrainline.com/en/train-times/trier-hbf-to-liege",
+      "source_checked_at": "2026-11-18",
+      "direction": "outbound_only",
+      "confidence": "low",
+      "return_2027_verified": false,
+      "valid_for_2027": false
+    },
+    {
+      "origin_id": "trier",
+      "destination_id": "nancy",
+      "minimum_oneway_min": 153,
+      "mode": "rail",
+      "reference_kind": "secondary_route_minimum",
+      "source_url": "https://www.thetrainline.com/en/train-times/trier-hbf-to-nancy",
+      "source_checked_at": "2026-11-18",
+      "direction": "outbound_only",
+      "confidence": "low",
+      "return_2027_verified": false,
+      "valid_for_2027": false
     }
   ]
 }
