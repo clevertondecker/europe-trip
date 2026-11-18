@@ -36,13 +36,14 @@ class Data13DirectedRailCoverageTests(unittest.TestCase):
         src={"schema_version":1,"scope":self.payload["scope"],
              "selection_policy":"fallback_after_historical_routes7_data9_data10_data11_data12",
              "checked_at":self.payload["checked_at"],"records":deepcopy(self.payload["records"])}
-        for bad in ("future","reverse","duplicate","unknown_origin","bad_source"):
+        for bad in ("future","reverse","duplicate","unknown_origin","bad_source","wrong_sncf_path"):
             with self.subTest(bad=bad):
                 p=deepcopy(src)
                 if bad=="future":p["records"][0]["valid_for_2027"]=True
                 elif bad=="reverse":p["records"][0]["direction"]="both"
                 elif bad=="duplicate":p["records"].append(deepcopy(p["records"][0]))
                 elif bad=="unknown_origin":p["records"][0]["origin_id"]="invalid_city"
+                elif bad=="wrong_sncf_path":p["records"][0]["source_url"]="https://www.sncf-connect.com/help/faq/rail/tickets"
                 else:p["records"][0]["source_url"]="https://example.com/travel"
                 with self.assertRaises(ValueError):validate_data13(p)
 
