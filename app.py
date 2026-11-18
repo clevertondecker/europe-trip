@@ -24,6 +24,7 @@ from attractions_ui import render_explorer
 from ux501_destination_discovery_ui import render_independent_destination_discovery
 from ux503_destination_base_comparison_ui import render_wishlist_base_comparison
 from travel_advisor_ui import render_advisor, _recover_saved_plan, _secure_save, _owner_signed_in
+from sidebar_account_ui import render_sidebar_account
 from travel_dashboard_ui import render_trip_dashboard
 from itinerary_flow_ui import render_itinerary_workbench
 from smart_calendar_ui import render_smart_calendar
@@ -353,6 +354,10 @@ with st.sidebar:
                       icon=icon, width="stretch",
                       help=("Seção atual: " if selected else "Abrir seção: ") + label,
                       on_click=_ux_sidebar_button_clicked, args=(area,))
+
+    # Keep account access visible before expandable Drive/legacy sections.
+    st.divider()
+    render_sidebar_account()
 
     live_count = sum(state["status"] == "live" for state in sync_sources.values())
     if sync_status == "live":
