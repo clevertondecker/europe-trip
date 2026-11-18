@@ -9,7 +9,7 @@ from ux502_destination_interests_model import (
 from ux503_destination_base_comparison_model import compare_wishlist_bases
 from ux506_decision_readiness_projection import build_decision_readiness
 from routes7_comparison_projection import decorate_comparison
-from data8_tourism_ui import render_data8_attraction_details, render_data8_cost_simulator
+from data8_tourism_ui import render_composed_attraction_details, render_data8_cost_simulator
 from ux_navigation import set_task
 from ux505_base_comparison_presentation import (
     comparison_overview, matrix_cell, known_findings, missing_research,
@@ -163,45 +163,7 @@ def render_wishlist_base_comparison(*, plan, discovery=None, research=None):
                      expanded=False):
         for entry in decision["attraction_details"]:
             st.markdown("**" + entry["name"] + "**")
-            if render_data8_attraction_details(entry["attraction_id"]):
-                continue
-            if entry["description"]:
-                st.write(entry["description"])
-            if entry["why_visit"]:
-                st.caption("Por que visitar: " + entry["why_visit"])
-            if entry["opening_rule"]:
-                st.write("Funcionamento pesquisado: " + entry["opening_rule"])
-                st.caption("Regra atual/histórica; não é confirmação para datas de 2027.")
-            else:
-                st.caption("Horários de visita ainda não pesquisados.")
-            ticket = entry["ticket_main"] or {}
-            amount = ticket.get("amount")
-            if amount is not None:
-                st.caption("Ingresso de referência: " + str(amount) + " " +
-                           str(ticket.get("currency") or "") +
-                           " (confirmar unidade/validade para a viagem)")
-            elif ticket.get("status") == "not_applicable":
-                st.caption("Sem ingresso principal aplicável segundo a referência histórica.")
-            else:
-                st.caption("Preço de ingresso desconhecido.")
-            activity = entry["additional_activity"] or {}
-            if activity:
-                st.caption("Atividade adicional: " + str(activity.get("name")) +
-                           " — " + str(activity.get("amount")) + " " +
-                           str(activity.get("currency") or "") +
-                           " (referência publicada; não cotação para 2027)")
-            if entry["visit_minutes"] is not None:
-                st.caption("Duração de visita: " + str(entry["visit_minutes"]) +
-                           " min · " + str(entry["visit_duration_status"]))
-            else:
-                st.caption("Duração de visita não documentada.")
-            if entry["last_mile_observations"]:
-                st.caption("Acessos registrados: " +
-                           str(len(entry["last_mile_observations"])) +
-                           " · nenhum percurso completo de 2027 garantido.")
-            if entry["opening_source_url"]:
-                st.link_button("Fonte da visita", entry["opening_source_url"],
-                               key="tourism_source_" + entry["attraction_id"])
+            render_composed_attraction_details(entry)
     with st.expander("Transporte: o que falta para uma visita completa",
                      expanded=False):
         for journey in decision["journeys"]:
