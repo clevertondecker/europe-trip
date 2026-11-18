@@ -14,6 +14,9 @@ class RailProjectionConsolidationTests(unittest.TestCase):
         self.assertIs(legacy.decorate_comparison, shared.decorate_comparison)
         self.assertIs(legacy.format_minutes, shared.format_minutes)
         self.assertIs(legacy._cached_route_gaps, shared._cached_route_gaps)
+        self.assertIs(legacy.load_route_references, shared.load_route_references)
+        self.assertIs(legacy.planning_reference, shared.planning_reference)
+        self.assertIs(legacy.load_gap_enrichment, shared.load_gap_enrichment)
 
     def test_local_unknown_and_historical_reference_semantics_preserved(self):
         rows={"rows":[
