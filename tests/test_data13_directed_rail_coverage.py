@@ -20,7 +20,13 @@ class Data13DirectedRailCoverageTests(unittest.TestCase):
         self.assertEqual({x["reference_kind"] for x in rows},{"official_operator_minimum"})
         for row in rows:
             with self.subTest(origin=row["origin_id"],destination=row["destination_id"]):
-                self.assertTrue(row["source_url"].startswith("https://www.sncf-connect.com/train/trajet/"))
+                self.assertTrue(
+                    row["source_url"].startswith((
+                        "https://www.sncf-connect.com/train/trajet/",
+                        "https://www.sncf-connect.com/train/horaires/",
+                    )),
+                    "Only canonical SNCF route and timetable URLs are accepted",
+                )
                 self.assertEqual(row["direction"],"outbound_only")
                 self.assertFalse(row["return_2027_verified"])
                 self.assertFalse(row["valid_for_2027"])
