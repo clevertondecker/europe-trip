@@ -7,6 +7,7 @@ from ux502_destination_interests_model import (
     empty_interests, ordered_interests, selected_destinations_for_comparison, LABELS,
 )
 from ux503_destination_base_comparison_model import compare_wishlist_bases
+from ux506_decision_readiness_projection import build_decision_readiness
 from ux_navigation import set_task
 from ux505_base_comparison_presentation import (
     comparison_overview, matrix_cell, known_findings, missing_research,
@@ -122,6 +123,105 @@ def render_wishlist_base_comparison(*, plan, discovery=None, research=None):
                f'{len(result["base_ids"])} cidades-base × '
                f'{len(result["destinations"])} destinos). '
                "Cobertura de pesquisa não significa qualidade de transporte.")
+
+    # New read-only decision layer: never modifies choices or official TripPlan.
+    decision = build_decision_readiness(result, discovery=discovery, research=research)
+    st.markdown("#### O que já sabemos para decidir?")
+    st.caption("Visitar um lugar, voltar de trem e morar na cidade-base são "
+               "perguntas diferentes. Os dados ainda não comprovam nenhum "
+               "roteiro completo nem aluguel de 56–60 noites em 2027.")
+    if decision["tourism_source_scope"] == "legacy_catalog_only":
+        st.info("Pesquisa turística adicional ainda não integrada: estes "
+                "indicadores incluem somente o catálogo principal.")
+    else:
+        st.caption("Inclui o piloto turístico com regras atuais de visita "
+                   "e fonte. Horários publicados não confirmam abertura "
+                   "em uma data de 2027.")
+    tourism_table = [
+        {
+            "Destino": x["destination_name"],
+            "Atrações no catálogo": x["catalog_attraction_count"],
+            "Ingressos históricos publicados": x["published_ticket_amounts_historical"],
+            "Horários/regras atuais documentados": x["published_opening_hours"],
+            "Novas fichas turísticas": x["enriched_current_opening_rules"],
+            "Visita em 2027": "Ainda não validada",
+        }
+        for x in decision["destinations"]
+    ]
+    st.dataframe(tourism_table, hide_index=True, width="stretch")
+    if decision["housing_source_scope"] == "legacy_housing_only":
+        st.caption("Contratos adicionais de hospedagem ainda não integrados; "
+                   "indicadores de moradia baseados no histórico cadastrado.")
+    with st.expander("Atrações: experiência, ingresso, horários e pendências",
+                     expanded=False):
+        for entry in decision["attraction_details"]:
+            st.markdown("**" + entry["name"] + "**")
+            if entry["description"]:
+                st.write(entry["description"])
+            if entry["why_visit"]:
+                st.caption("Por que visitar: " + entry["why_visit"])
+            if entry["opening_rule"]:
+                st.write("Funcionamento pesquisado: " + entry["opening_rule"])
+                st.caption("Regra atual/histórica; não é confirmação para datas de 2027.")
+            else:
+                st.caption("Horários de visita ainda não pesquisados.")
+            ticket = entry["ticket_main"] or {}
+            amount = ticket.get("amount")
+            if amount is not None:
+                st.caption("Ingresso de referência: " + str(amount) + " " +
+                           str(ticket.get("currency") or "") +
+                           " (confirmar unidade/validade para a viagem)")
+            elif ticket.get("status") == "not_applicable":
+                st.caption("Sem ingresso principal aplicável segundo a referência histórica.")
+            else:
+                st.caption("Preço de ingresso desconhecido.")
+            activity = entry["additional_activity"] or {}
+            if activity:
+                st.caption("Atividade adicional: " + str(activity.get("name")) +
+                           " — " + str(activity.get("amount")) + " " +
+                           str(activity.get("currency") or "") +
+                           " (referência publicada; não cotação para 2027)")
+            if entry["visit_minutes"] is not None:
+                st.caption("Duração de visita: " + str(entry["visit_minutes"]) +
+                           " min · " + str(entry["visit_duration_status"]))
+            else:
+                st.caption("Duração de visita não documentada.")
+            if entry["last_mile_observations"]:
+                st.caption("Acessos registrados: " +
+                           str(len(entry["last_mile_observations"])) +
+                           " · nenhum percurso completo de 2027 garantido.")
+            if entry["opening_source_url"]:
+                st.link_button("Fonte da visita", entry["opening_source_url"],
+                               key="tourism_source_" + entry["attraction_id"])
+    with st.expander("Transporte: o que falta para uma visita completa",
+                     expanded=False):
+        for journey in decision["journeys"]:
+            st.write(journey["base_id"] + " → " + journey["destination_id"])
+            st.caption("Ida histórica: " +
+                       (str(journey["historical_rail_oneway_min"]) + " min" if
+                        journey["historical_rail_oneway_min"] is not None else
+                        "desconhecida") +
+                       " · retorno/última milha: a verificar" +
+                       " · estado temporal: " + journey["temporal_association_status"])
+            if journey["association_reasons"]:
+                st.caption("Faltam: " + ", ".join(journey["association_reasons"]))
+    with st.expander("Condições de moradia nas cidades-base", expanded=False):
+        housing_table = [
+            {
+                "Cidade-base": x["base_name"],
+                "Anúncios históricos": x["historical_offer_count"],
+                "Cotações 2027 (56–60 noites)": x["verified_56_to_60_night_quotes_2027"],
+                "Internet verificada": x["remote_work_internet_verified_count"],
+                "Custo total da estadia": "Desconhecido",
+                "Taxas e caução": "Não verificadas",
+                "Espaço de trabalho": "Não confirmado",
+                "Acesso real à estação": "Não confirmado",
+            }
+            for x in decision["base_housing"]
+        ]
+        st.dataframe(housing_table, hide_index=True, width="stretch")
+    st.caption("Sem ranking automático: cobertura documental não equivale "
+               "a qualidade logística, viabilidade do passeio ou moradia.")
 
     st.markdown("#### Tempos históricos de ida que já conhecemos")
     indexed = {(r["base_id"], r["destination_id"]): r
