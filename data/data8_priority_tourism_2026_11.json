@@ -113,14 +113,15 @@
         "method": "Faixa editorial exploratória para visita sem fila, não publicada pelo operador"
       },
       "admission": {
-        "state": "free_general_entry",
-        "amount": 0,
-        "currency": "EUR",
-        "unit": "person",
+        "state": "external_no_ticket",
+        "amount": null,
+        "currency": null,
+        "unit": null,
         "source_url": "https://www.baden-baden.com/en/nature/lichtentaler-allee",
         "checked_at": "2026-11-18",
         "valid_for_2027": false,
-        "scope_note": "Somente área externa, sem afirmar gratuidade dos museus"
+        "scope_note": "Somente passeio externo pela avenida e área verde; não inclui museus ou atividades pagas.",
+        "external_access_basis": "documented_public_outdoor_area"
       },
       "opening": {
         "state": "published_general_rule",
