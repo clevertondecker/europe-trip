@@ -6,6 +6,7 @@ This audits coverage, not availability, feasibility, fares or 2027 services.
 from __future__ import annotations
 
 from collections import Counter
+from rail_component_contract import build_component_records
 from copy import deepcopy
 
 from attractions_model import load_attractions
@@ -113,87 +114,16 @@ def research_backlog(inventory):
                               "source_date","station_reconciliation",
                               "independent_return_service","two_adults_fare",
                               "last_mile_to_attraction"]}
-        for row in inventory["pairs"] if row["category"]=="missing"
-    ]
+        for row 
+def component_research_backlog(inventory, *, evidence_by_pair=None):
+    """Audit each component; preserve historical one-way backlog separately.
 
-
-
-def component_research_backlog(inventory):
-    """Track *all* missing logistical components, not only missing outward times.
-
-    Historical/indicative one-way durations never prove a 2027 return,
-    station-to-attraction access, opening window or cost for two adults.
-    The old research_backlog() remains an intentionally narrower API for
-    records with no outward time.
+    Uninspected supplementary sources stay not_evaluated, never absent or
+    impossible. Optional lookup observations must carry explicit provenance.
     """
-    result = []
-    seen = set()
-    for row in inventory["pairs"]:
-        base = row["base_id"]
-        dest = row["destination_id"]
-        key = (base, dest)
-        if key in seen:
-            raise ValueError("duplicate base-destination pair in audit")
-        seen.add(key)
-        category = row["category"]
-        if category not in {"historical", "indicative", "local", "missing"}:
-            raise ValueError("unsupported rail evidence category")
+    return build_component_records(inventory, evidence_by_pair=evidence_by_pair)
 
-        required = []
-        outward = row.get("oneway_min")
-        if category == "local":
-            if base != dest or outward is not None:
-                raise ValueError("local transport must not be inferred from a train")
-            required += [
-                "local_access_outbound",
-                "local_access_return",
-                "local_transport_two_adults_cost",
-            ]
-        else:
-            if base == dest:
-                raise ValueError("non-local category assigned to same-place pair")
-            if category == "missing":
-                if outward is not None:
-                    raise ValueError("missing time must be null")
-                required += ["operator_route_page", "published_oneway_duration"]
-            elif type(outward) is not int or outward <= 0:
-                raise ValueError("documentary duration must be a positive integer")
-            if not row.get("source_url"):
-                required.append("operator_route_page")
-            if not row.get("source_checked_at"):
-                required.append("source_date")
-            required += [
-                "station_reconciliation",
-                "dated_outbound_service_2027",
-                "independent_return_service",
-                "two_adults_fare",
-                "last_mile_to_attraction",
-            ]
-        # These are outing/attraction questions even for the local base.
-        required += [
-            "attraction_opening_window",
-            "attraction_visit_duration_evidence",
-        ]
-        if row.get("return_2027_verified") is not False:
-            raise ValueError("source inventory must not infer a verified return")
-        if row.get("door_to_door_2027_verified") is not False:
-            raise ValueError("source inventory must not infer complete itinerary")
-        if row.get("fare_couple_2027_eur") is not None:
-            raise ValueError("unexpected verified couple fare in 2026-only audit")
-        result.append({
-            "base_id": base,
-            "destination_id": dest,
-            "base_name": row["base_name"],
-            "destination_name": row["destination_name"],
-            "category": category,
-            "known_outbound_oneway_min": outward,
-            "source_url": row.get("source_url"),
-            "research_required": list(dict.fromkeys(required)),
-            "return_2027_verified": False,
-            "confirmed_2027": False,
-        })
-    if len(result) != inventory["total_pairs"]:
-        raise ValueError("component inventory does not cover all pairs")
+ent inventory does not cover all pairs")
     return result
 
 
