@@ -27,6 +27,25 @@ class Data8StreamlitIntegrationTests(unittest.TestCase):
         self.assertEqual(len(app.checkbox),1)
         self.assertFalse(app.checkbox[0].value)
 
+    def test_composed_renderer_keeps_legacy_when_data8_is_partial(self):
+        script=("from data8_tourism_ui import render_composed_attraction_details\\n"
+                "render_composed_attraction_details({"
+                "'attraction_id':'brussels_atomium','name':'Atomium',"
+                "'description':'Descrição legada relevante',"
+                "'why_visit':'Nota original','opening_rule':'Horário histórico',"
+                "'opening_source_url':'https://example.org/hours',"
+                "'ticket_main':{'amount':18,'currency':'EUR'},"
+                "'additional_activity':{'name':'Visita extra','amount':4,'currency':'EUR'},"
+                "'visit_minutes':90,'visit_duration_status':'historical',"
+                "'last_mile_observations':[{'direction':'walk'}]})\\n")
+        app=AppTest.from_string(script).run()
+        self.assertFalse(app.exception)
+        rendered=" ".join(str(x.value) for x in app.get("caption"))
+        self.assertIn("Ingresso histórico de referência: 18",rendered)
+        self.assertIn("Atividade adicional do catálogo",rendered)
+        self.assertIn("Duração registrada no catálogo",rendered)
+        self.assertIn("Acessos históricos registrados",rendered)
+
     def test_interactive_external_scope_requires_user_selection(self):
         script=("from data8_tourism_ui import render_data8_cost_simulator\\n"
                 "render_data8_cost_simulator('aachen')\\n")
