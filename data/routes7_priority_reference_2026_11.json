@@ -210,7 +210,7 @@
       "origin_id": "lille",
       "destination_id": "haguenau",
       "fastest_min": 230,
-      "average_min": null,
+      "average_min": 246,
       "source_url": "https://www.sncf-connect.com/train/trajet/lille/haguenau",
       "source_kind": "official_operator",
       "checked_at": "2026-11-17",
@@ -223,10 +223,10 @@
       "weekend_return_status": "unknown",
       "fare_for_two_eur": null,
       "transfer_count": null,
-      "notes": "Typical time 246 was secondary and remains unverified",
+      "notes": "Typical time 246 was secondary and remains unverified; original CSV average 246 retained separately, not independently reproduced",
       "original_snapshot": {
         "fastest_min": 230,
-        "average_min": null,
+        "average_min": 246,
         "source_url": "https://www.sncf-connect.com/train/trajet/lille/haguenau",
         "observed_on": "2026-11-17",
         "query_conditions": "not_recorded"
@@ -240,7 +240,7 @@
         "conditions": "dynamic route summary, specific travel date and service not pinned"
       },
       "fastest_provenance": "corroborated_city_level",
-      "average_provenance": "not_provided",
+      "average_provenance": "snapshot_only_unreproduced",
       "station_comparability": "city_level_ambiguous",
       "comparability": "indicative_only_not_station_comparable"
     },
@@ -349,7 +349,7 @@
       "destination_id": "brussels",
       "fastest_min": 288,
       "average_min": 311,
-      "source_url": "https://www.sncf-connect.com/train/trajet/mulhouse/bruxelles",
+      "source_url": "https://www.sncf-connect.com/train/horaires/mulhouse/bruxelles",
       "source_kind": "official_operator",
       "checked_at": "2026-11-17",
       "time_scope": "public_route_summary_not_date_specific",
@@ -365,7 +365,7 @@
       "original_snapshot": {
         "fastest_min": 288,
         "average_min": 311,
-        "source_url": "https://www.sncf-connect.com/train/trajet/mulhouse/bruxelles",
+        "source_url": "https://www.sncf-connect.com/train/horaires/mulhouse/bruxelles",
         "observed_on": "2026-11-17",
         "query_conditions": "not_recorded"
       },
@@ -574,5 +574,9 @@
     }
   ],
   "snapshot_file": "data/europa2027_pesquisa_15_pares_original.csv",
-  "rechecked_at": "2026-11-18"
+  "rechecked_at": "2026-11-18",
+  "migration_notes": [
+    "Original research CSV captured an unverified 246-minute average Lille-Haguenau omitted by the initial PR JSON; restored to snapshot only, not displayed as verified.",
+    "Original research CSV cited the SNCF /horaires/ URL for Mulhouse-Brussels, while initial PR JSON linked /trajet/; restored exact CSV source and kept /trajet/ as a separate recheck."
+  ]
 }
