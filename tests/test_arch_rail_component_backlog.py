@@ -20,15 +20,22 @@ class RailComponentBacklogTests(unittest.TestCase):
         only_outbound = research_backlog(self.inventory)
         all_components = component_research_backlog(self.inventory)
         counts = component_gap_summary(all_components)
-        self.assertEqual(len(only_outbound), 1262)
-        self.assertEqual(len(all_components), 1380)
-        self.assertEqual(counts["pairs"], 1380)
+        self.assertEqual(len(only_outbound), self.inventory["missing_pairs"])
+        self.assertEqual(len(all_components), self.inventory["total_pairs"])
+        self.assertEqual(counts["pairs"], self.inventory["total_pairs"])
         self.assertEqual(counts["by_category"],
-            {"historical": 54, "indicative": 34, "local": 30, "missing": 1262})
-        self.assertEqual(counts["missing_components"]["independent_return_service"], 1350)
-        self.assertEqual(counts["missing_components"]["local_access_return"], 30)
-        self.assertEqual(counts["missing_components"]["two_adults_fare"], 1350)
-        self.assertEqual(counts["missing_components"]["attraction_opening_window"], 1380)
+            {"historical": self.inventory["historical_pairs"],
+             "indicative": self.inventory["indicative_pairs"],
+             "local": self.inventory["local_pairs"],
+             "missing": self.inventory["missing_pairs"]})
+        self.assertEqual(counts["missing_components"]["independent_return_service"],
+                         self.inventory["total_pairs"]-self.inventory["local_pairs"])
+        self.assertEqual(counts["missing_components"]["local_access_return"],
+                         self.inventory["local_pairs"])
+        self.assertEqual(counts["missing_components"]["two_adults_fare"],
+                         self.inventory["total_pairs"]-self.inventory["local_pairs"])
+        self.assertEqual(counts["missing_components"]["attraction_opening_window"],
+                         self.inventory["total_pairs"])
         self.assertEqual(self.inventory, before)
 
     def test_documented_outbound_never_implies_a_verified_return(self):
