@@ -355,6 +355,10 @@ with st.sidebar:
                       help=("Seção atual: " if selected else "Abrir seção: ") + label,
                       on_click=_ux_sidebar_button_clicked, args=(area,))
 
+    # Keep account access visible before expandable Drive/legacy sections.
+    st.divider()
+    render_sidebar_account()
+
     live_count = sum(state["status"] == "live" for state in sync_sources.values())
     if sync_status == "live":
         sync_summary = "Dados sincronizados · 3/3 fontes"
@@ -408,8 +412,6 @@ with st.sidebar:
         st.radio("Acesso à navegação anterior", list(LEGACY_PAGES),
                  key="main_navigation", on_change=_ux_legacy_page_changed)
         st.caption("Acesso avançado às pesquisas e ferramentas anteriores.")
-    st.divider()
-    render_sidebar_account()
     st.caption("ⓘ Planejamento em andamento")
 
 # One configuration/comparison entrypoint. The TripPlan is the only official
