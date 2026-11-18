@@ -88,7 +88,7 @@ def table_rows(rows: list[dict]) -> list[dict]:
     """Keep minutes for audit/sort while displaying human-readable duration."""
     return [{
         "Destino": r["name"],
-        "País": r["country"],
+        "País": (COUNTRY_FLAGS.get(r["country"], "🌍") + " " + r["country"]),
         "Tempo de ida": format_travel_minutes(one_way_minutes(r))
             if one_way_minutes(r) is not None else
             ("Local" if r.get("local") else "A pesquisar"),
