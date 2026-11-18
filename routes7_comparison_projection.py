@@ -1,7 +1,7 @@
-"""Read-only ROUTES 7 presentation over current UX503 comparison.
+"""UX 5.0.5: non-mutating, mutually-exclusive rail time distribution.
 
-Keep minimum legacy times authoritative. Route-summary minimum is a labeled
-planning reference, not a date-specific 2027 train or typical time.
+A rechecked undated city-route minimum is *indicative*, not an itinerary.
+Historical rail evidence retains the existing display precedence.
 """
 from __future__ import annotations
 
@@ -17,43 +17,69 @@ def format_minutes(value):
 
 
 def decorate_comparison(result, *, references=None):
-    """Keep original comparison unchanged; add a display overlay by pair."""
-    refs=references if references is not None else load_route_references()
-    index={}
+    """All matrix categories are mutually exclusive, including custom baskets."""
+    refs = references if references is not None else load_route_references()
+    cells = {}
+    categories = {
+        "historical": 0, "reference_only": 0, "local": 0, "no_time": 0,
+    }
     for row in result["rows"]:
-        key=(row["base_id"],row["destination_id"])
-        if key in index:
-            raise ValueError("Duplicate comparison row")
-        legacy={
-            "status":row["evidence_status"],
-            "minimum_oneway_min":row["minimum_oneway_min"],
-            "source_url":row["source_url"],
+        key = row["base_id"], row["destination_id"]
+        if key in cells:
+            raise ValueError("duplicate base-destination pair")
+        legacy = {
+            "status": row["evidence_status"],
+            "minimum_oneway_min": row["minimum_oneway_min"],
+            "source_url": row["source_url"],
         }
-        v=planning_reference(*key,references=refs,legacy=legacy)
-        if v["status"]=="local":
-            label="Local · acesso a verificar"
-        elif v["display_basis"]=="legacy_historical":
-            label=f'{format_minutes(v["display_min"])} · ida histórica'
-            if row["divergent_sources"]:
-                label+=" · fontes divergentes"
-            if v.get("conflict_with_legacy"):
-                label+=" · outra referência disponível"
-        elif v["display_basis"]=="published_fastest_reference":
-            label=f'~{format_minutes(v["display_min"])} · mínimo publicado'
+        evidence = planning_reference(*key, references=refs, legacy=legacy)
+        basis = evidence["display_basis"]
+        if basis == "local_not_rail":
+            category = "local"
+            label = "Local · acesso urbano pendente"
+        elif basis == "legacy_historical":
+            category = "historical"
+            label = f'{format_minutes(evidence["display_min"])} · histórico'
+            if row.get("divergent_sources"):
+                label += " · divergência histórica"
+            if evidence.get("reference_differs_from_legacy"):
+                label += " · outra referência indicativa"
+        elif basis == "indicative_published_city_minimum":
+            category = "reference_only"
+            label = f'~{format_minutes(evidence["display_min"])} · mínimo indicativo'
+            if evidence.get("station_comparability") == "city_level_ambiguous":
+                label += " · estação pendente"
         else:
-            label="Pesquisa parcial · sem tempo" if row["observations"] else "Tempo não pesquisado"
-        if v.get("average_min") is not None:
-            typical_label=f'{format_minutes(v["average_min"])} · média publicada'
+            category = "no_time"
+            label = "Tempo não estimado"
+            if evidence["status"] == "unreproduced_snapshot":
+                label += " · fonte original não reproduzida"
+        categories[category] += 1
+
+        if evidence.get("average_min") is not None:
+            average_label = f'{format_minutes(evidence["average_min"])} · média publicada'
+        elif evidence.get("rechecked_average_min") is not None and evidence.get(
+                "average_provenance") == "disagrees_with_current_page":
+            average_label = (
+                f'{format_minutes(evidence["rechecked_average_min"])} · média reconsultada; '
+                f'{format_minutes(evidence["original_snapshot_average_min"])} no snapshot')
         else:
-            typical_label="Tempo típico não pesquisado"
-        index[key]={**v,"label":label,"typical_label":typical_label,
-                    "destination_id":key[1],"base_id":key[0]}
+            average_label = "Tempo médio não documentado"
+        cells[key] = {
+            **evidence, "base_id": key[0], "destination_id": key[1],
+            "category": category, "label": label, "typical_label": average_label,
+            "historical_source_url": row["source_url"],
+            "legacy_divergent_sources": bool(row.get("divergent_sources")),
+            "station_caveat": (
+                "Referência por cidade; estação de embarque/chegada não reconciliada."
+                if evidence.get("station_comparability") == "city_level_ambiguous"
+                else ("Estações citadas na fonte, sem serviço datado."
+                      if evidence.get("station_comparability") == "station_named_in_route_page"
+                      else None)),
+        }
+    if sum(categories.values()) != len(cells):
+        raise AssertionError("comparative coverage overlaps")
     return {
-        "cells":index,
-        "total":len(index),
-        "historical":sum(row["minimum_oneway_min"] is not None for row in result["rows"]),
-        "reference_only":sum(x["display_basis"]=="published_fastest_reference" for x in index.values()),
-        "local":sum(x["status"]=="local" for x in index.values()),
-        "no_time":sum(x["display_min"] is None and x["status"]!="local" for x in index.values()),
-        "comparison_mutated":False,
+        "cells": cells, "total": len(cells), **categories,
+        "comparison_mutated": False, "automatic_base_ranking": False,
     }
