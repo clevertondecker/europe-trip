@@ -42,6 +42,10 @@ def _url_valid(url, kind):
 def _snapshot_rows(path=SNAPSHOT):
     with Path(path).open(encoding="utf-8-sig", newline="") as handle:
         rows = list(csv.DictReader(handle))
+    identities = [(canonical_place(x["base_id"]), canonical_place(x["destination_id"]))
+                  for x in rows]
+    if len(rows) != 15 or len(set(identities)) != len(rows):
+        raise ValueError("original CSV contains duplicate or missing pairs")
     def int_or_none(v):
         return int(v) if v else None
     return {(canonical_place(x["base_id"]), canonical_place(x["destination_id"])): {
@@ -124,8 +128,11 @@ def load_route_references(path=DATA, *, snapshot_path=SNAPSHOT):
                     raise ValueError("claimed reproduced time not reproduced")
                 if row.get("source_research_status") != "route_summary_rechecked":
                     raise ValueError("reproduced source must be marked rechecked")
-            elif row.get("confidence") != "insufficient":
-                raise ValueError("unreproduced source cannot be confident")
+                if row.get("confidence") != "low":
+                    raise ValueError("reproduced city-level source is low confidence")
+            elif (row.get("confidence") != "insufficient" or
+                  row.get("source_research_status") != "snapshot_preserved_not_reproduced"):
+                raise ValueError("unreproduced source cannot be marked researched")
             if row["average_provenance"] == "corroborated_city_level":
                 if row["average_min"] is None or not recheck or (
                         recheck.get("average_min") != row["average_min"]):
@@ -140,6 +147,12 @@ def load_route_references(path=DATA, *, snapshot_path=SNAPSHOT):
                     "indicative_only_not_station_comparable",
                     "city_level_reference_not_dated_service")):
                 raise ValueError("unreconciled stations must not claim schedule")
+            if (row["station_comparability"] == "city_level_ambiguous" and
+                    row["comparability"] != "indicative_only_not_station_comparable"):
+                raise ValueError("unknown stations cannot be declared comparable")
+            if (row["station_comparability"] == "station_named_in_route_page" and
+                    row["comparability"] != "city_level_reference_not_dated_service"):
+                raise ValueError("named stations are not date-specific services")
             if row["station_comparability"] == "city_level_ambiguous":
                 if (row.get("station_status") != "station_not_reconciled" or
                         row.get("origin_station_id") is not None or
