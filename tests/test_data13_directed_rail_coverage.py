@@ -76,6 +76,19 @@ class Data13DirectedRailCoverageTests(unittest.TestCase):
         self.assertEqual(higher["display_min"],74)
         self.assertFalse(higher["data13_connectivity_applied"])
 
+    def test_secondary_source_is_not_mislabeled_as_operator(self):
+        row={"base_id":"arlon","destination_id":"strasbourg",
+             "evidence_status":"not_researched",
+             "minimum_oneway_min":None,"source_url":None,
+             "divergent_sources":False}
+        cell=decorate_comparison({"rows":[row]})["cells"][("arlon","strasbourg")]
+        self.assertEqual(cell["category"], "reference_only")
+        self.assertTrue(cell["data13_connectivity_applied"])
+        self.assertEqual(cell["source_kind"], "secondary_route_minimum")
+        self.assertEqual(cell["confidence"], "low")
+        self.assertIn("referência secundária", cell["label"])
+        self.assertNotIn("operadora", cell["label"])
+
     def test_dq32_is_read_only_and_evidence_reaches_front(self):
         overview=opportunity_overview("haguenau")
         match=next(x for x in overview["destinations"] if x["destination_id"]=="saverne")
