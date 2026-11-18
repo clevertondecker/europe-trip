@@ -103,7 +103,7 @@ class Route7UXRegressionTests(unittest.TestCase):
         view = decorate_comparison(synthetic)
         self.assertEqual(view["no_time"], 1)
         self.assertEqual(view["cells"][("unregistered", "noncatalog")]["label"],
-                         "Tempo não estimado")
+                         "Tempo não pesquisado")
 
     def test_duplicate_matrix_row_rejected(self):
         row = {"base_id": "mulhouse", "destination_id": "belfort",
