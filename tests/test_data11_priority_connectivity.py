@@ -1,6 +1,8 @@
 """DATA 11 source contract and DQ3.2 frontend projection regression tests."""
 import unittest
 from copy import deepcopy
+from pathlib import Path
+from streamlit.testing.v1 import AppTest
 
 from data11_priority_connectivity_model import (
     load_priority_connectivity, validate_priority_connectivity,
@@ -72,6 +74,25 @@ class Data11PriorityConnectivityTests(unittest.TestCase):
         existing = decorate_comparison(historical)["cells"][("mulhouse", "arlon")]
         self.assertEqual(existing["display_min"], 123)
         self.assertFalse(existing["priority_connectivity_applied"])
+
+    def test_streamlit_discovery_all_destinations_shows_mins_and_sources(self):
+        root = Path(__file__).resolve().parents[1]
+        app = AppTest.from_file(str(root/"app.py"), default_timeout=120).run()
+        self.assertFalse(app.exception, [x.message for x in app.exception])
+        app.radio(key="ux_area").set_value("Explorar").run()
+        app.segmented_control(key="ux_section").set_value("Passeios").run()
+        app.selectbox(key="attractions_scenario_base").set_value("mulhouse").run()
+        app.selectbox(key="ux_dq32_opportunity_group").set_value("Todos os destinos").run()
+        self.assertFalse(app.exception, [x.message for x in app.exception])
+        tables = [frame.value for frame in app.dataframe
+                  if "Mínimo de ida (min)" in frame.value.columns]
+        self.assertTrue(tables, "DQ3.2 must expose sortable travel minutes")
+        table = tables[0]
+        arlon = table[table["Destino"] == "Arlon"]
+        self.assertEqual(len(arlon), 1)
+        self.assertEqual(int(arlon.iloc[0]["Mínimo de ida (min)"]), 197)
+        self.assertIn("Referência", str(arlon.iloc[0]["Transporte"]).title())
+        self.assertEqual(len(table), 46)
 
     def test_dq32_frontend_receives_new_routes_and_correct_counts(self):
         overview = opportunity_overview("mulhouse")
