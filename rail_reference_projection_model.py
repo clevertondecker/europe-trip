@@ -11,6 +11,7 @@ from rail_gap_enrichment_model import load_gap_enrichment
 from data10_connectivity_model import load_connectivity_references
 from data11_priority_connectivity_model import load_priority_connectivity
 from data12_lille_connectivity_model import load_lille_connectivity
+from data13_directed_connectivity_model import load_data13
 
 
 def format_minutes(value):
@@ -40,9 +41,14 @@ def _cached_lille_connectivity():
     return load_lille_connectivity()
 
 
+@lru_cache(maxsize=1)
+def _cached_data13():
+    return load_data13()
+
+
 def decorate_comparison(result, *, references=None, gap_overlay=None,
                         connectivity_overlay=None, priority_overlay=None,
-                        lille_overlay=None):
+                        lille_overlay=None, data13_overlay=None):
     """All matrix categories are mutually exclusive, including custom baskets."""
     refs = references if references is not None else load_route_references()
     gaps = gap_overlay if gap_overlay is not None else _cached_route_gaps()
@@ -51,6 +57,7 @@ def decorate_comparison(result, *, references=None, gap_overlay=None,
     priority = (priority_overlay if priority_overlay is not None
                 else _cached_priority_connectivity())
     lille = lille_overlay if lille_overlay is not None else _cached_lille_connectivity()
+    data13 = data13_overlay if data13_overlay is not None else _cached_data13()
     cells = {}
     categories = {
         "historical": 0, "reference_only": 0, "local": 0, "no_time": 0,
@@ -143,6 +150,23 @@ def decorate_comparison(result, *, references=None, gap_overlay=None,
                 "weekend_return_known": False,
                 "valid_for_2027": False,
             }
+        data13_row = data13["by_pair"].get(key)
+        if (data13_row is not None and evidence.get("display_min") is None
+                and row["evidence_status"] != "local"):
+            evidence = {
+                **evidence,
+                "display_basis": "data13_reference",
+                "display_min": data13_row["minimum_oneway_min"],
+                "source_url": data13_row["source_url"],
+                "reference_source_url": data13_row["source_url"],
+                "gap_checked_at": data13_row["source_checked_at"],
+                "confidence": data13_row["confidence"],
+                "source_kind": data13_row["reference_kind"],
+                "station_comparability": "city_level_ambiguous",
+                "comparability": "indicative_only_not_station_comparable",
+                "weekend_return_known": False,
+                "valid_for_2027": False,
+            }
         basis = evidence["display_basis"]
         if basis == "local_not_rail":
             category = "local"
@@ -181,6 +205,9 @@ def decorate_comparison(result, *, references=None, gap_overlay=None,
                          if evidence.get("source_kind") == "official_operator_minimum"
                          else "referência secundária · mínimo divulgado")
             label = f'~{format_minutes(evidence["display_min"])} · {qualifier}'
+        elif basis == "data13_reference":
+            category = "reference_only"
+            label = f'~{format_minutes(evidence["display_min"])} · mínimo publicado · operadora'
         elif basis == "indicative_published_city_minimum":
             category = "reference_only"
             label = f'~{format_minutes(evidence["display_min"])} · mínimo indicativo'
@@ -211,6 +238,7 @@ def decorate_comparison(result, *, references=None, gap_overlay=None,
             "connectivity_applied": basis == "data10_reference",
             "priority_connectivity_applied": basis == "data11_reference",
             "lille_connectivity_applied": basis == "data12_reference",
+            "data13_connectivity_applied": basis == "data13_reference",
             "station_caveat": (
                 "Referência por cidade; estação de embarque/chegada não reconciliada."
                 if evidence.get("station_comparability") == "city_level_ambiguous"
