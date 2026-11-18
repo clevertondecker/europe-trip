@@ -48,3 +48,10 @@ Comentários diretamente no PR: P0/P1/P2; contratos/adaptadores que devem ser re
 - PR de implementação separado para revisão: [#120](https://github.com/clevertondecker/europe-trip/pull/120).
 - Implementação independente: chave estação + entrada + atração + modo + data/fonte; manter alternativas, não somar trechos incompatíveis, não criar ID canônico inexistente.
 - Este PR permanece **somente especificação**. Nenhum merge/deploy de implementação está autorizado até revisão do conjunto. Os testes de CI no PR de implementação validam contratos/código, não substituem confirmação de horários, aluguéis e acesso para datas de 2027.
+
+## Contrato final de acesso bidirecional (18/11/2026)
+
+- A observação possui `direction=station_to_attraction | attraction_to_station`, `station_id`, `entrance_id`, `attraction_id`, `mode`, `checked_at`, `observed_for_date` ou validade explícita, `duration_min | null` e `source_url`. Registros legados `arrival_station_id` são adaptados apenas para a direção de ida.
+- `bidirectional_access()` busca separadamente os sentidos; ida e retorno podem usar estações ou durações diferentes. Não presumir simetria nem deduzir caminhada por distância em linha reta.
+- `verified_sample` exige data efetiva de amostra ou intervalo de validade; data de consulta não é a data de uso. Múltiplas observações e versões históricas permanecem independentes; conflito não vira tempo selecionado.
+- Aceite: ida e volta comprovadas separadamente, estação distinta sem trecho documentado, fonte parcial com `null`, data incompatível e integração com #119/#122.
