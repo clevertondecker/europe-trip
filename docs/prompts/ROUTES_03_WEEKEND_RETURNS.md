@@ -46,3 +46,11 @@ Comentários diretamente no PR: P0/P1/P2; contratos/adaptadores que devem ser re
 - PR de implementação separado para revisão: [#119](https://github.com/clevertondecker/europe-trip/pull/119).
 - Implementação independente: exigir data concreta no calendário, direção, estação, transferências em ordem, abertura da atração e acesso compatível; duas viagens nunca bastam para afirmar passeio viável.
 - Este PR permanece **somente especificação**. Nenhum merge/deploy de implementação está autorizado até revisão do conjunto. Os testes de CI no PR de implementação validam contratos/código, não substituem confirmação de horários, aluguéis e acesso para datas de 2027.
+
+## Adendo do code review — contrato de horários (P1)
+
+- Reutilizar o **mesmo** `rail_temporal_contract.normalize_service_instants()` definido pelo #116. Na saída canônica, `departure_at` e `arrival_at` têm offsets UTC obrigatórios; `departure_local`/`arrival_local` no legado podem ser HH:MM, mas não geram instantes comparáveis sem data e offsets explícitos.
+- A sequência deve ser comparada em **UTC**, com horários locais preservados para apresentação, aceitando diferenças reais de offset e transições de horário de verão. Timestamps ingênuos não podem validar um passeio.
+- Um sábado de ida seguido por domingo de volta pode ser coerente; não exigir mesma data. Cada trecho deve comprovar seu próprio dia no calendário de serviço, direção, transferência e estação. A hora de abertura da atração, última milha e condições específicas continuam obrigatórias para falar em passeio viável.
+- Testes: meia-noite, ida sábado/volta domingo, fuso ausente, DST, retorno antes da chegada, transferência fora de ordem. A saída **nunca** presume disponibilidade em 2027.
+- Implementação corretiva: [#119](https://github.com/clevertondecker/europe-trip/pull/119), condicionada ao contrato compartilhado #116 e revisão integrada.
