@@ -20,7 +20,7 @@ from rail_evidence_unified_model import (
     canonical_place, load_rail_evidence,
 )
 from evidence_query_model import get_rail_evidence
-from routes7_comparison_projection import decorate_comparison
+from rail_reference_projection_model import decorate_comparison
 
 DEFAULT=Path(__file__).resolve().parent/"data"/"dq32_macro_tourism_2026_11.json"
 
