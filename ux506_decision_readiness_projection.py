@@ -173,8 +173,11 @@ def compatible_evidence_association(rail: dict | None, return_leg: dict | None,
             if any(part.get(k) is None for k in required):
                 reasons.append("incomplete_train_identity")
         if any(access.get(k) is None for k in (
-                "arrival_station_id", "return_station_id", "attraction_id")):
+                "arrival_station_id", "return_station_id", "attraction_id",
+                "destination_id")):
             reasons.append("incomplete_access_identity")
+        if access.get("destination_id") != rail.get("destination_id"):
+            reasons.append("attraction_destination_mismatch")
         if (rail.get("destination_station_id") != access.get("arrival_station_id") or
                 return_leg.get("origin_station_id") != access.get("return_station_id")):
             reasons.append("station_mismatch")
