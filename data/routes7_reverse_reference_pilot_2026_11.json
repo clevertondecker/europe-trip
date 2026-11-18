@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "scope": "reverse_direction_minimum_references_not_weekend_service",
+  "checked_at": "2026-11-17",
+  "records": [
+    {
+      "base_id": "mulhouse",
+      "destination_id": "belfort",
+      "reverse_origin_id": "belfort",
+      "reverse_destination_id": "mulhouse",
+      "reverse_fastest_min": 26,
+      "source_url": "https://www.sncf-connect.com/train/horaires/belfort/mulhouse",
+      "source_kind": "official_operator",
+      "exact_stations_verified": false,
+      "weekend_frequency": null,
+      "weekend_service_verified": false,
+      "train_transfer_count": null,
+      "roundtrip_fare_two_eur": null
+    },
+    {
+      "base_id": "strasbourg",
+      "destination_id": "haguenau",
+      "reverse_origin_id": "haguenau",
+      "reverse_destination_id": "strasbourg",
+      "reverse_fastest_min": 22,
+      "source_url": "https://www.sncf-connect.com/train/trajet/haguenau/strasbourg",
+      "source_kind": "official_operator",
+      "exact_stations_verified": false,
+      "weekend_frequency": null,
+      "weekend_service_verified": false,
+      "train_transfer_count": null,
+      "roundtrip_fare_two_eur": null
+    },
+    {
+      "base_id": "lille",
+      "destination_id": "brussels",
+      "reverse_origin_id": "brussels",
+      "reverse_destination_id": "lille",
+      "reverse_fastest_min": 34,
+      "source_url": "https://www.sncf-connect.com/train/horaires/bruxelles/lille",
+      "source_kind": "official_operator",
+      "exact_stations_verified": false,
+      "weekend_frequency": null,
+      "weekend_service_verified": false,
+      "train_transfer_count": null,
+      "roundtrip_fare_two_eur": null
+    },
+    {
+      "base_id": "lille",
+      "destination_id": "ghent",
+      "reverse_origin_id": "ghent",
+      "reverse_destination_id": "lille",
+      "reverse_fastest_min": 68,
+      "source_url": "https://www.thetrainline.com/train-times/ghent-to-lille",
+      "source_kind": "secondary_timetable_aggregator",
+      "exact_stations_verified": false,
+      "weekend_frequency": null,
+      "weekend_service_verified": false,
+      "train_transfer_count": null,
+      "roundtrip_fare_two_eur": null
+    }
+  ]
+}
