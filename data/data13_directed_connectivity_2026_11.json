@@ -1421,6 +1421,71 @@
       "confidence": "medium",
       "return_2027_verified": false,
       "valid_for_2027": false
+    },
+    {
+      "origin_id": "dijon",
+      "destination_id": "arras",
+      "minimum_oneway_min": 192,
+      "mode": "rail",
+      "reference_kind": "official_operator_minimum",
+      "source_url": "https://www.sncf-connect.com/train/trajet/dijon/arras",
+      "source_checked_at": "2026-11-18",
+      "direction": "outbound_only",
+      "confidence": "medium",
+      "return_2027_verified": false,
+      "valid_for_2027": false
+    },
+    {
+      "origin_id": "dijon",
+      "destination_id": "luxembourg_city",
+      "minimum_oneway_min": 228,
+      "mode": "rail",
+      "reference_kind": "official_operator_minimum",
+      "source_url": "https://www.sncf-connect.com/train/trajet/dijon/luxembourg",
+      "source_checked_at": "2026-11-18",
+      "direction": "outbound_only",
+      "confidence": "medium",
+      "return_2027_verified": false,
+      "valid_for_2027": false
+    },
+    {
+      "origin_id": "dijon",
+      "destination_id": "basel",
+      "minimum_oneway_min": 82,
+      "mode": "rail",
+      "reference_kind": "official_operator_minimum",
+      "source_url": "https://www.sncf-connect.com/train/trajet/dijon/bale",
+      "source_checked_at": "2026-11-18",
+      "direction": "outbound_only",
+      "confidence": "medium",
+      "return_2027_verified": false,
+      "valid_for_2027": false
+    },
+    {
+      "origin_id": "arras",
+      "destination_id": "dijon",
+      "minimum_oneway_min": 192,
+      "mode": "rail",
+      "reference_kind": "official_operator_minimum",
+      "source_url": "https://www.sncf-connect.com/train/trajet/arras/dijon",
+      "source_checked_at": "2026-11-18",
+      "direction": "outbound_only",
+      "confidence": "medium",
+      "return_2027_verified": false,
+      "valid_for_2027": false
+    },
+    {
+      "origin_id": "luxembourg_city",
+      "destination_id": "dijon",
+      "minimum_oneway_min": 236,
+      "mode": "rail",
+      "reference_kind": "official_operator_minimum",
+      "source_url": "https://www.sncf-connect.com/train/trajet/luxembourg/dijon",
+      "source_checked_at": "2026-11-18",
+      "direction": "outbound_only",
+      "confidence": "medium",
+      "return_2027_verified": false,
+      "valid_for_2027": false
     }
   ]
 }
