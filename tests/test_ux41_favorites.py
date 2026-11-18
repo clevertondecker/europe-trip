@@ -100,7 +100,7 @@ class FavoriteComparisonStreamlitTests(unittest.TestCase):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
         original=deepcopy(app.session_state["advisor_plan"])
-        app.radio(key="ux_area").set_value("Explorar").run()
+        app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
         app.segmented_control(key="ux_section").set_value("Cidades-base").run()
         app.segmented_control(key="ux42_city_activity").set_value("Comparar favoritas").run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
