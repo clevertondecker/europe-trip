@@ -286,12 +286,16 @@ def render_wishlist_base_comparison(*, plan, discovery=None, research=None):
                     if route["divergent_sources"]:
                         st.warning("O histórico contém serviços/observações divergentes. "
                                    "Consultar as condições antes de comparar.")
-                    if item.get("historical_source_url"):
-                        st.markdown("[Fonte do histórico](" +
-                                    item["historical_source_url"] + ")")
-                    if item.get("reference_source_url"):
+                    historical_url = item.get("historical_source_url")
+                    reference_url = item.get("reference_source_url")
+                    if historical_url:
+                        title = ("Fonte compartilhada: histórico e referência"
+                                 if reference_url == historical_url
+                                 else "Fonte do histórico")
+                        st.markdown("[" + title + "](" + historical_url + ")")
+                    if reference_url and reference_url != historical_url:
                         st.markdown("[Fonte da referência publicada](" +
-                                    item["reference_source_url"] + ")")
+                                    reference_url + ")")
                     for observation in route["observations"]:
                         source = observation.get("source_url")
                         if source and source != route["source_url"]:
