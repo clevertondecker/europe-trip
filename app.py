@@ -250,6 +250,11 @@ def _ux_area_changed() -> None:
     st.session_state.pop("flow_edit_target",None)
     set_ux_area(st.session_state,st.session_state["ux_area"])
 
+def _ux_sidebar_button_clicked(area: str) -> None:
+    """Native navigation buttons reuse the existing ux_area router and callback."""
+    st.session_state["ux_area"] = area
+    _ux_area_changed()
+
 
 def _ux_section_changed() -> None:
     # A repeated click may yield None in Streamlit. Preserve the return
@@ -331,16 +336,23 @@ with st.sidebar:
       <small>TRAVEL JOURNAL · 2027</small>
       <strong>✧ Nossa Europa</strong>
       <span>Lua de mel & temporada na França</span></div>""", unsafe_allow_html=True)
-    # Keep ux_area as the sole navigation state. The radio callback continues
-    # to mediate all area transitions through ux_navigation.
-    st.radio("Navegação", list(UX_AREAS), label_visibility="collapsed",
-             key="ux_area", on_change=_ux_area_changed,
-             format_func=lambda name: {
-                 "Minha viagem": "⌂  Minha viagem",
-                 "Explorar": "◈  Explorar destinos",
-                 "Meu roteiro": "▦  Meu roteiro",
-                 "Orçamento": "◉  Orçamento",
-             }[name])
+    # Native buttons provide real hit targets, icons, keyboard focus and a
+    # visible active state without relying on Streamlit radio DOM internals.
+    # UX_AREAS and ux_area remain the only navigation source of truth.
+    sidebar_items = (
+        ("Minha viagem", "Minha viagem", ":material/home:"),
+        ("Explorar", "Explorar destinos", ":material/explore:"),
+        ("Meu roteiro", "Meu roteiro", ":material/calendar_month:"),
+        ("Orçamento", "Orçamento", ":material/account_balance_wallet:"),
+    )
+    with st.container(gap="xxsmall"):
+        for index, (area, label, icon) in enumerate(sidebar_items):
+            selected = st.session_state["ux_area"] == area
+            st.button(label, key=f"ux_sidebar_nav_{index}",
+                      type="primary" if selected else "secondary",
+                      icon=icon, width="stretch",
+                      help=("Seção atual: " if selected else "Abrir seção: ") + label,
+                      on_click=_ux_sidebar_button_clicked, args=(area,))
 
     st.divider()
     live_count = sum(state["status"] == "live" for state in sync_sources.values())
