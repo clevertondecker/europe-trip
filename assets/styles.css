@@ -461,3 +461,33 @@ padding:17px 20px;margin:0 0 10px;}
     animation-duration:0.01ms !important;
   }
 }
+
+
+/* UX Sidebar: scoped to the existing main navigation widget only.
+   The legacy navigation radio in the advanced expander is intentionally unchanged. */
+.sidebar-brand{
+  padding:2px 0 12px;
+  margin-bottom:10px;
+}
+.sidebar-brand strong{
+  font-size:1.35rem;
+  margin:4px 0 3px;
+}
+.sidebar-brand span{font-size:.77rem;}
+[data-testid="stSidebar"] .st-key-ux_area [role="radiogroup"] > label{
+  display:flex;
+  align-items:center;
+  min-height:43px;
+  border-radius:9px;
+  padding:10px 11px;
+  border-left:3px solid transparent;
+  cursor:pointer;
+}
+[data-testid="stSidebar"] .st-key-ux_area [role="radiogroup"] > label:has(input:checked){
+  border-left-color:#078F88;
+  background:#E7F5F3;
+}
+[data-testid="stSidebar"] .st-key-ux_area [role="radiogroup"] > label:focus-within{
+  outline:2px solid #078F88;
+  outline-offset:2px;
+}
