@@ -567,8 +567,9 @@ def render_advisor(trip_data:dict,sync_sources:dict,workspace_area:str='Meus pas
                 with st.expander("Como comparamos esta opção"):
                     score=proposal["score"]
                     st.caption(f"Pontuação relativa: {score['relative_score']:.1f}. "
-                               f"Trem ida/volta conhecido: {score['known_roundtrip_train_minutes']} min. "
-                               "Não inclui deslocamento porta a porta ou tarifa 2027.")
+                               f"Trem documentado somente de ida: {score['known_outbound_train_minutes']} min. "
+                               "O retorno e o acesso local são desconhecidos; a penalidade da "
+                               "pontuação usa hipótese simétrica, não viagem confirmada para 2027.")
                 c1,c2=st.columns(2)
                 with c1:
                     if st.button("Aprovar esta proposta",key=f"advisor_accept_{index}",
