@@ -1,6 +1,10 @@
 """DATA 10 — research provenance and conservative shared projection regressions."""
 from copy import deepcopy
 import json
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
 import unittest
 
 from data10_connectivity_model import DATA,load_connectivity_references,validate_connectivity_dataset
@@ -133,6 +137,30 @@ class Data10ConnectivityTests(unittest.TestCase):
             ("historical_pairs","indicative_pairs","local_pairs","missing_pairs")),1380)
         self.assertFalse(snapshot["mutates_tripplan"])
         self.assertFalse(snapshot["fare_and_return_verified_2027"])
+
+    def test_reporting_cli_exports_complete_pair_audit(self):
+        root=Path(__file__).resolve().parents[1]
+        with tempfile.TemporaryDirectory() as tmp:
+            proc=subprocess.run([sys.executable,
+                str(root/"scripts/audit_data10_connectivity.py"),
+                "--output",tmp],cwd=root,capture_output=True,text=True,
+                check=True,timeout=120)
+            summary=json.loads(proc.stdout.strip())
+            self.assertEqual(summary["total_pairs"],1380)
+            self.assertEqual(summary["base_count"],30)
+            self.assertEqual(summary["destination_count"],46)
+            self.assertEqual(summary["data10_sourced_records"],99)
+            self.assertGreater(summary["data10_new_references_shown"],0)
+            base=Path(tmp)
+            data=json.loads((base/"coverage.json").read_text(encoding="utf-8"))
+            self.assertEqual(len(data["per_base"]),30)
+            self.assertEqual(len(data["per_destination"]),46)
+            self.assertEqual(len(data["pairs"]),1380)
+            self.assertIn("Conexões e tempos aproximados",
+                          (base/"coverage.md").read_text(encoding="utf-8"))
+            self.assertEqual(len((base/"unresearched_pairs.csv").read_text(
+                encoding="utf-8").splitlines())-1,summary["missing_pairs"])
+
 
 
 if __name__=="__main__":
