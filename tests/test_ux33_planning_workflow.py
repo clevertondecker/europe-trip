@@ -108,7 +108,7 @@ class WorkflowAppTests(unittest.TestCase):
 
     def test_resume_from_saved_in_session_destination(self):
         at=AppTest.from_file(str(ROOT/"app.py"),default_timeout=105).run()
-        at.radio(key="ux_area").set_value("Meu roteiro").run()
+        at.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Meu roteiro"))).click().run()
         at.segmented_control(key="ux_section").set_value("Meu planejamento").run()
         at.button(key="flow_add_open_button").click().run()
         at.selectbox(key="flow_add_destination").set_value("italy_amalfi").run()
@@ -116,7 +116,7 @@ class WorkflowAppTests(unittest.TestCase):
             ["italy_amalfi__1"]).run()
         at.button(key="flow_add_confirm").click().run()
         self.assertFalse(at.exception,[e.message for e in at.exception])
-        at.radio(key="ux_area").set_value("Minha viagem").run()
+        at.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Minha viagem"))).click().run()
         self.assertIn("home_continue_planning",{b.key for b in at.button})
         at.button(key="home_continue_planning").click().run()
         self.assertFalse(at.exception,[e.message for e in at.exception])
