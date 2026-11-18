@@ -17,16 +17,21 @@ class Data13DirectedRailCoverageTests(unittest.TestCase):
         rows=self.payload["records"]
         self.assertGreaterEqual(len(rows),30)
         self.assertEqual(len({(x["origin_id"],x["destination_id"]) for x in rows}),len(rows))
-        self.assertEqual({x["reference_kind"] for x in rows},{"official_operator_minimum"})
+        self.assertTrue({x["reference_kind"] for x in rows}.issubset({
+            "official_operator_minimum", "secondary_route_minimum"}))
+        self.assertIn("official_operator_minimum", {x["reference_kind"] for x in rows})
         for row in rows:
             with self.subTest(origin=row["origin_id"],destination=row["destination_id"]):
-                self.assertTrue(
-                    row["source_url"].startswith((
+                if row["reference_kind"] == "official_operator_minimum":
+                    self.assertTrue(row["source_url"].startswith((
                         "https://www.sncf-connect.com/train/trajet/",
                         "https://www.sncf-connect.com/train/horaires/",
-                    )),
-                    "Only canonical SNCF route and timetable URLs are accepted",
-                )
+                    )))
+                    self.assertEqual(row["confidence"], "medium")
+                else:
+                    self.assertTrue(row["source_url"].startswith(
+                        "https://www.thetrainline.com/en/train-times/"))
+                    self.assertEqual(row["confidence"], "low")
                 self.assertEqual(row["direction"],"outbound_only")
                 self.assertFalse(row["return_2027_verified"])
                 self.assertFalse(row["valid_for_2027"])
@@ -36,7 +41,7 @@ class Data13DirectedRailCoverageTests(unittest.TestCase):
         src={"schema_version":1,"scope":self.payload["scope"],
              "selection_policy":"fallback_after_historical_routes7_data9_data10_data11_data12",
              "checked_at":self.payload["checked_at"],"records":deepcopy(self.payload["records"])}
-        for bad in ("future","reverse","duplicate","unknown_origin","bad_source","wrong_sncf_path"):
+        for bad in ("future","reverse","duplicate","unknown_origin","bad_source","wrong_sncf_path","wrong_trainline_path","wrong_trainline_confidence"):
             with self.subTest(bad=bad):
                 p=deepcopy(src)
                 if bad=="future":p["records"][0]["valid_for_2027"]=True
@@ -44,6 +49,13 @@ class Data13DirectedRailCoverageTests(unittest.TestCase):
                 elif bad=="duplicate":p["records"].append(deepcopy(p["records"][0]))
                 elif bad=="unknown_origin":p["records"][0]["origin_id"]="invalid_city"
                 elif bad=="wrong_sncf_path":p["records"][0]["source_url"]="https://www.sncf-connect.com/help/faq/rail/tickets"
+                elif bad=="wrong_trainline_path":
+                    p["records"][0]["reference_kind"]="secondary_route_minimum"
+                    p["records"][0]["confidence"]="low"
+                    p["records"][0]["source_url"]="https://www.thetrainline.com/en/help/contact"
+                elif bad=="wrong_trainline_confidence":
+                    p["records"][0]["reference_kind"]="secondary_route_minimum"
+                    p["records"][0]["source_url"]="https://www.thetrainline.com/en/train-times/arlon-to-metz"
                 else:p["records"][0]["source_url"]="https://example.com/travel"
                 with self.assertRaises(ValueError):validate_data13(p)
 
