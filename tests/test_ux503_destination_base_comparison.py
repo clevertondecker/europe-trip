@@ -7,6 +7,7 @@ from streamlit.testing.v1 import AppTest
 from trip_plan_model import new_plan
 from ux502_destination_interests_model import empty_interests, set_interest
 from ux503_destination_base_comparison_model import compare_wishlist_bases
+from ux503_destination_base_comparison_ui import destination_country_label
 from ux501_destination_discovery_model import build_destination_discovery
 from base_research_expanded_model import load_research
 
@@ -20,6 +21,20 @@ def sample_wishes():
         ("basel","must_visit"),("strasbourg","maybe"),("lille","discarded")):
         d=set_interest(d,destination,priority)
     return d
+
+
+class DestinationCountryFlagsTests(unittest.TestCase):
+    def test_country_labels_come_from_country_not_from_city_names(self):
+        countries = {
+            "França": "🇫🇷", "Alemanha": "🇩🇪", "Bélgica": "🇧🇪",
+            "Luxemburgo": "🇱🇺", "Países Baixos": "🇳🇱", "Suíça": "🇨🇭",
+        }
+        for country, flag in countries.items():
+            with self.subTest(country=country):
+                self.assertEqual(destination_country_label("Destino", country),
+                                 f"{flag} Destino")
+        self.assertEqual(destination_country_label("Destino", "Não mapeado"),
+                         "Destino")
 
 
 class DestinationBaseComparisonTests(unittest.TestCase):
@@ -186,14 +201,15 @@ class DestinationBaseComparisonAppTests(unittest.TestCase):
         matrix=next(f.value for f in app.dataframe
                     if "Destino · prioridade" in f.value.columns)
         self.assertEqual(len(matrix),2)
-        self.assertIn("Colmar · Imperdível",list(matrix["Destino · prioridade"]))
+        self.assertIn("🇫🇷 Colmar · Imperdível",list(matrix["Destino · prioridade"]))
+        self.assertIn("🇧🇪 Bruges · Quero conhecer",list(matrix["Destino · prioridade"]))
         self.assertEqual(app.session_state["ux502_interests"],wish)
         revised=set_interest(wish,"bruges_be","must_visit")
         app.session_state["ux502_interests"]=revised
         app.run()
         matrix=next(f.value for f in app.dataframe
                     if "Destino · prioridade" in f.value.columns)
-        self.assertIn("Bruges · Imperdível",list(matrix["Destino · prioridade"]))
+        self.assertIn("🇧🇪 Bruges · Imperdível",list(matrix["Destino · prioridade"]))
         self.assertEqual(app.session_state["advisor_plan"],original)
         self.assertEqual(app.session_state["ux502_interests"],revised)
 

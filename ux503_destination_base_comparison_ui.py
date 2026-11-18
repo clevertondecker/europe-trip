@@ -16,6 +16,22 @@ from ux505_base_comparison_presentation import (
 )
 
 
+COUNTRY_FLAGS = {
+    "França": "🇫🇷",
+    "Alemanha": "🇩🇪",
+    "Bélgica": "🇧🇪",
+    "Luxemburgo": "🇱🇺",
+    "Países Baixos": "🇳🇱",
+    "Suíça": "🇨🇭",
+}
+
+
+def destination_country_label(name: str, country: str) -> str:
+    """Presentation only: never infer a flag from the city name."""
+    flag = COUNTRY_FLAGS.get(country)
+    return f"{flag} {name}" if flag else name
+
+
 def _return_to_wishlist():
     # Request a pre-widget navigation update on the next Streamlit run.
     st.session_state["ux503_pending_return_to_wishlist"] = True
@@ -95,7 +111,8 @@ def render_wishlist_base_comparison(*, plan, discovery=None, research=None):
     st.markdown("#### 2. Quais destinos queremos considerar?")
     selected_view = st.multiselect(
         "Destinos para exibir nesta comparação", active,
-        format_func=lambda x: names[x]["name"] + " · " + priorities[x],
+        format_func=lambda x: destination_country_label(
+                names[x]["name"], names[x]["country"]) + " · " + priorities[x],
         key="ux503_visible_destinations",
         help="Filtra apenas esta tela. Não altera ou remove destinos da lista salva.")
     st.session_state["ux504_visible_destinations_shadow"] = list(selected_view)
@@ -146,7 +163,8 @@ def render_wishlist_base_comparison(*, plan, discovery=None, research=None):
                    "em uma data de 2027.")
     tourism_table = [
         {
-            "Destino": x["destination_name"],
+            "Destino": destination_country_label(x["destination_name"],
+                names[x["destination_id"]]["country"]),
             "Atrações no catálogo": x["catalog_attraction_count"],
             "Ingressos históricos publicados": x["published_ticket_amounts_historical"],
             "Horários/regras atuais documentados": x["published_opening_hours"],
@@ -201,7 +219,8 @@ def render_wishlist_base_comparison(*, plan, discovery=None, research=None):
                for r in result["rows"]}
     matrix = []
     for destination in result["destinations"]:
-        line = {"Destino · prioridade": destination["name"] + " · " +
+        line = {"Destino · prioridade": destination_country_label(
+            destination["name"],destination["country"]) + " · " +
                 destination["priority_label"]}
         for base_id in selected:
             route = indexed[(base_id, destination["id"])]
@@ -223,12 +242,14 @@ def render_wishlist_base_comparison(*, plan, discovery=None, research=None):
                    "confirma a logística ou os preços de 2027.")
         detail = st.selectbox(
             "Examinar um destino", visible,
-            format_func=lambda x: names[x]["name"] + " · " + priorities[x],
+            format_func=lambda x: destination_country_label(
+                names[x]["name"], names[x]["country"]) + " · " + priorities[x],
             key="ux503_detail_destination")
         if detail:
             destination = next(x for x in result["destinations"]
                                if x["id"] == detail)
-            st.markdown("**" + destination["name"] + "** · " +
+            st.markdown("**" + destination_country_label(destination["name"],
+                destination["country"]) + "** · " +
                         destination["priority_label"])
             for base_id in selected:
                 route = indexed[(base_id, detail)]
