@@ -56,6 +56,18 @@ class EvidenceContractTests(unittest.TestCase):
         self.assertFalse(result["conflicts"])
         self.assertEqual(len(result["corroborated"]), 1)
 
+    def test_extra_known_precision_is_not_a_conflict(self):
+        # Same service/duration; the second source has an additional arrival
+        # date and UTC offset. Missing information from the first is not a
+        # contradictory fact.
+        richer = {**BASE, "source_url": "https://www.bahn.de/",
+                  "operator": "DB", "arrival_date": "2026-11-16",
+                  "arrival_utc_offset": "+01:00"}
+        result = validate_observations([BASE, richer])
+        self.assertEqual(result["count"], 2)
+        self.assertFalse(result["conflicts"])
+        self.assertEqual(len(result["corroborated"]), 1)
+
     def test_different_services_not_conflated(self):
         other_service = {**BASE, "service_id": "TER-2",
                          "source_url": "https://www.bahn.de/",
