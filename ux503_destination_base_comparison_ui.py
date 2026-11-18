@@ -9,6 +9,7 @@ from ux502_destination_interests_model import (
 from ux503_destination_base_comparison_model import compare_wishlist_bases
 from ux506_decision_readiness_projection import build_decision_readiness
 from routes7_comparison_projection import decorate_comparison
+from data8_tourism_ui import render_data8_attraction_details, render_data8_cost_simulator
 from ux_navigation import set_task
 from ux505_base_comparison_presentation import (
     comparison_overview, matrix_cell, known_findings, missing_research,
@@ -162,6 +163,8 @@ def render_wishlist_base_comparison(*, plan, discovery=None, research=None):
                      expanded=False):
         for entry in decision["attraction_details"]:
             st.markdown("**" + entry["name"] + "**")
+            if render_data8_attraction_details(entry["attraction_id"]):
+                continue
             if entry["description"]:
                 st.write(entry["description"])
             if entry["why_visit"]:
@@ -304,6 +307,7 @@ def render_wishlist_base_comparison(*, plan, discovery=None, research=None):
                         if source and source != route["source_url"]:
                             st.markdown("[Observação histórica alternativa](" +
                                         source + ")")
+            render_data8_cost_simulator(detail)
         st.markdown("##### Moradia e pendências por cidade-base")
         for summary in result["summaries"]:
             with st.container(border=True):
