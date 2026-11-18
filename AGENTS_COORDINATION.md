@@ -1,4 +1,12 @@
-# Coordenação de 3 agentes — Nossa Europa 2027
+# Coordenação de 3 agentes — Nossa Europa 2027 (histórico)
+
+> **Documento histórico da coordenação original.** As instruções e branches
+> abaixo descrevem a divisão de trabalho entre três agentes da fase anterior.
+> Não correspondem automaticamente a branches atualmente ativos ou ao
+> contrato de integração do código atual. O estado vigente de navegação,
+> pesquisa e arquitetura deve ser consultado no
+> [índice documental](docs/INDEX_VIGENTE_HISTORICO.md) e na `main`.
+> Preservado para rastreabilidade; não altera ownership nem autoriza merges.
 
 **Orquestração:** agente integrador (único autorizado a editar arquivos compartilhados). **Estado:** tarefas planejadas; a criação de issues/branches não inicia execução automática de agentes.
 
