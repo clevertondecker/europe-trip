@@ -1,5 +1,9 @@
 """DATA 9.1: DQ 3.2 / Comparar consistent-source integration tests."""
 import unittest
+import json
+import subprocess
+import sys
+import tempfile
 from copy import deepcopy
 from pathlib import Path
 
@@ -87,6 +91,23 @@ class SharedRailEvidenceTests(unittest.TestCase):
 
 
 class SharedRailAppTests(unittest.TestCase):
+    def test_audit_cli_executes_and_writes_backlog(self):
+        with tempfile.TemporaryDirectory() as temp:
+            result=subprocess.run(
+                [sys.executable, str(ROOT/"scripts/audit_data9_rail_coverage.py"),
+                 "--output",temp],cwd=ROOT,capture_output=True,text=True,
+                timeout=120,check=True)
+            summary=json.loads(result.stdout.strip())
+            self.assertEqual(summary["base_count"],30)
+            self.assertEqual(summary["total_pairs"],1380)
+            output=Path(temp)
+            inventory=json.loads((output/"inventory.json").read_text(encoding="utf-8"))
+            backlog=json.loads((output/"backlog.json").read_text(encoding="utf-8"))
+            self.assertEqual(len(backlog),summary["missing_pairs"])
+            self.assertEqual(len(inventory["per_base"]),30)
+            self.assertEqual(len(inventory["per_destination"]),46)
+            self.assertIn("Lacunas ferroviárias",(output/"summary.md").read_text(encoding="utf-8"))
+
     def test_dq32_indicative_group_and_canonical_wishlist_intact(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
         before=deepcopy(app.session_state["advisor_plan"])
