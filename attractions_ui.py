@@ -173,6 +173,7 @@ def _dq32_choose_destination(destination_id: str) -> None:
 def _render_dq32_macro_opportunities(base_id: str) -> None:
     """Sourced, read-only discovery. Duration means minimum ONE-WAY, not feasibility."""
     from dq32_macro_opportunities_model import opportunity_overview
+    from destination_photo_assets import local_destination_photo
     from dq32_explorer_presentation import (
         COUNTRY_FLAGS, evidence_label, evidence_source, format_travel_minutes,
         one_way_minutes, table_rows, visible_destinations,
@@ -255,6 +256,12 @@ def _render_dq32_macro_opportunities(base_id: str) -> None:
                 minutes = one_way_minutes(place)
                 with col:
                     with st.container(border=True):
+                        photo = local_destination_photo(place["destination_id"])
+                        if photo:
+                            st.image(photo["local_path"], width="stretch")
+                            st.caption("Foto: " + escape(photo["author"]) +
+                                       " · " + escape(photo["license"]) +
+                                       " · [crédito](" + photo["source_page"] + ")")
                         flag = COUNTRY_FLAGS.get(place["country"], "🌍")
                         st.markdown(f"#### {flag} {escape(place['name'])}")
                         if minutes is not None:
