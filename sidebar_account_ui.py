@@ -36,7 +36,10 @@ def _logged_in_user():
 def render_sidebar_account() -> None:
     """Show account access on every page, below primary navigation and tools."""
     config = _owner_config()
-    user = _logged_in_user()
+    # Do not access st.user before OIDC is configured: unauthenticated
+    # deployments must still render every navigation area normally.
+    user = (_logged_in_user() if config.get("google_configured")
+            and config.get("owner_email") else None)
     status = account_view_state(config, user)
 
     st.markdown("**Conta Google**")
