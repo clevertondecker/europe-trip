@@ -213,7 +213,9 @@ def render_independent_destination_discovery(*, discovery=None) -> None:
                                 "- ["+attraction["name"]+"]("+
                                 attraction["source_url"]+") · "+
                                 attraction["category"])
-                        render_data8_destination_preview(item["id"])
+                        render_data8_destination_preview(
+                            item["id"], attraction_names={
+                                a["id"]: a["name"] for a in item["attractions"]})
                     saved = {r["destination_id"]: r["priority"] for r in
                              st.session_state.get("ux502_interests",{}).get("items",[])}
                     if item["id"] in saved:
