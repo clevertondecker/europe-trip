@@ -48,7 +48,12 @@ def validate_access_dataset(payload, *, tourism=None):
         date.fromisoformat(x["checked_at"])
         if x["checked_at"] > payload["checked_at"]:
             raise ValueError("source after snapshot")
-        if ("NÃO publica" not in x.get("method", "") or
+        # The tourism URL establishes the attraction context, NOT a measured
+        # pedestrian route. Evidence type is structured, never parsed from prose.
+        if (x.get("source_scope") != "tourism_context_only" or
+            x.get("duration_basis") != "editorial_assumption" or
+            not isinstance(x.get("method"), str) or not x["method"].strip() or
+            x.get("route_evidence_source_url") is not None or
             x.get("distance_m") is not None or
             x.get("journey_date") is not None or
             x.get("joinable_to_rail_service") is not False or
