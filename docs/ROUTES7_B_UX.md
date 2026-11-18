@@ -26,3 +26,7 @@ Uma diferença numérica entre o tempo histórico e o mínimo de página-resumo 
 PR #127 começou empilhado sobre #126, que é o responsável por `data/routes7_priority_reference_2026_11.json` e `routes7_reference_model.py`. Sem alterar o workflow permanente, CI completo deve rodar **depois da integração da base #126 e do retarget para `main`**. Os testes cobrem 2–5 bases, 3 × 5, destinos fora do overlay, local, dados não reproduzidos, fonte/histórico simultâneos, diferenças numéricas que não são conflito, prioridades, wishlist e TripPlan.
 
 **Aceite visual:** a tela explica a referência sem conhecimento de arquitetura, não mostra dois resumos contraditórios e mantém os detalhes em um único expander. Inspeção real desktop/mobile ainda será necessária se não houver navegador disponível.
+
+## Integração após #126
+
+A base deste PR foi atualizada de `feature/routes7-a-historical-reference-overlay` para `main` depois do merge de #126 (commit `ac36c49a8afb837f980c3137c21338747c82d2ed`). Reexecutar o CI completo sobre a base `main` antes da integração deste PR.
