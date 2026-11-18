@@ -95,7 +95,13 @@ class EvidenceContractTests(unittest.TestCase):
             validate_observation({**BASE, "source_nature": "operator_route_summary",
                                   "travel_date": "2027-10-05",
                                   "temporal_validity": "future_date_explicitly_verified"})
+        # Future-date data must carry fully comparable offset-aware instants.
+        with self.assertRaises(ValueError):
+            validate_observation({**BASE, "travel_date": "2027-10-05",
+                                  "temporal_validity": "future_date_explicitly_verified"})
         valid = {**BASE, "travel_date": "2027-10-05",
+                 "departure_utc_offset": "+02:00",
+                 "arrival_utc_offset": "+02:00",
                  "temporal_validity": "future_date_explicitly_verified"}
         self.assertEqual(validate_observation(valid)["travel_date"], "2027-10-05")
 
