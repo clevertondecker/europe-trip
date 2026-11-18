@@ -207,7 +207,10 @@ def decorate_comparison(result, *, references=None, gap_overlay=None,
             label = f'~{format_minutes(evidence["display_min"])} · {qualifier}'
         elif basis == "data13_reference":
             category = "reference_only"
-            label = f'~{format_minutes(evidence["display_min"])} · mínimo publicado · operadora'
+            qualifier = ("mínimo publicado · operadora"
+                         if evidence.get("source_kind") == "official_operator_minimum"
+                         else "referência secundária · mínimo divulgado")
+            label = f'~{format_minutes(evidence["display_min"])} · {qualifier}'
         elif basis == "indicative_published_city_minimum":
             category = "reference_only"
             label = f'~{format_minutes(evidence["display_min"])} · mínimo indicativo'
