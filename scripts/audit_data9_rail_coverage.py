@@ -17,6 +17,7 @@ if str(ROOT) not in sys.path:
 
 from rail_gap_coverage_audit_model import (
     build_rail_coverage_inventory, research_backlog, audit_summary,
+    component_research_backlog, component_gap_summary,
 )
 
 
@@ -82,8 +83,17 @@ def main():
     (args.output/"backlog.json").write_text(
         json.dumps(research_backlog(result),ensure_ascii=False,indent=2)+"\n",
         encoding="utf-8")
+    all_components = component_research_backlog(result)
+    components_summary = component_gap_summary(all_components)
+    (args.output/"component_backlog.json").write_text(
+        json.dumps(all_components,ensure_ascii=False,indent=2)+"\n",
+        encoding="utf-8")
+    (args.output/"component_summary.json").write_text(
+        json.dumps(components_summary,ensure_ascii=False,indent=2)+"\n",
+        encoding="utf-8")
     (args.output/"summary.md").write_text(
         render_markdown(result),encoding="utf-8")
+    # Preserve the existing stdout contract consumed by tests and scripts.
     print(json.dumps(audit_summary(result),ensure_ascii=False,sort_keys=True))
 
 
