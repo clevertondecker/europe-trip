@@ -71,7 +71,7 @@ class DestinationInterestsAppTests(unittest.TestCase):
     def test_list_filter_priority_and_tripplan_isolation(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
         original=deepcopy(app.session_state["advisor_plan"])
-        app.radio(key="ux_area").set_value("Explorar").run()
+        app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
         app.segmented_control(key="ux_section").set_value("Passeios").run()
         app.radio(key="ux502_view").set_value("Minha lista").run()
         app.session_state["ux502_interests"]=set_interest(
@@ -90,7 +90,7 @@ class DestinationInterestsAppTests(unittest.TestCase):
 
     def test_selectboxes_rebind_after_replacement_same_revision(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
-        app.radio(key="ux_area").set_value("Explorar").run()
+        app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
         app.segmented_control(key="ux_section").set_value("Passeios").run()
         app.radio(key="ux502_view").set_value("Minha lista").run()
         first=set_interest(empty_interests(),"colmar","must_visit")
@@ -182,7 +182,7 @@ class PrivateWishlistPersistenceTests(unittest.TestCase):
         import continuity_ui
         from private_continuity_store import StorageConflict
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
-        app.radio(key="ux_area").set_value("Explorar").run()
+        app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
         app.segmented_control(key="ux_section").set_value("Passeios").run()
         app.session_state["ux502_interests"]=deepcopy(self.interests)
         fake=Mock()
