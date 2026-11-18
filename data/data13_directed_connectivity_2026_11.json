@@ -2630,6 +2630,97 @@
       "confidence": "low",
       "return_2027_verified": false,
       "valid_for_2027": false
+    },
+    {
+      "origin_id": "aachen",
+      "destination_id": "ghent",
+      "minimum_oneway_min": 111,
+      "mode": "rail",
+      "reference_kind": "secondary_route_minimum",
+      "source_url": "https://www.thetrainline.com/en/train-times/aachen-to-ghent",
+      "source_checked_at": "2026-11-18",
+      "direction": "outbound_only",
+      "confidence": "low",
+      "return_2027_verified": false,
+      "valid_for_2027": false
+    },
+    {
+      "origin_id": "aachen",
+      "destination_id": "bruges_be",
+      "minimum_oneway_min": 145,
+      "mode": "rail",
+      "reference_kind": "secondary_route_minimum",
+      "source_url": "https://www.thetrainline.com/en/train-times/aachen-to-bruges-brugge",
+      "source_checked_at": "2026-11-18",
+      "direction": "outbound_only",
+      "confidence": "low",
+      "return_2027_verified": false,
+      "valid_for_2027": false
+    },
+    {
+      "origin_id": "aachen",
+      "destination_id": "amsterdam",
+      "minimum_oneway_min": 178,
+      "mode": "rail",
+      "reference_kind": "secondary_route_minimum",
+      "source_url": "https://www.thetrainline.com/en/train-times/aachen-to-amsterdam",
+      "source_checked_at": "2026-11-18",
+      "direction": "outbound_only",
+      "confidence": "low",
+      "return_2027_verified": false,
+      "valid_for_2027": false
+    },
+    {
+      "origin_id": "aachen",
+      "destination_id": "namur",
+      "minimum_oneway_min": 78,
+      "mode": "rail",
+      "reference_kind": "secondary_route_minimum",
+      "source_url": "https://www.thetrainline.com/en/train-times/aachen-to-namur",
+      "source_checked_at": "2026-11-18",
+      "direction": "outbound_only",
+      "confidence": "low",
+      "return_2027_verified": false,
+      "valid_for_2027": false
+    },
+    {
+      "origin_id": "aachen",
+      "destination_id": "luxembourg_city",
+      "minimum_oneway_min": 203,
+      "mode": "rail",
+      "reference_kind": "secondary_route_minimum",
+      "source_url": "https://www.thetrainline.com/en/train-times/aachen-to-luxembourg",
+      "source_checked_at": "2026-11-18",
+      "direction": "outbound_only",
+      "confidence": "low",
+      "return_2027_verified": false,
+      "valid_for_2027": false
+    },
+    {
+      "origin_id": "esch",
+      "destination_id": "cologne",
+      "minimum_oneway_min": 260,
+      "mode": "rail",
+      "reference_kind": "secondary_route_minimum",
+      "source_url": "https://www.thetrainline.com/en/train-times/esch-sur-alzette-to-cologne-germany",
+      "source_checked_at": "2026-11-18",
+      "direction": "outbound_only",
+      "confidence": "low",
+      "return_2027_verified": false,
+      "valid_for_2027": false
+    },
+    {
+      "origin_id": "esch",
+      "destination_id": "bruges_be",
+      "minimum_oneway_min": 299,
+      "mode": "rail",
+      "reference_kind": "secondary_route_minimum",
+      "source_url": "https://www.thetrainline.com/en/train-times/esch-sur-alzette-to-bruges-brugge",
+      "source_checked_at": "2026-11-18",
+      "direction": "outbound_only",
+      "confidence": "low",
+      "return_2027_verified": false,
+      "valid_for_2027": false
     }
   ]
 }
