@@ -137,15 +137,17 @@ def render_wishlist_base_comparison(*, plan, discovery=None, research=None):
     st.markdown("#### Resumo da comparação")
     c1, c2, c3, c4 = st.columns(4)
     c1.metric("Histórico de trem", enriched["historical"])
-    c2.metric("Mínimo indicativo", enriched["reference_only"])
+    c2.metric("Referências indicativas", enriched["reference_only"])
     c3.metric("Sem tempo", enriched["no_time"])
     c4.metric("Deslocamento local", enriched["local"])
-    st.metric("Trajetos com tempo pesquisado", enriched["historical"])
+    st.metric("Trajetos com tempo pesquisado",
+              enriched["historical"] + enriched["reference_only"])
     st.markdown("#### O que ainda precisamos pesquisar?")
     st.caption(
         f'{enriched["total"]} combinações: uma categoria por par. '
-        "Mínimos indicativos vêm de páginas por cidade, não de serviços "
-        "com data e estações comprovadas. Isso não representa disponibilidade em 2027."
+        "Mínimos indicativos e amostras de 2026 possuem proveniências diferentes; "
+        "não são médias típicas nem percursos completos. Fontes secundárias são "
+        "identificadas. Não há disponibilidade de retorno comprovada para 2027."
     )
 
     # New read-only decision layer: never modifies choices or official TripPlan.
@@ -228,10 +230,24 @@ def render_wishlist_base_comparison(*, plan, discovery=None, research=None):
                 enriched["cells"][(base_id, destination["id"])]["label"])
         matrix.append(line)
     st.dataframe(matrix, hide_index=True, width="stretch")
-    st.caption("Ida histórica ou referência de tempo mínimo publicado, "
-               "sem data ferroviária confirmada para 2027. "
-               "Média publicada é outra métrica, e retorno continua pendente. "
-               "Em telas pequenas, deslize a tabela horizontalmente.")
+    st.caption("Valores de ida: histórico legado, mínimo indicativo publicado, "
+               "amostra de 2026 ou referência secundária (rotulada em cada célula). "
+               "Nenhum é confirmação de viagem em 2027; estações, retorno e "
+               "última milha continuam pendentes. Em telas pequenas, deslize a tabela.")
+    still_missing = [
+        {"Cidade-base": cities[b]["name"],
+         "Destino": destination_country_label(
+             dest["name"], dest["country"]),
+         "Pendente": "Pesquisar tempo ferroviário de ida e fonte"}
+        for b in selected for dest in result["destinations"]
+        if enriched["cells"][(b, dest["id"])]["category"] == "no_time"
+    ]
+    if still_missing:
+        with st.expander("Combinações ainda sem tempo pesquisado (" +
+                         str(len(still_missing)) + ")", expanded=False):
+            st.dataframe(still_missing, hide_index=True, width="stretch")
+            st.caption("Falta de referência não significa ligação inviável. "
+                       "Novos dados exigem fonte, data, origem/destino e grau de confiança.")
     st.caption("Retorno, tarifas e acesso até as atrações continuam sem comprovação "
                "para as datas da temporada. Valores ausentes não significam inviabilidade.")
 
@@ -260,6 +276,14 @@ def render_wishlist_base_comparison(*, plan, discovery=None, research=None):
                     st.caption(item["typical_label"])
                     if item["station_caveat"]:
                         st.caption(item["station_caveat"])
+                    if item.get("gap_applied"):
+                        st.caption("Pesquisa adicional consultada em " +
+                                   str(item["gap_checked_at"]) +
+                                   " · fonte " +
+                                   ("secundária, confiança baixa" if
+                                    item["gap_evidence_type"] == "secondary_sample"
+                                    else "operadora, referência histórica") +
+                                   " · ida apenas; nenhuma confirmação para 2027.")
                     if item.get("reference_differs_from_legacy"):
                         st.caption("A referência publicada difere do histórico. "
                                    "Não é conflito comprovado entre os mesmos serviços.")
