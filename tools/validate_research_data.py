@@ -95,6 +95,12 @@ def main():
     baseline=json.loads((ROOT/"research_snapshot_baseline.json").read_text(encoding="utf-8"))
     verify_snapshot_baseline(result,baseline)
     print("Reviewed research snapshot baseline matches:",baseline["baseline_id"])
+    # DATA10 is a strictly additive route-reference dataset; do not alter the
+    # historical snapshot's review counts or transform research into schedules.
+    from data10_connectivity_model import load_connectivity_references
+    data10=load_connectivity_references()
+    print("DATA10 sourced directed one-way references:",len(data10["records"]),
+          "across",len({r["origin_id"] for r in data10["records"]}),"base cities")
 
 
 if __name__=="__main__":

@@ -8,6 +8,7 @@ from __future__ import annotations
 from routes7_reference_model import load_route_references, planning_reference
 from functools import lru_cache
 from rail_gap_enrichment_model import load_gap_enrichment
+from data10_connectivity_model import load_connectivity_references
 
 
 def format_minutes(value):
@@ -22,11 +23,17 @@ def format_minutes(value):
 def _cached_route_gaps():
     return load_gap_enrichment()
 
+@lru_cache(maxsize=1)
+def _cached_connectivity():
+    return load_connectivity_references()
 
-def decorate_comparison(result, *, references=None, gap_overlay=None):
+
+def decorate_comparison(result, *, references=None, gap_overlay=None, connectivity_overlay=None):
     """All matrix categories are mutually exclusive, including custom baskets."""
     refs = references if references is not None else load_route_references()
     gaps = gap_overlay if gap_overlay is not None else _cached_route_gaps()
+    connectivity = (connectivity_overlay if connectivity_overlay is not None
+                    else _cached_connectivity())
     cells = {}
     categories = {
         "historical": 0, "reference_only": 0, "local": 0, "no_time": 0,
@@ -61,6 +68,26 @@ def decorate_comparison(result, *, references=None, gap_overlay=None):
                 "weekend_return_known": False,
                 "valid_for_2027": False,
             }
+        # DATA 10 is the last sourced fallback. Never overwrite older evidence
+        # or claim the reverse journey, a future timetable or local transport.
+        connectivity_row = connectivity["by_pair"].get(key)
+        if (connectivity_row is not None
+                and evidence.get("display_min") is None
+                and row["evidence_status"] != "local"):
+            evidence = {
+                **evidence,
+                "display_basis": "data10_reference",
+                "display_min": connectivity_row["minimum_oneway_min"],
+                "source_url": connectivity_row["source_url"],
+                "reference_source_url": connectivity_row["source_url"],
+                "gap_checked_at": connectivity_row["source_checked_at"],
+                "confidence": connectivity_row["confidence"],
+                "source_kind": connectivity_row["reference_kind"],
+                "station_comparability": "city_level_ambiguous",
+                "comparability": "indicative_only_not_station_comparable",
+                "weekend_return_known": False,
+                "valid_for_2027": False,
+            }
         basis = evidence["display_basis"]
         if basis == "local_not_rail":
             category = "local"
@@ -80,6 +107,12 @@ def decorate_comparison(result, *, references=None, gap_overlay=None):
                 "official_timetable_sample": "amostra datada de 2026",
                 "secondary_sample": "referência secundária",
             }[kind]
+            label = f'~{format_minutes(evidence["display_min"])} · {qualifier}'
+        elif basis == "data10_reference":
+            category = "reference_only"
+            qualifier = ("mínimo publicado · operadora"
+                         if evidence.get("source_kind") == "official_operator_minimum"
+                         else "referência secundária · mínimo divulgado")
             label = f'~{format_minutes(evidence["display_min"])} · {qualifier}'
         elif basis == "indicative_published_city_minimum":
             category = "reference_only"
@@ -108,6 +141,7 @@ def decorate_comparison(result, *, references=None, gap_overlay=None):
             "historical_source_url": row["source_url"],
             "legacy_divergent_sources": bool(row.get("divergent_sources")),
             "gap_applied": basis == "gap_reference",
+            "connectivity_applied": basis == "data10_reference",
             "station_caveat": (
                 "Referência por cidade; estação de embarque/chegada não reconciliada."
                 if evidence.get("station_comparability") == "city_level_ambiguous"

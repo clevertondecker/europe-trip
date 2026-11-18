@@ -64,6 +64,10 @@ def build_rail_coverage_inventory(*, bases=None, catalog=None,
                 "source_url":(dest["train_source_url"] if category == "historical"
                               else dest["indicative_source_url"]
                               if category == "indicative" else None),
+                "source_dataset":(dest["train_source_dataset"]
+                                  if category == "historical" else
+                                  dest["indicative_source_dataset"]
+                                  if category == "indicative" else None),
                 "source_checked_at":(dest["train_checked_at"] if category == "historical"
                                      else dest["indicative_source_checked_at"]
                                      if category == "indicative" else None),

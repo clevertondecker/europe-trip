@@ -213,6 +213,10 @@ def opportunity_overview(base_id, *, macro=None,catalog=None,exploration=None,
             entry["indicative_source_checked_at"]=cell.get("gap_checked_at") or cell.get("checked_at")
             entry["indicative_confidence"]=cell.get("confidence")
             entry["indicative_evidence_type"]=cell.get("gap_evidence_type") or "routes7_reference"
+            entry["indicative_source_dataset"]=(
+                "data10_connectivity_2026_11" if cell.get("connectivity_applied")
+                else "data9_rail_gap_2026_11" if cell.get("gap_applied")
+                else "routes7_2026_11")
         else:
             entry["indicative_train_oneway_min"]=None
             entry["indicative_train_label"]=None
@@ -220,6 +224,7 @@ def opportunity_overview(base_id, *, macro=None,catalog=None,exploration=None,
             entry["indicative_source_checked_at"]=None
             entry["indicative_confidence"]=None
             entry["indicative_evidence_type"]=None
+            entry["indicative_source_dataset"]=None
     entries.sort(key=lambda item:(
         0 if item["local"] else 1 if item["minimum_train_oneway_min"] is not None else 2,
         item["minimum_train_oneway_min"] if item["minimum_train_oneway_min"] is not None else 999999,
