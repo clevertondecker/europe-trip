@@ -50,7 +50,7 @@ class UX40StreamlitTests(unittest.TestCase):
         self.app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=110).run()
         self.assertFalse(self.app.exception,[e.message for e in self.app.exception])
         self.official=deepcopy(self.app.session_state["advisor_plan"])
-        self.app.radio(key="ux_area").set_value("Explorar").run()
+        self.app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
         self.app.segmented_control(key="ux_section").set_value("Cidades-base").run()
         self.app.segmented_control(key="ux42_city_activity").set_value("Comparar favoritas").run()
         self.assertFalse(self.app.exception,[e.message for e in self.app.exception])
