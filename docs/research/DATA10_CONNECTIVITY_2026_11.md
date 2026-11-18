@@ -7,7 +7,7 @@ serviço programado para 2027. Documento operacional vinculado ao dataset DATA10
 
 - **30 cidades-base** do cadastro existente e **46 destinos** canônicos, ou
   1.380 pares dirigidos (incluindo 30 pares locais).
-- **99 referências de tempo mínimo de ida** coletadas neste pacote, cobrindo
+- **108 referências de tempo mínimo de ida** coletadas neste pacote, cobrindo
   origens nas **30 bases**; parte pode ser redundante com o histórico anterior.
 - Duas classes de evidência: **operadora** (SNCF Connect, prioridade mais alta)
   e **fonte secundária** (Trainline, confiança reduzida).
