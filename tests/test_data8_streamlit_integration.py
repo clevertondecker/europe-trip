@@ -60,11 +60,11 @@ class Data8StreamlitIntegrationTests(unittest.TestCase):
         for i, amount in enumerate(("20-40","0-10","30-50")):
             app.text_input[i].set_value(amount).run()
         self.assertFalse(app.exception)
-        warnings=" ".join(str(x.message) for x in app.warning)
+        warnings=" ".join(str(x.value) for x in app.warning)
         self.assertIn("Estimativa incompleta",warnings)
         app.selectbox[0].set_value("external_visit").run()
         self.assertFalse(app.exception)
-        self.assertTrue(any("Cenário completo" in str(x.message) for x in app.success))
+        self.assertTrue(any("Cenário completo" in str(x.value) for x in app.success))
 
     def test_interactive_unknown_admission_cannot_become_free(self):
         script=("from data8_tourism_ui import render_data8_cost_simulator\n"
@@ -76,7 +76,7 @@ class Data8StreamlitIntegrationTests(unittest.TestCase):
         for i, amount in enumerate(("50-90","10-20","30-60")):
             app.text_input[i].set_value(amount).run()
         self.assertFalse(app.exception)
-        self.assertTrue(any("Estimativa incompleta" in str(x.message)
+        self.assertTrue(any("Estimativa incompleta" in str(x.value)
                             for x in app.warning))
         self.assertFalse(app.success)
 
