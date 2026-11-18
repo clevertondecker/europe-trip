@@ -6,13 +6,14 @@ This module validates *additional* research without changing that precedence.
 from __future__ import annotations
 
 from copy import deepcopy
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from hashlib import sha256
 from urllib.parse import urlparse
 import json
 
 from rail_evidence_unified_model import canonical_place
 from rail_temporal_contract import normalize_service_instants
+from rail_transfer_contract import normalize_transfers
 
 SCHEMA_VERSION = 1
 SOURCE_NATURES = frozenset({
@@ -90,6 +91,10 @@ def validate_observation(record: dict) -> dict:
     # never gain an invented offset or overnight arrival date.
     timing = normalize_service_instants(row)
     row["time_precision"] = timing["precision"]
+    transfer = normalize_transfers(row)
+    row["transfer_count"] = transfer["transfer_count"]
+    row["transfer_legs"] = transfer["transfer_legs"]
+    row["transfer_details_complete"] = transfer["transfer_details_complete"]
     minutes = row.get("duration_min")
     if row["evidence_state"] == "timed_observation":
         if type(minutes) is not int or minutes <= 0:
@@ -114,10 +119,6 @@ def validate_observation(record: dict) -> dict:
             raise ValueError("Validade futura requer observação do operador para a data")
     if row["temporal_validity"] == "historical_sample" and travel and travel.year >= 2027:
         raise ValueError("Amostra futura não é histórica")
-    if row.get("transfers") is not None and (
-        type(row["transfers"]) is not int or row["transfers"] < 0
-    ):
-        raise ValueError("Transferências precisam ser inteiras não negativas")
     for field in ("valid_from", "valid_until"):
         _date(row.get(field), field)
     if row.get("valid_from") and row.get("valid_until"):
@@ -129,28 +130,50 @@ def validate_observation(record: dict) -> dict:
 def journey_identity(row: dict) -> tuple:
     """Directional service identity; unresearched properties remain None."""
     row = validate_observation(row)
+    timing = normalize_service_instants(row)
+    departure = (
+        timing["departure"].astimezone(timezone.utc).isoformat()
+        if timing["precision"] == "offset_aware" else
+        (row.get("travel_date"), row.get("departure_local"),
+         row.get("departure_utc_offset"))
+    )
     return (
         row["origin_id"], row["destination_id"],
         row.get("origin_station_id"), row.get("destination_station_id"),
-        row.get("service_id"), row.get("travel_date"),
-        row.get("departure_local"), row.get("departure_utc_offset"),
+        row.get("service_id"),
         row.get("operator") if not row.get("service_id") else None,
+        departure,
     )
 
 
 def observation_id(row: dict) -> str:
-    """Content-based identity including source to preserve independent observations."""
-    row = validate_observation(row)
-    keys = (
-        "origin_id", "destination_id", "origin_station_id", "destination_station_id",
-        "service_id", "operator", "travel_date", "arrival_date",
-        "departure_local", "arrival_local", "departure_utc_offset",
-        "arrival_utc_offset", "departure_at", "arrival_at",
-        "source_url", "source_nature", "checked_at", "duration_min",
-    )
-    payload = json.dumps({k: row.get(k) for k in keys}, sort_keys=True,
-                         ensure_ascii=False, separators=(",", ":"))
-    return "rr1-" + sha256(payload.encode("utf-8")).hexdigest()[:24]
+    """Documentary identity: all normalized claims + provenance.
+
+    Legacy transfers=0 and transfer_count=0 are semantically equivalent, but
+    distinct stops, validity windows or source versions remain distinct.
+    """
+    value = dict(row)
+    for generated in ("observation_id", "time_precision", "transfer_details_complete"):
+        value.pop(generated, None)
+    value = validate_observation(value)
+    for generated in ("observation_id", "time_precision", "transfer_details_complete", "transfers"):
+        value.pop(generated, None)
+    payload = json.dumps(value, sort_keys=True, ensure_ascii=False,
+                         separators=(",", ":"), default=str)
+    return "rr1-" + sha256(payload.encode("utf-8")).hexdigest()[:32]
+
+
+def _claim_disagreement(group):
+    """An unknown value is not evidence of an actual contradiction."""
+    for field in ("duration_min", "arrival_at", "arrival_local",
+                  "arrival_date", "arrival_utc_offset", "transfer_count"):
+        known = {
+            json.dumps(x[field], sort_keys=True, default=str)
+            for x in group if x.get(field) is not None
+        }
+        if len(known) > 1:
+            return True
+    return False
 
 
 def validate_observations(records: list[dict]) -> dict:
@@ -168,19 +191,13 @@ def validate_observations(records: list[dict]) -> dict:
         seen.add(key)
         row["observation_id"] = key
         unique.append(row)
-        groups.setdefault(journey_identity(row), []).append(row)
+        # Partial unattributed records cannot be called the same real service.
+        if (row.get("origin_station_id") and row.get("destination_station_id")
+                and row.get("travel_date") and
+                (row.get("departure_local") or row.get("departure_at"))):
+            groups.setdefault(journey_identity(row), []).append(row)
     # Independent sources reporting the SAME service/timing corroborate it.
     # Source URL is provenance, never a reason for disagreement on its own.
-    def contradicts(group):
-        # Optional precision on one source is not itself contradictory.
-        # Compare only facts documented by two or more observations.
-        for field in ("duration_min", "arrival_local", "arrival_date",
-                      "arrival_utc_offset", "arrival_at"):
-            known = {x[field] for x in group if x.get(field) is not None}
-            if len(known) > 1:
-                return True
-        return False
-
     conflicting = {
         str(key): [x["observation_id"] for x in group]
         for key, group in groups.items() if contradicts(group)
@@ -188,7 +205,7 @@ def validate_observations(records: list[dict]) -> dict:
     corroborated = {
         str(key): [x["observation_id"] for x in group]
         for key, group in groups.items()
-        if len(group) > 1 and not contradicts(group)
+        if len(group) > 1 and not _claim_disagreement(group)
     }
     return {"schema_version": SCHEMA_VERSION, "observations": unique,
             "conflicts": conflicting, "corroborated": corroborated,

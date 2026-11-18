@@ -47,6 +47,26 @@ class HousingShortStayTests(unittest.TestCase):
         self.assertIn("internet", lacking["research_missing"])
         self.assertIn("total_de_despesas_comprovado", lacking["research_missing"])
 
+    def test_source_snapshot_and_independent_verification_are_separate(self):
+        snapshot = {**QUOTE, "captured_at": "2026-11-17T10:00:00+01:00"}
+        supplied = evaluate_short_stay_quote(QUOTE, source_evidence=snapshot)
+        self.assertEqual(supplied["source_evidence_state"], "supplied_snapshot_matches")
+        self.assertFalse(supplied["source_independently_verified"])
+        self.assertFalse(supplied["decision_ready_for_dates"])
+        mismatched = evaluate_short_stay_quote(
+            QUOTE, source_evidence={**snapshot, "rent_total": 1})
+        self.assertEqual(mismatched["source_evidence_state"], "supplied_snapshot_conflicts")
+        # Synthetic trusted-adapter fixture only: NOT an actual booking.
+        def fixture_provider(quote):
+            return {"method": "provider_live_api", "verified": True,
+                    "source_url": quote["source_url"],
+                    "checkin": quote["checkin"], "checkout": quote["checkout"],
+                    "quote_total": 2350.0}
+        confirmed = evaluate_short_stay_quote(QUOTE, independent_verifier=fixture_provider)
+        self.assertTrue(confirmed["source_independently_verified"])
+        self.assertTrue(confirmed["decision_ready_for_dates"])
+        self.assertFalse(confirmed["requires_live_listing_recheck"])
+
     def test_date_and_identity_gate(self):
         for q in (
             {**QUOTE, "checkin":"2027-09-04"},
