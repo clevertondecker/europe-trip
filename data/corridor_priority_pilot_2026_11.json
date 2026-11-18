@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "checked_at": "2026-11-17",
+  "purpose": "pilot_reference_only_no_2027_service_claim",
+  "public_fixed_basket": [
+    "aachen",
+    "baden_baden",
+    "cologne"
+  ],
+  "base_ids": [
+    "mulhouse",
+    "strasbourg",
+    "lille"
+  ],
+  "route_page_references": [
+    {
+      "origin_id": "mulhouse",
+      "destination_id": "baden_baden",
+      "source_url": "https://www.sncf-connect.com/train/horaires/mulhouse/baden-baden",
+      "source_nature": "operator_timetable_page_2026",
+      "historical_oneway_min": null,
+      "weekend_return_verified": false,
+      "applicable_2027": false
+    },
+    {
+      "origin_id": "mulhouse",
+      "destination_id": "cologne",
+      "source_url": "https://www.sncf-connect.com/train/horaires/mulhouse/cologne",
+      "source_nature": "operator_timetable_page_2026",
+      "historical_oneway_min": null,
+      "weekend_return_verified": false,
+      "applicable_2027": false
+    },
+    {
+      "origin_id": "strasbourg",
+      "destination_id": "cologne",
+      "source_url": "https://www.sncf-connect.com/en-en/train/timetables/strasbourg/cologne",
+      "source_nature": "operator_timetable_page_2026",
+      "historical_oneway_min": null,
+      "weekend_return_verified": false,
+      "applicable_2027": false
+    },
+    {
+      "origin_id": "lille",
+      "destination_id": "cologne",
+      "source_url": "https://www.sncf-connect.com/en-en/train/timetables/lille/cologne",
+      "source_nature": "operator_timetable_page_2026",
+      "historical_oneway_min": null,
+      "weekend_return_verified": false,
+      "applicable_2027": false
+    }
+  ],
+  "no_private_wishlist_read": true
+}

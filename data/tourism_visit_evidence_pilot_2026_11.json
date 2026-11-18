@@ -1,0 +1,92 @@
+{
+  "schema_version": 1,
+  "checked_at": "2026-11-17",
+  "scope": "historical_operator_read_only_2027_not_guaranteed",
+  "entries": [
+    {
+      "attraction_id": "dq32_aachen_07",
+      "destination_id": "aachen",
+      "name": "Catedral de Aachen",
+      "source_url": "https://www.aachenerdom.de/en/a-place-to-visit/faqs/",
+      "checked_at": "2026-11-17",
+      "experience_reason": "Patrimônio religioso e arquitetura histórica com restrição durante missas",
+      "address": "Domhof 1, 52062 Aachen, Alemanha",
+      "address_source_url": "https://www.aachen-tourismus.de/en/aachen-entdecken/details/poi/aachener-dom/",
+      "opening_rule": "Seg–sex visitas normalmente a partir de 11h; sábados a partir de 13h; domingos 13h–17h45; suspensões em celebrações",
+      "opening_state": "verified_current_rule",
+      "closed_dates_2027": null,
+      "visit_duration_min": null,
+      "visit_duration_state": "unknown",
+      "entry_ticket": {
+        "status": "free_public_entry",
+        "amount": 0,
+        "currency": "EUR",
+        "unit": "person",
+        "valid_for_2027": false
+      },
+      "additional_activity": {
+        "name": "Visita guiada para adulto",
+        "amount": 8.5,
+        "currency": "EUR",
+        "unit": "person",
+        "source_url": "https://www.aachenerdom.de/en/a-place-to-visit/faqs/",
+        "valid_for_2027": false
+      },
+      "reservation_required_2027": null,
+      "station_to_attraction_min": null,
+      "valid_for_2027": false
+    },
+    {
+      "attraction_id": "dq32_baden_baden_27",
+      "destination_id": "baden_baden",
+      "name": "Lichtentaler Allee",
+      "source_url": "https://www.baden-baden.com/en/nature/lichtentaler-allee",
+      "checked_at": "2026-11-17",
+      "experience_reason": "Caminhada por jardins e patrimônio urbano junto ao Rio Oos",
+      "address": "Lichtentaler Allee, 76530 Baden-Baden, Alemanha",
+      "address_source_url": "https://www.baden-baden.com/en/nature/lichtentaler-allee",
+      "opening_rule": "Área externa de acesso livre 24 horas por dia, segundo turismo oficial",
+      "opening_state": "verified_current_rule",
+      "closed_dates_2027": null,
+      "visit_duration_min": null,
+      "visit_duration_state": "unknown",
+      "entry_ticket": {
+        "status": "free_public_entry",
+        "amount": 0,
+        "currency": "EUR",
+        "unit": "person",
+        "valid_for_2027": false
+      },
+      "additional_activity": null,
+      "reservation_required_2027": null,
+      "station_to_attraction_min": null,
+      "valid_for_2027": false
+    },
+    {
+      "attraction_id": "strasbourg_cathedral",
+      "destination_id": "strasbourg",
+      "name": "Catedral de Strasbourg",
+      "source_url": "https://www.visitstrasbourg.fr/en/things-to-see-and-do/visiting/places-to-visit/historical-sites-and-monuments/f223007269_the-cathedral-of-notre-dame-strasbourg/",
+      "checked_at": "2026-11-17",
+      "experience_reason": "Arquitetura gótica, vitrais e relógio astronômico",
+      "address": "Place de la Cathédrale, 67000 Strasbourg, França",
+      "address_source_url": "https://www.visitstrasbourg.fr/en/things-to-see-and-do/visiting/places-to-visit/historical-sites-and-monuments/f223007269_the-cathedral-of-notre-dame-strasbourg/",
+      "opening_rule": "Seg–sáb 08h30–11h15 e 12h45–17h45; domingos/feriados 14h00–17h15; visitas suspensas durante ofícios",
+      "opening_state": "verified_current_rule",
+      "closed_dates_2027": null,
+      "visit_duration_min": null,
+      "visit_duration_state": "unknown",
+      "entry_ticket": {
+        "status": "unknown",
+        "amount": null,
+        "currency": null,
+        "unit": null,
+        "valid_for_2027": false
+      },
+      "additional_activity": null,
+      "reservation_required_2027": null,
+      "station_to_attraction_min": null,
+      "valid_for_2027": false
+    }
+  ]
+}
