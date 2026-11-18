@@ -6,6 +6,7 @@ This audits coverage, not availability, feasibility, fares or 2027 services.
 from __future__ import annotations
 
 from collections import Counter
+from rail_component_contract import build_component_records
 from copy import deepcopy
 
 from attractions_model import load_attractions
@@ -115,6 +116,25 @@ def research_backlog(inventory):
                               "last_mile_to_attraction"]}
         for row in inventory["pairs"] if row["category"]=="missing"
     ]
+
+
+
+def component_research_backlog(inventory, *, evidence_by_pair=None):
+    """Read-only evidence-component backlog; preserves the legacy API."""
+    return build_component_records(inventory, evidence_by_pair=evidence_by_pair)
+
+
+def component_gap_summary(backlog):
+    """Snapshot statistics; component *counts* are not trip quality scores."""
+    counts = Counter()
+    categories = Counter()
+    for row in backlog:
+        categories[row["category"]] += 1
+        counts.update(row["research_required"])
+    return {"pairs": len(backlog),
+            "by_category": dict(sorted(categories.items())),
+            "missing_components": dict(sorted(counts.items())),
+            "verified_2027_itineraries": 0}
 
 
 def audit_summary(inventory):
