@@ -6,24 +6,35 @@ existing modules and require their original authorization checks.
 """
 from __future__ import annotations
 
+import logging
+from datetime import datetime, timezone
+from collections.abc import Mapping
+
 import streamlit as st
 
 from travel_advisor_ui import _owner_config
 from advisor_auth import is_verified_owner
 
+_LOGGER = logging.getLogger(__name__)
 
-def account_view_state(config: dict, user) -> str:
-    """Deterministic UI-only state. An arbitrary Google login is not ownership."""
+
+def account_view_state(config: dict, user: Mapping | None) -> str:
+    """UI classification only; never a substitute for authorization checks."""
     if not config.get("google_configured") or not config.get("owner_email"):
         return "unconfigured"
+    if not isinstance(user, Mapping) or user.get("is_logged_in") is not True:
+        return "signed_out"
+    if is_verified_owner(user, config["owner_email"]):
+        return "owner"
+    # Distinguish an expired session only for presentation; authorization
+    # remains exclusively in advisor_auth.is_verified_owner (fail closed).
     try:
-        if is_verified_owner(user, config["owner_email"]):
-            return "owner"
-        if user.get("is_logged_in") is True:
-            return "other_account"
-    except (AttributeError, KeyError, TypeError):
+        expiry = int(user.get("exp"))
+        if expiry <= int(datetime.now(timezone.utc).timestamp()) + 30:
+            return "expired"
+    except (ValueError, TypeError, OverflowError):
         pass
-    return "signed_out"
+    return "other_account"
 
 
 def _logged_in_user():
@@ -31,6 +42,21 @@ def _logged_in_user():
         return st.user
     except (AttributeError, KeyError, TypeError):
         return None
+
+
+def _saving_status() -> str:
+    """Use the existing canonical storage labels; never infer saved from login."""
+    try:
+        from continuity_ui import private_status_label
+        from planning_status import save_label
+        from planning_session import active_plan
+        label, _ = private_status_label(save_label(
+            active_plan(), st.session_state.get("advisor_saved_snapshot"), True))
+        return label
+    except (AttributeError, KeyError, TypeError, ValueError, RuntimeError) as exc:
+        # Exception class only: provider exceptions may contain sensitive content.
+        _LOGGER.warning("Sidebar save-status unavailable: %s", type(exc).__name__)
+        return "Status de salvamento indisponível"
 
 
 def render_sidebar_account() -> None:
@@ -54,8 +80,14 @@ def render_sidebar_account() -> None:
                   width="stretch", on_click=st.login, args=["google"])
         return
 
+    if status == "expired":
+        st.warning("Sua sessão expirou. Saia e entre novamente para continuar.")
+        st.button("Sair do Google", key="ux52_google_logout_other",
+                  icon=":material/logout:", width="stretch", on_click=st.logout)
+        return
+
     if status == "other_account":
-        st.warning("Conta não autorizada ou sessão expirada. Salvamento protegido indisponível.")
+        st.warning("Conta não autorizada para salvar este planejamento.")
         st.button("Sair do Google", key="ux52_google_logout_other",
                   icon=":material/logout:", width="stretch", on_click=st.logout)
         return
@@ -64,18 +96,9 @@ def render_sidebar_account() -> None:
     st.caption("Conectado · conta autorizada")
     st.caption(config["owner_email"])
 
-    # Google authentication does not imply Google Drive write authorization.
-    # Reuse the existing saved-state contract; never infer successful persistence.
-    try:
-        from continuity_ui import private_status_label
-        from planning_status import save_label
-        from planning_session import active_plan
-        plan = active_plan()
-        label, _ = private_status_label(save_label(
-            plan, st.session_state.get("advisor_saved_snapshot"), True))
-        st.caption("Planejamento: " + label)
-    except (AttributeError, KeyError, TypeError, ValueError):
-        st.caption("Planejamento: status de salvamento indisponível")
+    # Logging in does not confer Drive write access or imply remote persistence.
+    st.caption("Planejamento: " + _saving_status())
+    st.caption("Entrar no Google não significa que seus dados foram salvos no Drive.")
 
     st.button("Sair do Google", key="ux52_google_logout",
               icon=":material/logout:", width="stretch", on_click=st.logout)
