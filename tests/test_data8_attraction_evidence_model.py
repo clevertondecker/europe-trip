@@ -54,6 +54,38 @@ class DATA8ContractTests(unittest.TestCase):
             with self.subTest(case=bad),self.assertRaises(ValueError):
                 validate_entry(bad,identity_map={"dq32_aachen_07":"aachen"})
 
+    def test_exterior_needs_specific_evidence_and_scope(self):
+        base=copy.deepcopy(DEMO)
+        base["admission"]={"state":"external_no_ticket", "amount":None,
+            "valid_for_2027":False}
+        with self.assertRaises(ValueError):
+            validate_entry(base,identity_map={"dq32_aachen_07":"aachen"})
+        base["admission"].update({
+            "external_access_basis":"documented_public_outdoor_area",
+            "scope_note":"Apenas área pública externa, não inclui atrações pagas",
+            "source_url":"https://www.aachenerdom.de/en/",
+            "checked_at":"2026-11-18",
+        })
+        self.assertEqual(validate_entry(base,identity_map={"dq32_aachen_07":"aachen"})[
+            "admission"]["state"],"external_no_ticket")
+        base["admission"]["checked_at"]="not-a-date"
+        with self.assertRaises(ValueError):
+            validate_entry(base,identity_map={"dq32_aachen_07":"aachen"})
+
+    def test_duration_dates_and_snapshot_guard(self):
+        base=copy.deepcopy(DEMO)
+        base["duration"]["source_url"]="https://www.aachenerdom.de/en/"
+        base["duration"]["checked_at"]="2026-11-19"
+        doc={"schema_version":1,"scope":"tourism_planning_overlay",
+             "checked_at":"2026-11-18","entries":[base]}
+        with self.assertRaises(ValueError):
+            validate_dataset(doc,discovery=DISCOVERY)
+        base["duration"]["checked_at"]="invalid"
+        with self.assertRaises(ValueError):
+            validate_entry(base,identity_map={"dq32_aachen_07":"aachen"})
+        base["duration"]["checked_at"]="2026-11-18"
+        validate_dataset(doc,discovery=DISCOVERY)
+
     def test_unreconciled_candidates_keep_null_canonical_id(self):
         doc={"schema_version":1,"scope":"tourism_planning_overlay",
              "checked_at":"2026-11-18","entries":[],

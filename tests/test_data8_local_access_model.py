@@ -23,6 +23,25 @@ class DATA8AccessTests(unittest.TestCase):
         other=local_access_scenario("dq32_aachen_07",station_id="other_station",evidence=data)
         self.assertIsNone(other["roundtrip_range_min"])
 
+    def test_structured_source_role_not_method_phrase(self):
+        from copy import deepcopy
+        dataset=load_access_dataset()
+        sample={"schema_version":1,"scope":"editorial_local_access_not_a_verified_route",
+                "checked_at":"2026-11-18","observations":deepcopy(dataset["observations"])}
+        # The method is explanatory prose, not a validation sentinel.
+        sample["observations"][0]["method"]="Estimativa manual ainda não verificada."
+        validate_access_dataset(sample)
+        for key,bad in (("source_scope","verified_map_route"),
+                        ("duration_basis","measured_minutes"),
+                        ("route_evidence_source_url","https://example.org/map")):
+            altered=deepcopy(sample)
+            altered["observations"][0][key]=bad
+            with self.subTest(key=key), self.assertRaises(ValueError):
+                validate_access_dataset(altered)
+        del sample["observations"][0]["source_scope"]
+        with self.assertRaises(ValueError):
+            validate_access_dataset(sample)
+
     def test_cannot_turn_editorial_into_verified_duration(self):
         from copy import deepcopy
         data=load_access_dataset()

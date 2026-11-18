@@ -29,6 +29,34 @@ class PriorityTourismPilotTests(unittest.TestCase):
         self.assertEqual(r["by_id"]["brussels_eu_quarter"]["admission"]["state"], "unknown")
         self.assertEqual(r["by_id"]["strasbourg_vauban"]["admission"]["state"], "unknown")
 
+    def test_admission_requires_proven_scope(self):
+        result=load_priority_lot()
+        from collections import Counter
+        states=Counter(x["admission"]["state"] for x in result["entries"])
+        self.assertEqual(states,{"free_general_entry":2,"external_no_ticket":4,"unknown":12})
+        for row in result["entries"]:
+            adm=row["admission"]
+            if adm["state"]=="external_no_ticket":
+                self.assertEqual(adm["external_access_basis"],"documented_public_outdoor_area")
+                self.assertIsNone(adm["amount"])
+                self.assertTrue(adm["scope_note"])
+                self.assertTrue(adm["source_url"])
+                self.assertTrue(adm["checked_at"])
+        self.assertEqual(result["by_id"]["brussels_atomium"]["admission"]["state"],"unknown")
+        self.assertEqual(result["by_id"]["brussels_grand_place"]["admission"]["state"],"unknown")
+        self.assertEqual(coverage_report(result)["general_entry_known"],2)
+
+    def test_18_records_retain_provenance_and_candidate_identity(self):
+        result=load_priority_lot()
+        self.assertEqual(len({x["attraction_id"] for x in result["entries"]}),18)
+        for row in result["entries"]:
+            self.assertTrue(row["experience"]["source_url"].startswith("https://"))
+            self.assertTrue(row["experience"]["checked_at"])
+            self.assertFalse(row["valid_for_2027"])
+            if row["duration"]["state"]=="editorial_estimate":
+                self.assertTrue(row["duration"]["method"])
+        self.assertEqual(len(result["unreconciled_candidates"]),2)
+
     def test_does_not_mutate_discovery(self):
         from ux501_destination_discovery_model import build_destination_discovery
         d = build_destination_discovery()
