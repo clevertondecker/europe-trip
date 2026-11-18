@@ -27,5 +27,39 @@ class Data8StreamlitIntegrationTests(unittest.TestCase):
         self.assertEqual(len(app.checkbox),1)
         self.assertFalse(app.checkbox[0].value)
 
+    def test_interactive_external_scope_requires_user_selection(self):
+        script=("from data8_tourism_ui import render_data8_cost_simulator\\n"
+                "render_data8_cost_simulator('aachen')\\n")
+        app=AppTest.from_string(script).run()
+        self.assertFalse(app.exception)
+        app.checkbox[0].set_value(True).run()
+        self.assertFalse(app.exception)
+        app.multiselect[0].set_value(["dq32_aachen_08"]).run()
+        self.assertFalse(app.exception)
+        self.assertEqual(app.selectbox[0].value,"unknown")
+        self.assertEqual(len(app.text_input),4)
+        for i, amount in enumerate(("20-40","0-10","30-50")):
+            app.text_input[i].set_value(amount).run()
+        self.assertFalse(app.exception)
+        warnings=" ".join(str(x.message) for x in app.warning)
+        self.assertIn("Estimativa incompleta",warnings)
+        app.selectbox[0].set_value("external_visit").run()
+        self.assertFalse(app.exception)
+        self.assertTrue(any("Cenário completo" in str(x.message) for x in app.success))
+
+    def test_interactive_unknown_admission_cannot_become_free(self):
+        script=("from data8_tourism_ui import render_data8_cost_simulator\\n"
+                "render_data8_cost_simulator('brussels')\\n")
+        app=AppTest.from_string(script).run()
+        app.checkbox[0].set_value(True).run()
+        app.multiselect[0].set_value(["brussels_atomium"]).run()
+        app.selectbox[0].set_value("external_visit").run()
+        for i, amount in enumerate(("50-90","10-20","30-60")):
+            app.text_input[i].set_value(amount).run()
+        self.assertFalse(app.exception)
+        self.assertTrue(any("Estimativa incompleta" in str(x.message)
+                            for x in app.warning))
+        self.assertFalse(app.success)
+
 if __name__=="__main__":
     unittest.main()
