@@ -4,20 +4,24 @@ A documented outbound and inbound alone NEVER confirms an outing.
 """
 from __future__ import annotations
 
-from datetime import datetime, date, timedelta
+from datetime import datetime, date, timedelta, timezone
 from urllib.parse import urlparse
 from copy import deepcopy
 
 from rail_evidence_unified_model import canonical_place
+from rail_temporal_contract import normalize_service_instants
 
 
 def _dt(value: str) -> datetime:
     if not isinstance(value, str):
         raise ValueError("Data/hora local obrigatória")
     try:
-        return datetime.fromisoformat(value)
+        moment = datetime.fromisoformat(value)
     except ValueError as exc:
         raise ValueError("Timestamp ISO inválido") from exc
+    if moment.tzinfo is None or moment.utcoffset() is None:
+        raise ValueError("Fuso UTC obrigatório para comprovar ordem de horários")
+    return moment
 
 
 def _source(value: str) -> bool:
@@ -39,12 +43,12 @@ def validate_service_leg(leg: dict) -> dict:
         raise ValueError("Deslocamento urbano não é trem intermunicipal")
     if not _source(leg.get("source_url")):
         raise ValueError("Trecho deve ter fonte HTTPS")
-    departure = _dt(leg["departure_local"])
-    arrival = _dt(leg["arrival_local"])
-    if departure.tzinfo != arrival.tzinfo:
-        raise ValueError("Fusos inconsistentes")
-    if not departure < arrival:
-        raise ValueError("Chegada precisa ocorrer após partida")
+    # Prefer explicit departure_at/arrival_at with offsets. Legacy ISO fields
+    # are accepted by the common adapter; HH:MM alone is not enough here.
+    moments = normalize_service_instants(leg, require_offsets=True)
+    departure, arrival = moments["departure"], moments["arrival"]
+    departure_utc = departure.astimezone(timezone.utc)
+    arrival_utc = arrival.astimezone(timezone.utc)
     verified_dates = leg.get("calendar_dates_verified") or []
     if not isinstance(verified_dates, list):
         raise ValueError("Calendário de serviço inválido")
@@ -53,7 +57,7 @@ def validate_service_leg(leg: dict) -> dict:
     transfers = leg.get("transfers")
     if not isinstance(transfers, list):
         raise ValueError("Transferências exigem lista documentada")
-    prev_arrival = departure
+    prev_arrival = departure_utc
     last_station = leg["origin_station_id"]
     for transfer in transfers:
         if any(not transfer.get(k) for k in ("station_id", "arrival_local",
@@ -62,16 +66,20 @@ def validate_service_leg(leg: dict) -> dict:
         if not _source(transfer["source_url"]):
             raise ValueError("Transferência sem fonte")
         a, b = _dt(transfer["arrival_local"]), _dt(transfer["departure_local"])
-        if not prev_arrival <= a < b <= arrival:
+        a_utc, b_utc = a.astimezone(timezone.utc), b.astimezone(timezone.utc)
+        if not prev_arrival <= a_utc < b_utc <= arrival_utc:
             raise ValueError("Transferência fora da ordem temporal")
         if transfer["station_id"] in (None, "", last_station):
             raise ValueError("Estação de transferência inválida")
-        prev_arrival, last_station = b, transfer["station_id"]
+        prev_arrival, last_station = b_utc, transfer["station_id"]
     result = deepcopy(leg)
     result["origin_id"] = origin
     result["destination_id"] = destination
     result["calendar_date_applicable"] = departure.date().isoformat() in verified_dates
     result["sample_weekend"] = departure.weekday() >= 5
+    result["departure_at"] = departure.isoformat()
+    result["arrival_at"] = arrival.isoformat()
+    result["time_precision"] = moments["precision"]
     return result
 
 
@@ -90,9 +98,12 @@ def weekend_roundtrip_evidence(outbound: dict | None, inbound: dict | None,
     if out["origin_id"] != back["destination_id"] or out["destination_id"] != back["origin_id"]:
         return {"status": "incompatible", "reason": "reversed_city_pair_mismatch",
                 "outing_feasible": False, "valid_for_2027": False}
-    start, arrive = _dt(out["departure_local"]), _dt(out["arrival_local"])
-    leave, finish = _dt(back["departure_local"]), _dt(back["arrival_local"])
-    if not (start < arrive < leave < finish):
+    start, arrive = _dt(out["departure_at"]), _dt(out["arrival_at"])
+    leave, finish = _dt(back["departure_at"]), _dt(back["arrival_at"])
+    # Always compare absolute instants; DST changes and overnight services
+    # legitimately have different local dates and UTC offsets.
+    if not (start.astimezone(timezone.utc) < arrive.astimezone(timezone.utc) <
+            leave.astimezone(timezone.utc) < finish.astimezone(timezone.utc)):
         return {"status": "incompatible", "reason": "schedule_order_inconsistent",
                 "outing_feasible": False, "valid_for_2027": False}
     if not (out["calendar_date_applicable"] and back["calendar_date_applicable"]):
@@ -120,14 +131,15 @@ def weekend_roundtrip_evidence(outbound: dict | None, inbound: dict | None,
     if any(type(x) is not int or x <= 0 for x in values):
         raise ValueError("Duração de deslocamento/visita sem comprovação positiva")
     opens, closes = _dt(attraction_window["opens_at"]), _dt(attraction_window["closes_at"])
-    visit_start = max(arrive + timedelta(minutes=values[0]), opens)
+    arrival_attraction = arrive.astimezone(timezone.utc) + timedelta(minutes=values[0])
+    visit_start = max(arrival_attraction, opens.astimezone(timezone.utc))
     visit_end = visit_start + timedelta(minutes=values[2])
-    if not (visit_end <= closes and
-            visit_end + timedelta(minutes=values[1]) <= leave):
+    if not (visit_end <= closes.astimezone(timezone.utc) and
+            visit_end + timedelta(minutes=values[1]) <= leave.astimezone(timezone.utc)):
         return {"status": "incompatible", "reason": "opening_or_useful_time_conflict",
                 "outing_feasible": False, "valid_for_2027": False}
     return {"status": "historical_schedule_coherent_only",
             "reason": "compatible_sample_not_future_guarantee",
             "outing_feasible": False, "valid_for_2027": False,
-            "useful_minutes_on_sample": int((leave-arrive).total_seconds()//60),
+            "useful_minutes_on_sample": int((leave.astimezone(timezone.utc)-arrive.astimezone(timezone.utc)).total_seconds()//60),
             "start_of_visit": visit_start.isoformat(), "end_of_visit": visit_end.isoformat()}
