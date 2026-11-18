@@ -49,7 +49,7 @@ class PlanningUXFlowTests(unittest.TestCase):
         selected=app.session_state["advisor_plan"]["packages"]
         self.assertIn("colmar",selected)
         self.assertEqual(selected,app.session_state["explore_packages"])
-        app.radio(key="ux_area").set_value("Meu roteiro").run()
+        app.button(key="ux_sidebar_nav_2").click().run()
         app.segmented_control(key="ux_section").set_value("Meu planejamento").run()
         self.assertEqual(len(app.exception),0,[e.message for e in app.exception])
         self.assertEqual(app.session_state["advisor_plan"]["packages"],selected)

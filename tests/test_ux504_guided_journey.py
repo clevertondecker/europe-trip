@@ -181,7 +181,7 @@ class JourneyAppTests(unittest.TestCase):
         self.assertEqual(app.session_state["ux_area"],"Orçamento")
         # Back to comparison. Streamlit removes unmounted widget keys; the
         # view-only shadow must rehydrate the previously selected bases.
-        app.radio(key="ux_area").set_value("Explorar").run()
+        app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
         app.segmented_control(key="ux_section").set_value("Comparar").run()
         self.assertEqual(app.multiselect(key="ux503_bases").value,["lille","metz"])
         self.assertEqual(

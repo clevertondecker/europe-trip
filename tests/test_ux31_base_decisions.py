@@ -53,7 +53,7 @@ class CityDecisionPageSmokeTests(unittest.TestCase):
         at=AppTest.from_file(str(ROOT/"app.py"),default_timeout=90).run()
         self.assertFalse(at.exception,[e.message for e in at.exception])
         plan=at.session_state["advisor_plan"].copy()
-        at.radio(key="ux_area").set_value("Explorar").run()
+        at.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
         at.segmented_control(key="ux_mode").set_value("Simulação").run()
         at.selectbox(key="scenario_sidebar").set_value("offenburg").run()
         at.segmented_control(key="ux_section").set_value("Comparar").run()
@@ -61,7 +61,7 @@ class CityDecisionPageSmokeTests(unittest.TestCase):
         self.assertEqual(at.session_state["advisor_plan"],plan)
         at.segmented_control(key="ux_compare_mode").set_value("Pesos das 30 cidades").run()
         self.assertFalse(at.exception,[e.message for e in at.exception])
-        at.radio(key="ux_area").set_value("Orçamento").run()
+        at.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Orçamento"))).click().run()
         for section in ("Resumo financeiro","Simulações","Detalhamento"):
             at.segmented_control(key="ux_section").set_value(section).run()
             self.assertFalse(at.exception,[e.message for e in at.exception])

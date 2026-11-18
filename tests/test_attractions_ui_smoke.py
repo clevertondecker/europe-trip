@@ -9,7 +9,7 @@ class ExplorerSmokeTests(unittest.TestCase):
     def test_route_screen_and_base_switch(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=60).run()
         app.radio(key="main_navigation").set_value("Roteiro").run()
-        app.radio(key="ux_area").set_value("Explorar").run()
+        app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
         app.segmented_control(key="ux_section").set_value("Passeios").run()
         self.assertEqual(len(app.exception),0,[e.message for e in app.exception])
         app.selectbox(key="attractions_scenario_base").set_value("strasbourg").run()
@@ -25,7 +25,7 @@ class ExplorerSmokeTests(unittest.TestCase):
     def test_choose_and_save_destination(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=60).run()
         app.radio(key="main_navigation").set_value("Roteiro").run()
-        app.radio(key="ux_area").set_value("Explorar").run()
+        app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
         app.segmented_control(key="ux_section").set_value("Passeios").run()
         app.button(key="explore_open_colmar").click().run()
         self.assertEqual(len(app.exception),0,[e.message for e in app.exception])

@@ -117,7 +117,7 @@ class CoverageStreamlitTests(unittest.TestCase):
         at=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
         self.assertFalse(at.exception,[x.message for x in at.exception])
         original=deepcopy(at.session_state["advisor_plan"])
-        at.radio(key="ux_area").set_value("Explorar").run()
+        at.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
         at.segmented_control(key="ux_section").set_value("Comparar").run()
         self.assertFalse(at.exception,[x.message for x in at.exception])
         at.segmented_control(key="ux_compare_mode").set_value(

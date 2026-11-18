@@ -116,7 +116,7 @@ class QuoteUIAppTest(unittest.TestCase):
                               default_timeout=110).run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
         previous=deepcopy(app.session_state["advisor_plan"])
-        app.radio(key="ux_area").set_value("Orçamento").run()
+        app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Orçamento"))).click().run()
         app.segmented_control(key="ux_section").set_value("Detalhamento").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
         self.assertEqual(app.session_state["advisor_plan"],previous)

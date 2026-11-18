@@ -172,7 +172,7 @@ class SmartCalendarUITests(unittest.TestCase):
     def test_calendar_is_contextual_and_proposes_without_mutation(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=115).run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
-        app.radio(key="ux_area").set_value("Meu roteiro").run()
+        app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Meu roteiro"))).click().run()
         app.segmented_control(key="ux_section").set_value("Organizar viagem").run()
         app.segmented_control(key="ux_organize_view").set_value(
             "Calendário inteligente").run()
@@ -187,7 +187,7 @@ class SmartCalendarUITests(unittest.TestCase):
 
     def test_navigation_returns_to_smart_calendar(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=115).run()
-        app.radio(key="ux_area").set_value("Meu roteiro").run()
+        app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Meu roteiro"))).click().run()
         app.segmented_control(key="ux_section").set_value("Organizar viagem").run()
         app.segmented_control(key="ux_organize_view").set_value(
             "Calendário inteligente").run()

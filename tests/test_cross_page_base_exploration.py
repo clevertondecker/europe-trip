@@ -10,7 +10,7 @@ class CrossPageExplorationTests(unittest.TestCase):
     def test_offenburg_never_changes_official_plan(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=90).run()
         original=app.session_state["advisor_plan"].copy()
-        app.radio(key="ux_area").set_value("Explorar").run()
+        app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
         app.segmented_control(key="ux_mode").set_value("Simulação").run()
         app.selectbox(key="scenario_sidebar").set_value("offenburg").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
@@ -18,7 +18,7 @@ class CrossPageExplorationTests(unittest.TestCase):
         self.assertEqual(app.session_state["advisor_plan"],original)
 
         app.radio(key="main_navigation").set_value("Roteiro").run()
-        app.radio(key="ux_area").set_value("Explorar").run()
+        app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
         app.segmented_control(key="ux_section").set_value("Cidades-base").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
         self.assertEqual(app.session_state["advisor_plan"],original)
@@ -29,7 +29,7 @@ class CrossPageExplorationTests(unittest.TestCase):
         self.assertEqual(app.session_state["advisor_plan"]["base_city"],original["base_city"])
 
         app.radio(key="main_navigation").set_value("Roteiro").run()
-        app.radio(key="ux_area").set_value("Explorar").run()
+        app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
         app.segmented_control(key="ux_section").set_value("Passeios").run()
         app.selectbox(key="attractions_scenario_base").set_value("offenburg").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])

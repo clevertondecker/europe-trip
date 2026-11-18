@@ -36,7 +36,7 @@ class CityNavigationTests(unittest.TestCase):
     def test_same_tab_click_does_not_crash_app(self):
         from streamlit.testing.v1 import AppTest
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
-        app.radio(key="ux_area").set_value("Explorar").run()
+        app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
         app.segmented_control(key="ux_section").set_value("Cidades-base").run()
         original=app.session_state["advisor_plan"].copy()
         # Streamlit can report None when the active segment is clicked again.
@@ -55,7 +55,7 @@ class CityNavigationTests(unittest.TestCase):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
         before=app.session_state["advisor_plan"].copy()
-        app.radio(key="ux_area").set_value("Explorar").run()
+        app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
         app.segmented_control(key="ux_section").set_value("Cidades-base").run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
         self.assertEqual(app.session_state["ux42_city_activity"],ACTIVITIES[0])

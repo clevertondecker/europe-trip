@@ -19,7 +19,7 @@ class WorkspaceNavigationTests(unittest.TestCase):
         ]
         for area,section,detail in flows:
             with self.subTest(area=area,section=section,detail=detail):
-                app.radio(key="ux_area").set_value(area).run()
+                app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index(area))).click().run()
                 app.segmented_control(key="ux_section").set_value(section).run()
                 if detail and section=="Melhorar meu roteiro":
                     app.selectbox(key="ux_improve_view").set_value(detail).run()
@@ -27,7 +27,7 @@ class WorkspaceNavigationTests(unittest.TestCase):
                     app.segmented_control(key="ux_budget_view").set_value(detail).run()
                 self.assertFalse(app.exception,[x.message for x in app.exception])
                 self.assertEqual(app.session_state["advisor_plan"]["plan_id"],original)
-        app.radio(key="ux_area").set_value("Meu roteiro").run()
+        app.button(key="ux_sidebar_nav_2").click().run()
         app.segmented_control(key="ux_section").set_value("Melhorar meu roteiro").run()
         app.selectbox(key="ux_improve_view").set_value("Descobrir").run()
         self.assertIsNotNone(app.selectbox(key="workspace_destination_category"))
