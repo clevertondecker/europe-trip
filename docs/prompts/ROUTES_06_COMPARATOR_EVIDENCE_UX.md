@@ -46,3 +46,12 @@ Comentários diretamente no PR: P0/P1/P2; contratos/adaptadores que devem ser re
 - PR de implementação separado para revisão: [#122](https://github.com/clevertondecker/europe-trip/pull/122).
 - Implementação independente: projeção turística/moradia mais associação de trem, retorno, estação e última milha com checagens de direção/data; nenhum total porta a porta sem componentes compatíveis.
 - Este PR permanece **somente especificação**. Nenhum merge/deploy de implementação está autorizado até revisão do conjunto. Os testes de CI no PR de implementação validam contratos/código, não substituem confirmação de horários, aluguéis e acesso para datas de 2027.
+
+## Adendo do code review — integração de pesquisa real e temporalidade (P1)
+
+- A projeção deve ler o catálogo canônico **e**, quando integrado, o overlay `tourism_visit_evidence_model.load_visit_evidence()` (#123). Informar claramente se só o legado está carregado. Distinguir horário/regra atual pesquisada de **horário verificado para uma data de 2027**; a contagem turística não pode ficar em zero após ingestão de fichas válidas do overlay.
+- A camada de moradia pode consumir o contrato `housing_short_stay_research_model.housing_research_overview()` (#124) sem apresentar cotação manual estruturalmente completa como oferta verificada ou elegível.
+- `compatible_evidence_association()` deve distinguir **compatibilidade de identidade** da validação temporal: nunca chamar `compatible` um par de trechos sem ordem de serviços e calendários confirmados. Reutilizar o validador #119 quando presente; sem ele, indicar `identity_match_only`.
+- Um retorno no dia seguinte não é rejeitado por datas desiguais; rejeitar retornos antes da chegada, estações/identidades de atração divergentes, falta de calendário ou tempo sem fuso. Nunca calcular minutos porta a porta com trechos parciais.
+- Testes integrados obrigatórios: fixture do overlay turístico, estado legado isolado, sábado→domingo, ordem incorreta, falta de retorno, estação/atração incompatível, calendário ausente, seleção de wishlist inalterada e ausência de ranking.
+- Implementação corretiva: [#122](https://github.com/clevertondecker/europe-trip/pull/122), com dependências de integração #119/#123/#124; reexecutar a suíte após os merges em sequência.
