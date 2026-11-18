@@ -54,3 +54,10 @@ Comentários diretamente no PR: P0/P1/P2; contratos/adaptadores que devem ser re
 - Um sábado de ida seguido por domingo de volta pode ser coerente; não exigir mesma data. Cada trecho deve comprovar seu próprio dia no calendário de serviço, direção, transferência e estação. A hora de abertura da atração, última milha e condições específicas continuam obrigatórias para falar em passeio viável.
 - Testes: meia-noite, ida sábado/volta domingo, fuso ausente, DST, retorno antes da chegada, transferência fora de ordem. A saída **nunca** presume disponibilidade em 2027.
 - Implementação corretiva: [#119](https://github.com/clevertondecker/europe-trip/pull/119), condicionada ao contrato compartilhado #116 e revisão integrada.
+
+## Contrato final de retorno e visita (18/11/2026)
+
+- Normalizar contagem e lista de transferências via `rail_transfer_contract`; não considerar `transfers: 1` uma conexão documentada sem estação, horários e fonte.
+- Aceitar `last_mile_pair` produzido por `bidirectional_access()` (#120): duas observações independentes e válidas para as datas efetivas, com estação, entrada, direção e modo apropriados. A volta **não herda** os minutos da ida; estação de retorno diferente exige observação própria.
+- A janela de visita poderá consumir `opening_schedule` com dias, intervalos, fechamentos, temporada, fuso e proveniência de #123, preservando `opening_rule` textual. Fonte histórica atual nunca confirma abertura em 2027.
+- Resultado máximo com amostras consistentes: `historical_schedule_coherent_only`, com `outing_feasible=False`. Testes de retorno no domingo, fechamento, janela insuficiente e incompatibilidade de estação são obrigatórios.
