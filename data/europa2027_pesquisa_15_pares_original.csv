@@ -1,0 +1,16 @@
+base_id,destination_id,published_fastest_oneway_min,published_average_oneway_min,source_url,source_kind,current_matrix_status,research_caveat
+mulhouse,belfort,25,,https://www.sncf-connect.com/train/trajet/mulhouse/belfort,official_operator,novo,Belfort-Ville vs Belfort-Montbéliard TGV: confirmar estação de chegada
+strasbourg,belfort,94,116,https://www.sncf-connect.com/train/trajet/strasbourg/belfort,official_operator,novo,mínimo citado para Belfort; confirmar Belfort-Ville e conexão
+lille,belfort,294,,https://www.sncf-connect.com/train/trajet/lille/belfort,official_operator,novo,"viagem longa, não classificar automaticamente como bate-volta"
+mulhouse,haguenau,88,,https://www.sncf-connect.com/train/trajet/mulhouse/haguenau,official_operator,novo,normalmente conexão; evitar usar melhor serviço como típico
+strasbourg,haguenau,21,,https://www.sncf-connect.com/train/trajet/strasbourg/haguenau,official_operator,novo,tempo mínimo; há TER regional
+lille,haguenau,230,246,https://www.sncf-connect.com/train/trajet/lille/haguenau,official_operator,novo,referência 3h50 mínimo; média 4h06 de pesquisa secundária
+mulhouse,mulhouse,,,,local,local,"acesso urbano, não deslocamento ferroviário intermunicipal"
+strasbourg,mulhouse,49,,https://www.sncf-connect.com/train/horaires/strasbourg/mulhouse,official_operator,existente_divergente,"49 min rápido; múltiplas classes e serviços, preservar divergência"
+lille,mulhouse,252,,https://www.sncf-connect.com/train/trajet/lille/mulhouse,official_operator,novo,pode exigir correspondência e mudança de estação; 4h12 mínimo
+mulhouse,brussels,288,311,https://www.sncf-connect.com/train/horaires/mulhouse/bruxelles,official_operator,existente,"288 min na matriz, média atual SNCF 311 min"
+strasbourg,brussels,222,,https://www.sncf-connect.com/train/horaires/strasbourg/bruxelles,official_operator,existente,mínimo 3h42
+lille,brussels,34,,https://www.sncf-connect.com/train/horaires/lille/bruxelles,official_operator,existente,mínimo Lille Europe–Bruxelles Midi; trem de alta velocidade
+mulhouse,ghent,323,392,https://www.thetrainline.com/train-times/mulhouse-to-ghent,secondary_timetable_aggregator,novo,5h23 mínimo e média 6h32; conexões não equivalem a sábado/domingo
+strasbourg,ghent,258,314,https://www.thetrainline.com/en/train-times/strasbourg-to-ghent,secondary_timetable_aggregator,novo,4h18 mínimo e média 5h14; corredor de grandes distâncias
+lille,ghent,68,76,https://www.thetrainline.com/train-times/lille-to-ghent,secondary_timetable_aggregator,existente_alternativa,"mínimo 68 min, média 76 min; histórico do app mantém 75 min; estações Lille-Flandres/Europe"
