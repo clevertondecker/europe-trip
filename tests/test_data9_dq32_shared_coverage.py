@@ -121,7 +121,7 @@ class SharedRailAppTests(unittest.TestCase):
         table=next(df.value for df in app.dataframe if
                    "Passeio confirmado" in df.value.columns)
         self.assertTrue((table["Transporte"].str.contains(
-            "mínimo publicado|amostra datada|referência secundária")).all())
+            "mínimo publicado|mínimo indicativo|amostra datada|referência secundária")).all())
         self.assertTrue((table["Passeio confirmado"]=="Não").all())
         self.assertTrue(any("Destinos com tempo ou referência" in m.label
                             for m in app.metric))
