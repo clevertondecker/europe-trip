@@ -115,7 +115,8 @@ def validate_observation(record: dict) -> dict:
     if row["temporal_validity"] == "future_date_explicitly_verified":
         if (travel is None or travel.year < 2027 or
                 row["source_nature"] != "operator_date_specific_schedule" or
-                not _https(row.get("source_url")) or checked is None):
+                not _https(row.get("source_url")) or checked is None or
+                timing["precision"] != "offset_aware"):
             raise ValueError("Validade futura requer observação do operador para a data")
     if row["temporal_validity"] == "historical_sample" and travel and travel.year >= 2027:
         raise ValueError("Amostra futura não é histórica")
@@ -200,7 +201,7 @@ def validate_observations(records: list[dict]) -> dict:
     # Source URL is provenance, never a reason for disagreement on its own.
     conflicting = {
         str(key): [x["observation_id"] for x in group]
-        for key, group in groups.items() if contradicts(group)
+        for key, group in groups.items() if len(group) > 1 and _claim_disagreement(group)
     }
     corroborated = {
         str(key): [x["observation_id"] for x in group]
