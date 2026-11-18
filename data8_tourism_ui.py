@@ -76,9 +76,11 @@ def destination_research_overview(destination_id, *, tourism=None):
 
 def render_data8_attraction_details(attraction_id, *, tourism=None, access=None):
     """Returns True if an enriched card was rendered; caller retains legacy fallback."""
-    card=build_data8_card(attraction_id,tourism=tourism,access=access)
-    if card is None:
+    research=tourism if tourism is not None else _tourism()
+    if attraction_id not in research["by_id"]:
         return False
+    local=access if access is not None else _access()
+    card=build_data8_card(attraction_id,tourism=research,access=local)
     st.caption("**Por que visitar:** "+card["why_visit"])
     d=card["duration"]
     if d["state"]=="editorial_estimate":
