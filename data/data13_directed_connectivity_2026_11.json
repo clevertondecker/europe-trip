@@ -2331,6 +2331,71 @@
       "confidence": "low",
       "return_2027_verified": false,
       "valid_for_2027": false
+    },
+    {
+      "origin_id": "aachen",
+      "destination_id": "brussels",
+      "minimum_oneway_min": 72,
+      "mode": "rail",
+      "reference_kind": "official_operator_minimum",
+      "source_url": "https://www.sncf-connect.com/train/trajet/aix-la-chapelle/bruxelles",
+      "source_checked_at": "2026-11-18",
+      "direction": "outbound_only",
+      "confidence": "medium",
+      "return_2027_verified": false,
+      "valid_for_2027": false
+    },
+    {
+      "origin_id": "aachen",
+      "destination_id": "lyon",
+      "minimum_oneway_min": 337,
+      "mode": "rail",
+      "reference_kind": "official_operator_minimum",
+      "source_url": "https://www.sncf-connect.com/train/trajet/aix-la-chapelle/lyon",
+      "source_checked_at": "2026-11-18",
+      "direction": "outbound_only",
+      "confidence": "medium",
+      "return_2027_verified": false,
+      "valid_for_2027": false
+    },
+    {
+      "origin_id": "strasbourg",
+      "destination_id": "brussels",
+      "minimum_oneway_min": 222,
+      "mode": "rail",
+      "reference_kind": "official_operator_minimum",
+      "source_url": "https://www.sncf-connect.com/train/trajet/strasbourg/bruxelles",
+      "source_checked_at": "2026-11-18",
+      "direction": "outbound_only",
+      "confidence": "medium",
+      "return_2027_verified": false,
+      "valid_for_2027": false
+    },
+    {
+      "origin_id": "strasbourg",
+      "destination_id": "amsterdam",
+      "minimum_oneway_min": 358,
+      "mode": "rail",
+      "reference_kind": "official_operator_minimum",
+      "source_url": "https://www.sncf-connect.com/train/trajet/strasbourg/amsterdam",
+      "source_checked_at": "2026-11-18",
+      "direction": "outbound_only",
+      "confidence": "medium",
+      "return_2027_verified": false,
+      "valid_for_2027": false
+    },
+    {
+      "origin_id": "strasbourg",
+      "destination_id": "rotterdam",
+      "minimum_oneway_min": 310,
+      "mode": "rail",
+      "reference_kind": "official_operator_minimum",
+      "source_url": "https://www.sncf-connect.com/train/trajet/strasbourg/rotterdam",
+      "source_checked_at": "2026-11-18",
+      "direction": "outbound_only",
+      "confidence": "medium",
+      "return_2027_verified": false,
+      "valid_for_2027": false
     }
   ]
 }
