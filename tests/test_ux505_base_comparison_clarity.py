@@ -124,6 +124,9 @@ class ComparisonPresentationAppTests(TestCase):
     def test_no_time_partial_divergent_and_local_remain_visible(self):
         wishes=set_interest(empty_interests(),"strasbourg","must_visit")
         wishes=set_interest(wishes,"colmar","interested")
+        # Oeschinensee has no station-to-attraction duration: it remains an
+        # intentionally unresearched cell after additive DATA11 coverage.
+        wishes=set_interest(wishes,"oeschinen","interested")
         def mock_evidence(base_id,destination_id,**kwargs):
             if base_id==destination_id:
                 status,minutes,observations="local",None,[]
