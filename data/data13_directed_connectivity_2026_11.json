@@ -2721,6 +2721,97 @@
       "confidence": "low",
       "return_2027_verified": false,
       "valid_for_2027": false
+    },
+    {
+      "origin_id": "aachen",
+      "destination_id": "metz",
+      "minimum_oneway_min": 272,
+      "mode": "rail",
+      "reference_kind": "secondary_route_minimum",
+      "source_url": "https://www.thetrainline.com/en/train-times/aachen-to-metz",
+      "source_checked_at": "2026-11-18",
+      "direction": "outbound_only",
+      "confidence": "low",
+      "return_2027_verified": false,
+      "valid_for_2027": false
+    },
+    {
+      "origin_id": "aachen",
+      "destination_id": "reims",
+      "minimum_oneway_min": 261,
+      "mode": "rail",
+      "reference_kind": "secondary_route_minimum",
+      "source_url": "https://www.thetrainline.com/en/train-times/aachen-to-reims",
+      "source_checked_at": "2026-11-18",
+      "direction": "outbound_only",
+      "confidence": "low",
+      "return_2027_verified": false,
+      "valid_for_2027": false
+    },
+    {
+      "origin_id": "aachen",
+      "destination_id": "strasbourg",
+      "minimum_oneway_min": 202,
+      "mode": "rail",
+      "reference_kind": "secondary_route_minimum",
+      "source_url": "https://www.thetrainline.com/en/train-times/aachen-to-strasbourg",
+      "source_checked_at": "2026-11-18",
+      "direction": "outbound_only",
+      "confidence": "low",
+      "return_2027_verified": false,
+      "valid_for_2027": false
+    },
+    {
+      "origin_id": "aachen",
+      "destination_id": "dijon",
+      "minimum_oneway_min": 312,
+      "mode": "rail",
+      "reference_kind": "secondary_route_minimum",
+      "source_url": "https://www.thetrainline.com/en/train-times/aachen-to-dijon",
+      "source_checked_at": "2026-11-18",
+      "direction": "outbound_only",
+      "confidence": "low",
+      "return_2027_verified": false,
+      "valid_for_2027": false
+    },
+    {
+      "origin_id": "aachen",
+      "destination_id": "freiburg",
+      "minimum_oneway_min": 252,
+      "mode": "rail",
+      "reference_kind": "secondary_route_minimum",
+      "source_url": "https://www.thetrainline.com/en/train-times/aachen-to-freiburg-breisgau-hbf",
+      "source_checked_at": "2026-11-18",
+      "direction": "outbound_only",
+      "confidence": "low",
+      "return_2027_verified": false,
+      "valid_for_2027": false
+    },
+    {
+      "origin_id": "aachen",
+      "destination_id": "basel",
+      "minimum_oneway_min": 263,
+      "mode": "rail",
+      "reference_kind": "secondary_route_minimum",
+      "source_url": "https://www.thetrainline.com/en/train-times/aachen-to-basel-sbb",
+      "source_checked_at": "2026-11-18",
+      "direction": "outbound_only",
+      "confidence": "low",
+      "return_2027_verified": false,
+      "valid_for_2027": false
+    },
+    {
+      "origin_id": "aachen",
+      "destination_id": "colmar",
+      "minimum_oneway_min": 257,
+      "mode": "rail",
+      "reference_kind": "secondary_route_minimum",
+      "source_url": "https://www.thetrainline.com/en/train-times/aachen-to-colmar",
+      "source_checked_at": "2026-11-18",
+      "direction": "outbound_only",
+      "confidence": "low",
+      "return_2027_verified": false,
+      "valid_for_2027": false
     }
   ]
 }
