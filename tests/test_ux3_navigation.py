@@ -63,6 +63,23 @@ class UX3NavigationModelTests(unittest.TestCase):
 
 
 class UX3StreamlitNavigationSmokeTests(unittest.TestCase):
+    def test_native_sidebar_buttons_share_one_navigation_state(self):
+        app = AppTest.from_file(str(ROOT/"app.py"),default_timeout=90).run()
+        self.assertFalse(app.exception,[x.message for x in app.exception])
+        keys = {widget.key for widget in app.button}
+        self.assertTrue({
+            "ux_sidebar_nav_0", "ux_sidebar_nav_1",
+            "ux_sidebar_nav_2", "ux_sidebar_nav_3",
+        }.issubset(keys))
+        self.assertNotIn("ux_area",{widget.key for widget in app.radio})
+        baseline = deepcopy(app.session_state["advisor_plan"])
+        for index, area in enumerate(AREAS):
+            with self.subTest(area=area):
+                app.button(key=f"ux_sidebar_nav_{index}").click().run()
+                self.assertFalse(app.exception,[x.message for x in app.exception])
+                self.assertEqual(app.session_state["ux_area"], area)
+                self.assertEqual(app.session_state["advisor_plan"], baseline)
+
     def test_four_areas_and_sections_with_offenburg_preserve_official(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=90).run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
