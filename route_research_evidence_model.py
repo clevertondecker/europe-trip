@@ -171,18 +171,24 @@ def validate_observations(records: list[dict]) -> dict:
         groups.setdefault(journey_identity(row), []).append(row)
     # Independent sources reporting the SAME service/timing corroborate it.
     # Source URL is provenance, never a reason for disagreement on its own.
-    signature = lambda x: (
-        x.get("duration_min"), x.get("arrival_local"), x.get("arrival_date"),
-        x.get("arrival_utc_offset"), x.get("arrival_at"))
+    def contradicts(group):
+        # Optional precision on one source is not itself contradictory.
+        # Compare only facts documented by two or more observations.
+        for field in ("duration_min", "arrival_local", "arrival_date",
+                      "arrival_utc_offset", "arrival_at"):
+            known = {x[field] for x in group if x.get(field) is not None}
+            if len(known) > 1:
+                return True
+        return False
+
     conflicting = {
         str(key): [x["observation_id"] for x in group]
-        for key, group in groups.items()
-        if len({signature(x) for x in group}) > 1
+        for key, group in groups.items() if contradicts(group)
     }
     corroborated = {
         str(key): [x["observation_id"] for x in group]
         for key, group in groups.items()
-        if len(group) > 1 and len({signature(x) for x in group}) == 1
+        if len(group) > 1 and not contradicts(group)
     }
     return {"schema_version": SCHEMA_VERSION, "observations": unique,
             "conflicts": conflicting, "corroborated": corroborated,
