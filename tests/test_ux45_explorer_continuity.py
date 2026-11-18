@@ -11,7 +11,7 @@ class ExplorerOutingContinuity(unittest.TestCase):
     def test_add_edit_return_preserves_selection_and_existing_plan(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
-        app.radio(key="ux_area").set_value("Explorar").run()
+        app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
         app.segmented_control(key="ux_section").set_value("Passeios").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
         app.slider(key="explore_max_minutes").set_value(120).run()
