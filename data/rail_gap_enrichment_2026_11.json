@@ -3,16 +3,16 @@
   "scope": "audited_historical_route_gap_overlay",
   "checked_at": "2026-11-18",
   "methodology": "Curated operator pages and explicitly downgraded third-party samples. Neither typical 2027 duration nor weekend return; never overwrite existing researched route.",
-  "selection_policy": "14 missing pairs from visible comparison plus 18 cross-border/base-destination explorations; no Cartesian expansion or inferred reverse legs",
+  "selection_policy": "14 pares prioritários da comparação anterior mais relações adicionais já cadastradas; destinos fora do catálogo mantidos como pesquisa futura, não publicados",
   "records": [
     {
       "origin_id": "mulhouse",
       "destination_id": "aachen",
-      "oneway_min": 311,
+      "oneway_min": 279,
       "evidence_type": "secondary_sample",
       "source_url": "https://www.thetrainline.com/train-times/mulhouse-to-aachen-hbf",
       "source_checked_at": "2026-11-18",
-      "service_date": "2026-10-06",
+      "service_date": null,
       "evidence_level": "third_party_sample",
       "confidence": "low",
       "direction": "outbound_only",
@@ -24,7 +24,7 @@
       "valid_for_2027": false,
       "fare_couple_eur": null,
       "transfer_count": null,
-      "note": "Amostra Trainline de 06/10/2026, 5h11 com 2 trocas; não é mínimo de operadora."
+      "note": "Mínimo publicado de 4h39 para Mulhouse → Aachen Hbf pelo agregador Trainline; não confirma horários específicos de 2027."
     },
     {
       "origin_id": "strasbourg",
@@ -75,7 +75,7 @@
       "evidence_type": "official_route_minimum",
       "source_url": "https://www.bahn.de/reisen/view/verbindung/karlsruhe/aachen.shtml",
       "source_checked_at": "2026-11-18",
-      "service_date": "2026-11-29",
+      "service_date": null,
       "evidence_level": "operator_city_level",
       "confidence": "medium",
       "direction": "outbound_only",
@@ -138,7 +138,7 @@
       "evidence_type": "official_route_minimum",
       "source_url": "https://www.sncf-connect.com/train/trajet/lille/karlsruhe",
       "source_checked_at": "2026-11-18",
-      "service_date": "2026-11-19",
+      "service_date": null,
       "evidence_level": "operator_city_level",
       "confidence": "medium",
       "direction": "outbound_only",
@@ -159,7 +159,7 @@
       "evidence_type": "official_route_minimum",
       "source_url": "https://www.bahn.de/reisen/view/verbindung/aachen/karlsruhe.shtml",
       "source_checked_at": "2026-11-18",
-      "service_date": "2026-11-16",
+      "service_date": null,
       "evidence_level": "operator_city_level",
       "confidence": "medium",
       "direction": "outbound_only",
@@ -177,11 +177,11 @@
       "origin_id": "mulhouse",
       "destination_id": "amsterdam",
       "oneway_min": 414,
-      "evidence_type": "official_timetable_sample",
-      "source_url": "https://www.sncf-connect.com/train/horaires/mulhouse/amsterdam",
+      "evidence_type": "official_route_minimum",
+      "source_url": "https://www.sncf-connect.com/train/trajet/mulhouse/amsterdam",
       "source_checked_at": "2026-11-18",
-      "service_date": "2026-11-19",
-      "evidence_level": "operator_schedule_sample",
+      "service_date": null,
+      "evidence_level": "operator_city_level",
       "confidence": "medium",
       "direction": "outbound_only",
       "origin_station_id": null,
@@ -192,7 +192,7 @@
       "valid_for_2027": false,
       "fare_couple_eur": null,
       "transfer_count": null,
-      "note": "Amostra SNCF com 6h54, conexão em Paris e mudança entre estações; não é faixa típica."
+      "note": "Mínimo publicado SNCF de 6h54 por cidade, não é itinerário garantido para 2027."
     },
     {
       "origin_id": "aachen",
@@ -243,7 +243,7 @@
       "evidence_type": "secondary_sample",
       "source_url": "https://www.thetrainline.com/train-times/lille-europe-to-interlaken-ost",
       "source_checked_at": "2026-11-18",
-      "service_date": "2026-11-10",
+      "service_date": "2026-11-24",
       "evidence_level": "third_party_sample",
       "confidence": "low",
       "direction": "outbound_only",
@@ -255,7 +255,7 @@
       "valid_for_2027": false,
       "fare_couple_eur": null,
       "transfer_count": null,
-      "note": "Amostra Trainline de 10/11/2026 para Lille Europe → Interlaken Ost: 7h02 com 3 trocas; não é mínimo oficial."
+      "note": "Amostra 14h01–21h03 Lille Europe → Interlaken Ost (7h02, 3 conexões) no quadro Trainline de 24/11/2026; existe mínimo global distinto (6h51), que não é esta amostra."
     },
     {
       "origin_id": "aachen",
@@ -382,27 +382,6 @@
       "fare_couple_eur": null,
       "transfer_count": null,
       "note": "Menor duração publicada DB Offenburg → Amsterdam."
-    },
-    {
-      "origin_id": "offenburg",
-      "destination_id": "zurich",
-      "oneway_min": 144,
-      "evidence_type": "official_route_minimum",
-      "source_url": "https://www.bahn.de/reisen/view/verbindung/offenburg/zuerich.shtml",
-      "source_checked_at": "2026-11-18",
-      "service_date": null,
-      "evidence_level": "operator_city_level",
-      "confidence": "medium",
-      "direction": "outbound_only",
-      "origin_station_id": null,
-      "destination_station_id": null,
-      "station_status": "not_reconciled",
-      "return_weekend_verified": false,
-      "door_to_door_verified": false,
-      "valid_for_2027": false,
-      "fare_couple_eur": null,
-      "transfer_count": null,
-      "note": "Menor duração publicada DB Offenburg → Zürich."
     },
     {
       "origin_id": "offenburg",
@@ -573,48 +552,6 @@
       "note": "Menor duração publicada SNCF Strasbourg → Lausanne."
     },
     {
-      "origin_id": "strasbourg",
-      "destination_id": "geneva",
-      "oneway_min": 274,
-      "evidence_type": "official_route_minimum",
-      "source_url": "https://www.sncf-connect.com/en-en/train/timetables/strasbourg/geneva",
-      "source_checked_at": "2026-11-18",
-      "service_date": null,
-      "evidence_level": "operator_city_level",
-      "confidence": "medium",
-      "direction": "outbound_only",
-      "origin_station_id": null,
-      "destination_station_id": null,
-      "station_status": "not_reconciled",
-      "return_weekend_verified": false,
-      "door_to_door_verified": false,
-      "valid_for_2027": false,
-      "fare_couple_eur": null,
-      "transfer_count": null,
-      "note": "Menor duração publicada SNCF Strasbourg → Geneva."
-    },
-    {
-      "origin_id": "lille",
-      "destination_id": "geneva",
-      "oneway_min": 324,
-      "evidence_type": "official_route_minimum",
-      "source_url": "https://www.sncf-connect.com/en-en/train/route/lille/geneva",
-      "source_checked_at": "2026-11-18",
-      "service_date": null,
-      "evidence_level": "operator_city_level",
-      "confidence": "medium",
-      "direction": "outbound_only",
-      "origin_station_id": null,
-      "destination_station_id": null,
-      "station_status": "not_reconciled",
-      "return_weekend_verified": false,
-      "door_to_door_verified": false,
-      "valid_for_2027": false,
-      "fare_couple_eur": null,
-      "transfer_count": null,
-      "note": "Menor duração publicada SNCF Lille → Geneva."
-    },
-    {
       "origin_id": "mulhouse",
       "destination_id": "basel",
       "oneway_min": 20,
@@ -663,7 +600,7 @@
       "evidence_type": "official_route_minimum",
       "source_url": "https://www.sncf-connect.com/en-en/train/timetables/lille/cologne",
       "source_checked_at": "2026-11-18",
-      "service_date": "2026-11-18",
+      "service_date": null,
       "evidence_level": "operator_city_level",
       "confidence": "medium",
       "direction": "outbound_only",
@@ -677,5 +614,9 @@
       "transfer_count": null,
       "note": "Menor duração publicada SNCF Lille → Köln na referência de 18/11/2026."
     }
+  ],
+  "known_unlinked_candidates": [
+    "zurich",
+    "geneva"
   ]
 }
