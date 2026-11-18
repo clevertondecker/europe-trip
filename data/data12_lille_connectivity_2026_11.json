@@ -3,7 +3,7 @@
   "scope": "data12_lille_directed_rail_reference_2026_snapshot",
   "checked_at": "2026-11-18",
   "selection_policy": "fallback_after_historical_routes7_data9_data10_data11",
-  "methodology": "24 mínimos publicados de deslocamento ferroviário de ida Lille→destino, coletados em 18/11/2026 de SNCF Connect e Trainline. Valores mudam com data/serviço; não há validação de 2027, retorno, conexão, estação ou última milha. Verificar divergências de escopo por estação e horário antes de usar em itinerários.",
+  "methodology": "26 mínimos publicados de deslocamento ferroviário de ida Lille→destino, coletados em 18/11/2026 de SNCF Connect e Trainline. Valores mudam com data/serviço; não há validação de 2027, retorno, conexão, estação ou última milha. Verificar divergências de escopo por estação e horário antes de usar em itinerários.",
   "records": [
     {
       "origin_id": "lille",
@@ -311,6 +311,32 @@
       "minimum_oneway_min": 324,
       "reference_kind": "secondary_route_minimum",
       "source_url": "https://www.thetrainline.com/en/train-times/lille-to-trier-hbf",
+      "source_checked_at": "2026-11-18",
+      "direction": "outbound_only",
+      "confidence": "low",
+      "return_2027_verified": false,
+      "valid_for_2027": false
+    },
+    {
+      "origin_id": "lille",
+      "destination_id": "offenburg",
+      "mode": "rail",
+      "minimum_oneway_min": 250,
+      "reference_kind": "secondary_route_minimum",
+      "source_url": "https://www.thetrainline.com/en/train-times/lille-to-offenburg",
+      "source_checked_at": "2026-11-18",
+      "direction": "outbound_only",
+      "confidence": "low",
+      "return_2027_verified": false,
+      "valid_for_2027": false
+    },
+    {
+      "origin_id": "lille",
+      "destination_id": "freiburg",
+      "mode": "rail",
+      "minimum_oneway_min": 295,
+      "reference_kind": "secondary_route_minimum",
+      "source_url": "https://www.thetrainline.com/en/train-times/lille-to-freiburg-breisgau-hbf",
       "source_checked_at": "2026-11-18",
       "direction": "outbound_only",
       "confidence": "low",
