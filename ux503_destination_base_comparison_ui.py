@@ -9,6 +9,7 @@ from ux502_destination_interests_model import (
 from ux503_destination_base_comparison_model import compare_wishlist_bases
 from ux506_decision_readiness_projection import build_decision_readiness
 from routes7_comparison_projection import decorate_comparison
+from routes7_return_scenarios_model import planning_return_scenarios
 from ux_navigation import set_task
 from ux505_base_comparison_presentation import (
     comparison_overview, matrix_cell, known_findings, missing_research,
@@ -264,6 +265,27 @@ def render_wishlist_base_comparison(*, plan, discovery=None, research=None):
                 if item.get("source_url"):
                     st.markdown("[Fonte da referência](" + item["source_url"] + ")")
         st.caption("Sem retorno de fim de semana ou tarifa confirmada neste overlay.")
+
+    with st.expander("Referências para ida e volta (sem garantia de horário)",
+                     expanded=False):
+        scenarios = planning_return_scenarios(result)
+        st.caption("Somatório de dois tempos mínimos publicados em sentidos "
+                   "separados: piso teórico, NÃO duração real reservável, "
+                   "nem garantia de ida/volta no fim de semana.")
+        for row in scenarios["rows"]:
+            if row["reverse_source_url"]:
+                st.write(
+                    cities[row["base_id"]]["name"] + " ↔ " +
+                    names[row["destination_id"]]["name"] + " · " +
+                    str(row["outbound_fastest_reference_min"]) + " min ida (mín.) + " +
+                    str(row["reverse_fastest_reference_min"]) + " min volta (mín.)"
+                )
+                st.caption("Piso hipotético: " +
+                           str(row["two_direction_minimum_sum_min"]) +
+                           " min nos trens, sem transferências extras ou acesso local.")
+                st.markdown("[Referência da volta](" + row["reverse_source_url"] + ")")
+        st.caption("Frequência de sábado/domingo, número de conexões, "
+                   "acesso a atrações e tarifa total do casal: desconhecidos.")
 
     left, right = st.columns(2)
     with left:
