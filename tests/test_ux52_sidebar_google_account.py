@@ -52,10 +52,10 @@ class SidebarGoogleAccountStateTests(unittest.TestCase):
         self.assertTrue(any("Conta Google" in x.value
                             for x in app.markdown))
         self.assertTrue(any("Login Google ainda não configurado" in x.value
-                            for x in app.caption))
-        self.assertEqual(len(app.button(key="ux52_google_login")), 0)
-        self.assertEqual(len(app.button(key="ux52_google_logout")), 0)
-        self.assertEqual(len(app.button(key="ux52_google_logout_other")), 0)
+                            for x in app.markdown))
+        keys = {button.key for button in app.button}
+        self.assertFalse({"ux52_google_login", "ux52_google_logout",
+                          "ux52_google_logout_other"} & keys)
         plan = app.session_state["advisor_plan"].copy()
         app.button(key="ux_sidebar_nav_1").click().run()
         self.assertFalse(app.exception, [x.message for x in app.exception])
