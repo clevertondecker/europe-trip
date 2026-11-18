@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "scope": "historical_optional_activity_reference_only",
+  "checked_at": "2026-11-18",
+  "optional_activities": [
+    {
+      "attraction_id": "dq32_aachen_07",
+      "destination_id": "aachen",
+      "activity_id": "aachen_cathedral_guided_tour",
+      "name": "Visita guiada da Catedral de Aachen — adulto",
+      "amount": 8.5,
+      "currency": "EUR",
+      "unit": "adult",
+      "status": "operator_published_historical",
+      "source_url": "https://www.aachenerdom.de/en/a-place-to-visit/faqs/",
+      "checked_at": "2026-11-17",
+      "valid_for_2027": false,
+      "notes": "Preço do piloto já pesquisado; opcional, separado da entrada geral gratuita e sujeito a atualização."
+    }
+  ]
+}
