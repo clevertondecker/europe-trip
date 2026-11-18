@@ -39,3 +39,22 @@ separação entre histórico/indicativo/local/não pesquisado, orçamento, retor
 - A projeção compartilhada ainda formata rótulos para duas telas; separá-los
   da estrutura tipada exigiria revisão de APIs e não é necessário neste patch.
 - Os tempos de ida históricos não comprovaram retorno ou viabilidade 2027.
+
+## Finding F-05 — Snapshot injetado e seleção global
+
+Se `opportunity_overview(base_id, rail=rail_a, exploration=exploration_a)`
+for invocado em testes ou pipelines com fontes injetadas, a chamada posterior
+a `decorate_comparison()` pode carregar ROUTES7/DATA9 globais, de outra
+versão. A célula mistura fontes sem um identificador de snapshot conjunto.
+A UX503 também admite a injeção parcial de fontes na comparação.
+
+**PR futuro, fora deste escopo:** criar `RailEvidenceSnapshotContext`
+imutável com `snapshot_id`, versões/hash de `historical_rail`,
+`exploration`, `routes7_references` e `data9_overlay`. O contexto deve
+ser integral, validado, usado como chave de cache; injeções parciais devem
+ser rejeitadas, sem fallback silencioso. Tanto DQ3.2 quanto UX503 deverão
+expor `effective_snapshot_id` sem alterar categorias legadas.
+
+Testes futuros: rejeitar contexto parcial/incompatível; mesmas evidências
+gerarem mesmas classificações; alteração de versão invalidar cache;
+preservar divergência ARCH10B; desconhecidos permanecerem `None`.
