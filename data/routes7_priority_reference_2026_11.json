@@ -257,7 +257,7 @@
       "destination_station_id": null,
       "station_status": "not_applicable",
       "source_research_status": "local",
-      "confidence": "insufficient",
+      "confidence": "not_applicable",
       "weekend_return_status": "unknown",
       "fare_for_two_eur": null,
       "transfer_count": null,
