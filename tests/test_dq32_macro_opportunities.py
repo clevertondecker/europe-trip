@@ -172,7 +172,8 @@ class MacroOpportunityUXTests(unittest.TestCase):
         at.selectbox(key="attractions_scenario_base").set_value("lille").run()
         self.assertFalse(at.exception,[x.message for x in at.exception])
         self.assertTrue(any("Descubra lugares para conhecer" in x.value for x in at.markdown))
-        self.assertTrue(any("Novas atrações locais" == x.label for x in at.metric))
+        self.assertTrue(any("Atrações na base" == x.label for x in at.metric))
+        self.assertTrue(any("2 adicionais nesta pesquisa" in x.value for x in at.markdown))
         at.selectbox(key="ux_dq32_opportunity_group").set_value(
             "Trem histórico documentado").run()
         self.assertFalse(at.exception,[x.message for x in at.exception])
