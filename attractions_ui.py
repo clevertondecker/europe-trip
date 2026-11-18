@@ -188,16 +188,27 @@ def _render_dq32_macro_opportunities(base_id: str) -> None:
         "não é necessariamente inacessível.")
     kind=st.selectbox(
         "Oportunidades para investigar",
-        ["Atrações da própria base", "Trem histórico documentado",
-         "Referências indicativas de ida",
+        ["Todos os destinos", "Atrações da própria base",
+         "Trem histórico documentado", "Referências indicativas de ida",
          "Outros destinos, transporte não pesquisado"],
         key="ux_dq32_opportunity_group")
+    # All-destinations is the default for a new session: research should be
+    # visible without guessing that the previous "unresearched" filter is active.
+    # Existing widget selections remain intact for session continuity.
+    all_destinations=sorted(overview["destinations"],key=lambda entry:(
+        0 if entry["status"]=="historical_train_time_only"
+        else 1 if entry["status"]=="indicative_rail_reference_only"
+        else 2 if entry["local"] else 3, entry["name"]))
     groups={
+        "Todos os destinos":all_destinations,
         "Atrações da própria base":overview["local_destinations"],
         "Trem histórico documentado":overview["historical_rail_destinations"],
         "Referências indicativas de ida":overview["indicative_rail_destinations"],
         "Outros destinos, transporte não pesquisado":overview["unresearched_destinations"],
     }
+    if kind=="Outros destinos, transporte não pesquisado":
+        st.caption("Este filtro mostra somente lacunas. Para analisar os novos "
+                   "tempos, escolha 'Todos os destinos' ou 'Referências indicativas de ida'.")
     shown=groups[kind]
     if not shown:
         st.info("Ainda não temos evidências desta categoria para a base. "
@@ -215,6 +226,10 @@ def _render_dq32_macro_opportunities(base_id: str) -> None:
         items.append({"Destino":place["name"],
                       "Atrações identificadas":place["attraction_count"],
                       "Transporte":duration,
+                      "Mínimo de ida (min)":(
+                          place["minimum_train_oneway_min"]
+                          if place["minimum_train_oneway_min"] is not None
+                          else place.get("indicative_train_oneway_min")),
                       "Passeio confirmado":"Não"})
     st.dataframe(pd.DataFrame(items),hide_index=True,width="stretch")
     labels={place["destination_id"]:place["name"] for place in shown}

@@ -101,6 +101,10 @@ def main():
     data10=load_connectivity_references()
     print("DATA10 sourced directed one-way references:",len(data10["records"]),
           "across",len({r["origin_id"] for r in data10["records"]}),"base cities")
+    from data11_priority_connectivity_model import load_priority_connectivity
+    data11 = load_priority_connectivity()
+    print("DATA11 additional sourced route references:", len(data11["records"]),
+          "across", len({row["origin_id"] for row in data11["records"]}), "priority bases")
 
 
 if __name__=="__main__":
