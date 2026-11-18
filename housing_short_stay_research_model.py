@@ -40,7 +40,7 @@ def housing_research_overview(*, research=None):
     }
 
 
-def evaluate_short_stay_quote(quote: dict) -> dict:
+def evaluate_short_stay_quote(quote: dict, *, source_evidence=None, independent_verifier=None) -> dict:
     """Separate booking availability, habitability, budget and upfront deposit."""
     if not isinstance(quote, dict):
         raise ValueError("Cotação inválida")
@@ -104,6 +104,35 @@ def evaluate_short_stay_quote(quote: dict) -> dict:
         q.get(k) is not None for k in prices) else None
     upfront = (round(expense + q["refundable_deposit"], 2)
                if expense is not None and q.get("refundable_deposit") is not None else None)
+    # A supplied screenshot/JSON snapshot is useful provenance but is not
+    # an independent live confirmation of dates and booking terms.
+    source_state = "not_supplied"
+    if source_evidence is not None:
+        if not isinstance(source_evidence, dict):
+            raise ValueError("Evidência de fonte inválida")
+        comparable = ("source_url", "base_id", "checkin", "checkout",
+                      "currency", "rent_total", "travelers")
+        source_state = ("supplied_snapshot_matches" if all(
+            source_evidence.get(k) == q.get(k) for k in comparable)
+            else "supplied_snapshot_conflicts")
+    # Only an approved caller-controlled verification adapter can substantiate
+    # a live provider response. Flags in q/source_evidence are never trusted.
+    verified = False
+    if independent_verifier is not None:
+        if not callable(independent_verifier):
+            raise ValueError("Verificador externo inválido")
+        evidence = independent_verifier(deepcopy(q))
+        verified = (isinstance(evidence, dict) and
+                    evidence.get("method") == "provider_live_api" and
+                    evidence.get("source_url") == q["source_url"] and
+                    evidence.get("checkin") == q["checkin"] and
+                    evidence.get("checkout") == q["checkout"] and
+                    evidence.get("verified") is True and
+                    evidence.get("quote_total") == expense)
+    suitable = all(q[k] is True for k in (
+        "private_entire_unit", "furnished", "short_stay_allowed",
+        "available_on_dates", "internet_verified", "work_space_verified",
+        "kitchen_verified", "laundry_verified", "station_access_verified"))
     return {
         "base_id": q["base_id"], "checkin": q["checkin"],
         "checkout": q["checkout"], "nights": nights,
@@ -113,10 +142,11 @@ def evaluate_short_stay_quote(quote: dict) -> dict:
         "upfront_cash_exposure": upfront,
         "research_missing": missing,
         "structurally_complete": not missing,
-        # User-supplied flags are not independently verified by this pure model.
-        # A human/live source check remains required before a housing decision.
-        "decision_ready_for_dates": False,
-        "requires_live_listing_recheck": True,
+        "suitable_for_couple_on_declared_fields": suitable,
+        "source_evidence_state": source_state,
+        "source_independently_verified": verified,
+        "decision_ready_for_dates": not missing and suitable and verified,
+        "requires_live_listing_recheck": not verified,
         "official_plan_modified": False,
     }
 
