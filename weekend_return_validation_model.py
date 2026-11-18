@@ -10,6 +10,7 @@ from copy import deepcopy
 
 from rail_evidence_unified_model import canonical_place
 from rail_temporal_contract import normalize_service_instants
+from rail_transfer_contract import normalize_transfers, validate_transfer_chain
 
 
 def _dt(value: str) -> datetime:
@@ -56,24 +57,11 @@ def validate_service_leg(leg: dict) -> dict:
         raise ValueError("Calendário de serviço inválido")
     for item in verified_dates:
         date.fromisoformat(item)
-    transfers = leg.get("transfers")
-    if not isinstance(transfers, list):
-        raise ValueError("Transferências exigem lista documentada")
-    prev_arrival = departure_utc
-    last_station = leg["origin_station_id"]
-    for transfer in transfers:
-        if any(not transfer.get(k) for k in ("station_id", "arrival_local",
-                                               "departure_local", "source_url")):
-            raise ValueError("Transferência incompleta")
-        if not _source(transfer["source_url"]):
-            raise ValueError("Transferência sem fonte")
-        a, b = _dt(transfer["arrival_local"]), _dt(transfer["departure_local"])
-        a_utc, b_utc = a.astimezone(timezone.utc), b.astimezone(timezone.utc)
-        if not prev_arrival <= a_utc < b_utc <= arrival_utc:
-            raise ValueError("Transferência fora da ordem temporal")
-        if transfer["station_id"] in (None, "", last_station):
-            raise ValueError("Estação de transferência inválida")
-        prev_arrival, last_station = b_utc, transfer["station_id"]
+    transfers = normalize_transfers(leg, require_details=True)
+    validate_transfer_chain(
+        transfers, departure=departure, arrival=arrival,
+        origin_station_id=leg["origin_station_id"],
+        destination_station_id=leg["destination_station_id"])
     result = deepcopy(leg)
     result["origin_id"] = origin
     result["destination_id"] = destination
@@ -82,6 +70,7 @@ def validate_service_leg(leg: dict) -> dict:
     result["departure_at"] = departure.isoformat()
     result["arrival_at"] = arrival.isoformat()
     result["time_precision"] = moments["precision"]
+    result.update(transfers)
     return result
 
 
