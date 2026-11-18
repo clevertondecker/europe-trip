@@ -347,17 +347,13 @@ def render_advisor(trip_data:dict,sync_sources:dict,workspace_area:str='Meus pas
                 except (AttributeError,TypeError):
                     logged_in=False
                 if logged_in:
-                    st.warning("Esta conta Google não corresponde ao proprietário autorizado "
+                    st.warning("Esta conta não corresponde ao proprietário autorizado "
                                "ou a sessão de identidade expirou. Nenhum acesso de escrita concedido.")
-                    st.button("Sair do Google",key="advisor_google_logout",on_click=st.logout)
-                else:
-                    st.button("Entrar com Google (proprietário)",
-                              key="advisor_google_login",on_click=st.login,args=["google"])
+                st.caption("Entre ou saia do Google pela seção Conta Google na barra lateral.")
             else:
                 st.success("Proprietário autenticado pelo Google. "
                            "As gravações exigem confirmação explícita.")
-                st.button("Encerrar sessão Google",key="advisor_google_signout",
-                          on_click=st.logout)
+                st.caption("Para encerrar a sessão, use Conta Google na barra lateral.")
                 st.checkbox("Entendo que o repositório GitHub atual é PÚBLICO e que "
                             "planos salvos nele poderão ser vistos por outras pessoas. "
                             "Não incluí informações pessoais ou confidenciais.",
