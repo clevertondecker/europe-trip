@@ -5,8 +5,8 @@ Na captura anterior, Lille mostrava 15 dos 46 destinos com mínimo ou referênci
 Faltavam trajetos como Strasbourg, Reims, Saverne, Colmar, Thionville e Metz.
 
 ## Alteração
-- 24 observações Lille → destino de menor tempo de ida divulgado.
-- Fontes: SNCF Connect (19) e Trainline (5).
+- 26 observações Lille → destino de menor tempo de ida divulgado.
+- Fontes: SNCF Connect (19) e Trainline (7).
 - Validação idêntica ao DATA10: pares canônicos, URLs autorizadas, confiança
   coerente com fonte, somente ida, nenhum horário de retorno comprovado.
 - Sobreposição como fallback estritamente depois de histórico, ROUTES7,
@@ -27,6 +27,8 @@ Faltavam trajetos como Strasbourg, Reims, Saverne, Colmar, Thionville e Metz.
 | Lille → Rotterdam | 2h01 | https://www.sncf-connect.com/train/trajet/lille/rotterdam |
 | Lille → Ghent | 1h08 | https://www.thetrainline.com/train-times/lille-to-ghent |
 | Lille → Arlon | 3h30 | https://www.thetrainline.com/en/train-times/lille-to-arlon |
+| Lille → Offenburg | 4h10 | https://www.thetrainline.com/en/train-times/lille-to-offenburg |
+| Lille → Freiburg (Breisgau) Hbf | 4h55 | https://www.thetrainline.com/en/train-times/lille-to-freiburg-breisgau-hbf |
 
 **Atenção:** algumas páginas variam segundo data consultada, estação ou
 horário; o valor é apenas um mínimo divulgado para triagem. Nunca somar
