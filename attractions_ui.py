@@ -165,100 +165,186 @@ def _render_research_only_outings(base_id: str, catalog: dict) -> None:
         "não estão confirmados. Nenhuma tarifa ou escolha oficial foi alterada.")
 
 
-def _render_dq32_macro_opportunities(base_id: str) -> None:
-    """Broad travel discovery is not itinerary viability or an official edit."""
-    from dq32_macro_opportunities_model import opportunity_overview
+def _dq32_choose_destination(destination_id: str) -> None:
+    """Keep the existing detail selector in sync with card actions."""
+    st.session_state["ux_dq32_selected_destination"] = destination_id
 
-    overview=opportunity_overview(base_id)
-    st.markdown("### Descoberta ampliada · DQ 3.2")
+
+def _render_dq32_macro_opportunities(base_id: str) -> None:
+    """Sourced, read-only discovery. Duration means minimum ONE-WAY, not feasibility."""
+    from dq32_macro_opportunities_model import opportunity_overview
+    from dq32_explorer_presentation import (
+        COUNTRY_FLAGS, evidence_label, evidence_source, format_travel_minutes,
+        one_way_minutes, table_rows, visible_destinations,
+    )
+
+    overview = opportunity_overview(base_id)
+    st.markdown("### Descubra lugares para conhecer")
+    st.caption("Pesquise destinos saindo de " + overview["base_name"] +
+               ". As durações são mínimas publicadas de **ida**, não tempos "
+               "médios nem garantias de bate-volta ou serviço em 2027.")
+
+    a, b, c, d = st.columns(4)
+    a.metric("Destinos cadastrados", overview["registry_destinations"])
+    b.metric("Com tempo de ida", overview["rail_reference_total_count"])
+    c.metric("Sem referência", overview["unresearched_count"])
+    d.metric("Atrações na base", overview["known_local_attractions"])
     st.caption(
-        "Primeiro conhecer destinos e atrações; depois verificar transportes e "
-        "passeios. Estas oportunidades são exploratórias, sem garantia de "
-        "bate-volta e sem alterar o roteiro oficial.")
-    a,b,c,d=st.columns(4)
-    a.metric("Destinos no universo exploratório",overview["registry_destinations"])
-    b.metric("Atrações canônicas locais",overview["canonical_local_attractions"])
-    c.metric("Novas atrações locais",overview["new_local_attractions"])
-    d.metric("Destinos com tempo ou referência",overview["rail_reference_total_count"])
-    st.caption(
-        f'{overview["rail_time_documented_count"]} tempos históricos e '
-        f'{overview["indicative_rail_reference_count"]} referências indicativas '
-        "de ida, apresentadas separadamente. Não comprova viagem, retorno, "
-        "tarifa, estação nem disponibilidade em 2027. Um destino sem pesquisa "
-        "não é necessariamente inacessível.")
-    kind=st.selectbox(
-        "Oportunidades para investigar",
+        f'{overview["rail_time_documented_count"]} registros históricos e '
+        f'{overview["indicative_rail_reference_count"]} referências indicativas. '
+        "O destino local não é uma viagem ferroviária. Ausência de pesquisa "
+        "não significa ausência de transporte.")
+
+    # Preserve the preexisting group selector so bookmarks and session state
+    # do not lose their filters during the visual migration.
+    kind = st.selectbox(
+        "Tipo de descoberta",
         ["Todos os destinos", "Atrações da própria base",
          "Trem histórico documentado", "Referências indicativas de ida",
          "Outros destinos, transporte não pesquisado"],
-        key="ux_dq32_opportunity_group")
-    # All-destinations is the default for a new session: research should be
-    # visible without guessing that the previous "unresearched" filter is active.
-    # Existing widget selections remain intact for session continuity.
-    all_destinations=sorted(overview["destinations"],key=lambda entry:(
-        0 if entry["status"]=="historical_train_time_only"
-        else 1 if entry["status"]=="indicative_rail_reference_only"
-        else 2 if entry["local"] else 3, entry["name"]))
-    groups={
-        "Todos os destinos":all_destinations,
-        "Atrações da própria base":overview["local_destinations"],
-        "Trem histórico documentado":overview["historical_rail_destinations"],
-        "Referências indicativas de ida":overview["indicative_rail_destinations"],
-        "Outros destinos, transporte não pesquisado":overview["unresearched_destinations"],
+        key="ux_dq32_opportunity_group",
+    )
+    groups = {
+        "Todos os destinos": overview["destinations"],
+        "Atrações da própria base": overview["local_destinations"],
+        "Trem histórico documentado": overview["historical_rail_destinations"],
+        "Referências indicativas de ida": overview["indicative_rail_destinations"],
+        "Outros destinos, transporte não pesquisado": overview["unresearched_destinations"],
     }
-    if kind=="Outros destinos, transporte não pesquisado":
-        st.caption("Este filtro mostra somente lacunas. Para analisar os novos "
-                   "tempos, escolha 'Todos os destinos' ou 'Referências indicativas de ida'.")
-    shown=groups[kind]
+    candidates = groups[kind]
+    if kind == "Outros destinos, transporte não pesquisado":
+        st.caption("Esta seleção mostra apenas lacunas. Use 'Todos os destinos' "
+                   "para comparar os tempos já disponíveis.")
+
+    countries = sorted({row["country"] for row in candidates})
+    options = ("Todas", "Até 1h", "1–2h", "2–4h", "Mais de 4h", "Sem referência")
+    first, second, third = st.columns([1.5, 1.0, 1.0], gap="small")
+    with first:
+        countries_chosen = st.multiselect(
+            "Países", countries, default=countries, key="ux_dq32_countries",
+            placeholder="Todos os países")
+    with second:
+        duration = st.selectbox(
+            "Tempo mínimo de ida", options, key="ux_dq32_duration")
+    with third:
+        sorting = st.selectbox(
+            "Ordenar por", ("Menor tempo", "Mais atrações", "Nome A–Z"),
+            key="ux_dq32_sort")
+    shown = visible_destinations(
+        candidates, countries=countries_chosen, duration=duration, sort=sorting)
+    st.caption(f"**{len(shown)} destinos exibidos** · tempo não informado permanece "
+               "desconhecido; intervalos são para um único trecho.")
+
     if not shown:
-        st.info("Ainda não temos evidências desta categoria para a base. "
-                "Isso é uma lacuna de pesquisa, não uma avaliação negativa.")
+        st.info("Nenhum destino corresponde aos filtros. Ajuste a duração "
+                "ou os países; isso não significa que o local é inacessível.")
         return
-    items=[]
-    for place in shown:
-        duration=("Menor tempo histórico: "+
-                  str(place["minimum_train_oneway_min"])+" min (ida)"
-                  if place["minimum_train_oneway_min"] is not None
-                  else place["indicative_train_label"]
-                  if place.get("indicative_train_oneway_min") is not None
-                  else "Local · acesso a verificar" if place["local"]
-                  else "Transporte não pesquisado")
-        items.append({"Destino":place["name"],
-                      "Atrações identificadas":place["attraction_count"],
-                      "Transporte":duration,
-                      "Mínimo de ida (min)":(
-                          place["minimum_train_oneway_min"]
-                          if place["minimum_train_oneway_min"] is not None
-                          else place.get("indicative_train_oneway_min")),
-                      "Passeio confirmado":"Não"})
-    st.dataframe(pd.DataFrame(items),hide_index=True,width="stretch")
-    labels={place["destination_id"]:place["name"] for place in shown}
-    key=st.session_state.get("ux_dq32_selected_destination")
-    if key not in labels:
-        st.session_state["ux_dq32_selected_destination"]=next(iter(labels))
-    chosen=st.selectbox(
-        "Ver fontes e atrações desta oportunidade",list(labels),
-        format_func=lambda k:labels[k],key="ux_dq32_selected_destination")
-    dest=next(place for place in shown if place["destination_id"]==chosen)
-    if dest["train_source_url"]:
-        st.markdown("[Fonte do menor tempo ferroviário histórico]("+
-                    dest["train_source_url"]+")")
-    elif dest.get("indicative_source_url"):
-        st.markdown("[Fonte da referência indicativa de ida]("+
-                    dest["indicative_source_url"]+")")
-        st.caption("Referência não equivalente a horário garantido · consulta: "+
-                   str(dest["indicative_source_checked_at"] or "não informada")+
-                   " · confiança: "+str(dest["indicative_confidence"] or "não especificada")+
-                   " · retorno de fim de semana não verificado.")
-    if dest["attractions"]:
-        for attraction in dest["attractions"]:
-            st.markdown("- **"+escape(attraction["name"])+"** · "+
-                        "[Fonte turística]("+attraction["source_url"]+")")
+
+    view = st.segmented_control(
+        "Visualização", ["Tabela", "Cartões"],
+        default="Tabela", key="ux_dq32_view")
+    if view == "Cartões":
+        page_size = 12
+        max_page = max(1, (len(shown) + page_size - 1) // page_size)
+        current = st.number_input(
+            "Página de destinos", 1, max_page, 1, key="ux_dq32_page")
+        window = shown[(current - 1) * page_size: current * page_size]
+        for start in range(0, len(window), 2):
+            cols = st.columns(2, gap="medium")
+            for col, place in zip(cols, window[start:start + 2]):
+                minutes = one_way_minutes(place)
+                with col:
+                    with st.container(border=True):
+                        flag = COUNTRY_FLAGS.get(place["country"], "🌍")
+                        st.markdown(f"#### {flag} {escape(place['name'])}")
+                        if minutes is not None:
+                            st.markdown(f"### 🚆 {format_travel_minutes(minutes)}")
+                            st.caption("Mínimo publicado de ida · " +
+                                       evidence_label(place).lower())
+                        else:
+                            st.markdown("### " + ("📍 Local" if place["local"] else "—"))
+                            st.caption("Acesso local a verificar" if place["local"]
+                                       else "Duração ainda não pesquisada")
+                        st.caption(f'{place["attraction_count"]} atrações cadastradas'
+                                   " · " + place["country"])
+                        source = evidence_source(place)
+                        if source:
+                            st.link_button("Fonte do trajeto", source, width="stretch")
+                        st.button(
+                            "Ver atrações e detalhes",
+                            key=f'ux_dq32_card_{place["destination_id"]}',
+                            width="stretch", on_click=_dq32_choose_destination,
+                            args=(place["destination_id"],))
     else:
-        st.caption("Destino identificado no universo de pesquisas, mas ainda "
-                   "sem atrações individuais cadastradas nesta camada.")
-    st.caption("Tempo de retorno, frequência, acessos, tarifas e disponibilidade "
-               "em 2027 permanecem a pesquisar. Sem Haversine ou roteamento presumido.")
+        rows = table_rows(shown)
+        st.dataframe(
+            pd.DataFrame(rows),
+            hide_index=True, width="stretch",
+            column_order=("Destino", "País", "Tempo de ida", "Atrações identificadas",
+                          "Evidência", "Fonte", "Mínimo de ida (min)"),
+            column_config={
+                "Destino": st.column_config.TextColumn("Destino", width="medium"),
+                "País": st.column_config.TextColumn("País", width="small"),
+                "Tempo de ida": st.column_config.TextColumn(
+                    "Tempo mínimo de ida", width="small",
+                    help="Formato legível do mínimo publicado de um trecho, não tempo médio."),
+                "Atrações identificadas": st.column_config.NumberColumn(
+                    "Atrações", width="small", format="%d"),
+                "Evidência": st.column_config.TextColumn(
+                    "Tipo da referência", width="medium"),
+                "Fonte": st.column_config.LinkColumn(
+                    "Fonte ferroviária", display_text="Ver fonte", width="small"),
+                "Mínimo de ida (min)": None,
+            },
+            height=430,
+        )
+        st.caption("A coluna numérica original permanece nos dados para auditoria; "
+                   "os tempos são exibidos em horas e minutos.")
+
+    labels = {row["destination_id"]: row["name"] for row in shown}
+    current_id = st.session_state.get("ux_dq32_selected_destination")
+    if current_id not in labels:
+        st.session_state["ux_dq32_selected_destination"] = next(iter(labels))
+    chosen = st.selectbox(
+        "Ver atrações e fontes do destino", list(labels),
+        format_func=lambda key: labels[key],
+        key="ux_dq32_selected_destination")
+    destination = next(row for row in shown if row["destination_id"] == chosen)
+    with st.container(border=True):
+        st.markdown("#### " + COUNTRY_FLAGS.get(destination["country"], "🌍") +
+                    " " + escape(destination["name"]))
+        minutes = one_way_minutes(destination)
+        if minutes is not None:
+            st.markdown("**🚆 " + format_travel_minutes(minutes) +
+                        "** · mínimo publicado de ida · " + evidence_label(destination))
+        else:
+            st.caption("Transporte local a pesquisar" if destination["local"] else
+                       "Tempo ferroviário ainda não pesquisado.")
+        st.caption("**Fonte:** " + (
+            "histórico" if destination["minimum_train_oneway_min"] is not None
+            else "referência indicativa" if destination.get("indicative_train_oneway_min") is not None
+            else "não documentada"))
+        if destination.get("indicative_source_checked_at"):
+            st.caption("Consulta da fonte: " +
+                       str(destination["indicative_source_checked_at"]) +
+                       " · confiança: " +
+                       str(destination.get("indicative_confidence") or "não informada"))
+        elif destination.get("train_checked_at"):
+            st.caption("Data da evidência histórica: " +
+                       str(destination["train_checked_at"]))
+        source = evidence_source(destination)
+        if source:
+            st.link_button("Consultar fonte de transporte", source)
+        st.markdown(f'**Atrações identificadas ({destination["attraction_count"]})**')
+        if destination["attractions"]:
+            for attraction in destination["attractions"]:
+                st.markdown("- **" + escape(attraction["name"]) + "** · " +
+                            "[Fonte turística](" + attraction["source_url"] + ")")
+        else:
+            st.caption("Ainda sem atrações individuais pesquisadas nesta camada.")
+        st.caption("**Ainda a verificar:** serviço de retorno, frequência, "
+                   "estações, acessos às atrações, tarifas para o casal e "
+                   "disponibilidade na viagem de 2027. Nenhum passeio foi reservado.")
 
 
 def render_explorer(trip_data: dict, sync_sources: dict, map_view) -> None:
