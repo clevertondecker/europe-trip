@@ -191,6 +191,9 @@ def _render_dq32_macro_opportunities(base_id: str) -> None:
     c.metric("Sem referência", overview["unresearched_count"])
     d.metric("Atrações na base", overview["known_local_attractions"])
     st.caption(
+        f'Atrações locais: {overview["canonical_local_attractions"]} já catalogadas '
+        f'e {overview["new_local_attractions"]} adicionais nesta pesquisa.')
+    st.caption(
         f'{overview["rail_time_documented_count"]} registros históricos e '
         f'{overview["indicative_rail_reference_count"]} referências indicativas. '
         "O destino local não é uma viagem ferroviária. Ausência de pesquisa "
