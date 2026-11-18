@@ -114,17 +114,14 @@ def research_backlog(inventory):
                               "source_date","station_reconciliation",
                               "independent_return_service","two_adults_fare",
                               "last_mile_to_attraction"]}
-        for row 
+        for row in inventory["pairs"] if row["category"]=="missing"
+    ]
+
+
+
 def component_research_backlog(inventory, *, evidence_by_pair=None):
-    """Audit each component; preserve historical one-way backlog separately.
-
-    Uninspected supplementary sources stay not_evaluated, never absent or
-    impossible. Optional lookup observations must carry explicit provenance.
-    """
+    """Read-only evidence-component backlog; preserves the legacy API."""
     return build_component_records(inventory, evidence_by_pair=evidence_by_pair)
-
-ent inventory does not cover all pairs")
-    return result
 
 
 def component_gap_summary(backlog):
