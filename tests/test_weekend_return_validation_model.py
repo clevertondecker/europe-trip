@@ -117,6 +117,30 @@ class ReturnValidationTests(unittest.TestCase):
         self.assertTrue(result["calendar_date_applicable"])
         self.assertEqual(result["time_precision"], "offset_aware")
 
+    def test_both_last_mile_directions_are_required(self):
+        to = {"direction": "station_to_attraction",
+              "attraction_id": "maastricht_museum",
+              "station_id": "maastricht_centraal",
+              "source_url": "https://www.visitmaastricht.com/en/",
+              "state": "verified_sample", "duration_min": 20}
+        back = {**to, "direction": "attraction_to_station", "duration_min": 35}
+        pair = {"status": "both_directions_documented",
+                "to_attraction": to, "to_station": back}
+        checked = weekend_roundtrip_evidence(
+            OUT, BACK, attraction_window=ACCESS, last_mile_pair=pair)
+        self.assertEqual(checked["status"], "historical_schedule_coherent_only")
+        self.assertFalse(checked["valid_for_2027"])
+        wrong = {"status": "missing_or_conflicting_access"}
+        self.assertEqual(weekend_roundtrip_evidence(
+            OUT, BACK, attraction_window=ACCESS,
+            last_mile_pair=wrong)["reason"], "reverse_last_mile_unknown")
+        changed = {"status": "both_directions_documented",
+                   "to_attraction": to, "to_station": {**back, "station_id": "other"}}
+        self.assertEqual(weekend_roundtrip_evidence(
+            OUT, BACK, attraction_window=ACCESS,
+            last_mile_pair=changed)["reason"],
+                         "bidirectional_station_or_attraction_mismatch")
+
     def test_missing_leg(self):
         self.assertEqual(weekend_roundtrip_evidence(OUT, None)["status"],
                          "insufficient_evidence")
