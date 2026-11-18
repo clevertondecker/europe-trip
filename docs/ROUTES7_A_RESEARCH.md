@@ -1,11 +1,22 @@
-# ROUTES 7A — historical route-summary research, 15 fixed pairs
+# ROUTES 7A — rastreabilidade do piloto de 15 pares
 
-Three existing cities (Mulhouse, Strasbourg, Lille) × five selected public demo destinations (Belfort, Haguenau, Mulhouse, Brussels, Ghent). Nine cells previously without time gain an explicitly identified **published fastest travel-time reference**. This is not an observed itinerary, typical service, a weekend schedule, or a 2027 quote.
+**Snapshot imutável:** `data/europa2027_pesquisa_15_pares_original.csv` reproduz a pesquisa de 17/11/2026, sem substituir durações originais. A matriz JSON mantém `fastest_min`, `average_min` e `original_snapshot` correspondentes ao CSV; `recheck` guarda uma observação separada de 18/11/2026. `load_route_references()` exige que ambos concordem quanto ao snapshot e valida estados cruzados.
 
-Dataset: `data/routes7_priority_reference_2026_11.json`. Loader: `routes7_reference_model.py`. Source of baseline research: `europa2027_pesquisa_15_pares.csv` checked 17 Nov 2026. One local movement has no railway duration. Sources are the direct SNCF Connect route-summary pages and three Trainline aggregate overview pages, supplied per row with caveats.
+**Resultado da reconsulta:** 13 dos 14 mínimos intermunicipais foram corroborados em páginas-resumo por cidade dos operadores/agregadores, sem fixação da data do serviço. O mínimo Strasbourg → Mulhouse (49 min) não foi corroborado nesta rodada como uma **nova** evidência, embora exista no histórico legado. Os valores de **Lille → Belfort 294**, **Lille → Mulhouse 252** e **Mulhouse → Bruxelas 288 minutos** continuam preservados; foram novamente encontrados em páginas da SNCF. Para a média Strasbourg → Belfort, o CSV contém **116 min** e a reconsulta SNCF exibiu **106 min**; o programa registra a divergência e não usa automaticamente a média antiga nem substitui o snapshot. A média Lille → Haguenau **246 min** não foi corroborada. Referências agregadas da Trainline foram tratadas como secundárias.
 
-Rules: source summaries without an explicit exact platform/station are `station_not_reconciled`; in particular **Belfort-Ville versus Belfort-Montbéliard TGV**, **Lille-Flandres versus Lille-Europe**, and Ghent Gent-Sint-Pieters. Numeric values are reference minima, not 2027 date-specific timetables. A source average is included only if stated in the research CSV, with weaker confidence and no inference of transfer count, fares or weekend frequency.
+**Identidade e comparabilidade:** o mínimo publicado pela página de uma rota entre *cidades* é somente uma referência indicativa, não um serviço concreto. Belfort-Ville ≠ Belfort-Montbéliard TGV; Lille-Flandres ≠ Lille-Europe; Gent-Sint-Pieters não representa qualquer ponto da cidade de Gand. Quando não há confirmação independente de origem e destino ferroviários, ambos IDs permanecem `null` e `comparability=indicative_only_not_station_comparable`. Lille-Europe ↔ Bruxelles-Midi e Strasbourg ↔ Bruxelles-Midi têm a identificação explicitamente apresentada nas páginas-resumo, mas **não** comprovam calendário/duração para 2027.
 
-**Do not overwrite** `get_rail_evidence()`, `rail_evidence_unified_model.py`, historical data, TripPlan, wishlist, or city-base preferences. Existing 75-minute Lille→Ghent and 49-minute Strasbourg→Mulhouse remain authoritative in legacy presentation. This overlay also carries 68-minute and 49-minute route references separately; differences are not collapsed into a 'best' service.
+## Estados por campo
 
-Acceptance: 15 unique directional pairs, 14 external minimum references + 1 local, 9 additional reference minima, one-way only, 0 fabricated return/cost/connection, exact baseline preserved. Next: separate UX consumer PR and a sparse estimates/caveats PR; no automatic merge.
+- `fastest_provenance=corroborated_city_level`: valor reproduzido como mínimo de uma página-resumo; mostrado apenas como `mínimo indicativo por cidade`, nunca como itinerário comparável por estação.
+- `fastest_provenance=snapshot_only_unreproduced`: preservar mas **não mostrar como referência confiável** em células novas.
+- `average_provenance=corroborated_city_level`: mostrar como média publicada, separadamente do mínimo.
+- `average_provenance=disagrees_with_current_page | snapshot_only_unreproduced | not_provided`: conservar a informação original, sem apresentá-la como média atual comprovada.
+- `reference_differs_from_legacy`: tempos numéricos diferentes de universos de serviços/estações não constituem conflito; somente observações sobre o mesmo serviço concreto e condições compatíveis poderiam ser classificadas como conflito verdadeiro.
+- `local`: sem trem intermunicipal; acesso urbano pendente.
+
+**Validação:** 15 pares direcionais únicos, domínio HTTPS consistente com a natureza da fonte, coerência entre estado/tempo/confiança/estações, nenhuma tarifa/retorno/frequência inventada, teste negativo de incompatibilidade, snapshot recalculável por CSV, `get_rail_evidence()` intocado.
+
+**Dependência:** PR #127 consome somente este overlay; após o merge de #126, sua base deve ser alterada para `main`, e a suíte integrada precisa passar. `TripPlan`, wishlist e base oficial intocados.
+
+**Limite:** as páginas mudam conforme data e operador e não são cotação para setembro–novembro de 2027. Os registros continuam adequados apenas a planejamento exploratório.

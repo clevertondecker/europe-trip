@@ -1,101 +1,206 @@
-"""ROUTES 7 sourced *planning reference* overlay for fifteen fixed pairs.
+"""ROUTES 7 audit trail for 15 public city-level rail research pairs.
 
-Never replaces get_rail_evidence() or writes TripPlan/wishlist. Fastest
-published route-summary times are not dates, stations, or weekend services.
+Snapshots are immutable claims, not current 2027 schedules. The legacy
+get_rail_evidence() controls historical display precedence.
 """
 from __future__ import annotations
+
+import csv
+import json
 from copy import deepcopy
 from datetime import date
 from pathlib import Path
 from urllib.parse import urlparse
-import json
 
 from rail_evidence_unified_model import canonical_place
 from evidence_query_model import get_rail_evidence
 
-DATA = Path(__file__).resolve().parent / "data/routes7_priority_reference_2026_11.json"
-SOURCES = {"official_operator", "secondary_timetable_aggregator", "local"}
-STATES = {"public_reference_checked", "local"}
+ROOT = Path(__file__).resolve().parent
+DATA = ROOT / "data/routes7_priority_reference_2026_11.json"
+SNAPSHOT = ROOT / "data/europa2027_pesquisa_15_pares_original.csv"
+ALLOWED_SOURCE_DOMAINS = {
+    "official_operator": {"sncf-connect.com", "www.sncf-connect.com"},
+    "secondary_timetable_aggregator": {"thetrainline.com", "www.thetrainline.com"},
+}
+FASTEST_STATES = {"corroborated_city_level", "snapshot_only_unreproduced"}
+AVERAGE_STATES = {
+    "not_provided", "corroborated_city_level",
+    "disagrees_with_current_page", "snapshot_only_unreproduced",
+}
 
-def _positive_or_none(value, field):
-    if value is not None and (type(value) is not int or value <= 0):
-        raise ValueError(f"{field} must be positive integer or null")
-    return value
 
-def load_route_references(path=DATA):
-    payload=json.loads(Path(path).read_text(encoding="utf-8-sig"))
-    if payload.get("schema_version") != 1 or payload.get("scope") != "planning_reference_not_bookable_2027":
-        raise ValueError("invalid route reference scope")
-    date.fromisoformat(payload["checked_at"])
-    bases=payload["bases"]
-    destinations=payload["destinations"]
-    if (len(bases)!=3 or len(destinations)!=5 or
-        len(set(bases))!=3 or len(set(destinations))!=5):
-        raise ValueError("expected fixed 3 by 5 public research basket")
-    registered={(canonical_place(b),canonical_place(d)) for b in bases for d in destinations}
-    observed={}
-    for raw in payload["records"]:
-        row=deepcopy(raw)
-        origin,destination=canonical_place(row["origin_id"]),canonical_place(row["destination_id"])
-        key=(origin,destination)
-        if key not in registered or key in observed:
-            raise ValueError("duplicate/unexpected base-destination pair")
-        if row["source_kind"] not in SOURCES or row["source_research_status"] not in STATES:
-            raise ValueError("invalid source type/status")
+def _positive(value):
+    return type(value) is int and value > 0
+
+
+def _url_valid(url, kind):
+    parsed = urlparse(url or "")
+    return (parsed.scheme == "https" and
+            parsed.hostname in ALLOWED_SOURCE_DOMAINS.get(kind, set()))
+
+
+def _snapshot_rows(path=SNAPSHOT):
+    with Path(path).open(encoding="utf-8-sig", newline="") as handle:
+        rows = list(csv.DictReader(handle))
+    def int_or_none(v):
+        return int(v) if v else None
+    return {(canonical_place(x["base_id"]), canonical_place(x["destination_id"])): {
+        "fastest_min": int_or_none(x["published_fastest_oneway_min"]),
+        "average_min": int_or_none(x["published_average_oneway_min"]),
+        "source_url": x["source_url"] or None, "source_kind": x["source_kind"],
+    } for x in rows}
+
+
+def load_route_references(path=DATA, *, snapshot_path=SNAPSHOT):
+    data = json.loads(Path(path).read_text(encoding="utf-8-sig"))
+    if data.get("schema_version") != 2 or data.get("scope") != (
+            "planning_reference_with_audited_provenance"):
+        raise ValueError("routes7 schema mismatch")
+    if data.get("snapshot_file") != "data/europa2027_pesquisa_15_pares_original.csv":
+        raise ValueError("missing immutable original snapshot")
+    date.fromisoformat(data["checked_at"])
+    date.fromisoformat(data["rechecked_at"])
+    bases, destinations = data["bases"], data["destinations"]
+    if (len(bases) != 3 or len(set(bases)) != 3 or
+            len(destinations) != 5 or len(set(destinations)) != 5):
+        raise ValueError("pilot basket identity changed")
+    expected = {(canonical_place(b), canonical_place(d))
+                for b in bases for d in destinations}
+    snapshots = _snapshot_rows(snapshot_path)
+    if set(snapshots) != expected:
+        raise ValueError("original CSV is missing or has duplicate pairs")
+    records = {}
+    for row in data["records"]:
+        key = canonical_place(row["origin_id"]), canonical_place(row["destination_id"])
+        if key not in expected or key in records:
+            raise ValueError("duplicated or unexpected research pair")
+        original = row.get("original_snapshot")
+        if not isinstance(original, dict) or any(
+                original.get(k) != snapshots[key].get(k)
+                for k in ("fastest_min", "average_min", "source_url")):
+            raise ValueError("research value changed since original CSV")
+        if row.get("fastest_min") != original.get("fastest_min") or (
+                row.get("average_min") != original.get("average_min")):
+            raise ValueError("historical research values must not be overwritten")
         date.fromisoformat(row["checked_at"])
-        if row["checked_at"] > payload["checked_at"]:
-            raise ValueError("source research date after snapshot")
-        fastest=_positive_or_none(row.get("fastest_min"),"fastest")
-        average=_positive_or_none(row.get("average_min"),"average")
-        if average is not None and (fastest is None or average < fastest):
-            raise ValueError("published average incompatible with minimum")
-        if origin==destination:
-            if fastest is not None or average is not None or row["source_kind"]!="local":
-                raise ValueError("intra-city movement is not train time")
+        if row["checked_at"] > data["checked_at"]:
+            raise ValueError("snapshot date mismatch")
+        if any(row.get(key) is not None for key in ("fare_for_two_eur", "transfer_count")):
+            raise ValueError("no verified fare or connections in this pilot")
+        if row.get("weekend_return_status") != "unknown":
+            raise ValueError("weekend return not proven")
+        local = key[0] == key[1]
+        if local:
+            if (row["source_kind"] != "local" or row.get("time_scope") != "local"
+                    or any(row.get(k) is not None for k in (
+                        "fastest_min", "average_min", "source_url"))
+                    or row.get("station_status") != "not_applicable"
+                    or row.get("source_research_status") != "local"
+                    or row.get("confidence") != "not_applicable"):
+                raise ValueError("local access is not railway time")
         else:
-            url=urlparse(row.get("source_url") or "")
-            if url.scheme!="https" or not url.netloc or fastest is None:
-                raise ValueError("external route reference needs positive duration and HTTPS source")
-            if row["source_research_status"]!="public_reference_checked":
-                raise ValueError("route reference does not have a documented source")
-        if row.get("fare_for_two_eur") is not None or row.get("transfer_count") is not None:
-            raise ValueError("pilot does not verify fares or transfers")
-        if row.get("weekend_return_status")!="unknown":
-            raise ValueError("outbound reference cannot validate weekend return")
-        if row.get("station_status") not in ("station_not_reconciled","not_applicable"):
-            raise ValueError("station identity cannot be inferred from city names")
-        observed[key]=row
-    if set(observed)!=registered or len(observed)!=15:
-        raise ValueError("research matrix not complete")
-    return {"schema_version":1,"checked_at":payload["checked_at"],
-            "records":list(observed.values()),"by_pair":observed,
-            "bases":list(bases),"destinations":list(destinations)}
+            if (row["source_kind"] not in ALLOWED_SOURCE_DOMAINS or
+                    row["source_kind"] != snapshots[key]["source_kind"] or
+                    not _url_valid(row.get("source_url"), row["source_kind"]) or
+                    row.get("time_scope") != "public_route_summary_not_date_specific" or
+                    not _positive(row.get("fastest_min"))):
+                raise ValueError("invalid operator/secondary source or duration")
+            if row["average_min"] is not None and (
+                    not _positive(row["average_min"]) or
+                    row["average_min"] < row["fastest_min"]):
+                raise ValueError("average lower than published fastest")
+            if row.get("fastest_provenance") not in FASTEST_STATES or (
+                    row.get("average_provenance") not in AVERAGE_STATES):
+                raise ValueError("invalid field-level provenance")
+            recheck = row.get("recheck")
+            if recheck:
+                if not _url_valid(recheck.get("source_url"), row["source_kind"]):
+                    raise ValueError("recheck source type inconsistent")
+                date.fromisoformat(recheck["checked_at"])
+                if recheck["checked_at"] > data["rechecked_at"]:
+                    raise ValueError("recheck date after dataset")
+            if row["fastest_provenance"] == "corroborated_city_level":
+                if not recheck or recheck.get("fastest_min") != row["fastest_min"]:
+                    raise ValueError("claimed reproduced time not reproduced")
+                if row.get("source_research_status") != "route_summary_rechecked":
+                    raise ValueError("reproduced source must be marked rechecked")
+            elif row.get("confidence") != "insufficient":
+                raise ValueError("unreproduced source cannot be confident")
+            if row["average_provenance"] == "corroborated_city_level":
+                if row["average_min"] is None or not recheck or (
+                        recheck.get("average_min") != row["average_min"]):
+                    raise ValueError("published average not reproduced")
+            if row["average_provenance"] == "disagrees_with_current_page":
+                if row["average_min"] is None or not recheck or (
+                        recheck.get("average_min") in (None, row["average_min"])):
+                    raise ValueError("average discrepancy has no recheck evidence")
+            if (row.get("station_comparability") not in (
+                    "city_level_ambiguous", "station_named_in_route_page") or
+                    row.get("comparability") not in (
+                    "indicative_only_not_station_comparable",
+                    "city_level_reference_not_dated_service")):
+                raise ValueError("unreconciled stations must not claim schedule")
+            if row["station_comparability"] == "city_level_ambiguous" and (
+                    row.get("origin_station_id") is not None or
+                    row.get("destination_station_id") is not None):
+                raise ValueError("unknown station must remain null")
+            if row["station_comparability"] == "station_named_in_route_page" and (
+                    not row.get("origin_station_id") or
+                    not row.get("destination_station_id")):
+                raise ValueError("reconciled stations need both identities")
+            if row.get("confidence") not in ("low", "insufficient"):
+                raise ValueError("undated source cannot have high confidence")
+        records[key] = deepcopy(row)
+    if set(records) != expected or len(records) != 15:
+        raise ValueError("incomplete pilot matrix")
+    return {"by_pair": records, "records": list(records.values()),
+            "bases": list(bases), "destinations": list(destinations),
+            "checked_at": data["checked_at"]}
 
-def planning_reference(base_id,destination_id, *, references=None, legacy=None):
-    """Separate overlay: never alter legacy source precedence or estimate a return."""
-    base_id,destination_id=canonical_place(base_id),canonical_place(destination_id)
-    ref=references if references is not None else load_route_references()
-    original=legacy if legacy is not None else get_rail_evidence(base_id,destination_id)
-    row=ref["by_pair"].get((base_id,destination_id))
-    if original.get("status")=="local":
-        return {"status":"local","fastest_min":None,"average_min":None,
-                "display_min":None,"display_basis":"local_not_rail",
-                "source_url":None,"confidence":"not_applicable",
-                "legacy_min":None,"weekend_return_known":False}
-    legacy_min=original.get("minimum_oneway_min")
+
+def planning_reference(base_id, destination_id, *, references=None, legacy=None):
+    base_id, destination_id = canonical_place(base_id), canonical_place(destination_id)
+    references = references if references is not None else load_route_references()
+    old = legacy if legacy is not None else get_rail_evidence(base_id, destination_id)
+    historical = old.get("minimum_oneway_min")
+    row = references["by_pair"].get((base_id, destination_id))
+    if old.get("status") == "local" or base_id == destination_id:
+        return {"status": "local", "fastest_min": None, "average_min": None,
+                "display_min": None, "display_basis": "local_not_rail",
+                "source_url": None, "legacy_min": None,
+                "weekend_return_known": False}
+    result = {
+        "status": "unknown", "fastest_min": None, "average_min": None,
+        "display_min": historical, "legacy_min": historical,
+        "display_basis": "legacy_historical" if historical is not None else "unknown",
+        "source_url": old.get("source_url"), "historical_source_url": old.get("source_url"),
+        "confidence": "unknown", "reference_differs_from_legacy": False,
+        "conflict_with_legacy": False, "weekend_return_known": False,
+        "typical_time_known": False, "station_comparability": "unknown",
+        "comparability": "unknown", "reference_display_allowed": False,
+    }
     if row is None:
-        return {"status":"legacy_only" if legacy_min is not None else "unknown",
-                "fastest_min":None,"average_min":None,
-                "display_min":legacy_min,"display_basis":"legacy_historical" if legacy_min is not None else "unknown",
-                "source_url":original.get("source_url"),"confidence":"unknown",
-                "legacy_min":legacy_min,"weekend_return_known":False}
-    return {"status":"published_reference",
-            "fastest_min":row["fastest_min"],"average_min":row["average_min"],
-            "display_min":legacy_min if legacy_min is not None else row["fastest_min"],
-            "display_basis":"legacy_historical" if legacy_min is not None else "published_fastest_reference",
-            "source_url":row["source_url"],"confidence":row["confidence"],
-            "source_kind":row["source_kind"],"checked_at":row["checked_at"],
-            "station_status":row["station_status"],"legacy_min":legacy_min,
-            "conflict_with_legacy":legacy_min is not None and legacy_min != row["fastest_min"],
-            "weekend_return_known":False,
-            "typical_time_known":row["average_min"] is not None}
+        result["status"] = "legacy_only" if historical is not None else "unknown"
+        return result
+    corroborated = row.get("fastest_provenance") == "corroborated_city_level"
+    shown = row["fastest_min"] if corroborated else None
+    result.update({
+        "status": "published_reference" if corroborated else "unreproduced_snapshot",
+        "fastest_min": shown, "original_snapshot_fastest_min": row["fastest_min"],
+        "average_min": row["average_min"] if row.get("average_provenance") == "corroborated_city_level" else None,
+        "original_snapshot_average_min": row["average_min"],
+        "display_min": historical if historical is not None else shown,
+        "display_basis": "legacy_historical" if historical is not None else (
+            "indicative_published_city_minimum" if corroborated else "unknown"),
+        "source_url": row.get("recheck", {}).get("source_url") if row.get("recheck") else row["source_url"],
+        "reference_source_url": row["source_url"],
+        "source_kind": row["source_kind"], "checked_at": row.get("recheck", {}).get("checked_at") if row.get("recheck") else row["checked_at"],
+        "confidence": row["confidence"], "station_comparability": row["station_comparability"],
+        "comparability": row["comparability"], "fastest_provenance": row["fastest_provenance"],
+        "average_provenance": row["average_provenance"],
+        "reference_display_allowed": corroborated,
+        "reference_differs_from_legacy": historical is not None and shown is not None and historical != shown,
+        "conflict_with_legacy": False,  # only same service/dates/stations can truly conflict
+        "typical_time_known": row.get("average_provenance") == "corroborated_city_level",
+    })
+    return result
