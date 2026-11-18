@@ -107,7 +107,7 @@ class FiveBaseComparisonModelTests(unittest.TestCase):
 class FiveBaseComparisonAppTests(unittest.TestCase):
     def test_five_base_panel_is_read_only(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=100).run()
-        app.radio(key="ux_area").set_value("Explorar").run()
+        app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
         app.segmented_control(key="ux_section").set_value("Cidades-base").run()
         app.segmented_control(key="ux42_city_activity").set_value("Comparar favoritas").run()
         original=deepcopy(app.session_state["advisor_plan"])
