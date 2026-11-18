@@ -79,7 +79,7 @@ class Data11PriorityConnectivityTests(unittest.TestCase):
         root = Path(__file__).resolve().parents[1]
         app = AppTest.from_file(str(root/"app.py"), default_timeout=120).run()
         self.assertFalse(app.exception, [x.message for x in app.exception])
-        app.radio(key="ux_area").set_value("Explorar").run()
+        app.button(key="ux_sidebar_nav_1").click().run()
         app.segmented_control(key="ux_section").set_value("Passeios").run()
         app.selectbox(key="attractions_scenario_base").set_value("mulhouse").run()
         app.selectbox(key="ux_dq32_opportunity_group").set_value("Todos os destinos").run()
