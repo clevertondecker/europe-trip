@@ -48,6 +48,27 @@ class EvidenceContractTests(unittest.TestCase):
         self.assertEqual(result["count"], 2)
         self.assertEqual(len(result["conflicts"]), 1)
 
+    def test_corroborating_sources_do_not_conflict(self):
+        corroborating = {**BASE, "source_url": "https://www.bahn.de/",
+                         "operator": "DB", "duration_min": 32}
+        result = validate_observations([BASE, corroborating])
+        self.assertEqual(result["count"], 2)
+        self.assertFalse(result["conflicts"])
+        self.assertEqual(len(result["corroborated"]), 1)
+
+    def test_different_services_not_conflated(self):
+        other_service = {**BASE, "service_id": "TER-2",
+                         "source_url": "https://www.bahn.de/",
+                         "duration_min": 45}
+        result = validate_observations([BASE, other_service])
+        self.assertEqual(result["count"], 2)
+        self.assertFalse(result["conflicts"])
+        self.assertFalse(result["corroborated"])
+
+    def test_clock_only_has_no_usable_instant(self):
+        result = validate_observation(BASE)
+        self.assertEqual(result["time_precision"], "local_clock_only")
+
     def test_unknown_has_no_duration(self):
         row = {**BASE, "evidence_state": "unknown", "duration_min": None,
                "temporal_validity": "validity_unknown", "source_url": None}
