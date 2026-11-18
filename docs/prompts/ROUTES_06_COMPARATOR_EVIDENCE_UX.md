@@ -55,3 +55,10 @@ Comentários diretamente no PR: P0/P1/P2; contratos/adaptadores que devem ser re
 - Um retorno no dia seguinte não é rejeitado por datas desiguais; rejeitar retornos antes da chegada, estações/identidades de atração divergentes, falta de calendário ou tempo sem fuso. Nunca calcular minutos porta a porta com trechos parciais.
 - Testes integrados obrigatórios: fixture do overlay turístico, estado legado isolado, sábado→domingo, ordem incorreta, falta de retorno, estação/atração incompatível, calendário ausente, seleção de wishlist inalterada e ausência de ranking.
 - Implementação corretiva: [#122](https://github.com/clevertondecker/europe-trip/pull/122), com dependências de integração #119/#123/#124; reexecutar a suíte após os merges em sequência.
+
+## Critérios de integração por decisão (18/11/2026)
+
+- A projeção #122 exibe, por atração, descrição, motivo de visita, regras de abertura, ingresso principal, atividade adicional, duração (com natureza histórica/editorial), fonte e data. Os overlays #123, #124 e #120 são opcionais e versionados: ausência = `unknown`, não zero ou gratuito.
+- Ida ferroviária histórica, estação e transferências permanecem separadas do **retorno** e do acesso **nos dois sentidos**. `compatible_evidence_association()` apenas delega confirmação de calendário/ordem a #119 e jamais afirma 2027 ou calcula porta-a-porta com parcelas ausentes.
+- Moradia mostra opções históricas e pendências de 56–60 noites, internet, espaço de trabalho, taxas e caução separadas. `structurally_complete` não significa anúncio verificado; comprovação externa é obrigação própria.
+- Cenário vertical mínimo: três bases × três destinos cadastrados, destinos desejados idênticos para todas as bases, sem seleção automática, sem alteração de `TripPlan`/wishlist. Validar integração em QA antes do merge e reexecutar CI após atualizar `main`.
