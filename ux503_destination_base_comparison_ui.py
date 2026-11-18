@@ -8,6 +8,7 @@ from ux502_destination_interests_model import (
 )
 from ux503_destination_base_comparison_model import compare_wishlist_bases
 from ux506_decision_readiness_projection import build_decision_readiness
+from routes7_comparison_projection import decorate_comparison
 from ux_navigation import set_task
 from ux505_base_comparison_presentation import (
     comparison_overview, matrix_cell, known_findings, missing_research,
@@ -111,18 +112,23 @@ def render_wishlist_base_comparison(*, plan, discovery=None, research=None):
         st.error("Não foi possível montar a comparação: " + str(exc))
         return
 
-    # UI-only summary; all values and identities come from the existing model.
-    overview = comparison_overview(result)
+    # UI-only coverage of exactly the same selected base x destination matrix.
+    # Keep canonical legacy coverage as a separate dimension in the details.
+    enriched = decorate_comparison(result)
+    st.markdown("#### O que podemos concluir com os dados atuais?")
     st.markdown("#### Resumo da comparação")
-    st.write(overview["description"])
-    c1, c2, c3 = st.columns(3)
-    c1.metric("Trajetos com tempo pesquisado", overview["documented"])
-    c2.metric("Trajetos sem tempo identificado", overview["missing"])
-    c3.metric("Deslocamentos locais", overview["local"])
-    st.caption(f'{overview["total"]} combinações ('
-               f'{len(result["base_ids"])} cidades-base × '
-               f'{len(result["destinations"])} destinos). '
-               "Cobertura de pesquisa não significa qualidade de transporte.")
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("Histórico de trem", enriched["historical"])
+    c2.metric("Mínimo indicativo", enriched["reference_only"])
+    c3.metric("Sem tempo", enriched["no_time"])
+    c4.metric("Deslocamento local", enriched["local"])
+    st.metric("Trajetos com tempo pesquisado", enriched["historical"])
+    st.markdown("#### O que ainda precisamos pesquisar?")
+    st.caption(
+        f'{enriched["total"]} combinações: uma categoria por par. '
+        "Mínimos indicativos vêm de páginas por cidade, não de serviços "
+        "com data e estações comprovadas. Isso não representa disponibilidade em 2027."
+    )
 
     # New read-only decision layer: never modifies choices or official TripPlan.
     decision = build_decision_readiness(result, discovery=discovery, research=research)
@@ -223,7 +229,9 @@ def render_wishlist_base_comparison(*, plan, discovery=None, research=None):
     st.caption("Sem ranking automático: cobertura documental não equivale "
                "a qualidade logística, viabilidade do passeio ou moradia.")
 
-    st.markdown("#### Tempos históricos de ida que já conhecemos")
+    st.markdown("#### Tempo ferroviário de ida para planejar")
+    st.caption("Histórico e mínimos de referência não são médias típicas. "
+               "Onde a estação está indefinida, o valor é apenas indicativo.")
     indexed = {(r["base_id"], r["destination_id"]): r
                for r in result["rows"]}
     matrix = []
@@ -232,22 +240,16 @@ def render_wishlist_base_comparison(*, plan, discovery=None, research=None):
                 destination["priority_label"]}
         for base_id in selected:
             route = indexed[(base_id, destination["id"])]
-            line[cities[base_id]["name"]] = matrix_cell(route)
+            line[cities[base_id]["name"]] = (
+                enriched["cells"][(base_id, destination["id"])]["label"])
         matrix.append(line)
     st.dataframe(matrix, hide_index=True, width="stretch")
-    st.caption("Os tempos são históricos, apenas de ida. Um traço ou uma "
-               "pesquisa parcial não comprovam falta de conexão. "
+    st.caption("Ida histórica ou referência de tempo mínimo publicado, "
+               "sem data ferroviária confirmada para 2027. "
+               "Média publicada é outra métrica, e retorno continua pendente. "
                "Em telas pequenas, deslize a tabela horizontalmente.")
-
-    left, right = st.columns(2)
-    with left:
-        st.markdown("#### O que podemos concluir com os dados atuais?")
-        for finding in known_findings(result):
-            st.markdown("- " + finding)
-    with right:
-        st.markdown("#### O que ainda precisamos pesquisar?")
-        for gap in missing_research(result):
-            st.markdown("- " + gap)
+    st.caption("Retorno, tarifas e acesso até as atrações continuam sem comprovação "
+               "para as datas da temporada. Valores ausentes não significam inviabilidade.")
 
     with st.expander("Detalhes por destino, fontes e outras informações",
                      expanded=False):
@@ -265,40 +267,53 @@ def render_wishlist_base_comparison(*, plan, discovery=None, research=None):
                         destination["priority_label"])
             for base_id in selected:
                 route = indexed[(base_id, detail)]
+                item = enriched["cells"][(base_id, detail)]
                 with st.container(border=True):
-                    st.markdown("**" + cities[base_id]["name"] + "** · " +
-                                route["status"])
-                    st.write(matrix_cell(route))
-                    if route["typical_oneway_min"] is not None:
-                        st.caption("Tempo típico observado: " +
-                                   str(route["typical_oneway_min"]) + " min")
+                    st.markdown("**" + cities[base_id]["name"] + "**")
+                    st.write(item["label"])
+                    st.caption(item["typical_label"])
+                    if item["station_caveat"]:
+                        st.caption(item["station_caveat"])
+                    if item.get("reference_differs_from_legacy"):
+                        st.caption("A referência publicada difere do histórico. "
+                                   "Não é conflito comprovado entre os mesmos serviços.")
+                    if item.get("fastest_provenance") == "snapshot_only_unreproduced":
+                        st.warning("Número registrado no snapshot, mas não reproduzido "
+                                   "como referência independente nesta reconsulta.")
                     st.write("Transferências: " +
-                             (str(route["transfers"]) if
-                              route["transfers"] is not None
+                             (str(route["transfers"]) if route["transfers"] is not None
                               else "Não pesquisadas"))
-                    st.caption("Data da observação: " +
-                               str(route["source_date"] or "Não informada"))
-                    st.caption("Retorno de fim de semana e última milha "
-                               "não verificados.")
+                    st.caption("Histórico selecionado em: " +
+                               str(route["source_date"] or "Data desconhecida"))
+                    st.caption("Retorno de fim de semana e última milha: não confirmados.")
                     if route["divergent_sources"]:
-                        st.warning("Fontes com tempos divergentes; "
-                                   "verificar condições e datas.")
-                    if route["source_url"]:
-                        st.link_button("Fonte selecionada", route["source_url"])
+                        st.warning("O histórico contém serviços/observações divergentes. "
+                                   "Consultar as condições antes de comparar.")
+                    historical_url = item.get("historical_source_url")
+                    reference_url = item.get("reference_source_url")
+                    if historical_url:
+                        title = ("Fonte compartilhada: histórico e referência"
+                                 if reference_url == historical_url
+                                 else "Fonte do histórico")
+                        st.markdown("[" + title + "](" + historical_url + ")")
+                    if reference_url and reference_url != historical_url:
+                        st.markdown("[Fonte da referência publicada](" +
+                                    reference_url + ")")
                     for observation in route["observations"]:
                         source = observation.get("source_url")
                         if source and source != route["source_url"]:
-                            st.markdown("[Observação alternativa](" +
+                            st.markdown("[Observação histórica alternativa](" +
                                         source + ")")
         st.markdown("##### Moradia e pendências por cidade-base")
         for summary in result["summaries"]:
             with st.container(border=True):
                 st.markdown("**" + summary["base_name"] +
                             "** · condições e pesquisas pendentes")
-                st.caption(
-                    f'{summary["documented_time_count"]} trajetos com tempo '
-                    f'pesquisado; {summary["missing_time_count"]} sem tempo; '
-                    f'{summary["local_count"]} locais.')
+                st.caption("Cobertura histórica original: " +
+                           str(summary["documented_time_count"]) + " com tempo, " +
+                           str(summary["missing_time_count"]) + " sem tempo, " +
+                           str(summary["local_count"]) +
+                           " locais. As referências indicativas são separadas.")
                 housing = summary["housing"]
                 if housing["count"]:
                     st.write("Moradia: " + str(housing["count"]) +
