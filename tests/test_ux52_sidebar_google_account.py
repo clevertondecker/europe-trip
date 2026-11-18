@@ -40,7 +40,7 @@ class SidebarGoogleAccountStateTests(unittest.TestCase):
             self.config, {**self.user, "email": "someoneelse@example.com"}),
             "other_account")
         self.assertEqual(account_view_state(
-            self.config, {**self.user, "exp": 1}), "other_account")
+            self.config, {**self.user, "exp": 1}), "expired")
         self.assertEqual(account_view_state(
             self.config, {**self.user, "iss": "https://example.com"}),
             "other_account")
@@ -51,7 +51,7 @@ class SidebarGoogleAccountStateTests(unittest.TestCase):
         self.assertFalse(app.exception, [x.message for x in app.exception])
         self.assertTrue(any("Conta Google" in x.value
                             for x in app.markdown))
-        self.assertTrue(any("Login Google ainda não configurado" in x.value
+        self.assertTrue(any("Login Google indisponível" in x.value
                             for x in app.markdown))
         keys = {button.key for button in app.button}
         self.assertFalse({"ux52_google_login", "ux52_google_logout",
