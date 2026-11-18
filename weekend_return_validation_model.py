@@ -34,8 +34,10 @@ def validate_service_leg(leg: dict) -> dict:
     if not isinstance(leg, dict):
         raise ValueError("Trecho inválido")
     required = ("origin_id", "destination_id", "origin_station_id",
-                "destination_station_id", "departure_local", "arrival_local")
-    if any(not leg.get(key) for key in required):
+                "destination_station_id")
+    if any(not leg.get(key) for key in required) or not (
+            leg.get("departure_at") or leg.get("departure_local")) or not (
+            leg.get("arrival_at") or leg.get("arrival_local")):
         raise ValueError("Faltam identidades/horários do trecho")
     origin = canonical_place(leg["origin_id"])
     destination = canonical_place(leg["destination_id"])
