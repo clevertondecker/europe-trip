@@ -67,14 +67,14 @@ class UX3StreamlitNavigationSmokeTests(unittest.TestCase):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=90).run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
         official=deepcopy(app.session_state["advisor_plan"])
-        app.radio(key="ux_area").set_value("Explorar").run()
+        app.button(key="ux_sidebar_nav_1").click().run()
         app.segmented_control(key="ux_mode").set_value("Simulação").run()
         app.selectbox(key="scenario_sidebar").set_value("offenburg").run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
         self.assertEqual(app.session_state["advisor_plan"],official)
         for area, sections in SECTIONS.items():
             with self.subTest(area=area):
-                app.radio(key="ux_area").set_value(area).run()
+                app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index(area))).click().run()
                 self.assertFalse(app.exception,[x.message for x in app.exception])
                 if area=="Minha viagem":
                     self.assertNotIn("ux_section",{v.key for v in app.segmented_control})
@@ -97,7 +97,7 @@ class UX3StreamlitNavigationSmokeTests(unittest.TestCase):
     def test_shared_city_and_duration_between_explore_and_budget(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=90).run()
         official=deepcopy(app.session_state["advisor_plan"])
-        app.radio(key="ux_area").set_value("Explorar").run()
+        app.button(key="ux_sidebar_nav_1").click().run()
         app.segmented_control(key="ux_section").set_value("Cidades-base").run()
         app.segmented_control(key="ux_mode").set_value("Simulação").run()
         app.selectbox(key="scenario_sidebar").set_value("offenburg").run()
@@ -107,7 +107,7 @@ class UX3StreamlitNavigationSmokeTests(unittest.TestCase):
         self.assertEqual(app.session_state["advisor_plan"],official)
         app.number_input(key="ux_days").set_value(65).run()
         self.assertEqual(app.session_state["unified_stay"],65)
-        app.radio(key="ux_area").set_value("Orçamento").run()
+        app.button(key="ux_sidebar_nav_3").click().run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
         self.assertEqual(app.session_state["scenario_base_selected"],"offenburg")
         self.assertEqual(app.session_state["unified_stay"],65)
@@ -120,13 +120,13 @@ class UX3StreamlitNavigationSmokeTests(unittest.TestCase):
 
     def test_budget_and_italy_access_through_guided_menu(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=90).run()
-        app.radio(key="ux_area").set_value("Meu roteiro").run()
+        app.button(key="ux_sidebar_nav_2").click().run()
         app.segmented_control(key="ux_section").set_value("Melhorar meu roteiro").run()
         app.selectbox(key="ux_improve_view").set_value("Itália").run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
         self.assertEqual(app.session_state["main_navigation"],"Roteiro")
         self.assertEqual(app.session_state["itinerary_section"],"Itália")
-        app.radio(key="ux_area").set_value("Orçamento").run()
+        app.button(key="ux_sidebar_nav_3").click().run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
         self.assertEqual(app.session_state["main_navigation"],"Orçamento")
 
