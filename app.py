@@ -331,47 +331,72 @@ with st.sidebar:
       <small>TRAVEL JOURNAL · 2027</small>
       <strong>✧ Nossa Europa</strong>
       <span>Lua de mel & temporada na França</span></div>""", unsafe_allow_html=True)
-    st.caption("**ONDE VOCÊ QUER IR?**")
-    st.radio("Menu principal",list(UX_AREAS),label_visibility="collapsed",
-             key="ux_area",on_change=_ux_area_changed,
-             format_func=lambda name:{
-                 "Minha viagem":"⌂  Minha viagem",
-                 "Explorar":"⌕  Explorar destinos",
-                 "Meu roteiro":"▦  Meu roteiro",
-                 "Orçamento":"◉  Orçamento"}[name])
-    st.caption("Escolha uma tarefa dentro de cada área. Seu plano continua salvo separadamente.")
-    with st.expander("Fontes e ferramentas avançadas",expanded=False):
-        st.radio("Acesso à navegação anterior",list(LEGACY_PAGES),
-                 key="main_navigation",on_change=_ux_legacy_page_changed)
-        st.caption("Compatibilidade com atalhos e pesquisas antigas. "
-                   "Use as quatro áreas acima para o planejamento habitual.")
-        st.caption("**ORIGEM DOS DADOS**")
-    st.caption("Drive sincronizado" if sync_status == "live" else ("Drive parcialmente sincronizado" if sync_status == "partial" else "Snapshot de 14/11/2026"))
-    for source_name, source_label in (("decisions", "Decisões"), ("tasks", "Pendências"), ("finance", "Financeiro e roteiro")):
-        state = sync_sources[source_name]
-        st.caption(f"{'✅' if state['status'] == 'live' else '⚪'} {source_label}: {state['status']}" + (f" · {state['modified_at'][:10]}" if state.get('modified_at') else ""))
-    if st.button("Atualizar dados do Drive", use_container_width=True):
-        fetch_live.clear()
-        st.rerun()
-    if sync_error:
-        # Exception class only; never expose keys, tokens or raw API errors.
-        st.warning("Sincronização indisponível; exibindo snapshot.")
-        diagnosis = {
-            "StreamlitSecretNotFoundError": "Secrets ausentes: configure [gcp_service_account] em Settings → Secrets.",
-            "KeyError": "O campo [gcp_service_account] ou um campo obrigatório está ausente.",
-            "ValueError": "Formato da credencial inválido. Confira especialmente os caracteres de nova linha na chave privada.",
-            "MalformedError": "A chave privada não pôde ser interpretada.",
-            "RefreshError": "O Google rejeitou a autenticação. Confira se a chave está ativa.",
-        }.get(sync_error, "Verifique os logs do aplicativo no Streamlit Cloud.")
-        st.error(f"Diagnóstico: {sync_error}. {diagnosis}")
-    elif not any(state["status"] == "live" for state in sync_sources.values()):
-        st.info("Nenhuma fonte sincronizada. Confira os Secrets e os avisos abaixo.")
-    if sync_issues:
-        with st.expander(f"Avisos de sincronização ({len(sync_issues)})"):
-            for issue in sync_issues:
-                st.warning(issue)
-    st.link_button("Abrir pasta no Drive", data["sources"]["project_folder"], use_container_width=True)
-    st.info("Painel em desenvolvimento. Nenhum voo, imóvel ou passeio foi reservado.")
+    # Keep ux_area as the sole navigation state. The radio callback continues
+    # to mediate all area transitions through ux_navigation.
+    st.radio("Navegação", list(UX_AREAS), label_visibility="collapsed",
+             key="ux_area", on_change=_ux_area_changed,
+             format_func=lambda name: {
+                 "Minha viagem": "⌂  Minha viagem",
+                 "Explorar": "◈  Explorar destinos",
+                 "Meu roteiro": "▦  Meu roteiro",
+                 "Orçamento": "◉  Orçamento",
+             }[name])
+
+    st.divider()
+    live_count = sum(state["status"] == "live" for state in sync_sources.values())
+    if sync_status == "live":
+        sync_summary = "Dados sincronizados · 3/3 fontes"
+    elif sync_status == "partial":
+        sync_summary = f"Sincronização parcial · {live_count}/3 fontes"
+    else:
+        sync_summary = "Dados locais · nenhuma fonte ativa"
+    st.caption(sync_summary)
+    # The sync operation time and each source's modified_at are distinct.
+    # A successful fetch must never imply every Drive source changed today.
+    with st.expander("Google Drive · detalhes", expanded=False):
+        if sync_time:
+            st.caption(f"Consulta ao Drive: {sync_time} (UTC)")
+        else:
+            st.caption(f"Snapshot local: {data['snapshot_date']}")
+        for source_name, source_label in (
+            ("decisions", "Decisões"),
+            ("tasks", "Pendências"),
+            ("finance", "Financeiro e roteiro"),
+        ):
+            state = sync_sources[source_name]
+            modified_at = state.get("modified_at")
+            date_info = f" · fonte: {modified_at[:10]}" if modified_at else " · data não informada"
+            label = "sincronizada" if state["status"] == "live" else "snapshot"
+            st.caption(f"{'✅' if state['status'] == 'live' else '⚪'} {source_label}: {label}{date_info}")
+        if st.button("Atualizar dados do Drive", use_container_width=True):
+            fetch_live.clear()
+            st.rerun()
+        st.link_button("Abrir pasta no Drive", data["sources"]["project_folder"],
+                       use_container_width=True)
+        if sync_error:
+            # Exception class only; never expose keys, tokens or raw API errors.
+            st.warning("Sincronização indisponível; exibindo snapshot.")
+            diagnosis = {
+                "StreamlitSecretNotFoundError": "Secrets ausentes: configure [gcp_service_account] em Settings → Secrets.",
+                "KeyError": "O campo [gcp_service_account] ou um campo obrigatório está ausente.",
+                "ValueError": "Formato da credencial inválido. Confira especialmente os caracteres de nova linha na chave privada.",
+                "MalformedError": "A chave privada não pôde ser interpretada.",
+                "RefreshError": "O Google rejeitou a autenticação. Confira se a chave está ativa.",
+            }.get(sync_error, "Verifique os logs do aplicativo no Streamlit Cloud.")
+            st.error(f"Diagnóstico: {sync_error}. {diagnosis}")
+        elif live_count == 0:
+            st.caption("Nenhuma fonte ao vivo. Verifique a configuração de sincronização.")
+        if sync_issues:
+            with st.expander(f"Avisos de sincronização ({len(sync_issues)})"):
+                for issue in sync_issues:
+                    st.warning(issue)
+
+    # Retain legacy tools for compatibility without competing with main areas.
+    with st.expander("Fontes e ferramentas", expanded=False):
+        st.radio("Acesso à navegação anterior", list(LEGACY_PAGES),
+                 key="main_navigation", on_change=_ux_legacy_page_changed)
+        st.caption("Acesso avançado às pesquisas e ferramentas anteriores.")
+    st.caption("ⓘ Planejamento em andamento")
 
 # One configuration/comparison entrypoint. The TripPlan is the only official
 # state; exploratory controls inside the shared panel are never official edits.
