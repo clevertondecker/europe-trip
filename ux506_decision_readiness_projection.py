@@ -212,36 +212,62 @@ def compatible_evidence_association(rail: dict | None, return_leg: dict | None,
     yet be merged. Do not implement a weaker duplicate validator here.
     """
     reasons = []
+    paired = access if isinstance(access,dict) and (
+        access.get("status") == "both_directions_documented") else None
     if not rail or not return_leg or not access:
         reasons.append("missing_component")
     else:
-        required = (
-            "origin_id", "destination_id", "origin_station_id",
-            "destination_station_id", "source_url", "duration_min")
-        for part in (rail, return_leg):
-            if any(part.get(k) is None for k in required):
+        for leg in (rail, return_leg):
+            if any(leg.get(k) is None for k in (
+                    "origin_id", "destination_id",
+                    "origin_station_id", "destination_station_id",
+                    "source_url", "duration_min")):
                 reasons.append("incomplete_train_identity")
-        if any(access.get(k) is None for k in (
-                "arrival_station_id", "return_station_id", "attraction_id",
-                "destination_id")):
-            reasons.append("incomplete_access_identity")
-        if access.get("destination_id") != rail.get("destination_id"):
-            reasons.append("attraction_destination_mismatch")
-        if (rail.get("destination_station_id") != access.get("arrival_station_id") or
-                return_leg.get("origin_station_id") != access.get("return_station_id")):
-            reasons.append("station_mismatch")
+            if not _https(leg.get("source_url")):
+                reasons.append("source_missing")
+            if type(leg.get("duration_min")) is not int or leg["duration_min"]<=0:
+                reasons.append("duration_missing")
         if (rail.get("destination_id") != return_leg.get("origin_id") or
                 rail.get("origin_id") != return_leg.get("destination_id")):
             reasons.append("direction_mismatch")
-        if any(not _https((part or {}).get("source_url"))
-               for part in (rail, return_leg, access)):
-            reasons.append("source_missing")
-        for part in (rail, return_leg, access):
-            minutes = part.get("duration_min")
-            if type(minutes) is not int or minutes <= 0:
+        if paired:
+            forward=paired.get("to_attraction") or {}
+            reverse=paired.get("to_station") or {}
+            if (forward.get("station_id") != rail.get("destination_station_id") or
+                    reverse.get("station_id") != return_leg.get("origin_station_id")):
+                reasons.append("station_mismatch")
+            if (not forward.get("attraction_id") or
+                    forward.get("attraction_id") != reverse.get("attraction_id") or
+                    forward.get("destination_id") != rail.get("destination_id") or
+                    reverse.get("destination_id") != rail.get("destination_id")):
+                reasons.append("attraction_destination_mismatch")
+            if (forward.get("direction") != "station_to_attraction" or
+                    reverse.get("direction") != "attraction_to_station"):
+                reasons.append("access_direction_mismatch")
+            for record in (forward,reverse):
+                if (not _https(record.get("source_url")) or
+                        record.get("state")!="verified_sample" or
+                        type(record.get("duration_min")) is not int or
+                        record["duration_min"]<=0):
+                    reasons.append("access_duration_or_source_missing")
+        elif isinstance(access,dict) and access.get("status") == "missing_or_conflicting_access":
+            reasons.append("reverse_last_mile_unknown")
+        else:
+            # Old flat access inputs are accepted for identity regression,
+            # but are not independently sourced in both directions.
+            if any(access.get(k) is None for k in (
+                    "arrival_station_id","return_station_id",
+                    "attraction_id","destination_id")):
+                reasons.append("incomplete_access_identity")
+            if access.get("destination_id") != rail.get("destination_id"):
+                reasons.append("attraction_destination_mismatch")
+            if (rail.get("destination_station_id") != access.get("arrival_station_id") or
+                    return_leg.get("origin_station_id") != access.get("return_station_id")):
+                reasons.append("station_mismatch")
+            if not _https(access.get("source_url")):
+                reasons.append("source_missing")
+            if type(access.get("duration_min")) is not int or access["duration_min"]<=0:
                 reasons.append("duration_missing")
-        # A Saturday outbound and Sunday return are allowed; the calendar
-        # comparison must operate on real instants, not equality of dates.
     if reasons:
         return {"association_status": "not_composable",
                 "reasons": sorted(set(reasons)), "temporal_status": "not_checked",
@@ -260,8 +286,13 @@ def compatible_evidence_association(rail: dict | None, return_leg: dict | None,
                 "temporal_status": "not_checked",
                 "full_door_to_door_min": None, "outing_feasible_2027": False}
     try:
-        checked = schedule_validator(
-            rail, return_leg, attraction_window=attraction_window)
+        if paired is not None:
+            checked = schedule_validator(
+                rail, return_leg, attraction_window=attraction_window,
+                last_mile_pair=paired)
+        else:
+            checked = schedule_validator(
+                rail, return_leg, attraction_window=attraction_window)
     except ValueError:
         return {"association_status": "not_composable",
                 "reasons": ["invalid_temporal_or_service_evidence"],
