@@ -89,7 +89,7 @@ class ExplorerAppTest(unittest.TestCase):
         app = AppTest.from_file(str(Path(__file__).resolve().parents[1] / "app.py"),
                                 default_timeout=115).run()
         self.assertFalse(app.exception, [x.message for x in app.exception])
-        app.radio(key="ux_area").set_value("Explorar").run()
+        app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
         app.segmented_control(key="ux_section").set_value("Passeios").run()
         self.assertFalse(app.exception, [x.message for x in app.exception])
         original = deepcopy(app.session_state["advisor_plan"])
