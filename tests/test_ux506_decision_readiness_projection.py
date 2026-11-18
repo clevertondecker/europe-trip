@@ -149,6 +149,36 @@ class ReadinessProjectionTests(unittest.TestCase):
         self.assertEqual(calendar_missing["association_status"], "not_composable")
         self.assertIn("service_dates_not_verified", calendar_missing["reasons"])
 
+    def test_real_tourism_and_housing_overlays_when_integrated(self):
+        try:
+            import tourism_visit_evidence_model
+            import housing_short_stay_research_model
+        except ModuleNotFoundError:
+            self.skipTest("PRs #123/#124 ainda não estão nesta branch")
+        result = build_decision_readiness(comparison(), discovery=DISCOVERY)
+        self.assertEqual(result["tourism_source_scope"],
+                         "pilot_overlay_and_legacy_catalog")
+        self.assertEqual(result["housing_source_scope"],
+                         "housing_research_contract_and_legacy")
+        self.assertGreaterEqual(
+            result["destinations"][0]["enriched_current_opening_rules"], 1)
+        self.assertTrue(all(x["housing_contract_loaded"]
+                            for x in result["base_housing"]))
+
+    def test_real_weekend_validator_when_integrated(self):
+        try:
+            import weekend_return_validation_model
+        except ModuleNotFoundError:
+            self.skipTest("PR #119 ainda não está nesta branch")
+        good = compatible_evidence_association(RAIL, RETURN, ACCESS)
+        self.assertEqual(good["temporal_status"], "documented_legs_only")
+        self.assertEqual(good["association_status"],
+                         "historical_schedule_checked_components_only")
+        bad = compatible_evidence_association(
+            RAIL, {**RETURN, "calendar_dates_verified": []}, ACCESS)
+        self.assertEqual(bad["association_status"], "not_composable")
+        self.assertEqual(bad["temporal_status"], "partial_calendar")
+
     def test_without_temporal_validator_only_identity_matches(self):
         result = compatible_evidence_association(
             RAIL, RETURN, ACCESS,
