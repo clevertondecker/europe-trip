@@ -115,12 +115,15 @@ def render_wishlist_base_comparison(*, plan, discovery=None, research=None):
     # UI-only coverage of exactly the same selected base x destination matrix.
     # Keep canonical legacy coverage as a separate dimension in the details.
     enriched = decorate_comparison(result)
+    st.markdown("#### O que podemos concluir com os dados atuais?")
     st.markdown("#### Resumo da comparação")
     c1, c2, c3, c4 = st.columns(4)
     c1.metric("Histórico de trem", enriched["historical"])
     c2.metric("Mínimo indicativo", enriched["reference_only"])
     c3.metric("Sem tempo", enriched["no_time"])
     c4.metric("Deslocamento local", enriched["local"])
+    st.metric("Trajetos com tempo pesquisado", enriched["historical"])
+    st.markdown("#### O que ainda precisamos pesquisar?")
     st.caption(
         f'{enriched["total"]} combinações: uma categoria por par. '
         "Mínimos indicativos vêm de páginas por cidade, não de serviços "
