@@ -212,9 +212,14 @@ def opportunity_overview(base_id, *, macro=None,catalog=None,exploration=None,
             entry["indicative_source_url"]=cell.get("reference_source_url") or cell.get("source_url")
             entry["indicative_source_checked_at"]=cell.get("gap_checked_at") or cell.get("checked_at")
             entry["indicative_confidence"]=cell.get("confidence")
-            entry["indicative_evidence_type"]=cell.get("gap_evidence_type") or "routes7_reference"
+            entry["indicative_evidence_type"]=(
+                cell.get("gap_evidence_type")
+                or ("data11_priority_reference" if cell.get("priority_connectivity_applied")
+                    else "data10_connectivity_reference" if cell.get("connectivity_applied")
+                    else "routes7_reference"))
             entry["indicative_source_dataset"]=(
-                "data10_connectivity_2026_11" if cell.get("connectivity_applied")
+                "data11_priority_connectivity_2026_11" if cell.get("priority_connectivity_applied")
+                else "data10_connectivity_2026_11" if cell.get("connectivity_applied")
                 else "data9_rail_gap_2026_11" if cell.get("gap_applied")
                 else "routes7_2026_11")
         else:
