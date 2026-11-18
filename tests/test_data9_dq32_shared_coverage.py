@@ -115,7 +115,7 @@ class SharedRailAppTests(unittest.TestCase):
     def test_dq32_indicative_group_and_canonical_wishlist_intact(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
         before=deepcopy(app.session_state["advisor_plan"])
-        app.radio(key="ux_area").set_value("Explorar").run()
+        app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
         app.segmented_control(key="ux_section").set_value("Passeios").run()
         app.selectbox(key="attractions_scenario_base").set_value("mulhouse").run()
         app.selectbox(key="ux_dq32_opportunity_group").set_value(
@@ -139,7 +139,7 @@ class SharedRailAppTests(unittest.TestCase):
     def test_strasbourg_preserves_historical_and_exposes_indicative(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
         before=deepcopy(app.session_state["advisor_plan"])
-        app.radio(key="ux_area").set_value("Explorar").run()
+        app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
         app.segmented_control(key="ux_section").set_value("Passeios").run()
         app.selectbox(key="attractions_scenario_base").set_value("strasbourg").run()
         app.selectbox(key="ux_dq32_opportunity_group").set_value(
