@@ -2539,6 +2539,97 @@
       "confidence": "low",
       "return_2027_verified": false,
       "valid_for_2027": false
+    },
+    {
+      "origin_id": "arlon",
+      "destination_id": "cologne",
+      "minimum_oneway_min": 219,
+      "mode": "rail",
+      "reference_kind": "secondary_route_minimum",
+      "source_url": "https://www.thetrainline.com/en/train-times/arlon-to-cologne-germany",
+      "source_checked_at": "2026-11-18",
+      "direction": "outbound_only",
+      "confidence": "low",
+      "return_2027_verified": false,
+      "valid_for_2027": false
+    },
+    {
+      "origin_id": "arlon",
+      "destination_id": "rotterdam",
+      "minimum_oneway_min": 266,
+      "mode": "rail",
+      "reference_kind": "secondary_route_minimum",
+      "source_url": "https://www.thetrainline.com/en/train-times/arlon-to-rotterdam",
+      "source_checked_at": "2026-11-18",
+      "direction": "outbound_only",
+      "confidence": "low",
+      "return_2027_verified": false,
+      "valid_for_2027": false
+    },
+    {
+      "origin_id": "arlon",
+      "destination_id": "lyon",
+      "minimum_oneway_min": 351,
+      "mode": "rail",
+      "reference_kind": "secondary_route_minimum",
+      "source_url": "https://www.thetrainline.com/en/train-times/arlon-to-lyon",
+      "source_checked_at": "2026-11-18",
+      "direction": "outbound_only",
+      "confidence": "low",
+      "return_2027_verified": false,
+      "valid_for_2027": false
+    },
+    {
+      "origin_id": "arlon",
+      "destination_id": "stuttgart",
+      "minimum_oneway_min": 267,
+      "mode": "rail",
+      "reference_kind": "secondary_route_minimum",
+      "source_url": "https://www.thetrainline.com/en/train-times/arlon-to-stuttgart",
+      "source_checked_at": "2026-11-18",
+      "direction": "outbound_only",
+      "confidence": "low",
+      "return_2027_verified": false,
+      "valid_for_2027": false
+    },
+    {
+      "origin_id": "namur",
+      "destination_id": "lyon",
+      "minimum_oneway_min": 310,
+      "mode": "rail",
+      "reference_kind": "secondary_route_minimum",
+      "source_url": "https://www.thetrainline.com/en/train-times/namur-to-lyon",
+      "source_checked_at": "2026-11-18",
+      "direction": "outbound_only",
+      "confidence": "low",
+      "return_2027_verified": false,
+      "valid_for_2027": false
+    },
+    {
+      "origin_id": "namur",
+      "destination_id": "dijon",
+      "minimum_oneway_min": 312,
+      "mode": "rail",
+      "reference_kind": "secondary_route_minimum",
+      "source_url": "https://www.thetrainline.com/en/train-times/namur-to-dijon",
+      "source_checked_at": "2026-11-18",
+      "direction": "outbound_only",
+      "confidence": "low",
+      "return_2027_verified": false,
+      "valid_for_2027": false
+    },
+    {
+      "origin_id": "namur",
+      "destination_id": "aachen",
+      "minimum_oneway_min": 75,
+      "mode": "rail",
+      "reference_kind": "secondary_route_minimum",
+      "source_url": "https://www.thetrainline.com/en/train-times/namur-to-aachen",
+      "source_checked_at": "2026-11-18",
+      "direction": "outbound_only",
+      "confidence": "low",
+      "return_2027_verified": false,
+      "valid_for_2027": false
     }
   ]
 }
