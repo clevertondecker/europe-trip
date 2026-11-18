@@ -3,6 +3,7 @@ import unittest
 from attraction_last_mile_model import (
     load_access_pilot, matching_access_options,
     station_to_attraction_duration, validate_access_observation,
+    bidirectional_access,
 )
 
 EXAMPLE = {
@@ -46,6 +47,27 @@ class LastMileTests(unittest.TestCase):
             attraction_id="strasbourg_cathedral")
         self.assertIsNone(result["duration_min"])
         self.assertEqual(result["options"], [])
+
+    def test_reverse_leg_must_be_independent_and_dated(self):
+        outbound = {**EXAMPLE, "direction": "station_to_attraction"}
+        reverse = {**EXAMPLE, "direction": "attraction_to_station",
+                   "station_id": "strasbourg_gare", "duration_min": 30}
+        answer = bidirectional_access([outbound, reverse],
+            attraction_id="strasbourg_cathedral",
+            arrival_station_id="strasbourg_gare",
+            return_station_id="strasbourg_gare", arrival_date="2026-11-17",
+            return_date="2026-11-17")
+        self.assertEqual(answer["status"], "both_directions_documented")
+        self.assertEqual(answer["to_station"]["duration_min"], 30)
+        self.assertFalse(answer["ready_for_2027"])
+        mismatched = bidirectional_access([outbound, reverse],
+            attraction_id="strasbourg_cathedral",
+            arrival_station_id="strasbourg_gare",
+            return_station_id="different_station", arrival_date="2026-11-17",
+            return_date="2026-11-17")
+        self.assertEqual(mismatched["status"], "missing_or_conflicting_access")
+        with self.assertRaises(ValueError):
+            validate_access_observation({**EXAMPLE, "observed_for_date": None})
 
     def test_unverified_durations_and_ids_rejected(self):
         for row in (
