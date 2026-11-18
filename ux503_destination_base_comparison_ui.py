@@ -8,6 +8,7 @@ from ux502_destination_interests_model import (
 )
 from ux503_destination_base_comparison_model import compare_wishlist_bases
 from ux506_decision_readiness_projection import build_decision_readiness
+from routes7_comparison_projection import decorate_comparison
 from ux_navigation import set_task
 from ux505_base_comparison_presentation import (
     comparison_overview, matrix_cell, known_findings, missing_research,
@@ -223,7 +224,15 @@ def render_wishlist_base_comparison(*, plan, discovery=None, research=None):
     st.caption("Sem ranking automático: cobertura documental não equivale "
                "a qualidade logística, viabilidade do passeio ou moradia.")
 
-    st.markdown("#### Tempos históricos de ida que já conhecemos")
+    st.markdown("#### Tempos de ida: históricos e referências para planejamento")
+    enriched = decorate_comparison(result)
+    st.caption(
+        f'{enriched["historical"]} pares com histórico, '
+        f'{enriched["reference_only"]} com mínimo publicado adicional, '
+        f'{enriched["local"]} local(is), '
+        f'{enriched["no_time"]} ainda sem tempo de referência. '
+        "Um mínimo publicado não é tempo típico nem garantia de 2027."
+    )
     indexed = {(r["base_id"], r["destination_id"]): r
                for r in result["rows"]}
     matrix = []
@@ -232,12 +241,29 @@ def render_wishlist_base_comparison(*, plan, discovery=None, research=None):
                 destination["priority_label"]}
         for base_id in selected:
             route = indexed[(base_id, destination["id"])]
-            line[cities[base_id]["name"]] = matrix_cell(route)
+            line[cities[base_id]["name"]] = (
+                enriched["cells"][(base_id, destination["id"])]["label"])
         matrix.append(line)
     st.dataframe(matrix, hide_index=True, width="stretch")
-    st.caption("Os tempos são históricos, apenas de ida. Um traço ou uma "
-               "pesquisa parcial não comprovam falta de conexão. "
+    st.caption("Ida histórica ou referência de tempo mínimo publicado, "
+               "sem data ferroviária confirmada para 2027. "
+               "Média publicada é outra métrica, e retorno continua pendente. "
                "Em telas pequenas, deslize a tabela horizontalmente.")
+    with st.expander("Fontes, tempos típicos e ressalvas dos 15 pares",
+                     expanded=False):
+        for destination in result["destinations"]:
+            st.markdown("**" + destination["name"] + "**")
+            for base_id in selected:
+                item = enriched["cells"][(base_id, destination["id"])]
+                st.write(
+                    cities[base_id]["name"] + ": " + item["label"] +
+                    " · " + item["typical_label"]
+                )
+                if item.get("station_status") == "station_not_reconciled":
+                    st.caption("Estações/serviços específicos ainda não reconciliados.")
+                if item.get("source_url"):
+                    st.markdown("[Fonte da referência](" + item["source_url"] + ")")
+        st.caption("Sem retorno de fim de semana ou tarifa confirmada neste overlay.")
 
     left, right = st.columns(2)
     with left:
