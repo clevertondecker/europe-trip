@@ -1124,19 +1124,6 @@
       "valid_for_2027": false
     },
     {
-      "origin_id": "epernay",
-      "destination_id": "nancy",
-      "minimum_oneway_min": 118,
-      "mode": "rail",
-      "reference_kind": "official_operator_minimum",
-      "source_url": "https://www.sncf-connect.com/train/trajet/epernay/nancy",
-      "source_checked_at": "2026-11-18",
-      "direction": "outbound_only",
-      "confidence": "medium",
-      "return_2027_verified": false,
-      "valid_for_2027": false
-    },
-    {
       "origin_id": "saint_louis",
       "destination_id": "nancy",
       "minimum_oneway_min": 152,
