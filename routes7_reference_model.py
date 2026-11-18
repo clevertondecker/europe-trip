@@ -189,6 +189,7 @@ def planning_reference(base_id, destination_id, *, references=None, legacy=None)
         "fastest_min": shown, "original_snapshot_fastest_min": row["fastest_min"],
         "average_min": row["average_min"] if row.get("average_provenance") == "corroborated_city_level" else None,
         "original_snapshot_average_min": row["average_min"],
+        "rechecked_average_min": row["recheck"].get("average_min") if row.get("recheck") else None,
         "display_min": historical if historical is not None else shown,
         "display_basis": "legacy_historical" if historical is not None else (
             "indicative_published_city_minimum" if corroborated else "unknown"),
