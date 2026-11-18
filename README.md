@@ -2,7 +2,20 @@
 
 App de lua de mel Itália → França, com mapa, orçamento, cronograma e pesquisas. Repositório de código: `clevertondecker/europe-trip`. Os arquivos oficiais da viagem continuam no **Google Drive**.
 
-## Como navegar (UX 3.9)
+> **Estado vigente (18/11/2026):** a navegação já inclui UX 5.0, os contratos
+> DATA 8 e a pesquisa ferroviária DATA 9.1. As seções datadas mais abaixo
+> documentam etapas históricas; não devem ser interpretadas como versões atuais
+> nem como disponibilidade de trens ou preços para 2027. Consulte o
+> [índice de documentos vigentes e históricos](docs/INDEX_VIGENTE_HISTORICO.md).
+>
+> **Limite atual:** os 30 cenários de cidade-base e 46 destinos exploratórios
+> somam 1.380 pares no snapshot de 18/11/2026, dos quais 1.262 ainda não
+> têm duração de ida documentada. Um mínimo de ida não comprova retorno,
+> última milha, janela de atração ou excursão realizável. O motor temporal
+> multicritério continua uma PoC isolada, não uma função da interface pública.
+
+
+## Navegação vigente — UX 5.0 e DATA 9.1
 
 A interface atual organiza o planejamento em **quatro áreas**, com controles de apoio dentro das atividades, sem precisar mudar de aplicativo:
 
