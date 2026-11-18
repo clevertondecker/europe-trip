@@ -53,7 +53,7 @@ class UX39StreamlitSmoke(unittest.TestCase):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=110).run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
         original=deepcopy(app.session_state["advisor_plan"])
-        app.radio(key="ux_area").set_value("Orçamento").run()
+        app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Orçamento"))).click().run()
         app.segmented_control(key="ux_section").set_value("Resumo financeiro").run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
         self.assertEqual(app.session_state["advisor_plan"],original)
@@ -64,7 +64,7 @@ class UX39StreamlitSmoke(unittest.TestCase):
     def test_comparison_explains_all_four_outcomes_in_prose(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=110).run()
         plan=deepcopy(app.session_state["advisor_plan"])
-        app.radio(key="ux_area").set_value("Explorar").run()
+        app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
         app.segmented_control(key="ux_section").set_value("Comparar").run()
         app.multiselect(key="ux34_candidates").set_value(["strasbourg"]).run()
         app.multiselect(key="ux34_destinations").set_value(["luxembourg","brussels"]).run()
