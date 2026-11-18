@@ -129,9 +129,10 @@ def render_data8_attraction_details(attraction_id, *, tourism=None, access=None)
     return True
 
 
-def render_data8_destination_preview(destination_id, *, tourism=None):
+def render_data8_destination_preview(destination_id, *, tourism=None, attraction_names=None):
     """For the existing discovery card's open attraction/source expander."""
     research=tourism if tourism is not None else _tourism()
+    attraction_names = attraction_names or {}
     summary=destination_research_overview(destination_id,tourism=research)
     if summary["researched_attractions"]:
         st.caption(str(summary["researched_attractions"]) +
@@ -139,7 +140,8 @@ def render_data8_destination_preview(destination_id, *, tourism=None):
                    "incluindo estimativas editoriais.")
         for row in research["entries"]:
             if row["destination_id"]==destination_id:
-                st.markdown("**"+row["attraction_id"]+"** · "+row["experience"]["why_visit"])
+                st.markdown("**"+attraction_names.get(row["attraction_id"], row["attraction_id"])+"**")
+                st.caption(row["experience"]["why_visit"])
     for row in summary["unreconciled_candidates"]:
         st.caption("Atração ainda não cadastrada: "+row["name"]+
                    " · documentação turística disponível, identidade pendente.")
