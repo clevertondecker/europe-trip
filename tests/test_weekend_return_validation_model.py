@@ -75,6 +75,48 @@ class ReturnValidationTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             validate_service_leg(wrong)
 
+    def test_missing_timezone_cannot_be_scheduled(self):
+        naive = {**OUT, "departure_local": "2026-11-21T08:00",
+                 "arrival_local": "2026-11-21T08:45"}
+        with self.assertRaises(ValueError):
+            validate_service_leg(naive)
+        clock_only = {**OUT, "travel_date": "2026-11-21",
+                      "departure_local": "08:00", "arrival_local": "08:45"}
+        with self.assertRaises(ValueError):
+            validate_service_leg(clock_only)
+
+    def test_canonical_clock_adapter_with_explicit_offsets(self):
+        clock = {**OUT, "travel_date": "2026-11-21",
+                 "departure_local": "08:00", "arrival_local": "08:45",
+                 "departure_utc_offset": "+01:00",
+                 "arrival_utc_offset": "+01:00"}
+        result = validate_service_leg(clock)
+        self.assertEqual(result["departure_at"], "2026-11-21T08:00:00+01:00")
+        self.assertTrue(result["calendar_date_applicable"])
+
+    def test_saturday_outbound_sunday_return_is_valid_historical_pair(self):
+        saturday = {**OUT, "departure_at": "2026-11-21T08:00+01:00",
+                    "arrival_at": "2026-11-21T08:45+01:00"}
+        sunday = {**BACK, "departure_at": "2026-11-22T18:10+01:00",
+                  "arrival_at": "2026-11-22T18:55+01:00",
+                  "calendar_dates_verified": ["2026-11-22"]}
+        self.assertEqual(weekend_roundtrip_evidence(saturday, sunday)["status"],
+                         "documented_legs_only")
+        self.assertFalse(weekend_roundtrip_evidence(
+            saturday, sunday)["outing_feasible"])
+
+    def test_daylight_saving_transition_uses_absolute_instants(self):
+        # DST ends in Europe on 25 Oct 2026: 02:20+02 precedes 02:50+01.
+        leg = {**OUT, "departure_at": "2026-10-25T02:20+02:00",
+               "arrival_at": "2026-10-25T02:50+01:00",
+               "calendar_dates_verified": ["2026-10-25"],
+               "origin_timezone": "Europe/Brussels",
+               "destination_timezone": "Europe/Amsterdam"}
+        result = validate_service_leg(leg)
+        self.assertTrue(result["sample_weekend"])
+        self.assertTrue(result["calendar_date_applicable"])
+        self.assertEqual(result["time_precision"], "offset_aware")
+
     def test_missing_leg(self):
         self.assertEqual(weekend_roundtrip_evidence(OUT, None)["status"],
                          "insufficient_evidence")
