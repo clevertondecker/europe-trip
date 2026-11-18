@@ -26,10 +26,11 @@ Este índice distingue **documentação operacional vigente**, **snapshots de pe
 ## Estado da integração dos PRs (auditado por branch)
 
 - **DATA 9.1 / PR #136** já foi incorporado à `main` e fornece 30 bases × 46 destinos no snapshot histórico, sem horários futuros garantidos.
-- **PR #139** introduz a projeção compartilhada e mantém a fachada legada. Sua efetividade na `main` depende do merge, e o comportamento da tela continua baseado no mesmo contrato.
-- **PR #138** propõe apenas um inventário de evidências por componente, sem mudar fontes ou provar retorno; consulte `docs/LOGISTICS_COMPONENT_BACKLOG_CONTRACT.md` após a integração.
+- **PR #137** corrigiu o score do consultor: o dobro do tempo de ida é somente uma penalidade editorial, não retorno documentado.
+- **PR #139** foi integrado à `main` e introduziu a projeção compartilhada, mantendo a fachada de compatibilidade da UX503.
+- **PR #138** foi integrado à `main` e acrescentou o inventário documental por componente; consulte `docs/LOGISTICS_COMPONENT_BACKLOG_CONTRACT.md`. Ele **não comprova** retorno, última milha, horário nem tarifa de 2027.
 - **A PoC do avaliador temporal/multicritério permanece externa ao repositório**, sem API pública nem integração à interface.
-- O estado de integração deste texto corresponde à proposta de documentação no PR #140. Para verificar merges e CI posteriores, prevalecem os commits da `main` e os checks do GitHub.
+- Este índice reflete o código e as evidências na `main` após #137, #139 e #138. Para merges futuros e o estado do CI, prevalecem os commits e checks do GitHub.
 
 ## Documentação histórica, preservar sem reescrever
 
