@@ -137,7 +137,7 @@ def render_wishlist_base_comparison(*, plan, discovery=None, research=None):
     st.markdown("#### Resumo da comparação")
     c1, c2, c3, c4 = st.columns(4)
     c1.metric("Histórico de trem", enriched["historical"])
-    c2.metric("Mínimo indicativo", enriched["reference_only"])
+    c2.metric("Referências indicativas", enriched["reference_only"])
     c3.metric("Sem tempo", enriched["no_time"])
     c4.metric("Deslocamento local", enriched["local"])
     st.metric("Trajetos com tempo pesquisado",
