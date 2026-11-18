@@ -140,14 +140,16 @@ def load_route_references(path=DATA, *, snapshot_path=SNAPSHOT):
                     "indicative_only_not_station_comparable",
                     "city_level_reference_not_dated_service")):
                 raise ValueError("unreconciled stations must not claim schedule")
-            if row["station_comparability"] == "city_level_ambiguous" and (
-                    row.get("origin_station_id") is not None or
-                    row.get("destination_station_id") is not None):
-                raise ValueError("unknown station must remain null")
-            if row["station_comparability"] == "station_named_in_route_page" and (
-                    not row.get("origin_station_id") or
-                    not row.get("destination_station_id")):
-                raise ValueError("reconciled stations need both identities")
+            if row["station_comparability"] == "city_level_ambiguous":
+                if (row.get("station_status") != "station_not_reconciled" or
+                        row.get("origin_station_id") is not None or
+                        row.get("destination_station_id") is not None):
+                    raise ValueError("unreconciled stations must remain unknown")
+            if row["station_comparability"] == "station_named_in_route_page":
+                if (row.get("station_status") != "route_page_identified_stations" or
+                        not row.get("origin_station_id") or
+                        not row.get("destination_station_id")):
+                    raise ValueError("named stations require source-consistent identities")
             if row.get("confidence") not in ("low", "insufficient"):
                 raise ValueError("undated source cannot have high confidence")
         records[key] = deepcopy(row)
