@@ -13,3 +13,8 @@ from rail_reference_projection_model import (
     load_gap_enrichment,
     lru_cache,
 )
+
+# Keep the previous non-private wildcard import surface while allowing explicit
+# access to _cached_route_gaps for legacy callers.
+__all__ = ("format_minutes", "decorate_comparison", "load_route_references",
+           "planning_reference", "load_gap_enrichment", "lru_cache")
