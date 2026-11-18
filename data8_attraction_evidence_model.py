@@ -56,8 +56,9 @@ def _duration(row):
     if row["state"] == "editorial_estimate":
         if not row.get("method"):
             raise ValueError("editorial range needs explicit method")
-    if row["state"] == "operator_guidance":
-        _source_field(row, required=True)
+    # Editorial estimates may be unsourced assumptions, but dates supplied must
+    # still be valid. Operator guidance always requires field-level evidence.
+    _source_field(row, required=row["state"] == "operator_guidance")
 
 
 def _admission(row):
@@ -66,9 +67,17 @@ def _admission(row):
     if row.get("valid_for_2027") is not False:
         raise ValueError("price cannot claim 2027 booking")
     amount = row.get("amount")
-    if row["state"] in {"unknown", "external_no_ticket"}:
+    if row["state"] == "unknown":
         if amount is not None:
-            raise ValueError("unknown/external ticket is not numeric")
+            raise ValueError("unknown ticket is not numeric")
+        _source_field(row)
+    elif row["state"] == "external_no_ticket":
+        if amount is not None:
+            raise ValueError("external ticket is not numeric")
+        if (row.get("external_access_basis") != "documented_public_outdoor_area"
+                or not row.get("scope_note")):
+            raise ValueError("external access needs a documented outdoor-only scope")
+        _source_field(row, required=True)
     elif row["state"] == "free_general_entry":
         if amount != 0:
             raise ValueError("free entry requires explicit zero")
@@ -151,7 +160,7 @@ def validate_dataset(data, *, discovery):
     rows = [validate_entry(x, identity_map=ids, seen=seen)
             for x in data.get("entries", [])]
     for x in rows:
-        for field in ("experience", "opening", "admission", "seasonality", "location"):
+        for field in ("experience", "duration", "opening", "admission", "seasonality", "location"):
             checked = x[field].get("checked_at")
             if checked and checked > data["checked_at"]:
                 raise ValueError("source checked after dataset snapshot")
@@ -181,7 +190,7 @@ def coverage_report(research, *, destination_ids=None):
     return {"selected_attractions": len(rows),
             "experience_sourced": sum(bool(r["experience"]["why_visit"]) for r in rows),
             "duration_range": sum(r["duration"]["state"] != "unknown" for r in rows),
-            "general_entry_known": sum(r["admission"]["state"] not in ("unknown",) for r in rows),
+            "general_entry_known": sum(r["admission"]["state"] in ("free_general_entry", "published_price") for r in rows),
             "general_hours_documented": sum(r["opening"]["state"] != "unknown" for r in rows),
             "seasonality_documented": sum(r["seasonality"]["state"] != "unknown" for r in rows),
             "address_documented": sum(r["location"]["state"] != "unknown" for r in rows),

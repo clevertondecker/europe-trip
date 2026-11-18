@@ -73,7 +73,8 @@
         "source_url": "https://www.aachen-tourismus.de/en/aachen-entdecken/details/poi/elisenbrunnen/",
         "checked_at": "2026-11-18",
         "valid_for_2027": false,
-        "scope_note": "Passeio externo; serviços internos e opcionais são cobrados separadamente ou desconhecidos"
+        "scope_note": "Somente passeio em espaço público externo, sem incluir atividades internas, ingressos ou serviços.",
+        "external_access_basis": "documented_public_outdoor_area"
       },
       "opening": {
         "state": "unknown",
@@ -158,14 +159,14 @@
         "method": "Faixa editorial exploratória para visita sem fila, não publicada pelo operador"
       },
       "admission": {
-        "state": "external_no_ticket",
+        "state": "unknown",
         "amount": null,
         "currency": null,
         "unit": null,
-        "source_url": "https://www.visit.brussels/en/visitors/what-to-do/must-see-attractions",
-        "checked_at": "2026-11-18",
+        "source_url": null,
+        "checked_at": null,
         "valid_for_2027": false,
-        "scope_note": "Passeio externo; serviços internos e opcionais são cobrados separadamente ou desconhecidos"
+        "scope_note": "Ainda sem comprovação específica de acesso exterior sem ingresso; visita interna e serviços não podem ser presumidos gratuitos."
       },
       "opening": {
         "state": "unknown",
@@ -204,14 +205,14 @@
         "method": "Faixa editorial exploratória para visita sem fila, não publicada pelo operador"
       },
       "admission": {
-        "state": "external_no_ticket",
+        "state": "unknown",
         "amount": null,
         "currency": null,
         "unit": null,
-        "source_url": "https://www.visit.brussels/en/visitors/what-to-do/must-see-attractions",
-        "checked_at": "2026-11-18",
+        "source_url": null,
+        "checked_at": null,
         "valid_for_2027": false,
-        "scope_note": "Passeio externo; serviços internos e opcionais são cobrados separadamente ou desconhecidos"
+        "scope_note": "Ainda sem comprovação específica de acesso exterior sem ingresso; visita interna e serviços não podem ser presumidos gratuitos."
       },
       "opening": {
         "state": "unknown",
@@ -250,14 +251,14 @@
         "method": "Faixa editorial exploratória para visita sem fila, não publicada pelo operador"
       },
       "admission": {
-        "state": "external_no_ticket",
+        "state": "unknown",
         "amount": null,
         "currency": null,
         "unit": null,
-        "source_url": "https://www.visit.brussels/en/visitors/what-to-do/must-see-attractions",
-        "checked_at": "2026-11-18",
+        "source_url": null,
+        "checked_at": null,
         "valid_for_2027": false,
-        "scope_note": "Passeio externo; serviços internos e opcionais são cobrados separadamente ou desconhecidos"
+        "scope_note": "Ainda sem comprovação específica de acesso exterior sem ingresso; visita interna e serviços não podem ser presumidos gratuitos."
       },
       "opening": {
         "state": "unknown",
@@ -296,14 +297,14 @@
         "method": "Faixa editorial exploratória para visita sem fila, não publicada pelo operador"
       },
       "admission": {
-        "state": "external_no_ticket",
+        "state": "unknown",
         "amount": null,
         "currency": null,
         "unit": null,
-        "source_url": "https://www.visit.brussels/en/visitors/what-to-do/attractions-and-monuments",
-        "checked_at": "2026-11-18",
+        "source_url": null,
+        "checked_at": null,
         "valid_for_2027": false,
-        "scope_note": "Passeio externo; serviços internos e opcionais são cobrados separadamente ou desconhecidos"
+        "scope_note": "Ainda sem comprovação específica de acesso exterior sem ingresso; visita interna e serviços não podem ser presumidos gratuitos."
       },
       "opening": {
         "state": "unknown",
@@ -439,7 +440,8 @@
         "source_url": "https://www.visitstrasbourg.fr/en/discover/strasbourg-and-its-surrounding-area/petite-france/",
         "checked_at": "2026-11-18",
         "valid_for_2027": false,
-        "scope_note": "Passeio externo; serviços internos e opcionais são cobrados separadamente ou desconhecidos"
+        "scope_note": "Somente passeio em espaço público externo, sem incluir atividades internas, ingressos ou serviços.",
+        "external_access_basis": "documented_public_outdoor_area"
       },
       "opening": {
         "state": "unknown",
@@ -478,14 +480,14 @@
         "method": "Faixa editorial exploratória para visita sem fila, não publicada pelo operador"
       },
       "admission": {
-        "state": "external_no_ticket",
+        "state": "unknown",
         "amount": null,
         "currency": null,
         "unit": null,
-        "source_url": "https://www.visitstrasbourg.fr/en/discover/must-see-attractions/",
-        "checked_at": "2026-11-18",
+        "source_url": null,
+        "checked_at": null,
         "valid_for_2027": false,
-        "scope_note": "Passeio externo; serviços internos e opcionais são cobrados separadamente ou desconhecidos"
+        "scope_note": "Ainda sem comprovação específica de acesso exterior sem ingresso; visita interna e serviços não podem ser presumidos gratuitos."
       },
       "opening": {
         "state": "unknown",
@@ -531,7 +533,8 @@
         "source_url": "https://www.visitstrasbourg.fr/en/discover/strasbourg-and-its-surrounding-area/petite-france/",
         "checked_at": "2026-11-18",
         "valid_for_2027": false,
-        "scope_note": "Passeio externo; serviços internos e opcionais são cobrados separadamente ou desconhecidos"
+        "scope_note": "Somente passeio em espaço público externo, sem incluir atividades internas, ingressos ou serviços.",
+        "external_access_basis": "documented_public_outdoor_area"
       },
       "opening": {
         "state": "unknown",
@@ -615,14 +618,14 @@
         "method": "Faixa editorial exploratória para visita sem fila, não publicada pelo operador"
       },
       "admission": {
-        "state": "external_no_ticket",
+        "state": "unknown",
         "amount": null,
         "currency": null,
         "unit": null,
-        "source_url": "https://www.visitstrasbourg.fr/en/discover/must-see-attractions/",
-        "checked_at": "2026-11-18",
+        "source_url": null,
+        "checked_at": null,
         "valid_for_2027": false,
-        "scope_note": "Passeio externo; serviços internos e opcionais são cobrados separadamente ou desconhecidos"
+        "scope_note": "Ainda sem comprovação específica de acesso exterior sem ingresso; visita interna e serviços não podem ser presumidos gratuitos."
       },
       "opening": {
         "state": "unknown",
@@ -668,7 +671,8 @@
         "source_url": "https://en.lilletourism.com/explore/lille-and-the-surrounding-area/museums-and-tourist-attractions/grand-place/",
         "checked_at": "2026-11-18",
         "valid_for_2027": false,
-        "scope_note": "Passeio externo; serviços internos e opcionais são cobrados separadamente ou desconhecidos"
+        "scope_note": "Somente passeio em espaço público externo, sem incluir atividades internas, ingressos ou serviços.",
+        "external_access_basis": "documented_public_outdoor_area"
       },
       "opening": {
         "state": "unknown",
@@ -833,14 +837,17 @@
       "canonical_attraction_id": null,
       "name": "Catedral de Colônia",
       "source_url": "https://willkommen.koelntourismus.de/terminal/v/en/poi/cologne-cathedral",
-      "reason": "Destinação cadastrada, atração ainda sem ID canônico: conciliar antes de enriquecer"
+      "reason": "Destinação cadastrada, atração ainda sem ID canônico: conciliar antes de enriquecer",
+      "checked_at": "2026-11-18"
     },
     {
       "destination_id": "ghent",
       "canonical_attraction_id": null,
       "name": "Gravensteen — Castle of the Counts",
       "source_url": "https://visit.gent.be/en/see-do/castle-counts",
-      "reason": "Destinação cadastrada, atração ainda sem ID canônico: conciliar antes de enriquecer"
+      "reason": "Destinação cadastrada, atração ainda sem ID canônico: conciliar antes de enriquecer",
+      "checked_at": "2026-11-18"
     }
-  ]
+  ],
+  "research_limitations": "Links turísticos de contexto não comprovam preço nem acesso; estados sem evidência específica permanecem unknown. Fontes e preços de 2026 não garantem serviços ou ingressos em 2027."
 }
