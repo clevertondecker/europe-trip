@@ -20,6 +20,7 @@ from rail_evidence_unified_model import (
     canonical_place, load_rail_evidence,
 )
 from evidence_query_model import get_rail_evidence
+from routes7_comparison_projection import decorate_comparison
 
 DEFAULT=Path(__file__).resolve().parent/"data"/"dq32_macro_tourism_2026_11.json"
 
@@ -160,6 +161,7 @@ def opportunity_overview(base_id, *, macro=None,catalog=None,exploration=None,
     catalog_attractions=reconciled["canonical_by_city"]
     local_new=reconciled["new_by_city"]
     entries=[]
+    projection_rows=[]
     for dest_id,meta in destinations.items():
         local=dest_id==origin
         evidence=get_rail_evidence(
@@ -169,6 +171,13 @@ def opportunity_overview(base_id, *, macro=None,catalog=None,exploration=None,
         source=evidence["source_url"]
         checked=evidence["source_date"]
         dataset=evidence["source_dataset"]
+        projection_rows.append({
+            "base_id":origin, "destination_id":dest_id,
+            "evidence_status":evidence["status"],
+            "minimum_oneway_min":minutes,
+            "source_url":source,
+            "divergent_sources":False,
+        })
         attrs=local_new.get(dest_id,[])+catalog_attractions.get(dest_id,[])
         canonical_count=len(catalog_attractions.get(dest_id,[]))
         new_count=len(local_new.get(dest_id,[]))
@@ -190,13 +199,35 @@ def opportunity_overview(base_id, *, macro=None,catalog=None,exploration=None,
             "journey_scope":"historical_minimum_station_to_station_only" if minutes is not None
                             else "not_available",
         })
+    # Reuse the exact same precedence and DATA 9 projection as Explorar → Comparar.
+    # No new rail estimator, no synthetic reverse, and no mutation of historical
+    # records. Keep indicative observations distinct from historical evidence.
+    projection=decorate_comparison({"rows":projection_rows})
+    for entry in entries:
+        cell=projection["cells"][(origin,entry["destination_id"])]
+        if cell["category"]=="reference_only":
+            entry["status"]="indicative_rail_reference_only"
+            entry["indicative_train_oneway_min"]=cell["display_min"]
+            entry["indicative_train_label"]=cell["label"]
+            entry["indicative_source_url"]=cell.get("reference_source_url") or cell.get("source_url")
+            entry["indicative_source_checked_at"]=cell.get("gap_checked_at") or cell.get("checked_at")
+            entry["indicative_confidence"]=cell.get("confidence")
+            entry["indicative_evidence_type"]=cell.get("gap_evidence_type") or "routes7_reference"
+        else:
+            entry["indicative_train_oneway_min"]=None
+            entry["indicative_train_label"]=None
+            entry["indicative_source_url"]=None
+            entry["indicative_source_checked_at"]=None
+            entry["indicative_confidence"]=None
+            entry["indicative_evidence_type"]=None
     entries.sort(key=lambda item:(
         0 if item["local"] else 1 if item["minimum_train_oneway_min"] is not None else 2,
         item["minimum_train_oneway_min"] if item["minimum_train_oneway_min"] is not None else 999999,
         item["name"]))
     local_rows=[x for x in entries if x["local"]]
     observed=[x for x in entries if x["minimum_train_oneway_min"] is not None]
-    unknown=[x for x in entries if not x["local"] and x["minimum_train_oneway_min"] is None]
+    indicative=[x for x in entries if x["status"]=="indicative_rail_reference_only"]
+    unknown=[x for x in entries if x["status"]=="unresearched_from_base"]
     return {
         "base_id":origin,"base_name":valid_bases[origin]["name"],
         "registry_destinations":len(entries),
@@ -209,7 +240,15 @@ def opportunity_overview(base_id, *, macro=None,catalog=None,exploration=None,
         "historical_rail_destinations":deepcopy(observed),
         "unresearched_destinations":deepcopy(unknown),
         "rail_time_documented_count":len(observed),
+        "indicative_rail_destinations":deepcopy(indicative),
+        "indicative_rail_reference_count":len(indicative),
         "unresearched_count":len(unknown),
+        "rail_reference_total_count":len(observed)+len(indicative),
+        "rail_coverage_audit":{
+            "historical":len(observed),"indicative":len(indicative),
+            "local":len(local_rows),"unknown":len(unknown),
+            "total":len(entries),
+        },
         "destinations":deepcopy(entries),
         "feasible_destinations_count":None,
         "comparison_score":None,
