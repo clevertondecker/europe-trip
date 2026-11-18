@@ -1,0 +1,92 @@
+{
+  "schema_version": 1,
+  "checked_at": "2026-11-17",
+  "scope": "exploratory_only_not_wishlist_not_route",
+  "fixed_reference_basket_untouched": true,
+  "proposals": [
+    {
+      "proposed_destination_id": "maastricht",
+      "name": "Maastricht",
+      "country": "Países Baixos",
+      "corridor": "north_belgium_netherlands",
+      "relevant_registered_bases": [
+        "liege",
+        "lille"
+      ],
+      "example_attraction": "Basílica de São Servácio",
+      "source_url": "https://www.visitmaastricht.com/en/locations/2059606782/sint-servaasbasiliek-1",
+      "source_kind": "official_tourism",
+      "checked_at": "2026-11-17",
+      "discovered": true,
+      "rail_service_researched": false,
+      "historical_train_time_min": null,
+      "weekend_return_verified": false,
+      "last_mile_verified": false,
+      "seasonality_2027_verified": false,
+      "proposal_status": "discovered_no_route_claim"
+    },
+    {
+      "proposed_destination_id": "leuven",
+      "name": "Leuven",
+      "country": "Bélgica",
+      "corridor": "north_belgium_netherlands",
+      "relevant_registered_bases": [
+        "liege",
+        "lille"
+      ],
+      "example_attraction": "Biblioteca Universitária e Torre",
+      "source_url": "https://www.visitleuven.be/en/university-library",
+      "source_kind": "official_tourism",
+      "checked_at": "2026-11-17",
+      "discovered": true,
+      "rail_service_researched": false,
+      "historical_train_time_min": null,
+      "weekend_return_verified": false,
+      "last_mile_verified": false,
+      "seasonality_2027_verified": false,
+      "proposal_status": "discovered_no_route_claim"
+    },
+    {
+      "proposed_destination_id": "eguisheim",
+      "name": "Eguisheim",
+      "country": "França",
+      "corridor": "alsace_wine_route",
+      "relevant_registered_bases": [
+        "mulhouse",
+        "strasbourg"
+      ],
+      "example_attraction": "Centro histórico e vinhedos",
+      "source_url": "https://www.visit.alsace/253000781-eguisheim/",
+      "source_kind": "official_tourism",
+      "checked_at": "2026-11-17",
+      "discovered": true,
+      "rail_service_researched": false,
+      "historical_train_time_min": null,
+      "weekend_return_verified": false,
+      "last_mile_verified": false,
+      "seasonality_2027_verified": false,
+      "proposal_status": "discovered_no_route_claim"
+    },
+    {
+      "proposed_destination_id": "riquewihr",
+      "name": "Riquewihr",
+      "country": "França",
+      "corridor": "alsace_wine_route",
+      "relevant_registered_bases": [
+        "mulhouse",
+        "strasbourg"
+      ],
+      "example_attraction": "Centro histórico e rota dos vinhos",
+      "source_url": "https://www.visit.alsace/en/sit/229000837-office-de-tourisme-du-pays-de-ribeauville-et-riquewihr/",
+      "source_kind": "official_tourism",
+      "checked_at": "2026-11-17",
+      "discovered": true,
+      "rail_service_researched": false,
+      "historical_train_time_min": null,
+      "weekend_return_verified": false,
+      "last_mile_verified": false,
+      "seasonality_2027_verified": false,
+      "proposal_status": "discovered_no_route_claim"
+    }
+  ]
+}
