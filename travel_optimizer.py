@@ -1,7 +1,6 @@
 """Bounded, deterministic draft calendar optimization; never commits a proposal."""
 from __future__ import annotations
 from datetime import date
-from itertools import permutations
 from calendar_model import calendar_plan
 from attractions_model import route_for
 from trip_plan_model import validate_plan
@@ -29,21 +28,24 @@ def propose_schedule(plan,attractions,routes,profile="balanced",max_variants=3):
     unresolved=[]
     for dest, ids in plan["packages"].items():
         if dest in plan["assignments"].values():continue
-        route=route_for(routes,plan["base_city"],dest)
         if dest not in by_dest:
             unresolved.append({"destination":dest,"reason":"Destino desconhecido"})
             continue
         if by_dest[dest]["kind"]=="overnight":
             unresolved.append({"destination":dest,"reason":"Pernoite e conexões não verificados"})
             continue
-        if dest!=plan["base_city"] and route["train_minutes_one_way"] is None:
+        route=route_for(routes,plan["base_city"],dest)
+        oneway=route["train_minutes_one_way"]
+        if dest!=plan["base_city"] and (type(oneway) is not int or oneway<=0):
             unresolved.append({"destination":dest,"reason":"Tempo de deslocamento não verificado"})
             continue
         length=sum(a["visit_minutes"] for a in attractions["attractions"] if a["id"] in ids)
         if length>7*60:
             unresolved.append({"destination":dest,"reason":"Tempo dentro das atrações superior a 7h"})
             continue
-        jobs.append((dest,route["train_minutes_one_way"] or 0))
+        # A zero here is strictly a rail sorting penalty for a local outing,
+        # never an estimate of walking / urban travel.
+        jobs.append((dest,oneway if dest!=plan["base_city"] else 0))
     # Stable deterministic sort; optional priorities cannot remove mandatory selections.
     if profile=="economy": jobs.sort(key=lambda x:(x[1],x[0]))
     elif profile=="experience":jobs.sort(key=lambda x:(-x[1],x[0]))
@@ -92,20 +94,40 @@ def propose_schedule(plan,attractions,routes,profile="balanced",max_variants=3):
     return distinct
 
 def score_proposal(proposal,plan,routes,profile):
-    """Relative ranking within considered verifiable candidates, never a truth metric."""
+    """Relative draft ordering only; not an itinerary feasibility assessment."""
     count=len(proposal["placed"])
-    rail_mins=sum((route_for(routes,plan["base_city"],dest)["train_minutes_one_way"] or 0)*2
-        for dest in proposal["placed"])
+    # Historical one-way times are not verified return journeys.
+    # Preserve the old relative score by using the symmetric value ONLY as
+    # an explicit heuristic penalty, not as a known duration.
+    outbound_mins = 0
+    for dest in proposal["placed"]:
+        if dest == plan["base_city"]:
+            # A local destination needs no intercity train; local transit is unknown.
+            continue
+        minutes = route_for(routes, plan["base_city"], dest)["train_minutes_one_way"]
+        if type(minutes) is not int or minutes <= 0:
+            raise ValueError("Cannot score a proposed outing with unknown outbound rail time")
+        outbound_mins += minutes
+    symmetric_proxy_mins = outbound_mins * 2
     holidays=sum(1 for day,dest in proposal["assignments"].items()
         if day not in plan["assignments"] and date.fromisoformat(day).weekday()<5)
     unfinished=len(proposal["unresolved"])
     if profile=="economy":
-        raw= count*70-rail_mins/12-unfinished*30
+        raw= count*70-symmetric_proxy_mins/12-unfinished*30
     elif profile=="experience":
-        raw=count*95-rail_mins/35-unfinished*40+holidays*2
+        raw=count*95-symmetric_proxy_mins/35-unfinished*40+holidays*2
     else:
-        raw=count*85-rail_mins/20-unfinished*35
+        raw=count*85-symmetric_proxy_mins/20-unfinished*35
     return {"relative_score":round(raw,2),"scheduled":count,
-            "known_roundtrip_train_minutes":rail_mins,
+            # Retained legacy field is deliberately null, never an inferred route.
+            "known_roundtrip_train_minutes":None,
+            "known_outbound_train_minutes":outbound_mins,
+            "symmetric_train_proxy_minutes":symmetric_proxy_mins,
+            "return_train_minutes":None,
+            "local_access_minutes":None,
+            "return_2027_verified":False,
+            "score_time_basis":"outbound_twice_editorial_proxy_not_verified_return",
+            "logistical_feasibility":None,
+            "confirmed_2027":False,
             "unscheduled":unfinished,
-            "method":"Relative heuristic using scheduled outings, known train-only travel and unresolved data. Not a guaranteed cost or route."}
+            "method":"Relative draft-ordering heuristic; twice the known outbound is only a penalty proxy. Return, access, openings and 2027 availability are NOT verified."}
