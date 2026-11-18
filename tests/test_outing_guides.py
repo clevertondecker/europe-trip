@@ -86,7 +86,7 @@ class OutingGuideModelTests(unittest.TestCase):
 class OutingGuideUITests(unittest.TestCase):
     def test_changing_base_updates_confirmed_card_and_add_optional_is_explicit(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=100).run()
-        app.radio(key="ux_area").set_value("Meu roteiro").run()
+        app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Meu roteiro"))).click().run()
         app.segmented_control(key="ux_section").set_value("Melhorar meu roteiro").run()
         app.selectbox(key="ux_improve_view").set_value("Temporada europeia").run()
         app.button(key="outing_add_open").click().run()
@@ -119,7 +119,7 @@ class OutingGuideUITests(unittest.TestCase):
 
     def test_discovery_and_budget_can_open_the_same_guide(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=100).run()
-        app.radio(key="ux_area").set_value("Meu roteiro").run()
+        app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Meu roteiro"))).click().run()
         app.segmented_control(key="ux_section").set_value("Melhorar meu roteiro").run()
         app.selectbox(key="ux_improve_view").set_value("Descobrir").run()
         self.assertIn("discovery_guide_toggle_colmar",{c.key for c in app.checkbox})
@@ -127,7 +127,7 @@ class OutingGuideUITests(unittest.TestCase):
         self.assertFalse(app.exception,[e.message for e in app.exception])
         self.assertTrue(any(m.label=="Trem de ida" for m in app.metric))
         self.assertEqual(app.session_state["advisor_plan"]["packages"],{})
-        app.radio(key="ux_area").set_value("Orçamento").run()
+        app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Orçamento"))).click().run()
         app.segmented_control(key="ux_section").set_value("Simulações").run()
         app.segmented_control(key="ux_budget_view").set_value("Consultor de passeios").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
