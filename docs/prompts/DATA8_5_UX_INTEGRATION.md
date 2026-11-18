@@ -13,3 +13,12 @@
 **Aceite:** 18 fichas acessíveis nas telas existentes, ausência de fichas nos destinos de Colônia/Gand explicitamente demonstrada sem cadastro forçado, 7 cenários de caminhada editoriais, simulação incompleta transparente, nenhum dado futuro inventado.
 
 **Regra de governança:** alterações de UX de propriedade compartilhada devem ser realizadas somente pela função integradora do projeto; este PR é o ponto de integração. Entregar aberto para revisão, sem merge/deploy.
+
+## Revisão corretiva — 18/11/2026
+
+- Na comparação, compor campos DATA 8 e legado por proveniência, sem `continue` que oculte documentação histórica.
+- Usar entrada geral, visita exclusivamente externa e atividades adicionais como escopos distintos e explícitos.
+- Classificar ingresso não pesquisado como desconhecido; não equiparar a custo zero.
+- Cada faixa de transporte informada na simulação representa ida e volta de **dois adultos** e é hipótese manual.
+- Caso qualquer custo do escopo esteja ausente, exibir total parcial com pendências e bloquear total completo.
+- Validar cenários interativos por Streamlit AppTest; não alterar `TripPlan`, wishlist ou orçamento.
