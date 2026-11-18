@@ -28,21 +28,24 @@ def propose_schedule(plan,attractions,routes,profile="balanced",max_variants=3):
     unresolved=[]
     for dest, ids in plan["packages"].items():
         if dest in plan["assignments"].values():continue
-        route=route_for(routes,plan["base_city"],dest)
         if dest not in by_dest:
             unresolved.append({"destination":dest,"reason":"Destino desconhecido"})
             continue
         if by_dest[dest]["kind"]=="overnight":
             unresolved.append({"destination":dest,"reason":"Pernoite e conexões não verificados"})
             continue
-        if dest!=plan["base_city"] and route["train_minutes_one_way"] is None:
+        route=route_for(routes,plan["base_city"],dest)
+        oneway=route["train_minutes_one_way"]
+        if dest!=plan["base_city"] and (type(oneway) is not int or oneway<=0):
             unresolved.append({"destination":dest,"reason":"Tempo de deslocamento não verificado"})
             continue
         length=sum(a["visit_minutes"] for a in attractions["attractions"] if a["id"] in ids)
         if length>7*60:
             unresolved.append({"destination":dest,"reason":"Tempo dentro das atrações superior a 7h"})
             continue
-        jobs.append((dest,route["train_minutes_one_way"] or 0))
+        # A zero here is strictly a rail sorting penalty for a local outing,
+        # never an estimate of walking / urban travel.
+        jobs.append((dest,oneway if dest!=plan["base_city"] else 0))
     # Stable deterministic sort; optional priorities cannot remove mandatory selections.
     if profile=="economy": jobs.sort(key=lambda x:(x[1],x[0]))
     elif profile=="experience":jobs.sort(key=lambda x:(-x[1],x[0]))
@@ -91,7 +94,7 @@ def propose_schedule(plan,attractions,routes,profile="balanced",max_variants=3):
     return distinct
 
 def score_proposal(proposal,plan,routes,profile):
-    """Relative ranking within considered verifiable candidates, never a truth metric."""
+    """Relative draft ordering only; not an itinerary feasibility assessment."""
     count=len(proposal["placed"])
     # Historical one-way times are not verified return journeys.
     # Preserve the old relative score by using the symmetric value ONLY as
@@ -124,5 +127,7 @@ def score_proposal(proposal,plan,routes,profile):
             "local_access_minutes":None,
             "return_2027_verified":False,
             "score_time_basis":"outbound_twice_editorial_proxy_not_verified_return",
+            "logistical_feasibility":None,
+            "confirmed_2027":False,
             "unscheduled":unfinished,
             "method":"Relative draft-ordering heuristic; twice the known outbound is only a penalty proxy. Return, access, openings and 2027 availability are NOT verified."}
