@@ -6,7 +6,9 @@ The audit does not fetch network content or change datasets or TripPlan.
 from __future__ import annotations
 import argparse
 import json
-from collections import Counter
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from dq32_macro_opportunities_model import opportunity_overview
 from base_scenario_model import base_options
 
