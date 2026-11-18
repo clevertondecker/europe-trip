@@ -16,8 +16,8 @@ from rail_gap_coverage_audit_model import build_rail_coverage_inventory
 class Data10ConnectivityTests(unittest.TestCase):
     def test_all_registered_bases_and_additive_sourced_times(self):
         data=load_connectivity_references()
-        self.assertEqual(len(data["records"]),99)
-        self.assertEqual(len(data["by_pair"]),99)
+        self.assertEqual(len(data["records"]),108)
+        self.assertEqual(len(data["by_pair"]),108)
         self.assertEqual(len({r["origin_id"] for r in data["records"]}),30)
         self.assertFalse(data["mutates_catalog"])
         self.assertEqual(data["verified_2027_services"],0)
@@ -149,7 +149,7 @@ class Data10ConnectivityTests(unittest.TestCase):
             self.assertEqual(summary["total_pairs"],1380)
             self.assertEqual(summary["base_count"],30)
             self.assertEqual(summary["destination_count"],46)
-            self.assertEqual(summary["data10_sourced_records"],99)
+            self.assertEqual(summary["data10_sourced_records"],108)
             self.assertGreater(summary["data10_new_references_shown"],0)
             base=Path(tmp)
             data=json.loads((base/"coverage.json").read_text(encoding="utf-8"))
