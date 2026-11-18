@@ -79,7 +79,7 @@ class LocalDestinationPhotosAppTests(unittest.TestCase):
         with patch.object(ui,"_cached_visible_photos",side_effect=fake_dynamic):
             app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
             initial=deepcopy(app.session_state["advisor_plan"])
-            app.radio(key="ux_area").set_value("Explorar").run()
+            app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
             app.segmented_control(key="ux_section").set_value("Passeios").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
         self.assertFalse(FIVE.intersection(observed))
