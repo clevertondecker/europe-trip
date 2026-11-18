@@ -42,7 +42,7 @@ class DQ21DecisionTests(unittest.TestCase):
         from streamlit.testing.v1 import AppTest
         root=Path(__file__).resolve().parents[1]
         app=AppTest.from_file(str(root/"app.py"),default_timeout=120).run()
-        app.radio(key="ux_area").set_value("Explorar").run()
+        app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
         app.segmented_control(key="ux_section").set_value("Cidades-base").run()
         app.segmented_control(key="ux42_city_activity").set_value("Comparar favoritas").run()
         app.multiselect(key="ux41_favorites_widget").set_value(
