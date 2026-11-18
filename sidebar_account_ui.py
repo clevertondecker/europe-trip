@@ -8,7 +8,8 @@ from __future__ import annotations
 
 import streamlit as st
 
-from travel_advisor_ui import _owner_config, _owner_signed_in
+from travel_advisor_ui import _owner_config
+from advisor_auth import is_verified_owner
 
 
 def account_view_state(config: dict, user) -> str:
@@ -16,7 +17,7 @@ def account_view_state(config: dict, user) -> str:
     if not config.get("google_configured") or not config.get("owner_email"):
         return "unconfigured"
     try:
-        if _owner_signed_in(config):
+        if is_verified_owner(user, config["owner_email"]):
             return "owner"
         if user.get("is_logged_in") is True:
             return "other_account"
