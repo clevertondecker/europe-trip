@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "checked_at": "2026-11-17",
+  "scope": "historical_partial_access_no_routing",
+  "observations": [
+    {
+      "attraction_id": "strasbourg_cathedral",
+      "destination_id": "strasbourg",
+      "arrival_station_id": null,
+      "entrance_id": null,
+      "mode": "tram",
+      "state": "partial",
+      "public_access_point": "Place de la Cathédrale, Strasbourg, France",
+      "urban_stop": "Langstross Grand'Rue",
+      "duration_min": null,
+      "distance_m": null,
+      "source_url": "https://www.visitstrasbourg.fr/en/fiche-sit/F223007269_the-cathedral-of-notre-dame-strasbourg/",
+      "checked_at": "2026-11-17",
+      "observed_for_date": null,
+      "evidence_method": null,
+      "line_or_walk_id": "tram-A-D-mention"
+    },
+    {
+      "attraction_id": "dq32_aachen_07",
+      "destination_id": "aachen",
+      "arrival_station_id": null,
+      "entrance_id": null,
+      "mode": "unknown",
+      "state": "partial",
+      "public_access_point": null,
+      "urban_stop": null,
+      "duration_min": null,
+      "distance_m": null,
+      "source_url": "https://www.aachen-tourismus.de/en/aachen-entdecken/sehenswuerdigkeiten/",
+      "checked_at": "2026-11-17",
+      "observed_for_date": null,
+      "evidence_method": null,
+      "line_or_walk_id": null
+    },
+    {
+      "attraction_id": "dq32_baden_baden_27",
+      "destination_id": "baden_baden",
+      "arrival_station_id": null,
+      "entrance_id": null,
+      "mode": "unknown",
+      "state": "partial",
+      "public_access_point": null,
+      "urban_stop": null,
+      "duration_min": null,
+      "distance_m": null,
+      "source_url": "https://www.baden-baden.com/en/nature/lichtentaler-allee",
+      "checked_at": "2026-11-17",
+      "observed_for_date": null,
+      "evidence_method": null,
+      "line_or_walk_id": null
+    }
+  ],
+  "unreconciled_manual_notes": [
+    {
+      "name": "Catedral de Colônia",
+      "destination_id": "cologne",
+      "attraction_id": null,
+      "reason": "Não localizada como atração canônica nos 94 itens em 17/11/2026; reconciliar antes de vincular última milha."
+    },
+    {
+      "name": "Musée Unterlinden",
+      "destination_id": "colmar",
+      "attraction_id": null,
+      "reason": "Referência externa publicada de caminhada não canônica; não criar ID fictício."
+    }
+  ]
+}
