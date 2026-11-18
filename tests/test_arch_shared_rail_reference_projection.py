@@ -56,6 +56,35 @@ class RailProjectionConsolidationTests(unittest.TestCase):
         self.assertEqual(selected["indicative_train_label"],example["label"])
         self.assertFalse(row["official_plan_modified"])
 
+    def test_old_public_star_import_surface_is_preserved(self):
+        expected={"format_minutes","decorate_comparison","load_route_references",
+                  "planning_reference","load_gap_enrichment","lru_cache"}
+        self.assertEqual(set(legacy.__all__),expected)
+        self.assertTrue(all(getattr(legacy,key) is getattr(shared,key)
+                            for key in expected))
+        self.assertIs(legacy._cached_route_gaps,shared._cached_route_gaps)
+
+    def test_four_categories_stay_exclusive(self):
+        rows={"rows":[
+            {"base_id":"strasbourg","destination_id":"strasbourg",
+             "evidence_status":"local","minimum_oneway_min":None,"source_url":None},
+            {"base_id":"strasbourg","destination_id":"karlsruhe",
+             "evidence_status":"not_researched","minimum_oneway_min":None,"source_url":None},
+            {"base_id":"lille","destination_id":"brussels",
+             "evidence_status":"historical_time","minimum_oneway_min":82,
+             "source_url":"https://example.org/legacy"},
+            {"base_id":"unknown","destination_id":"unregistered",
+             "evidence_status":"not_researched","minimum_oneway_min":None,
+             "source_url":None},
+        ]}
+        before=deepcopy(rows)
+        p=shared.decorate_comparison(rows)
+        self.assertEqual((p["local"],p["reference_only"],p["historical"],p["no_time"]),(1,1,1,1))
+        self.assertEqual(p["total"],4)
+        self.assertEqual(rows,before)
+        self.assertFalse(p["automatic_base_ranking"])
+
+
 
 if __name__ == "__main__":
     unittest.main()
