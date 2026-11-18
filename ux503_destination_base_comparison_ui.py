@@ -130,17 +130,28 @@ def render_wishlist_base_comparison(*, plan, discovery=None, research=None):
     st.caption("Visitar um lugar, voltar de trem e morar na cidade-base são "
                "perguntas diferentes. Os dados ainda não comprovam nenhum "
                "roteiro completo nem aluguel de 56–60 noites em 2027.")
+    if decision["tourism_source_scope"] == "legacy_catalog_only":
+        st.info("Pesquisa turística adicional ainda não integrada: estes "
+                "indicadores incluem somente o catálogo principal.")
+    else:
+        st.caption("Inclui o piloto turístico com regras atuais de visita "
+                   "e fonte. Horários publicados não confirmam abertura "
+                   "em uma data de 2027.")
     tourism_table = [
         {
             "Destino": x["destination_name"],
             "Atrações no catálogo": x["catalog_attraction_count"],
             "Ingressos históricos publicados": x["published_ticket_amounts_historical"],
-            "Horários de funcionamento publicados": x["published_opening_hours"],
+            "Horários/regras atuais documentados": x["published_opening_hours"],
+            "Novas fichas turísticas": x["enriched_current_opening_rules"],
             "Visita em 2027": "Ainda não validada",
         }
         for x in decision["destinations"]
     ]
     st.dataframe(tourism_table, hide_index=True, width="stretch")
+    if decision["housing_source_scope"] == "legacy_housing_only":
+        st.caption("Contratos adicionais de hospedagem ainda não integrados; "
+                   "indicadores de moradia baseados no histórico cadastrado.")
     with st.expander("Condições de moradia nas cidades-base", expanded=False):
         housing_table = [
             {
