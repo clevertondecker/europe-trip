@@ -354,7 +354,6 @@ with st.sidebar:
                       help=("Seção atual: " if selected else "Abrir seção: ") + label,
                       on_click=_ux_sidebar_button_clicked, args=(area,))
 
-    st.divider()
     live_count = sum(state["status"] == "live" for state in sync_sources.values())
     if sync_status == "live":
         sync_summary = "Dados sincronizados · 3/3 fontes"
