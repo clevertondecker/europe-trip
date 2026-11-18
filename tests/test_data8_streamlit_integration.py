@@ -28,7 +28,7 @@ class Data8StreamlitIntegrationTests(unittest.TestCase):
         self.assertFalse(app.checkbox[0].value)
 
     def test_composed_renderer_keeps_legacy_when_data8_is_partial(self):
-        script=("from data8_tourism_ui import render_composed_attraction_details\\n"
+        script=("from data8_tourism_ui import render_composed_attraction_details\n"
                 "render_composed_attraction_details({"
                 "'attraction_id':'brussels_atomium','name':'Atomium',"
                 "'description':'Descrição legada relevante',"
@@ -37,7 +37,7 @@ class Data8StreamlitIntegrationTests(unittest.TestCase):
                 "'ticket_main':{'amount':18,'currency':'EUR'},"
                 "'additional_activity':{'name':'Visita extra','amount':4,'currency':'EUR'},"
                 "'visit_minutes':90,'visit_duration_status':'historical',"
-                "'last_mile_observations':[{'direction':'walk'}]})\\n")
+                "'last_mile_observations':[{'direction':'walk'}]})\n")
         app=AppTest.from_string(script).run()
         self.assertFalse(app.exception)
         rendered=" ".join(str(x.value) for x in app.get("caption"))
@@ -47,8 +47,8 @@ class Data8StreamlitIntegrationTests(unittest.TestCase):
         self.assertIn("Acessos históricos registrados",rendered)
 
     def test_interactive_external_scope_requires_user_selection(self):
-        script=("from data8_tourism_ui import render_data8_cost_simulator\\n"
-                "render_data8_cost_simulator('aachen')\\n")
+        script=("from data8_tourism_ui import render_data8_cost_simulator\n"
+                "render_data8_cost_simulator('aachen')\n")
         app=AppTest.from_string(script).run()
         self.assertFalse(app.exception)
         app.checkbox[0].set_value(True).run()
@@ -67,8 +67,8 @@ class Data8StreamlitIntegrationTests(unittest.TestCase):
         self.assertTrue(any("Cenário completo" in str(x.message) for x in app.success))
 
     def test_interactive_unknown_admission_cannot_become_free(self):
-        script=("from data8_tourism_ui import render_data8_cost_simulator\\n"
-                "render_data8_cost_simulator('brussels')\\n")
+        script=("from data8_tourism_ui import render_data8_cost_simulator\n"
+                "render_data8_cost_simulator('brussels')\n")
         app=AppTest.from_string(script).run()
         app.checkbox[0].set_value(True).run()
         app.multiselect[0].set_value(["brussels_atomium"]).run()
