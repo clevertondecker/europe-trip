@@ -24,6 +24,7 @@ from attractions_ui import render_explorer
 from ux501_destination_discovery_ui import render_independent_destination_discovery
 from ux503_destination_base_comparison_ui import render_wishlist_base_comparison
 from travel_advisor_ui import render_advisor, _recover_saved_plan, _secure_save, _owner_signed_in
+from sidebar_account_ui import render_sidebar_account
 from travel_dashboard_ui import render_trip_dashboard
 from itinerary_flow_ui import render_itinerary_workbench
 from smart_calendar_ui import render_smart_calendar
@@ -407,6 +408,8 @@ with st.sidebar:
         st.radio("Acesso à navegação anterior", list(LEGACY_PAGES),
                  key="main_navigation", on_change=_ux_legacy_page_changed)
         st.caption("Acesso avançado às pesquisas e ferramentas anteriores.")
+    st.divider()
+    render_sidebar_account()
     st.caption("ⓘ Planejamento em andamento")
 
 # One configuration/comparison entrypoint. The TripPlan is the only official
