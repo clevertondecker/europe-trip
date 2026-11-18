@@ -1,6 +1,6 @@
 {
-  "schema_version": 1,
-  "scope": "planning_reference_not_bookable_2027",
+  "schema_version": 2,
+  "scope": "planning_reference_with_audited_provenance",
   "checked_at": "2026-11-17",
   "provenance": "Research CSV europa2027_pesquisa_15_pares.csv; operator/aggregator route summaries verified through web; any station ambiguity remains explicit",
   "bases": [
@@ -28,12 +28,31 @@
       "origin_station_id": null,
       "destination_station_id": null,
       "station_status": "station_not_reconciled",
-      "source_research_status": "public_reference_checked",
-      "confidence": "medium",
+      "source_research_status": "route_summary_rechecked",
+      "confidence": "low",
       "weekend_return_status": "unknown",
       "fare_for_two_eur": null,
       "transfer_count": null,
-      "notes": "Belfort-Ville versus Belfort-Montbéliard TGV: station to verify"
+      "notes": "Belfort-Ville versus Belfort-Montbéliard TGV: station to verify",
+      "original_snapshot": {
+        "fastest_min": 25,
+        "average_min": null,
+        "source_url": "https://www.sncf-connect.com/train/trajet/mulhouse/belfort",
+        "observed_on": "2026-11-17",
+        "query_conditions": "not_recorded"
+      },
+      "recheck": {
+        "fastest_min": 25,
+        "average_min": null,
+        "source_url": "https://www.sncf-connect.com/train/trajet/mulhouse/belfort",
+        "checked_at": "2026-11-18",
+        "method": "published_city_level_route_summary",
+        "conditions": "dynamic route summary, specific travel date and service not pinned"
+      },
+      "fastest_provenance": "corroborated_city_level",
+      "average_provenance": "not_provided",
+      "station_comparability": "city_level_ambiguous",
+      "comparability": "indicative_only_not_station_comparable"
     },
     {
       "origin_id": "strasbourg",
@@ -47,12 +66,31 @@
       "origin_station_id": null,
       "destination_station_id": null,
       "station_status": "station_not_reconciled",
-      "source_research_status": "public_reference_checked",
-      "confidence": "medium",
+      "source_research_status": "route_summary_rechecked",
+      "confidence": "low",
       "weekend_return_status": "unknown",
       "fare_for_two_eur": null,
       "transfer_count": null,
-      "notes": "Destination station to verify"
+      "notes": "Destination station to verify; original average differs from current source, do not overwrite",
+      "original_snapshot": {
+        "fastest_min": 94,
+        "average_min": 116,
+        "source_url": "https://www.sncf-connect.com/train/trajet/strasbourg/belfort",
+        "observed_on": "2026-11-17",
+        "query_conditions": "not_recorded"
+      },
+      "recheck": {
+        "fastest_min": 94,
+        "average_min": 106,
+        "source_url": "https://www.sncf-connect.com/train/trajet/strasbourg/belfort",
+        "checked_at": "2026-11-18",
+        "method": "published_city_level_route_summary",
+        "conditions": "dynamic route summary, specific travel date and service not pinned"
+      },
+      "fastest_provenance": "corroborated_city_level",
+      "average_provenance": "disagrees_with_current_page",
+      "station_comparability": "city_level_ambiguous",
+      "comparability": "indicative_only_not_station_comparable"
     },
     {
       "origin_id": "lille",
@@ -66,12 +104,31 @@
       "origin_station_id": null,
       "destination_station_id": null,
       "station_status": "station_not_reconciled",
-      "source_research_status": "public_reference_checked",
-      "confidence": "medium",
+      "source_research_status": "route_summary_rechecked",
+      "confidence": "low",
       "weekend_return_status": "unknown",
       "fare_for_two_eur": null,
       "transfer_count": null,
-      "notes": "Long distance, connection and exact destination station to verify"
+      "notes": "Long distance, connection and exact destination station to verify",
+      "original_snapshot": {
+        "fastest_min": 294,
+        "average_min": null,
+        "source_url": "https://www.sncf-connect.com/train/trajet/lille/belfort",
+        "observed_on": "2026-11-17",
+        "query_conditions": "not_recorded"
+      },
+      "recheck": {
+        "fastest_min": 294,
+        "average_min": null,
+        "source_url": "https://www.sncf-connect.com/train/trajet/lille/belfort",
+        "checked_at": "2026-11-18",
+        "method": "published_city_level_route_summary",
+        "conditions": "dynamic route summary, specific travel date and service not pinned"
+      },
+      "fastest_provenance": "corroborated_city_level",
+      "average_provenance": "not_provided",
+      "station_comparability": "city_level_ambiguous",
+      "comparability": "indicative_only_not_station_comparable"
     },
     {
       "origin_id": "mulhouse",
@@ -85,12 +142,31 @@
       "origin_station_id": null,
       "destination_station_id": null,
       "station_status": "station_not_reconciled",
-      "source_research_status": "public_reference_checked",
-      "confidence": "medium",
+      "source_research_status": "route_summary_rechecked",
+      "confidence": "low",
       "weekend_return_status": "unknown",
       "fare_for_two_eur": null,
       "transfer_count": null,
-      "notes": "Connections and typical time unverified"
+      "notes": "Connections and typical time unverified",
+      "original_snapshot": {
+        "fastest_min": 88,
+        "average_min": null,
+        "source_url": "https://www.sncf-connect.com/train/trajet/mulhouse/haguenau",
+        "observed_on": "2026-11-17",
+        "query_conditions": "not_recorded"
+      },
+      "recheck": {
+        "fastest_min": 88,
+        "average_min": null,
+        "source_url": "https://www.sncf-connect.com/train/trajet/mulhouse/haguenau",
+        "checked_at": "2026-11-18",
+        "method": "published_city_level_route_summary",
+        "conditions": "dynamic route summary, specific travel date and service not pinned"
+      },
+      "fastest_provenance": "corroborated_city_level",
+      "average_provenance": "not_provided",
+      "station_comparability": "city_level_ambiguous",
+      "comparability": "indicative_only_not_station_comparable"
     },
     {
       "origin_id": "strasbourg",
@@ -104,12 +180,31 @@
       "origin_station_id": null,
       "destination_station_id": null,
       "station_status": "station_not_reconciled",
-      "source_research_status": "public_reference_checked",
-      "confidence": "medium",
+      "source_research_status": "route_summary_rechecked",
+      "confidence": "low",
       "weekend_return_status": "unknown",
       "fare_for_two_eur": null,
       "transfer_count": null,
-      "notes": "TER route: exact timetable unverified"
+      "notes": "TER route: exact timetable unverified",
+      "original_snapshot": {
+        "fastest_min": 21,
+        "average_min": null,
+        "source_url": "https://www.sncf-connect.com/train/trajet/strasbourg/haguenau",
+        "observed_on": "2026-11-17",
+        "query_conditions": "not_recorded"
+      },
+      "recheck": {
+        "fastest_min": 21,
+        "average_min": null,
+        "source_url": "https://www.sncf-connect.com/train/trajet/strasbourg/haguenau",
+        "checked_at": "2026-11-18",
+        "method": "published_city_level_route_summary",
+        "conditions": "dynamic route summary, specific travel date and service not pinned"
+      },
+      "fastest_provenance": "corroborated_city_level",
+      "average_provenance": "not_provided",
+      "station_comparability": "city_level_ambiguous",
+      "comparability": "indicative_only_not_station_comparable"
     },
     {
       "origin_id": "lille",
@@ -123,12 +218,31 @@
       "origin_station_id": null,
       "destination_station_id": null,
       "station_status": "station_not_reconciled",
-      "source_research_status": "public_reference_checked",
-      "confidence": "medium",
+      "source_research_status": "route_summary_rechecked",
+      "confidence": "low",
       "weekend_return_status": "unknown",
       "fare_for_two_eur": null,
       "transfer_count": null,
-      "notes": "Typical time 246 was secondary and remains unverified"
+      "notes": "Typical time 246 was secondary and remains unverified",
+      "original_snapshot": {
+        "fastest_min": 230,
+        "average_min": null,
+        "source_url": "https://www.sncf-connect.com/train/trajet/lille/haguenau",
+        "observed_on": "2026-11-17",
+        "query_conditions": "not_recorded"
+      },
+      "recheck": {
+        "fastest_min": 230,
+        "average_min": null,
+        "source_url": "https://www.sncf-connect.com/train/trajet/lille/haguenau",
+        "checked_at": "2026-11-18",
+        "method": "published_city_level_route_summary",
+        "conditions": "dynamic route summary, specific travel date and service not pinned"
+      },
+      "fastest_provenance": "corroborated_city_level",
+      "average_provenance": "not_provided",
+      "station_comparability": "city_level_ambiguous",
+      "comparability": "indicative_only_not_station_comparable"
     },
     {
       "origin_id": "mulhouse",
@@ -143,11 +257,23 @@
       "destination_station_id": null,
       "station_status": "not_applicable",
       "source_research_status": "local",
-      "confidence": "not_applicable",
+      "confidence": "insufficient",
       "weekend_return_status": "unknown",
       "fare_for_two_eur": null,
       "transfer_count": null,
-      "notes": "Urban access not rail"
+      "notes": "Urban access not rail",
+      "original_snapshot": {
+        "fastest_min": null,
+        "average_min": null,
+        "source_url": null,
+        "observed_on": "2026-11-17",
+        "query_conditions": "not_recorded"
+      },
+      "recheck": null,
+      "fastest_provenance": "snapshot_only_unreproduced",
+      "average_provenance": "not_provided",
+      "station_comparability": "not_applicable",
+      "comparability": "local_not_rail"
     },
     {
       "origin_id": "strasbourg",
@@ -161,12 +287,24 @@
       "origin_station_id": null,
       "destination_station_id": null,
       "station_status": "station_not_reconciled",
-      "source_research_status": "public_reference_checked",
-      "confidence": "medium",
+      "source_research_status": "snapshot_preserved_not_reproduced",
+      "confidence": "insufficient",
       "weekend_return_status": "unknown",
       "fare_for_two_eur": null,
       "transfer_count": null,
-      "notes": "Existing precedence retained, conflicting service classes"
+      "notes": "Existing precedence retained, conflicting service classes",
+      "original_snapshot": {
+        "fastest_min": 49,
+        "average_min": null,
+        "source_url": "https://www.sncf-connect.com/train/horaires/strasbourg/mulhouse",
+        "observed_on": "2026-11-17",
+        "query_conditions": "not_recorded"
+      },
+      "recheck": null,
+      "fastest_provenance": "snapshot_only_unreproduced",
+      "average_provenance": "not_provided",
+      "station_comparability": "city_level_ambiguous",
+      "comparability": "indicative_only_not_station_comparable"
     },
     {
       "origin_id": "lille",
@@ -180,12 +318,31 @@
       "origin_station_id": null,
       "destination_station_id": null,
       "station_status": "station_not_reconciled",
-      "source_research_status": "public_reference_checked",
-      "confidence": "medium",
+      "source_research_status": "route_summary_rechecked",
+      "confidence": "low",
       "weekend_return_status": "unknown",
       "fare_for_two_eur": null,
       "transfer_count": null,
-      "notes": "Paris interchange and station unknown"
+      "notes": "Paris interchange and station unknown",
+      "original_snapshot": {
+        "fastest_min": 252,
+        "average_min": null,
+        "source_url": "https://www.sncf-connect.com/train/trajet/lille/mulhouse",
+        "observed_on": "2026-11-17",
+        "query_conditions": "not_recorded"
+      },
+      "recheck": {
+        "fastest_min": 252,
+        "average_min": null,
+        "source_url": "https://www.sncf-connect.com/train/trajet/lille/mulhouse",
+        "checked_at": "2026-11-18",
+        "method": "published_city_level_route_summary",
+        "conditions": "dynamic route summary, specific travel date and service not pinned"
+      },
+      "fastest_provenance": "corroborated_city_level",
+      "average_provenance": "not_provided",
+      "station_comparability": "city_level_ambiguous",
+      "comparability": "indicative_only_not_station_comparable"
     },
     {
       "origin_id": "mulhouse",
@@ -199,12 +356,31 @@
       "origin_station_id": null,
       "destination_station_id": null,
       "station_status": "station_not_reconciled",
-      "source_research_status": "public_reference_checked",
-      "confidence": "medium",
+      "source_research_status": "route_summary_rechecked",
+      "confidence": "low",
       "weekend_return_status": "unknown",
       "fare_for_two_eur": null,
       "transfer_count": null,
-      "notes": "Published average may reflect different service mix"
+      "notes": "Published average may reflect different service mix",
+      "original_snapshot": {
+        "fastest_min": 288,
+        "average_min": 311,
+        "source_url": "https://www.sncf-connect.com/train/trajet/mulhouse/bruxelles",
+        "observed_on": "2026-11-17",
+        "query_conditions": "not_recorded"
+      },
+      "recheck": {
+        "fastest_min": 288,
+        "average_min": null,
+        "source_url": "https://www.sncf-connect.com/train/trajet/mulhouse/bruxelles",
+        "checked_at": "2026-11-18",
+        "method": "published_city_level_route_summary",
+        "conditions": "dynamic route summary, specific travel date and service not pinned"
+      },
+      "fastest_provenance": "corroborated_city_level",
+      "average_provenance": "snapshot_only_unreproduced",
+      "station_comparability": "city_level_ambiguous",
+      "comparability": "indicative_only_not_station_comparable"
     },
     {
       "origin_id": "strasbourg",
@@ -215,15 +391,34 @@
       "source_kind": "official_operator",
       "checked_at": "2026-11-17",
       "time_scope": "public_route_summary_not_date_specific",
-      "origin_station_id": null,
-      "destination_station_id": null,
-      "station_status": "station_not_reconciled",
-      "source_research_status": "public_reference_checked",
-      "confidence": "medium",
+      "origin_station_id": "strasbourg",
+      "destination_station_id": "brussels_midi",
+      "station_status": "route_page_identified_stations",
+      "source_research_status": "route_summary_rechecked",
+      "confidence": "low",
       "weekend_return_status": "unknown",
       "fare_for_two_eur": null,
       "transfer_count": null,
-      "notes": "Existing historical time preserved"
+      "notes": "Existing historical time preserved",
+      "original_snapshot": {
+        "fastest_min": 222,
+        "average_min": null,
+        "source_url": "https://www.sncf-connect.com/train/horaires/strasbourg/bruxelles",
+        "observed_on": "2026-11-17",
+        "query_conditions": "not_recorded"
+      },
+      "recheck": {
+        "fastest_min": 222,
+        "average_min": null,
+        "source_url": "https://www.sncf-connect.com/train/trajet/strasbourg/bruxelles",
+        "checked_at": "2026-11-18",
+        "method": "published_city_level_route_summary",
+        "conditions": "dynamic route summary, specific travel date and service not pinned"
+      },
+      "fastest_provenance": "corroborated_city_level",
+      "average_provenance": "not_provided",
+      "station_comparability": "station_named_in_route_page",
+      "comparability": "city_level_reference_not_dated_service"
     },
     {
       "origin_id": "lille",
@@ -234,15 +429,34 @@
       "source_kind": "official_operator",
       "checked_at": "2026-11-17",
       "time_scope": "public_route_summary_not_date_specific",
-      "origin_station_id": null,
-      "destination_station_id": null,
-      "station_status": "station_not_reconciled",
-      "source_research_status": "public_reference_checked",
-      "confidence": "medium",
+      "origin_station_id": "lille_europe",
+      "destination_station_id": "brussels_midi",
+      "station_status": "route_page_identified_stations",
+      "source_research_status": "route_summary_rechecked",
+      "confidence": "low",
       "weekend_return_status": "unknown",
       "fare_for_two_eur": null,
       "transfer_count": null,
-      "notes": "High speed Lille Europe–Bruxelles Midi"
+      "notes": "High speed Lille Europe–Bruxelles Midi",
+      "original_snapshot": {
+        "fastest_min": 34,
+        "average_min": null,
+        "source_url": "https://www.sncf-connect.com/train/horaires/lille/bruxelles",
+        "observed_on": "2026-11-17",
+        "query_conditions": "not_recorded"
+      },
+      "recheck": {
+        "fastest_min": 34,
+        "average_min": null,
+        "source_url": "https://www.sncf-connect.com/train/trajet/lille/bruxelles",
+        "checked_at": "2026-11-18",
+        "method": "published_city_level_route_summary",
+        "conditions": "dynamic route summary, specific travel date and service not pinned"
+      },
+      "fastest_provenance": "corroborated_city_level",
+      "average_provenance": "not_provided",
+      "station_comparability": "station_named_in_route_page",
+      "comparability": "city_level_reference_not_dated_service"
     },
     {
       "origin_id": "mulhouse",
@@ -256,12 +470,31 @@
       "origin_station_id": null,
       "destination_station_id": null,
       "station_status": "station_not_reconciled",
-      "source_research_status": "public_reference_checked",
+      "source_research_status": "route_summary_rechecked",
       "confidence": "low",
       "weekend_return_status": "unknown",
       "fare_for_two_eur": null,
       "transfer_count": null,
-      "notes": "Long distance connection times change"
+      "notes": "Long distance connection times change",
+      "original_snapshot": {
+        "fastest_min": 323,
+        "average_min": 392,
+        "source_url": "https://www.thetrainline.com/train-times/mulhouse-to-ghent",
+        "observed_on": "2026-11-17",
+        "query_conditions": "not_recorded"
+      },
+      "recheck": {
+        "fastest_min": 323,
+        "average_min": 392,
+        "source_url": "https://www.thetrainline.com/train-times/mulhouse-to-ghent",
+        "checked_at": "2026-11-18",
+        "method": "published_city_level_route_summary",
+        "conditions": "dynamic route summary, specific travel date and service not pinned"
+      },
+      "fastest_provenance": "corroborated_city_level",
+      "average_provenance": "corroborated_city_level",
+      "station_comparability": "city_level_ambiguous",
+      "comparability": "indicative_only_not_station_comparable"
     },
     {
       "origin_id": "strasbourg",
@@ -275,12 +508,31 @@
       "origin_station_id": null,
       "destination_station_id": null,
       "station_status": "station_not_reconciled",
-      "source_research_status": "public_reference_checked",
+      "source_research_status": "route_summary_rechecked",
       "confidence": "low",
       "weekend_return_status": "unknown",
       "fare_for_two_eur": null,
       "transfer_count": null,
-      "notes": "Long distance connection times change"
+      "notes": "Long distance connection times change",
+      "original_snapshot": {
+        "fastest_min": 258,
+        "average_min": 314,
+        "source_url": "https://www.thetrainline.com/en/train-times/strasbourg-to-ghent",
+        "observed_on": "2026-11-17",
+        "query_conditions": "not_recorded"
+      },
+      "recheck": {
+        "fastest_min": 258,
+        "average_min": 314,
+        "source_url": "https://www.thetrainline.com/en/train-times/strasbourg-to-ghent",
+        "checked_at": "2026-11-18",
+        "method": "published_city_level_route_summary",
+        "conditions": "dynamic route summary, specific travel date and service not pinned"
+      },
+      "fastest_provenance": "corroborated_city_level",
+      "average_provenance": "corroborated_city_level",
+      "station_comparability": "city_level_ambiguous",
+      "comparability": "indicative_only_not_station_comparable"
     },
     {
       "origin_id": "lille",
@@ -294,12 +546,33 @@
       "origin_station_id": null,
       "destination_station_id": null,
       "station_status": "station_not_reconciled",
-      "source_research_status": "public_reference_checked",
+      "source_research_status": "route_summary_rechecked",
       "confidence": "low",
       "weekend_return_status": "unknown",
       "fare_for_two_eur": null,
       "transfer_count": null,
-      "notes": "Keep 75 min legacy; Lille Flandres/Europe and Gent-Sint-Pieters differ"
+      "notes": "Keep 75 min legacy; Lille Flandres/Europe and Gent-Sint-Pieters differ",
+      "original_snapshot": {
+        "fastest_min": 68,
+        "average_min": 76,
+        "source_url": "https://www.thetrainline.com/train-times/lille-to-ghent",
+        "observed_on": "2026-11-17",
+        "query_conditions": "not_recorded"
+      },
+      "recheck": {
+        "fastest_min": 68,
+        "average_min": 76,
+        "source_url": "https://www.thetrainline.com/train-times/lille-to-ghent",
+        "checked_at": "2026-11-18",
+        "method": "published_city_level_route_summary",
+        "conditions": "dynamic route summary, specific travel date and service not pinned"
+      },
+      "fastest_provenance": "corroborated_city_level",
+      "average_provenance": "corroborated_city_level",
+      "station_comparability": "city_level_ambiguous",
+      "comparability": "indicative_only_not_station_comparable"
     }
-  ]
+  ],
+  "snapshot_file": "data/europa2027_pesquisa_15_pares_original.csv",
+  "rechecked_at": "2026-11-18"
 }
