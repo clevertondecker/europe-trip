@@ -179,19 +179,23 @@ def _render_dq32_macro_opportunities(base_id: str) -> None:
     a.metric("Destinos no universo exploratório",overview["registry_destinations"])
     b.metric("Atrações canônicas locais",overview["canonical_local_attractions"])
     c.metric("Novas atrações locais",overview["new_local_attractions"])
-    d.metric("Destinos com trem histórico publicado",overview["rail_time_documented_count"])
+    d.metric("Destinos com tempo ou referência",overview["rail_reference_total_count"])
     st.caption(
-        "O universo reúne pesquisa ampliada, catálogo histórico e fontes de "
-        "turismo. Não representa quantidade de passeios viáveis. A ausência de "
-        "uma ligação pesquisada não significa que a cidade seja inacessível.")
+        f'{overview["rail_time_documented_count"]} tempos históricos e '
+        f'{overview["indicative_rail_reference_count"]} referências indicativas '
+        "de ida, apresentadas separadamente. Não comprova viagem, retorno, "
+        "tarifa, estação nem disponibilidade em 2027. Um destino sem pesquisa "
+        "não é necessariamente inacessível.")
     kind=st.selectbox(
         "Oportunidades para investigar",
         ["Atrações da própria base", "Trem histórico documentado",
+         "Referências indicativas de ida",
          "Outros destinos, transporte não pesquisado"],
         key="ux_dq32_opportunity_group")
     groups={
         "Atrações da própria base":overview["local_destinations"],
         "Trem histórico documentado":overview["historical_rail_destinations"],
+        "Referências indicativas de ida":overview["indicative_rail_destinations"],
         "Outros destinos, transporte não pesquisado":overview["unresearched_destinations"],
     }
     shown=groups[kind]
@@ -204,6 +208,8 @@ def _render_dq32_macro_opportunities(base_id: str) -> None:
         duration=("Menor tempo histórico: "+
                   str(place["minimum_train_oneway_min"])+" min (ida)"
                   if place["minimum_train_oneway_min"] is not None
+                  else place["indicative_train_label"]
+                  if place.get("indicative_train_oneway_min") is not None
                   else "Local · acesso a verificar" if place["local"]
                   else "Transporte não pesquisado")
         items.append({"Destino":place["name"],
@@ -222,6 +228,13 @@ def _render_dq32_macro_opportunities(base_id: str) -> None:
     if dest["train_source_url"]:
         st.markdown("[Fonte do menor tempo ferroviário histórico]("+
                     dest["train_source_url"]+")")
+    elif dest.get("indicative_source_url"):
+        st.markdown("[Fonte da referência indicativa de ida]("+
+                    dest["indicative_source_url"]+")")
+        st.caption("Referência não equivalente a horário garantido · consulta: "+
+                   str(dest["indicative_source_checked_at"] or "não informada")+
+                   " · confiança: "+str(dest["indicative_confidence"] or "não especificada")+
+                   " · retorno de fim de semana não verificado.")
     if dest["attractions"]:
         for attraction in dest["attractions"]:
             st.markdown("- **"+escape(attraction["name"])+"** · "+
