@@ -36,12 +36,12 @@ def decorate_comparison(result, *, references=None):
         basis = evidence["display_basis"]
         if basis == "local_not_rail":
             category = "local"
-            label = "Local · acesso urbano pendente"
+            label = "Local — acesso a verificar"
         elif basis == "legacy_historical":
             category = "historical"
             label = f'{format_minutes(evidence["display_min"])} · histórico'
             if row.get("divergent_sources"):
-                label += " · divergência histórica"
+                label += " · fontes divergentes"
             if evidence.get("reference_differs_from_legacy"):
                 label += " · outra referência indicativa"
         elif basis == "indicative_published_city_minimum":
@@ -51,7 +51,7 @@ def decorate_comparison(result, *, references=None):
                 label += " · estação pendente"
         else:
             category = "no_time"
-            label = "Tempo não estimado"
+            label = "Tempo não pesquisado"
             if evidence["status"] == "unreproduced_snapshot":
                 label += " · fonte original não reproduzida"
         categories[category] += 1
