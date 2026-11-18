@@ -150,7 +150,7 @@ class ItineraryFlowAppTests(unittest.TestCase):
         at=AppTest.from_file(str(ROOT/"app.py"),default_timeout=100).run()
         self.assertFalse(at.exception,[e.message for e in at.exception])
         before=at.session_state["advisor_plan"]["revision"]
-        at.radio(key="ux_area").set_value("Meu roteiro").run()
+        at.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Meu roteiro"))).click().run()
         at.segmented_control(key="ux_section").set_value("Meu planejamento").run()
         at.button(key="flow_add_open_button").click().run()
         self.assertFalse(at.exception,[e.message for e in at.exception])
@@ -173,7 +173,7 @@ class ItineraryFlowAppTests(unittest.TestCase):
 
     def test_inline_organizer_supports_period_and_exact_date(self):
         at=AppTest.from_file(str(ROOT/"app.py"),default_timeout=110).run()
-        at.radio(key="ux_area").set_value("Meu roteiro").run()
+        at.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Meu roteiro"))).click().run()
         at.segmented_control(key="ux_section").set_value("Meu planejamento").run()
         at.button(key="flow_add_open_button").click().run()
         at.selectbox(key="flow_add_destination").set_value("italy_amalfi").run()
@@ -204,7 +204,7 @@ class ItineraryFlowAppTests(unittest.TestCase):
 
     def test_italy_proposal_requires_two_separate_user_clicks(self):
         at=AppTest.from_file(str(ROOT/"app.py"),default_timeout=100).run()
-        at.radio(key="ux_area").set_value("Meu roteiro").run()
+        at.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Meu roteiro"))).click().run()
         at.segmented_control(key="ux_section").set_value("Melhorar meu roteiro").run()
         at.selectbox(key="ux_improve_view").set_value("Itália").run()
         before=deepcopy(at.session_state["advisor_plan"])
