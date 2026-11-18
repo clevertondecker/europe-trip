@@ -1,0 +1,846 @@
+{
+  "schema_version": 1,
+  "scope": "tourism_planning_overlay",
+  "checked_at": "2026-11-18",
+  "selection_method": "public_lot_based_on_user-discussed destinations, not private wishlist; 18 already-canonical attractions",
+  "entries": [
+    {
+      "attraction_id": "dq32_aachen_07",
+      "destination_id": "aachen",
+      "valid_for_2027": false,
+      "experience": {
+        "why_visit": "Patrimônio UNESCO ligado à história de Carlos Magno e da Europa medieval.",
+        "source_url": "https://www.aachenerdom.de/en/",
+        "checked_at": "2026-11-18"
+      },
+      "duration": {
+        "state": "editorial_estimate",
+        "min_minutes": 35,
+        "max_minutes": 75,
+        "method": "Faixa editorial exploratória para visita sem fila, não publicada pelo operador"
+      },
+      "admission": {
+        "state": "free_general_entry",
+        "amount": 0,
+        "currency": "EUR",
+        "unit": "person",
+        "source_url": "https://www.aachenerdom.de/en/a-place-to-visit/faqs/",
+        "checked_at": "2026-11-18",
+        "valid_for_2027": false,
+        "scope_note": "Entrada geral, não inclui visitas guiadas"
+      },
+      "opening": {
+        "state": "published_general_rule",
+        "rule": "Seg–sex normalmente a partir das 11h; sábado a partir de 13h; domingo 13h–17h45; celebrações podem suspender visitas.",
+        "source_url": "https://www.aachenerdom.de/en/a-place-to-visit/faqs/",
+        "checked_at": "2026-11-18",
+        "valid_for_2027": false
+      },
+      "seasonality": {
+        "state": "unknown",
+        "note": null,
+        "source_url": null,
+        "checked_at": null
+      },
+      "location": {
+        "state": "published_address",
+        "address": "Domhof 1, Aachen, Alemanha",
+        "source_url": "https://www.aachenerdom.de/en/",
+        "checked_at": "2026-11-18"
+      },
+      "travel_time_from_station": null
+    },
+    {
+      "attraction_id": "dq32_aachen_08",
+      "destination_id": "aachen",
+      "valid_for_2027": false,
+      "experience": {
+        "why_visit": "Pavilhão neoclássico associado às fontes termais de Aachen, interessante para um passeio no centro.",
+        "source_url": "https://www.aachen-tourismus.de/en/aachen-entdecken/details/poi/elisenbrunnen/",
+        "checked_at": "2026-11-18"
+      },
+      "duration": {
+        "state": "editorial_estimate",
+        "min_minutes": 20,
+        "max_minutes": 40,
+        "method": "Faixa editorial exploratória para visita sem fila, não publicada pelo operador"
+      },
+      "admission": {
+        "state": "external_no_ticket",
+        "amount": null,
+        "currency": null,
+        "unit": null,
+        "source_url": "https://www.aachen-tourismus.de/en/aachen-entdecken/details/poi/elisenbrunnen/",
+        "checked_at": "2026-11-18",
+        "valid_for_2027": false,
+        "scope_note": "Passeio externo; serviços internos e opcionais são cobrados separadamente ou desconhecidos"
+      },
+      "opening": {
+        "state": "unknown",
+        "rule": null,
+        "source_url": null,
+        "checked_at": null,
+        "valid_for_2027": false
+      },
+      "seasonality": {
+        "state": "unknown",
+        "note": null,
+        "source_url": null,
+        "checked_at": null
+      },
+      "location": {
+        "state": "unknown",
+        "address": null,
+        "source_url": null,
+        "checked_at": null
+      },
+      "travel_time_from_station": null
+    },
+    {
+      "attraction_id": "dq32_baden_baden_27",
+      "destination_id": "baden_baden",
+      "valid_for_2027": false,
+      "experience": {
+        "why_visit": "Passeio paisagístico por alamedas, jardins e edifícios culturais ao longo do rio.",
+        "source_url": "https://www.baden-baden.com/en/nature/lichtentaler-allee",
+        "checked_at": "2026-11-18"
+      },
+      "duration": {
+        "state": "editorial_estimate",
+        "min_minutes": 45,
+        "max_minutes": 100,
+        "method": "Faixa editorial exploratória para visita sem fila, não publicada pelo operador"
+      },
+      "admission": {
+        "state": "free_general_entry",
+        "amount": 0,
+        "currency": "EUR",
+        "unit": "person",
+        "source_url": "https://www.baden-baden.com/en/nature/lichtentaler-allee",
+        "checked_at": "2026-11-18",
+        "valid_for_2027": false,
+        "scope_note": "Somente área externa, sem afirmar gratuidade dos museus"
+      },
+      "opening": {
+        "state": "published_general_rule",
+        "rule": "Área externa acessível livremente; a visita a museus próximos tem regras próprias.",
+        "source_url": "https://www.baden-baden.com/en/nature/lichtentaler-allee",
+        "checked_at": "2026-11-18",
+        "valid_for_2027": false
+      },
+      "seasonality": {
+        "state": "unknown",
+        "note": null,
+        "source_url": null,
+        "checked_at": null
+      },
+      "location": {
+        "state": "unknown",
+        "address": null,
+        "source_url": null,
+        "checked_at": null
+      },
+      "travel_time_from_station": null
+    },
+    {
+      "attraction_id": "brussels_grand_place",
+      "destination_id": "brussels",
+      "valid_for_2027": false,
+      "experience": {
+        "why_visit": "Praça histórica monumental da capital belga e ponto de partida do centro antigo.",
+        "source_url": "https://www.visit.brussels/en/visitors/what-to-do/must-see-attractions",
+        "checked_at": "2026-11-18"
+      },
+      "duration": {
+        "state": "editorial_estimate",
+        "min_minutes": 35,
+        "max_minutes": 75,
+        "method": "Faixa editorial exploratória para visita sem fila, não publicada pelo operador"
+      },
+      "admission": {
+        "state": "external_no_ticket",
+        "amount": null,
+        "currency": null,
+        "unit": null,
+        "source_url": "https://www.visit.brussels/en/visitors/what-to-do/must-see-attractions",
+        "checked_at": "2026-11-18",
+        "valid_for_2027": false,
+        "scope_note": "Passeio externo; serviços internos e opcionais são cobrados separadamente ou desconhecidos"
+      },
+      "opening": {
+        "state": "unknown",
+        "rule": null,
+        "source_url": null,
+        "checked_at": null,
+        "valid_for_2027": false
+      },
+      "seasonality": {
+        "state": "unknown",
+        "note": null,
+        "source_url": null,
+        "checked_at": null
+      },
+      "location": {
+        "state": "unknown",
+        "address": null,
+        "source_url": null,
+        "checked_at": null
+      },
+      "travel_time_from_station": null
+    },
+    {
+      "attraction_id": "brussels_royal_galleries",
+      "destination_id": "brussels",
+      "valid_for_2027": false,
+      "experience": {
+        "why_visit": "Galerias cobertas históricas próximas à Grand-Place, com arquitetura e lojas.",
+        "source_url": "https://www.visit.brussels/en/visitors/what-to-do/must-see-attractions",
+        "checked_at": "2026-11-18"
+      },
+      "duration": {
+        "state": "editorial_estimate",
+        "min_minutes": 25,
+        "max_minutes": 60,
+        "method": "Faixa editorial exploratória para visita sem fila, não publicada pelo operador"
+      },
+      "admission": {
+        "state": "external_no_ticket",
+        "amount": null,
+        "currency": null,
+        "unit": null,
+        "source_url": "https://www.visit.brussels/en/visitors/what-to-do/must-see-attractions",
+        "checked_at": "2026-11-18",
+        "valid_for_2027": false,
+        "scope_note": "Passeio externo; serviços internos e opcionais são cobrados separadamente ou desconhecidos"
+      },
+      "opening": {
+        "state": "unknown",
+        "rule": null,
+        "source_url": null,
+        "checked_at": null,
+        "valid_for_2027": false
+      },
+      "seasonality": {
+        "state": "unknown",
+        "note": null,
+        "source_url": null,
+        "checked_at": null
+      },
+      "location": {
+        "state": "unknown",
+        "address": null,
+        "source_url": null,
+        "checked_at": null
+      },
+      "travel_time_from_station": null
+    },
+    {
+      "attraction_id": "brussels_mont_arts",
+      "destination_id": "brussels",
+      "valid_for_2027": false,
+      "experience": {
+        "why_visit": "Jardins e mirantes que conectam os bairros alto e baixo de Bruxelas.",
+        "source_url": "https://www.visit.brussels/en/visitors/what-to-do/must-see-attractions",
+        "checked_at": "2026-11-18"
+      },
+      "duration": {
+        "state": "editorial_estimate",
+        "min_minutes": 35,
+        "max_minutes": 75,
+        "method": "Faixa editorial exploratória para visita sem fila, não publicada pelo operador"
+      },
+      "admission": {
+        "state": "external_no_ticket",
+        "amount": null,
+        "currency": null,
+        "unit": null,
+        "source_url": "https://www.visit.brussels/en/visitors/what-to-do/must-see-attractions",
+        "checked_at": "2026-11-18",
+        "valid_for_2027": false,
+        "scope_note": "Passeio externo; serviços internos e opcionais são cobrados separadamente ou desconhecidos"
+      },
+      "opening": {
+        "state": "unknown",
+        "rule": null,
+        "source_url": null,
+        "checked_at": null,
+        "valid_for_2027": false
+      },
+      "seasonality": {
+        "state": "unknown",
+        "note": null,
+        "source_url": null,
+        "checked_at": null
+      },
+      "location": {
+        "state": "unknown",
+        "address": null,
+        "source_url": null,
+        "checked_at": null
+      },
+      "travel_time_from_station": null
+    },
+    {
+      "attraction_id": "brussels_atomium",
+      "destination_id": "brussels",
+      "valid_for_2027": false,
+      "experience": {
+        "why_visit": "Monumento de arquitetura singular com observação externa; ingresso interno separado.",
+        "source_url": "https://www.visit.brussels/en/visitors/what-to-do/attractions-and-monuments",
+        "checked_at": "2026-11-18"
+      },
+      "duration": {
+        "state": "editorial_estimate",
+        "min_minutes": 30,
+        "max_minutes": 60,
+        "method": "Faixa editorial exploratória para visita sem fila, não publicada pelo operador"
+      },
+      "admission": {
+        "state": "external_no_ticket",
+        "amount": null,
+        "currency": null,
+        "unit": null,
+        "source_url": "https://www.visit.brussels/en/visitors/what-to-do/attractions-and-monuments",
+        "checked_at": "2026-11-18",
+        "valid_for_2027": false,
+        "scope_note": "Passeio externo; serviços internos e opcionais são cobrados separadamente ou desconhecidos"
+      },
+      "opening": {
+        "state": "unknown",
+        "rule": null,
+        "source_url": null,
+        "checked_at": null,
+        "valid_for_2027": false
+      },
+      "seasonality": {
+        "state": "unknown",
+        "note": null,
+        "source_url": null,
+        "checked_at": null
+      },
+      "location": {
+        "state": "unknown",
+        "address": null,
+        "source_url": null,
+        "checked_at": null
+      },
+      "travel_time_from_station": null
+    },
+    {
+      "attraction_id": "brussels_eu_quarter",
+      "destination_id": "brussels",
+      "valid_for_2027": false,
+      "experience": {
+        "why_visit": "Bairro das instituições europeias, interessante por sua dimensão política e arquitetônica.",
+        "source_url": "https://www.visit.brussels/en/visitors/what-to-do/must-see-attractions",
+        "checked_at": "2026-11-18"
+      },
+      "duration": {
+        "state": "editorial_estimate",
+        "min_minutes": 60,
+        "max_minutes": 120,
+        "method": "Faixa editorial exploratória para visita sem fila, não publicada pelo operador"
+      },
+      "admission": {
+        "state": "unknown",
+        "amount": null,
+        "currency": null,
+        "unit": null,
+        "source_url": null,
+        "checked_at": null,
+        "valid_for_2027": false
+      },
+      "opening": {
+        "state": "unknown",
+        "rule": null,
+        "source_url": null,
+        "checked_at": null,
+        "valid_for_2027": false
+      },
+      "seasonality": {
+        "state": "unknown",
+        "note": null,
+        "source_url": null,
+        "checked_at": null
+      },
+      "location": {
+        "state": "unknown",
+        "address": null,
+        "source_url": null,
+        "checked_at": null
+      },
+      "travel_time_from_station": null
+    },
+    {
+      "attraction_id": "strasbourg_cathedral",
+      "destination_id": "strasbourg",
+      "valid_for_2027": false,
+      "experience": {
+        "why_visit": "Catedral gótica célebre pelos vitrais e pelo relógio astronômico.",
+        "source_url": "https://www.visitstrasbourg.fr/en/discover/must-see-attractions/",
+        "checked_at": "2026-11-18"
+      },
+      "duration": {
+        "state": "editorial_estimate",
+        "min_minutes": 45,
+        "max_minutes": 90,
+        "method": "Faixa editorial exploratória para visita sem fila, não publicada pelo operador"
+      },
+      "admission": {
+        "state": "unknown",
+        "amount": null,
+        "currency": null,
+        "unit": null,
+        "source_url": null,
+        "checked_at": null,
+        "valid_for_2027": false
+      },
+      "opening": {
+        "state": "published_general_rule",
+        "rule": "Seg–sáb 08h30–11h15 e 12h45–17h45; domingo/feriados 14h00–17h15; ofícios podem suspender visitas.",
+        "source_url": "https://www.visitstrasbourg.fr/en/things-to-see-and-do/visiting/places-to-visit/historical-sites-and-monuments/f223007269_the-cathedral-of-notre-dame-strasbourg/",
+        "checked_at": "2026-11-18",
+        "valid_for_2027": false
+      },
+      "seasonality": {
+        "state": "unknown",
+        "note": null,
+        "source_url": null,
+        "checked_at": null
+      },
+      "location": {
+        "state": "published_address",
+        "address": "Place de la Cathédrale, Strasbourg, França",
+        "source_url": "https://www.visitstrasbourg.fr/en/discover/must-see-attractions/",
+        "checked_at": "2026-11-18"
+      },
+      "travel_time_from_station": null
+    },
+    {
+      "attraction_id": "strasbourg_petite",
+      "destination_id": "strasbourg",
+      "valid_for_2027": false,
+      "experience": {
+        "why_visit": "Bairro de canais e casas enxaimel, parte marcante da experiência de Strasbourg.",
+        "source_url": "https://www.visitstrasbourg.fr/en/discover/strasbourg-and-its-surrounding-area/petite-france/",
+        "checked_at": "2026-11-18"
+      },
+      "duration": {
+        "state": "editorial_estimate",
+        "min_minutes": 60,
+        "max_minutes": 120,
+        "method": "Faixa editorial exploratória para visita sem fila, não publicada pelo operador"
+      },
+      "admission": {
+        "state": "external_no_ticket",
+        "amount": null,
+        "currency": null,
+        "unit": null,
+        "source_url": "https://www.visitstrasbourg.fr/en/discover/strasbourg-and-its-surrounding-area/petite-france/",
+        "checked_at": "2026-11-18",
+        "valid_for_2027": false,
+        "scope_note": "Passeio externo; serviços internos e opcionais são cobrados separadamente ou desconhecidos"
+      },
+      "opening": {
+        "state": "unknown",
+        "rule": null,
+        "source_url": null,
+        "checked_at": null,
+        "valid_for_2027": false
+      },
+      "seasonality": {
+        "state": "unknown",
+        "note": null,
+        "source_url": null,
+        "checked_at": null
+      },
+      "location": {
+        "state": "unknown",
+        "address": null,
+        "source_url": null,
+        "checked_at": null
+      },
+      "travel_time_from_station": null
+    },
+    {
+      "attraction_id": "strasbourg_grande",
+      "destination_id": "strasbourg",
+      "valid_for_2027": false,
+      "experience": {
+        "why_visit": "Centro histórico insular de Strasbourg, com arquitetura e praças para explorar a pé.",
+        "source_url": "https://www.visitstrasbourg.fr/en/discover/must-see-attractions/",
+        "checked_at": "2026-11-18"
+      },
+      "duration": {
+        "state": "editorial_estimate",
+        "min_minutes": 60,
+        "max_minutes": 120,
+        "method": "Faixa editorial exploratória para visita sem fila, não publicada pelo operador"
+      },
+      "admission": {
+        "state": "external_no_ticket",
+        "amount": null,
+        "currency": null,
+        "unit": null,
+        "source_url": "https://www.visitstrasbourg.fr/en/discover/must-see-attractions/",
+        "checked_at": "2026-11-18",
+        "valid_for_2027": false,
+        "scope_note": "Passeio externo; serviços internos e opcionais são cobrados separadamente ou desconhecidos"
+      },
+      "opening": {
+        "state": "unknown",
+        "rule": null,
+        "source_url": null,
+        "checked_at": null,
+        "valid_for_2027": false
+      },
+      "seasonality": {
+        "state": "unknown",
+        "note": null,
+        "source_url": null,
+        "checked_at": null
+      },
+      "location": {
+        "state": "unknown",
+        "address": null,
+        "source_url": null,
+        "checked_at": null
+      },
+      "travel_time_from_station": null
+    },
+    {
+      "attraction_id": "strasbourg_ponts",
+      "destination_id": "strasbourg",
+      "valid_for_2027": false,
+      "experience": {
+        "why_visit": "Pontes históricas sobre os canais junto à Petite France.",
+        "source_url": "https://www.visitstrasbourg.fr/en/discover/strasbourg-and-its-surrounding-area/petite-france/",
+        "checked_at": "2026-11-18"
+      },
+      "duration": {
+        "state": "editorial_estimate",
+        "min_minutes": 20,
+        "max_minutes": 50,
+        "method": "Faixa editorial exploratória para visita sem fila, não publicada pelo operador"
+      },
+      "admission": {
+        "state": "external_no_ticket",
+        "amount": null,
+        "currency": null,
+        "unit": null,
+        "source_url": "https://www.visitstrasbourg.fr/en/discover/strasbourg-and-its-surrounding-area/petite-france/",
+        "checked_at": "2026-11-18",
+        "valid_for_2027": false,
+        "scope_note": "Passeio externo; serviços internos e opcionais são cobrados separadamente ou desconhecidos"
+      },
+      "opening": {
+        "state": "unknown",
+        "rule": null,
+        "source_url": null,
+        "checked_at": null,
+        "valid_for_2027": false
+      },
+      "seasonality": {
+        "state": "unknown",
+        "note": null,
+        "source_url": null,
+        "checked_at": null
+      },
+      "location": {
+        "state": "unknown",
+        "address": null,
+        "source_url": null,
+        "checked_at": null
+      },
+      "travel_time_from_station": null
+    },
+    {
+      "attraction_id": "strasbourg_vauban",
+      "destination_id": "strasbourg",
+      "valid_for_2027": false,
+      "experience": {
+        "why_visit": "Barragem histórica com terraço panorâmico sobre os canais e as pontes cobertas.",
+        "source_url": "https://www.visitstrasbourg.fr/en/things-to-see-and-do/visiting/places-to-visit/historical-sites-and-monuments/F223005692_the-vauban-dam-strasbourg/",
+        "checked_at": "2026-11-18"
+      },
+      "duration": {
+        "state": "editorial_estimate",
+        "min_minutes": 25,
+        "max_minutes": 60,
+        "method": "Faixa editorial exploratória para visita sem fila, não publicada pelo operador"
+      },
+      "admission": {
+        "state": "unknown",
+        "amount": null,
+        "currency": null,
+        "unit": null,
+        "source_url": null,
+        "checked_at": null,
+        "valid_for_2027": false
+      },
+      "opening": {
+        "state": "unknown",
+        "rule": null,
+        "source_url": null,
+        "checked_at": null,
+        "valid_for_2027": false
+      },
+      "seasonality": {
+        "state": "unknown",
+        "note": null,
+        "source_url": null,
+        "checked_at": null
+      },
+      "location": {
+        "state": "unknown",
+        "address": null,
+        "source_url": null,
+        "checked_at": null
+      },
+      "travel_time_from_station": null
+    },
+    {
+      "attraction_id": "strasbourg_europe",
+      "destination_id": "strasbourg",
+      "valid_for_2027": false,
+      "experience": {
+        "why_visit": "Área das instituições europeias para conhecer a dimensão diplomática da cidade.",
+        "source_url": "https://www.visitstrasbourg.fr/en/discover/must-see-attractions/",
+        "checked_at": "2026-11-18"
+      },
+      "duration": {
+        "state": "editorial_estimate",
+        "min_minutes": 45,
+        "max_minutes": 110,
+        "method": "Faixa editorial exploratória para visita sem fila, não publicada pelo operador"
+      },
+      "admission": {
+        "state": "external_no_ticket",
+        "amount": null,
+        "currency": null,
+        "unit": null,
+        "source_url": "https://www.visitstrasbourg.fr/en/discover/must-see-attractions/",
+        "checked_at": "2026-11-18",
+        "valid_for_2027": false,
+        "scope_note": "Passeio externo; serviços internos e opcionais são cobrados separadamente ou desconhecidos"
+      },
+      "opening": {
+        "state": "unknown",
+        "rule": null,
+        "source_url": null,
+        "checked_at": null,
+        "valid_for_2027": false
+      },
+      "seasonality": {
+        "state": "unknown",
+        "note": null,
+        "source_url": null,
+        "checked_at": null
+      },
+      "location": {
+        "state": "unknown",
+        "address": null,
+        "source_url": null,
+        "checked_at": null
+      },
+      "travel_time_from_station": null
+    },
+    {
+      "attraction_id": "dq32_lille_01",
+      "destination_id": "lille",
+      "valid_for_2027": false,
+      "experience": {
+        "why_visit": "Grand'Place e Vieille Bourse permitem explorar arquitetura e a história mercantil de Lille.",
+        "source_url": "https://en.lilletourism.com/explore/lille-and-the-surrounding-area/museums-and-tourist-attractions/grand-place/",
+        "checked_at": "2026-11-18"
+      },
+      "duration": {
+        "state": "editorial_estimate",
+        "min_minutes": 40,
+        "max_minutes": 85,
+        "method": "Faixa editorial exploratória para visita sem fila, não publicada pelo operador"
+      },
+      "admission": {
+        "state": "external_no_ticket",
+        "amount": null,
+        "currency": null,
+        "unit": null,
+        "source_url": "https://en.lilletourism.com/explore/lille-and-the-surrounding-area/museums-and-tourist-attractions/grand-place/",
+        "checked_at": "2026-11-18",
+        "valid_for_2027": false,
+        "scope_note": "Passeio externo; serviços internos e opcionais são cobrados separadamente ou desconhecidos"
+      },
+      "opening": {
+        "state": "unknown",
+        "rule": null,
+        "source_url": null,
+        "checked_at": null,
+        "valid_for_2027": false
+      },
+      "seasonality": {
+        "state": "unknown",
+        "note": null,
+        "source_url": null,
+        "checked_at": null
+      },
+      "location": {
+        "state": "unknown",
+        "address": null,
+        "source_url": null,
+        "checked_at": null
+      },
+      "travel_time_from_station": null
+    },
+    {
+      "attraction_id": "dq32_lille_02",
+      "destination_id": "lille",
+      "valid_for_2027": false,
+      "experience": {
+        "why_visit": "Museu de belas artes de Lille com coleções históricas; ingresso precisa de pesquisa atualizada.",
+        "source_url": "https://en.lilletourism.com/explore/hello-culture/museums-and-cultural-venues/all-cultural-sites/palais-des-beaux-arts-lille-en-4431779/",
+        "checked_at": "2026-11-18"
+      },
+      "duration": {
+        "state": "editorial_estimate",
+        "min_minutes": 90,
+        "max_minutes": 180,
+        "method": "Faixa editorial exploratória para visita sem fila, não publicada pelo operador"
+      },
+      "admission": {
+        "state": "unknown",
+        "amount": null,
+        "currency": null,
+        "unit": null,
+        "source_url": null,
+        "checked_at": null,
+        "valid_for_2027": false
+      },
+      "opening": {
+        "state": "unknown",
+        "rule": null,
+        "source_url": null,
+        "checked_at": null,
+        "valid_for_2027": false
+      },
+      "seasonality": {
+        "state": "unknown",
+        "note": null,
+        "source_url": null,
+        "checked_at": null
+      },
+      "location": {
+        "state": "published_address",
+        "address": "Place de la République, 59000 Lille, França",
+        "source_url": "https://en.lilletourism.com/explore/hello-culture/museums-and-cultural-venues/all-cultural-sites/palais-des-beaux-arts-lille-en-4431779/",
+        "checked_at": "2026-11-18"
+      },
+      "travel_time_from_station": null
+    },
+    {
+      "attraction_id": "dq32_belfort_25",
+      "destination_id": "belfort",
+      "valid_for_2027": false,
+      "experience": {
+        "why_visit": "Cidadela e escultura do Leão, associadas à resistência histórica da cidade.",
+        "source_url": "https://www.belfort-tourisme.com/en/unmissable-territory/the-citadel-of-belfort/",
+        "checked_at": "2026-11-18"
+      },
+      "duration": {
+        "state": "editorial_estimate",
+        "min_minutes": 60,
+        "max_minutes": 120,
+        "method": "Faixa editorial exploratória para visita sem fila, não publicada pelo operador"
+      },
+      "admission": {
+        "state": "unknown",
+        "amount": null,
+        "currency": null,
+        "unit": null,
+        "source_url": null,
+        "checked_at": null,
+        "valid_for_2027": false
+      },
+      "opening": {
+        "state": "unknown",
+        "rule": null,
+        "source_url": null,
+        "checked_at": null,
+        "valid_for_2027": false
+      },
+      "seasonality": {
+        "state": "unknown",
+        "note": null,
+        "source_url": null,
+        "checked_at": null
+      },
+      "location": {
+        "state": "unknown",
+        "address": null,
+        "source_url": null,
+        "checked_at": null
+      },
+      "travel_time_from_station": null
+    },
+    {
+      "attraction_id": "dq32_dijon_03",
+      "destination_id": "dijon",
+      "valid_for_2027": false,
+      "experience": {
+        "why_visit": "Palácio dos Duques de Borgonha que reúne patrimônio histórico e instituições culturais.",
+        "source_url": "https://en.destinationdijon.com/cultural-heritage/palais-des-ducs-et-des-etats-de-bourgogne/",
+        "checked_at": "2026-11-18"
+      },
+      "duration": {
+        "state": "editorial_estimate",
+        "min_minutes": 45,
+        "max_minutes": 100,
+        "method": "Faixa editorial exploratória para visita sem fila, não publicada pelo operador"
+      },
+      "admission": {
+        "state": "unknown",
+        "amount": null,
+        "currency": null,
+        "unit": null,
+        "source_url": null,
+        "checked_at": null,
+        "valid_for_2027": false
+      },
+      "opening": {
+        "state": "unknown",
+        "rule": null,
+        "source_url": null,
+        "checked_at": null,
+        "valid_for_2027": false
+      },
+      "seasonality": {
+        "state": "unknown",
+        "note": null,
+        "source_url": null,
+        "checked_at": null
+      },
+      "location": {
+        "state": "unknown",
+        "address": null,
+        "source_url": null,
+        "checked_at": null
+      },
+      "travel_time_from_station": null
+    }
+  ],
+  "unreconciled_candidates": [
+    {
+      "destination_id": "cologne",
+      "canonical_attraction_id": null,
+      "name": "Catedral de Colônia",
+      "source_url": "https://willkommen.koelntourismus.de/terminal/v/en/poi/cologne-cathedral",
+      "reason": "Destinação cadastrada, atração ainda sem ID canônico: conciliar antes de enriquecer"
+    },
+    {
+      "destination_id": "ghent",
+      "canonical_attraction_id": null,
+      "name": "Gravensteen — Castle of the Counts",
+      "source_url": "https://visit.gent.be/en/see-do/castle-counts",
+      "reason": "Destinação cadastrada, atração ainda sem ID canônico: conciliar antes de enriquecer"
+    }
+  ]
+}
