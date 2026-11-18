@@ -91,7 +91,7 @@ class Data11PriorityConnectivityTests(unittest.TestCase):
         arlon = table[table["Destino"] == "Arlon"]
         self.assertEqual(len(arlon), 1)
         self.assertEqual(int(arlon.iloc[0]["Mínimo de ida (min)"]), 197)
-        self.assertIn("Referência", str(arlon.iloc[0]["Transporte"]).title())
+        self.assertEqual(str(arlon.iloc[0]["Evidência"]), "Referência indicativa")
         self.assertEqual(len(table), 46)
 
     def test_dq32_frontend_receives_new_routes_and_correct_counts(self):

@@ -123,17 +123,17 @@ class SharedRailAppTests(unittest.TestCase):
         self.assertFalse(app.exception,[e.message for e in app.exception])
         self.assertEqual(app.session_state["advisor_plan"],before)
         table=next(df.value for df in app.dataframe if
-                   "Passeio confirmado" in df.value.columns)
-        self.assertTrue((table["Transporte"].str.contains(
-            "mínimo publicado|mínimo indicativo|amostra datada|referência secundária")).all())
-        self.assertTrue((table["Passeio confirmado"]=="Não").all())
-        self.assertTrue(any("Destinos com tempo ou referência" in m.label
-                            for m in app.metric))
+                   "Evidência" in df.value.columns)
+        self.assertTrue((table["Evidência"]=="Referência indicativa").all())
+        self.assertTrue(table["Fonte"].notna().all())
+        self.assertTrue(table["Tempo de ida"].str.contains("h| min").all())
+        self.assertTrue(any("Com tempo de ida" in m.label for m in app.metric))
         app.selectbox(key="ux_dq32_opportunity_group").set_value(
             "Outros destinos, transporte não pesquisado").run()
         table=next(df.value for df in app.dataframe if
-                   "Passeio confirmado" in df.value.columns)
-        self.assertTrue((table["Transporte"]=="Transporte não pesquisado").all())
+                   "Evidência" in df.value.columns)
+        self.assertTrue((table["Evidência"]=="Sem referência").all())
+        self.assertTrue((table["Tempo de ida"]=="A pesquisar").all())
         self.assertEqual(app.session_state["advisor_plan"],before)
 
     def test_strasbourg_preserves_historical_and_exposes_indicative(self):
@@ -146,7 +146,7 @@ class SharedRailAppTests(unittest.TestCase):
             "Referências indicativas de ida").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
         table=next(df.value for df in app.dataframe if
-                   "Passeio confirmado" in df.value.columns)
+                   "Evidência" in df.value.columns)
         self.assertTrue(any("Karlsruhe" in x for x in table["Destino"]))
         self.assertEqual(app.session_state["advisor_plan"],before)
 
