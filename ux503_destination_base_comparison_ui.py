@@ -140,7 +140,7 @@ def render_wishlist_base_comparison(*, plan, discovery=None, research=None):
     c2.metric("Mínimo indicativo", enriched["reference_only"])
     c3.metric("Sem tempo", enriched["no_time"])
     c4.metric("Deslocamento local", enriched["local"])
-    st.metric("Trajetos com referência temporal",
+    st.metric("Trajetos com tempo pesquisado",
               enriched["historical"] + enriched["reference_only"])
     st.markdown("#### O que ainda precisamos pesquisar?")
     st.caption(
