@@ -60,7 +60,7 @@ class Route7UXRegressionTests(unittest.TestCase):
 
     def test_other_wishlist_destinations_never_require_overlay(self):
         _, matrix, _ = make_comparison(
-            ["freiburg", "metz"], ["paris", "berlin"])
+            ["freiburg", "metz"], ["paris", "amsterdam"])
         view = decorate_comparison(matrix)
         self.assertEqual(view["total"], 4)
         self.assertEqual(
