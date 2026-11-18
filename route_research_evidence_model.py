@@ -12,6 +12,7 @@ from urllib.parse import urlparse
 import json
 
 from rail_evidence_unified_model import canonical_place
+from rail_temporal_contract import normalize_service_instants
 
 SCHEMA_VERSION = 1
 SOURCE_NATURES = frozenset({
@@ -85,6 +86,10 @@ def validate_observation(record: dict) -> dict:
     _date(row.get("published_at"), "published_at")
     departure = _time(row.get("departure_local"), "departure_local")
     arrival = _time(row.get("arrival_local"), "arrival_local")
+    # Historical clock-only records remain usable as source observations, but
+    # never gain an invented offset or overnight arrival date.
+    timing = normalize_service_instants(row)
+    row["time_precision"] = timing["precision"]
     minutes = row.get("duration_min")
     if row["evidence_state"] == "timed_observation":
         if type(minutes) is not int or minutes <= 0:
@@ -128,7 +133,8 @@ def journey_identity(row: dict) -> tuple:
         row["origin_id"], row["destination_id"],
         row.get("origin_station_id"), row.get("destination_station_id"),
         row.get("service_id"), row.get("travel_date"),
-        row.get("departure_local"), row.get("operator"),
+        row.get("departure_local"), row.get("departure_utc_offset"),
+        row.get("operator") if not row.get("service_id") else None,
     )
 
 
@@ -137,7 +143,9 @@ def observation_id(row: dict) -> str:
     row = validate_observation(row)
     keys = (
         "origin_id", "destination_id", "origin_station_id", "destination_station_id",
-        "service_id", "operator", "travel_date", "departure_local", "arrival_local",
+        "service_id", "operator", "travel_date", "arrival_date",
+        "departure_local", "arrival_local", "departure_utc_offset",
+        "arrival_utc_offset", "departure_at", "arrival_at",
         "source_url", "source_nature", "checked_at", "duration_min",
     )
     payload = json.dumps({k: row.get(k) for k in keys}, sort_keys=True,
@@ -161,13 +169,24 @@ def validate_observations(records: list[dict]) -> dict:
         row["observation_id"] = key
         unique.append(row)
         groups.setdefault(journey_identity(row), []).append(row)
+    # Independent sources reporting the SAME service/timing corroborate it.
+    # Source URL is provenance, never a reason for disagreement on its own.
+    signature = lambda x: (
+        x.get("duration_min"), x.get("arrival_local"), x.get("arrival_date"),
+        x.get("arrival_utc_offset"), x.get("arrival_at"))
     conflicting = {
         str(key): [x["observation_id"] for x in group]
         for key, group in groups.items()
-        if len({(x.get("duration_min"), x.get("source_url")) for x in group}) > 1
+        if len({signature(x) for x in group}) > 1
+    }
+    corroborated = {
+        str(key): [x["observation_id"] for x in group]
+        for key, group in groups.items()
+        if len(group) > 1 and len({signature(x) for x in group}) == 1
     }
     return {"schema_version": SCHEMA_VERSION, "observations": unique,
-            "conflicts": conflicting, "count": len(unique)}
+            "conflicts": conflicting, "corroborated": corroborated,
+            "count": len(unique)}
 
 
 def legacy_projection(base_id: str, destination_id: str, *, rail=None, exploration=None):
