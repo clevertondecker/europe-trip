@@ -6,7 +6,7 @@ from trip_plan_model import new_plan,validate_plan,with_revision,apply_proposal
 from trip_plan_repository import safe_path
 from attractions_model import load_attractions,load_base_routes
 from travel_advisor import assess_plan,recommendations,objective_weights
-from travel_optimizer import propose_schedule,available_days
+from travel_optimizer import propose_schedule,available_days,score_proposal
 
 class AdvisorDomainTests(unittest.TestCase):
     @classmethod
@@ -48,6 +48,28 @@ class AdvisorDomainTests(unittest.TestCase):
         valid_dates={d["date"] for d in available_days(p)}
         for prop in candidates:
             self.assertTrue(set(prop["assignments"])<=valid_dates)
+    def test_draft_score_never_reports_inferred_roundtrip_as_known(self):
+        plan=self.make_plan()
+        before=copy.deepcopy(plan)
+        proposal=propose_schedule(plan,self.catalog,self.routes)[0]
+        score=proposal["score"]
+        self.assertIsNone(score["known_roundtrip_train_minutes"])
+        self.assertIsNone(score["return_train_minutes"])
+        self.assertIsNone(score["local_access_minutes"])
+        self.assertFalse(score["return_2027_verified"])
+        self.assertGreater(score["known_outbound_train_minutes"],0)
+        self.assertEqual(score["symmetric_train_proxy_minutes"],
+                         score["known_outbound_train_minutes"]*2)
+        self.assertEqual(score["score_time_basis"],
+                         "outbound_twice_editorial_proxy_not_verified_return")
+        self.assertEqual(plan,before)
+
+    def test_scoring_unknown_oneway_is_not_implicitly_zero(self):
+        plan=self.make_plan()
+        proposal={"placed":["oeschinen"],"assignments":{},"unresolved":[]}
+        with self.assertRaises(ValueError):
+            score_proposal(proposal,plan,self.routes,"balanced")
+
     def test_missing_data_and_discount_are_flagged(self):
         p=self.make_plan()
         warnings=assess_plan(p,self.catalog,self.routes)
