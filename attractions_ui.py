@@ -300,10 +300,12 @@ def _render_data19_nancy_research(base_id: str) -> None:
                 verified=_data16_photo(photo["file_title"])
                 if verified:
                     st.image(verified["url"],width="stretch")
-                    st.caption("Foto: "+escape(verified["author"])+
-                               " · "+escape(verified["license"])+
-                               " · [arquivo no Commons]("+photo["source_page"]+")"+
-                               " · [licença]("+verified["license_url"]+")")
+                    credit=("Foto: "+escape(verified["author"])+
+                            " · "+escape(verified["license"])+
+                            " · [arquivo no Commons]("+photo["source_page"]+")")
+                    if verified.get("license_url"):
+                        credit+=" · [licença]("+verified["license_url"]+")"
+                    st.caption(credit)
                 else:
                     st.info("Foto indisponível ou licença não validada. "
                             "[Ver arquivo original]("+photo["source_page"]+")")

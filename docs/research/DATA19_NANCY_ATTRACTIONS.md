@@ -12,7 +12,7 @@ Source checks: 2026-11-19. The six canonical Nancy attractions are unchanged. Th
 | Nancy Thermal | Nancy | media | https://www.destination-nancy.com/tourisme/decouvrir-nancy/visiter-nancy-toute-lannee/nancy-a-lautomne/ | https://commons.wikimedia.org/wiki/File:Grand_Nancy_Thermal_(52772423596).jpg |
 | Château de Lunéville | Lunéville | alta | https://chateauluneville.meurthe-et-moselle.fr/horaires-et-acces | https://commons.wikimedia.org/wiki/File:Ch%C3%A2teau_de_Lun%C3%A9ville.jpg |
 | Cathédrale Saint-Étienne de Toul | Toul | alta | https://tourisme-terrestouloises.com/detail/fr/523340/523436/995004940/cathedrale-saint-etienne-et-son-cloitre-toul/ | https://commons.wikimedia.org/wiki/File:Cath%C3%A9drale_de_Toul.jpg |
-| Basilique de Saint-Nicolas-de-Port | Saint-Nicolas-de-Port | media_alta | https://www.destination-nancy.com/tourisme/decouvrir-nancy/les-incontournables/ | https://commons.wikimedia.org/wiki/File:Basilique_saint_nicolas_de_port_facade.jpg |
+| Basilique de Saint-Nicolas-de-Port | Saint-Nicolas-de-Port | media_alta | https://saintnicolasdeport.com/fr/tr/1264265/31072/basilique-saint-nicolas | https://commons.wikimedia.org/wiki/File:Basilique_saint_nicolas_de_port_facade.jpg |
 | Abbaye des Prémontrés | Pont-à-Mousson | media_alta | https://www.abbaye-premontres.com/informations-pratiques/ | https://commons.wikimedia.org/wiki/File:Pont-%C3%A0-Mousson_abbaye_des_Pr%C3%A9montr%C3%A9s_et_Moselle.jpg |
 | Château de Fléville | Fléville-devant-Nancy | media_alta | https://www.chateaudefleville.com/horaires-tarifs-acc%C3%A8s | https://commons.wikimedia.org/wiki/File:Ch%C3%A2teau_de_Fl%C3%A9ville_(Meurthe-et-Moselle).jpg |
 
