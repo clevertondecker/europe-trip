@@ -255,38 +255,37 @@ def _render_dq32_macro_opportunities(base_id: str) -> None:
         window = shown[(current - 1) * page_size: current * page_size]
         for start in range(0, len(window), 2):
             with st.container(key=f"ux53_row_dq32_{start}"):
-                cols = st.columns(2, gap="medium")
+                cols = st.columns(2, gap="medium", border=True)
                 for col, place in zip(cols, window[start:start + 2]):
                     minutes = one_way_minutes(place)
                     with col:
-                        with st.container(border=True, key=f'ux53_card_dq32_{place["destination_id"]}'):
-                            photo = local_destination_photo(place["destination_id"])
-                            if photo:
-                                st.image(photo["local_path"], width="stretch")
-                                st.caption("Foto: " + escape(photo["author"]) +
-                                           " · " + escape(photo["license"]) +
-                                           " · [crédito](" + photo["source_page"] + ")")
-                            flag = COUNTRY_FLAGS.get(place["country"], "🌍")
-                            st.markdown(f"#### {flag} {escape(place['name'])}")
-                            if minutes is not None:
-                                st.markdown(f"### 🚆 {format_travel_minutes(minutes)}")
-                                st.caption("Mínimo publicado de ida · " +
-                                           evidence_label(place).lower())
-                            else:
-                                st.markdown("### " + ("📍 Local" if place["local"] else "—"))
-                                st.caption("Acesso local a verificar" if place["local"]
-                                           else "Duração ainda não pesquisada")
-                            st.caption(f'{place["attraction_count"]} atrações cadastradas'
-                                       " · " + place["country"])
-                            with st.container(key=f'ux53_footer_dq32_{place["destination_id"]}'):
-                                source = evidence_source(place)
-                                if source:
-                                    st.link_button("Fonte do trajeto", source, width="stretch")
-                                st.button(
-                                    "Ver atrações e detalhes",
-                                    key=f'ux_dq32_card_{place["destination_id"]}',
-                                    width="stretch", on_click=_dq32_choose_destination,
-                                    args=(place["destination_id"],))
+                        photo = local_destination_photo(place["destination_id"])
+                        if photo:
+                            st.image(photo["local_path"], width="stretch")
+                            st.caption("Foto: " + escape(photo["author"]) +
+                                       " · " + escape(photo["license"]) +
+                                       " · [crédito](" + photo["source_page"] + ")")
+                        flag = COUNTRY_FLAGS.get(place["country"], "🌍")
+                        st.markdown(f"#### {flag} {escape(place['name'])}")
+                        if minutes is not None:
+                            st.markdown(f"### 🚆 {format_travel_minutes(minutes)}")
+                            st.caption("Mínimo publicado de ida · " +
+                                       evidence_label(place).lower())
+                        else:
+                            st.markdown("### " + ("📍 Local" if place["local"] else "—"))
+                            st.caption("Acesso local a verificar" if place["local"]
+                                       else "Duração ainda não pesquisada")
+                        st.caption(f'{place["attraction_count"]} atrações cadastradas'
+                                   " · " + place["country"])
+                        with st.container(key=f'ux53_footer_dq32_{place["destination_id"]}'):
+                            source = evidence_source(place)
+                            if source:
+                                st.link_button("Fonte do trajeto", source, width="stretch")
+                            st.button(
+                                "Ver atrações e detalhes",
+                                key=f'ux_dq32_card_{place["destination_id"]}',
+                                width="stretch", on_click=_dq32_choose_destination,
+                                args=(place["destination_id"],))
     else:
         rows = table_rows(shown)
         st.dataframe(

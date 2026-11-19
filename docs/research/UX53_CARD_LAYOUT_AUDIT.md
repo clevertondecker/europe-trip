@@ -28,3 +28,9 @@ The 3-column discovery grid rendered text/credits, optional source links and nat
 Structural tests cannot certify rendered geometry. Browser test desktop 1440/1024 px; tablet 768 px and mobile 390 px. Check >=3 cards with different lengths, source absent/present, local/remote/fallback photos, saved state, and expanded details. Card bottoms within <=2px in desktop row, native buttons aligned, no lost attribution or keyboard controls, no overflow. Screenshots should be attached to PR before visual sign-off.
 
 This change does not update TripPlan, persisted interests, route evidence, budgets or authentication.
+
+
+## UX 5.3.1 correction after production screenshot
+The initial PR #150 **did not resolve equal-height cards**. A user screenshot after merge showed Freiburg/Karlsruhe/Kehl cards with different bottom borders and unaligned actions. Original nested `st.container(border=True)` elements size to their content even when the surrounding columns stretch; keyed footer margin was applied to an inner element rather than its wrapper.
+
+Replace nested borders with native `st.columns(..., border=True)`, which the Streamlit documentation explicitly recommends for consistent heights. Native column border is the actual card. Keep source/actions in the final keyed footer and move the *last child wrapper* of the stretched column to the bottom. No fixed heights/scrollbars. Audit this visually at 1440, 1024, 768, and 390px; do not merge solely on static/CI tests. Document any remaining misalignment with screenshots.

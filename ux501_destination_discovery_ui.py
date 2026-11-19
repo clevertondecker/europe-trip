@@ -182,51 +182,50 @@ def render_independent_destination_discovery(*, discovery=None) -> None:
                        if missing_on_page else {})
     for idx in range(0, len(subset), 3):
         with st.container(key=f"ux53_row_destinations_{idx}"):
-            columns = st.columns(3)
+            columns = st.columns(3, border=True)
             for column, item in zip(columns, subset[idx:idx+3]):
                 with column:
-                    with st.container(border=True, key=f"ux53_card_destination_{item['id']}"):
-                        photo = preferred_destination_photo(item, fallback_photos.get(item["id"]))
-                        _render_destination_media(item,photo)
-                        st.markdown("**"+item["name"]+"** · "+item["country"])
-                        if item["attraction_count"]:
-                            names = [attr["name"] for attr in item["attractions"][:3]]
-                            st.write(" · ".join(names))
-                            if item["attraction_count"] > 3:
-                                st.caption(
-                                    f"+ {item['attraction_count']-3} atrações catalogadas")
-                        else:
+                    photo = preferred_destination_photo(item, fallback_photos.get(item["id"]))
+                    _render_destination_media(item,photo)
+                    st.markdown("**"+item["name"]+"** · "+item["country"])
+                    if item["attraction_count"]:
+                        names = [attr["name"] for attr in item["attractions"][:3]]
+                        st.write(" · ".join(names))
+                        if item["attraction_count"] > 3:
                             st.caption(
-                                "Destino conhecido; atrações individuais ainda "
-                                "não cadastradas nesta pesquisa.")
-                        if item["categories"]:
-                            st.caption("Experiências: "+", ".join(item["categories"][:3]))
+                                f"+ {item['attraction_count']-3} atrações catalogadas")
+                    else:
                         st.caption(
-                            "Pesquisa de atrações disponível" if item["attraction_count"]
-                            else "Pesquisa local a aprofundar")
-                        with st.container(key=f"ux53_footer_destination_{item['id']}"):
-                            if item.get("source_url"):
-                                st.link_button("Consultar fonte turística", item["source_url"])
-                            with st.expander("Ver atrações e fontes"):
-                                if not item["attractions"]:
-                                    st.caption("Nenhuma atração individual documentada.")
-                                for attraction in item["attractions"]:
-                                    st.markdown(
-                                        "- ["+attraction["name"]+"]("+
-                                        attraction["source_url"]+") · "+
-                                        attraction["category"])
-                                render_data8_destination_preview(
-                                    item["id"], attraction_names={
-                                        a["id"]: a["name"] for a in item["attractions"]})
-                            saved = {r["destination_id"]: r["priority"] for r in
-                                     st.session_state.get("ux502_interests",{}).get("items",[])}
-                            if item["id"] in saved:
-                                st.caption("Na minha lista: " + saved[item["id"]].replace("_"," "))
-                            else:
-                                st.button("Adicionar à minha lista",
-                                          key="ux502_add_"+item["id"],
-                                          use_container_width=True,
-                                          on_click=add_destination, args=(item["id"], discovery))
+                            "Destino conhecido; atrações individuais ainda "
+                            "não cadastradas nesta pesquisa.")
+                    if item["categories"]:
+                        st.caption("Experiências: "+", ".join(item["categories"][:3]))
+                    st.caption(
+                        "Pesquisa de atrações disponível" if item["attraction_count"]
+                        else "Pesquisa local a aprofundar")
+                    with st.container(key=f"ux53_footer_destination_{item['id']}"):
+                        if item.get("source_url"):
+                            st.link_button("Consultar fonte turística", item["source_url"])
+                        with st.expander("Ver atrações e fontes"):
+                            if not item["attractions"]:
+                                st.caption("Nenhuma atração individual documentada.")
+                            for attraction in item["attractions"]:
+                                st.markdown(
+                                    "- ["+attraction["name"]+"]("+
+                                    attraction["source_url"]+") · "+
+                                    attraction["category"])
+                            render_data8_destination_preview(
+                                item["id"], attraction_names={
+                                    a["id"]: a["name"] for a in item["attractions"]})
+                        saved = {r["destination_id"]: r["priority"] for r in
+                                 st.session_state.get("ux502_interests",{}).get("items",[])}
+                        if item["id"] in saved:
+                            st.caption("Na minha lista: " + saved[item["id"]].replace("_"," "))
+                        else:
+                            st.button("Adicionar à minha lista",
+                                      key="ux502_add_"+item["id"],
+                                      use_container_width=True,
+                                      on_click=add_destination, args=(item["id"], discovery))
 
     st.caption(
         "Acesso ferroviário, retorno de fim de semana, última milha e custo "

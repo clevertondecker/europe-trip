@@ -52,26 +52,25 @@ def _five_city_comparison(study, five)->None:
     for start in (0,2,4):
         with st.container(key=f"ux53_row_bases_{start}"):
             group=cards[start:start+2]
-            cols=st.columns(2)
+            cols=st.columns(2, border=True)
             for col,card in zip(cols,group):
                 with col:
-                    with st.container(border=True,key=f'ux53_card_base_{card["id"]}'):
-                        st.markdown("**"+FIVE_FLAGS.get(card["country"],"")+" "+card["name"]+"**")
-                        st.caption(card["country"]+" · "+card["status"])
-                        st.markdown("**"+str(card["with_station_times"])+"/"+
-                                    str(card["total_destinations"])+
-                                    "** rotas com tempo de ida documentado")
-                        st.caption(str(card["housing_count"])+
-                                   " anúncios de 2026 · "+
-                                   str(card["size_comparable_count"])+"/"+
-                                   str(card["housing_count"])+
-                                   " na faixa de 30–60 m²")
-                        st.caption("Hospedagem 2027: não confirmada")
-                        with st.container(key=f'ux53_footer_base_{card["id"]}'):
-                            st.button("Abrir detalhes · "+card["name"],
-                                      key="ux40_open_"+card["id"],
-                                      on_click=_open_city,args=(card["id"],),
-                                      use_container_width=True)
+                    st.markdown("**"+FIVE_FLAGS.get(card["country"],"")+" "+card["name"]+"**")
+                    st.caption(card["country"]+" · "+card["status"])
+                    st.markdown("**"+str(card["with_station_times"])+"/"+
+                                str(card["total_destinations"])+
+                                "** rotas com tempo de ida documentado")
+                    st.caption(str(card["housing_count"])+
+                               " anúncios de 2026 · "+
+                               str(card["size_comparable_count"])+"/"+
+                               str(card["housing_count"])+
+                               " na faixa de 30–60 m²")
+                    st.caption("Hospedagem 2027: não confirmada")
+                    with st.container(key=f'ux53_footer_base_{card["id"]}'):
+                        st.button("Abrir detalhes · "+card["name"],
+                                  key="ux40_open_"+card["id"],
+                                  on_click=_open_city,args=(card["id"],),
+                                  use_container_width=True)
     st.caption("As amostras são pequenas; a quantidade de evidências indica "
                "andamento da pesquisa, não preço, segurança ou adequação.")
     with st.expander("Comparação ferroviária completa, 15 destinos e simulação manual"):
