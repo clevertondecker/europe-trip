@@ -33,6 +33,47 @@ class NancyAttractionData19Tests(unittest.TestCase):
         d=deepcopy(self.data)
         d["attraction_candidates"][0]["photo"]["file_title"]=""
         with self.assertRaises(ValueError):validate_data19(d)
+    def test_nancy_cards_render_with_verified_photo_and_safe_fallback(self):
+        from unittest.mock import MagicMock,patch
+        import attractions_ui
+        fake=MagicMock()
+        fake.toggle.return_value=True
+        fake.selectbox.side_effect=["Todas",1]
+        fake.columns.return_value=[MagicMock(),MagicMock()]
+        original={"packages":{"nancy":[]}}
+        fake.session_state={"advisor_plan":deepcopy(original)}
+        photo={"url":"https://upload.wikimedia.org/example.jpg",
+               "author":"Verified author","license":"CC BY-SA 4.0",
+               "license_url":"https://creativecommons.org/licenses/by-sa/4.0/"}
+        with patch.object(attractions_ui,"st",fake),patch.object(
+            attractions_ui,"_data16_photo",side_effect=[photo,None]):
+            attractions_ui._render_data19_nancy_research("nancy")
+        self.assertEqual(fake.image.call_count,1)
+        self.assertGreater(fake.info.call_count,0)
+        captions=" ".join(str(call.args[0]) for call in fake.caption.call_args_list)
+        self.assertIn("Verified author",captions)
+        self.assertIn("commons.wikimedia.org",captions)
+        self.assertEqual(fake.link_button.call_count,2)
+        self.assertEqual(fake.session_state["advisor_plan"],original)
+
+    def test_nancy_cards_are_not_loaded_for_other_bases(self):
+        from unittest.mock import MagicMock,patch
+        import attractions_ui
+        fake=MagicMock()
+        with patch.object(attractions_ui,"st",fake):
+            attractions_ui._render_data19_nancy_research("liege")
+        fake.toggle.assert_not_called()
+        fake.image.assert_not_called()
+
+    def test_pagination_reset_callback(self):
+        from unittest.mock import MagicMock,patch
+        import attractions_ui
+        fake=MagicMock()
+        fake.session_state={"data19_page":5}
+        with patch.object(attractions_ui,"st",fake):
+            attractions_ui._data19_reset_page()
+        self.assertEqual(fake.session_state["data19_page"],1)
+
     def test_photo_license_gate_does_not_allow_unlicensed_media(self):
         info={"query":{"pages":{"1":{"title":"File:Example.jpg","imageinfo":[{
           "thumburl":"https://upload.wikimedia.org/test.jpg","extmetadata":{
