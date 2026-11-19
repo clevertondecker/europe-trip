@@ -1,0 +1,32 @@
+{
+  "records": [
+    {
+      "origin_id": "colmar",
+      "destination_id": "rotterdam",
+      "published_min": 377,
+      "source_url": "https://www.sncf-connect.com/train/horaires/colmar/rotterdam",
+      "timetable_sample_date": "2026-08-30"
+    },
+    {
+      "origin_id": "metz",
+      "destination_id": "rotterdam",
+      "published_min": 297,
+      "source_url": "https://www.sncf-connect.com/train/horaires/metz/rotterdam",
+      "timetable_sample_date": "2026-10-13"
+    },
+    {
+      "origin_id": "nancy",
+      "destination_id": "rotterdam",
+      "published_min": 285,
+      "source_url": "https://www.sncf-connect.com/train/horaires/nancy/rotterdam",
+      "timetable_sample_date": "2026-09-05"
+    },
+    {
+      "origin_id": "besancon",
+      "destination_id": "rotterdam",
+      "published_min": 388,
+      "source_url": "https://www.sncf-connect.com/train/horaires/besancon/rotterdam",
+      "timetable_sample_date": "2026-09-15"
+    }
+  ]
+}
