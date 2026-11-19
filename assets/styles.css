@@ -493,11 +493,19 @@ padding:17px 20px;margin:0 0 10px;}
   height: 100%;
   min-width: 0;
 }
+[class*="st-key-ux53_card_"]:is([data-testid="stVerticalBlock"],
+                                [data-testid="stVerticalBlockBorderWrapper"]),
 [class*="st-key-ux53_card_"] > [data-testid="stVerticalBlock"],
 [class*="st-key-ux53_card_"] [data-testid="stVerticalBlockBorderWrapper"] > [data-testid="stVerticalBlock"] {
   display: flex;
   flex-direction: column;
   height: 100%;
+}
+[class*="st-key-ux53_card_"] [data-testid="stImage"] img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
 }
 [class*="st-key-ux53_footer_"] {
   margin-top: auto;
