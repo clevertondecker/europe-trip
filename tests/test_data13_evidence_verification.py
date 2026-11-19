@@ -22,14 +22,14 @@ class Data13EvidenceVerificationTests(unittest.TestCase):
 
     def test_full_manifest_is_explicit_and_unverified_are_not_displayed(self):
         displayed, audit=vetted_overlay_by_pair(self.records,MANIFEST)
-        self.assertEqual(audit["research_rows"],248)
-        self.assertEqual(audit["verified_displayable"],66)
+        self.assertEqual(audit["research_rows"],253)
+        self.assertEqual(audit["verified_displayable"],71)
         self.assertEqual(audit["pending_source_review"],182)
         self.assertEqual(displayed[("aachen","lille")]["minimum_oneway_min"],134)
         self.assertNotIn(("haguenau","saverne"),displayed)
         actual=load_data13()
-        self.assertEqual(len(actual["records"]),248)
-        self.assertEqual(len(actual["by_pair"]),66)
+        self.assertEqual(len(actual["records"]),253)
+        self.assertEqual(len(actual["by_pair"]),71)
 
     def test_all_record_urls_match_directional_canonical_ids(self):
         for row in self.records:
@@ -89,6 +89,12 @@ class Data13EvidenceVerificationTests(unittest.TestCase):
             ("offenburg","liege"):251,
             ("offenburg","interlaken"):181,
             ("saint_louis","lausanne"):151,
+            ("besancon","namur"):366,
+            ("selestat","basel"):56,
+            ("selestat","lille"):225,
+            ("selestat","lyon"):227,
+            ("belfort","lausanne"):229,
+            ("arras","lausanne"):324,
         }
         for key,minutes in observed.items():
             with self.subTest(pair=key):

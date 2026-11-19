@@ -3,7 +3,7 @@
   "scope": "data13_directed_rail_reference_2026_snapshot",
   "checked_at": "2026-11-18",
   "selection_policy": "fallback_after_historical_routes7_data9_data10_data11_data12",
-  "methodology": "Citações individuais de durações mínimas de ida publicadas em páginas de rotas SNCF Connect, verificadas na pesquisa de 18/11/2026. Não extrapolar por simetria, distância ou conexões. Dados exclusivamente exploratórios, sem horários ou retorno garantidos em 2027. Lote adicional validado em páginas individuais de trajeto/horários SNCF Connect; a referência é ao mínimo publicado na página consultada, não à disponibilidade futura. Lote Trainline (fonte secundária, confiança baixa) para cidades belgas, luxemburguesas e alemãs, somente quando a página divulga mínimo direcional; não inferir retorno nem itinerário 2027. DATA14: 27 directional web-page minima rechecked on 2026-11-18, six values reconciled with published minimum; lower precedence and no timetable/return verified for 2027.",
+  "methodology": "Citações individuais de durações mínimas de ida publicadas em páginas de rotas SNCF Connect, verificadas na pesquisa de 18/11/2026. Não extrapolar por simetria, distância ou conexões. Dados exclusivamente exploratórios, sem horários ou retorno garantidos em 2027. Lote adicional validado em páginas individuais de trajeto/horários SNCF Connect; a referência é ao mínimo publicado na página consultada, não à disponibilidade futura. Lote Trainline (fonte secundária, confiança baixa) para cidades belgas, luxemburguesas e alemãs, somente quando a página divulga mínimo direcional; não inferir retorno nem itinerário 2027. DATA14: 27 directional web-page minima rechecked on 2026-11-18, six values reconciled with published minimum; lower precedence and no timetable/return verified for 2027. DATA14 additional verified SNCF pages: Sélestat→Basel/Lille/Lyon, Belfort→Lausanne and Arras→Lausanne.",
   "records": [
     {
       "origin_id": "metz",
@@ -3226,6 +3226,71 @@
       "source_checked_at": "2026-11-18",
       "direction": "outbound_only",
       "confidence": "low",
+      "return_2027_verified": false,
+      "valid_for_2027": false
+    },
+    {
+      "origin_id": "selestat",
+      "destination_id": "basel",
+      "minimum_oneway_min": 56,
+      "mode": "rail",
+      "reference_kind": "official_operator_minimum",
+      "source_url": "https://www.sncf-connect.com/train/trajet/selestat/bale",
+      "source_checked_at": "2026-11-18",
+      "direction": "outbound_only",
+      "confidence": "medium",
+      "return_2027_verified": false,
+      "valid_for_2027": false
+    },
+    {
+      "origin_id": "selestat",
+      "destination_id": "lille",
+      "minimum_oneway_min": 225,
+      "mode": "rail",
+      "reference_kind": "official_operator_minimum",
+      "source_url": "https://www.sncf-connect.com/train/trajet/selestat/lille",
+      "source_checked_at": "2026-11-18",
+      "direction": "outbound_only",
+      "confidence": "medium",
+      "return_2027_verified": false,
+      "valid_for_2027": false
+    },
+    {
+      "origin_id": "selestat",
+      "destination_id": "lyon",
+      "minimum_oneway_min": 227,
+      "mode": "rail",
+      "reference_kind": "official_operator_minimum",
+      "source_url": "https://www.sncf-connect.com/train/trajet/selestat/lyon",
+      "source_checked_at": "2026-11-18",
+      "direction": "outbound_only",
+      "confidence": "medium",
+      "return_2027_verified": false,
+      "valid_for_2027": false
+    },
+    {
+      "origin_id": "belfort",
+      "destination_id": "lausanne",
+      "minimum_oneway_min": 229,
+      "mode": "rail",
+      "reference_kind": "official_operator_minimum",
+      "source_url": "https://www.sncf-connect.com/train/trajet/belfort/lausanne",
+      "source_checked_at": "2026-11-18",
+      "direction": "outbound_only",
+      "confidence": "medium",
+      "return_2027_verified": false,
+      "valid_for_2027": false
+    },
+    {
+      "origin_id": "arras",
+      "destination_id": "lausanne",
+      "minimum_oneway_min": 324,
+      "mode": "rail",
+      "reference_kind": "official_operator_minimum",
+      "source_url": "https://www.sncf-connect.com/train/trajet/arras/lausanne",
+      "source_checked_at": "2026-11-18",
+      "direction": "outbound_only",
+      "confidence": "medium",
       "return_2027_verified": false,
       "valid_for_2027": false
     }

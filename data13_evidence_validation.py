@@ -30,6 +30,7 @@ SNCF = {
 }
 TRAINLINE = {
     "aachen":"aachen", "amsterdam":"amsterdam", "arlon":"arlon",
+    "besancon":"besancon",
     "brussels":"brussels",
     "basel":"basel-sbb", "bruges_be":"bruges-brugge",
     "colmar":"colmar", "cologne":"cologne-germany", "dijon":"dijon",
