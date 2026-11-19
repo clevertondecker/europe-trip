@@ -17,6 +17,16 @@ class DATA16LogisticsTests(unittest.TestCase):
                                 r["feasibility"]=="unknown" for r in rows))
         self.assertIsNone(hub_references("selestat")["selestat"]["rail_to_hub_min"])
         with self.assertRaises(ValueError):hub_references("not_a_city")
+    def test_photo_cards_are_opt_in_and_no_nested_expanders(self):
+        from pathlib import Path
+        source=(Path(__file__).resolve().parents[1]/"attractions_ui.py").read_text(encoding="utf-8")
+        self.assertIn('key="data16_show_research"',source)
+        self.assertIn('key="data16_cards_page"',source)
+        self.assertIn('key="data16_show_matrix"',source)
+        self.assertNotIn('with st.expander("Comparar as 30 cidades-base',source)
+        self.assertIn('photo=_data16_photo(photo_ref["file_title"])',source)
+        self.assertIn('st.link_button("Fonte turística"',source)
+
     def test_invalid_license_rejected(self):
         p={"query":{"pages":{"1":{"title":"File:A.jpg","imageinfo":[{
             "thumburl":"https://upload.wikimedia.org/x.jpg","extmetadata":{
