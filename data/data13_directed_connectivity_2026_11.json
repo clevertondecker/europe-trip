@@ -3,7 +3,7 @@
   "scope": "data13_directed_rail_reference_2026_snapshot",
   "checked_at": "2026-11-18",
   "selection_policy": "fallback_after_historical_routes7_data9_data10_data11_data12",
-  "methodology": "Citações individuais de durações mínimas de ida publicadas em páginas de rotas SNCF Connect, verificadas na pesquisa de 18/11/2026. Não extrapolar por simetria, distância ou conexões. Dados exclusivamente exploratórios, sem horários ou retorno garantidos em 2027. Lote adicional validado em páginas individuais de trajeto/horários SNCF Connect; a referência é ao mínimo publicado na página consultada, não à disponibilidade futura. Lote Trainline (fonte secundária, confiança baixa) para cidades belgas, luxemburguesas e alemãs, somente quando a página divulga mínimo direcional; não inferir retorno nem itinerário 2027. DATA14: 27 directional web-page minima rechecked on 2026-11-18, six values reconciled with published minimum; lower precedence and no timetable/return verified for 2027. DATA14 additional verified SNCF pages: Sélestat→Basel/Lille/Lyon, Belfort→Lausanne and Arras→Lausanne.",
+  "methodology": "Citações individuais de durações mínimas de ida publicadas em páginas de rotas SNCF Connect, verificadas na pesquisa de 18/11/2026. Não extrapolar por simetria, distância ou conexões. Dados exclusivamente exploratórios, sem horários ou retorno garantidos em 2027. Lote adicional validado em páginas individuais de trajeto/horários SNCF Connect; a referência é ao mínimo publicado na página consultada, não à disponibilidade futura. Lote Trainline (fonte secundária, confiança baixa) para cidades belgas, luxemburguesas e alemãs, somente quando a página divulga mínimo direcional; não inferir retorno nem itinerário 2027. DATA14: 27 directional web-page minima rechecked on 2026-11-18, six values reconciled with published minimum; lower precedence and no timetable/return verified for 2027. DATA14 additional verified SNCF pages: Sélestat→Basel/Lille/Lyon, Belfort→Lausanne and Arras→Lausanne. DATA14.2: 70 previously unreviewed SNCF route/timetable pages checked individually for minimum one-way travel time; 19 published minima reconciled; manifest documents each checked page; lower precedence and no 2027 guarantee.",
   "records": [
     {
       "origin_id": "metz",
@@ -164,7 +164,7 @@
     {
       "origin_id": "colmar",
       "destination_id": "lyon",
-      "minimum_oneway_min": 215,
+      "minimum_oneway_min": 214,
       "mode": "rail",
       "reference_kind": "official_operator_minimum",
       "source_url": "https://www.sncf-connect.com/train/trajet/colmar/lyon",
@@ -216,7 +216,7 @@
     {
       "origin_id": "dijon",
       "destination_id": "belfort",
-      "minimum_oneway_min": 68,
+      "minimum_oneway_min": 70,
       "mode": "rail",
       "reference_kind": "official_operator_minimum",
       "source_url": "https://www.sncf-connect.com/train/trajet/dijon/belfort",
@@ -307,7 +307,7 @@
     {
       "origin_id": "reims",
       "destination_id": "lille",
-      "minimum_oneway_min": 126,
+      "minimum_oneway_min": 143,
       "mode": "rail",
       "reference_kind": "official_operator_minimum",
       "source_url": "https://www.sncf-connect.com/train/trajet/reims/lille",
@@ -320,7 +320,7 @@
     {
       "origin_id": "reims",
       "destination_id": "nancy",
-      "minimum_oneway_min": 98,
+      "minimum_oneway_min": 117,
       "mode": "rail",
       "reference_kind": "official_operator_minimum",
       "source_url": "https://www.sncf-connect.com/train/trajet/reims/nancy",
@@ -463,7 +463,7 @@
     {
       "origin_id": "besancon",
       "destination_id": "metz",
-      "minimum_oneway_min": 314,
+      "minimum_oneway_min": 209,
       "mode": "rail",
       "reference_kind": "official_operator_minimum",
       "source_url": "https://www.sncf-connect.com/train/trajet/besancon/metz",
@@ -476,7 +476,7 @@
     {
       "origin_id": "besancon",
       "destination_id": "colmar",
-      "minimum_oneway_min": 140,
+      "minimum_oneway_min": 151,
       "mode": "rail",
       "reference_kind": "official_operator_minimum",
       "source_url": "https://www.sncf-connect.com/train/trajet/besancon/colmar",
@@ -554,7 +554,7 @@
     {
       "origin_id": "kehl",
       "destination_id": "strasbourg",
-      "minimum_oneway_min": 9,
+      "minimum_oneway_min": 10,
       "mode": "rail",
       "reference_kind": "official_operator_minimum",
       "source_url": "https://www.sncf-connect.com/train/trajet/kehl/strasbourg",
@@ -606,7 +606,7 @@
     {
       "origin_id": "freiburg",
       "destination_id": "strasbourg",
-      "minimum_oneway_min": 64,
+      "minimum_oneway_min": 65,
       "mode": "rail",
       "reference_kind": "official_operator_minimum",
       "source_url": "https://www.sncf-connect.com/train/trajet/fribourg-en-brisgau/strasbourg",
@@ -619,7 +619,7 @@
     {
       "origin_id": "freiburg",
       "destination_id": "colmar",
-      "minimum_oneway_min": 105,
+      "minimum_oneway_min": 88,
       "mode": "rail",
       "reference_kind": "official_operator_minimum",
       "source_url": "https://www.sncf-connect.com/train/trajet/fribourg-en-brisgau/colmar",
@@ -697,7 +697,7 @@
     {
       "origin_id": "saarbrucken",
       "destination_id": "metz",
-      "minimum_oneway_min": 60,
+      "minimum_oneway_min": 59,
       "mode": "rail",
       "reference_kind": "official_operator_minimum",
       "source_url": "https://www.sncf-connect.com/train/trajet/sarrebruck/metz",
@@ -710,7 +710,7 @@
     {
       "origin_id": "saarbrucken",
       "destination_id": "strasbourg",
-      "minimum_oneway_min": 106,
+      "minimum_oneway_min": 103,
       "mode": "rail",
       "reference_kind": "official_operator_minimum",
       "source_url": "https://www.sncf-connect.com/train/trajet/sarrebruck/strasbourg",
@@ -788,7 +788,7 @@
     {
       "origin_id": "metz",
       "destination_id": "arras",
-      "minimum_oneway_min": 180,
+      "minimum_oneway_min": 162,
       "mode": "rail",
       "reference_kind": "official_operator_minimum",
       "source_url": "https://www.sncf-connect.com/train/trajet/metz/arras",
@@ -814,7 +814,7 @@
     {
       "origin_id": "metz",
       "destination_id": "amsterdam",
-      "minimum_oneway_min": 324,
+      "minimum_oneway_min": 365,
       "mode": "rail",
       "reference_kind": "official_operator_minimum",
       "source_url": "https://www.sncf-connect.com/train/trajet/metz/amsterdam",
@@ -840,7 +840,7 @@
     {
       "origin_id": "metz",
       "destination_id": "saint_louis",
-      "minimum_oneway_min": 134,
+      "minimum_oneway_min": 143,
       "mode": "rail",
       "reference_kind": "official_operator_minimum",
       "source_url": "https://www.sncf-connect.com/train/trajet/metz/saint-louis",
@@ -879,7 +879,7 @@
     {
       "origin_id": "metz",
       "destination_id": "brussels",
-      "minimum_oneway_min": 199,
+      "minimum_oneway_min": 205,
       "mode": "rail",
       "reference_kind": "official_operator_minimum",
       "source_url": "https://www.sncf-connect.com/train/trajet/metz/bruxelles",
@@ -892,7 +892,7 @@
     {
       "origin_id": "metz",
       "destination_id": "cologne",
-      "minimum_oneway_min": 237,
+      "minimum_oneway_min": 235,
       "mode": "rail",
       "reference_kind": "official_operator_minimum",
       "source_url": "https://www.sncf-connect.com/train/trajet/metz/cologne",
@@ -918,7 +918,7 @@
     {
       "origin_id": "haguenau",
       "destination_id": "metz",
-      "minimum_oneway_min": 98,
+      "minimum_oneway_min": 95,
       "mode": "rail",
       "reference_kind": "official_operator_minimum",
       "source_url": "https://www.sncf-connect.com/train/trajet/haguenau/metz",
@@ -970,7 +970,7 @@
     {
       "origin_id": "nancy",
       "destination_id": "arras",
-      "minimum_oneway_min": 179,
+      "minimum_oneway_min": 180,
       "mode": "rail",
       "reference_kind": "official_operator_minimum",
       "source_url": "https://www.sncf-connect.com/train/trajet/nancy/arras",
@@ -1009,7 +1009,7 @@
     {
       "origin_id": "nancy",
       "destination_id": "belfort",
-      "minimum_oneway_min": 157,
+      "minimum_oneway_min": 159,
       "mode": "rail",
       "reference_kind": "official_operator_minimum",
       "source_url": "https://www.sncf-connect.com/train/trajet/nancy/belfort",
