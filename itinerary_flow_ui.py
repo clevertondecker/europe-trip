@@ -52,6 +52,10 @@ def _ux45_return_to_research()->None:
 
 def _stage_changed()->None:
     st.session_state["flow_active_stage"]=st.session_state["flow_stage"]
+    st.session_state.pop("flow_active_destination", None)
+    st.session_state.pop("flow_add_destination", None)
+    st.session_state["flow_search"] = ""
+    st.session_state["flow_search_saved"] = ""
 
 
 def _chosen_destination_changed()->None:
@@ -152,8 +156,11 @@ def _render_add(plan:dict,catalog:dict)->None:
         else:
             lookup={d["id"]:d for d in all_choices}
             previous=st.session_state.get("flow_active_destination")
-            if previous in lookup and st.session_state.get("flow_add_destination")!=previous:
-                st.session_state["flow_add_destination"]=previous
+            selected=st.session_state.get("flow_add_destination")
+            if previous in lookup and selected != previous:
+                st.session_state["flow_add_destination"] = previous
+            elif selected not in lookup:
+                st.session_state["flow_add_destination"] = next(iter(lookup))
             dest_id=st.selectbox("Lugar",list(lookup),
                                  format_func=lambda key:lookup[key]["name"],
                                  key="flow_add_destination",
@@ -173,13 +180,13 @@ def _render_add(plan:dict,catalog:dict)->None:
             pick_key="flow_pick_"+dest_id
             if pick_key not in st.session_state:
                 st.session_state[pick_key]=[x for x in draft if x in labels]
-            st.caption("Selecione até cinco atrações. As descrições ficam logo abaixo.")
+            from ux55_visual_outing_ui import render_destination_preview
+            render_destination_preview(dest,catalog,st.session_state[pick_key])
+            st.markdown("##### Escolha as atrações para este passeio")
             picked=st.multiselect("Atrações desejadas (1 a 5)",list(labels),
                                   format_func=lambda key:labels[key],
                                   key=pick_key,max_selections=5,
                                   on_change=_picks_changed,args=(dest_id,))
-            from ux55_visual_outing_ui import render_destination_preview
-            render_destination_preview(dest,catalog,picked)
             periods=period_options(stage)
             period_key="flow_period_"+dest_id
             selected_period=st.session_state.get(
