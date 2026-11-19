@@ -22,14 +22,14 @@ class Data13EvidenceVerificationTests(unittest.TestCase):
 
     def test_full_manifest_is_explicit_and_unverified_are_not_displayed(self):
         displayed, audit=vetted_overlay_by_pair(self.records,MANIFEST)
-        self.assertEqual(audit["research_rows"],288)
-        self.assertEqual(audit["verified_displayable"],288)
+        self.assertEqual(audit["research_rows"],319)
+        self.assertEqual(audit["verified_displayable"],319)
         self.assertEqual(audit["pending_source_review"],0)
         self.assertEqual(displayed[("aachen","lille")]["minimum_oneway_min"],134)
         self.assertEqual(len(displayed),len(self.records))
         actual=load_data13()
-        self.assertEqual(len(actual["records"]),288)
-        self.assertEqual(len(actual["by_pair"]),288)
+        self.assertEqual(len(actual["records"]),319)
+        self.assertEqual(len(actual["by_pair"]),319)
 
     def test_all_record_urls_match_directional_canonical_ids(self):
         for row in self.records:
@@ -266,6 +266,43 @@ class Data13EvidenceVerificationTests(unittest.TestCase):
                 validate_record_url(row)
                 self.assertFalse(row["return_2027_verified"])
                 self.assertFalse(row["valid_for_2027"])
+
+    def test_data14_batch7_31_secondary_minima(self):
+        import csv
+        fixture=json.loads((ROOT/"tests"/"fixtures"/
+                           "data14_batch7_2026_11_secondary_minima.json").read_text(encoding="utf-8"))["records"]
+        self.assertEqual(len(fixture),31)
+        with MANIFEST.open(newline="",encoding="utf-8") as source:
+            evidence={(row["origin_id"],row["destination_id"]):row for row in csv.DictReader(source)}
+        for item in fixture:
+            key=item["origin_id"],item["destination_id"]
+            with self.subTest(pair=key):
+                r=next(x for x in self.records if
+                       (x["origin_id"],x["destination_id"])==key)
+                m=evidence[key]
+                self.assertEqual(r["source_url"],item["source_url"])
+                self.assertEqual(r["minimum_oneway_min"],item["published_min"])
+                self.assertEqual(r["reference_kind"],"secondary_route_minimum")
+                self.assertEqual(r["confidence"],"low")
+                self.assertEqual(m["verification_status"],"verified_minimum")
+                self.assertEqual(int(m["published_min_rechecked"]),item["published_min"])
+                self.assertIn("DATA14.7",m["brief_evidence"])
+                validate_record_url(r)
+                self.assertFalse(r["valid_for_2027"])
+                self.assertFalse(r["return_2027_verified"])
+
+    def test_data14_interlaken_ost_not_generic_destination(self):
+        from rail_reference_projection_model import decorate_comparison
+        row={"base_id":"besancon","destination_id":"interlaken",
+             "evidence_status":"not_researched","minimum_oneway_min":None,
+             "source_url":None,"divergent_sources":False}
+        c=decorate_comparison({"rows":[row]})["cells"][("besancon","interlaken")]
+        if c["data13_connectivity_applied"]:
+            self.assertEqual(c["arrival_station"],"Interlaken Ost")
+            self.assertIn("Interlaken Ost",c["station_caveat"])
+            self.assertEqual(c["station_comparability"],"station_named_in_route_page")
+        self.assertFalse(c["weekend_return_known"])
+        self.assertFalse(c["valid_for_2027"])
 
     def test_never_claims_2027_schedule_or_return(self):
         for record in self.records:

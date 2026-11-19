@@ -162,7 +162,16 @@ def decorate_comparison(result, *, references=None, gap_overlay=None,
                 "gap_checked_at": data13_row["source_checked_at"],
                 "confidence": data13_row["confidence"],
                 "source_kind": data13_row["reference_kind"],
-                "station_comparability": "city_level_ambiguous",
+                "arrival_station": (
+                    "Interlaken Ost" if data13_row["source_url"].endswith("-to-interlaken-ost")
+                    else "Basel SBB" if data13_row["source_url"].endswith("-to-basel-sbb")
+                    else None
+                ),
+                "station_comparability": (
+                    "station_named_in_route_page" if data13_row["source_url"].endswith(
+                        ("-to-interlaken-ost", "-to-basel-sbb"))
+                    else "city_level_ambiguous"
+                ),
                 "comparability": "indicative_only_not_station_comparable",
                 "weekend_return_known": False,
                 "valid_for_2027": False,
@@ -243,11 +252,14 @@ def decorate_comparison(result, *, references=None, gap_overlay=None,
             "lille_connectivity_applied": basis == "data12_reference",
             "data13_connectivity_applied": basis == "data13_reference",
             "station_caveat": (
-                "Referência por cidade; estação de embarque/chegada não reconciliada."
-                if evidence.get("station_comparability") == "city_level_ambiguous"
-                else ("Estações citadas na fonte, sem serviço datado."
-                      if evidence.get("station_comparability") == "station_named_in_route_page"
-                      else None)),
+                "Fonte refere-se à chegada na estação " + evidence["arrival_station"]
+                + "; não confirma acesso a atrações fora da estação."
+                if evidence.get("arrival_station")
+                else ("Referência por cidade; estação de embarque/chegada não reconciliada."
+                      if evidence.get("station_comparability") == "city_level_ambiguous"
+                      else ("Estações citadas na fonte, sem serviço datado."
+                            if evidence.get("station_comparability") == "station_named_in_route_page"
+                            else None))),
         }
     if sum(categories.values()) != len(cells):
         raise AssertionError("comparative coverage overlaps")
