@@ -60,19 +60,19 @@ class Data13DirectedRailCoverageTests(unittest.TestCase):
                 with self.assertRaises(ValueError):validate_data13(p)
 
     def test_shared_projection_displays_only_sourced_fallback(self):
-        r={"base_id":"haguenau","destination_id":"saverne",
+        r={"base_id":"arlon","destination_id":"strasbourg",
            "evidence_status":"not_researched",
            "minimum_oneway_min":None,"source_url":None,"divergent_sources":False}
         result=decorate_comparison({"rows":[r]})
-        cell=result["cells"][("haguenau","saverne")]
+        cell=result["cells"][("arlon","strasbourg")]
         self.assertEqual(cell["category"],"reference_only")
         self.assertTrue(cell["data13_connectivity_applied"])
-        self.assertEqual(cell["display_min"],63)
+        self.assertEqual(cell["display_min"],141)
         self.assertFalse(cell["valid_for_2027"])
         self.assertFalse(cell["weekend_return_known"])
         before={**r,"minimum_oneway_min":74,"evidence_status":"historical_time",
                 "source_url":"https://www.sncf-connect.com/test/historical"}
-        higher=decorate_comparison({"rows":[before]})["cells"][("haguenau","saverne")]
+        higher=decorate_comparison({"rows":[before]})["cells"][("arlon","strasbourg")]
         self.assertEqual(higher["display_min"],74)
         self.assertFalse(higher["data13_connectivity_applied"])
 
@@ -90,10 +90,10 @@ class Data13DirectedRailCoverageTests(unittest.TestCase):
         self.assertNotIn("operadora", cell["label"])
 
     def test_dq32_is_read_only_and_evidence_reaches_front(self):
-        overview=opportunity_overview("haguenau")
-        match=next(x for x in overview["destinations"] if x["destination_id"]=="saverne")
+        overview=opportunity_overview("arlon")
+        match=next(x for x in overview["destinations"] if x["destination_id"]=="strasbourg")
         self.assertEqual(match["status"],"indicative_rail_reference_only")
-        self.assertEqual(match["indicative_train_oneway_min"],63)
+        self.assertEqual(match["indicative_train_oneway_min"],141)
         self.assertEqual(match["indicative_source_dataset"],"data13_directed_connectivity_2026_11")
         self.assertTrue(match["indicative_source_url"].startswith("https://"))
         self.assertFalse(match["reachable_confirmed"])
