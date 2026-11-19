@@ -53,19 +53,19 @@ def _render_destination_media(destination: dict, photo: dict | None) -> None:
     if photo and photo.get("url"):
         url = escape(display_photo_url(photo["url"]), quote=True)
         name = escape(destination["name"], quote=True)
-        # A photo service can fail in the browser even if its license page exists.
-        # Keep a visible, accessible fallback beneath the image instead of the
-        # browser's broken-image icon; source attribution remains available.
+        # CSS backgrounds do not produce broken-image glyphs. When the
+        # resource fails, the visible placeholder remains deterministic.
         st.markdown(
-            '<div role="img" aria-label="Fotografia de ' + name + '" '
+            '<div role="img" aria-label="Fotografia de '+name+'" '
             'style="position:relative;width:100%;aspect-ratio:16/9;'
             'overflow:hidden;border-radius:9px;background:#e7ebe9;'
             'display:flex;align-items:center;justify-content:center;'
             'color:#586e70;text-align:center">'
-            '<span aria-hidden="true">Foto indisponível no momento</span>'
-            f'<img src="{url}" alt="" loading="lazy" '
-            'style="position:absolute;inset:0;width:100%;height:100%;'
-            'object-fit:cover;display:block;color:transparent">'
+            '<span>Foto indisponível no momento</span>'
+            '<div aria-hidden="true" style="position:absolute;inset:0;'
+            'background-size:cover;background-position:center;'
+            'background-repeat:no-repeat;'
+            'background-image:url(&quot;'+url+'&quot;)"></div>'
             '</div>',unsafe_allow_html=True)
         author = escape(photo.get("author") or "Autor não identificado")
         license_label = escape(photo.get("license") or "Licença não identificada")

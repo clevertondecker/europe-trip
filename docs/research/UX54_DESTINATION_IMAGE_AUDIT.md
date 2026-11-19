@@ -19,3 +19,9 @@
 
 ## Remaining acceptance criteria
 Browser-check all pages, including Metz, Strasbourg, Nancy, Colmar, Oeschinensee, and the remaining editorial-only destinations. For each, confirm the image really appears *or* the neutral fallback appears, and the author/license/source remain legible. Screenshots are required to claim 46/46 image display success; static source tests and a green CI do not prove live CDN availability.
+
+
+## UX54 reviewer correction
+- A failed remote browser image must reveal a deterministic text placeholder. CSS background replaces the native `<img>` glyph for the editable discovery cards; the same browser-failure principle is used by UX4.7.
+- Wikimedia API `imageinfo` thumbnail URL is preferred over MD5-derived guesses. If API fails, original editorial FilePath is retained as a CSS background only; no verified CDN claim is made.
+- 10 editorial source records are render-tested under mocked network failure, alongside author/license/source assertions. Browser screenshots and live CDN response checks remain outstanding.

@@ -4,8 +4,6 @@ from __future__ import annotations
 from functools import lru_cache
 import json
 from pathlib import Path
-from hashlib import md5
-from urllib.parse import quote, unquote, urlsplit
 
 ROOT = Path(__file__).resolve().parent
 MANIFEST = ROOT / "data" / "destination_photo_assets.json"
@@ -56,22 +54,38 @@ def preferred_destination_photo(destination: dict, online_photo: dict | None = N
 
 
 
+@lru_cache(maxsize=256)
 def display_photo_url(url: str) -> str:
-    """Resolve reviewed Commons FilePath links to their canonical media CDN URL.
+    """Use Wikimedia API imageinfo URLs, never synthesize the Commons CDN hash.
 
-    Do not guess an image title: Wikimedia stores the MD5 directory from the
-    exact UTF-8 file title. Leave all other URLs untouched.
+    The original Wikimedia FilePath URL is returned if Commons is unavailable;
+    callers render it as a CSS background with a stable no-image fallback.
     """
-    parsed = urlsplit(url)
-    prefix = "/wiki/Special:FilePath/"
-    if (parsed.scheme != "https" or
-            parsed.netloc != "commons.wikimedia.org" or
-            not parsed.path.startswith(prefix)):
+    from urllib.parse import unquote, urlsplit, urlencode
+    from urllib.request import urlopen, Request
+    p=urlsplit(url)
+    prefix="/wiki/Special:FilePath/"
+    if not (p.scheme=="https" and p.netloc=="commons.wikimedia.org"
+            and p.path.startswith(prefix)):
         return url
-    title = unquote(parsed.path[len(prefix):]).replace(" ", "_")
-    if (not title or "/" in title or "\\" in title or
-            title.startswith(".") or "." not in title):
+    title=unquote(p.path[len(prefix):]).replace("_"," ")
+    if not title or "/" in title or "\\" in title or not title.lower().endswith(
+            (".jpg",".jpeg",".png",".webp")):
         return url
-    digest = md5(title.encode("utf-8")).hexdigest()
-    return ("https://upload.wikimedia.org/wikipedia/commons/" +
-            digest[0] + "/" + digest[:2] + "/" + quote(title, safe="()_-."))
+    endpoint="https://commons.wikimedia.org/w/api.php?"+urlencode({
+        "action":"query","titles":"File:"+title,"prop":"imageinfo",
+        "iiprop":"url","iiurlwidth":"800","format":"json"})
+    try:
+        req=Request(endpoint,headers={"User-Agent":"EuropeTrip-Research/1.0",
+                                      "Accept":"application/json"})
+        with urlopen(req,timeout=4) as response:
+            payload=json.load(response)
+        for page in payload.get("query",{}).get("pages",{}).values():
+            for info in page.get("imageinfo",[]):
+                result=info.get("thumburl") or info.get("url")
+                parsed=urlsplit(result or "")
+                if parsed.scheme=="https" and parsed.netloc=="upload.wikimedia.org":
+                    return result
+    except (OSError,ValueError,TypeError,KeyError):
+        pass
+    return url

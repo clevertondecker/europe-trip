@@ -61,41 +61,64 @@ class LocalDestinationPhotosTests(unittest.TestCase):
         self.assertEqual(preferred_destination_photo(
             {"id":"unregistered_destination","photo":None},external),external)
 
-    def test_commons_filepath_resolves_to_canonical_media_host(self):
-        url = "https://commons.wikimedia.org/wiki/Special:FilePath/Centre_Pompidou_%C3%A0_Metz.jpg"
-        displayed = display_photo_url(url)
-        self.assertTrue(displayed.startswith("https://upload.wikimedia.org/wikipedia/commons/"))
-        self.assertIn("Centre_Pompidou_%C3%A0_Metz.jpg", displayed)
-        self.assertEqual(display_photo_url(displayed), displayed)
-        self.assertEqual(display_photo_url("https://example.com/pic.jpg"),
-                         "https://example.com/pic.jpg")
-        self.assertEqual(display_photo_url("http://commons.wikimedia.org/wiki/Special:FilePath/a.jpg"),
-                         "http://commons.wikimedia.org/wiki/Special:FilePath/a.jpg")
+    def test_wikimedia_api_is_authoritative_not_a_guessed_cdn_path(self):
+        import io
+        import json
+        from destination_photo_assets import display_photo_url
+        url="https://commons.wikimedia.org/wiki/Special:FilePath/Centre_Pompidou_%C3%A0_Metz.jpg"
+        payload={"query":{"pages":{"17":{"imageinfo":[{
+            "thumburl":"https://upload.wikimedia.org/official/thumb.jpg"}]}}}}
+        class Response(io.BytesIO):
+            def __enter__(self): return self
+            def __exit__(self,*args): self.close()
+        display_photo_url.cache_clear()
+        with patch("urllib.request.urlopen",return_value=Response(
+                json.dumps(payload).encode())) as request:
+            self.assertEqual(display_photo_url(url),
+                             "https://upload.wikimedia.org/official/thumb.jpg")
+            self.assertEqual(request.call_count,1)
+        display_photo_url.cache_clear()
+        with patch("urllib.request.urlopen",side_effect=OSError("offline")):
+            self.assertEqual(display_photo_url(url),url)
+        display_photo_url.cache_clear()
 
-    def test_browser_failure_has_graceful_placeholder(self):
-        ui = (ROOT / "ux501_destination_discovery_ui.py").read_text(encoding="utf-8")
-        self.assertIn("Foto indisponível no momento", ui)
-        self.assertIn("display_photo_url(photo", ui)
-        self.assertIn('role="img"', ui)
+    def test_external_failure_has_deterministic_fallback(self):
+        from unittest.mock import MagicMock
+        import ux501_destination_discovery_ui as ui
+        fake=MagicMock()
+        entry={"id":"metz","name":"Metz"}
+        photo={"url":"https://commons.wikimedia.org/wiki/Special:FilePath/Centre_Pompidou_%C3%A0_Metz.jpg",
+               "author":"LuxFoto09","license":"CC BY-SA 4.0",
+               "source_page":"https://commons.wikimedia.org/wiki/File:Centre_Pompidou_à_Metz.jpg"}
+        with patch.object(ui,"st",fake),patch.object(ui,"display_photo_url",return_value=photo["url"]):
+            ui._render_destination_media(entry,photo)
+        markup=fake.markdown.call_args_list[0].args[0]
+        self.assertIn("Foto indisponível no momento",markup)
+        self.assertIn("background-image:url(",markup)
+        self.assertNotIn("<img ",markup)
+        self.assertIn("role=\"img\"",markup)
+        self.assertIn("LuxFoto09",fake.markdown.call_args_list[1].args[0])
 
-    def test_all_editorial_destinations_have_safe_direct_photo_urls(self):
+    def test_ten_editorial_destinations_keep_attribution_and_fallback(self):
         from attractions_model import load_attractions
-        catalog = load_attractions()
-        editorial = {d["id"]: d["photo"] for d in catalog["destinations"]
-                     if d.get("photo")}
-        self.assertEqual(len(editorial), 10)
-        for destination_id, photo in editorial.items():
-            with self.subTest(destination=destination_id):
-                direct = display_photo_url(photo["url"])
-                self.assertTrue(
-                    direct.startswith("https://upload.wikimedia.org/wikipedia/commons/"),
-                    f"Unresolved external image for {destination_id}")
-                self.assertTrue(photo["author"])
-                self.assertTrue(photo["license"])
-                self.assertTrue(photo["source_page"].startswith(
+        from unittest.mock import MagicMock
+        import ux501_destination_discovery_ui as ui
+        editorial=[d for d in load_attractions()["destinations"] if d.get("photo")]
+        self.assertEqual(len(editorial),10)
+        for entry in editorial:
+            with self.subTest(destination=entry["id"]):
+                fake=MagicMock()
+                with patch.object(ui,"st",fake),patch.object(ui,"display_photo_url",return_value=entry["photo"]["url"]):
+                    ui._render_destination_media(entry,entry["photo"])
+                # Rendering behavior, not mere syntactic URL validation.
+                markup=fake.markdown.call_args_list[0].args[0]
+                self.assertIn("background-image:url(",markup)
+                self.assertNotIn("<img ",markup)
+                self.assertIn("Foto indisponível no momento",markup)
+                self.assertTrue(entry["photo"]["author"])
+                self.assertTrue(entry["photo"]["license"])
+                self.assertTrue(entry["photo"]["source_page"].startswith(
                     "https://commons.wikimedia.org/wiki/File:"))
-                self.assertTrue(preferred_destination_photo(
-                    {"id": destination_id, "photo": photo}))
 
     def test_catalog_and_plan_not_modified(self):
         catalog=build_destination_discovery()
