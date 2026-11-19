@@ -9,7 +9,8 @@ from __future__ import annotations
 import streamlit as st
 from html import escape
 from ux501_destination_photo_service import lookup_destination_photos
-from destination_photo_assets import local_destination_photo, preferred_destination_photo
+from destination_photo_assets import (local_destination_photo, preferred_destination_photo,
+                                      display_photo_url)
 
 from ux501_destination_discovery_model import (
     build_destination_discovery, filter_destinations,
@@ -50,13 +51,21 @@ def _render_destination_media(destination: dict, photo: dict | None) -> None:
             unsafe_allow_html=True)
         return
     if photo and photo.get("url"):
-        url = escape(photo["url"], quote=True)
+        url = escape(display_photo_url(photo["url"]), quote=True)
         name = escape(destination["name"], quote=True)
+        # A photo service can fail in the browser even if its license page exists.
+        # Keep a visible, accessible fallback beneath the image instead of the
+        # browser's broken-image icon; source attribution remains available.
         st.markdown(
-            '<div style="width:100%;aspect-ratio:16/9;overflow:hidden;'
-            'border-radius:9px;background:#e7ebe9">'
-            f'<img src="{url}" alt="Fotografia de {name}" loading="lazy" '
-            'style="width:100%;height:100%;object-fit:cover;display:block">'
+            '<div role="img" aria-label="Fotografia de ' + name + '" '
+            'style="position:relative;width:100%;aspect-ratio:16/9;'
+            'overflow:hidden;border-radius:9px;background:#e7ebe9;'
+            'display:flex;align-items:center;justify-content:center;'
+            'color:#586e70;text-align:center">'
+            '<span aria-hidden="true">Foto indisponível no momento</span>'
+            f'<img src="{url}" alt="" loading="lazy" '
+            'style="position:absolute;inset:0;width:100%;height:100%;'
+            'object-fit:cover;display:block;color:transparent">'
             '</div>',unsafe_allow_html=True)
         author = escape(photo.get("author") or "Autor não identificado")
         license_label = escape(photo.get("license") or "Licença não identificada")

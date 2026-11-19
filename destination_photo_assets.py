@@ -4,6 +4,8 @@ from __future__ import annotations
 from functools import lru_cache
 import json
 from pathlib import Path
+from hashlib import md5
+from urllib.parse import quote, unquote, urlsplit
 
 ROOT = Path(__file__).resolve().parent
 MANIFEST = ROOT / "data" / "destination_photo_assets.json"
@@ -48,6 +50,28 @@ def local_destination_photo(destination_id: str) -> dict | None:
 
 
 def preferred_destination_photo(destination: dict, online_photo: dict | None = None) -> dict | None:
-    """Prioritize preexisting editorial image, bundled photo, then online fallback."""
-    return (destination.get("photo") or
-            local_destination_photo(destination["id"]) or online_photo)
+    """Prefer bundled verified bytes over hotlinked editorial images."""
+    return (local_destination_photo(destination["id"]) or
+            destination.get("photo") or online_photo)
+
+
+
+def display_photo_url(url: str) -> str:
+    """Resolve reviewed Commons FilePath links to their canonical media CDN URL.
+
+    Do not guess an image title: Wikimedia stores the MD5 directory from the
+    exact UTF-8 file title. Leave all other URLs untouched.
+    """
+    parsed = urlsplit(url)
+    prefix = "/wiki/Special:FilePath/"
+    if (parsed.scheme != "https" or
+            parsed.netloc != "commons.wikimedia.org" or
+            not parsed.path.startswith(prefix)):
+        return url
+    title = unquote(parsed.path[len(prefix):]).replace(" ", "_")
+    if (not title or "/" in title or "\\" in title or
+            title.startswith(".") or "." not in title):
+        return url
+    digest = md5(title.encode("utf-8")).hexdigest()
+    return ("https://upload.wikimedia.org/wikipedia/commons/" +
+            digest[0] + "/" + digest[:2] + "/" + quote(title, safe="()_-."))

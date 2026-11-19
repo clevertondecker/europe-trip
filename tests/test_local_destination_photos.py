@@ -12,6 +12,7 @@ from streamlit.testing.v1 import AppTest
 
 from destination_photo_assets import (
     ROOT, _manifest, local_destination_photo, preferred_destination_photo,
+    display_photo_url,
 )
 from ux501_destination_discovery_model import build_destination_discovery
 
@@ -49,16 +50,33 @@ class LocalDestinationPhotosTests(unittest.TestCase):
         self.assertEqual(len(set(hashes)),len(records),
                          "Different cities must not share a photo")
 
-    def test_editorial_photo_then_local_then_dynamic_fallback(self):
+    def test_bundled_photo_preferred_over_remote_editorial(self):
         city={"id":"aachen","photo":None}
         photo=local_destination_photo("aachen")
         external={"url":"https://upload.wikimedia.org/example.jpg"}
         self.assertEqual(preferred_destination_photo(city,external),photo)
         city["photo"]={"url":"https://commons.wikimedia.org/wiki/Special:FilePath/editorial.jpg"}
-        self.assertEqual(preferred_destination_photo(city,external),city["photo"])
+        self.assertEqual(preferred_destination_photo(city,external),photo)
         self.assertIsNone(local_destination_photo("unregistered_destination"))
         self.assertEqual(preferred_destination_photo(
             {"id":"unregistered_destination","photo":None},external),external)
+
+    def test_commons_filepath_resolves_to_canonical_media_host(self):
+        url = "https://commons.wikimedia.org/wiki/Special:FilePath/Centre_Pompidou_%C3%A0_Metz.jpg"
+        displayed = display_photo_url(url)
+        self.assertTrue(displayed.startswith("https://upload.wikimedia.org/wikipedia/commons/"))
+        self.assertIn("Centre_Pompidou_%C3%A0_Metz.jpg", displayed)
+        self.assertEqual(display_photo_url(displayed), displayed)
+        self.assertEqual(display_photo_url("https://example.com/pic.jpg"),
+                         "https://example.com/pic.jpg")
+        self.assertEqual(display_photo_url("http://commons.wikimedia.org/wiki/Special:FilePath/a.jpg"),
+                         "http://commons.wikimedia.org/wiki/Special:FilePath/a.jpg")
+
+    def test_browser_failure_has_graceful_placeholder(self):
+        ui = (ROOT / "ux501_destination_discovery_ui.py").read_text(encoding="utf-8")
+        self.assertIn("Foto indisponível no momento", ui)
+        self.assertIn("display_photo_url(photo", ui)
+        self.assertIn("role=\\"img\\"", ui)
 
     def test_catalog_and_plan_not_modified(self):
         catalog=build_destination_discovery()
