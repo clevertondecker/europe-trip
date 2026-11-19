@@ -81,20 +81,20 @@ class Data13EvidenceVerificationTests(unittest.TestCase):
 
     def test_data14_aliases_and_source_minima(self):
         observed = {
-            ("saint_louis","reims"):232,
-            ("strasbourg","lausanne"):245,
-            ("selestat","brussels"):265,
-            ("saverne","mulhouse"):87,
+            ("saint_louis","reims"):178,
+            ("strasbourg","lausanne"):232,
+            ("selestat","brussels"):264,
+            ("saverne","mulhouse"):88,
             ("offenburg","brussels"):278,
             ("offenburg","liege"):251,
             ("offenburg","interlaken"):181,
             ("saint_louis","lausanne"):151,
             ("besancon","namur"):366,
             ("selestat","basel"):56,
-            ("selestat","lille"):225,
+            ("selestat","lille"):220,
             ("selestat","lyon"):227,
             ("belfort","lausanne"):229,
-            ("arras","lausanne"):324,
+            ("arras","lausanne"):321,
         }
         for key,minutes in observed.items():
             with self.subTest(pair=key):
@@ -118,6 +118,33 @@ class Data13EvidenceVerificationTests(unittest.TestCase):
                 **row,
                 "source_url":"https://www.thetrainline.com/en/train-times/offenburg-to-lausanne"
             })
+
+    def test_reconciled_data14_minima_and_manifest_match(self):
+        import csv
+        expected={
+            ("saint_louis","reims"):178,
+            ("strasbourg","lausanne"):232,
+            ("selestat","brussels"):264,
+            ("saverne","mulhouse"):88,
+            ("selestat","lille"):220,
+            ("arras","lausanne"):321,
+        }
+        with MANIFEST.open(newline="", encoding="utf-8") as file:
+            index={(r["origin_id"],r["destination_id"]):r for r in csv.DictReader(file)}
+        for key,minimum in expected.items():
+            with self.subTest(pair=key):
+                record=next(r for r in self.records
+                            if (r["origin_id"],r["destination_id"])==key)
+                self.assertEqual(record["minimum_oneway_min"],minimum)
+                validate_record_url(record)
+                manifest=index[key]
+                self.assertEqual(manifest["verification_status"],"verified_minimum")
+                self.assertEqual(manifest["source_url"],record["source_url"])
+                self.assertEqual(int(manifest["minimum_dataset_min"]),minimum)
+                self.assertEqual(int(manifest["published_min_rechecked"]),minimum)
+                self.assertEqual(record["direction"],"outbound_only")
+                self.assertFalse(record["valid_for_2027"])
+                self.assertFalse(record["return_2027_verified"])
 
     def test_never_claims_2027_schedule_or_return(self):
         for record in self.records:

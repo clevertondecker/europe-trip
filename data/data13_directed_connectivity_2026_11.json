@@ -2985,7 +2985,7 @@
     {
       "origin_id": "saint_louis",
       "destination_id": "reims",
-      "minimum_oneway_min": 232,
+      "minimum_oneway_min": 178,
       "mode": "rail",
       "reference_kind": "official_operator_minimum",
       "source_url": "https://www.sncf-connect.com/train/horaires/saint-louis/reims",
@@ -3011,7 +3011,7 @@
     {
       "origin_id": "strasbourg",
       "destination_id": "lausanne",
-      "minimum_oneway_min": 245,
+      "minimum_oneway_min": 232,
       "mode": "rail",
       "reference_kind": "official_operator_minimum",
       "source_url": "https://www.sncf-connect.com/train/trajet/strasbourg/lausanne",
@@ -3063,7 +3063,7 @@
     {
       "origin_id": "selestat",
       "destination_id": "brussels",
-      "minimum_oneway_min": 265,
+      "minimum_oneway_min": 264,
       "mode": "rail",
       "reference_kind": "official_operator_minimum",
       "source_url": "https://www.sncf-connect.com/train/trajet/selestat/bruxelles",
@@ -3141,7 +3141,7 @@
     {
       "origin_id": "saverne",
       "destination_id": "mulhouse",
-      "minimum_oneway_min": 87,
+      "minimum_oneway_min": 88,
       "mode": "rail",
       "reference_kind": "official_operator_minimum",
       "source_url": "https://www.sncf-connect.com/train/horaires/saverne/mulhouse",
@@ -3245,7 +3245,7 @@
     {
       "origin_id": "selestat",
       "destination_id": "lille",
-      "minimum_oneway_min": 225,
+      "minimum_oneway_min": 220,
       "mode": "rail",
       "reference_kind": "official_operator_minimum",
       "source_url": "https://www.sncf-connect.com/train/trajet/selestat/lille",
@@ -3284,7 +3284,7 @@
     {
       "origin_id": "arras",
       "destination_id": "lausanne",
-      "minimum_oneway_min": 324,
+      "minimum_oneway_min": 321,
       "mode": "rail",
       "reference_kind": "official_operator_minimum",
       "source_url": "https://www.sncf-connect.com/train/trajet/arras/lausanne",
