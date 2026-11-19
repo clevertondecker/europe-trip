@@ -9,7 +9,8 @@ from __future__ import annotations
 import streamlit as st
 from html import escape
 from ux501_destination_photo_service import lookup_destination_photos
-from destination_photo_assets import local_destination_photo, preferred_destination_photo
+from destination_photo_assets import (local_destination_photo, preferred_destination_photo,
+                                      display_photo_url)
 
 from ux501_destination_discovery_model import (
     build_destination_discovery, filter_destinations,
@@ -50,13 +51,21 @@ def _render_destination_media(destination: dict, photo: dict | None) -> None:
             unsafe_allow_html=True)
         return
     if photo and photo.get("url"):
-        url = escape(photo["url"], quote=True)
+        url = escape(display_photo_url(photo["url"]), quote=True)
         name = escape(destination["name"], quote=True)
+        # CSS backgrounds do not produce broken-image glyphs. When the
+        # resource fails, the visible placeholder remains deterministic.
         st.markdown(
-            '<div style="width:100%;aspect-ratio:16/9;overflow:hidden;'
-            'border-radius:9px;background:#e7ebe9">'
-            f'<img src="{url}" alt="Fotografia de {name}" loading="lazy" '
-            'style="width:100%;height:100%;object-fit:cover;display:block">'
+            '<div role="img" aria-label="Fotografia de '+name+'" '
+            'style="position:relative;width:100%;aspect-ratio:16/9;'
+            'overflow:hidden;border-radius:9px;background:#e7ebe9;'
+            'display:flex;align-items:center;justify-content:center;'
+            'color:#586e70;text-align:center">'
+            '<span>Foto indisponível no momento</span>'
+            '<div aria-hidden="true" style="position:absolute;inset:0;'
+            'background-size:cover;background-position:center;'
+            'background-repeat:no-repeat;'
+            'background-image:url(&quot;'+url+'&quot;)"></div>'
             '</div>',unsafe_allow_html=True)
         author = escape(photo.get("author") or "Autor não identificado")
         license_label = escape(photo.get("license") or "Licença não identificada")

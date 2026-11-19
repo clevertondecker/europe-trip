@@ -9,6 +9,8 @@ from __future__ import annotations
 from html import escape
 from urllib.parse import urlsplit,quote
 
+from destination_photo_assets import display_photo_url
+
 PHOTO_HOSTS=frozenset({"commons.wikimedia.org","upload.wikimedia.org",
                        "thumb.wikimedia.org"})
 
@@ -31,7 +33,8 @@ def permitted_photo_url(value:object)->str|None:
 
 def photo_markup(photo:dict|None,name:str)->str:
     """Build a local, responsive 4:5 visual with a neutral failure fallback."""
-    url=permitted_photo_url((photo or {}).get("url"))
+    original=permitted_photo_url((photo or {}).get("url"))
+    url=permitted_photo_url(display_photo_url(original)) if original else None
     name_html=escape(str(name),quote=True)
     # Background images do not display the browser's broken image icon.
     # Transparent layer when load fails leaves the neutral placeholder visible.

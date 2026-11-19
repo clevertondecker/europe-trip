@@ -48,6 +48,44 @@ def local_destination_photo(destination_id: str) -> dict | None:
 
 
 def preferred_destination_photo(destination: dict, online_photo: dict | None = None) -> dict | None:
-    """Prioritize preexisting editorial image, bundled photo, then online fallback."""
-    return (destination.get("photo") or
-            local_destination_photo(destination["id"]) or online_photo)
+    """Prefer bundled verified bytes over hotlinked editorial images."""
+    return (local_destination_photo(destination["id"]) or
+            destination.get("photo") or online_photo)
+
+
+
+@lru_cache(maxsize=256)
+def display_photo_url(url: str) -> str:
+    """Use Wikimedia API imageinfo URLs, never synthesize the Commons CDN hash.
+
+    The original Wikimedia FilePath URL is returned if Commons is unavailable;
+    callers render it as a CSS background with a stable no-image fallback.
+    """
+    from urllib.parse import unquote, urlsplit, urlencode
+    from urllib.request import urlopen, Request
+    p=urlsplit(url)
+    prefix="/wiki/Special:FilePath/"
+    if not (p.scheme=="https" and p.netloc=="commons.wikimedia.org"
+            and p.path.startswith(prefix)):
+        return url
+    title=unquote(p.path[len(prefix):]).replace("_"," ")
+    if not title or "/" in title or "\\" in title or not title.lower().endswith(
+            (".jpg",".jpeg",".png",".webp")):
+        return url
+    endpoint="https://commons.wikimedia.org/w/api.php?"+urlencode({
+        "action":"query","titles":"File:"+title,"prop":"imageinfo",
+        "iiprop":"url","iiurlwidth":"800","format":"json"})
+    try:
+        req=Request(endpoint,headers={"User-Agent":"EuropeTrip-Research/1.0",
+                                      "Accept":"application/json"})
+        with urlopen(req,timeout=4) as response:
+            payload=json.load(response)
+        for page in payload.get("query",{}).get("pages",{}).values():
+            for info in page.get("imageinfo",[]):
+                result=info.get("thumburl") or info.get("url")
+                parsed=urlsplit(result or "")
+                if parsed.scheme=="https" and parsed.netloc=="upload.wikimedia.org":
+                    return result
+    except (OSError,ValueError,TypeError,KeyError):
+        pass
+    return url
