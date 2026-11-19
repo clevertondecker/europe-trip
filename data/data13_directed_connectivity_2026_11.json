@@ -3,7 +3,7 @@
   "scope": "data13_directed_rail_reference_2026_snapshot",
   "checked_at": "2026-11-18",
   "selection_policy": "fallback_after_historical_routes7_data9_data10_data11_data12",
-  "methodology": "Citações individuais de durações mínimas de ida publicadas em páginas de rotas SNCF Connect, verificadas na pesquisa de 18/11/2026. Não extrapolar por simetria, distância ou conexões. Dados exclusivamente exploratórios, sem horários ou retorno garantidos em 2027. Lote adicional validado em páginas individuais de trajeto/horários SNCF Connect; a referência é ao mínimo publicado na página consultada, não à disponibilidade futura. Lote Trainline (fonte secundária, confiança baixa) para cidades belgas, luxemburguesas e alemãs, somente quando a página divulga mínimo direcional; não inferir retorno nem itinerário 2027. DATA14: 27 directional web-page minima rechecked on 2026-11-18, six values reconciled with published minimum; lower precedence and no timetable/return verified for 2027. DATA14 additional verified SNCF pages: Sélestat→Basel/Lille/Lyon, Belfort→Lausanne and Arras→Lausanne. DATA14.2: 70 previously unreviewed SNCF route/timetable pages checked individually for minimum one-way travel time; 19 published minima reconciled; manifest documents each checked page; lower precedence and no 2027 guarantee. DATA14.3: 17 new official source-confirmed directional minima on underserved French/German bases and 1 existing Nancy-Basel minimum reconciled from 162 to 174. Unverified records remain excluded from display.",
+  "methodology": "Citações individuais de durações mínimas de ida publicadas em páginas de rotas SNCF Connect, verificadas na pesquisa de 18/11/2026. Não extrapolar por simetria, distância ou conexões. Dados exclusivamente exploratórios, sem horários ou retorno garantidos em 2027. Lote adicional validado em páginas individuais de trajeto/horários SNCF Connect; a referência é ao mínimo publicado na página consultada, não à disponibilidade futura. Lote Trainline (fonte secundária, confiança baixa) para cidades belgas, luxemburguesas e alemãs, somente quando a página divulga mínimo direcional; não inferir retorno nem itinerário 2027. DATA14: 27 directional web-page minima rechecked on 2026-11-18, six values reconciled with published minimum; lower precedence and no timetable/return verified for 2027. DATA14 additional verified SNCF pages: Sélestat→Basel/Lille/Lyon, Belfort→Lausanne and Arras→Lausanne. DATA14.2: 70 previously unreviewed SNCF route/timetable pages checked individually for minimum one-way travel time; 19 published minima reconciled; manifest documents each checked page; lower precedence and no 2027 guarantee. DATA14.3: 17 new official source-confirmed directional minima on underserved French/German bases and 1 existing Nancy-Basel minimum reconciled from 162 to 174. Unverified records remain excluded from display. DATA14.4: another 60 individually checked official SNCF minima; every reviewed directional route has a source-matched manifest line and static regression fixture; no return/2027 inferred.",
   "records": [
     {
       "origin_id": "metz",
@@ -1035,7 +1035,7 @@
     {
       "origin_id": "nancy",
       "destination_id": "karlsruhe",
-      "minimum_oneway_min": 144,
+      "minimum_oneway_min": 136,
       "mode": "rail",
       "reference_kind": "official_operator_minimum",
       "source_url": "https://www.sncf-connect.com/train/trajet/nancy/karlsruhe",
@@ -1048,7 +1048,7 @@
     {
       "origin_id": "nancy",
       "destination_id": "brussels",
-      "minimum_oneway_min": 211,
+      "minimum_oneway_min": 204,
       "mode": "rail",
       "reference_kind": "official_operator_minimum",
       "source_url": "https://www.sncf-connect.com/train/trajet/nancy/bruxelles",
@@ -1100,7 +1100,7 @@
     {
       "origin_id": "nancy",
       "destination_id": "lyon",
-      "minimum_oneway_min": 255,
+      "minimum_oneway_min": 258,
       "mode": "rail",
       "reference_kind": "official_operator_minimum",
       "source_url": "https://www.sncf-connect.com/train/horaires/nancy/lyon",
@@ -1139,7 +1139,7 @@
     {
       "origin_id": "besancon",
       "destination_id": "nancy",
-      "minimum_oneway_min": 211,
+      "minimum_oneway_min": 251,
       "mode": "rail",
       "reference_kind": "official_operator_minimum",
       "source_url": "https://www.sncf-connect.com/train/trajet/besancon/nancy",
@@ -1191,7 +1191,7 @@
     {
       "origin_id": "karlsruhe",
       "destination_id": "nancy",
-      "minimum_oneway_min": 151,
+      "minimum_oneway_min": 143,
       "mode": "rail",
       "reference_kind": "official_operator_minimum",
       "source_url": "https://www.sncf-connect.com/train/trajet/karlsruhe/nancy",
@@ -1204,7 +1204,7 @@
     {
       "origin_id": "colmar",
       "destination_id": "arras",
-      "minimum_oneway_min": 243,
+      "minimum_oneway_min": 244,
       "mode": "rail",
       "reference_kind": "official_operator_minimum",
       "source_url": "https://www.sncf-connect.com/train/horaires/colmar/arras",
@@ -1321,7 +1321,7 @@
     {
       "origin_id": "colmar",
       "destination_id": "brussels",
-      "minimum_oneway_min": 271,
+      "minimum_oneway_min": 277,
       "mode": "rail",
       "reference_kind": "official_operator_minimum",
       "source_url": "https://www.sncf-connect.com/train/horaires/colmar/bruxelles",
@@ -1347,7 +1347,7 @@
     {
       "origin_id": "saverne",
       "destination_id": "colmar",
-      "minimum_oneway_min": 65,
+      "minimum_oneway_min": 64,
       "mode": "rail",
       "reference_kind": "official_operator_minimum",
       "source_url": "https://www.sncf-connect.com/train/trajet/saverne/colmar",
@@ -1360,7 +1360,7 @@
     {
       "origin_id": "baden_baden",
       "destination_id": "colmar",
-      "minimum_oneway_min": 76,
+      "minimum_oneway_min": 81,
       "mode": "rail",
       "reference_kind": "official_operator_minimum",
       "source_url": "https://www.sncf-connect.com/train/trajet/baden-baden/colmar",
@@ -1373,7 +1373,7 @@
     {
       "origin_id": "thionville",
       "destination_id": "colmar",
-      "minimum_oneway_min": 121,
+      "minimum_oneway_min": 122,
       "mode": "rail",
       "reference_kind": "official_operator_minimum",
       "source_url": "https://www.sncf-connect.com/train/trajet/thionville/colmar",
@@ -1399,7 +1399,7 @@
     {
       "origin_id": "haguenau",
       "destination_id": "colmar",
-      "minimum_oneway_min": 61,
+      "minimum_oneway_min": 70,
       "mode": "rail",
       "reference_kind": "official_operator_minimum",
       "source_url": "https://www.sncf-connect.com/train/horaires/haguenau/colmar",
