@@ -20,9 +20,9 @@
     {
       "origin_id": "belfort",
       "destination_id": "saint_louis",
-      "published_min": 54,
+      "published_min": 53,
       "source_url": "https://www.sncf-connect.com/train/trajet/belfort/saint-louis",
-      "verified_excerpt": "Durée du trajet le plus court | 0h54"
+      "verified_excerpt": "Durée du trajet le plus court | 0h53"
     },
     {
       "origin_id": "belfort",
@@ -41,16 +41,16 @@
     {
       "origin_id": "belfort",
       "destination_id": "haguenau",
-      "published_min": 146,
+      "published_min": 127,
       "source_url": "https://www.sncf-connect.com/train/trajet/belfort/haguenau",
-      "verified_excerpt": "Durée du trajet le plus court | 2h26"
+      "verified_excerpt": "Durée du trajet le plus court | 2h07"
     },
     {
       "origin_id": "reims",
       "destination_id": "mulhouse",
-      "published_min": 158,
+      "published_min": 188,
       "source_url": "https://www.sncf-connect.com/train/trajet/reims/mulhouse",
-      "verified_excerpt": "Durée du trajet le plus court | 2h38"
+      "verified_excerpt": "Durée du trajet le plus court | 3h08"
     },
     {
       "origin_id": "reims",
@@ -62,9 +62,9 @@
     {
       "origin_id": "reims",
       "destination_id": "besancon",
-      "published_min": 289,
+      "published_min": 272,
       "source_url": "https://www.sncf-connect.com/train/trajet/reims/besancon",
-      "verified_excerpt": "Durée du trajet le plus court | 4h49"
+      "verified_excerpt": "Durée du trajet le plus court | 4h32"
     },
     {
       "origin_id": "reims",
@@ -76,9 +76,9 @@
     {
       "origin_id": "reims",
       "destination_id": "arras",
-      "published_min": 137,
+      "published_min": 149,
       "source_url": "https://www.sncf-connect.com/train/trajet/reims/arras",
-      "verified_excerpt": "Durée du trajet le plus court | 2h17"
+      "verified_excerpt": "Durée du trajet le plus court | 2h29"
     },
     {
       "origin_id": "reims",

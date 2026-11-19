@@ -37,15 +37,15 @@ Twelve new direction-specific SNCF minima were checked in the original route-pag
 |---|---|---:|---|
 | haguenau | mulhouse | 1h34 (94 min) | https://www.sncf-connect.com/train/trajet/haguenau/mulhouse |
 | haguenau | belfort | 2h01 (121 min) | https://www.sncf-connect.com/train/trajet/haguenau/belfort |
-| belfort | saint_louis | 0h54 (54 min) | https://www.sncf-connect.com/train/trajet/belfort/saint-louis |
+| belfort | saint_louis | 0h53 (53 min) | https://www.sncf-connect.com/train/trajet/belfort/saint-louis |
 | belfort | selestat | 1h10 (70 min) | https://www.sncf-connect.com/train/trajet/belfort/selestat |
 | belfort | beaune | 1h45 (105 min) | https://www.sncf-connect.com/train/trajet/belfort/beaune |
-| belfort | haguenau | 2h26 (146 min) | https://www.sncf-connect.com/train/trajet/belfort/haguenau |
-| reims | mulhouse | 2h38 (158 min) | https://www.sncf-connect.com/train/trajet/reims/mulhouse |
+| belfort | haguenau | 2h07 (127 min) | https://www.sncf-connect.com/train/trajet/belfort/haguenau |
+| reims | mulhouse | 3h08 (188 min) | https://www.sncf-connect.com/train/trajet/reims/mulhouse |
 | reims | metz | 1h08 (68 min) | https://www.sncf-connect.com/train/trajet/reims/metz |
-| reims | besancon | 4h49 (289 min) | https://www.sncf-connect.com/train/trajet/reims/besancon |
+| reims | besancon | 4h32 (272 min) | https://www.sncf-connect.com/train/trajet/reims/besancon |
 | reims | beaune | 3h45 (225 min) | https://www.sncf-connect.com/train/trajet/reims/beaune |
-| reims | arras | 2h17 (137 min) | https://www.sncf-connect.com/train/trajet/reims/arras |
+| reims | arras | 2h29 (149 min) | https://www.sncf-connect.com/train/trajet/reims/arras |
 | reims | saint_louis | 3h24 (204 min) | https://www.sncf-connect.com/train/trajet/reims/saint-louis |
 
 **Rejections and quality caveats:** Haguenau→Dijon yielded conflicting source retrievals (2h56 vs 2h48) and Haguenau→Lille differed (3h45 vs 4h01); both were omitted. No source evidence claims a 2027 date-specific return or station-to-attraction accessibility.
@@ -63,3 +63,17 @@ Twelve new direction-specific SNCF minima were checked in the original route-pag
 The route-specific `/train/trajet/` page for Saverne→Saint-Louis publishes 1h44; a separate September timetable snapshot includes a 1h43 trip. They are not automatically reconciled. The recorded value describes **the cited page's published minimum**, not a claim about universal network minimum or a 2027 itinerary.
 
 If the app projection passes, total coverage becomes **544/1350 = 40.30%** and 401 further pairs are needed to reach 70%.
+
+## Independent reviewer source reconciliation — 2026-11-19
+
+A code review independently reopened all 18 cited SNCF `/train/trajet/` pages and compared their explicitly labeled "Durée du trajet le plus court" to the DATA15 manifest. **Five records did not match** the independently observed operator page; they have been corrected rather than silently accepted from internal fixtures:
+
+| Pair | Previously captured | Independently rechecked page |
+| --- | ---: | ---: |
+| belfort → saint_louis | 54 min | 53 min |
+| belfort → haguenau | 146 min | 127 min |
+| reims → mulhouse | 158 min | 188 min |
+| reims → besancon | 289 min | 272 min |
+| reims → arras | 137 min | 149 min |
+
+The other 13 source-page minima matched. Source HTML/index snapshots are time-sensitive: this audit establishes agreement with the page material available during this recheck, not that the duration is invariant across dates or that a train can be booked for the 2027 trip. The JSON remains an indicative outbound-only fallback and must not be treated as train-station-matched trip feasibility.

@@ -64,15 +64,15 @@ class Data13EvidenceVerificationTests(unittest.TestCase):
         expected={
             ("haguenau","mulhouse"):94,
             ("haguenau","belfort"):121,
-            ("belfort","saint_louis"):54,
+            ("belfort","saint_louis"):53,
             ("belfort","selestat"):70,
             ("belfort","beaune"):105,
-            ("belfort","haguenau"):146,
-            ("reims","mulhouse"):158,
+            ("belfort","haguenau"):127,
+            ("reims","mulhouse"):188,
             ("reims","metz"):68,
-            ("reims","besancon"):289,
+            ("reims","besancon"):272,
             ("reims","beaune"):225,
-            ("reims","arras"):137,
+            ("reims","arras"):149,
             ("reims","saint_louis"):204,
         }
         with MANIFEST.open(newline="",encoding="utf-8") as file:
