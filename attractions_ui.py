@@ -183,6 +183,10 @@ def _data16_matrix():
     return all_base_hubs()
 
 
+def _reset_data16_page():
+    st.session_state["data16_cards_page"] = 1
+
+
 def _render_data16_research(base_id):
     from data16_three_base_attraction_model import load_data16
     from data16_vicinity_logistics_model import attraction_references
@@ -199,10 +203,11 @@ def _render_data16_research(base_id):
                    "até cada atração e os retornos de 2027 permanecem desconhecidos.")
         source_base=st.selectbox("Partindo de",list(options),
             index=list(options).index(base_id) if base_id in options else 0,
-            format_func=lambda x:options[x],key="data16_source_base")
+            format_func=lambda x:options[x],key="data16_source_base",
+            on_change=_reset_data16_page)
         selected=st.selectbox("Região de atrações",list(research["base_ids"]),
             format_func=lambda x:research["base_profiles"][x]["name"],
-            key="data16_region")
+            key="data16_region",on_change=_reset_data16_page)
         paths={x["attraction_id"]:x for x in attraction_references(
             source_base,data=research)}
         filtered=[x for x in research["attraction_candidates"]
@@ -221,7 +226,8 @@ def _render_data16_research(base_id):
                             st.image(photo["url"],width="stretch")
                             st.caption("Foto: "+escape(photo["author"])+
                                        " · "+escape(photo["license"])+
-                                       " · [crédito/licença]("+photo_ref["source_page"]+")")
+                                       " · [arquivo original]("+photo_ref["source_page"]+")"+
+                                       " · [licença]("+photo["license_url"]+")")
                         else:
                             st.info("Imagem indisponível ou licença não validada. "
                                     "[Ver arquivo no Commons]("+photo_ref["source_page"]+")")
@@ -231,16 +237,18 @@ def _render_data16_research(base_id):
                         st.caption(escape(attraction["location"]))
                         route=paths[attraction["id"]]
                         if route["local_hub"]:
-                            st.caption("Destino na região de partida: acesso local a pesquisar.")
+                            st.markdown("**1 · Cidade de referência:** na mesma cidade da partida.")
                         elif route["rail_to_hub_min"] is None:
-                            st.caption("Tempo ferroviário até "+options[selected]+": desconhecido.")
+                            st.markdown("**1 · Trem até "+options[selected]+":** duração desconhecida.")
                         else:
                             mins=route["rail_to_hub_min"]
                             st.markdown("🚆 **"+f"{mins//60}h{mins%60:02d}"+
-                                        " — referência mínima de ida até "+options[selected]+"**")
+                                        " — mínimo de ida até a estação de "+options[selected]+" (não até a atração)**")
                             if route["rail_to_hub_source"]:
                                 st.caption("[Fonte do trem]("+route["rail_to_hub_source"]+")")
-                        st.warning("Último trecho até a atração e retorno: não verificados.")
+                        st.warning("**2 · Estação → atração:** duração e percurso desconhecidos. "
+                                   "**3 · Retorno e horários 2027:** não verificados. "
+                                   "Viabilidade do passeio não confirmada.")
                         st.caption(escape(attraction["notes"]))
                         st.link_button("Fonte turística",attraction["source_url"],
                                        width="stretch")
