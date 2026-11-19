@@ -523,3 +523,12 @@ padding:17px 20px;margin:0 0 10px;}
   aspect-ratio: 16 / 9;
   object-fit: cover;
 }
+
+
+/* DATA19 research cards: fixed photo framing, flexible descriptive content. */
+[class*="st-key-data19_nancy_cards"] [data-testid="stImage"] img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
