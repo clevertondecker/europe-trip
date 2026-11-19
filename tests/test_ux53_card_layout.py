@@ -10,9 +10,9 @@ ROOT = Path(__file__).resolve().parents[1]
 class UnifiedCardLayoutTests(unittest.TestCase):
     def test_scoped_css(self):
         css = (ROOT / "assets/styles.css").read_text(encoding="utf-8")
-        for token in ('st-key-ux53_row_', 'st-key-ux53_footer_',
-                      'align-items: stretch', 'margin-top: auto',
-                      '[data-testid="stColumn"]'):
+        for token in ('st-key-ux53_row_', 'align-items: stretch',
+                      'margin-top: auto', '[data-testid="stColumn"]',
+                      '> :last-child', 'aspect-ratio: 16 / 9'):
             self.assertIn(token, css)
 
     def test_grid_scopes(self):
