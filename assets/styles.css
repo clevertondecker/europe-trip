@@ -473,3 +473,40 @@ padding:17px 20px;margin:0 0 10px;}
   margin: 3px 0 2px;
 }
 .sidebar-brand span { font-size: .77rem; }
+
+/* UX 5.3: opt-in equal-height cards. Keyed Streamlit containers avoid global overrides. */
+[class*="st-key-ux53_row_"] [data-testid="stHorizontalBlock"] {
+  align-items: stretch;
+}
+[class*="st-key-ux53_row_"] [data-testid="stColumn"] {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+[class*="st-key-ux53_row_"] [data-testid="stColumn"] > [data-testid="stVerticalBlock"] {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+}
+[class*="st-key-ux53_card_"] {
+  flex: 1 1 auto;
+  height: 100%;
+  min-width: 0;
+}
+[class*="st-key-ux53_card_"] > [data-testid="stVerticalBlock"],
+[class*="st-key-ux53_card_"] [data-testid="stVerticalBlockBorderWrapper"] > [data-testid="stVerticalBlock"] {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+[class*="st-key-ux53_footer_"] {
+  margin-top: auto;
+}
+[class*="st-key-ux53_card_"] [data-testid="stExpander"] {
+  min-width: 0;
+}
+@media (max-width: 800px) {
+  [class*="st-key-ux53_card_"] {
+    height: auto;
+  }
+}
