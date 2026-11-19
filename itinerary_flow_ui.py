@@ -52,6 +52,10 @@ def _ux45_return_to_research()->None:
 
 def _stage_changed()->None:
     st.session_state["flow_active_stage"]=st.session_state["flow_stage"]
+    st.session_state.pop("flow_active_destination", None)
+    st.session_state.pop("flow_add_destination", None)
+    st.session_state["flow_search"] = ""
+    st.session_state["flow_search_saved"] = ""
 
 
 def _chosen_destination_changed()->None:
@@ -124,13 +128,17 @@ def _render_add(plan:dict,catalog:dict)->None:
     if not st.session_state.get("flow_add_open",False):
         return
     with st.container(border=True):
-        st.markdown("#### Adicionar ao meu roteiro")
-        st.caption("Escolha os lugares e atrações agora. Datas e reservas podem "
-                   "ser definidas posteriormente.")
+        st.markdown("#### Explorar e escolher um passeio")
+        st.caption("Veja a foto do destino, conheça as atrações e escolha o que visitar. "
+                   "Datas e reservas podem ser definidas depois.")
         stage=st.segmented_control(
             "Em qual etapa?",[ITALY_STAGE,FRANCE_STAGE],default=ITALY_STAGE,
             key="flow_stage",selection_mode="single",
             format_func=_stage_label,on_change=_stage_changed)
+        if stage == FRANCE_STAGE:
+            st.button("Abrir explorador completo de passeios →",
+                      key="ux55_open_explorer",
+                      on_click=_navigate,args=("Explorar","Passeios"))
         if "flow_search" not in st.session_state:
             st.session_state["flow_search"]=st.session_state.get(
                 "flow_search_saved","")
@@ -148,8 +156,11 @@ def _render_add(plan:dict,catalog:dict)->None:
         else:
             lookup={d["id"]:d for d in all_choices}
             previous=st.session_state.get("flow_active_destination")
-            if previous in lookup and st.session_state.get("flow_add_destination")!=previous:
-                st.session_state["flow_add_destination"]=previous
+            selected=st.session_state.get("flow_add_destination")
+            if previous in lookup and selected != previous:
+                st.session_state["flow_add_destination"] = previous
+            elif selected not in lookup:
+                st.session_state["flow_add_destination"] = next(iter(lookup))
             dest_id=st.selectbox("Lugar",list(lookup),
                                  format_func=lambda key:lookup[key]["name"],
                                  key="flow_add_destination",
@@ -169,6 +180,9 @@ def _render_add(plan:dict,catalog:dict)->None:
             pick_key="flow_pick_"+dest_id
             if pick_key not in st.session_state:
                 st.session_state[pick_key]=[x for x in draft if x in labels]
+            from ux55_visual_outing_ui import render_destination_preview
+            render_destination_preview(dest,catalog,st.session_state[pick_key])
+            st.markdown("##### Escolha as atrações para este passeio")
             picked=st.multiselect("Atrações desejadas (1 a 5)",list(labels),
                                   format_func=lambda key:labels[key],
                                   key=pick_key,max_selections=5,
@@ -619,7 +633,7 @@ def render_itinerary_workbench(plan:dict,catalog:dict,
     st.caption(label+" · "+hint+" · "+
                str(stats["organized"])+" lugar(es) organizado(s) por período ou data")
     a,b,c=st.columns(3,gap="small")
-    a.button("＋ Adicionar passeio",key="flow_add_open_button",
+    a.button("＋ Explorar e adicionar passeio",key="flow_add_open_button",
              on_click=_show_add,type="primary",width="stretch")
     b.button("Organizar dias",key="flow_go_calendar",
              on_click=_show_organize,width="stretch")
