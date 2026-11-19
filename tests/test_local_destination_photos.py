@@ -76,7 +76,26 @@ class LocalDestinationPhotosTests(unittest.TestCase):
         ui = (ROOT / "ux501_destination_discovery_ui.py").read_text(encoding="utf-8")
         self.assertIn("Foto indisponível no momento", ui)
         self.assertIn("display_photo_url(photo", ui)
-        self.assertIn("role=\\"img\\"", ui)
+        self.assertIn('role="img"', ui)
+
+    def test_all_editorial_destinations_have_safe_direct_photo_urls(self):
+        from attractions_model import load_attractions
+        catalog = load_attractions()
+        editorial = {d["id"]: d["photo"] for d in catalog["destinations"]
+                     if d.get("photo")}
+        self.assertEqual(len(editorial), 10)
+        for destination_id, photo in editorial.items():
+            with self.subTest(destination=destination_id):
+                direct = display_photo_url(photo["url"])
+                self.assertTrue(
+                    direct.startswith("https://upload.wikimedia.org/wikipedia/commons/"),
+                    f"Unresolved external image for {destination_id}")
+                self.assertTrue(photo["author"])
+                self.assertTrue(photo["license"])
+                self.assertTrue(photo["source_page"].startswith(
+                    "https://commons.wikimedia.org/wiki/File:"))
+                self.assertTrue(preferred_destination_photo(
+                    {"id": destination_id, "photo": photo}))
 
     def test_catalog_and_plan_not_modified(self):
         catalog=build_destination_discovery()
