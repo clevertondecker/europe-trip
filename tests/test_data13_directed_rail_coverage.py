@@ -119,6 +119,8 @@ class Data13DirectedRailCoverageTests(unittest.TestCase):
             ("reims","beaune",225),
             ("reims","arras",137),
             ("reims","saint_louis",204),
+            ("belfort","besancon",70),
+            ("saverne","saint_louis",104),
         )
         for origin,destination,minimum in checked:
             with self.subTest(pair=(origin,destination)):
@@ -131,8 +133,8 @@ class Data13DirectedRailCoverageTests(unittest.TestCase):
                 self.assertFalse(row["weekend_return_verified"])
                 self.assertFalse(row["reachable_confirmed"])
         audit=audit_coverage()
-        self.assertEqual(audit["historical_plus_indicative"],542)
-        self.assertEqual(audit["unresearched"],808)
+        self.assertEqual(audit["historical_plus_indicative"],544)
+        self.assertEqual(audit["unresearched"],806)
 
     def test_exact_matrix_and_target_gap_are_audited(self):
         out=audit_coverage()

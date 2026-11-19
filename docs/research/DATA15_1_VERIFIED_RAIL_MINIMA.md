@@ -51,3 +51,15 @@ Twelve new direction-specific SNCF minima were checked in the original route-pag
 **Rejections and quality caveats:** Haguenau→Dijon yielded conflicting source retrievals (2h56 vs 2h48) and Haguenau→Lille differed (3h45 vs 4h01); both were omitted. No source evidence claims a 2027 date-specific return or station-to-attraction accessibility.
 
 **Projection target for this branch:** 542/1350 (40.15%) if the actual display audit and CI pass. This is a testable target, not an observed outcome until the pipeline passes.
+
+
+## DATA15.3 — Two additional source-checked routes
+
+| Origin | Destination | Minimum from selected SNCF route page | Station / provenance caveat |
+| --- | --- | ---: | --- |
+| belfort | besancon | 1h10 (70 min) | Belfort-Ville → Besançon Viotte explicitly named on operator page — https://www.sncf-connect.com/train/trajet/belfort/besancon |
+| saverne | saint_louis | 1h44 (104 min) | General route-page minimum 1h44; separate dated /horaires snapshot displayed 1h43, so not a date-specific guarantee — https://www.sncf-connect.com/train/trajet/saverne/saint-louis |
+
+The route-specific `/train/trajet/` page for Saverne→Saint-Louis publishes 1h44; a separate September timetable snapshot includes a 1h43 trip. They are not automatically reconciled. The recorded value describes **the cited page's published minimum**, not a claim about universal network minimum or a 2027 itinerary.
+
+If the app projection passes, total coverage becomes **544/1350 = 40.30%** and 401 further pairs are needed to reach 70%.
