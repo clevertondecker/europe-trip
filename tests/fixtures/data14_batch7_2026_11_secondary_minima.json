@@ -1,0 +1,190 @@
+{
+  "records": [
+    {
+      "origin_id": "offenburg",
+      "destination_id": "basel",
+      "published_min": 68,
+      "source_url": "https://www.thetrainline.com/en/train-times/offenburg-to-basel-sbb"
+    },
+    {
+      "origin_id": "offenburg",
+      "destination_id": "lausanne",
+      "published_min": 221,
+      "source_url": "https://www.thetrainline.com/en/train-times/offenburg-to-lausanne"
+    },
+    {
+      "origin_id": "offenburg",
+      "destination_id": "dijon",
+      "published_min": 173,
+      "source_url": "https://www.thetrainline.com/en/train-times/offenburg-to-dijon"
+    },
+    {
+      "origin_id": "offenburg",
+      "destination_id": "metz",
+      "published_min": 101,
+      "source_url": "https://www.thetrainline.com/en/train-times/offenburg-to-metz"
+    },
+    {
+      "origin_id": "offenburg",
+      "destination_id": "lille",
+      "published_min": 234,
+      "source_url": "https://www.thetrainline.com/en/train-times/offenburg-to-lille"
+    },
+    {
+      "origin_id": "offenburg",
+      "destination_id": "nancy",
+      "published_min": 117,
+      "source_url": "https://www.thetrainline.com/en/train-times/offenburg-to-nancy"
+    },
+    {
+      "origin_id": "offenburg",
+      "destination_id": "mulhouse",
+      "published_min": 89,
+      "source_url": "https://www.thetrainline.com/en/train-times/offenburg-to-mulhouse"
+    },
+    {
+      "origin_id": "offenburg",
+      "destination_id": "amsterdam",
+      "published_min": 331,
+      "source_url": "https://www.thetrainline.com/en/train-times/offenburg-to-amsterdam"
+    },
+    {
+      "origin_id": "freiburg",
+      "destination_id": "lille",
+      "published_min": 283,
+      "source_url": "https://www.thetrainline.com/en/train-times/freiburg-breisgau-hbf-to-lille"
+    },
+    {
+      "origin_id": "freiburg",
+      "destination_id": "brussels",
+      "published_min": 320,
+      "source_url": "https://www.thetrainline.com/en/train-times/freiburg-breisgau-hbf-to-brussels"
+    },
+    {
+      "origin_id": "freiburg",
+      "destination_id": "lausanne",
+      "published_min": 190,
+      "source_url": "https://www.thetrainline.com/en/train-times/freiburg-breisgau-hbf-to-lausanne"
+    },
+    {
+      "origin_id": "freiburg",
+      "destination_id": "amsterdam",
+      "published_min": 362,
+      "source_url": "https://www.thetrainline.com/en/train-times/freiburg-breisgau-hbf-to-amsterdam"
+    },
+    {
+      "origin_id": "kehl",
+      "destination_id": "basel",
+      "published_min": 104,
+      "source_url": "https://www.thetrainline.com/en/train-times/kehl-to-basel-sbb"
+    },
+    {
+      "origin_id": "kehl",
+      "destination_id": "lausanne",
+      "published_min": 250,
+      "source_url": "https://www.thetrainline.com/en/train-times/kehl-to-lausanne"
+    },
+    {
+      "origin_id": "kehl",
+      "destination_id": "brussels",
+      "published_min": 259,
+      "source_url": "https://www.thetrainline.com/en/train-times/kehl-to-brussels"
+    },
+    {
+      "origin_id": "saverne",
+      "destination_id": "basel",
+      "published_min": 112,
+      "source_url": "https://www.thetrainline.com/en/train-times/saverne-to-basel-sbb"
+    },
+    {
+      "origin_id": "saverne",
+      "destination_id": "brussels",
+      "published_min": 368,
+      "source_url": "https://www.thetrainline.com/en/train-times/saverne-to-brussels"
+    },
+    {
+      "origin_id": "thionville",
+      "destination_id": "amsterdam",
+      "published_min": 374,
+      "source_url": "https://www.thetrainline.com/en/train-times/thionville-to-amsterdam"
+    },
+    {
+      "origin_id": "thionville",
+      "destination_id": "cologne",
+      "published_min": 166,
+      "source_url": "https://www.thetrainline.com/en/train-times/thionville-to-cologne-germany"
+    },
+    {
+      "origin_id": "thionville",
+      "destination_id": "ghent",
+      "published_min": 269,
+      "source_url": "https://www.thetrainline.com/en/train-times/thionville-to-ghent"
+    },
+    {
+      "origin_id": "thionville",
+      "destination_id": "bruges_be",
+      "published_min": 295,
+      "source_url": "https://www.thetrainline.com/en/train-times/thionville-to-bruges-brugge"
+    },
+    {
+      "origin_id": "trier",
+      "destination_id": "brussels",
+      "published_min": 206,
+      "source_url": "https://www.thetrainline.com/en/train-times/trier-hbf-to-brussels"
+    },
+    {
+      "origin_id": "trier",
+      "destination_id": "amsterdam",
+      "published_min": 296,
+      "source_url": "https://www.thetrainline.com/en/train-times/trier-hbf-to-amsterdam"
+    },
+    {
+      "origin_id": "trier",
+      "destination_id": "strasbourg",
+      "published_min": 201,
+      "source_url": "https://www.thetrainline.com/en/train-times/trier-hbf-to-strasbourg"
+    },
+    {
+      "origin_id": "trier",
+      "destination_id": "freiburg",
+      "published_min": 268,
+      "source_url": "https://www.thetrainline.com/en/train-times/trier-hbf-to-freiburg-breisgau-hbf"
+    },
+    {
+      "origin_id": "trier",
+      "destination_id": "basel",
+      "published_min": 290,
+      "source_url": "https://www.thetrainline.com/en/train-times/trier-hbf-to-basel-sbb"
+    },
+    {
+      "origin_id": "lorrach",
+      "destination_id": "brussels",
+      "published_min": 372,
+      "source_url": "https://www.thetrainline.com/en/train-times/lorrach-to-brussels"
+    },
+    {
+      "origin_id": "arlon",
+      "destination_id": "basel",
+      "published_min": 230,
+      "source_url": "https://www.thetrainline.com/en/train-times/arlon-to-basel-sbb"
+    },
+    {
+      "origin_id": "arlon",
+      "destination_id": "lausanne",
+      "published_min": 380,
+      "source_url": "https://www.thetrainline.com/en/train-times/arlon-to-lausanne"
+    },
+    {
+      "origin_id": "besancon",
+      "destination_id": "interlaken",
+      "published_min": 240,
+      "source_url": "https://www.thetrainline.com/en/train-times/besancon-to-interlaken-ost"
+    },
+    {
+      "origin_id": "besancon",
+      "destination_id": "cologne",
+      "published_min": 284,
+      "source_url": "https://www.thetrainline.com/en/train-times/besancon-to-cologne-germany"
+    }
+  ]
+}

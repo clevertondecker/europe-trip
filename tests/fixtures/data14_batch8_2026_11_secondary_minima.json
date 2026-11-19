@@ -1,0 +1,136 @@
+{
+  "records": [
+    {
+      "origin_id": "kehl",
+      "destination_id": "amsterdam",
+      "published_min": 356,
+      "source_url": "https://www.thetrainline.com/en/train-times/kehl-to-amsterdam"
+    },
+    {
+      "origin_id": "kehl",
+      "destination_id": "rotterdam",
+      "published_min": 338,
+      "source_url": "https://www.thetrainline.com/en/train-times/kehl-to-rotterdam"
+    },
+    {
+      "origin_id": "lorrach",
+      "destination_id": "paris",
+      "published_min": 238,
+      "source_url": "https://www.thetrainline.com/en/train-times/lorrach-to-paris"
+    },
+    {
+      "origin_id": "trier",
+      "destination_id": "ghent",
+      "published_min": 299,
+      "source_url": "https://www.thetrainline.com/en/train-times/trier-hbf-to-ghent"
+    },
+    {
+      "origin_id": "arras",
+      "destination_id": "basel",
+      "published_min": 271,
+      "source_url": "https://www.thetrainline.com/en/train-times/arras-to-basel-sbb"
+    },
+    {
+      "origin_id": "arras",
+      "destination_id": "amsterdam",
+      "published_min": 227,
+      "source_url": "https://www.thetrainline.com/en/train-times/arras-to-amsterdam"
+    },
+    {
+      "origin_id": "arras",
+      "destination_id": "cologne",
+      "published_min": 212,
+      "source_url": "https://www.thetrainline.com/en/train-times/arras-to-cologne-germany"
+    },
+    {
+      "origin_id": "selestat",
+      "destination_id": "amsterdam",
+      "published_min": 391,
+      "source_url": "https://www.thetrainline.com/en/train-times/selestat-to-amsterdam"
+    },
+    {
+      "origin_id": "kehl",
+      "destination_id": "bruges_be",
+      "published_min": 326,
+      "source_url": "https://www.thetrainline.com/en/train-times/kehl-to-bruges-brugge"
+    },
+    {
+      "origin_id": "offenburg",
+      "destination_id": "bruges_be",
+      "published_min": 345,
+      "source_url": "https://www.thetrainline.com/en/train-times/offenburg-to-bruges-brugge"
+    },
+    {
+      "origin_id": "trier",
+      "destination_id": "bruges_be",
+      "published_min": 281,
+      "source_url": "https://www.thetrainline.com/en/train-times/trier-hbf-to-bruges-brugge"
+    },
+    {
+      "origin_id": "arras",
+      "destination_id": "bruges_be",
+      "published_min": 137,
+      "source_url": "https://www.thetrainline.com/en/train-times/arras-to-bruges-brugge"
+    },
+    {
+      "origin_id": "arras",
+      "destination_id": "ghent",
+      "published_min": 112,
+      "source_url": "https://www.thetrainline.com/en/train-times/arras-to-ghent"
+    },
+    {
+      "origin_id": "arras",
+      "destination_id": "luxembourg_city",
+      "published_min": 236,
+      "source_url": "https://www.thetrainline.com/en/train-times/arras-to-luxembourg"
+    },
+    {
+      "origin_id": "lorrach",
+      "destination_id": "dijon",
+      "published_min": 147,
+      "source_url": "https://www.thetrainline.com/en/train-times/lorrach-to-dijon"
+    },
+    {
+      "origin_id": "trier",
+      "destination_id": "arlon",
+      "published_min": 84,
+      "source_url": "https://www.thetrainline.com/en/train-times/trier-hbf-to-arlon"
+    },
+    {
+      "origin_id": "arras",
+      "destination_id": "liege",
+      "published_min": 148,
+      "source_url": "https://www.thetrainline.com/en/train-times/arras-to-liege"
+    },
+    {
+      "origin_id": "offenburg",
+      "destination_id": "rotterdam",
+      "published_min": 342,
+      "source_url": "https://www.thetrainline.com/en/train-times/offenburg-to-rotterdam"
+    },
+    {
+      "origin_id": "selestat",
+      "destination_id": "stuttgart",
+      "published_min": 141,
+      "source_url": "https://www.thetrainline.com/en/train-times/selestat-to-stuttgart"
+    },
+    {
+      "origin_id": "offenburg",
+      "destination_id": "luxembourg_city",
+      "published_min": 164,
+      "source_url": "https://www.thetrainline.com/en/train-times/offenburg-to-luxembourg"
+    },
+    {
+      "origin_id": "trier",
+      "destination_id": "reims",
+      "published_min": 219,
+      "source_url": "https://www.thetrainline.com/en/train-times/trier-hbf-to-reims"
+    },
+    {
+      "origin_id": "trier",
+      "destination_id": "lille",
+      "published_min": 275,
+      "source_url": "https://www.thetrainline.com/en/train-times/trier-hbf-to-lille"
+    }
+  ]
+}

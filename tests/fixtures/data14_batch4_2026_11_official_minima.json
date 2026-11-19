@@ -1,0 +1,364 @@
+{
+  "records": [
+    {
+      "origin_id": "nancy",
+      "destination_id": "amsterdam",
+      "published_min": 334,
+      "source_url": "https://www.sncf-connect.com/train/trajet/nancy/amsterdam"
+    },
+    {
+      "origin_id": "nancy",
+      "destination_id": "karlsruhe",
+      "published_min": 136,
+      "source_url": "https://www.sncf-connect.com/train/trajet/nancy/karlsruhe"
+    },
+    {
+      "origin_id": "nancy",
+      "destination_id": "brussels",
+      "published_min": 204,
+      "source_url": "https://www.sncf-connect.com/train/trajet/nancy/bruxelles"
+    },
+    {
+      "origin_id": "nancy",
+      "destination_id": "haguenau",
+      "published_min": 111,
+      "source_url": "https://www.sncf-connect.com/train/trajet/nancy/haguenau"
+    },
+    {
+      "origin_id": "nancy",
+      "destination_id": "besancon",
+      "published_min": 230,
+      "source_url": "https://www.sncf-connect.com/train/horaires/nancy/besancon"
+    },
+    {
+      "origin_id": "nancy",
+      "destination_id": "paris",
+      "published_min": 90,
+      "source_url": "https://www.sncf-connect.com/train/horaires/nancy/paris"
+    },
+    {
+      "origin_id": "nancy",
+      "destination_id": "lyon",
+      "published_min": 258,
+      "source_url": "https://www.sncf-connect.com/train/horaires/nancy/lyon"
+    },
+    {
+      "origin_id": "saint_louis",
+      "destination_id": "nancy",
+      "published_min": 152,
+      "source_url": "https://www.sncf-connect.com/train/trajet/saint-louis/nancy"
+    },
+    {
+      "origin_id": "besancon",
+      "destination_id": "nancy",
+      "published_min": 251,
+      "source_url": "https://www.sncf-connect.com/train/trajet/besancon/nancy"
+    },
+    {
+      "origin_id": "arras",
+      "destination_id": "nancy",
+      "published_min": 176,
+      "source_url": "https://www.sncf-connect.com/train/trajet/arras/nancy"
+    },
+    {
+      "origin_id": "haguenau",
+      "destination_id": "nancy",
+      "published_min": 109,
+      "source_url": "https://www.sncf-connect.com/train/trajet/haguenau/nancy"
+    },
+    {
+      "origin_id": "belfort",
+      "destination_id": "nancy",
+      "published_min": 160,
+      "source_url": "https://www.sncf-connect.com/train/horaires/belfort/nancy"
+    },
+    {
+      "origin_id": "karlsruhe",
+      "destination_id": "nancy",
+      "published_min": 143,
+      "source_url": "https://www.sncf-connect.com/train/trajet/karlsruhe/nancy"
+    },
+    {
+      "origin_id": "colmar",
+      "destination_id": "arras",
+      "published_min": 244,
+      "source_url": "https://www.sncf-connect.com/train/horaires/colmar/arras"
+    },
+    {
+      "origin_id": "colmar",
+      "destination_id": "saverne",
+      "published_min": 65,
+      "source_url": "https://www.sncf-connect.com/train/trajet/colmar/saverne"
+    },
+    {
+      "origin_id": "colmar",
+      "destination_id": "lille",
+      "published_min": 233,
+      "source_url": "https://www.sncf-connect.com/train/trajet/colmar/lille"
+    },
+    {
+      "origin_id": "colmar",
+      "destination_id": "luxembourg_city",
+      "published_min": 143,
+      "source_url": "https://www.sncf-connect.com/train/trajet/colmar/luxembourg"
+    },
+    {
+      "origin_id": "colmar",
+      "destination_id": "amsterdam",
+      "published_min": 394,
+      "source_url": "https://www.sncf-connect.com/train/trajet/colmar/amsterdam"
+    },
+    {
+      "origin_id": "colmar",
+      "destination_id": "thionville",
+      "published_min": 116,
+      "source_url": "https://www.sncf-connect.com/train/trajet/colmar/thionville"
+    },
+    {
+      "origin_id": "colmar",
+      "destination_id": "baden_baden",
+      "published_min": 84,
+      "source_url": "https://www.sncf-connect.com/train/trajet/colmar/baden-baden"
+    },
+    {
+      "origin_id": "colmar",
+      "destination_id": "haguenau",
+      "published_min": 58,
+      "source_url": "https://www.sncf-connect.com/train/trajet/colmar/haguenau"
+    },
+    {
+      "origin_id": "colmar",
+      "destination_id": "karlsruhe",
+      "published_min": 103,
+      "source_url": "https://www.sncf-connect.com/train/trajet/colmar/karlsruhe"
+    },
+    {
+      "origin_id": "colmar",
+      "destination_id": "brussels",
+      "published_min": 277,
+      "source_url": "https://www.sncf-connect.com/train/horaires/colmar/bruxelles"
+    },
+    {
+      "origin_id": "arras",
+      "destination_id": "colmar",
+      "published_min": 212,
+      "source_url": "https://www.sncf-connect.com/train/trajet/arras/colmar"
+    },
+    {
+      "origin_id": "saverne",
+      "destination_id": "colmar",
+      "published_min": 64,
+      "source_url": "https://www.sncf-connect.com/train/trajet/saverne/colmar"
+    },
+    {
+      "origin_id": "baden_baden",
+      "destination_id": "colmar",
+      "published_min": 81,
+      "source_url": "https://www.sncf-connect.com/train/trajet/baden-baden/colmar"
+    },
+    {
+      "origin_id": "thionville",
+      "destination_id": "colmar",
+      "published_min": 122,
+      "source_url": "https://www.sncf-connect.com/train/trajet/thionville/colmar"
+    },
+    {
+      "origin_id": "karlsruhe",
+      "destination_id": "colmar",
+      "published_min": 88,
+      "source_url": "https://www.sncf-connect.com/train/trajet/karlsruhe/colmar"
+    },
+    {
+      "origin_id": "haguenau",
+      "destination_id": "colmar",
+      "published_min": 70,
+      "source_url": "https://www.sncf-connect.com/train/horaires/haguenau/colmar"
+    },
+    {
+      "origin_id": "luxembourg_city",
+      "destination_id": "colmar",
+      "published_min": 149,
+      "source_url": "https://www.sncf-connect.com/train/horaires/luxembourg/colmar"
+    },
+    {
+      "origin_id": "dijon",
+      "destination_id": "arras",
+      "published_min": 192,
+      "source_url": "https://www.sncf-connect.com/train/trajet/dijon/arras"
+    },
+    {
+      "origin_id": "dijon",
+      "destination_id": "luxembourg_city",
+      "published_min": 228,
+      "source_url": "https://www.sncf-connect.com/train/trajet/dijon/luxembourg"
+    },
+    {
+      "origin_id": "dijon",
+      "destination_id": "basel",
+      "published_min": 82,
+      "source_url": "https://www.sncf-connect.com/train/trajet/dijon/bale"
+    },
+    {
+      "origin_id": "arras",
+      "destination_id": "dijon",
+      "published_min": 192,
+      "source_url": "https://www.sncf-connect.com/train/trajet/arras/dijon"
+    },
+    {
+      "origin_id": "luxembourg_city",
+      "destination_id": "dijon",
+      "published_min": 236,
+      "source_url": "https://www.sncf-connect.com/train/trajet/luxembourg/dijon"
+    },
+    {
+      "origin_id": "liege",
+      "destination_id": "paris",
+      "published_min": 134,
+      "source_url": "https://www.sncf-connect.com/train/trajet/liege/paris"
+    },
+    {
+      "origin_id": "liege",
+      "destination_id": "lille",
+      "published_min": 205,
+      "source_url": "https://www.sncf-connect.com/train/horaires/liege/lille"
+    },
+    {
+      "origin_id": "liege",
+      "destination_id": "strasbourg",
+      "published_min": 285,
+      "source_url": "https://www.sncf-connect.com/train/horaires/liege/strasbourg"
+    },
+    {
+      "origin_id": "liege",
+      "destination_id": "basel",
+      "published_min": 375,
+      "source_url": "https://www.sncf-connect.com/train/horaires/liege/bale"
+    },
+    {
+      "origin_id": "strasbourg",
+      "destination_id": "epernay",
+      "published_min": 120,
+      "source_url": "https://www.sncf-connect.com/train/trajet/strasbourg/epernay"
+    },
+    {
+      "origin_id": "strasbourg",
+      "destination_id": "liege",
+      "published_min": 290,
+      "source_url": "https://www.sncf-connect.com/train/trajet/strasbourg/liege"
+    },
+    {
+      "origin_id": "strasbourg",
+      "destination_id": "saint_louis",
+      "published_min": 69,
+      "source_url": "https://www.sncf-connect.com/train/trajet/strasbourg/saint-louis"
+    },
+    {
+      "origin_id": "strasbourg",
+      "destination_id": "belfort",
+      "published_min": 94,
+      "source_url": "https://www.sncf-connect.com/train/trajet/strasbourg/belfort"
+    },
+    {
+      "origin_id": "strasbourg",
+      "destination_id": "thionville",
+      "published_min": 70,
+      "source_url": "https://www.sncf-connect.com/train/trajet/strasbourg/thionville"
+    },
+    {
+      "origin_id": "strasbourg",
+      "destination_id": "haguenau",
+      "published_min": 21,
+      "source_url": "https://www.sncf-connect.com/train/trajet/strasbourg/haguenau"
+    },
+    {
+      "origin_id": "strasbourg",
+      "destination_id": "saverne",
+      "published_min": 22,
+      "source_url": "https://www.sncf-connect.com/train/trajet/strasbourg/saverne"
+    },
+    {
+      "origin_id": "strasbourg",
+      "destination_id": "offenburg",
+      "published_min": 21,
+      "source_url": "https://www.sncf-connect.com/train/trajet/strasbourg/offenbourg"
+    },
+    {
+      "origin_id": "strasbourg",
+      "destination_id": "luxembourg_city",
+      "published_min": 95,
+      "source_url": "https://www.sncf-connect.com/train/trajet/strasbourg/luxembourg"
+    },
+    {
+      "origin_id": "lille",
+      "destination_id": "lyon",
+      "published_min": 178,
+      "source_url": "https://www.sncf-connect.com/train/trajet/lille/lyon"
+    },
+    {
+      "origin_id": "lille",
+      "destination_id": "karlsruhe",
+      "published_min": 263,
+      "source_url": "https://www.sncf-connect.com/train/trajet/lille/karlsruhe"
+    },
+    {
+      "origin_id": "mulhouse",
+      "destination_id": "belfort",
+      "published_min": 25,
+      "source_url": "https://www.sncf-connect.com/train/trajet/mulhouse/belfort"
+    },
+    {
+      "origin_id": "mulhouse",
+      "destination_id": "karlsruhe",
+      "published_min": 116,
+      "source_url": "https://www.sncf-connect.com/train/trajet/mulhouse/karlsruhe"
+    },
+    {
+      "origin_id": "mulhouse",
+      "destination_id": "amsterdam",
+      "published_min": 414,
+      "source_url": "https://www.sncf-connect.com/train/trajet/mulhouse/amsterdam"
+    },
+    {
+      "origin_id": "luxembourg_city",
+      "destination_id": "reims",
+      "published_min": 156,
+      "source_url": "https://www.sncf-connect.com/train/trajet/luxembourg/reims"
+    },
+    {
+      "origin_id": "luxembourg_city",
+      "destination_id": "lille",
+      "published_min": 246,
+      "source_url": "https://www.sncf-connect.com/train/trajet/luxembourg/lille"
+    },
+    {
+      "origin_id": "saarbrucken",
+      "destination_id": "lille",
+      "published_min": 228,
+      "source_url": "https://www.sncf-connect.com/train/trajet/sarrebruck/lille"
+    },
+    {
+      "origin_id": "saarbrucken",
+      "destination_id": "cologne",
+      "published_min": 186,
+      "source_url": "https://www.sncf-connect.com/train/trajet/sarrebruck/cologne"
+    },
+    {
+      "origin_id": "saarbrucken",
+      "destination_id": "brussels",
+      "published_min": 227,
+      "source_url": "https://www.sncf-connect.com/train/trajet/sarrebruck/bruxelles"
+    },
+    {
+      "origin_id": "metz",
+      "destination_id": "beaune",
+      "published_min": 232,
+      "source_url": "https://www.sncf-connect.com/train/trajet/metz/beaune"
+    },
+    {
+      "origin_id": "strasbourg",
+      "destination_id": "rotterdam",
+      "published_min": 310,
+      "source_url": "https://www.sncf-connect.com/train/trajet/strasbourg/rotterdam"
+    }
+  ]
+}

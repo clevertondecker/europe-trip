@@ -1,0 +1,424 @@
+{
+  "records": [
+    {
+      "origin_id": "metz",
+      "destination_id": "saverne",
+      "published_min": 61,
+      "source_url": "https://www.sncf-connect.com/train/trajet/metz/saverne"
+    },
+    {
+      "origin_id": "nancy",
+      "destination_id": "mulhouse",
+      "published_min": 131,
+      "source_url": "https://www.sncf-connect.com/train/trajet/nancy/mulhouse"
+    },
+    {
+      "origin_id": "nancy",
+      "destination_id": "thionville",
+      "published_min": 65,
+      "source_url": "https://www.sncf-connect.com/train/trajet/nancy/thionville"
+    },
+    {
+      "origin_id": "colmar",
+      "destination_id": "besancon",
+      "published_min": 143,
+      "source_url": "https://www.sncf-connect.com/train/trajet/colmar/besancon"
+    },
+    {
+      "origin_id": "colmar",
+      "destination_id": "lyon",
+      "published_min": 214,
+      "source_url": "https://www.sncf-connect.com/train/trajet/colmar/lyon"
+    },
+    {
+      "origin_id": "colmar",
+      "destination_id": "metz",
+      "published_min": 85,
+      "source_url": "https://www.sncf-connect.com/train/trajet/colmar/metz"
+    },
+    {
+      "origin_id": "colmar",
+      "destination_id": "saint_louis",
+      "published_min": 36,
+      "source_url": "https://www.sncf-connect.com/train/trajet/colmar/saint-louis"
+    },
+    {
+      "origin_id": "dijon",
+      "destination_id": "besancon",
+      "published_min": 44,
+      "source_url": "https://www.sncf-connect.com/train/trajet/dijon/besancon"
+    },
+    {
+      "origin_id": "dijon",
+      "destination_id": "belfort",
+      "published_min": 70,
+      "source_url": "https://www.sncf-connect.com/train/trajet/dijon/belfort"
+    },
+    {
+      "origin_id": "dijon",
+      "destination_id": "mulhouse",
+      "published_min": 61,
+      "source_url": "https://www.sncf-connect.com/train/trajet/dijon/mulhouse"
+    },
+    {
+      "origin_id": "dijon",
+      "destination_id": "reims",
+      "published_min": 192,
+      "source_url": "https://www.sncf-connect.com/train/trajet/dijon/reims"
+    },
+    {
+      "origin_id": "dijon",
+      "destination_id": "colmar",
+      "published_min": 93,
+      "source_url": "https://www.sncf-connect.com/train/trajet/dijon/colmar"
+    },
+    {
+      "origin_id": "dijon",
+      "destination_id": "metz",
+      "published_min": 181,
+      "source_url": "https://www.sncf-connect.com/train/trajet/dijon/metz"
+    },
+    {
+      "origin_id": "reims",
+      "destination_id": "dijon",
+      "published_min": 192,
+      "source_url": "https://www.sncf-connect.com/train/trajet/reims/dijon"
+    },
+    {
+      "origin_id": "reims",
+      "destination_id": "strasbourg",
+      "published_min": 94,
+      "source_url": "https://www.sncf-connect.com/train/trajet/reims/strasbourg"
+    },
+    {
+      "origin_id": "reims",
+      "destination_id": "lille",
+      "published_min": 143,
+      "source_url": "https://www.sncf-connect.com/train/trajet/reims/lille"
+    },
+    {
+      "origin_id": "reims",
+      "destination_id": "nancy",
+      "published_min": 117,
+      "source_url": "https://www.sncf-connect.com/train/trajet/reims/nancy"
+    },
+    {
+      "origin_id": "reims",
+      "destination_id": "colmar",
+      "published_min": 136,
+      "source_url": "https://www.sncf-connect.com/train/trajet/reims/colmar"
+    },
+    {
+      "origin_id": "thionville",
+      "destination_id": "nancy",
+      "published_min": 64,
+      "source_url": "https://www.sncf-connect.com/train/trajet/thionville/nancy"
+    },
+    {
+      "origin_id": "thionville",
+      "destination_id": "paris",
+      "published_min": 106,
+      "source_url": "https://www.sncf-connect.com/train/trajet/thionville/paris"
+    },
+    {
+      "origin_id": "thionville",
+      "destination_id": "strasbourg",
+      "published_min": 75,
+      "source_url": "https://www.sncf-connect.com/train/trajet/thionville/strasbourg"
+    },
+    {
+      "origin_id": "saverne",
+      "destination_id": "haguenau",
+      "published_min": 65,
+      "source_url": "https://www.sncf-connect.com/train/trajet/saverne/haguenau"
+    },
+    {
+      "origin_id": "selestat",
+      "destination_id": "colmar",
+      "published_min": 10,
+      "source_url": "https://www.sncf-connect.com/train/trajet/selestat/colmar"
+    },
+    {
+      "origin_id": "arras",
+      "destination_id": "reims",
+      "published_min": 123,
+      "source_url": "https://www.sncf-connect.com/train/trajet/arras/reims"
+    },
+    {
+      "origin_id": "belfort",
+      "destination_id": "colmar",
+      "published_min": 47,
+      "source_url": "https://www.sncf-connect.com/train/trajet/belfort/colmar"
+    },
+    {
+      "origin_id": "belfort",
+      "destination_id": "metz",
+      "published_min": 136,
+      "source_url": "https://www.sncf-connect.com/train/trajet/belfort/metz"
+    },
+    {
+      "origin_id": "belfort",
+      "destination_id": "lyon",
+      "published_min": 193,
+      "source_url": "https://www.sncf-connect.com/train/trajet/belfort/lyon"
+    },
+    {
+      "origin_id": "besancon",
+      "destination_id": "metz",
+      "published_min": 209,
+      "source_url": "https://www.sncf-connect.com/train/trajet/besancon/metz"
+    },
+    {
+      "origin_id": "besancon",
+      "destination_id": "colmar",
+      "published_min": 151,
+      "source_url": "https://www.sncf-connect.com/train/trajet/besancon/colmar"
+    },
+    {
+      "origin_id": "haguenau",
+      "destination_id": "saverne",
+      "published_min": 63,
+      "source_url": "https://www.sncf-connect.com/train/trajet/haguenau/saverne"
+    },
+    {
+      "origin_id": "saint_louis",
+      "destination_id": "strasbourg",
+      "published_min": 68,
+      "source_url": "https://www.sncf-connect.com/train/trajet/saint-louis/strasbourg"
+    },
+    {
+      "origin_id": "saint_louis",
+      "destination_id": "colmar",
+      "published_min": 34,
+      "source_url": "https://www.sncf-connect.com/train/trajet/saint-louis/colmar"
+    },
+    {
+      "origin_id": "baden_baden",
+      "destination_id": "strasbourg",
+      "published_min": 30,
+      "source_url": "https://www.sncf-connect.com/train/trajet/baden-baden/strasbourg"
+    },
+    {
+      "origin_id": "baden_baden",
+      "destination_id": "paris",
+      "published_min": 161,
+      "source_url": "https://www.sncf-connect.com/train/trajet/baden-baden/paris"
+    },
+    {
+      "origin_id": "kehl",
+      "destination_id": "strasbourg",
+      "published_min": 10,
+      "source_url": "https://www.sncf-connect.com/train/trajet/kehl/strasbourg"
+    },
+    {
+      "origin_id": "karlsruhe",
+      "destination_id": "strasbourg",
+      "published_min": 41,
+      "source_url": "https://www.sncf-connect.com/train/trajet/karlsruhe/strasbourg"
+    },
+    {
+      "origin_id": "karlsruhe",
+      "destination_id": "paris",
+      "published_min": 150,
+      "source_url": "https://www.sncf-connect.com/train/trajet/karlsruhe/paris"
+    },
+    {
+      "origin_id": "offenburg",
+      "destination_id": "strasbourg",
+      "published_min": 25,
+      "source_url": "https://www.sncf-connect.com/train/horaires/offenbourg/strasbourg"
+    },
+    {
+      "origin_id": "freiburg",
+      "destination_id": "strasbourg",
+      "published_min": 65,
+      "source_url": "https://www.sncf-connect.com/train/trajet/fribourg-en-brisgau/strasbourg"
+    },
+    {
+      "origin_id": "freiburg",
+      "destination_id": "colmar",
+      "published_min": 88,
+      "source_url": "https://www.sncf-connect.com/train/trajet/fribourg-en-brisgau/colmar"
+    },
+    {
+      "origin_id": "luxembourg_city",
+      "destination_id": "nancy",
+      "published_min": 90,
+      "source_url": "https://www.sncf-connect.com/train/trajet/luxembourg/nancy"
+    },
+    {
+      "origin_id": "luxembourg_city",
+      "destination_id": "strasbourg",
+      "published_min": 103,
+      "source_url": "https://www.sncf-connect.com/train/trajet/luxembourg/strasbourg"
+    },
+    {
+      "origin_id": "luxembourg_city",
+      "destination_id": "paris",
+      "published_min": 130,
+      "source_url": "https://www.sncf-connect.com/train/trajet/luxembourg/paris"
+    },
+    {
+      "origin_id": "luxembourg_city",
+      "destination_id": "metz",
+      "published_min": 42,
+      "source_url": "https://www.sncf-connect.com/train/trajet/luxembourg/metz"
+    },
+    {
+      "origin_id": "luxembourg_city",
+      "destination_id": "thionville",
+      "published_min": 21,
+      "source_url": "https://www.sncf-connect.com/train/trajet/luxembourg/thionville"
+    },
+    {
+      "origin_id": "saarbrucken",
+      "destination_id": "metz",
+      "published_min": 59,
+      "source_url": "https://www.sncf-connect.com/train/trajet/sarrebruck/metz"
+    },
+    {
+      "origin_id": "saarbrucken",
+      "destination_id": "strasbourg",
+      "published_min": 103,
+      "source_url": "https://www.sncf-connect.com/train/trajet/sarrebruck/strasbourg"
+    },
+    {
+      "origin_id": "saarbrucken",
+      "destination_id": "paris",
+      "published_min": 110,
+      "source_url": "https://www.sncf-connect.com/train/horaires/sarrebruck/paris"
+    },
+    {
+      "origin_id": "metz",
+      "destination_id": "saarbrucken",
+      "published_min": 62,
+      "source_url": "https://www.sncf-connect.com/train/horaires/metz/sarrebruck"
+    },
+    {
+      "origin_id": "nancy",
+      "destination_id": "luxembourg_city",
+      "published_min": 91,
+      "source_url": "https://www.sncf-connect.com/train/horaires/nancy/luxembourg"
+    },
+    {
+      "origin_id": "strasbourg",
+      "destination_id": "saarbrucken",
+      "published_min": 96,
+      "source_url": "https://www.sncf-connect.com/train/horaires/strasbourg/sarrebruck"
+    },
+    {
+      "origin_id": "metz",
+      "destination_id": "epernay",
+      "published_min": 118,
+      "source_url": "https://www.sncf-connect.com/train/trajet/metz/epernay"
+    },
+    {
+      "origin_id": "metz",
+      "destination_id": "arras",
+      "published_min": 162,
+      "source_url": "https://www.sncf-connect.com/train/trajet/metz/arras"
+    },
+    {
+      "origin_id": "metz",
+      "destination_id": "paris",
+      "published_min": 83,
+      "source_url": "https://www.sncf-connect.com/train/trajet/metz/paris"
+    },
+    {
+      "origin_id": "metz",
+      "destination_id": "amsterdam",
+      "published_min": 365,
+      "source_url": "https://www.sncf-connect.com/train/trajet/metz/amsterdam"
+    },
+    {
+      "origin_id": "metz",
+      "destination_id": "lyon",
+      "published_min": 257,
+      "source_url": "https://www.sncf-connect.com/train/trajet/metz/lyon"
+    },
+    {
+      "origin_id": "metz",
+      "destination_id": "saint_louis",
+      "published_min": 143,
+      "source_url": "https://www.sncf-connect.com/train/trajet/metz/saint-louis"
+    },
+    {
+      "origin_id": "metz",
+      "destination_id": "haguenau",
+      "published_min": 97,
+      "source_url": "https://www.sncf-connect.com/train/trajet/metz/haguenau"
+    },
+    {
+      "origin_id": "metz",
+      "destination_id": "karlsruhe",
+      "published_min": 112,
+      "source_url": "https://www.sncf-connect.com/train/trajet/metz/karlsruhe"
+    },
+    {
+      "origin_id": "metz",
+      "destination_id": "brussels",
+      "published_min": 205,
+      "source_url": "https://www.sncf-connect.com/train/trajet/metz/bruxelles"
+    },
+    {
+      "origin_id": "metz",
+      "destination_id": "cologne",
+      "published_min": 235,
+      "source_url": "https://www.sncf-connect.com/train/trajet/metz/cologne"
+    },
+    {
+      "origin_id": "metz",
+      "destination_id": "basel",
+      "published_min": 137,
+      "source_url": "https://www.sncf-connect.com/train/trajet/metz/bale"
+    },
+    {
+      "origin_id": "haguenau",
+      "destination_id": "metz",
+      "published_min": 95,
+      "source_url": "https://www.sncf-connect.com/train/trajet/haguenau/metz"
+    },
+    {
+      "origin_id": "saint_louis",
+      "destination_id": "metz",
+      "published_min": 129,
+      "source_url": "https://www.sncf-connect.com/train/trajet/saint-louis/metz"
+    },
+    {
+      "origin_id": "karlsruhe",
+      "destination_id": "metz",
+      "published_min": 112,
+      "source_url": "https://www.sncf-connect.com/train/trajet/karlsruhe/metz"
+    },
+    {
+      "origin_id": "arras",
+      "destination_id": "metz",
+      "published_min": 172,
+      "source_url": "https://www.sncf-connect.com/train/trajet/arras/metz"
+    },
+    {
+      "origin_id": "nancy",
+      "destination_id": "arras",
+      "published_min": 180,
+      "source_url": "https://www.sncf-connect.com/train/trajet/nancy/arras"
+    },
+    {
+      "origin_id": "nancy",
+      "destination_id": "epernay",
+      "published_min": 119,
+      "source_url": "https://www.sncf-connect.com/train/trajet/nancy/epernay"
+    },
+    {
+      "origin_id": "nancy",
+      "destination_id": "saint_louis",
+      "published_min": 154,
+      "source_url": "https://www.sncf-connect.com/train/trajet/nancy/saint-louis"
+    },
+    {
+      "origin_id": "nancy",
+      "destination_id": "belfort",
+      "published_min": 159,
+      "source_url": "https://www.sncf-connect.com/train/trajet/nancy/belfort"
+    }
+  ]
+}
