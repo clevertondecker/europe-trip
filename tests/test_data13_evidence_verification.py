@@ -22,14 +22,14 @@ class Data13EvidenceVerificationTests(unittest.TestCase):
 
     def test_full_manifest_is_explicit_and_unverified_are_not_displayed(self):
         displayed, audit=vetted_overlay_by_pair(self.records,MANIFEST)
-        self.assertEqual(audit["research_rows"],221)
-        self.assertEqual(audit["verified_displayable"],39)
+        self.assertEqual(audit["research_rows"],248)
+        self.assertEqual(audit["verified_displayable"],66)
         self.assertEqual(audit["pending_source_review"],182)
         self.assertEqual(displayed[("aachen","lille")]["minimum_oneway_min"],134)
         self.assertNotIn(("haguenau","saverne"),displayed)
         actual=load_data13()
-        self.assertEqual(len(actual["records"]),221)
-        self.assertEqual(len(actual["by_pair"]),39)
+        self.assertEqual(len(actual["records"]),248)
+        self.assertEqual(len(actual["by_pair"]),66)
 
     def test_all_record_urls_match_directional_canonical_ids(self):
         for row in self.records:
@@ -78,6 +78,40 @@ class Data13EvidenceVerificationTests(unittest.TestCase):
         row["minimum_oneway_min"]+=1
         with self.assertRaises(EvidenceError):
             vetted_overlay_by_pair(changed,MANIFEST)
+
+    def test_data14_aliases_and_source_minima(self):
+        observed = {
+            ("saint_louis","reims"):232,
+            ("strasbourg","lausanne"):245,
+            ("selestat","brussels"):265,
+            ("saverne","mulhouse"):87,
+            ("offenburg","brussels"):278,
+            ("offenburg","liege"):251,
+            ("offenburg","interlaken"):181,
+            ("saint_louis","lausanne"):151,
+        }
+        for key,minutes in observed.items():
+            with self.subTest(pair=key):
+                row=next(r for r in self.records
+                         if (r["origin_id"],r["destination_id"])==key)
+                validate_record_url(row)
+                self.assertEqual(row["minimum_oneway_min"],minutes)
+
+    def test_data14_rejects_inverted_trainline_alias(self):
+        row=next(r for r in self.records if
+                 (r["origin_id"],r["destination_id"])==("offenburg","interlaken"))
+        self.assertEqual(row["source_url"].split("/")[-1],
+                         "offenburg-to-interlaken-ost")
+        with self.assertRaises(EvidenceError):
+            validate_record_url({
+                **row,
+                "source_url":"https://www.thetrainline.com/en/train-times/interlaken-ost-to-offenburg"
+            })
+        with self.assertRaises(EvidenceError):
+            validate_record_url({
+                **row,
+                "source_url":"https://www.thetrainline.com/en/train-times/offenburg-to-lausanne"
+            })
 
     def test_never_claims_2027_schedule_or_return(self):
         for record in self.records:
