@@ -244,7 +244,8 @@ def _render_data16_research(base_id):
                         st.caption(escape(attraction["notes"]))
                         st.link_button("Fonte turística",attraction["source_url"],
                                        width="stretch")
-        with st.expander("Comparar as 30 cidades-base até as três regiões"):
+        if st.checkbox("Exibir matriz das 30 cidades-base × três regiões",
+                       value=False,key="data16_show_matrix"):
             data=_data16_matrix()
             st.dataframe(pd.DataFrame([{
                 "Origem":options[x["origin_id"]],"Região":options[x["hub_id"]],
