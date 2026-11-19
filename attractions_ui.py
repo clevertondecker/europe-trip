@@ -188,7 +188,10 @@ def _render_data16_research(base_id):
     from data16_vicinity_logistics_model import attraction_references
     from base_scenario_model import base_options
 
-    with st.expander("Novas atrações com fotos e logística · Sélestat, Offenburg, Dijon"):
+    if not st.toggle("Explorar novas atrações com fotos e logística · DATA16",
+                     value=False,key="data16_show_research"):
+        return
+    with st.expander("Novas atrações com fotos e logística · Sélestat, Offenburg, Dijon",expanded=True):
         research=load_data16()
         options={b["id"]:b["name"] for b in base_options()}
         st.caption("Pesquisa exploratória, não constitui roteiro confirmado. Os tempos "
@@ -204,10 +207,13 @@ def _render_data16_research(base_id):
             source_base,data=research)}
         filtered=[x for x in research["attraction_candidates"]
                   if x["base_id"]==selected]
-        for start in range(0,len(filtered),2):
+        page=st.selectbox("Página de atrações",list(range(1,(len(filtered)+1)//2+1)),
+                          key="data16_cards_page")
+        shown=filtered[(page-1)*2:page*2]
+        for start in range(0,len(shown),2):
             with st.container(key=f"data16_photo_row_{start}"):
                 cols=st.columns(2,border=True)
-                for col,attraction in zip(cols,filtered[start:start+2]):
+                for col,attraction in zip(cols,shown[start:start+2]):
                     with col:
                         photo_ref=attraction["photo"]
                         photo=_data16_photo(photo_ref["file_title"])
