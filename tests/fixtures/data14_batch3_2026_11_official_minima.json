@@ -1,0 +1,112 @@
+{
+  "records": [
+    {
+      "origin_id": "kehl",
+      "destination_id": "colmar",
+      "published_min": 50,
+      "source_url": "https://www.sncf-connect.com/train/trajet/kehl/colmar"
+    },
+    {
+      "origin_id": "freiburg",
+      "destination_id": "mulhouse",
+      "published_min": 51,
+      "source_url": "https://www.sncf-connect.com/train/trajet/fribourg-en-brisgau/mulhouse"
+    },
+    {
+      "origin_id": "selestat",
+      "destination_id": "paris",
+      "published_min": 134,
+      "source_url": "https://www.sncf-connect.com/train/trajet/selestat/paris"
+    },
+    {
+      "origin_id": "haguenau",
+      "destination_id": "paris",
+      "published_min": 141,
+      "source_url": "https://www.sncf-connect.com/train/trajet/haguenau/paris"
+    },
+    {
+      "origin_id": "belfort",
+      "destination_id": "basel",
+      "published_min": 61,
+      "source_url": "https://www.sncf-connect.com/train/trajet/belfort/bale"
+    },
+    {
+      "origin_id": "besancon",
+      "destination_id": "basel",
+      "published_min": 144,
+      "source_url": "https://www.sncf-connect.com/train/trajet/besancon/bale"
+    },
+    {
+      "origin_id": "selestat",
+      "destination_id": "dijon",
+      "published_min": 107,
+      "source_url": "https://www.sncf-connect.com/train/trajet/selestat/dijon"
+    },
+    {
+      "origin_id": "selestat",
+      "destination_id": "nancy",
+      "published_min": 103,
+      "source_url": "https://www.sncf-connect.com/train/trajet/selestat/nancy"
+    },
+    {
+      "origin_id": "haguenau",
+      "destination_id": "lyon",
+      "published_min": 285,
+      "source_url": "https://www.sncf-connect.com/train/trajet/haguenau/lyon"
+    },
+    {
+      "origin_id": "belfort",
+      "destination_id": "paris",
+      "published_min": 173,
+      "source_url": "https://www.sncf-connect.com/train/trajet/belfort/paris"
+    },
+    {
+      "origin_id": "saint_louis",
+      "destination_id": "paris",
+      "published_min": 185,
+      "source_url": "https://www.sncf-connect.com/train/trajet/saint-louis/paris"
+    },
+    {
+      "origin_id": "saint_louis",
+      "destination_id": "besancon",
+      "published_min": 136,
+      "source_url": "https://www.sncf-connect.com/train/trajet/saint-louis/besancon"
+    },
+    {
+      "origin_id": "kehl",
+      "destination_id": "lyon",
+      "published_min": 274,
+      "source_url": "https://www.sncf-connect.com/train/trajet/kehl/lyon"
+    },
+    {
+      "origin_id": "freiburg",
+      "destination_id": "dijon",
+      "published_min": 164,
+      "source_url": "https://www.sncf-connect.com/train/trajet/fribourg-en-brisgau/dijon"
+    },
+    {
+      "origin_id": "freiburg",
+      "destination_id": "besancon",
+      "published_min": 221,
+      "source_url": "https://www.sncf-connect.com/train/trajet/fribourg-en-brisgau/besancon"
+    },
+    {
+      "origin_id": "freiburg",
+      "destination_id": "lyon",
+      "published_min": 272,
+      "source_url": "https://www.sncf-connect.com/train/trajet/fribourg-en-brisgau/lyon"
+    },
+    {
+      "origin_id": "belfort",
+      "destination_id": "brussels",
+      "published_min": 302,
+      "source_url": "https://www.sncf-connect.com/train/trajet/belfort/bruxelles"
+    },
+    {
+      "origin_id": "nancy",
+      "destination_id": "basel",
+      "published_min": 174,
+      "source_url": "https://www.sncf-connect.com/train/trajet/nancy/bale"
+    }
+  ]
+}
