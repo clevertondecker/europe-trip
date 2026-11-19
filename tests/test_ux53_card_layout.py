@@ -1,0 +1,47 @@
+"""UX 5.3: opt-in card layout and native interaction source contracts.
+
+These are structural checks, not a substitute for browser screenshot geometry.
+"""
+from pathlib import Path
+import unittest
+
+ROOT = Path(__file__).resolve().parents[1]
+
+class UnifiedCardLayoutTests(unittest.TestCase):
+    def test_scoped_css(self):
+        css = (ROOT / "assets/styles.css").read_text(encoding="utf-8")
+        for token in ('st-key-ux53_row_', 'st-key-ux53_card_', 'st-key-ux53_footer_',
+                      'align-items: stretch', 'margin-top: auto',
+                      '[data-testid="stColumn"]'):
+            self.assertIn(token, css)
+
+    def test_grid_scopes(self):
+        cases = (
+            ("ux501_destination_discovery_ui.py", "destinations", "destination"),
+            ("attractions_ui.py", "dq32", "dq32"),
+            ("base_research_expanded_ui.py", "bases", "base"),
+        )
+        for path, row, card in cases:
+            with self.subTest(path=path):
+                code = (ROOT / path).read_text(encoding="utf-8")
+                self.assertIn("ux53_row_" + row, code)
+                self.assertIn("ux53_card_" + card, code)
+                self.assertIn("ux53_footer_" + card, code)
+
+    def test_discovery_callbacks_and_attributions_preserved(self):
+        code = (ROOT / "ux501_destination_discovery_ui.py").read_text(encoding="utf-8")
+        for term in ("Fonte original", "Fonte e licença", "Foto a pesquisar",
+                     "Consultar fonte turística", "Ver atrações e fontes",
+                     "Adicionar à minha lista", "on_click=add_destination",
+                     'key="ux501_page"'):
+            self.assertIn(term, code)
+
+    def test_existing_callback_contracts(self):
+        rail = (ROOT / "attractions_ui.py").read_text(encoding="utf-8")
+        bases = (ROOT / "base_research_expanded_ui.py").read_text(encoding="utf-8")
+        self.assertIn("on_click=_dq32_choose_destination", rail)
+        self.assertIn("on_click=_open_city", bases)
+        self.assertIn("Duração ainda não pesquisada", rail)
+
+if __name__ == "__main__":
+    unittest.main()
