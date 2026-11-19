@@ -264,6 +264,67 @@ def _render_data16_research(base_id):
                        "Tempos ausentes são desconhecidos, não inexistentes.")
 
 
+
+def _data19_reset_page():
+    st.session_state["data19_page"]=1
+
+
+def _render_data19_nancy_research(base_id: str) -> None:
+    """Opt-in Nancy-area discoveries; never imply completed trips."""
+    if base_id!="nancy":
+        return
+    if not st.toggle("Novas atrações de Nancy e arredores · DATA19",
+                     value=False,key="data19_show"):
+        return
+    from data19_nancy_attractions_model import load_data19
+    data=load_data19()
+    st.caption("Pesquisa adicional: 11 atrações candidatas com fontes oficiais. "
+               "Fotos exibidas somente quando autoria e licença forem confirmadas "
+               "pela API Wikimedia. Não estão automaticamente no roteiro.")
+    group=st.selectbox("Onde explorar",("Todas","Nancy","Área metropolitana",
+                                       "Passeios regionais"),
+                       key="data19_group",on_change=_data19_reset_page)
+    filter_zone={"Todas":None,"Nancy":"cidade","Área metropolitana":"metro",
+                 "Passeios regionais":"regional"}[group]
+    items=[x for x in data["attraction_candidates"]
+           if filter_zone is None or x["zone"]==filter_zone]
+    page_count=(len(items)+1)//2
+    page=st.selectbox("Página de descobertas",range(1,page_count+1),
+                      key="data19_page")
+    shown=items[(page-1)*2:page*2]
+    with st.container(key="data19_nancy_cards"):
+        columns=st.columns(len(shown),border=True)
+        for column,item in zip(columns,shown):
+            with column:
+                photo=item["photo"]
+                verified=_data16_photo(photo["file_title"])
+                if verified:
+                    st.image(verified["url"],width="stretch")
+                    st.caption("Foto: "+escape(verified["author"])+
+                               " · "+escape(verified["license"])+
+                               " · [arquivo no Commons]("+photo["source_page"]+")"+
+                               " · [licença]("+verified["license_url"]+")")
+                else:
+                    st.info("Foto indisponível ou licença não validada. "
+                            "[Ver arquivo original]("+photo["source_page"]+")")
+                st.markdown("#### "+escape(item["name"]))
+                st.caption(escape(item["municipality"]+" · França")+" · Prioridade "+item["priority"])
+                st.write(item["description"])
+                st.markdown("**Por que visitar:** "+escape(item["visit_tip"]))
+                if item["zone"]=="cidade":
+                    st.caption("Dentro de Nancy · deslocamento local ainda não medido.")
+                elif item["zone"]=="metro":
+                    st.caption("Outro município da área metropolitana · transporte local pendente.")
+                else:
+                    st.caption("Outro município da Lorena · trem/ônibus e última milha pendentes.")
+                st.warning("Horários e retorno em 2027 não verificados. "
+                           "Tempo completo, ingresso e viabilidade: desconhecidos.")
+                st.link_button("Fonte oficial da atração",item["source_url"],
+                               width="stretch")
+    st.caption("As seis atrações já cadastradas em Nancy permanecem no catálogo. "
+               "Estas são descobertas complementares, sem modificar o TripPlan.")
+
+
 def _render_dq32_macro_opportunities(base_id: str) -> None:
     """Sourced, read-only discovery. Duration means minimum ONE-WAY, not feasibility."""
     from dq32_macro_opportunities_model import opportunity_overview
@@ -293,6 +354,7 @@ def _render_dq32_macro_opportunities(base_id: str) -> None:
         "O destino local não é uma viagem ferroviária. Ausência de pesquisa "
         "não significa ausência de transporte.")
 
+    _render_data19_nancy_research(base_id)
     _render_data16_research(base_id)
 
     # Preserve the preexisting group selector so bookmarks and session state
