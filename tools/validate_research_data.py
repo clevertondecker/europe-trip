@@ -108,6 +108,10 @@ def main():
     from data12_lille_connectivity_model import load_lille_connectivity
     data12 = load_lille_connectivity()
     print("DATA12 Lille directed one-way references:", len(data12["records"]))
+    from data13_directed_connectivity_model import load_data13
+    data13 = load_data13()
+    print("DATA13 additional directed one-way references:",len(data13["records"]))
+
 
 
 if __name__=="__main__":

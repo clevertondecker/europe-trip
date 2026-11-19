@@ -1,0 +1,33 @@
+name: DATA13 sourced-candidate probe (advisory)
+on:
+  push:
+    branches:
+      - feature/data13-directed-rail-coverage-audit
+    paths:
+      - 'tools/data13_probe_public_routes.py'
+      - 'tools/data13_research_queue.py'
+      - '.github/workflows/data13-probe.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r requirements.txt
+      - name: Probe public route summaries without changing any dataset
+        run: |
+          set -o pipefail
+          python tools/data13_probe_public_routes.py --limit 60 --delay 1.5 | tee data13-probe.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: data13-candidates-advisory
+          path: data13-probe.log
