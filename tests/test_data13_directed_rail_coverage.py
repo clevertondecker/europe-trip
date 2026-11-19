@@ -100,15 +100,27 @@ class Data13DirectedRailCoverageTests(unittest.TestCase):
         self.assertFalse(match["weekend_return_verified"])
         self.assertFalse(overview["official_plan_modified"])
 
-    def test_data15_batch1_reaches_actual_discovery_projection(self):
-        # A research row is not a coverage gain unless it appears in the
-        # same projected matrix the application uses.
-        for origin,destination,minimum in (
+    def test_data15_batches_reach_actual_discovery_projection(self):
+        # Validate the *displayed* matrix, not merely new dataset row counts.
+        checked=(
             ("belfort","lille",298),
             ("reims","lausanne",382),
             ("belfort","reims",235),
             ("reims","lyon",204),
-        ):
+            ("haguenau","mulhouse",94),
+            ("haguenau","belfort",121),
+            ("belfort","saint_louis",54),
+            ("belfort","selestat",70),
+            ("belfort","beaune",105),
+            ("belfort","haguenau",146),
+            ("reims","mulhouse",158),
+            ("reims","metz",68),
+            ("reims","besancon",289),
+            ("reims","beaune",225),
+            ("reims","arras",137),
+            ("reims","saint_louis",204),
+        )
+        for origin,destination,minimum in checked:
             with self.subTest(pair=(origin,destination)):
                 view=opportunity_overview(origin)
                 row=next(x for x in view["destinations"]
@@ -119,8 +131,8 @@ class Data13DirectedRailCoverageTests(unittest.TestCase):
                 self.assertFalse(row["weekend_return_verified"])
                 self.assertFalse(row["reachable_confirmed"])
         audit=audit_coverage()
-        self.assertEqual(audit["historical_plus_indicative"],530)
-        self.assertEqual(audit["unresearched"],820)
+        self.assertEqual(audit["historical_plus_indicative"],542)
+        self.assertEqual(audit["unresearched"],808)
 
     def test_exact_matrix_and_target_gap_are_audited(self):
         out=audit_coverage()
