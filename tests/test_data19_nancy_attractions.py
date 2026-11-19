@@ -80,3 +80,60 @@ class NancyAttractionData19Tests(unittest.TestCase):
           "Artist":{"value":"A"},"LicenseShortName":{"value":"All rights reserved"},
           "LicenseUrl":{"value":"https://example.com"}}}]}}}}
         self.assertIsNone(parse_metadata(info,"Example.jpg"))
+
+    def test_reject_semantic_duplicate_even_with_distinct_ids(self):
+        d = deepcopy(self.data)
+        first, second = d["attraction_candidates"][:2]
+        second["name"] = first["name"].upper()
+        second["municipality"] = first["municipality"]
+        with self.assertRaisesRegex(ValueError, "Duplicate attraction identity"):
+            validate_data19(d)
+
+    def test_reject_wrong_wikimedia_file_link(self):
+        d = deepcopy(self.data)
+        d["attraction_candidates"][0]["photo"]["source_page"] = (
+            "https://commons.wikimedia.org/wiki/File:Another_Attraction.jpg")
+        with self.assertRaisesRegex(ValueError, "Wikimedia file reference"):
+            validate_data19(d)
+
+    def test_reject_non_commons_host_and_unrecognized_zone(self):
+        d = deepcopy(self.data)
+        d["attraction_candidates"][0]["photo"]["source_page"] = (
+            "https://commons.wikimedia.org.evil.example/wiki/File:Porte_de_la_Craffe_%C3%A0_Nancy.jpg")
+        with self.assertRaises(ValueError):
+            validate_data19(d)
+        d = deepcopy(self.data)
+        d["attraction_candidates"][0]["zone"] = "unknown_zone"
+        with self.assertRaises(ValueError):
+            validate_data19(d)
+
+    def test_reject_invalid_region_distribution_and_unknown_fields(self):
+        d = deepcopy(self.data)
+        d["attraction_candidates"][0]["zone"] = "metro"
+        with self.assertRaisesRegex(ValueError, "distribution"):
+            validate_data19(d)
+        d = deepcopy(self.data)
+        del d["attraction_candidates"][0]["ticket_eur"]
+        with self.assertRaises(ValueError):
+            validate_data19(d)
+
+    def test_reject_duplicate_image_and_unrecognized_priority(self):
+        d = deepcopy(self.data)
+        d["attraction_candidates"][1]["photo"] = deepcopy(
+            d["attraction_candidates"][0]["photo"])
+        with self.assertRaises(ValueError):
+            validate_data19(d)
+        d = deepcopy(self.data)
+        d["attraction_candidates"][0]["priority"] = "inventada"
+        with self.assertRaises(ValueError):
+            validate_data19(d)
+
+    def test_reject_wrong_base_and_missing_photo_alt(self):
+        d = deepcopy(self.data)
+        d["attraction_candidates"][0]["base_id"] = "liege"
+        with self.assertRaises(ValueError):
+            validate_data19(d)
+        d = deepcopy(self.data)
+        d["attraction_candidates"][0]["photo"]["alt"] = ""
+        with self.assertRaises(ValueError):
+            validate_data19(d)
