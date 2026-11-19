@@ -43,3 +43,14 @@ Sélestat has no qualified short-let quote in the original research; its general
 5. Compare two-adult furnished apartments for 55–65 nights, taxes, deposit, internet, station distance. No live property qualifies yet.
 
 This PR adds a vetted **research queue** without inflating rail coverage, tourism counts, costs, or TripPlan.
+
+
+## DATA16.1 — Visual cards + multi-base rail hub projection
+
+The read-only **Explorar → Passeios** view now has an opt-in research section. Users can choose one of the 30 existing exploratory bases as origin, choose one of the three DATA16 regions, and page through the five attraction cards per region (15 total). Each card requests a Wikimedia Commons file-specific 720px thumbnail and creator/license metadata from the Commons API with a 24-hour application cache. If license or author cannot be verified or the API fails, it shows a safe placeholder with a link to the file page instead of an uncredited broken image. The Cassissium card explicitly labels its Nuits-Saint-Georges picture as *contextual*, not a museum photo.
+
+The matrix contains 30 existing bases × 3 regional hubs = **90 directional research cells**. Each of the 15 attractions inherits its own hub's available *station-to-station published one-way minimum*, preserving the app's existing evidence precedence. A missing reference remains unknown. If the origin is the same city, railway minutes stay null. Each card leaves the station-to-POI last mile, full door-to-door travel time, trip fares and 2027 return verification **null/unverified**. Accordingly 90 does not mean 90 confirmed journeys.
+
+The section is not rendered beyond its toggle until the user opts in, and photos are paginated at two visible cards at a time to avoid unnecessary external requests. Source credits and links remain visible in each card.
+
+**Acceptance still required:** visual check with the deployed Streamlit app, verification that Commons API is reachable from hosting, desktop/mobile card heights, photographer/license links, and representative trips from other bases to the chosen hubs. These are runtime conditions not established solely by structural tests.
