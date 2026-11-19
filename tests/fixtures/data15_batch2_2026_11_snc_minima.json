@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "checked_at": "2026-11-19",
+  "scope": "DATA15.2 twelve sourced directional SNCF minima: no return or 2027 claim",
+  "records": [
+    {
+      "origin_id": "haguenau",
+      "destination_id": "mulhouse",
+      "published_min": 94,
+      "source_url": "https://www.sncf-connect.com/train/trajet/haguenau/mulhouse",
+      "verified_excerpt": "Durée du trajet le plus court | 1h34"
+    },
+    {
+      "origin_id": "haguenau",
+      "destination_id": "belfort",
+      "published_min": 121,
+      "source_url": "https://www.sncf-connect.com/train/trajet/haguenau/belfort",
+      "verified_excerpt": "Durée du trajet le plus court | 2h01"
+    },
+    {
+      "origin_id": "belfort",
+      "destination_id": "saint_louis",
+      "published_min": 53,
+      "source_url": "https://www.sncf-connect.com/train/trajet/belfort/saint-louis",
+      "verified_excerpt": "Durée du trajet le plus court | 0h53"
+    },
+    {
+      "origin_id": "belfort",
+      "destination_id": "selestat",
+      "published_min": 70,
+      "source_url": "https://www.sncf-connect.com/train/trajet/belfort/selestat",
+      "verified_excerpt": "Durée du trajet le plus court | 1h10"
+    },
+    {
+      "origin_id": "belfort",
+      "destination_id": "beaune",
+      "published_min": 105,
+      "source_url": "https://www.sncf-connect.com/train/trajet/belfort/beaune",
+      "verified_excerpt": "Durée du trajet le plus court | 1h45"
+    },
+    {
+      "origin_id": "belfort",
+      "destination_id": "haguenau",
+      "published_min": 127,
+      "source_url": "https://www.sncf-connect.com/train/trajet/belfort/haguenau",
+      "verified_excerpt": "Durée du trajet le plus court | 2h07"
+    },
+    {
+      "origin_id": "reims",
+      "destination_id": "mulhouse",
+      "published_min": 188,
+      "source_url": "https://www.sncf-connect.com/train/trajet/reims/mulhouse",
+      "verified_excerpt": "Durée du trajet le plus court | 3h08"
+    },
+    {
+      "origin_id": "reims",
+      "destination_id": "metz",
+      "published_min": 68,
+      "source_url": "https://www.sncf-connect.com/train/trajet/reims/metz",
+      "verified_excerpt": "Durée du trajet le plus court | 1h08"
+    },
+    {
+      "origin_id": "reims",
+      "destination_id": "besancon",
+      "published_min": 272,
+      "source_url": "https://www.sncf-connect.com/train/trajet/reims/besancon",
+      "verified_excerpt": "Durée du trajet le plus court | 4h32"
+    },
+    {
+      "origin_id": "reims",
+      "destination_id": "beaune",
+      "published_min": 225,
+      "source_url": "https://www.sncf-connect.com/train/trajet/reims/beaune",
+      "verified_excerpt": "Durée du trajet le plus court | 3h45"
+    },
+    {
+      "origin_id": "reims",
+      "destination_id": "arras",
+      "published_min": 149,
+      "source_url": "https://www.sncf-connect.com/train/trajet/reims/arras",
+      "verified_excerpt": "Durée du trajet le plus court | 2h29"
+    },
+    {
+      "origin_id": "reims",
+      "destination_id": "saint_louis",
+      "published_min": 204,
+      "source_url": "https://www.sncf-connect.com/train/trajet/reims/saint-louis",
+      "verified_excerpt": "Durée du trajet le plus court | 3h24"
+    }
+  ]
+}

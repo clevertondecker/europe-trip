@@ -100,6 +100,42 @@ class Data13DirectedRailCoverageTests(unittest.TestCase):
         self.assertFalse(match["weekend_return_verified"])
         self.assertFalse(overview["official_plan_modified"])
 
+    def test_data15_batches_reach_actual_discovery_projection(self):
+        # Validate the *displayed* matrix, not merely new dataset row counts.
+        checked=(
+            ("belfort","lille",298),
+            ("reims","lausanne",382),
+            ("belfort","reims",235),
+            ("reims","lyon",204),
+            ("haguenau","mulhouse",94),
+            ("haguenau","belfort",121),
+            ("belfort","saint_louis",53),
+            ("belfort","selestat",70),
+            ("belfort","beaune",105),
+            ("belfort","haguenau",127),
+            ("reims","mulhouse",188),
+            ("reims","metz",68),
+            ("reims","besancon",272),
+            ("reims","beaune",225),
+            ("reims","arras",149),
+            ("reims","saint_louis",204),
+            ("belfort","besancon",70),
+            ("saverne","saint_louis",104),
+        )
+        for origin,destination,minimum in checked:
+            with self.subTest(pair=(origin,destination)):
+                view=opportunity_overview(origin)
+                row=next(x for x in view["destinations"]
+                         if x["destination_id"]==destination)
+                self.assertEqual(row["indicative_train_oneway_min"],minimum)
+                self.assertEqual(row["indicative_source_dataset"],
+                                 "data13_directed_connectivity_2026_11")
+                self.assertFalse(row["weekend_return_verified"])
+                self.assertFalse(row["reachable_confirmed"])
+        audit=audit_coverage()
+        self.assertEqual(audit["historical_plus_indicative"],544)
+        self.assertEqual(audit["unresearched"],806)
+
     def test_exact_matrix_and_target_gap_are_audited(self):
         out=audit_coverage()
         self.assertEqual(out["eligible_pairs"],1350)

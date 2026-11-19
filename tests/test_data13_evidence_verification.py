@@ -22,14 +22,102 @@ class Data13EvidenceVerificationTests(unittest.TestCase):
 
     def test_full_manifest_is_explicit_and_unverified_are_not_displayed(self):
         displayed, audit=vetted_overlay_by_pair(self.records,MANIFEST)
-        self.assertEqual(audit["research_rows"],345)
-        self.assertEqual(audit["verified_displayable"],345)
+        self.assertEqual(audit["research_rows"],363)
+        self.assertEqual(audit["verified_displayable"],363)
         self.assertEqual(audit["pending_source_review"],0)
         self.assertEqual(displayed[("aachen","lille")]["minimum_oneway_min"],134)
         self.assertEqual(len(displayed),len(self.records))
         actual=load_data13()
-        self.assertEqual(len(actual["records"]),345)
-        self.assertEqual(len(actual["by_pair"]),345)
+        self.assertEqual(len(actual["records"]),363)
+        self.assertEqual(len(actual["by_pair"]),363)
+
+    def test_data15_batch1_source_verified_directional_minima(self):
+        import csv
+        checks={
+            ("belfort","lille"):298,
+            ("reims","lausanne"):382,
+            ("belfort","reims"):235,
+            ("reims","lyon"):204,
+        }
+        with MANIFEST.open(newline="",encoding="utf-8") as source:
+            manifest={(r["origin_id"],r["destination_id"]):r for r in csv.DictReader(source)}
+        for key,expected in checks.items():
+            with self.subTest(pair=key):
+                rows=[r for r in self.records
+                      if (r["origin_id"],r["destination_id"])==key]
+                self.assertEqual(len(rows),1)
+                row=rows[0]
+                validate_record_url(row)
+                self.assertEqual(row["minimum_oneway_min"],expected)
+                self.assertEqual(row["source_checked_at"],"2026-11-19")
+                self.assertFalse(row["valid_for_2027"])
+                self.assertFalse(row["return_2027_verified"])
+                m=manifest[key]
+                self.assertEqual(m["source_url"],row["source_url"])
+                self.assertEqual(int(m["published_min_rechecked"]),expected)
+                self.assertEqual(m["verification_status"],"verified_minimum")
+                self.assertIn("DATA15.1",m["brief_evidence"])
+                self.assertEqual(m["verification_checked_at"],"2026-11-19")
+
+    def test_data15_batch2_source_verified_directional_minima(self):
+        import csv
+        expected={
+            ("haguenau","mulhouse"):94,
+            ("haguenau","belfort"):121,
+            ("belfort","saint_louis"):53,
+            ("belfort","selestat"):70,
+            ("belfort","beaune"):105,
+            ("belfort","haguenau"):127,
+            ("reims","mulhouse"):188,
+            ("reims","metz"):68,
+            ("reims","besancon"):272,
+            ("reims","beaune"):225,
+            ("reims","arras"):149,
+            ("reims","saint_louis"):204,
+        }
+        with MANIFEST.open(newline="",encoding="utf-8") as file:
+            manifest={(r["origin_id"],r["destination_id"]):r for r in csv.DictReader(file)}
+        for key,minimum in expected.items():
+            with self.subTest(pair=key):
+                matches=[x for x in self.records if
+                         (x["origin_id"],x["destination_id"])==key]
+                self.assertEqual(len(matches),1)
+                record=matches[0]
+                validate_record_url(record)
+                evidence=manifest[key]
+                self.assertEqual(record["minimum_oneway_min"],minimum)
+                self.assertEqual(int(evidence["minimum_dataset_min"]),minimum)
+                self.assertEqual(int(evidence["published_min_rechecked"]),minimum)
+                self.assertEqual(evidence["source_url"],record["source_url"])
+                self.assertEqual(evidence["verification_checked_at"],"2026-11-19")
+                self.assertIn("DATA15.2",evidence["brief_evidence"])
+                self.assertEqual(evidence["verification_status"],"verified_minimum")
+                self.assertFalse(record["valid_for_2027"])
+                self.assertFalse(record["return_2027_verified"])
+
+    def test_data15_batch3_source_verified_directional_minima(self):
+        import csv
+        expected={
+            ("belfort","besancon"):70,
+            ("saverne","saint_louis"):104,
+        }
+        with MANIFEST.open(newline="",encoding="utf-8") as file:
+            manifest={(r["origin_id"],r["destination_id"]):r for r in csv.DictReader(file)}
+        for key,minimum in expected.items():
+            with self.subTest(pair=key):
+                rows=[x for x in self.records
+                      if (x["origin_id"],x["destination_id"])==key]
+                self.assertEqual(len(rows),1)
+                record=rows[0]
+                validate_record_url(record)
+                evidence=manifest[key]
+                self.assertEqual(record["minimum_oneway_min"],minimum)
+                self.assertEqual(int(evidence["published_min_rechecked"]),minimum)
+                self.assertEqual(evidence["source_url"],record["source_url"])
+                self.assertIn("DATA15.3",evidence["brief_evidence"])
+                self.assertEqual(evidence["verification_status"],"verified_minimum")
+                self.assertFalse(record["return_2027_verified"])
+                self.assertFalse(record["valid_for_2027"])
 
     def test_all_record_urls_match_directional_canonical_ids(self):
         for row in self.records:

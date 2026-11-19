@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "checked_at": "2026-11-19",
+  "scope": "DATA15.3 directional route page minima; 2027/return not verified",
+  "records": [
+    {
+      "origin_id": "belfort",
+      "destination_id": "besancon",
+      "published_min": 70,
+      "source_url": "https://www.sncf-connect.com/train/trajet/belfort/besancon",
+      "verified_excerpt": "Durée du trajet le plus court | 1h10",
+      "provenance_note": "Belfort-Ville → Besançon Viotte explicitly named on operator page"
+    },
+    {
+      "origin_id": "saverne",
+      "destination_id": "saint_louis",
+      "published_min": 104,
+      "source_url": "https://www.sncf-connect.com/train/trajet/saverne/saint-louis",
+      "verified_excerpt": "Durée du trajet le plus court | 1h44",
+      "provenance_note": "General route-page minimum 1h44; separate dated /horaires snapshot displayed 1h43, so not a date-specific guarantee"
+    }
+  ]
+}

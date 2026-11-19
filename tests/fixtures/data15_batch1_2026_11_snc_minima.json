@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "checked_at": "2026-11-19",
+  "scope": "DATA15.1 official SNCF directional minima observed via operator page text; not 2027",
+  "records": [
+    {
+      "origin_id": "belfort",
+      "destination_id": "lille",
+      "published_min": 298,
+      "source_url": "https://www.sncf-connect.com/train/trajet/belfort/lille",
+      "verified_excerpt": "Durée du trajet le plus court | 4h58",
+      "station_note": "Belfort Ville listed; Lille Europe/Flandres; station-specific fastest service not inferred"
+    },
+    {
+      "origin_id": "reims",
+      "destination_id": "lausanne",
+      "published_min": 382,
+      "source_url": "https://www.sncf-connect.com/train/trajet/reims/lausanne",
+      "verified_excerpt": "Durée du trajet le plus court | 6h22",
+      "station_note": "Route may involve connections; dated return unverified"
+    },
+    {
+      "origin_id": "belfort",
+      "destination_id": "reims",
+      "published_min": 235,
+      "source_url": "https://www.sncf-connect.com/train/trajet/belfort/reims",
+      "verified_excerpt": "Durée du trajet le plus court | 3h55",
+      "station_note": "Belfort Montbeliard TGV/Meroux appears on source; station equivalence not assumed"
+    },
+    {
+      "origin_id": "reims",
+      "destination_id": "lyon",
+      "published_min": 204,
+      "source_url": "https://www.sncf-connect.com/train/trajet/reims/lyon",
+      "verified_excerpt": "Durée du trajet le plus court | 3h24",
+      "station_note": "Route may involve connections; dated return unverified"
+    }
+  ]
+}
