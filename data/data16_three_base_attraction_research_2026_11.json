@@ -2,7 +2,7 @@
   "schema_version": 1,
   "checked_at": "2026-11-19",
   "scope": "DATA16_research_candidates_not_canonical_tripplan",
-  "methodology": "Official tourism/city/operator evidence only for attraction existence; no automatic inference of ticket, timetable, round trip, last mile or 2027 availability. Newly discovered nearby POIs are candidates and not counted as canonical attractions before city/destination identity reconciliation.",
+  "methodology": "Official tourism/city/operator evidence only for attraction existence; no automatic inference of ticket, timetable, round trip, last mile or 2027 availability. Newly discovered nearby POIs are candidates and not counted as canonical attractions before city/destination identity reconciliation. DATA16.1: 15 identified Wikimedia Commons file pages; licensing metadata must be fetched and checked at render time before display. The Cassissium photo is a contextual city image.",
   "base_ids": [
     "selestat",
     "offenburg",
@@ -66,7 +66,14 @@
       "return_verified_2027": false,
       "open_2027_verified": false,
       "ticket_eur": null,
-      "notes": "Castelo fortificado; ônibus L500 anunciado em 2026, confirmar serviço no outono de 2027"
+      "notes": "Castelo fortificado; ônibus L500 anunciado em 2026, confirmar serviço no outono de 2027",
+      "photo": {
+        "file_title": "Haut Koenigsbourg.jpg",
+        "source_page": "https://commons.wikimedia.org/wiki/File:Haut_Koenigsbourg.jpg",
+        "contextual": false,
+        "alt": "Foto de Château du Haut-Koenigsbourg",
+        "license_verified_for_reuse": false
+      }
     },
     {
       "id": "data16_selestat_illwald",
@@ -86,7 +93,14 @@
       "return_verified_2027": false,
       "open_2027_verified": false,
       "ticket_eur": null,
-      "notes": "Trilhas e observação de fauna; percurso exato desde a hospedagem não verificado"
+      "notes": "Trilhas e observação de fauna; percurso exato desde a hospedagem não verificado",
+      "photo": {
+        "file_title": "Illwald Sélestat.JPG",
+        "source_page": "https://commons.wikimedia.org/wiki/File:Illwald_S%C3%A9lestat.JPG",
+        "contextual": false,
+        "alt": "Foto de Réserve naturelle de l’Illwald",
+        "license_verified_for_reuse": false
+      }
     },
     {
       "id": "data16_selestat_ebersmunster",
@@ -106,7 +120,14 @@
       "return_verified_2027": false,
       "open_2027_verified": false,
       "ticket_eur": null,
-      "notes": "Abadia barroca de interesse arquitetônico; transporte público não reconciliado"
+      "notes": "Abadia barroca de interesse arquitetônico; transporte público não reconciliado",
+      "photo": {
+        "file_title": "Nave of Abbey Church, Ebersmunster 02.jpg",
+        "source_page": "https://commons.wikimedia.org/wiki/File:Nave_of_Abbey_Church%2C_Ebersmunster_02.jpg",
+        "contextual": false,
+        "alt": "Foto de Abbatiale Saint-Maurice d’Ebersmunster",
+        "license_verified_for_reuse": false
+      }
     },
     {
       "id": "data16_selestat_chatenois",
@@ -126,7 +147,14 @@
       "return_verified_2027": false,
       "open_2027_verified": false,
       "ticket_eur": null,
-      "notes": "Muralhas medievais e torre; acesso final sem carro a investigar"
+      "notes": "Muralhas medievais e torre; acesso final sem carro a investigar",
+      "photo": {
+        "file_title": "Tour des sorcières et rempart est, à Châtenois,.jpg",
+        "source_page": "https://commons.wikimedia.org/wiki/File:Tour_des_sorci%C3%A8res_et_rempart_est%2C_%C3%A0_Ch%C3%A2tenois%2C.jpg",
+        "contextual": false,
+        "alt": "Foto de Remparts et Tour des Sorcières",
+        "license_verified_for_reuse": false
+      }
     },
     {
       "id": "data16_selestat_kintzheim",
@@ -146,7 +174,14 @@
       "return_verified_2027": false,
       "open_2027_verified": false,
       "ticket_eur": null,
-      "notes": "Aves de rapina e ruínas de castelo; operação sazonal e transporte a confirmar"
+      "notes": "Aves de rapina e ruínas de castelo; operação sazonal e transporte a confirmar",
+      "photo": {
+        "file_title": "Volerie des Aigles 09.jpg",
+        "source_page": "https://commons.wikimedia.org/wiki/File:Volerie_des_Aigles_09.jpg",
+        "contextual": false,
+        "alt": "Foto de Volerie des Aigles / Château de Kintzheim",
+        "license_verified_for_reuse": false
+      }
     },
     {
       "id": "data16_offenburg_gengenbach",
@@ -166,7 +201,14 @@
       "return_verified_2027": false,
       "open_2027_verified": false,
       "ticket_eur": null,
-      "notes": "Centro histórico preservado na ferrovia Floresta Negra; não afirmar duração ou retorno"
+      "notes": "Centro histórico preservado na ferrovia Floresta Negra; não afirmar duração ou retorno",
+      "photo": {
+        "file_title": "Gengenbach.jpg",
+        "source_page": "https://commons.wikimedia.org/wiki/File:Gengenbach.jpg",
+        "contextual": false,
+        "alt": "Foto de Altstadt Gengenbach",
+        "license_verified_for_reuse": false
+      }
     },
     {
       "id": "data16_offenburg_staufenberg",
@@ -186,7 +228,14 @@
       "return_verified_2027": false,
       "open_2027_verified": false,
       "ticket_eur": null,
-      "notes": "Castelo e vista de vinhedos; ônibus 7142 atende Offenburg–Durbach mas última milha até o castelo não validada"
+      "notes": "Castelo e vista de vinhedos; ônibus 7142 atende Offenburg–Durbach mas última milha até o castelo não validada",
+      "photo": {
+        "file_title": "Das Schloss Staufenberg in Durbach. 01.jpg",
+        "source_page": "https://commons.wikimedia.org/wiki/File:Das_Schloss_Staufenberg_in_Durbach._01.jpg",
+        "contextual": false,
+        "alt": "Foto de Schloss Staufenberg",
+        "license_verified_for_reuse": false
+      }
     },
     {
       "id": "data16_offenburg_allerheiligen",
@@ -206,7 +255,14 @@
       "return_verified_2027": false,
       "open_2027_verified": false,
       "ticket_eur": null,
-      "notes": "Cachoeiras e caminhada; informações do ônibus 425 não provam viagem completa de Offenburg"
+      "notes": "Cachoeiras e caminhada; informações do ônibus 425 não provam viagem completa de Offenburg",
+      "photo": {
+        "file_title": "Allerheiligen-Wasserfälle 01.jpg",
+        "source_page": "https://commons.wikimedia.org/wiki/File:Allerheiligen-Wasserf%C3%A4lle_01.jpg",
+        "contextual": false,
+        "alt": "Foto de Allerheiligen Wasserfälle",
+        "license_verified_for_reuse": false
+      }
     },
     {
       "id": "data16_offenburg_salmen",
@@ -226,7 +282,14 @@
       "return_verified_2027": false,
       "open_2027_verified": false,
       "ticket_eur": null,
-      "notes": "Memorial histórico da democracia alemã, não é o mesmo que o Ritterhaus existente"
+      "notes": "Memorial histórico da democracia alemã, não é o mesmo que o Ritterhaus existente",
+      "photo": {
+        "file_title": "Salmen Offenburg.jpg",
+        "source_page": "https://commons.wikimedia.org/wiki/File:Salmen_Offenburg.jpg",
+        "contextual": false,
+        "alt": "Foto de Der Salmen",
+        "license_verified_for_reuse": false
+      }
     },
     {
       "id": "data16_offenburg_gifiz",
@@ -246,7 +309,14 @@
       "return_verified_2027": false,
       "open_2027_verified": false,
       "ticket_eur": null,
-      "notes": "Lago urbano e área de lazer; avaliar se o período de outono ainda é interessante"
+      "notes": "Lago urbano e área de lazer; avaliar se o período de outono ainda é interessante",
+      "photo": {
+        "file_title": "2024 10 03 OG Gifiz.jpg",
+        "source_page": "https://commons.wikimedia.org/wiki/File:2024_10_03_OG_Gifiz.jpg",
+        "contextual": false,
+        "alt": "Foto de Gifiz-See",
+        "license_verified_for_reuse": false
+      }
     },
     {
       "id": "data16_dijon_cite_gastronomie",
@@ -266,7 +336,14 @@
       "return_verified_2027": false,
       "open_2027_verified": false,
       "ticket_eur": null,
-      "notes": "Exposições e gastronomia na cidade; não é o mesmo que Palais des Ducs ou Parcours de la Chouette"
+      "notes": "Exposições e gastronomia na cidade; não é o mesmo que Palais des Ducs ou Parcours de la Chouette",
+      "photo": {
+        "file_title": "Dijon Cité internationale de la gastronomie et du vin 02.jpg",
+        "source_page": "https://commons.wikimedia.org/wiki/File:Dijon_Cit%C3%A9_internationale_de_la_gastronomie_et_du_vin_02.jpg",
+        "contextual": false,
+        "alt": "Foto de Cité internationale de la gastronomie et du vin",
+        "license_verified_for_reuse": false
+      }
     },
     {
       "id": "data16_dijon_clos_vougeot",
@@ -286,7 +363,14 @@
       "return_verified_2027": false,
       "open_2027_verified": false,
       "ticket_eur": null,
-      "notes": "Patrimônio dos vinhedos da Borgonha; acesso da estação até o château não comprovado"
+      "notes": "Patrimônio dos vinhedos da Borgonha; acesso da estação até o château não comprovado",
+      "photo": {
+        "file_title": "Vougeot, le château du Clos de Vougeot.jpg",
+        "source_page": "https://commons.wikimedia.org/wiki/File:Vougeot%2C_le_ch%C3%A2teau_du_Clos_de_Vougeot.jpg",
+        "contextual": false,
+        "alt": "Foto de Château du Clos de Vougeot",
+        "license_verified_for_reuse": false
+      }
     },
     {
       "id": "data16_dijon_fontenay",
@@ -306,7 +390,14 @@
       "return_verified_2027": false,
       "open_2027_verified": false,
       "ticket_eur": null,
-      "notes": "Abadia cisterciense UNESCO; acesso sem carro requer solução de última milha"
+      "notes": "Abadia cisterciense UNESCO; acesso sem carro requer solução de última milha",
+      "photo": {
+        "file_title": "Abbaye-de-fontenay.jpg",
+        "source_page": "https://commons.wikimedia.org/wiki/File:Abbaye-de-fontenay.jpg",
+        "contextual": false,
+        "alt": "Foto de Abbaye de Fontenay",
+        "license_verified_for_reuse": false
+      }
     },
     {
       "id": "data16_dijon_chateauneuf",
@@ -326,7 +417,14 @@
       "return_verified_2027": false,
       "open_2027_verified": false,
       "ticket_eur": null,
-      "notes": "Vila medieval e castelo; logística sem carro particularmente importante"
+      "notes": "Vila medieval e castelo; logística sem carro particularmente importante",
+      "photo": {
+        "file_title": "Châteauneuf en Auxois-Le château.jpg",
+        "source_page": "https://commons.wikimedia.org/wiki/File:Ch%C3%A2teauneuf_en_Auxois-Le_ch%C3%A2teau.jpg",
+        "contextual": false,
+        "alt": "Foto de Château et village de Châteauneuf-en-Auxois",
+        "license_verified_for_reuse": false
+      }
     },
     {
       "id": "data16_dijon_cassissium",
@@ -346,7 +444,14 @@
       "return_verified_2027": false,
       "open_2027_verified": false,
       "ticket_eur": null,
-      "notes": "Museu do cassis e produção; Nuits-Saint-Georges tem linha ferroviária, última milha ainda pendente"
+      "notes": "Museu do cassis e produção; Nuits-Saint-Georges tem linha ferroviária, última milha ainda pendente",
+      "photo": {
+        "file_title": "Nuits Saint Georges.jpg",
+        "source_page": "https://commons.wikimedia.org/wiki/File:Nuits_Saint_Georges.jpg",
+        "contextual": true,
+        "alt": "Vista da cidade de Nuits-Saint-Georges, não do museu Cassissium",
+        "license_verified_for_reuse": false
+      }
     }
   ]
 }

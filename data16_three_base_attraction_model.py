@@ -38,6 +38,16 @@ def validate_data16(data):
             raise ValueError("Candidate lacks individual official source")
         if x["source_kind"]!="official_tourism_or_operator":
             raise ValueError("Non-official source")
+        photo=x.get("photo")
+        if (not isinstance(photo,dict) or not photo.get("file_title")
+                or not photo.get("source_page","").startswith(
+                    "https://commons.wikimedia.org/wiki/File:")
+                or not photo.get("alt")
+                or photo.get("license_verified_for_reuse") is not False
+                or type(photo.get("contextual")) is not bool):
+            raise ValueError("DATA16 image identity/credit missing or fabricated")
+        if x["id"]=="data16_dijon_cassissium" and not photo["contextual"]:
+            raise ValueError("Contextual photo must remain labeled")
         if (x["minimum_oneway_min"] is not None or x["door_to_door_min"] is not None or
             x["return_verified_2027"] is not False or x["open_2027_verified"] is not False or
             x["ticket_eur"] is not None or x["existing_local_attraction"] is not False):

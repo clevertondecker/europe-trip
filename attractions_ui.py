@@ -170,6 +170,85 @@ def _dq32_choose_destination(destination_id: str) -> None:
     st.session_state["ux_dq32_selected_destination"] = destination_id
 
 
+
+@st.cache_data(ttl=86400,show_spinner=False)
+def _data16_photo(file_title):
+    from data16_commons_photo_model import fetch_photo
+    return fetch_photo(file_title)
+
+
+@st.cache_data(show_spinner=False)
+def _data16_matrix():
+    from data16_vicinity_logistics_model import all_base_hubs
+    return all_base_hubs()
+
+
+def _render_data16_research(base_id):
+    from data16_three_base_attraction_model import load_data16
+    from data16_vicinity_logistics_model import attraction_references
+    from base_scenario_model import base_options
+
+    with st.expander("Novas atrações com fotos e logística · Sélestat, Offenburg, Dijon"):
+        research=load_data16()
+        options={b["id"]:b["name"] for b in base_options()}
+        st.caption("Pesquisa exploratória, não constitui roteiro confirmado. Os tempos "
+                   "são mínimos publicados de ida entre cidades; a última milha "
+                   "até cada atração e os retornos de 2027 permanecem desconhecidos.")
+        source_base=st.selectbox("Partindo de",list(options),
+            index=list(options).index(base_id) if base_id in options else 0,
+            format_func=lambda x:options[x],key="data16_source_base")
+        selected=st.selectbox("Região de atrações",list(research["base_ids"]),
+            format_func=lambda x:research["base_profiles"][x]["name"],
+            key="data16_region")
+        paths={x["attraction_id"]:x for x in attraction_references(
+            source_base,data=research)}
+        filtered=[x for x in research["attraction_candidates"]
+                  if x["base_id"]==selected]
+        for start in range(0,len(filtered),2):
+            with st.container(key=f"data16_photo_row_{start}"):
+                cols=st.columns(2,border=True)
+                for col,attraction in zip(cols,filtered[start:start+2]):
+                    with col:
+                        photo_ref=attraction["photo"]
+                        photo=_data16_photo(photo_ref["file_title"])
+                        if photo:
+                            st.image(photo["url"],width="stretch")
+                            st.caption("Foto: "+escape(photo["author"])+
+                                       " · "+escape(photo["license"])+
+                                       " · [crédito/licença]("+photo_ref["source_page"]+")")
+                        else:
+                            st.info("Imagem indisponível ou licença não validada. "
+                                    "[Ver arquivo no Commons]("+photo_ref["source_page"]+")")
+                        if photo_ref["contextual"]:
+                            st.caption("Foto contextual da cidade; não mostra a atração.")
+                        st.markdown("#### "+escape(attraction["name"]))
+                        st.caption(escape(attraction["location"]))
+                        route=paths[attraction["id"]]
+                        if route["local_hub"]:
+                            st.caption("Destino na região de partida: acesso local a pesquisar.")
+                        elif route["rail_to_hub_min"] is None:
+                            st.caption("Tempo ferroviário até "+options[selected]+": desconhecido.")
+                        else:
+                            mins=route["rail_to_hub_min"]
+                            st.markdown("🚆 **"+f"{mins//60}h{mins%60:02d}"+
+                                        " — referência mínima de ida até "+options[selected]+"**")
+                            if route["rail_to_hub_source"]:
+                                st.caption("[Fonte do trem]("+route["rail_to_hub_source"]+")")
+                        st.warning("Último trecho até a atração e retorno: não verificados.")
+                        st.caption(escape(attraction["notes"]))
+                        st.link_button("Fonte turística",attraction["source_url"],
+                                       width="stretch")
+        with st.expander("Comparar as 30 cidades-base até as três regiões"):
+            data=_data16_matrix()
+            st.dataframe(pd.DataFrame([{
+                "Origem":options[x["origin_id"]],"Região":options[x["hub_id"]],
+                "Mínimo ida (min)":x["rail_to_hub_min"],
+                "Evidência":x["evidence_label"],"Fonte":x["source_url"]
+            } for x in data]),hide_index=True,width="stretch")
+            st.caption("90 relações entre cidades; não são 90 passeios completos. "
+                       "Tempos ausentes são desconhecidos, não inexistentes.")
+
+
 def _render_dq32_macro_opportunities(base_id: str) -> None:
     """Sourced, read-only discovery. Duration means minimum ONE-WAY, not feasibility."""
     from dq32_macro_opportunities_model import opportunity_overview
@@ -198,6 +277,8 @@ def _render_dq32_macro_opportunities(base_id: str) -> None:
         f'{overview["indicative_rail_reference_count"]} referências indicativas. '
         "O destino local não é uma viagem ferroviária. Ausência de pesquisa "
         "não significa ausência de transporte.")
+
+    _render_data16_research(base_id)
 
     # Preserve the preexisting group selector so bookmarks and session state
     # do not lose their filters during the visual migration.

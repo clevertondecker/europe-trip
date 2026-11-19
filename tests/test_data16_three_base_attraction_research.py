@@ -19,6 +19,14 @@ class Data16ThreeBaseResearchTests(unittest.TestCase):
             self.assertIsNone(candidate["door_to_door_min"])
             self.assertIsNone(candidate["minimum_oneway_min"])
 
+    def test_photos_are_all_traced_and_license_not_invented(self):
+        photos=[r["photo"] for r in self.data["attraction_candidates"]]
+        self.assertEqual(len(photos),15)
+        self.assertTrue(all(p["source_page"].startswith(
+            "https://commons.wikimedia.org/wiki/File:") for p in photos))
+        self.assertTrue(all(p["license_verified_for_reuse"] is False for p in photos))
+        self.assertTrue(photos[-1]["contextual"])
+
     def test_no_source_url_is_proof_of_return_or_lodging(self):
         for row in self.data["attraction_candidates"]:
             self.assertFalse(row["return_verified_2027"])
