@@ -1,0 +1,310 @@
+{
+  "records": [
+    {
+      "origin_id": "arlon",
+      "destination_id": "paris",
+      "published_min": 165,
+      "source_url": "https://www.thetrainline.com/en/train-times/arlon-to-paris"
+    },
+    {
+      "origin_id": "namur",
+      "destination_id": "lille",
+      "published_min": 114,
+      "source_url": "https://www.thetrainline.com/en/train-times/namur-to-lille"
+    },
+    {
+      "origin_id": "liege",
+      "destination_id": "metz",
+      "published_min": 225,
+      "source_url": "https://www.thetrainline.com/en/train-times/liege-to-metz"
+    },
+    {
+      "origin_id": "esch",
+      "destination_id": "paris",
+      "published_min": 155,
+      "source_url": "https://www.thetrainline.com/en/train-times/esch-sur-alzette-to-paris"
+    },
+    {
+      "origin_id": "aachen",
+      "destination_id": "ghent",
+      "published_min": 111,
+      "source_url": "https://www.thetrainline.com/en/train-times/aachen-to-ghent"
+    },
+    {
+      "origin_id": "arlon",
+      "destination_id": "colmar",
+      "published_min": 186,
+      "source_url": "https://www.thetrainline.com/en/train-times/arlon-to-colmar"
+    },
+    {
+      "origin_id": "arlon",
+      "destination_id": "nancy",
+      "published_min": 123,
+      "source_url": "https://www.thetrainline.com/en/train-times/arlon-to-nancy"
+    },
+    {
+      "origin_id": "arlon",
+      "destination_id": "reims",
+      "published_min": 190,
+      "source_url": "https://www.thetrainline.com/en/train-times/arlon-to-reims"
+    },
+    {
+      "origin_id": "namur",
+      "destination_id": "arlon",
+      "published_min": 89,
+      "source_url": "https://www.thetrainline.com/en/train-times/namur-to-arlon"
+    },
+    {
+      "origin_id": "namur",
+      "destination_id": "luxembourg_city",
+      "published_min": 113,
+      "source_url": "https://www.thetrainline.com/en/train-times/namur-to-luxembourg"
+    },
+    {
+      "origin_id": "namur",
+      "destination_id": "strasbourg",
+      "published_min": 252,
+      "source_url": "https://www.thetrainline.com/en/train-times/namur-to-strasbourg"
+    },
+    {
+      "origin_id": "namur",
+      "destination_id": "paris",
+      "published_min": 169,
+      "source_url": "https://www.thetrainline.com/en/train-times/namur-to-paris"
+    },
+    {
+      "origin_id": "namur",
+      "destination_id": "colmar",
+      "published_min": 299,
+      "source_url": "https://www.thetrainline.com/en/train-times/namur-to-colmar"
+    },
+    {
+      "origin_id": "namur",
+      "destination_id": "nancy",
+      "published_min": 228,
+      "source_url": "https://www.thetrainline.com/en/train-times/namur-to-nancy"
+    },
+    {
+      "origin_id": "liege",
+      "destination_id": "luxembourg_city",
+      "published_min": 159,
+      "source_url": "https://www.thetrainline.com/en/train-times/liege-to-luxembourg"
+    },
+    {
+      "origin_id": "liege",
+      "destination_id": "nancy",
+      "published_min": 273,
+      "source_url": "https://www.thetrainline.com/en/train-times/liege-to-nancy"
+    },
+    {
+      "origin_id": "liege",
+      "destination_id": "colmar",
+      "published_min": 333,
+      "source_url": "https://www.thetrainline.com/en/train-times/liege-to-colmar"
+    },
+    {
+      "origin_id": "liege",
+      "destination_id": "lyon",
+      "published_min": 297,
+      "source_url": "https://www.thetrainline.com/en/train-times/liege-to-lyon"
+    },
+    {
+      "origin_id": "esch",
+      "destination_id": "metz",
+      "published_min": 55,
+      "source_url": "https://www.thetrainline.com/en/train-times/esch-sur-alzette-to-metz"
+    },
+    {
+      "origin_id": "esch",
+      "destination_id": "arlon",
+      "published_min": 55,
+      "source_url": "https://www.thetrainline.com/en/train-times/esch-sur-alzette-to-arlon"
+    },
+    {
+      "origin_id": "esch",
+      "destination_id": "strasbourg",
+      "published_min": 115,
+      "source_url": "https://www.thetrainline.com/en/train-times/esch-sur-alzette-to-strasbourg"
+    },
+    {
+      "origin_id": "esch",
+      "destination_id": "reims",
+      "published_min": 163,
+      "source_url": "https://www.thetrainline.com/en/train-times/esch-sur-alzette-to-reims"
+    },
+    {
+      "origin_id": "esch",
+      "destination_id": "lille",
+      "published_min": 267,
+      "source_url": "https://www.thetrainline.com/en/train-times/esch-sur-alzette-to-lille"
+    },
+    {
+      "origin_id": "lorrach",
+      "destination_id": "strasbourg",
+      "published_min": 122,
+      "source_url": "https://www.thetrainline.com/en/train-times/lorrach-to-strasbourg"
+    },
+    {
+      "origin_id": "lorrach",
+      "destination_id": "colmar",
+      "published_min": 92,
+      "source_url": "https://www.thetrainline.com/en/train-times/lorrach-to-colmar"
+    },
+    {
+      "origin_id": "namur",
+      "destination_id": "bruges_be",
+      "published_min": 137,
+      "source_url": "https://www.thetrainline.com/en/train-times/namur-to-bruges-brugge"
+    },
+    {
+      "origin_id": "namur",
+      "destination_id": "ghent",
+      "published_min": 106,
+      "source_url": "https://www.thetrainline.com/en/train-times/namur-to-ghent"
+    },
+    {
+      "origin_id": "namur",
+      "destination_id": "cologne",
+      "published_min": 115,
+      "source_url": "https://www.thetrainline.com/en/train-times/namur-to-cologne-germany"
+    },
+    {
+      "origin_id": "liege",
+      "destination_id": "amsterdam",
+      "published_min": 177,
+      "source_url": "https://www.thetrainline.com/en/train-times/liege-to-amsterdam"
+    },
+    {
+      "origin_id": "liege",
+      "destination_id": "ghent",
+      "published_min": 85,
+      "source_url": "https://www.thetrainline.com/en/train-times/liege-to-ghent"
+    },
+    {
+      "origin_id": "liege",
+      "destination_id": "bruges_be",
+      "published_min": 117,
+      "source_url": "https://www.thetrainline.com/en/train-times/liege-to-bruges-brugge"
+    },
+    {
+      "origin_id": "arlon",
+      "destination_id": "bruges_be",
+      "published_min": 237,
+      "source_url": "https://www.thetrainline.com/en/train-times/arlon-to-bruges-brugge"
+    },
+    {
+      "origin_id": "arlon",
+      "destination_id": "ghent",
+      "published_min": 210,
+      "source_url": "https://www.thetrainline.com/en/train-times/arlon-to-ghent"
+    },
+    {
+      "origin_id": "arlon",
+      "destination_id": "amsterdam",
+      "published_min": 314,
+      "source_url": "https://www.thetrainline.com/en/train-times/arlon-to-amsterdam"
+    },
+    {
+      "origin_id": "arlon",
+      "destination_id": "cologne",
+      "published_min": 219,
+      "source_url": "https://www.thetrainline.com/en/train-times/arlon-to-cologne-germany"
+    },
+    {
+      "origin_id": "arlon",
+      "destination_id": "rotterdam",
+      "published_min": 266,
+      "source_url": "https://www.thetrainline.com/en/train-times/arlon-to-rotterdam"
+    },
+    {
+      "origin_id": "arlon",
+      "destination_id": "stuttgart",
+      "published_min": 267,
+      "source_url": "https://www.thetrainline.com/en/train-times/arlon-to-stuttgart"
+    },
+    {
+      "origin_id": "namur",
+      "destination_id": "lyon",
+      "published_min": 310,
+      "source_url": "https://www.thetrainline.com/en/train-times/namur-to-lyon"
+    },
+    {
+      "origin_id": "namur",
+      "destination_id": "dijon",
+      "published_min": 312,
+      "source_url": "https://www.thetrainline.com/en/train-times/namur-to-dijon"
+    },
+    {
+      "origin_id": "namur",
+      "destination_id": "aachen",
+      "published_min": 75,
+      "source_url": "https://www.thetrainline.com/en/train-times/namur-to-aachen"
+    },
+    {
+      "origin_id": "aachen",
+      "destination_id": "bruges_be",
+      "published_min": 145,
+      "source_url": "https://www.thetrainline.com/en/train-times/aachen-to-bruges-brugge"
+    },
+    {
+      "origin_id": "aachen",
+      "destination_id": "namur",
+      "published_min": 78,
+      "source_url": "https://www.thetrainline.com/en/train-times/aachen-to-namur"
+    },
+    {
+      "origin_id": "aachen",
+      "destination_id": "luxembourg_city",
+      "published_min": 203,
+      "source_url": "https://www.thetrainline.com/en/train-times/aachen-to-luxembourg"
+    },
+    {
+      "origin_id": "esch",
+      "destination_id": "cologne",
+      "published_min": 260,
+      "source_url": "https://www.thetrainline.com/en/train-times/esch-sur-alzette-to-cologne-germany"
+    },
+    {
+      "origin_id": "aachen",
+      "destination_id": "strasbourg",
+      "published_min": 202,
+      "source_url": "https://www.thetrainline.com/en/train-times/aachen-to-strasbourg"
+    },
+    {
+      "origin_id": "aachen",
+      "destination_id": "dijon",
+      "published_min": 312,
+      "source_url": "https://www.thetrainline.com/en/train-times/aachen-to-dijon"
+    },
+    {
+      "origin_id": "aachen",
+      "destination_id": "freiburg",
+      "published_min": 252,
+      "source_url": "https://www.thetrainline.com/en/train-times/aachen-to-freiburg-breisgau-hbf"
+    },
+    {
+      "origin_id": "aachen",
+      "destination_id": "basel",
+      "published_min": 263,
+      "source_url": "https://www.thetrainline.com/en/train-times/aachen-to-basel-sbb"
+    },
+    {
+      "origin_id": "aachen",
+      "destination_id": "colmar",
+      "published_min": 257,
+      "source_url": "https://www.thetrainline.com/en/train-times/aachen-to-colmar"
+    },
+    {
+      "origin_id": "trier",
+      "destination_id": "liege",
+      "published_min": 154,
+      "source_url": "https://www.thetrainline.com/en/train-times/trier-hbf-to-liege"
+    },
+    {
+      "origin_id": "trier",
+      "destination_id": "nancy",
+      "published_min": 153,
+      "source_url": "https://www.thetrainline.com/en/train-times/trier-hbf-to-nancy"
+    }
+  ]
+}

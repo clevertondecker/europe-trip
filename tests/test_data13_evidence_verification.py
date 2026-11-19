@@ -23,13 +23,13 @@ class Data13EvidenceVerificationTests(unittest.TestCase):
     def test_full_manifest_is_explicit_and_unverified_are_not_displayed(self):
         displayed, audit=vetted_overlay_by_pair(self.records,MANIFEST)
         self.assertEqual(audit["research_rows"],270)
-        self.assertEqual(audit["verified_displayable"],219)
-        self.assertEqual(audit["pending_source_review"],51)
+        self.assertEqual(audit["verified_displayable"],270)
+        self.assertEqual(audit["pending_source_review"],0)
         self.assertEqual(displayed[("aachen","lille")]["minimum_oneway_min"],134)
-        self.assertNotIn(("nancy","amsterdam"),displayed)
+        self.assertEqual(len(displayed),len(self.records))
         actual=load_data13()
         self.assertEqual(len(actual["records"]),270)
-        self.assertEqual(len(actual["by_pair"]),219)
+        self.assertEqual(len(actual["by_pair"]),270)
 
     def test_all_record_urls_match_directional_canonical_ids(self):
         for row in self.records:
@@ -215,6 +215,32 @@ class Data13EvidenceVerificationTests(unittest.TestCase):
                 validate_record_url(record)
                 self.assertFalse(record["return_2027_verified"])
                 self.assertFalse(record["valid_for_2027"])
+
+    def test_data14_batch5_all_51_secondary_minima(self):
+        import csv
+        fixture=json.loads((ROOT/"tests"/"fixtures"/
+                           "data14_batch5_2026_11_trainline_minima.json").read_text(encoding="utf-8"))["records"]
+        self.assertEqual(len(fixture),51)
+        with MANIFEST.open(newline="",encoding="utf-8") as source:
+            index={(m["origin_id"],m["destination_id"]):m for m in csv.DictReader(source)}
+        for item in fixture:
+            key=item["origin_id"],item["destination_id"]
+            with self.subTest(pair=key):
+                r=next(rec for rec in self.records
+                       if (rec["origin_id"],rec["destination_id"])==key)
+                m=index[key]
+                self.assertEqual(r["reference_kind"],"secondary_route_minimum")
+                self.assertEqual(r["confidence"],"low")
+                self.assertEqual(r["minimum_oneway_min"],item["published_min"])
+                self.assertEqual(r["source_url"],item["source_url"])
+                self.assertEqual(m["verification_status"],"verified_minimum")
+                self.assertEqual(int(m["published_min_rechecked"]),item["published_min"])
+                self.assertEqual(m["source_url"],r["source_url"])
+                self.assertIn("DATA14.5",m["brief_evidence"])
+                self.assertEqual(m["source_kind"],r["reference_kind"])
+                validate_record_url(r)
+                self.assertFalse(r["return_2027_verified"])
+                self.assertFalse(r["valid_for_2027"])
 
     def test_never_claims_2027_schedule_or_return(self):
         for record in self.records:
