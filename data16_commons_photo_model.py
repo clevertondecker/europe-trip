@@ -27,7 +27,7 @@ def parse_metadata(payload,file_title):
         from urllib.parse import urlsplit
         p=urlsplit(license_url)
         name=license_name.casefold().strip()
-        free_by=bool(re.fullmatch(r"cc by(?:-sa)? [1-9]\\.\\d",name))
+        free_by=bool(re.fullmatch(r"cc by(?:-sa)? [1-9]\.\d",name))
         url_free=(p.scheme=="https" and p.hostname=="creativecommons.org"
                   and p.path.startswith(("/licenses/by/","/licenses/by-sa/")))
         public_domain=(name in ("cc0","cc-zero","public domain","pd-old","pd-us")
