@@ -17,15 +17,29 @@ class DATA16LogisticsTests(unittest.TestCase):
                                 r["feasibility"]=="unknown" for r in rows))
         self.assertIsNone(hub_references("selestat")["selestat"]["rail_to_hub_min"])
         with self.assertRaises(ValueError):hub_references("not_a_city")
-    def test_photo_cards_are_opt_in_and_no_nested_expanders(self):
+    def test_streamlit_interactions_reset_pagination_and_preserve_plan(self):
+        from copy import deepcopy
         from pathlib import Path
-        source=(Path(__file__).resolve().parents[1]/"attractions_ui.py").read_text(encoding="utf-8")
-        self.assertIn('key="data16_show_research"',source)
-        self.assertIn('key="data16_cards_page"',source)
-        self.assertIn('key="data16_show_matrix"',source)
-        self.assertNotIn('with st.expander("Comparar as 30 cidades-base',source)
-        self.assertIn('photo=_data16_photo(photo_ref["file_title"])',source)
-        self.assertIn('st.link_button("Fonte turística"',source)
+        from unittest.mock import patch
+        from streamlit.testing.v1 import AppTest
+        import attractions_ui
+        app=Path(__file__).resolve().parents[1]/"app.py"
+        with patch.object(attractions_ui,"_data16_photo",return_value=None):
+            at=AppTest.from_file(str(app),default_timeout=120).run()
+            baseline=deepcopy(at.session_state["advisor_plan"])
+            at.button(key="ux_sidebar_nav_1").click().run()
+            at.segmented_control(key="ux_section").set_value("Passeios").run()
+            at.toggle(key="data16_show_research").set_value(True).run()
+            self.assertFalse(at.exception,[e.message for e in at.exception])
+            at.selectbox(key="data16_cards_page").set_value(3).run()
+            self.assertEqual(at.session_state["data16_cards_page"],3)
+            at.selectbox(key="data16_region").set_value("offenburg").run()
+            self.assertEqual(at.session_state["data16_cards_page"],1)
+            at.selectbox(key="data16_cards_page").set_value(2).run()
+            at.selectbox(key="data16_source_base").set_value("metz").run()
+            self.assertEqual(at.session_state["data16_cards_page"],1)
+            self.assertFalse(at.exception,[e.message for e in at.exception])
+            self.assertEqual(at.session_state["advisor_plan"],baseline)
 
     def test_invalid_license_rejected(self):
         p={"query":{"pages":{"1":{"title":"File:A.jpg","imageinfo":[{
@@ -37,3 +51,7 @@ class DATA16LogisticsTests(unittest.TestCase):
         m["LicenseShortName"]["value"]="CC BY-SA 4.0"
         m["LicenseUrl"]["value"]="https://creativecommons.org/licenses/by-sa/4.0/"
         self.assertIsNotNone(parse_metadata(p,"A.jpg"))
+        m["LicenseShortName"]["value"]="CC BY-NC 4.0"
+        self.assertIsNone(parse_metadata(p,"A.jpg"))
+        m["LicenseShortName"]["value"]="CC BY-ND 4.0"
+        self.assertIsNone(parse_metadata(p,"A.jpg"))
