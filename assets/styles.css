@@ -513,3 +513,13 @@ padding:17px 20px;margin:0 0 10px;}
     min-height: 0;
   }
 }
+
+
+/* DATA16.1 research-only attraction cards: consistent photo crop without
+   changing other destination imagery or truncating the card contents. */
+[class*="st-key-data16_photo_row_"] [data-testid="stImage"] img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
