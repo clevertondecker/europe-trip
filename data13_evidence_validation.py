@@ -30,6 +30,7 @@ SNCF = {
 }
 TRAINLINE = {
     "aachen":"aachen", "amsterdam":"amsterdam", "arlon":"arlon",
+    "arras":"arras",
     "besancon":"besancon",
     "brussels":"brussels",
     "basel":"basel-sbb", "bruges_be":"bruges-brugge",
@@ -40,7 +41,7 @@ TRAINLINE = {
     "lorrach":"lorrach", "luxembourg_city":"luxembourg", "mulhouse":"mulhouse", "offenburg":"offenburg",
     "lyon":"lyon", "metz":"metz", "namur":"namur",
     "nancy":"nancy", "paris":"paris", "reims":"reims",
-    "rotterdam":"rotterdam", "saint_louis":"st-louis", "saverne":"saverne", "strasbourg":"strasbourg",
+    "rotterdam":"rotterdam", "saint_louis":"st-louis", "saverne":"saverne", "selestat":"selestat", "strasbourg":"strasbourg",
     "stuttgart":"stuttgart", "thionville":"thionville",
     "trier":"trier-hbf",
 }
