@@ -170,6 +170,100 @@ def _dq32_choose_destination(destination_id: str) -> None:
     st.session_state["ux_dq32_selected_destination"] = destination_id
 
 
+
+@st.cache_data(ttl=86400,show_spinner=False)
+def _data16_photo(file_title):
+    from data16_commons_photo_model import fetch_photo
+    return fetch_photo(file_title)
+
+
+@st.cache_data(show_spinner=False)
+def _data16_matrix():
+    from data16_vicinity_logistics_model import all_base_hubs
+    return all_base_hubs()
+
+
+def _reset_data16_page():
+    st.session_state["data16_cards_page"] = 1
+
+
+def _render_data16_research(base_id):
+    from data16_three_base_attraction_model import load_data16
+    from data16_vicinity_logistics_model import attraction_references
+    from base_scenario_model import base_options
+
+    if not st.toggle("Explorar novas atrações com fotos e logística · DATA16",
+                     value=False,key="data16_show_research"):
+        return
+    with st.expander("Novas atrações com fotos e logística · Sélestat, Offenburg, Dijon",expanded=True):
+        research=load_data16()
+        options={b["id"]:b["name"] for b in base_options()}
+        st.caption("Pesquisa exploratória, não constitui roteiro confirmado. Os tempos "
+                   "são mínimos publicados de ida entre cidades; a última milha "
+                   "até cada atração e os retornos de 2027 permanecem desconhecidos.")
+        source_base=st.selectbox("Partindo de",list(options),
+            index=list(options).index(base_id) if base_id in options else 0,
+            format_func=lambda x:options[x],key="data16_source_base",
+            on_change=_reset_data16_page)
+        selected=st.selectbox("Região de atrações",list(research["base_ids"]),
+            format_func=lambda x:research["base_profiles"][x]["name"],
+            key="data16_region",on_change=_reset_data16_page)
+        paths={x["attraction_id"]:x for x in attraction_references(
+            source_base,data=research)}
+        filtered=[x for x in research["attraction_candidates"]
+                  if x["base_id"]==selected]
+        page=st.selectbox("Página de atrações",list(range(1,(len(filtered)+1)//2+1)),
+                          key="data16_cards_page")
+        shown=filtered[(page-1)*2:page*2]
+        for start in range(0,len(shown),2):
+            with st.container(key=f"data16_photo_row_{start}"):
+                cols=st.columns(2,border=True)
+                for col,attraction in zip(cols,shown[start:start+2]):
+                    with col:
+                        photo_ref=attraction["photo"]
+                        photo=_data16_photo(photo_ref["file_title"])
+                        if photo:
+                            st.image(photo["url"],width="stretch")
+                            st.caption("Foto: "+escape(photo["author"])+
+                                       " · "+escape(photo["license"])+
+                                       " · [arquivo original]("+photo_ref["source_page"]+")"+
+                                       " · [licença]("+photo["license_url"]+")")
+                        else:
+                            st.info("Imagem indisponível ou licença não validada. "
+                                    "[Ver arquivo no Commons]("+photo_ref["source_page"]+")")
+                        if photo_ref["contextual"]:
+                            st.caption("Foto contextual da cidade; não mostra a atração.")
+                        st.markdown("#### "+escape(attraction["name"]))
+                        st.caption(escape(attraction["location"]))
+                        route=paths[attraction["id"]]
+                        if route["local_hub"]:
+                            st.markdown("**1 · Cidade de referência:** na mesma cidade da partida.")
+                        elif route["rail_to_hub_min"] is None:
+                            st.markdown("**1 · Trem até "+options[selected]+":** duração desconhecida.")
+                        else:
+                            mins=route["rail_to_hub_min"]
+                            st.markdown("🚆 **"+f"{mins//60}h{mins%60:02d}"+
+                                        " — mínimo de ida até a estação de "+options[selected]+" (não até a atração)**")
+                            if route["rail_to_hub_source"]:
+                                st.caption("[Fonte do trem]("+route["rail_to_hub_source"]+")")
+                        st.warning("**2 · Estação → atração:** duração e percurso desconhecidos. "
+                                   "**3 · Retorno e horários 2027:** não verificados. "
+                                   "Viabilidade do passeio não confirmada.")
+                        st.caption(escape(attraction["notes"]))
+                        st.link_button("Fonte turística",attraction["source_url"],
+                                       width="stretch")
+        if st.checkbox("Exibir matriz das 30 cidades-base × três regiões",
+                       value=False,key="data16_show_matrix"):
+            data=_data16_matrix()
+            st.dataframe(pd.DataFrame([{
+                "Origem":options[x["origin_id"]],"Região":options[x["hub_id"]],
+                "Mínimo ida (min)":x["rail_to_hub_min"],
+                "Evidência":x["evidence_label"],"Fonte":x["source_url"]
+            } for x in data]),hide_index=True,width="stretch")
+            st.caption("90 relações entre cidades; não são 90 passeios completos. "
+                       "Tempos ausentes são desconhecidos, não inexistentes.")
+
+
 def _render_dq32_macro_opportunities(base_id: str) -> None:
     """Sourced, read-only discovery. Duration means minimum ONE-WAY, not feasibility."""
     from dq32_macro_opportunities_model import opportunity_overview
@@ -198,6 +292,8 @@ def _render_dq32_macro_opportunities(base_id: str) -> None:
         f'{overview["indicative_rail_reference_count"]} referências indicativas. '
         "O destino local não é uma viagem ferroviária. Ausência de pesquisa "
         "não significa ausência de transporte.")
+
+    _render_data16_research(base_id)
 
     # Preserve the preexisting group selector so bookmarks and session state
     # do not lose their filters during the visual migration.
