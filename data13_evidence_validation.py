@@ -37,7 +37,7 @@ TRAINLINE = {
     "esch":"esch-sur-alzette", "freiburg":"freiburg-breisgau-hbf",
     "ghent":"ghent", "interlaken":"interlaken-ost", "kehl":"kehl", "lausanne":"lausanne",
     "liege":"liege", "lille":"lille",
-    "lorrach":"lorrach", "luxembourg_city":"luxembourg", "offenburg":"offenburg",
+    "lorrach":"lorrach", "luxembourg_city":"luxembourg", "mulhouse":"mulhouse", "offenburg":"offenburg",
     "lyon":"lyon", "metz":"metz", "namur":"namur",
     "nancy":"nancy", "paris":"paris", "reims":"reims",
     "rotterdam":"rotterdam", "saint_louis":"st-louis", "saverne":"saverne", "strasbourg":"strasbourg",
