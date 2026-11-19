@@ -24,10 +24,17 @@ def parse_metadata(payload,file_title):
         license_name=_plain(meta.get("LicenseShortName",{}).get("value"))
         license_url=meta.get("LicenseUrl",{}).get("value","")
         image_url=info.get("thumburl") or info.get("url")
-        permitted=(license_name.lower().startswith(("cc by","cc0","cc-zero",
-                                                   "public domain","pd-")) and
-                   (license_url.startswith("https://creativecommons.org/")
-                    or license_name.lower().startswith(("public domain","pd-"))))
+        from urllib.parse import urlsplit
+        p=urlsplit(license_url)
+        name=license_name.casefold().strip()
+        free_by=bool(re.fullmatch(r"cc by(?:-sa)? [1-9]\\.\\d",name))
+        url_free=(p.scheme=="https" and p.hostname=="creativecommons.org"
+                  and p.path.startswith(("/licenses/by/","/licenses/by-sa/")))
+        public_domain=(name in ("cc0","cc-zero","public domain","pd-old","pd-us")
+                       and (not license_url or (p.scheme=="https"
+                           and p.hostname=="creativecommons.org"
+                           and p.path.startswith("/publicdomain/"))))
+        permitted=(free_by and url_free) or public_domain
         if (not author or not permitted or not image_url
                 or not image_url.startswith("https://upload.wikimedia.org/")):
             return None
