@@ -474,47 +474,42 @@ padding:17px 20px;margin:0 0 10px;}
 }
 .sidebar-brand span { font-size: .77rem; }
 
-/* UX 5.3: opt-in equal-height cards. Keyed Streamlit containers avoid global overrides. */
+/* UX 5.3.1: native bordered columns provide equal outer card heights per row.
+   Streamlit's own flex row stretches bordered columns without nesting cards.
+   Stretch vertical contents and move their *last element wrapper* to the foot.
+   The footer's keyed container is kept last for each card. */
 [class*="st-key-ux53_row_"] [data-testid="stHorizontalBlock"] {
   align-items: stretch;
 }
 [class*="st-key-ux53_row_"] [data-testid="stColumn"] {
+  min-width: 0;
+  align-self: stretch;
   display: flex;
   flex-direction: column;
-  min-width: 0;
 }
 [class*="st-key-ux53_row_"] [data-testid="stColumn"] > [data-testid="stVerticalBlock"] {
-  flex: 1 1 auto;
   display: flex;
   flex-direction: column;
-}
-[class*="st-key-ux53_card_"] {
   flex: 1 1 auto;
-  height: 100%;
+  min-height: 100%;
   min-width: 0;
 }
-[class*="st-key-ux53_card_"]:is([data-testid="stVerticalBlock"],
-                                [data-testid="stVerticalBlockBorderWrapper"]),
-[class*="st-key-ux53_card_"] > [data-testid="stVerticalBlock"],
-[class*="st-key-ux53_card_"] [data-testid="stVerticalBlockBorderWrapper"] > [data-testid="stVerticalBlock"] {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
+/* A Streamlit element wrapper surrounds each keyed footer; setting margin on
+   the nested footer itself did not push the element down (UX 5.3 regression). */
+[class*="st-key-ux53_row_"] [data-testid="stColumn"] > [data-testid="stVerticalBlock"] > :last-child {
+  margin-top: auto;
 }
-[class*="st-key-ux53_card_"] [data-testid="stImage"] img {
+[class*="st-key-ux53_row_"] [data-testid="stColumn"] [data-testid="stImage"] img {
   display: block;
   width: 100%;
   aspect-ratio: 16 / 9;
   object-fit: cover;
 }
-[class*="st-key-ux53_footer_"] {
-  margin-top: auto;
-}
-[class*="st-key-ux53_card_"] [data-testid="stExpander"] {
+[class*="st-key-ux53_row_"] [data-testid="stColumn"] [data-testid="stExpander"] {
   min-width: 0;
 }
-@media (max-width: 800px) {
-  [class*="st-key-ux53_card_"] {
-    height: auto;
+@media (max-width: 640px) {
+  [class*="st-key-ux53_row_"] [data-testid="stColumn"] > [data-testid="stVerticalBlock"] {
+    min-height: 0;
   }
 }
