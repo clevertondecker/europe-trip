@@ -22,14 +22,14 @@ class Data13EvidenceVerificationTests(unittest.TestCase):
 
     def test_full_manifest_is_explicit_and_unverified_are_not_displayed(self):
         displayed, audit=vetted_overlay_by_pair(self.records,MANIFEST)
-        self.assertEqual(audit["research_rows"],367)
-        self.assertEqual(audit["verified_displayable"],367)
+        self.assertEqual(audit["research_rows"],376)
+        self.assertEqual(audit["verified_displayable"],376)
         self.assertEqual(audit["pending_source_review"],0)
         self.assertEqual(displayed[("aachen","lille")]["minimum_oneway_min"],134)
         self.assertEqual(len(displayed),len(self.records))
         actual=load_data13()
-        self.assertEqual(len(actual["records"]),367)
-        self.assertEqual(len(actual["by_pair"]),367)
+        self.assertEqual(len(actual["records"]),376)
+        self.assertEqual(len(actual["by_pair"]),376)
 
     def test_data15_batch1_source_verified_directional_minima(self):
         import csv
@@ -146,6 +146,39 @@ class Data13EvidenceVerificationTests(unittest.TestCase):
                 self.assertEqual(record["source_checked_at"],"2026-11-19")
                 self.assertFalse(record["valid_for_2027"])
                 self.assertFalse(record["return_2027_verified"])
+
+    def test_data18_nancy_evidence_and_source_classes(self):
+        import csv
+        checks={
+            "saverne":(56,"official_operator_minimum"),
+            "selestat":(103,"official_operator_minimum"),
+            "freiburg":(172,"official_operator_minimum"),
+            "cologne":(279,"official_operator_minimum"),
+            "kehl":(109,"secondary_route_minimum"),
+            "esch":(98,"secondary_route_minimum"),
+            "namur":(231,"secondary_route_minimum"),
+            "bruges_be":(286,"secondary_route_minimum"),
+            "beaune":(187,"secondary_route_minimum"),
+        }
+        with MANIFEST.open(newline="",encoding="utf-8") as source:
+            manifest={(r["origin_id"],r["destination_id"]):r for r in csv.DictReader(source)}
+        for destination,(minutes,kind) in checks.items():
+            with self.subTest(destination=destination):
+                records=[x for x in self.records if x["origin_id"]=="nancy"
+                         and x["destination_id"]==destination]
+                self.assertEqual(len(records),1)
+                record=records[0]
+                validate_record_url(record)
+                evidence=manifest[("nancy",destination)]
+                self.assertEqual(record["minimum_oneway_min"],minutes)
+                self.assertEqual(record["reference_kind"],kind)
+                self.assertEqual(int(evidence["published_min_rechecked"]),minutes)
+                self.assertEqual(record["source_url"],evidence["source_url"])
+                self.assertEqual(record["confidence"],evidence["confidence"])
+                self.assertIn("DATA18",evidence["brief_evidence"])
+                self.assertEqual(evidence["verification_status"],"verified_minimum")
+                self.assertFalse(record["return_2027_verified"])
+                self.assertFalse(record["valid_for_2027"])
 
     def test_all_record_urls_match_directional_canonical_ids(self):
         for row in self.records:
