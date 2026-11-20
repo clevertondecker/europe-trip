@@ -15,6 +15,7 @@ from destination_photo_assets import (local_destination_photo, preferred_destina
 from ux501_destination_discovery_model import (
     build_destination_discovery, filter_destinations,
 )
+from trip01_supplemental_discovery import append_trip01_candidates
 from ux502_destination_interests_ui import render_wishlist,add_destination
 from data8_tourism_ui import render_data8_destination_preview
 
@@ -22,7 +23,7 @@ from data8_tourism_ui import render_data8_destination_preview
 
 @st.cache_data(show_spinner=False)
 def _cached_discovery():
-    return build_destination_discovery()
+    return append_trip01_candidates(build_destination_discovery())
 
 
 
@@ -191,7 +192,8 @@ def render_independent_destination_discovery(*, discovery=None) -> None:
                     for item in subset if not item.get("photo")}
     missing_on_page = tuple((item["id"],item["name"]) for item in subset
                             if not item.get("photo") and
-                            not local_photos.get(item["id"]))
+                            not local_photos.get(item["id"]) and
+                            item.get("research_status") != "supplemental_attractions_documented")
     fallback_photos = (_cached_visible_photos(missing_on_page)
                        if missing_on_page else {})
     for row_index, row_items in enumerate(_destination_rows(subset)):
