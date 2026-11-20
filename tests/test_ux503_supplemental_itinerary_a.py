@@ -51,7 +51,7 @@ class Trip01BrowseComparisonTests(unittest.TestCase):
         app.button(key="ux_sidebar_nav_1").click().run()
         app.segmented_control(key="ux_section").set_value("Comparar").run()
         self.assertFalse(app.exception, [e.message for e in app.exception])
-        self.assertFalse(any("Lista de destinos incompatível" in e.message
+        self.assertFalse(any("Lista de destinos incompatível" in e.value
                              for e in app.error))
         comparison_tables = [
             item.value for item in app.dataframe
