@@ -1,10 +1,10 @@
 {
-  "baseline_id": "ARCH13-reviewed-2026-11-17",
-  "description": "Explicit reviewed catalog sizes; update only with approved source expansion and tests",
+  "baseline_id": "DATA17-reviewed-additive-destination-expansion-2026-11-20",
+  "description": "Reviewed additive addition: 2 destination records (Obernai, Lucerne) and 6 canonical attractions. The 30-base DQ3.2 snapshot and its source-count remain unchanged; 8 2027-unknown route placeholders in separate attractions routing matrix are not counted here.",
   "expected_counts": {
     "bases": 30,
-    "canonical_destinations": 14,
-    "canonical_attractions": 65,
+    "canonical_destinations": 16,
+    "canonical_attractions": 71,
     "dq32_source_records": 30,
     "dq32_cities": 23,
     "historical_exploration_routes": 34
