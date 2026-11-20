@@ -16,7 +16,7 @@ A solução revisada preserva integralmente o snapshot original (30 bases, 46 de
 1. `data/trip01_supplemental_destinations_2027.json`: dois destinos candidatos, com seis atrações e URLs oficiais.
 2. `trip01_supplemental_discovery.py`: projeção somente leitura que combina as novas entradas com o inventário existente; valida IDs, fontes e coordenadas.
 3. `ux501_destination_discovery_ui.py`: a busca e os cartões usam essa projeção, sem alterar o `TripPlan` ou os dados ferroviários históricos.
-4. Fotografias não foram inventadas: quando não houver uma foto licenciada, o fluxo existente usa a busca sob demanda/fallback.
+4. Fotos verificadas de Obernai (Morio60/Patrick Monchicourt, CC BY-SA 2.0) e Lucerna (Yair Haklai, CC BY-SA 4.0) foram vinculadas por URLs diretas oficiais do Wikimedia e páginas Commons de autoria/licença. O fallback visual é preservado para falhas de rede. Nenhuma imagem gerada ou sem fonte foi usada.
 5. **Limitação:** as entradas complementares aparecem em **Explorar → Passeios**, inclusive para adicionar à lista de interesses, mas ainda não são automaticamente selecionáveis na matriz de passeios do **Meu planejamento**. Isso precisará de uma integração posterior com contratos canônicos e auditoria de regressões. Nenhum custo ou retorno é declarado confirmado.
 
 ## Obernai — referências
