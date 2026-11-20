@@ -19,6 +19,11 @@ class MissingGuideDestinationsTests(unittest.TestCase):
                 matches = filter_destinations(self.discovery, query=name)
                 self.assertEqual([row["id"] for row in matches], [key])
                 self.assertEqual(matches[0]["attraction_count"], 3)
+                photo = matches[0]["photo"]
+                self.assertTrue(photo["url"].startswith("https://commons.wikimedia.org/"))
+                self.assertTrue(photo["source_page"].startswith("https://commons.wikimedia.org/wiki/File:"))
+                self.assertTrue(photo["author"])
+                self.assertIn("CC BY-SA", photo["license"])
                 self.assertFalse(matches[0]["verified_weekend_return"])
                 self.assertFalse(matches[0]["officially_selected"])
 
