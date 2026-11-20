@@ -190,9 +190,11 @@ def render_independent_destination_discovery(*, discovery=None) -> None:
     fallback_photos = (_cached_visible_photos(missing_on_page)
                        if missing_on_page else {})
     for idx in range(0, len(subset), 3):
+        row_items = subset[idx:idx+3]
         with st.container(key=f"ux53_row_destinations_{idx}"):
-            columns = st.columns(3, border=True)
-            for column, item in zip(columns, subset[idx:idx+3]):
+            # Avoid empty bordered cards for searches returning 1 or 2 places.
+            columns = st.columns(len(row_items), border=True)
+            for column, item in zip(columns, row_items):
                 with column:
                     photo = preferred_destination_photo(item, fallback_photos.get(item["id"]))
                     _render_destination_media(item,photo)
