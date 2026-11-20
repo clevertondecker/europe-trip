@@ -2,7 +2,7 @@
 from __future__ import annotations
 from copy import deepcopy
 import json
-from ux501_destination_discovery_model import build_destination_discovery
+from trip01_supplemental_discovery import build_exploration_discovery
 from rail_evidence_unified_model import canonical_place
 
 KIND = "nossa-europa-destination-interests"
@@ -17,7 +17,7 @@ def empty_interests() -> dict:
 
 
 def _ids(discovery=None) -> set[str]:
-    discovery = discovery if discovery is not None else build_destination_discovery()
+    discovery = discovery if discovery is not None else build_exploration_discovery()
     return {row["id"] for row in discovery["destinations"]}
 
 
