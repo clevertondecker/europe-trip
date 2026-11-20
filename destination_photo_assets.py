@@ -53,14 +53,17 @@ def preferred_destination_photo(destination: dict, online_photo: dict | None = N
     if local:
         return local
     photo = destination.get("photo")
-    if destination["id"] == "metz" and photo and (
-            photo.get("source_page") ==
-            "https://commons.wikimedia.org/wiki/File:Centre_Pompidou_%C3%A0_Metz.jpg"):
-        # Use Wikimedia's original media endpoint, preserving the source
-        # page and license. Avoid the browser's failed FilePath redirect.
+    if destination["id"] == "metz" and photo:
+        # Verified Wikimedia Commons source (not a guessed CDN hash).
+        # Keep this as an editorial fallback until a licensed local WEBP
+        # can be bundled through the photo manifest.
         return {
             **photo,
-            "url": "https://upload.wikimedia.org/wikipedia/commons/0/00/Centre_Pompidou_%C3%A0_Metz.jpg",
+            "url": "https://upload.wikimedia.org/wikipedia/commons/3/36/Metz_centre_ville_crop.jpg",
+            "source_page": "https://commons.wikimedia.org/wiki/File:Metz_centre_ville_crop.jpg",
+            "author": "Philippe Gisselbrecht / Ville de Metz",
+            "license": "CC BY-SA 4.0",
+            "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
         }
     return photo or online_photo
 
