@@ -247,6 +247,20 @@
       "country": "França",
       "lat": 49.1193,
       "lon": 6.1757
+    },
+    {
+      "id": "obernai",
+      "name": "Obernai",
+      "country": "França",
+      "lat": 48.4627,
+      "lon": 7.4816
+    },
+    {
+      "id": "lucerne",
+      "name": "Lucerna",
+      "country": "Suíça",
+      "lat": 47.0502,
+      "lon": 8.3093
     }
   ],
   "routes": [
