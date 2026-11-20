@@ -92,6 +92,11 @@ def _render_destination_media(destination: dict, photo: dict | None) -> None:
             '<small>Foto a pesquisar</small></div>',unsafe_allow_html=True)
 
 
+def _destination_rows(items: list[dict], size: int = 3) -> list[list[dict]]:
+    """Return only populated destination rows, keeping the catalog order."""
+    return [items[i:i+size] for i in range(0, len(items), size)]
+
+
 def render_independent_destination_discovery(*, discovery=None) -> None:
     discovery = discovery if discovery is not None else _cached_discovery()
     destinations = discovery["destinations"]
@@ -189,10 +194,11 @@ def render_independent_destination_discovery(*, discovery=None) -> None:
                             not local_photos.get(item["id"]))
     fallback_photos = (_cached_visible_photos(missing_on_page)
                        if missing_on_page else {})
-    for idx in range(0, len(subset), 3):
-        with st.container(key=f"ux53_row_destinations_{idx}"):
-            columns = st.columns(3, border=True)
-            for column, item in zip(columns, subset[idx:idx+3]):
+    for row_index, row_items in enumerate(_destination_rows(subset)):
+        with st.container(key=f"ux53_row_destinations_{row_index * 3}"):
+            # Avoid empty bordered cards for searches returning 1 or 2 places.
+            columns = st.columns(len(row_items), border=True)
+            for column, item in zip(columns, row_items):
                 with column:
                     photo = preferred_destination_photo(item, fallback_photos.get(item["id"]))
                     _render_destination_media(item,photo)

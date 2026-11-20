@@ -34,7 +34,7 @@ class UnifiedCardLayoutTests(unittest.TestCase):
         discovery = (ROOT / "ux501_destination_discovery_ui.py").read_text(encoding="utf-8")
         rail = (ROOT / "attractions_ui.py").read_text(encoding="utf-8")
         bases = (ROOT / "base_research_expanded_ui.py").read_text(encoding="utf-8")
-        self.assertIn("st.columns(3, border=True)", discovery)
+        self.assertIn("st.columns(len(row_items), border=True)", discovery)
         self.assertIn('st.columns(2, gap="medium", border=True)', rail)
         self.assertIn("st.columns(2, border=True)", bases)
         self.assertNotIn("ux53_card_destination_", discovery)
