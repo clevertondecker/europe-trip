@@ -2,7 +2,7 @@
 import unittest
 from ux501_destination_discovery_model import build_destination_discovery, filter_destinations
 from base_explorer_model import load_exploration
-from dq32_macro_opportunities_model import load_macro_tourism
+from attractions_model import load_attractions, load_base_routes
 from rail_evidence_unified_model import canonical_place
 
 
@@ -34,10 +34,17 @@ class MissingGuideDestinationsTests(unittest.TestCase):
         for item in options["routes"]:
             if item["destination_id"] in ("obernai", "lucerne"):
                 self.assertFalse(item["return_verified_2027"])
-        macro = load_macro_tourism()
-        added = [x for x in macro["attractions"] if x["city_id"] in ("obernai", "lucerne")]
+        canonical = load_attractions()
+        added = [x for x in canonical["attractions"] if x["destination_id"] in ("obernai", "lucerne")]
         self.assertEqual(len(added), 6)
-        self.assertTrue(all(x["ticket_eur"] is None and x["availability_2027"] is None for x in added))
+        self.assertTrue(all(x["ticket"]["amount"] is None for x in added))
+        route_data = load_base_routes()
+        for destination_id in ("obernai", "lucerne"):
+            unknown = [r for r in route_data["routes"] if r["destination_id"] == destination_id]
+            self.assertEqual(len(unknown), 4)
+            self.assertTrue(all(r["train_minutes_one_way"] is None and
+                                r["fare_eur_person_oneway"] is None and
+                                r["eligible_2027"] is False for r in unknown))
 
 
 if __name__ == "__main__":
