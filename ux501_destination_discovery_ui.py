@@ -192,7 +192,8 @@ def render_independent_destination_discovery(*, discovery=None) -> None:
                     for item in subset if not item.get("photo")}
     missing_on_page = tuple((item["id"],item["name"]) for item in subset
                             if not item.get("photo") and
-                            not local_photos.get(item["id"]))
+                            not local_photos.get(item["id"]) and
+                            item.get("research_status") != "supplemental_attractions_documented")
     fallback_photos = (_cached_visible_photos(missing_on_page)
                        if missing_on_page else {})
     for row_index, row_items in enumerate(_destination_rows(subset)):
