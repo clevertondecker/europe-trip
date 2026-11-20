@@ -10,9 +10,11 @@ Auditoria de cidades e passeios **citados na apresentação visual** para as tr�
 
 ## Fix mínimo
 1. Adicionar **Obernai** (48.4627, 7.4816), França, e **Lucerna/Luzern** (47.0502, 8.3093), Suíça, como destinos na coleção exploratória já consumida pelo registro.
-2. Adicionar três atrações documentadas por destino a `data/dq32_macro_tourism_2026_11.json` (fontes oficiais abaixo).
-3. Não fabricar trechos de trem, horário de retorno, duração de visita, preço ou disponibilidade para 2027: todos permanecem desconhecidos e precisam de pesquisa específica.
-4. Preservar o mecanismo de fotos atual: nenhuma foto sem licença foi anexada. Os novos destinos usarão busca de imagem sob demanda e fallback visual já implementado, podendo exibir placeholder enquanto não existir mídia validada.
+2. Adicionar três atrações documentadas por destino ao catálogo canônico `data/attractions_2027.json`; DQ3.2 permanece reservado a cidades-base e não foi ampliado.
+3. Criar oito registros explicitamente desconhecidos na matriz de rotas de atrações, um por cada uma das quatro bases antigas e cada novo destino, sem inferir tarifa ou duração.
+4. Atualizar o snapshot revisado com +2 destinos e +6 atrações, sem alterar a contagem de bases ou os registros DQ3.2.
+5. Não fabricar trechos de trem, horário de retorno, duração de visita, preço ou disponibilidade para 2027: todos permanecem desconhecidos e precisam de pesquisa específica.
+6. Preservar o mecanismo de fotos atual: nenhuma foto sem licença foi anexada. Os novos destinos usarão busca de imagem sob demanda e fallback visual já implementado, podendo exibir placeholder enquanto não existir mídia validada.
 
 ## Obernai — referências
 - [Turismo Grand Est](https://visitgrandest.fr/en/lieux/obernai/)
