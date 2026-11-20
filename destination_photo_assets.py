@@ -49,8 +49,20 @@ def local_destination_photo(destination_id: str) -> dict | None:
 
 def preferred_destination_photo(destination: dict, online_photo: dict | None = None) -> dict | None:
     """Prefer bundled verified bytes over hotlinked editorial images."""
-    return (local_destination_photo(destination["id"]) or
-            destination.get("photo") or online_photo)
+    local = local_destination_photo(destination["id"])
+    if local:
+        return local
+    photo = destination.get("photo")
+    if destination["id"] == "metz" and photo and (
+            photo.get("source_page") ==
+            "https://commons.wikimedia.org/wiki/File:Centre_Pompidou_%C3%A0_Metz.jpg"):
+        # Use Wikimedia's original media endpoint, preserving the source
+        # page and license. Avoid the browser's failed FilePath redirect.
+        return {
+            **photo,
+            "url": "https://upload.wikimedia.org/wikipedia/commons/0/00/Centre_Pompidou_%C3%A0_Metz.jpg",
+        }
+    return photo or online_photo
 
 
 
