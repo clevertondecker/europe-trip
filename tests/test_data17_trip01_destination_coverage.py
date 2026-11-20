@@ -20,7 +20,7 @@ class MissingGuideDestinationsTests(unittest.TestCase):
                 self.assertEqual([row["id"] for row in matches], [key])
                 self.assertEqual(matches[0]["attraction_count"], 3)
                 photo = matches[0]["photo"]
-                self.assertTrue(photo["url"].startswith("https://commons.wikimedia.org/"))
+                self.assertTrue(photo["url"].startswith(("https://upload.wikimedia.org/", "https://thumb.wikimedia.org/")))
                 self.assertTrue(photo["source_page"].startswith("https://commons.wikimedia.org/wiki/File:"))
                 self.assertTrue(photo["author"])
                 self.assertIn("CC BY-SA", photo["license"])
