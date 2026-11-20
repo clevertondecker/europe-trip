@@ -49,8 +49,8 @@ class SupplementalWishlistPersistenceTests(unittest.TestCase):
         }
         storage = Mock()
         storage.save.return_value = 5
-        with patch.object(continuity_ui.st, "session_state", state), \\
-             patch.object(continuity_ui, "_private_store", return_value=storage):
+        with (patch.object(continuity_ui.st, "session_state", state),
+              patch.object(continuity_ui, "_private_store", return_value=storage)):
             continuity_ui.save_private_now(plan, catalog)
         body, expected = storage.save.call_args.args
         self.assertEqual(expected, 4)
