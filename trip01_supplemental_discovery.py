@@ -24,6 +24,12 @@ def append_trip01_candidates(discovery: dict, path: Path = DATA) -> dict:
             raise ValueError("Supplemental destination duplicated or missing source")
         if not (-90 <= entry["lat"] <= 90 and -180 <= entry["lon"] <= 180):
             raise ValueError("Supplemental destination has invalid coordinates")
+        photo = entry.get("photo")
+        if photo and (not photo.get("url", "").startswith("https://commons.wikimedia.org/")
+                      or not photo.get("source_page", "").startswith("https://commons.wikimedia.org/")
+                      or not photo.get("author") or not photo.get("license")
+                      or not photo.get("license_url", "").startswith("https://")):
+            raise ValueError("Supplemental destination photo lacks Commons source or license")
         attrs = entry.get("attractions", [])
         if not attrs or any(not a["source_url"].startswith("https://") for a in attrs):
             raise ValueError("Supplemental attraction missing source")
