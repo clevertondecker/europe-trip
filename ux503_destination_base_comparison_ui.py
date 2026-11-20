@@ -2,7 +2,7 @@
 from __future__ import annotations
 import streamlit as st
 from base_research_expanded_model import load_research
-from ux501_destination_discovery_model import build_destination_discovery
+from trip01_supplemental_discovery import build_exploration_discovery
 from ux502_destination_interests_model import (
     empty_interests, ordered_interests, selected_destinations_for_comparison, LABELS,
 )
@@ -38,7 +38,7 @@ def _return_to_wishlist():
 
 
 def render_wishlist_base_comparison(*, plan, discovery=None, research=None):
-    discovery = discovery if discovery is not None else build_destination_discovery()
+    discovery = discovery if discovery is not None else build_exploration_discovery()
     research = research if research is not None else load_research()
     st.markdown("### Como seria visitar nossos destinos a partir de cada cidade?")
     st.write("Compare os tempos de trem que já pesquisamos para diferentes "

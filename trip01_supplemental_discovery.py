@@ -64,3 +64,13 @@ def append_trip01_candidates(discovery: dict, path: Path = DATA) -> dict:
         category for d in output["destinations"] for category in d["categories"]
     })
     return output
+
+
+def build_exploration_discovery() -> dict:
+    """Shared read-only catalog for both destination browsing and comparison.
+
+    The historical core inventory remains unchanged; supplemental entries
+    belong only to this user-facing exploratory projection.
+    """
+    from ux501_destination_discovery_model import build_destination_discovery
+    return append_trip01_candidates(build_destination_discovery())
