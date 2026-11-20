@@ -1,0 +1,136 @@
+{
+  "schema_version": "trip01-exploratory-1.0",
+  "status": "unapproved_research_fixture",
+  "generated_at": "2026-11-20",
+  "source_document": "docs/research/TRIP01_THREE_SCENARIOS_2027.md",
+  "authoritative_plan_mutation": false,
+  "travelers": 2,
+  "wedding": "2027-09-04",
+  "candidate_arrival": "2027-09-08",
+  "candidate_departure": "2027-11-16",
+  "italy_nights": 9,
+  "france_nights": 60,
+  "assumed_vacation_end": "2027-10-02",
+  "assumed_remote_work_from": "2027-10-04",
+  "budget_brl": {
+    "baseline": 70000,
+    "alternate": 60000,
+    "conditional_ceiling": 75000,
+    "verified_total": null
+  },
+  "warnings": [
+    "Not an importable TripPlan",
+    "No 2027 flight, rental or return schedules verified",
+    "Do not count unknown prices as zero",
+    "No tickets or bookings confirmed"
+  ],
+  "scenarios": [
+    {
+      "id": "trip01_a",
+      "label": "Strasbourg + Roma/Salerno",
+      "france_base_id": "strasbourg",
+      "italy_bases": [
+        {
+          "place_id": "rome",
+          "nights": 4
+        },
+        {
+          "place_id": "salerno",
+          "nights": 5
+        }
+      ],
+      "italy_candidates": [
+        "amalfi",
+        "positano",
+        "maiori",
+        "minori",
+        "capri"
+      ],
+      "france_after_work": [
+        "strasbourg"
+      ],
+      "france_weekend_candidates": [
+        "colmar",
+        "freiburg",
+        "basel"
+      ],
+      "france_vacation_candidates": [
+        "paris",
+        "basel"
+      ],
+      "confidence": "editorial_candidates_only",
+      "budget_total_brl": null
+    },
+    {
+      "id": "trip01_b",
+      "label": "Metz + Roma/Maiori",
+      "france_base_id": "metz",
+      "italy_bases": [
+        {
+          "place_id": "rome",
+          "nights": 3
+        },
+        {
+          "place_id": "maiori",
+          "nights": 6
+        }
+      ],
+      "italy_candidates": [
+        "amalfi",
+        "positano",
+        "minori",
+        "capri"
+      ],
+      "france_after_work": [
+        "metz"
+      ],
+      "france_weekend_candidates": [
+        "luxembourg",
+        "nancy",
+        "trier",
+        "saarbrucken"
+      ],
+      "france_vacation_candidates": [
+        "paris",
+        "reims"
+      ],
+      "confidence": "editorial_candidates_only",
+      "budget_total_brl": null
+    },
+    {
+      "id": "trip01_c",
+      "label": "Mulhouse + Roma/Nápoles",
+      "france_base_id": "mulhouse",
+      "italy_bases": [
+        {
+          "place_id": "rome",
+          "nights": 4
+        },
+        {
+          "place_id": "naples",
+          "nights": 5
+        }
+      ],
+      "italy_candidates": [
+        "capri",
+        "pompeii",
+        "sorrento"
+      ],
+      "france_after_work": [
+        "mulhouse"
+      ],
+      "france_weekend_candidates": [
+        "colmar",
+        "freiburg",
+        "basel",
+        "strasbourg"
+      ],
+      "france_vacation_candidates": [
+        "interlaken",
+        "oeschinen"
+      ],
+      "confidence": "editorial_candidates_only",
+      "budget_total_brl": null
+    }
+  ]
+}
