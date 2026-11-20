@@ -15,6 +15,7 @@ from destination_photo_assets import (local_destination_photo, preferred_destina
 from ux501_destination_discovery_model import (
     build_destination_discovery, filter_destinations,
 )
+from trip01_supplemental_discovery import append_trip01_candidates
 from ux502_destination_interests_ui import render_wishlist,add_destination
 from data8_tourism_ui import render_data8_destination_preview
 
@@ -22,7 +23,7 @@ from data8_tourism_ui import render_data8_destination_preview
 
 @st.cache_data(show_spinner=False)
 def _cached_discovery():
-    return build_destination_discovery()
+    return append_trip01_candidates(build_destination_discovery())
 
 
 
