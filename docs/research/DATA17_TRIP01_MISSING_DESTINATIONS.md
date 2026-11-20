@@ -8,13 +8,16 @@ Auditoria de cidades e passeios **citados na apresentação visual** para as tr�
 - **Já representados:** Strasbourg, Colmar, Freiburg, Baden-Baden, Basel, Paris, Metz, Luxembourg City (alias canônico `luxembourg_city`), Nancy, Trier, Saarbrücken, Reims, Mulhouse, Interlaken e Oeschinensee/Kandersteg.
 - **Itália:** Roma, Nápoles, Salerno, Maiori, Minori, Amalfi, Positano e Capri aparecem em `data/itinerary_options_2027.json` ou na experiência italiana; **não** são automaticamente parte do explorador independente das cidades francesas. Pompeia, Herculano, Sorrento e Ravello estão citados no guia, mas é preciso auditoria funcional separada de suas representações na experiência Itália para determinar quais podem ser selecionados como passeio. Não duplicar seus IDs no catálogo francês por suposição.
 
-## Fix mínimo
-1. Adicionar **Obernai** (48.4627, 7.4816), França, e **Lucerna/Luzern** (47.0502, 8.3093), Suíça, como destinos na coleção exploratória já consumida pelo registro.
-2. Adicionar três atrações documentadas por destino ao catálogo canônico `data/attractions_2027.json`; DQ3.2 permanece reservado a cidades-base e não foi ampliado.
-3. Criar oito registros explicitamente desconhecidos na matriz de rotas de atrações, um por cada uma das quatro bases antigas e cada novo destino, sem inferir tarifa ou duração.
-4. Atualizar o snapshot revisado com +2 destinos e +6 atrações, sem alterar a contagem de bases ou os registros DQ3.2.
-5. Não fabricar trechos de trem, horário de retorno, duração de visita, preço ou disponibilidade para 2027: todos permanecem desconhecidos e precisam de pesquisa específica.
-6. Preservar o mecanismo de fotos atual: nenhuma foto sem licença foi anexada. Os novos destinos usarão busca de imagem sob demanda e fallback visual já implementado, podendo exibir placeholder enquanto não existir mídia validada.
+## Correção aditiva com snapshot preservado
+
+A primeira tentativa de adicionar os dois destinos aos arquivos históricos globais alterou o inventário 30×46 e causou regressões amplas em testes e relatórios ferroviários. A mudança foi **revertida** antes do merge.
+
+A solução revisada preserva integralmente o snapshot original (30 bases, 46 destinos, 1.380 pares):
+1. `data/trip01_supplemental_destinations_2027.json`: dois destinos candidatos, com seis atrações e URLs oficiais.
+2. `trip01_supplemental_discovery.py`: projeção somente leitura que combina as novas entradas com o inventário existente; valida IDs, fontes e coordenadas.
+3. `ux501_destination_discovery_ui.py`: a busca e os cartões usam essa projeção, sem alterar o `TripPlan` ou os dados ferroviários históricos.
+4. Fotografias não foram inventadas: quando não houver uma foto licenciada, o fluxo existente usa a busca sob demanda/fallback.
+5. **Limitação:** as entradas complementares aparecem em **Explorar → Passeios**, inclusive para adicionar à lista de interesses, mas ainda não são automaticamente selecionáveis na matriz de passeios do **Meu planejamento**. Isso precisará de uma integração posterior com contratos canônicos e auditoria de regressões. Nenhum custo ou retorno é declarado confirmado.
 
 ## Obernai — referências
 - [Turismo Grand Est](https://visitgrandest.fr/en/lieux/obernai/)
