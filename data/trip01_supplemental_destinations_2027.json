@@ -11,7 +11,13 @@
       "lat": 48.4627,
       "lon": 7.4816,
       "source_url": "https://visitgrandest.fr/en/lieux/obernai/",
-      "photo": null,
+      "photo": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Obernai_(Bas-Rhin)_-_Place_du_march%C3%A9_-_H%C3%B4tel_de_ville_et_Kappelturm.jpg",
+        "author": "Morio60 (Patrick Monchicourt)",
+        "license": "CC BY-SA 2.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/2.0/",
+        "source_page": "https://commons.wikimedia.org/wiki/File:Obernai_(Bas-Rhin)_-_Place_du_march%C3%A9_-_H%C3%B4tel_de_ville_et_Kappelturm.jpg"
+      },
       "attractions": [
         {
           "id": "obernai_market",
@@ -40,7 +46,13 @@
       "lat": 47.0502,
       "lon": 8.3093,
       "source_url": "https://www.myswitzerland.com/en-us/destinations/lucerne",
-      "photo": null,
+      "photo": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Kapellbr%C3%BCcke-Lucerne.jpg",
+        "author": "Yair Haklai",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "source_page": "https://commons.wikimedia.org/wiki/File:Kapellbr%C3%BCcke-Lucerne.jpg"
+      },
       "attractions": [
         {
           "id": "lucerne_chapel",
