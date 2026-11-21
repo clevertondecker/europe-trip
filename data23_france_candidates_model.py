@@ -65,7 +65,8 @@ def validate_data23(data:dict)->dict:
                 or not _safe_url(a.get("source_url"),{
                     "www.destination-angers.com","www.anjou-tourisme.com",
                     "www.lemans-tourisme.com","www.ville-annecy.fr",
-                    "www.tourisme-rennes.com","www.saint-malo-tourisme.com"})
+                    "www.tourisme-rennes.com","www.saint-malo-tourisme.com",
+                    "lemans-tourisme.com","www.dinan-capfrehel.com"})
                 or not isinstance(photo,dict)
                 or not _safe_url(photo.get("url"),WIKIMEDIA_HOSTS)
                 or not _safe_url(photo.get("source_page"),WIKIMEDIA_HOSTS)
