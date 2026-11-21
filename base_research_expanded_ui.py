@@ -19,6 +19,8 @@ from base_coverage_model import coverage_matrix
 from city_profiles_model import load_profiles,profile_by_id
 from city_research_packs_model import load_city_packs,pack_for_city
 from ux41_favorites_ui import render_favorite_comparison
+from data23_france_candidates_model import base_attractions,base_routes
+from ux47_photo_ui import photo_markup,photo_credit
 from ux40_research_model import (
     ACTIVITIES,five_base_cards,filter_candidates,evidence_state,
 )
@@ -165,6 +167,42 @@ def _city_profile(city_id):
                    "e informações faltantes permanecem identificados.")
 
 
+def _candidate_media_and_logistics(city_id:str)->None:
+    """Pictures and outbound rail evidence for newly researched home bases."""
+    attractions=base_attractions(city_id)
+    if not attractions:
+        return
+    st.markdown("#### Atrações para conhecer")
+    st.caption("Fotografias licenciadas e fontes oficiais. A visita não é uma reserva; "
+               "bilhetes, acesso local e funcionamento no outono de 2027 ainda pendem de confirmação.")
+    for attraction in attractions:
+        with st.container(border=True):
+            left,right=st.columns([1,2])
+            with left:
+                st.markdown(photo_markup(attraction["photo"],attraction["name"]),
+                            unsafe_allow_html=True)
+                credit=photo_credit(attraction["photo"])
+                if credit:
+                    st.caption(credit)
+            with right:
+                st.markdown("**"+attraction["name"]+"**")
+                st.caption(attraction["place"]+" · "+
+                    ("Passeio local" if attraction["proximity"]=="local"
+                     else "Excursão nas redondezas"))
+                st.write(attraction["notes"])
+                st.markdown("[Fonte turística]("+attraction["source_url"]+")")
+    st.markdown("#### Tempos ferroviários pesquisados a partir desta base")
+    st.caption("Mínimos de ida publicados em 2026, estação a estação; não são "
+               "tempos porta a porta e não confirmam retorno aos fins de semana de 2027.")
+    for route in base_routes(city_id):
+        mins=route["minimum_oneway_min"]
+        label=route["destination_id"].replace("_"," ").title()
+        st.markdown("**"+label+"** · "+f"{mins//60}h{mins%60:02d}"+
+                    " · [SNCF Connect]("+route["source_url"]+")")
+    st.info("As demais combinações ainda não pesquisadas permanecem sem tempo; "
+            "não suponha que ausência de dados signifique ausência de trem.")
+
+
 def _explore_city(study,rail,five)->None:
     st.markdown("#### Explore uma cidade")
     options={c["id"]:c for c in study["cities"]}
@@ -187,6 +225,7 @@ def _explore_city(study,rail,five)->None:
     b.metric("Tempos ferroviários pesquisados",
              str(documented["route_basket_with_time"])+"/15")
     _city_profile(selected)
+    _candidate_media_and_logistics(selected)
     _city_housing(city)
     _city_routes(selected,five,rail)
     with st.expander("Pesquisa técnica · critérios, pesos e pontuação indisponível"):
@@ -234,7 +273,7 @@ def _all_candidates(study)->None:
                               args=("ux40_corridor_filter","ux40_saved_corridor"))
     with col2:
         _restore_widget("expanded_bases_only_shortlisted","ux40_saved_finalists",False)
-        finalists=st.checkbox("Mostrar somente as 12 finalistas",
+        finalists=st.checkbox("Mostrar somente as "+str(sum(c["shortlist"] for c in study["cities"]))+" finalistas",
                               key="expanded_bases_only_shortlisted",
                               on_change=_save_widget,
                               args=("expanded_bases_only_shortlisted","ux40_saved_finalists"))
@@ -246,7 +285,7 @@ def _all_candidates(study)->None:
                              args=("ux40_evidence_filter","ux40_saved_evidence"))
     filtered=filter_candidates(study,country=country,only_finalists=finalists,
                                corridor=corridor,evidence=evidence)
-    st.caption(str(len(filtered))+" cidades encontradas nas 30 candidatas.")
+    st.caption(str(len(filtered))+" cidades encontradas nas "+str(len(study["cities"]))+" candidatas.")
     st.dataframe([{
         "Cidade":COUNTRY_FLAGS.get(c["country"],"")+" "+c["name"],
         "País":c["country"],"Corredor":c["corridor"],
