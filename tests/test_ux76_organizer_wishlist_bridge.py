@@ -1,6 +1,7 @@
 """Wishlist destinations are visible in organizer, never auto-confirmed."""
 from copy import deepcopy
 import unittest
+from unittest.mock import patch
 
 from itinerary_flow_model import FRANCE_STAGE, ITALY_STAGE, UNASSIGNED, selected_rows_for_stage
 from trip_plan_model import new_plan
@@ -77,6 +78,39 @@ class WishlistOrganizerBridgeTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             organizer_wishlist_candidates(self.wishes,self.plan,self.discovery,
                                           self.catalog,"Etapa inválida")
+
+
+class OrganizerIntegrationSmokeTests(WishlistOrganizerBridgeTests):
+    @patch("ux61_destination_board_ui._discovery")
+    @patch("itinerary_flow_ui.st")
+    def test_organizer_surfaces_wishlist_even_when_no_visits_confirmed(self, st, discovery):
+        from itinerary_flow_ui import _render_organizer_wishlist
+        discovery.return_value=self.discovery
+        st.session_state={"ux502_interests":self.wishes}
+        st.selectbox.return_value="colmar"
+        st.button.return_value=False
+        _render_organizer_wishlist(self.plan,self.catalog,FRANCE_STAGE)
+        self.assertEqual(st.selectbox.call_args.args[0],"Lugar da minha lista")
+        self.assertIn("colmar",st.selectbox.call_args.args[1])
+        st.button.assert_any_call("Incluir no roteiro sem data",
+                                  key="flow_wishlist_confirm_França")
+
+    @patch("ux61_destination_board_ui._discovery")
+    @patch("itinerary_flow_ui.commit_outing")
+    @patch("itinerary_flow_ui.st")
+    def test_organizer_promotes_only_after_explicit_click(self, st, commit, discovery):
+        from itinerary_flow_ui import _render_organizer_wishlist
+        from ux45_outing_contract import OutingResult
+        discovery.return_value=self.discovery
+        st.session_state={"ux502_interests":self.wishes}
+        st.selectbox.return_value="colmar"
+        st.button.return_value=True
+        commit.return_value=OutingResult(
+            "added","colmar","Colmar",0,UNASSIGNED,(),True)
+        _render_organizer_wishlist(self.plan,self.catalog,FRANCE_STAGE)
+        commit.assert_called_once_with("colmar",[],UNASSIGNED,confirmed=True)
+        st.rerun.assert_called_once()
+        self.assertEqual(st.session_state["flow_organize_destination"],"colmar")
 
 
 if __name__=="__main__":
