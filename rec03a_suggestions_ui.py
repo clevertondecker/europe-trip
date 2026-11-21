@@ -6,7 +6,6 @@ import streamlit as st
 from rail_reference_projection_model import format_minutes
 
 _LOG = logging.getLogger(__name__)
-from base_recommendation_model import recommend_bases
 from base_research_expanded_model import load_research
 from recommendation_scope_model import confirm_scope
 from trip01_supplemental_discovery import build_exploration_discovery
@@ -29,6 +28,17 @@ _REASON = {
     "sem_tempo_ou_identificacao_local": "Sem tempo ou identificação local documentados neste escopo.",
     "destinos_com_tempo_pendente": "Há destinos sem tempo pesquisado.",
 }
+
+
+def recommend_bases(*args, **kwargs):
+    """Load REC02 only for a confirmed suggestion request.
+
+    A rolling deployment may temporarily retain an older UX503 module without
+    build_wishlist_matrix. Do not reload shared modules in a running process,
+    substitute an older algorithm, or make the entire app depend on this import.
+    """
+    from base_recommendation_model import recommend_bases as calculate
+    return calculate(*args, **kwargs)
 
 
 def _go(target):
@@ -235,6 +245,15 @@ def render_suggestions(*, plan, discovery=None, research=None):
         research=research if research is not None else load_research(include_candidates=True)
         result=recommend_bases(interests,checked["scope"],discovery=discovery,research=research)
         cities={x["id"]:x for x in research["cities"]}
+    except ImportError:
+        _LOG.exception("REC03A dependency import failed; verify deployed revision and restart worker")
+        st.error("As recomendações estão temporariamente indisponíveis. "
+                 "Sua lista e seu planejamento permanecem intactos. "
+                 "Use a comparação personalizada enquanto a aplicação é atualizada.")
+        st.button("Tentar novamente",key="rec03a_retry")
+        st.button("Abrir comparação personalizada",key="rec03a_manual_fallback",
+                  on_click=_go,args=("manual",))
+        return
     except Exception:
         _LOG.exception("REC03A analysis failed")
         # No stale or empty-looking recommendations after a loader failure.
