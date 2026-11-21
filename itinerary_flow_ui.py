@@ -508,7 +508,7 @@ def _render_organizer_wishlist(plan:dict,catalog:dict,stage:str)->None:
                    " destino(s) desejados pertencem à outra etapa.")
 
 
-def _render_organize(plan:dict,catalog:dict,stage:str)->None:
+def _render_organize(plan:dict,catalog:dict,stage:str,*,show_wishlist:bool=True)->None:
     """Organize by flexible period or precise day without leaving this editor."""
     if not st.session_state.get("flow_organize_open",False):
         return
@@ -516,7 +516,8 @@ def _render_organize(plan:dict,catalog:dict,stage:str)->None:
         st.markdown("#### Montar meu roteiro")
         st.caption("Inclua destinos agora e defina os dias só quando quiser. "
                    "Você pode salvar o roteiro sem nenhuma data.")
-        _render_organizer_wishlist(plan,catalog,stage)
+        if show_wishlist:
+            _render_organizer_wishlist(plan,catalog,stage)
         rows=selected_rows_for_stage(plan,catalog,stage)
         _reconcile_organize_state(st.session_state,rows,stage)
         if not rows:
