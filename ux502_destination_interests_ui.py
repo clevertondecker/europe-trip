@@ -69,7 +69,8 @@ def render_wishlist(discovery) -> bool:
         st.session_state["ux502_discovery_filters"] = snapshot
 
     if "ux64_public_task" in st.session_state:
-        view = st.session_state.get("ux502_view", "Descobrir lugares")
+        view = ("Minha lista" if st.session_state["ux64_public_task"]=="Minha lista"
+                else "Descobrir lugares")
     else:
         view = st.radio("Visualização", ("Descobrir lugares", "Minha lista"),
                         horizontal=True, key="ux502_view",
