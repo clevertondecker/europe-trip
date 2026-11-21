@@ -82,7 +82,7 @@ class PrimaryPrivateSaveTests(unittest.TestCase):
 
 
 class PublicAutosaveSafetyTests(unittest.TestCase):
-    @patch("planning_session.bootstrap", return_value={"revision": 0})
+    @patch("planning_session.bootstrap")
     @patch("planning_session.sync_legacy_view")
     @patch("planning_session.st")
     def test_local_change_never_queues_public_autosave(self, st, sync, bootstrap):
@@ -92,7 +92,10 @@ class PublicAutosaveSafetyTests(unittest.TestCase):
             "advisor_public_repo_ack": True,
             "advisor_autosave_pending": True,
         }
-        next_plan = {"revision": 1}
+        from trip_plan_model import new_plan, with_revision
+        previous = new_plan()
+        bootstrap.return_value = previous
+        next_plan = with_revision(previous, {"profile": "economy"})
         self.assertEqual(_commit(next_plan), next_plan)
         self.assertFalse(st.session_state["advisor_autosave_pending"])
         self.assertTrue(st.session_state["ux36_cloud_dirty"])
