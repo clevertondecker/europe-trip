@@ -1,0 +1,31 @@
+name: REC01 integration diagnostics
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  diagnostics:
+    if: github.head_ref == 'integration/rec01-rec01b-review' || github.ref_name == 'integration/rec01-rec01b-review'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r requirements.txt
+      - name: Run combined assessment
+        run: |
+          python rec01_feasibility.py > rec01-assessment.json
+          python -c "import json; d=json.load(open('rec01-assessment.json')); assert not d['skipped_scenarios_missing_ids']; print(json.dumps({k:v for k,v in d.items() if k not in ('overall','scenarios')}, indent=2)); print(json.dumps({n:{k:v for k,v in row.items() if k!='coverage_by_base'} for n,row in [('overall',d['overall']),*d['scenarios'].items()]},indent=2))"
+      - name: Measure real and synthetic workloads
+        run: |
+          python rec01_feasibility.py --benchmark > rec01-benchmark.json
+          cat rec01-benchmark.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rec01-integration-results
+          path: |
+            rec01-assessment.json
+            rec01-benchmark.json
