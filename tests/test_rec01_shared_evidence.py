@@ -7,7 +7,9 @@ from base_recommendation_evidence_model import build_recommendation_matrix, cand
 from base_research_expanded_model import load_research
 from data23_france_candidates_model import REQUIRED_IDS
 from rail_reference_projection_model import decorate_comparison
-from rec01_feasibility import run_assessment
+from rec01_feasibility import run_assessment, SCENARIOS, DATA23_SCENARIOS
+from rail_pair_projection_model import pair_projection_row
+from ux503_destination_base_comparison_model import build_wishlist_matrix
 from trip01_supplemental_discovery import build_exploration_discovery
 from trip_plan_model import new_plan
 from ux502_destination_interests_model import empty_interests, set_interest
@@ -48,6 +50,42 @@ class SharedEvidenceTests(unittest.TestCase):
         self.assertEqual(plan, plan_before)
         self.assertFalse(result["official_plan_modified"])
 
+    def test_single_base_and_observation_variation(self):
+        wishes = set_interest(empty_interests(), "colmar", "must_visit", self.discovery)
+        view = build_wishlist_matrix(wishes, ["strasbourg"], discovery=self.discovery)
+        self.assertEqual(len(view["rows"]), 1)
+        with self.assertRaises(ValueError):
+            compare_wishlist_bases(wishes, ["strasbourg"], discovery=self.discovery)
+        example = {"status": "historical_time", "minimum_oneway_min": 30,
+                   "source_url": "https://example.org", "observations": [
+                       {"minimum_oneway_min": 30, "evidence_date": "2026-11-10"},
+                       {"minimum_oneway_min": 45, "evidence_date": "2026-11-11"}]}
+        pair = pair_projection_row("strasbourg", "colmar", example)
+        self.assertTrue(pair["divergent_sources"])
+        self.assertEqual(pair["variation_status"], "multiple_dates")
+        self.assertFalse(pair["contradiction_confirmed"])
+
+    def test_candidate_pairs_with_explicit_catalog_fixtures(self):
+        # Geneva may not yet be selectable; fixture exercises direction without
+        # falsely claiming availability in the actual discovery catalog.
+        discovery = deepcopy(self.discovery)
+        known = {d["id"] for d in discovery["destinations"]}
+        for key in ("saumur", "geneva", "saint_malo"):
+            if key not in known:
+                discovery["destinations"].append({"id": key, "name": key, "country": "Fixture"})
+        wishes = empty_interests()
+        for key in ("paris", "saumur", "geneva", "saint_malo", "colmar"):
+            wishes = set_interest(wishes, key, "interested", discovery)
+        all_view = build_recommendation_matrix(wishes, [x["destination_id"] for x in wishes["items"]],
+                                                discovery=discovery)
+        ids = ["angers", "annecy", "rennes", "le_mans", "strasbourg"]
+        manual = decorate_comparison(compare_wishlist_bases(wishes, ids, discovery=discovery))
+        for key, cell in manual["cells"].items():
+            self.assertEqual(all_view["evidence"]["cells"][key], cell)
+        for key in (("angers", "saumur"), ("annecy", "geneva"), ("rennes", "saint_malo")):
+            self.assertEqual(manual["cells"][key]["category"], "reference_only")
+            self.assertFalse(manual["cells"][key]["weekend_return_known"])
+
     def test_scope_must_be_explicit_and_canonical(self):
         wishes = set_interest(empty_interests(), "paris", "interested", self.discovery)
         wishes = set_interest(wishes, "colmar", "discarded", self.discovery)
@@ -65,7 +103,9 @@ class SharedEvidenceTests(unittest.TestCase):
         report = run_assessment()
         self.assertEqual(report["candidate_count"], len(self.research["cities"]))
         self.assertEqual(report["selectable_destination_count"], len(self.discovery["destinations"]))
-        self.assertEqual(len(report["scenarios"]), 7)
+        self.assertEqual(set(report["scenarios"]) | set(report["skipped_scenarios_missing_ids"]),
+                         set(SCENARIOS) | set(DATA23_SCENARIOS))
+        self.assertTrue(set(SCENARIOS) <= set(report["scenarios"]))
         for name, row in [("overall", report["overall"]), *report["scenarios"].items()]:
             with self.subTest(scenario=name):
                 self.assertEqual(row["bases"], report["candidate_count"])
@@ -73,7 +113,11 @@ class SharedEvidenceTests(unittest.TestCase):
                 self.assertEqual(row["with_time"]+row["without_time"], row["bases"])
                 self.assertEqual(list(row["thresholds"].values()), sorted(row["thresholds"].values(), reverse=True))
                 self.assertLessEqual(len(row["complete_without_local"]), row["with_time"])
-        # Report actual loader results in CI logs; counts are not frozen constants.
+        # Keep CI log summary compact; CLI emits full per-base coverage.
+        for row in [report["overall"], *report["scenarios"].values()]:
+            self.assertEqual(row["strict_complete_group_count"]+row["partial_evidence_count"]+
+                             row["insufficient_evidence_count"], row["bases"])
+            row.pop("coverage_by_base")
         print("REC01_FEASIBILITY " + json.dumps(report, ensure_ascii=False, sort_keys=True))
 
 
