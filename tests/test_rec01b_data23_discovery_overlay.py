@@ -83,5 +83,30 @@ class Data23DiscoveryOverlayTests(unittest.TestCase):
         self.assertFalse(view["official_plan_modified"])
 
 
+class Data23WishlistAppTests(unittest.TestCase):
+    def test_wishlist_compare_return_preserves_priority_and_official_plan(self):
+        from pathlib import Path
+        from streamlit.testing.v1 import AppTest
+        from unittest.mock import patch
+        root = Path(__file__).resolve().parents[1]
+        catalog = build_exploration_discovery()
+        wishes = set_interest(empty_interests(), "saumur", "must_visit", catalog)
+        with patch("ux501_destination_discovery_ui.display_photo_url", side_effect=lambda url: url):
+            app = AppTest.from_file(str(root/"app.py"), default_timeout=120).run()
+            before = deepcopy(app.session_state["advisor_plan"])
+            app.button(key="ux_sidebar_nav_1").click().run()
+            app.segmented_control(key="ux_section").set_value("Passeios").run()
+            app.session_state["ux502_interests"] = wishes
+            app.radio(key="ux502_view").set_value("Minha lista").run()
+            self.assertFalse(app.exception, [e.message for e in app.exception])
+            app.button(key="ux503_open_from_wishlist").click().run()
+            app.multiselect(key="ux503_bases").set_value(["angers", "rennes"]).run()
+            self.assertFalse(app.exception, [e.message for e in app.exception])
+            self.assertTrue(any("Ainda não podem ser incluídos" in c.value for c in app.caption))
+            app.button(key="ux503_back_to_wishes").click().run()
+            self.assertEqual(app.session_state["ux502_interests"], wishes)
+            self.assertEqual(app.session_state["advisor_plan"], before)
+
+
 if __name__ == "__main__":
     unittest.main()
