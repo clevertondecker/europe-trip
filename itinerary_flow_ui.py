@@ -632,6 +632,9 @@ def render_itinerary_workbench(plan:dict,catalog:dict,
     metrics[2].metric("Lugares escolhidos",stats["destinations"])
     st.caption(label+" · "+hint+" · "+
                str(stats["organized"])+" lugar(es) organizado(s) por período ou data")
+    # UX 6.1: show saved wishes here without confirming any outing.
+    from ux61_destination_board_ui import render_destination_board
+    render_destination_board(plan, catalog)
     a,b,c=st.columns(3,gap="small")
     a.button("＋ Explorar e adicionar passeio",key="flow_add_open_button",
              on_click=_show_add,type="primary",width="stretch")
