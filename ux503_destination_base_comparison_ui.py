@@ -39,7 +39,7 @@ def _return_to_wishlist():
 
 def render_wishlist_base_comparison(*, plan, discovery=None, research=None):
     discovery = discovery if discovery is not None else build_exploration_discovery()
-    research = research if research is not None else load_research()
+    research = research if research is not None else load_research(include_candidates=True)
     st.markdown("### Como seria visitar nossos destinos a partir de cada cidade?")
     st.write("Compare os tempos de trem que já pesquisamos para diferentes "
              "cidades-base. Quando faltarem informações, mostramos o que "
