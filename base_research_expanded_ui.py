@@ -167,6 +167,12 @@ def _city_profile(city_id):
                    "e informações faltantes permanecem identificados.")
 
 
+@st.cache_data(show_spinner=False,ttl=86400,max_entries=64)
+def _candidate_photo_markup(photo:dict,name:str)->str:
+    """Cache Wikimedia image URL resolution to avoid network calls on every rerun."""
+    return photo_markup(photo,name)
+
+
 def _candidate_media_and_logistics(city_id:str)->None:
     """Pictures and outbound rail evidence for newly researched home bases."""
     attractions=base_attractions(city_id)
@@ -179,7 +185,7 @@ def _candidate_media_and_logistics(city_id:str)->None:
         with st.container(border=True):
             left,right=st.columns([1,2])
             with left:
-                st.markdown(photo_markup(attraction["photo"],attraction["name"]),
+                st.markdown(_candidate_photo_markup(attraction["photo"],attraction["name"]),
                             unsafe_allow_html=True)
                 credit=photo_credit(attraction["photo"])
                 if credit:
