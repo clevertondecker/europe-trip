@@ -227,7 +227,8 @@ def _explore_city(study,rail,five)->None:
     _city_profile(selected)
     _candidate_media_and_logistics(selected)
     _city_housing(city)
-    _city_routes(selected,five,rail)
+    if not base_routes(selected):
+        _city_routes(selected,five,rail)
     with st.expander("Pesquisa técnica · critérios, pesos e pontuação indisponível"):
         preset=st.segmented_control("Ponderação",["Geral","Econômico","Explorador"],
                                     default="Geral",key="expanded_bases_rank_preset")
