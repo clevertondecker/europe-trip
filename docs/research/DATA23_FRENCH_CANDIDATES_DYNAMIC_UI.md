@@ -4,9 +4,9 @@ Revisão de 21/11/2026. Objetivo: estudar Angers, Le Mans, Annecy e Rennes, com 
 
 ## Arquitetura sem contagem fixa de cidades
 
-A antiga base de 30 cidades em `data/base_city_research_expanded_2026_11.json` e as 30 fichas em `data/city_profiles_enriched.json` são **snapshots históricos** e permanecem byte-a-byte intactas. A função `load_research()` agrega o lote DATA23, totalizando 34 cidades. `load_profiles()` agrega 4 fichas mínimas e validadas. Métricas, filtros e rótulos da interface usam o tamanho real da coleção, não valores literais de 30.
+A antiga base de 30 cidades em `data/base_city_research_expanded_2026_11.json` e as 30 fichas em `data/city_profiles_enriched.json` são **snapshots históricos** e permanecem byte-a-byte intactas. As funções `load_research()` e `load_profiles()` **sem argumentos** preservam os 30 registros históricos, garantindo a reprodutibilidade das auditorias DATA10–DATA22 e dos relatórios antigos. A interface opta explicitamente por `load_research(include_candidates=True)` e por `load_profiles(canonical=research)`, resultando em 34 candidatas atuais e 34 fichas. As telas modernas de exploração e comparação solicitam o catálogo dinâmico; o relatório histórico não deve misturar os dois denominadores.
 
-O baseline `data/research_snapshot_baseline.json` permanece em 30, pois audita os *arquivos de origem congelados*. Nenhum teste deve mudar esse baseline apenas para ocultar o aumento da visualização.
+O baseline `data/research_snapshot_baseline.json` permanece em 30, pois audita os *arquivos de origem congelados*. Nenhum teste deve mudar esse baseline apenas para ocultar o aumento da visualização. O `base_options` compartilhado oferece `include_candidates=True` apenas para telas exploratórias; as auditorias permanecem limitadas às 30 bases antigas.
 
 ## Atrações verificadas com fotos e atribuição
 
@@ -58,3 +58,14 @@ Esses mínimos refletem exemplos ou páginas disponíveis em 2026, não disponib
 ## Próximos enriquecimentos
 
 O lote não garante que todo passeio nas redondezas esteja catalogado. Próximas investigações: Fontevraud, Cité Plantagenêt completa, Talloires e Mont-Saint-Michel com fotos individualmente licenciadas, retornos e acessos pela última milha. Não anunciar esses passeios como cadastrados até ter os três elementos.
+
+## Revisão de impactos cruzados (UX78)
+
+- **Explorar cidades-base:** carrega 34 fichas quando solicitada a pesquisa atual, sem alterar o plano; painéis de atrações com 3 fotografias por nova base e referências ferroviárias; contador dinâmico.
+- **Explorador de cenários:** `base_options(..., include_candidates=True)`, `_nearby` e `expanded_rail_routes` usam IDs válidos e fontes DATA23. Bases não suportadas pelo `TripPlan` continuam sem permissão de aprovação automática.
+- **Comparar cidades-base:** UX503 carrega os quatro candidatos e usa DATA23 apenas como camada subsidiária de referências direcionais, sem ranking de logística quando faltam retornos e última milha.
+- **Auditorias de dados, cobertura macro, orçamento e indicadores históricos:** usam `load_research()` e `base_options()` sem inclusão de candidatos, preservando o universo de 30 bases e os 12 finalistas enquanto auditam o snapshot histórico.
+- **Meu roteiro, escolhas, GCS e favoritos:** esta mudança não escreve nem migra o documento do usuário. Os quatro candidatos aparecem para estudo, não como base oficial.
+- **Foto fallback:** créditos e licença são preservados; serviço Commons tem cache na UI e imagens externas podem exibir fallback neutro se indisponíveis.
+
+Testes de regressão checam os dois universos separadamente (30 histórico / 34 pesquisados) e o fluxo Streamlit de abertura de Angers sem mudança do plano oficial.
