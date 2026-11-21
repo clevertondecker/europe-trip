@@ -104,7 +104,7 @@ def evaluate_matrix(matrix, *, weights=None):
                                                      "destination_ids": sorted(known[b])},
                          "evidence": {d: deepcopy(cells[(b,d)]) for d in sorted(by_id)},
                          "local_only": bool(local[b]) and not known[b],
-                         "reasons": [], "highlight": False}
+                         "reasons": [], "highlight": False, "highlight_kind": None}
     full_groups = defaultdict(list)
     minimum_common = 1 if len(by_id) == 1 else 2
     for b in bases:
@@ -122,6 +122,7 @@ def evaluate_matrix(matrix, *, weights=None):
         full_pairs.update(combinations(members,2))
         for b in g["lowest_on_this_set"]:
             candidates[b]["highlight"] = True
+            candidates[b]["highlight_kind"] = "complete_reference_group"
             candidates[b]["reasons"].append("menor_minimo_ponderado_no_mesmo_escopo_completo")
     conditional = []
     conditional_members = set()
@@ -150,6 +151,9 @@ def evaluate_matrix(matrix, *, weights=None):
             # No conditional time victory is promoted to an overall highlight.
             if b not in complete_members and not dominated:
                 c["highlight"] = True
+                c["highlight_kind"] = ("individual_complete" if not missing[b] and known[b]
+                                       else "local_investigation" if c["local_only"]
+                                       else "conditional_investigation")
                 c["reasons"].append("fronteira_documental_do_escopo")
             if not (must & missing[b]):
                 c["reasons"].append("imperdiveis_identificados")
@@ -173,7 +177,8 @@ def evaluate_matrix(matrix, *, weights=None):
             "candidates": list(candidates.values()), "complete_groups": groups,
             "conditional_comparisons": conditional,
             "highlight_ids": [b for b in bases if candidates[b]["highlight"]],
-            "has_conditional_comparison": bool(conditional), "global_ranking": False,
+            "has_conditional_comparison": bool(conditional),
+            "has_local_only": any(c["local_only"] for c in candidates.values()), "global_ranking": False,
             "official_plan_modified": False, "limitation": LIMITATION}
 
 
