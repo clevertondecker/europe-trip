@@ -62,7 +62,9 @@ class DynamicBaseCatalogTests(unittest.TestCase):
         for a in self.data["attractions"]:
             with self.subTest(a=a["id"]):
                 photo=a["photo"]
-                self.assertIn("Special:FilePath",photo_markup(photo,a["name"]))
+                # Deterministic rendering test: don't depend on live Commons API.
+                with patch("ux47_photo_ui.display_photo_url",side_effect=lambda url:url):
+                    self.assertIn("Special:FilePath",photo_markup(photo,a["name"]))
                 credit=photo_credit(photo)
                 self.assertIn(photo["author"],credit)
                 self.assertIn(photo["license"],credit)
