@@ -17,7 +17,16 @@ O baseline `data/research_snapshot_baseline.json` permanece em 30, pois audita o
 | Annecy | Palais de l'Île; foto Châtaigne des Cévennes CC BY-SA 4.0 ([Commons](https://commons.wikimedia.org/wiki/File:Palais_de_l%27Isle_%C3%A0_Annecy.jpg)) | Gorges du Fier; foto Tiia Monto CC BY-SA 3.0 ([Commons](https://commons.wikimedia.org/wiki/File:Gorges_du_Fier.jpg)) |
 | Rennes | Parc du Thabor; foto Oldspider CC BY-SA 3.0 ([Commons](https://commons.wikimedia.org/wiki/File:Parc_du_Thabor.jpg)) | Remparts de Saint-Malo; foto Avi1111 CC BY-SA 4.0 ([Commons](https://commons.wikimedia.org/wiki/File:Ramparts_of_Saint-Malo.jpg)) |
 
-Todas as oito atrações têm foto, autor, licença, URL de origem e página turística identificadas. Fotos podem deixar de carregar por indisponibilidade externa; um fallback visual neutro permanece obrigatório. Não substituir por imagens de outro local.
+Todas as doze atrações têm foto, autor, licença, URL de origem e página turística identificadas. Fotos podem deixar de carregar por indisponibilidade externa; um fallback visual neutro permanece obrigatório. Não substituir por imagens de outro local.
+
+## Quatro fotografias adicionais (3 atrações por base)
+
+| Base | Terceira atração | Fonte turística | Foto Commons (autor/licença) |
+|---|---|---|---|
+| Angers | Terra Botanica | https://www.destination-angers.com/tourisme/organiser-son-sejour/activites-a-faire-a-angers/sites-visites-angers/ | [Chabe01, CC BY-SA 4.0](https://commons.wikimedia.org/wiki/File:Terra_Botanica_2017.08.23_Angers_46.jpg) |
+| Le Mans | Abbaye Royale de l'Épau | https://lemans-tourisme.com/fr/abbaye-de-lepau.html | [Benchaum, CC BY-SA 3.0](https://commons.wikimedia.org/wiki/File:Abbatiale_de_l%27%C3%A9pau.JPG) |
+| Annecy | Château de Menthon-Saint-Bernard | https://www.ville-annecy.fr/que-faire-autour-d-annecy/ | [Hamster hypertonique, CC BY-SA 4.0](https://commons.wikimedia.org/wiki/File:Ch%C3%A2teau-Menthon-Saint-Bernard.jpg) |
+| Rennes | Rua Jerzual, Dinan | https://www.dinan-capfrehel.com/nos-incontournables/dinan-cite-medievale-bretagne/ | [Zairon, CC BY-SA 4.0](https://commons.wikimedia.org/wiki/File:Dinan_Rue_du_Jerzual_1.jpg) |
 
 ## Logística ferroviária — mínimas de ida e fontes
 
@@ -48,4 +57,4 @@ Esses mínimos refletem exemplos ou páginas disponíveis em 2026, não disponib
 
 ## Próximos enriquecimentos
 
-O lote não garante que todo passeio nas redondezas esteja catalogado. Próximas investigações: Terra Botanica, Fontevraud, Cité Plantagenêt completa, Abbaye de l'Épau, Talloires, Menthon-Saint-Bernard, Mont-Saint-Michel e Dinan com fotos individualmente licenciadas, retornos e acessos pela última milha. Não anunciar esses passeios como cadastrados até ter os três elementos.
+O lote não garante que todo passeio nas redondezas esteja catalogado. Próximas investigações: Fontevraud, Cité Plantagenêt completa, Talloires e Mont-Saint-Michel com fotos individualmente licenciadas, retornos e acessos pela última milha. Não anunciar esses passeios como cadastrados até ter os três elementos.
