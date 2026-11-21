@@ -630,7 +630,7 @@ def _save_panel(plan:dict,catalog:dict)->None:
                         st.dataframe(comparison["different_fields"], hide_index=True,
                                      use_container_width=True)
                         if comparison["difference_count"] > len(comparison["different_fields"]):
-                            st.warning("Há diferenças adicionais não exibidas; revise os JSONs completos.")
+                            st.warning("Há diferenças não exibidas. Baixe e revise os JSONs completos; a publicação fica bloqueada nesta tela.")
                     else:
                         st.info("Os dados são iguais. É necessário reconciliar apenas a versão.")
                     st.download_button("Baixar versão do GitHub",
@@ -644,7 +644,9 @@ def _save_panel(plan:dict,catalog:dict)->None:
                         "Conferi as diferenças e autorizo publicar minha versão local",
                         key="flow_reconcile_ack", value=False)
                     if st.button("Confirmar reconciliação e salvar",
-                                 key="flow_reconcile_confirm", disabled=not (approved and agree)):
+                                 key="flow_reconcile_confirm",
+                                 disabled=not (approved and agree and
+                                     comparison["difference_count"] <= len(comparison["different_fields"]))):
                         try:
                             if plan_digest(st.session_state["advisor_plan"]) != preview["local_digest"]:
                                 raise ValueError("O plano mudou desde a prévia. Compare novamente.")
