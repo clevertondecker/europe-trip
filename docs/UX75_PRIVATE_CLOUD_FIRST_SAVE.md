@@ -15,7 +15,7 @@ O planejamento de viagem não deve exigir que o usuário administre SHA, commits
 2. Avançado: JSON para exportação/importação manual e GitHub público para publicação opcional separada, mantendo autorização por operação.
 3. Estado de planejamento passa a priorizar a confirmação da nuvem privada, não o snapshot do GitHub público.
 4. Falhas ou conflitos preservam a versão local e não geram declaração falsa de sucesso.
-5. Nenhuma gravação pública é ativada pela opção de autosave privado.
+5. Nenhuma gravação pública é ativada pela opção de autosave privado. O autosave GitHub legado foi desativado, inclusive para flags antigas ainda presentes na sessão; publicação pública permanece somente manual.
 
 ## Caminho de migração seguro
 - Quando o owner possui um plano legado vindo do GitHub e GCS configurado, o primeiro **Salvar minha viagem** cria o arquivo privado completo no GCS; não apaga o arquivo público nem seu histórico.
