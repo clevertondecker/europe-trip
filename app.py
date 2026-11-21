@@ -1661,10 +1661,14 @@ elif page == "Orçamento":
         catalog_extra=0.0
         attraction_ref=None
         current_plan=active_plan()
-        if current_plan["packages"]:
+        from itinerary_flow_model import selected_rows, FRANCE_STAGE
+        official_cities=[row["id"] for row in selected_rows(current_plan,load_attractions())
+                         if row["stage"]==FRANCE_STAGE]
+        if official_cities:
             known_cost=package_cost(
                 load_attractions(),load_base_routes(),current_plan["base_city"],
-                [id for items in current_plan["packages"].values() for id in items])
+                [id for items in current_plan["packages"].values() for id in items],
+                planned_destination_ids=official_cities)
             attraction_ref={
                 "eur":known_cost["known_by_currency"]["EUR"],
                 "chf":known_cost["known_by_currency"]["CHF"],
@@ -1672,7 +1676,7 @@ elif page == "Orçamento":
                 "fx_chf":st.session_state.get("explore_chf_fx",7.1),
                 "base":current_plan["base_city"],
                 "incomplete":not known_cost["complete"],
-                "destinations":list(current_plan["packages"])}
+                "destinations":official_cities}
             st.caption("Passeios importados do roteiro oficial. Os custos destas "
                        "atrações ainda não foram recalculados para a base hipotética "
                        "selecionada; compare as rotas em Roteiro → Explorar bases.")
