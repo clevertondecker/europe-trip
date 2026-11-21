@@ -614,39 +614,7 @@ def _save_panel(plan:dict,catalog:dict)->None:
         st.markdown("#### Salvar minha viagem")
         st.caption("Suas escolhas ficam na sua nuvem privada quando ela está configurada.")
         render_primary_private_save(plan, catalog)
-        st.caption("Publicação no GitHub e arquivos JSON são opções de recuperação avançadas.")
-        with st.expander("Opções avançadas · backup JSON (opcional)", expanded=False):
-            st.caption("Use somente para recuperação manual. O salvamento principal é online.")
-            st.download_button("Baixar backup JSON",data=json.dumps(
-                plan,ensure_ascii=False,indent=2),
-                file_name="nossa-europa-planejamento.json",
-                mime="application/json",key="flow_backup_download")
-            uploaded=st.file_uploader("Recuperar backup local (JSON)",
-                                      type=["json"],key="flow_import_json")
-            if uploaded is not None:
-                try:
-                    candidate=json.loads(uploaded.getvalue().decode("utf-8"))
-                    validate_flow_backup(candidate,catalog)
-                except (ValueError,KeyError,TypeError,UnicodeDecodeError) as exc:
-                    st.error("Backup incompatível ou inválido. Nenhum dado foi substituído.")
-                else:
-                    st.warning("Revisão do backup: "+
-                               str(len(selected_rows(candidate,catalog)))+
-                               " lugares. Restaurar substituirá o plano DESTA SESSÃO, "
-                               "sem modificar automaticamente arquivos do GitHub.")
-                    if st.button("Confirmar recuperação nesta sessão",
-                                 key="flow_import_confirm"):
-                        st.session_state["advisor_plan"]=candidate
-                        st.session_state["advisor_saved_snapshot"]=None
-                        st.session_state["advisor_github_sha"]=None
-                        st.session_state["advisor_autosave_pending"]=False
-                        st.session_state["advisor_autosave_optin"]=False
-                        st.session_state["advisor_local_changed"]=True
-                        sync_legacy_view(candidate,st.session_state)
-                        st.session_state["flow_notice"]=(
-                            "Backup recuperado nesta sessão; salve ou exporte para não perder.")
-                        st.session_state["flow_save_open"]=False
-                        st.rerun()
+        st.caption("Publicação no GitHub público é opcional e separada da nuvem privada.")
         with st.expander("Avançado · publicar no GitHub público", expanded=False):
             st.caption("Uso opcional. Esta publicação é pública e separada da nuvem privada.")
             if _owner_signed_in():
@@ -759,9 +727,8 @@ def _save_panel(plan:dict,catalog:dict)->None:
                                 st.session_state["flow_save_open"] = False
                                 st.rerun()
             else:
-                st.info("Salvamento remoto disponível somente para o proprietário "
-                        "autenticado. O backup JSON funciona sem login. "
-                        "Recarregue o backup pelo painel avançado de salvamento.")
+                st.info("A publicação no GitHub público requer a conta proprietária autorizada. "
+                        "O salvamento normal deve ser feito na nuvem privada.")
         if st.button("Fechar",key="flow_save_close"):
             st.session_state["flow_save_open"]=False
             st.rerun()
