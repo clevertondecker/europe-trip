@@ -59,7 +59,7 @@ def _map_base(data:dict,base_id:str,dest_ids:list[str])->None:
 def _nearby(data:dict,base_id:str)->None:
     base=next((b for b in data["bases"] if b["id"]==base_id),None)
     if base is None:
-        research=find_city(load_research(),base_id)
+        research=find_city(load_research(include_candidates=True),base_id)
         housing=observed_housing(research)
         st.markdown("### "+place_label(research["name"],research["country"]))
         trains=expanded_rail_routes(base_id)
@@ -399,7 +399,7 @@ def render_base_explorer(plan:dict,trip_data:dict,finance_live:bool,
         current=normalize_activity(st.session_state.get("ux42_city_activity"))
         st.session_state["ux42_city_activity"]=current
         st.caption("Base oficial: "+names.get(official,official)+
-                   " · 30 cidades cadastradas · explorar não muda seu plano.")
+                   " · "+str(len(study_options))+" cidades cadastradas · explorar não muda seu plano.")
         st.segmented_control("O que você deseja fazer?",list(ACTIVITIES),
                              key="ux42_city_activity")
         activity=st.session_state["ux42_city_activity"]
