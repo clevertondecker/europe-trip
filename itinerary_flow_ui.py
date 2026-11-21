@@ -668,6 +668,10 @@ def render_itinerary_workbench(plan:dict,catalog:dict,
     st.caption(str(len(selected_rows_for_stage(active_plan(),catalog,stage)))+
                " passeio(s) selecionado(s) nesta etapa")
     _render_add(active_plan(),catalog)
+    if (st.session_state.get("ux_section") in ("Organizar viagem","Organizar")
+            and st.session_state.get("ux_area") in ("Meu roteiro","Planejar")):
+        from ux63_timeline_ui import render_timeline
+        render_timeline(active_plan(),catalog,stage)
     _render_organize(active_plan(),catalog,stage)
     _save_panel(active_plan(),catalog)
     _selected_stage(selected_rows(active_plan(),catalog),stage,catalog)
