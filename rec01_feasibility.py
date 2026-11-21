@@ -1,0 +1,99 @@
+"""Reproduce REC01 coverage using actual validated repository loaders.
+
+Run from repository root: python rec01_feasibility.py
+No claims about future timetable, costs, reachability or editorial verification.
+"""
+from __future__ import annotations
+
+import json
+from fractions import Fraction
+from collections import Counter
+from base_recommendation_evidence_model import build_recommendation_matrix, candidate_ids
+from base_research_expanded_model import load_research
+from base_explorer_model import load_exploration
+from rail_evidence_unified_model import load_rail_evidence
+from data23_france_candidates_model import load_data23
+from trip01_supplemental_discovery import build_exploration_discovery
+from ux502_destination_interests_model import empty_interests, set_interest
+
+I, Q, T = "must_visit", "interested", "maybe"
+SCENARIOS = {
+    "france": [("paris", I), ("strasbourg", I), ("colmar", Q), ("nancy", Q), ("metz", T)],
+    "multi_country": [("paris", I), ("cologne", Q), ("brussels", Q), ("basel", I), ("lucerne", T)],
+    "border": [("luxembourg_city", I), ("trier", Q), ("saarbrucken", T), ("metz", I)],
+    "must_visit": [(d, I) for d in ("paris", "strasbourg", "brussels", "basel", "interlaken", "amsterdam")],
+    "small": [("paris", I), ("colmar", Q), ("basel", T)],
+    "large": [("paris", I), ("strasbourg", I), ("colmar", Q), ("brussels", Q),
+              ("bruges_be", T), ("amsterdam", I), ("cologne", Q), ("aachen", T),
+              ("luxembourg_city", Q), ("basel", I), ("lucerne", T), ("interlaken", Q)],
+    "supplemental": [("obernai", I), ("lucerne", Q)],
+}
+WEIGHTS = ((5, 3, 1), (10, 3, 1), (3, 2, 1))
+THRESHOLDS = (60, 70, 80, 90, 100)
+
+
+def coverage_report(matrix: dict) -> dict:
+    comparison, enriched = matrix["comparison"], matrix["evidence"]
+    cells = enriched["cells"]
+    destinations = comparison["destinations"]
+    bases = comparison["base_ids"]
+    counts = Counter(c["category"] for c in cells.values())
+    candidates = []
+    for base in bases:
+        selected = [(d, cells[(base, d["id"])]) for d in destinations]
+        known = [(d, c) for d, c in selected if c["category"] in ("historical", "reference_only")]
+        nonlocal_rows = [(d, c) for d, c in selected if c["category"] != "local"]
+        must_covered = all(c["category"] != "no_time" for d, c in selected if d["priority"] == I)
+        fractions = []
+        for weights in WEIGHTS:
+            weight = dict(zip((I, Q, T), weights))
+            denominator = sum(weight[d["priority"]] for d, _ in nonlocal_rows)
+            numerator = sum(weight[d["priority"]] for d, _ in known)
+            fractions.append(Fraction(numerator, denominator) if denominator else None)
+        candidates.append({
+            "base_id": base, "known": len(known), "local": len(selected)-len(nonlocal_rows),
+            "must_covered": must_covered, "fractions": fractions,
+            "complete_without_local": len(known) == len(selected),
+        })
+    def eligible(index, threshold):
+        return sum(c["must_covered"] and c["fractions"][index] is not None
+                   and c["fractions"][index] >= Fraction(threshold, 100)
+                   for c in candidates)
+    with_time = sum(c["known"] > 0 for c in candidates)
+    return {
+        "bases": len(bases), "destinations": len(destinations),
+        "with_time": with_time, "without_time": len(bases)-with_time,
+        "categories": {k: counts[k] for k in ("historical", "reference_only", "local", "no_time")},
+        "thresholds": {str(t): eligible(0, t) for t in THRESHOLDS},
+        "sensitivity_at_80": {"-".join(map(str, w)): eligible(i, 80) for i, w in enumerate(WEIGHTS)},
+        "complete_without_local": [c["base_id"] for c in candidates if c["complete_without_local"]],
+    }
+
+
+def run_assessment() -> dict:
+    research = load_research(include_candidates=True)
+    discovery = build_exploration_discovery()
+    rail, exploration = load_rail_evidence(), load_exploration()
+    valid = {d["id"] for d in discovery["destinations"]}
+    def evaluate(items):
+        interests = empty_interests()
+        for destination_id, priority in items:
+            interests = set_interest(interests, destination_id, priority, discovery)
+        return coverage_report(build_recommendation_matrix(
+            interests, [d for d, _ in items], discovery=discovery, research=research,
+            rail=rail, exploration=exploration))
+    missing = sorted({r["destination_id"] for r in load_data23()["routes"]} - valid)
+    return {
+        "candidate_count": len(candidate_ids(research)),
+        "selectable_destination_count": len(valid),
+        "data23_missing_destination_ids": missing,
+        "housing_cities_with_historical_offers": sum(bool(c["housing_offers"]) for c in research["cities"]),
+        "housing_cities_with_eligible_2027_quotes": sum(c["eligible_2027_quotes"] > 0 for c in research["cities"]),
+        "overall": evaluate([(d, Q) for d in sorted(valid)]),
+        "scenarios": {name: evaluate(items) for name, items in SCENARIOS.items()},
+        "limitations": "Documentary outbound evidence only; not a ranking or verified return.",
+    }
+
+
+if __name__ == "__main__":
+    print(json.dumps(run_assessment(), ensure_ascii=False, indent=2))
