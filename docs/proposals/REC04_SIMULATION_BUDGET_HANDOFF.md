@@ -18,3 +18,7 @@ Contrato puro derivado dos contratos existentes com researchable, comparable (ca
 
 ## Coordenação com a nova jornada Planejar (#195)
 Depende de #195 e #190 integrados e validados. Simulações e revisão de orçamento são ferramentas complementares, nunca condição para montar, revisar ou salvar rascunho. CTA financeiro abre o cenário somente após ação explícita, preservando TripPlan, cidade oficial, etapa e contexto de retorno. Não criar novo editor de roteiro, nem alterar request_planning ou a persistência privada para calcular cenários. Candidata sem suporte de orçamento detalhado recebe explicação, não fallback silencioso. Testar ida/volta da revisão do roteiro para orçamento, comparação antes/depois, e salvamento sem custos definidos. Atualizar especificação e reconciliar base no momento da implementação; nenhuma implementação antecipada neste commit.
+
+
+## Gate após revisão de elegibilidade de Planejar
+A entrada financeira permanece secundária em todos os estados, inclusive wishlist exclusivamente exploratória. Não equiparar destino elegível a logística/finanças verificadas. Retornar à mesma revisão ou contexto de recomendação, sem promover candidatas, sem bloquear rascunho a salvar e sem alterar o contrato de inclusão. Os testes devem cobrir roteiro existente sem wishlist, revisão com desejos exploratórios e estado de conflito de salvamento. Implementação somente após #195 e #190 integrados.
