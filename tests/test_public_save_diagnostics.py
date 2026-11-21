@@ -68,6 +68,16 @@ class PublicSaveDiagnosticsTests(unittest.TestCase):
         exc = HTTPError("https://api.github.com/", 412, "Precondition Failed", {}, BytesIO())
         self.assertIn("conflito", explain_storage_error(exc).lower())
 
+    def test_http_422_is_not_assumed_to_be_a_version_conflict(self):
+        self.plan["revision"] = 2
+        saved = dict(self.plan, revision=1)
+        exc = HTTPError("https://api.github.com/", 422, "Unprocessable", {}, BytesIO())
+        with patch.object(self.repo, "load", return_value=(saved, "sha")):
+            with patch.object(self.repo, "_request", side_effect=exc):
+                with self.assertRaises(PlanValidationError):
+                    self.repo.save(self.plan, "sha")
+        self.assertNotIn("conflito", explain_storage_error(exc).lower())
+
     def test_non_conflict_network_errors_are_not_mislabeled(self):
         exc = HTTPError("https://api.github.com/", 403, "Forbidden", {}, BytesIO())
         self.assertIn("acesso", explain_storage_error(exc).lower())
