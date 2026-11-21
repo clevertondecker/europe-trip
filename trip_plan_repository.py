@@ -149,6 +149,9 @@ class GitHubPlanRepository:
         try:
             response=self._request(path,"PUT",payload)
         except HTTPError as exc:
-            if exc.code in (409,422):raise PlanConflictError("O GitHub recusou a gravação por conflito de versão. Exporte um backup e recarregue o plano.") from exc
+            if exc.code in (409,412):
+                raise PlanConflictError("O GitHub recusou a gravação por conflito de versão. Exporte um backup e recarregue o plano.") from exc
+            if exc.code == 422:
+                raise PlanValidationError("O GitHub rejeitou a atualização (HTTP 422). Verifique o arquivo e suas permissões antes de tentar novamente.") from exc
             raise
         return response["content"]["sha"]
