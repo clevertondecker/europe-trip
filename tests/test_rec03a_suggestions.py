@@ -198,8 +198,9 @@ class RecommendationAppTests(unittest.TestCase):
         self.run_ok(a)
         a.session_state["test_identity"]="other"
         self.run_ok(a)
-        self.assertNotIn(SCOPE,a.session_state.filtered_state)
-        self.assertNotIn(DRAFT,a.session_state.filtered_state)
+        for key in (SCOPE,DRAFT):
+            with self.assertRaises(KeyError):
+                _ = a.session_state[key]
         self.assertEqual(a.session_state[ACTIVITY],MANUAL)
         a.radio(key="rec03a_activity_widget").set_value(SUGGESTED)
         with patch("rec03a_suggestions_ui.recommend_bases") as engine:
