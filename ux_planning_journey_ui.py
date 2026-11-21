@@ -308,6 +308,7 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
                                    selection_mode="single")
         if stage not in STAGES:
             stage=ITALY_STAGE
+        st.markdown("##### "+("Etapa 1 · Lua de mel na Itália" if stage==ITALY_STAGE else "Etapa 2 · Temporada europeia"))
         if state.get("flow_add_open"):
             st.button("Organizar períodos e datas",key="flow_go_calendar",on_click=_show_organize)
             _render_add(active_plan(),catalog)
