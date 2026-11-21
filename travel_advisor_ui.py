@@ -393,12 +393,16 @@ def render_advisor(trip_data:dict,sync_sources:dict,workspace_area:str='Meus pas
                                     st.warning("Agrupamentos não salvos na nuvem: configure "
                                                "o espaço privado ou baixe a cópia de segurança.")
                             except Exception as exc:
-                                if isinstance(exc,HTTPError) and exc.code in (401,403):
-                                    st.error(explain_storage_error(exc))
-                                elif isinstance(exc,ValueError):
-                                    st.error(explain_storage_error(exc))
-                                else:
-                                    st.error(explain_storage_error(exc))
+                                st.error(explain_storage_error(exc))
+                                from trip_plan_repository import PlanConflictError, PlanValidationError
+                                if isinstance(exc, PlanConflictError):
+                                    st.info("O planejamento desta sessão foi preservado. "
+                                            "Baixe o backup JSON acima antes de abrir a versão "
+                                            "remota em outra sessão e comparar as diferenças.")
+                                elif isinstance(exc, PlanValidationError):
+                                    st.info("Confira os campos e passeios do roteiro. "
+                                            "O erro acima informa o motivo da validação; "
+                                            "nenhuma gravação foi confirmada.")
                     with col2:
                         if st.button("Reabrir planejamento salvo",key="advisor_load",use_container_width=True):
                             try:
