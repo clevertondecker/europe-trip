@@ -7,7 +7,7 @@ from base_research_expanded_model import DATA as OLD_BASES,load_research,researc
 from city_profiles_model import load_profiles,profile_by_id
 from data23_france_candidates_model import (load_data23,validate_data23,
     base_attractions,base_routes,REQUIRED_IDS)
-from base_scenario_model import base_options
+from base_scenario_model import base_options,expanded_rail_routes
 from base_coverage_model import coverage_matrix
 from rail_reference_projection_model import decorate_comparison
 from trip_plan_model import new_plan
@@ -56,6 +56,15 @@ class DynamicBaseCatalogTests(unittest.TestCase):
         by_id={x["id"]:x for x in rows}
         self.assertTrue(REQUIRED_IDS <= set(by_id))
         self.assertTrue(all(by_id[x]["route_return_verified"]==0 for x in REQUIRED_IDS))
+
+    def test_scenario_explorer_reuses_new_base_rail_with_unknown_fares(self):
+        for base_id in REQUIRED_IDS:
+            with self.subTest(base_id=base_id):
+                rows=expanded_rail_routes(base_id)
+                self.assertGreaterEqual(len(rows),2)
+                self.assertTrue(all(r["fare_eur_person_oneway"] is None
+                                    and r["return_verified_2027"] is False
+                                    for r in rows))
 
     def test_photos_exist_for_every_attraction_and_are_credited(self):
         self.assertEqual(len(self.data["attractions"]),12)
