@@ -98,6 +98,8 @@ class RecommendationPolicyTests(unittest.TestCase):
                                         "c":{"z":5}},{"z":"must_visit"}))
         self.assertEqual(result["state"],"partial_evidence")
         self.assertEqual(result["highlight_ids"],["a","c"])
+        self.assertEqual(result["highlight_sections"]["conditional_all_must_identified"],["c"])
+        self.assertEqual(result["highlight_sections"]["conditional_must_pending"],["a"])
         self.assertIn("menor_minimo_ponderado_no_mesmo_subconjunto",result["candidates"][0]["reasons"])
         self.assertIn("imperdiveis_com_evidencia_pendente",result["candidates"][0]["reasons"])
         self.assertEqual(result["conditional_comparisons"][0]["must_visit_omitted"],["z"])
