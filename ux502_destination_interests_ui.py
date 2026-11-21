@@ -68,9 +68,19 @@ def render_wishlist(discovery) -> bool:
             st.session_state["ux502_transient_shadow"] = list(st.session_state["ux501_interest_session"])
         st.session_state["ux502_discovery_filters"] = snapshot
 
+    def legacy_view_changed():
+        remember_discovery_filters()
+        if "ux64_public_task" in st.session_state:
+            st.session_state["ux64_public_task"]=(
+                "Minha lista" if st.session_state["ux502_view"]=="Minha lista"
+                else "Descobrir")
     if "ux64_public_task" in st.session_state:
-        view = ("Minha lista" if st.session_state["ux64_public_task"]=="Minha lista"
-                else "Descobrir lugares")
+        # Keep the original widget for existing bookmarks and navigation tests.
+        # Public task tabs remain the main way to switch views.
+        with st.expander("Visualização anterior · avançado", expanded=False):
+            view=st.radio("Visualização", ("Descobrir lugares", "Minha lista"),
+                          horizontal=True,key="ux502_view",
+                          on_change=legacy_view_changed)
     else:
         view = st.radio("Visualização", ("Descobrir lugares", "Minha lista"),
                         horizontal=True, key="ux502_view",
