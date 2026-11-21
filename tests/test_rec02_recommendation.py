@@ -85,6 +85,24 @@ class RecommendationPolicyTests(unittest.TestCase):
         self.assertTrue(all("imperdiveis_com_evidencia_pendente" in c["reasons"] for c in partial["candidates"]))
         self.assertFalse(partial["complete_groups"])
 
+    def test_single_complete_alternative_is_not_a_winner(self):
+        result=evaluate_matrix(fixture({"a":{"x":10,"y":20},"b":{"x":2}}))
+        self.assertEqual(result["state"],"partial_evidence")
+        self.assertEqual(result["highlight_ids"],["a"])
+        self.assertEqual(result["candidates"][0]["highlight_kind"],"individual_complete")
+        self.assertFalse(result["complete_groups"])
+
+    def test_equal_partial_sets_highlight_only_within_that_group(self):
+        result=evaluate_matrix(fixture({"a":{"x":10,"y":20,"z":None},
+                                        "b":{"x":20,"y":30,"z":None},
+                                        "c":{"z":5}},{"z":"must_visit"}))
+        self.assertEqual(result["state"],"partial_evidence")
+        self.assertEqual(result["highlight_ids"],["a","c"])
+        self.assertIn("menor_minimo_ponderado_no_mesmo_subconjunto",result["candidates"][0]["reasons"])
+        self.assertIn("imperdiveis_com_evidencia_pendente",result["candidates"][0]["reasons"])
+        self.assertEqual(result["conditional_comparisons"][0]["must_visit_omitted"],["z"])
+        self.assertFalse(result["global_ranking"])
+
     def test_disjoint_and_unknown(self):
         self.assertFalse(evaluate_matrix(fixture({"a":{"x":20},"b":{"y":30}}))["conditional_comparisons"])
         none=evaluate_matrix(fixture({"a":{"x":None},"b":{"x":None}}))
@@ -177,6 +195,18 @@ class RealRecommendationTests(unittest.TestCase):
                 self.assertFalse(result["official_plan_modified"])
                 self.assertFalse(result["global_ranking"])
         self.assertEqual(plan,original_plan)
+
+    def test_diagnostics_real_and_expanded_synthetic(self):
+        import json
+        from rec02_diagnostics import run_diagnostics
+        report=run_diagnostics()
+        self.assertEqual(set(report["examples"]),set(SCENARIOS)|set(DATA23_SCENARIOS)|{"product"})
+        self.assertEqual(report["benchmark"]["all_real"]["destinations"],len(self.discovery["destinations"]))
+        self.assertEqual(report["benchmark"]["synthetic_200"]["destinations"],200)
+        for data in report["benchmark"].values():
+            self.assertEqual(len(data["measurements"]),2)
+            self.assertTrue(all(row["engine_seconds_with_tracing"]>=0 for row in data["measurements"]))
+        print("REC02_DIAGNOSTICS "+json.dumps(report,ensure_ascii=False,sort_keys=True))
 
     def test_loader_error_and_empty(self):
         wishes=set_interest(empty_interests(),"paris","must_visit",self.discovery)
