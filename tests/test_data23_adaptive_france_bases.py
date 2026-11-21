@@ -22,7 +22,7 @@ class DynamicBaseCatalogTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.data=load_data23()
-        cls.research=load_research()
+        cls.research=load_research(include_candidates=True)
 
     def test_historical_snapshot_unchanged_and_four_candidates_visible(self):
         historical=json.loads(OLD_BASES.read_text(encoding="utf-8"))
@@ -51,7 +51,7 @@ class DynamicBaseCatalogTests(unittest.TestCase):
         options={r["id"]:r for r in base_options()}
         self.assertTrue(REQUIRED_IDS <= set(options))
         self.assertTrue(all(not options[x]["official_supported"] for x in REQUIRED_IDS))
-        rows=coverage_matrix("general")
+        rows=coverage_matrix("general",study=self.research)
         self.assertEqual(len(rows),len(self.research["cities"]))
         by_id={x["id"]:x for x in rows}
         self.assertTrue(REQUIRED_IDS <= set(by_id))
