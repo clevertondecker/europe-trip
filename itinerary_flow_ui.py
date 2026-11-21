@@ -380,8 +380,11 @@ def _compact_budget(plan:dict,catalog:dict,trip_data:dict,
         return
     try:
         selected=[a for group in plan["packages"].values() for a in group]
+        scheduled_cities=[row["id"] for row in selected_rows(plan,catalog)
+                          if row["stage"]==FRANCE_STAGE]
         historical=package_cost(catalog,load_base_routes(),
-                                plan["base_city"],selected)
+                                plan["base_city"],selected,
+                                planned_destination_ids=scheduled_cities)
         snapshot=advisor_projection(trip_data,finance_live,plan,historical,
                                     eurfx,chffx,False)
     except (ValueError,KeyError,TypeError):
