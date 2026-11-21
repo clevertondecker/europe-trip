@@ -17,10 +17,27 @@ TRIP_STYLES={"balanced":"Equilibrado","economy":"Econômico",
              "experience":"Lua de mel e experiências"}
 BUDGET_LABELS={"60k":"R$ 60 mil","70k":"R$ 70 mil"}
 
+# Older valid TripPlans can omit these fields. Keep legacy documents unchanged;
+# defaults apply only while projecting/reviewing editable settings.
+OPTIONAL_EDITABLE_DEFAULTS={"preferences":dict,
+                            "mandatory_destinations":list,
+                            "excluded_destinations":list}
+
+
+def _editable_value(plan:dict,key:str):
+    if key in plan:
+        return deepcopy(plan[key])
+    if key in OPTIONAL_EDITABLE_DEFAULTS:
+        return OPTIONAL_EDITABLE_DEFAULTS[key]()
+    # A missing required field is still an error; never fabricate it.
+    raise KeyError(key)
+
+
 
 def settings(plan:dict)->dict:
     """Supported plan fields only; never derive official state from widgets."""
-    return {key:deepcopy(plan[key]) for key in EDITABLE}
+    validate_plan(plan)
+    return {key:_editable_value(plan,key) for key in EDITABLE}
 
 
 def preview_settings(plan:dict,changes:dict)->dict:
@@ -42,8 +59,15 @@ def preview_settings(plan:dict,changes:dict)->dict:
         exact=item.get("exact_date")
         if exact and not departure<=date.fromisoformat(exact)<italy_end:
             raise ValueError("A nova duração colocaria visitas italianas fora da etapa")
-    delta={key:{"current":deepcopy(plan[key]),"proposed":deepcopy(proposed[key])}
-           for key in EDITABLE if proposed[key]!=plan[key]}
+    # Compare against the model-approved defaults for optional legacy fields.
+    # This avoids KeyError and phantom edits while preserving the original
+    # document and its revision until a user confirms an actual change.
+    delta={}
+    for key in EDITABLE:
+        current=_editable_value(plan,key)
+        proposed_value=_editable_value(proposed,key)
+        if proposed_value!=current:
+            delta[key]={"current":current,"proposed":proposed_value}
     return {"original_revision":plan["revision"],
             "plan_id":plan["plan_id"],"changes":delta,
             "same_choice":not bool(delta),"proposed_plan":proposed,

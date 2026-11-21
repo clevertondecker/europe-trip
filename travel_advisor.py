@@ -69,7 +69,7 @@ def recommendations(plan,attractions,routes,risks):
     if any(x["code"]=="OVERNIGHT" for x in risks):
         nearby=[]
         for dest in ("colmar","strasbourg","nancy","metz","basel"):
-            if dest==plan["base_city"] or dest in plan["excluded_destinations"]:continue
+            if dest==plan["base_city"] or dest in plan.get("excluded_destinations",[]):continue
             rr=route_for(routes,plan["base_city"],dest)
             if rr["train_minutes_one_way"] is not None and rr["train_minutes_one_way"]<=70:
                 nearby.append(dest)
