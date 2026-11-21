@@ -358,6 +358,9 @@ with st.sidebar:
     # Keep account access visible before expandable Drive/legacy sections.
     st.divider()
     render_sidebar_account()
+    # A single private persistence action is available from every area.
+    from continuity_ui import render_global_private_save
+    render_global_private_save(active_plan(), load_attractions())
 
     live_count = sum(state["status"] == "live" for state in sync_sources.values())
     if sync_status == "live":
