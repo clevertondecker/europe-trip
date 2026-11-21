@@ -381,11 +381,8 @@ def render_advisor(trip_data:dict,sync_sources:dict,workspace_area:str='Meus pas
                             "Não incluí informações pessoais ou confidenciais.",
                             value=False,key="advisor_public_repo_ack")
                 if st.session_state.get("advisor_public_repo_ack"):
-                    st.checkbox("Salvar minhas alterações aprovadas automaticamente",
-                                value=False,key="advisor_autosave_optin",
-                                help="As escolhas serão gravadas após sua confirmação. "
-                                     "Não salva propostas ainda em análise. "
-                                     "O repositório atual é público.")
+                    st.caption("A publicação no GitHub público é sempre manual. "
+                               "O salvamento automático fica restrito à nuvem privada.")
                 if not st.session_state["advisor_public_repo_ack"]:
                     st.warning("A gravação só será habilitada após reconhecer a "
                                "visibilidade pública do repositório. "
