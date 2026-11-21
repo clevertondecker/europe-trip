@@ -91,6 +91,11 @@ def render_wishlist_base_comparison(*, plan, discovery=None, research=None):
     except ValueError as exc:
         st.error("Lista de destinos incompatível: " + str(exc))
         return
+    exploratory = [d["name"] for d in discovery["destinations"]
+                   if d["id"] in active and d.get("planning_support") == "exploration_only"]
+    if exploratory:
+        st.caption("Somente pesquisa e comparação por enquanto: " + ", ".join(exploratory) +
+                   ". Ainda não podem ser incluídos no roteiro.")
     if not active:
         if ordered:
             st.info("Todos os destinos da lista foram descartados. "
