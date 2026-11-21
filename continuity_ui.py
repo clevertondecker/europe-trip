@@ -280,6 +280,47 @@ def render_private_controls(plan, catalog):
             st.error("Falha no armazenamento privado. Baixe uma cópia local.")
 
 
+def render_global_private_save(plan, catalog):
+    """One compact, reusable save control; no automatic public GitHub writes."""
+    state = st.session_state
+    st.markdown("**Minha viagem · salvamento**")
+    store = _private_store()
+    if store is None:
+        st.caption("Somente nesta sessão · use o backup JSON. "
+                   "Login e espaço privado são configurações distintas.")
+        return
+    try:
+        dirty = (state.get("ux36_saved_decisions_fingerprint") !=
+                 _current_decisions_fingerprint(plan, catalog))
+    except (ValueError, TypeError, KeyError):
+        st.warning("Dados precisam de revisão antes de salvar.")
+        return
+    status = state.get("ux36_cloud_status", "")
+    if status.startswith("Conflito"):
+        st.warning("Outra sessão alterou a cópia privada.")
+    elif status.startswith("Erro"):
+        st.warning("Último salvamento falhou; alterações só nesta sessão.")
+    elif dirty:
+        st.caption("Alterações somente nesta sessão.")
+    else:
+        st.caption("Salvo no espaço privado · confirmado pelo servidor.")
+    if st.button("Salvar minha viagem", key="ux65_global_private_save",
+                 width="stretch", disabled=not dirty and
+                 status=="Salvo em espaço privado"):
+        try:
+            save_private_now(plan, catalog)
+        except StorageConflict:
+            state["ux36_cloud_status"] = "Conflito de versão; alterações apenas nesta sessão"
+            state["ux36_cloud_dirty"] = True
+            st.error("Outra sessão atualizou o arquivo. Exporte um backup antes de reconciliar.")
+        except (StorageUnavailable, ValueError, KeyError, TypeError):
+            state["ux36_cloud_status"] = "Erro ao salvar; alterações apenas nesta sessão"
+            state["ux36_cloud_dirty"] = True
+            st.error("Falha ao salvar. Seus dados continuam na sessão; baixe o backup.")
+        else:
+            st.success("Salvamento privado confirmado.")
+
+
 def private_status_label(fallback):
     """Show private success only after a confirmed remote response."""
     state = st.session_state
