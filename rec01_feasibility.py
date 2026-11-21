@@ -8,6 +8,7 @@ from __future__ import annotations
 import json
 from fractions import Fraction
 from collections import Counter
+from recommendation_metrics import weighted_coverage, ratio
 from base_recommendation_evidence_model import build_recommendation_matrix, candidate_ids
 from base_research_expanded_model import load_research
 from base_explorer_model import load_exploration
@@ -59,9 +60,8 @@ def coverage_report(matrix: dict) -> dict:
         fractions = []
         for weights in WEIGHTS:
             weight = dict(zip((I, Q, T), weights))
-            denominator = sum(weight[d["priority"]] for d, _ in nonlocal_rows)
-            numerator = sum(weight[d["priority"]] for d, _ in known)
-            fractions.append(Fraction(numerator, denominator) if denominator else None)
+            numerator, denominator = weighted_coverage(selected, weight)
+            fractions.append(ratio(numerator, denominator))
         candidates.append({
             "base_id": base, "known": len(known), "local": len(selected)-len(nonlocal_rows),
             "must_covered": must_covered, "fractions": fractions,
