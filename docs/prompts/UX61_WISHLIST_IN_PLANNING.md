@@ -1,50 +1,50 @@
-# PROMPT DE IMPLEMENTAÇÃO — UX 6.1
+# UX 6.1 — Uma visão dos destinos, sem segunda lista
 
-**Situação:** apenas especificação para revisão; **não implementado**.
-**Prioridade:** P0
-**Dependência:** Nenhuma dependência funcional; primeiro PR a implementar.
+**Situação:** PROMPT REVISADO; ainda não implementado. **Prioridade P0.**
+**Veredito do review adversarial:** REDESENHAR (a versão anterior sugeria simplesmente duplicar a wishlist no planejamento).
+**Dependências:** nenhuma alteração de contrato necessária; UX 6.2 amplia os estados/ações depois. UX 6.4 migra o endereço de navegação de `Meu roteiro` para `Planejar`.
 
-## Papel do agente
-Atue como Staff Software Engineer, Senior Python/Streamlit Engineer, UX/Product Engineer e Data Integrity Reviewer.
+## Papel
+Atue como Principal Product Designer, Staff Python/Streamlit Engineer, Arquiteto de Domínio e Test Engineer.
 
-## Objetivo
-Fazer os destinos desejados e salvos em Explorar → Minha lista aparecerem automaticamente na etapa correspondente de Meu roteiro → Meu planejamento, sem convertê-los silenciosamente em passeios do TripPlan.
+## Problema real e decisão
+O usuário salva Colmar, Obernai, Paris, Basel e Strasbourg na wishlist e vê `0 lugares escolhidos` em Meu planejamento. Mostrar **duas listas independentes** resolve o sintoma, mas cria redundância. Construir **uma projeção compartilhada de destinos com estados compostos**, reutilizada tanto na lista quanto no painel Planejar, com ações contextuais diferenciadas. Não fazer uma segunda tabela persistida.
 
-## O que implementar
-1. Criar uma **projeção de leitura** (p.ex. ux61_planning_candidate_projection.py) que combine os itens ativos de ux502_interests com os destinos de build_exploration_discovery(), agrupados por etapa e prioridade; distinguir os que já constam do TripPlan daqueles ainda a organizar.
-2. Mostrar, em Meu planejamento, um bloco claro **Destinos da minha lista (N)** com nome, país, prioridade, estado "A organizar" ou "Já incluído no roteiro" e ação contextual para revisar atrações (a ação de confirmação fica para UX 6.2).
-3. Preservar os descartados apenas em Minha lista ou seção secundária; nunca contabilizá-los como roteiro. Não mostrar um contador '0 lugares escolhidos' isolado dos interesses, sem explicação.
-4. A lista permanece editável em Explorar; o planejamento deve reagir ao cadastro, remoção, mudança de prioridade, recuperação de JSON ou nuvem sem exigir sincronização manual.
-5. Se um destino já foi planejado, removê-lo de Minha lista **não** deve excluir o passeio do TripPlan. Apresentar os estados separadamente.
-6. Se um destino tiver dados exploratórios sem suporte no catálogo canônico (Obernai/Lucerna), mantê-lo visível e informar que escolher atrações para o roteiro requer UX 6.2. Não inventar atrações, tempos ferroviários ou valores.
-7. Tornar o comportamento explícito para as etapas da Itália vs temporada europeia. Nunca classificar uma cidade como italiana por inferência frágil de nome; usar fontes tipadas/IDs verificáveis.
-8. Evitar copiar a wishlist para uma segunda sessão: projetar a partir de st.session_state["ux502_interests"] como fonte do interesse.
-9. A interface deve funcionar em tela estreita, conservar seleção ao mudar de aba e respeitar navegação por teclado e leitores de tela.
+## Proposta de UX
+- Em **Planejar → Visão geral/Meus destinos** (com compatibilidade para `Meu roteiro → Meu planejamento` até UX 6.4), renderizar **um único conjunto de cartões/linhas** de destinos, filtrável por `Todos`, `Quero conhecer`, `No roteiro` e `Organizados`, por etapa/país e prioridade, com busca e paginação para até 200 itens.
+- Cada cartão pode exibir: foto com fallback e crédito, nome, país, prioridade, base sob estudo quando houver; estado `Quero conhecer`, `No roteiro`, `Atrações selecionadas`, `Organizado`. Estados não devem ser mutuamente excludentes; não inventar `Reservado`.
+- Mostrar métricas distintas `6 destinos desejados`, `0 visitas no roteiro`, `0 com período/data`; não apresentar `0 passeios` como se a lista estivesse vazia.
+- Destinos já confirmados no TripPlan aparecem uma vez, com detalhes de atração/período quando existirem. Remover interesse não apaga visita; remover visita (com confirmação, na UX 6.2) não apaga interesse.
+- Se houver nenhum destino, exibir estado vazio com uma ação `Explorar cidades`. Se houver dezenas, usar filtros e paginação sem repetição ou expander por cartão.
+- Ações **somente de navegação**, nesta fase: `Ver atrações`, `Comparar bases`, `Continuar planejando`. Não oferecer falsa ação `Adicionar ao roteiro` até UX 6.2 implementar a confirmação real. Pode indicar `Visita a planejar`.
+- A lista deve atualizar imediatamente após adicionar/remover/alterar prioridade ou importar/restaurar, sem botão `Sincronizar`. Preserve contexto ao alternar Espanha/Itália/temporada europeia? Não inventar etapa por heurística de país; as cidades da wishlist são destinos de exploração, e Itália usa catálogo de estágio diferente. `Sem etapa definida` é preferível à classificação falsa.
+- Orçamento e logística podem ser consultados como contexto; nenhuma informação pesquisada equivale a logística confirmada.
 
-## Pontos atuais de integração
-- ux502_destination_interests_model.py e ux502_destination_interests_ui.py
-- trip01_supplemental_discovery.py / ux501_destination_discovery_model.py
-- itinerary_flow_ui.py e itinerary_flow_model.py
-- ux504_guided_journey_model.py / ux504_guided_journey_ui.py
-- continuity_ui.py / continuity_archive_model.py
-- app.py e planning_session.py
+## Modelo e limites
+1. Criar função pura de projeção, p.ex. `build_destination_board(wishlist, trip_plan, discovery, canonical_catalog)`. **Não** materializar lista em outra chave de `st.session_state`. `wishlist` continua em `ux502_interests`, `TripPlan` em `advisor_plan`.
+2. Indexar por `destination_id` estável, evitando duplicatas e respeitando `canonical_place`/aliases **somente** onde registrados. A projeção deve aceitar Obernai/Lucerna da `trip01_supplemental_discovery.py` para leitura e apontar restrições canônicas explicitamente.
+3. Ler `packages` e `flexible_visits` do plano atual para status; não mexer no schema do TripPlan agora. UX 6.2 adicionará suporte a visita sem atrações.
+4. Preservar entradas descartadas e alterações de prioridade apenas na wishlist; cartão de destino `descartado` fica oculto por padrão, consultável no filtro avançado.
+5. Reutilizar `ux502_destination_interests_model.py`, `trip01_supplemental_discovery.py`, `itinerary_flow_ui.py` / `ux504_guided_journey_model.py`. Não criar novo editor nem novo repositório de dados.
+6. Acesso antigo `Explorar → Passeios → Minha lista` e `Meu roteiro → Meu planejamento` permanece funcional; o novo painel deve consumir a **mesma projeção**.
 
-## Critérios de aceite e testes
-- Lista salva com Colmar, Obernai, Paris, Basel, Strasbourg (+ sexto destino), aparece no planejador com prioridades corretas; 0 passeios continua honestamente 0 até confirmação, mas não aparenta lista vazia.
-- O mesmo resultado após export/import da wishlist e restauração do armazenamento privado.
-- Sem duplicatas quando destino figura na lista e no TripPlan; métricas de desejados vs confirmados vs organizados separadas.
-- Mudar etapa, país, busca, comparar cidades e voltar não perde lista ou plano.
-- Testar 0,1,5,6 e muitos destinos, prioridade descartada, IDs desconhecidos, documento legado, sessão sem login.
-- Testes comprovam **nenhuma escrita** em TripPlan, GitHub público, GCS ou matriz de rotas por apenas exibir a lista.
+## Cenários Given / When / Then
+- **GIVEN** wishlist com 5 ou 6 destinos incluindo Obernai **WHEN** abro Meu planejamento **THEN** os interesses aparecem sem recadastro, há 0 visitas se TripPlan vazio, e nenhum commit.
+- **GIVEN** Colmar existe na wishlist e no TripPlan **WHEN** renderizo as duas superfícies **THEN** aparece uma única entrada por destino e os dois aspectos de estado são visíveis.
+- **GIVEN** removo Colmar da wishlist mas ele já estava no roteiro **WHEN** reabro o painel **THEN** a visita persiste.
+- **GIVEN** descarto uma cidade **WHEN** aplico filtro padrão **THEN** ela não conta como candidata ativa nem é eliminada do backup.
+- **GIVEN** restauro arquivo privado ou importo JSON **WHEN** reabro o painel **THEN** mesma ordenação/IDs/prioridades; nenhuma duplicata.
+- **GIVEN** wishlist vazia, 1 item ou 200 itens **WHEN** consulto via desktop/mobile **THEN** estado vazio, paginação e ações contextuais coerentes.
+- **GIVEN** navego para Comparar e volto **WHEN** retorno **THEN** busca, página e estágio são preservados onde pertinentes sem mutar o TripPlan.
 
-## Contexto e regras obrigatórias
-Repositório: https://github.com/clevertondecker/europe-trip
-Produto: Nossa Europa 2027 (Streamlit/Python), lua de mel na Itália + temporada europeia.
-Este PR foi aberto **somente com este prompt**, para review do escopo. Ainda não há implementação funcional. Após aprovação explícita, implementar **nesta branch** e executar testes/CI. Não fazer merge de PR apenas documental.
-- TripPlan continua a única fonte autoritativa de passeios confirmados no plano; preferências e pesquisas não são reservas.
-- Preservar IDs existentes, compatibilidade de dados/arquivos, isolamento de fontes, fluxos de autenticação, regressões e segurança.
-- Sem inventar custos, trens, horários, disponibilidade de 2027, fotos/licenças ou estado de decisão.
-- Evitar novos editores paralelos, duplicação de estado de Streamlit e alterações não solicitadas no planejamento oficial.
-- Verificar os contratos e os testes existentes antes de editar; adicionar testes de domínio + AppTest; testar troca de etapa Itália/França, restauração, navegação e histórico onde aplicável.
-- Rever a branch contra main antes de implementar, pois estes cinco PRs são independentes e poderão ser executados sequencialmente.
-- Entregar implementação + explicação da UX + testes + riscos e limitações. Não fazer merge até revisão e autorização posteriores.
+## Testes e entrega futura
+Testes unitários de projeção pura e deduplicação; `streamlit.testing.v1.AppTest` (rotas antigas, estados de auth, mudanças de prioridade, buscas, import/export, troca de etapa, 0/1/6/200 itens); asserts de nenhuma gravação em TripPlan, GCS, GitHub ou rotas ferroviárias em render/navegação. Responsividade + uso de label/teclado. Capturas antes/depois e tabela de métricas. Atualizar documentação do estado sem promover pesquisa a reserva.
+
+## Direção de produto aprovada (UX 6.0)
+**Arquitetura-alvo:** três áreas principais: **Explorar**, **Planejar** (início + destinos + agenda + decisões) e **Orçamento**. A sequência sugerida é orientativa, **não obrigatória**: pesquisar, comparar cidades-base, organizar e simular custos podem ocorrer em qualquer ordem. Orçamento resumido acompanha a jornada, inclusive durante a descoberta. Ferramentas técnicas/legadas ficam em contexto ou em expansão avançada, não desaparecem.
+
+**Semântica canônica:** `Quero conhecer` = interesse na wishlist; `No roteiro` = visita explicitamente confirmada no TripPlan, com **zero ou mais atrações** após evolução contratual UX 6.2; `Atrações escolhidas` é detalhe opcional; `Organizado` = período/data definidos; `Reservado` exige evidência externa. Ler uma tela não significa aceitar opção, concluir comparação ou fazer reserva.
+
+**Segurança:** TripPlan permanece autoridade das visitas planejadas; wishlist permanece fonte de interesse. Um destino pode estar em ambos, mas sua **visualização deve ser única** com estado composto, sem cópias mutáveis ou um segundo editor. Preservar IDs, autenticidade de fontes, base/roteiro oficiais, isolamento de simulações, datas reais do plano e snapshots ferroviários (30×46), sem inventar tarifas, horários/retornos ou dados 2027. Não escrever remotamente por navegar, pesquisar, favoritar ou abrir editor. Persistência privada em GCS é distinta de login Google e publicação pública do GitHub.
+
+**Regra de execução:** PR **somente de especificação** nesta etapa. Na futura implementação, reconciliar branch com a `main` mais recente, executar validações, testar AppTest e obter review antes do merge. Nunca fazer merge somente de prompt.
