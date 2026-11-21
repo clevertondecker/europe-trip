@@ -1,0 +1,64 @@
+"""UX 6.4: public three-area navigation backed by the existing canonical router.
+
+The legacy 4-area route IDs remain accepted for bookmarks and archives. Public
+labels are a compatibility presentation, not a second persisted router.
+"""
+from __future__ import annotations
+
+PUBLIC_AREAS=("Explorar","Planejar","Orçamento")
+PUBLIC_TASKS={
+    "Explorar":("Descobrir","Minha lista","Comparar bases","Mapa"),
+    "Planejar":("Visão geral","Meus destinos","Organizar"),
+    "Orçamento":("Visão financeira","Simulações"),
+}
+TARGETS={
+    ("Explorar","Descobrir"):("Explorar","Passeios"),
+    ("Explorar","Minha lista"):("Explorar","Passeios"),
+    ("Explorar","Comparar bases"):("Explorar","Comparar"),
+    ("Explorar","Mapa"):("Explorar","Mapa"),
+    ("Planejar","Visão geral"):("Minha viagem","Resumo"),
+    ("Planejar","Meus destinos"):("Meu roteiro","Meu planejamento"),
+    ("Planejar","Organizar"):("Meu roteiro","Organizar viagem"),
+    ("Orçamento","Visão financeira"):("Orçamento","Resumo financeiro"),
+    ("Orçamento","Simulações"):("Orçamento","Simulações"),
+}
+
+
+def public_area(legacy_area):
+    return "Planejar" if legacy_area in ("Minha viagem","Meu roteiro") else (
+        legacy_area if legacy_area in PUBLIC_AREAS else "Planejar")
+
+
+def public_task(legacy_area, legacy_section, wishlist_view=None):
+    if legacy_area=="Explorar":
+        return ("Minha lista" if legacy_section=="Passeios"
+                and wishlist_view=="Minha lista" else
+                "Descobrir" if legacy_section=="Passeios" else
+                "Mapa" if legacy_section=="Mapa" else "Comparar bases")
+    if legacy_area=="Minha viagem":
+        return "Visão geral"
+    if legacy_area=="Meu roteiro":
+        return "Organizar" if legacy_section=="Organizar viagem" else "Meus destinos"
+    if legacy_area=="Orçamento":
+        return "Simulações" if legacy_section=="Simulações" else "Visão financeira"
+    return "Visão geral"
+
+
+def select_public_task(state, area, task):
+    if area not in PUBLIC_TASKS or task not in PUBLIC_TASKS[area]:
+        raise ValueError("Área/atividade desconhecida")
+    from ux_navigation import set_task
+    target_area,target_section=TARGETS[(area,task)]
+    set_task(state,target_area,target_section)
+    if (area,task)==("Explorar","Minha lista"):
+        state["ux502_view"]="Minha lista"
+    elif (area,task)==("Explorar","Descobrir"):
+        state["ux502_view"]="Descobrir lugares"
+
+
+def select_public_area(state, area):
+    if area not in PUBLIC_AREAS:
+        raise ValueError("Área desconhecida")
+    preferred={"Explorar":"Descobrir","Planejar":"Visão geral",
+               "Orçamento":"Visão financeira"}
+    select_public_task(state,area,preferred[area])
