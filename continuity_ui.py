@@ -81,6 +81,8 @@ def apply_pending_restore(catalog:dict)->None:
         state["ux502_interests"]=deepcopy(pending["archive"].get("destination_interests",empty_interests()))
         from rec03a_session import clear_recommendation_context
         clear_recommendation_context(state)
+        from ux_planning_journey_model import clear_planning_context
+        clear_planning_context(state)
         state["ux502_private_saved_revision"]=None
         state["ux48_weekend_groups"]=deepcopy(pending["archive"]["weekend_groups"])
         state.pop("ux35_review_proposal",None)
@@ -192,6 +194,8 @@ def restore_private_on_start(catalog):
         state["ux502_interests"] = deepcopy(archive.get("destination_interests",empty_interests()))
         from rec03a_session import clear_recommendation_context
         clear_recommendation_context(state)
+        from ux_planning_journey_model import clear_planning_context
+        clear_planning_context(state)
         state["ux502_private_saved_revision"] = state["ux502_interests"]["revision"]
         state["ux48_weekend_groups"] = deepcopy(archive["weekend_groups"])
         sync_legacy_view(plan, state, include_controls=True)

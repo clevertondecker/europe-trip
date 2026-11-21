@@ -151,7 +151,8 @@ class ItineraryFlowAppTests(unittest.TestCase):
         self.assertFalse(at.exception,[e.message for e in at.exception])
         before=at.session_state["advisor_plan"]["revision"]
         at.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Meu roteiro"))).click().run()
-        at.segmented_control(key="ux_section").set_value("Meu planejamento").run()
+        at.segmented_control(key="ux_section").set_value("Organizar viagem").run()
+        at.button(key="flow_journey_step_organize").click().run()
         at.button(key="flow_add_open_button").click().run()
         self.assertFalse(at.exception,[e.message for e in at.exception])
         at.selectbox(key="flow_add_destination").set_value("italy_amalfi").run()
@@ -174,7 +175,8 @@ class ItineraryFlowAppTests(unittest.TestCase):
     def test_inline_organizer_supports_period_and_exact_date(self):
         at=AppTest.from_file(str(ROOT/"app.py"),default_timeout=110).run()
         at.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Meu roteiro"))).click().run()
-        at.segmented_control(key="ux_section").set_value("Meu planejamento").run()
+        at.segmented_control(key="ux_section").set_value("Organizar viagem").run()
+        at.button(key="flow_journey_step_organize").click().run()
         at.button(key="flow_add_open_button").click().run()
         at.selectbox(key="flow_add_destination").set_value("italy_amalfi").run()
         at.multiselect(key="flow_pick_italy_amalfi").set_value(
