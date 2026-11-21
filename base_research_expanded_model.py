@@ -1,4 +1,4 @@
-"""Evidence-first screening for 30 candidate European home bases.
+"""Evidence-first screening for a dynamically sized set of European home bases.
 
 The score is intentionally NOT published until every criterion has comparable
 evidence and 3 truly bookable 2027 furnished private rentals. This prevents a
@@ -27,6 +27,11 @@ COUNTRY_FLAGS={"França":"🇫🇷","Alemanha":"🇩🇪","Bélgica":"🇧🇪",
 
 def load_research(path:Path=DATA)->dict:
     data=json.loads(path.read_text(encoding="utf-8"))
+    # Keep the historical 30-city snapshot immutable. Current default research
+    # view overlays newer, independently sourced candidate batches.
+    if Path(path).resolve()==DATA.resolve():
+        from data23_france_candidates_model import candidate_bases
+        data["cities"].extend(candidate_bases())
     cities=data["cities"]
     if data["schema_version"]!=1 or len(cities)<25 or data["travelers"]!=2:
         raise ValueError("Pesquisa de cidades-base incompleta")
