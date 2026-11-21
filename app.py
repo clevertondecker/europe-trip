@@ -1673,7 +1673,7 @@ elif page == "Orçamento":
                 "fx_chf":st.session_state.get("explore_chf_fx",7.1),
                 "base":current_plan["base_city"],
                 "incomplete":not known_cost["complete"],
-                "destinations":list(current_plan["packages"])}
+                "destinations":official_cities}
             st.caption("Passeios importados do roteiro oficial. Os custos destas "
                        "atrações ainda não foram recalculados para a base hipotética "
                        "selecionada; compare as rotas em Roteiro → Explorar bases.")
