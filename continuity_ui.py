@@ -325,6 +325,8 @@ def private_status_label(fallback):
     """Show private success only after a confirmed remote response."""
     state = st.session_state
     if state.get("ux36_cloud_status") == "Salvo em espaço privado":
+        if state.get("ux36_saved_decisions_fingerprint") is None:
+            return fallback  # Old session: no complete remote decision hash available.
         try:
             from attractions_model import load_attractions
             if state.get("ux36_saved_decisions_fingerprint") == _current_decisions_fingerprint(
