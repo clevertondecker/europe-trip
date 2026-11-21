@@ -98,6 +98,10 @@ class DynamicBaseCatalogTests(unittest.TestCase):
         self.assertTrue(REQUIRED_IDS <= set(options))
         self.assertTrue(REQUIRED_IDS.isdisjoint({r["id"] for r in base_options()}))
         self.assertTrue(all(not options[x]["official_supported"] for x in REQUIRED_IDS))
+        for city_id in REQUIRED_IDS:
+            self.assertEqual(options[city_id]["routes"],len(expanded_rail_routes(city_id)))
+            self.assertEqual(options[city_id]["time_coverage"],len(base_routes(city_id)))
+            self.assertEqual(options[city_id]["fare_coverage"],0)
         rows=coverage_matrix("general",study=self.research)
         self.assertEqual(len(rows),len(self.research["cities"]))
         by_id={x["id"]:x for x in rows}
