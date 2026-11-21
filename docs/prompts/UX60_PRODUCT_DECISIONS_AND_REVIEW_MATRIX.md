@@ -34,16 +34,24 @@ A experiência antiga tem quatro áreas e treze abas; a wishlist de destinos (`u
 - **Não exigir salvar a cada passo**: status claro, ação manual e autosave privado só com opt-in, validação segura de geração.
 - **Dados de 2027:** duração editorial e viagem indicativa não equivalem a tarifa/horário/retorno confirmado.
 
-## Estados do produto
-| Estado | Autoridade | Quando entra | Pode voltar? |
-|---|---|---|---|
-| Quero conhecer | Wishlist | Favoritar ou priorizar | Sim |
-| No roteiro | TripPlan | Confirmação de visita, com 0–5 atrações | Sim, removendo visita explicitamente |
-| Atrações escolhidas | TripPlan | Escolha opcional de atrações | Sim, edição explícita |
-| Organizado | TripPlan/agrupamentos validados | Período, data ou viagem agrupada | Sim, após revisar impacto |
-| Reservado | Evidência externa | Somente confirmação comprovável | Nunca por simples agendamento |
+## Estados do produto — revisão após análise adversarial
 
-Os estados são facetas, não uma enumeração única: Colmar pode ser `Quero conhecer`, `No roteiro` e `Organizado` simultaneamente, exibida uma só vez.
+| Faceta | Autoridade | Critério verificável |
+|---|---|---|
+| Quero conhecer | Wishlist | Favorito/prioridade ativa, sem confirmação de visita |
+| No roteiro | TripPlan | Inclusão explícita de cidade; após UX 6.2, 0–5 atrações |
+| Atrações escolhidas | TripPlan | Seleção efetiva de pelo menos uma atração |
+| Em grupo de viagem | `weekend_groups` validado | Vinculado a grupo, mesmo se período e data ainda pendentes |
+| Organizado temporalmente | TripPlan e grupos validados | Período conhecido (não `Ainda não definido`) e/ou data exata confirmada |
+| Reservado | Confirmação externa | Nunca inferir a partir de favoritar, planejar, agendar ou agrupar |
+
+Facetas coexistem: Colmar pode estar desejado, no roteiro, agrupado e datado ao mesmo tempo, **mas é uma única cidade e uma visita**. Um grupo `Fim de semana na Suíça` com Basel e Lucerna, `start_date=None` e período não definido **não** aumenta o contador `com período/data`.
+
+**Limites conscientes de escopo:**
+- UX 6.3 mantém `assignments: date -> destination_id` para **um passeio francês principal por dia**. Vários destinos podem pertencer a um grupo de fim de semana sem ocuparem individualmente a mesma data; múltiplos passeios no mesmo dia são uma decisão futura e não bloqueiam esta versão.
+- UX 6.2 precisa garantir o caminho completo 0 atrações: adicionar → agenda francesa e italiana → grupo → editar → custo pendente → exportar/importar → recuperar. Não usar `packages[dest]=[]` fictício para contornar o contrato.
+- UX 6.5 distingue fingerprint de **decisões persistíveis** do fingerprint do **arquivo integral**; navegar não pode exibir falso aviso `Alterações não salvas`.
+- UX 6.4 normaliza rotas antigas de arquivos GCS/JSON **antes da validação de navegação**, mantendo validação estrita do conteúdo do plano.
 
 ## Cenários de usuário e aceites
 | Cenário | Atrito atual | Fluxo esperado | Aceite verificável |
