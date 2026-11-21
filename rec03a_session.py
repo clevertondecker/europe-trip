@@ -46,6 +46,9 @@ def request_navigation(state, target):
 
 def apply_navigation(state):
     target = state.pop(INTENT, None)
+    if "rec03a_handoff_pending" in state:
+        from rec03b_handoffs import apply_handoff
+        apply_handoff(state)
     if target == "wishlist":
         select_public_task(state, "Explorar", "Minha lista")
     elif target in ("suggestions", "manual"):
