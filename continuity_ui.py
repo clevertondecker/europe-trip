@@ -13,6 +13,7 @@ import streamlit as st
 
 from continuity_archive_model import (
     make_archive,export_archive,import_archive,preview_restore,confirm_restore,plan_fingerprint,
+    persisted_data_fingerprint,
 )
 from planning_status import save_label
 from itinerary_flow_model import selected_rows
@@ -49,7 +50,8 @@ def apply_pending_restore(catalog:dict)->None:
     if pending is None:return
     try:
         plan=confirm_restore(bootstrap(),pending["archive"],pending["preview"],
-                             catalog,confirmed=True)
+                             catalog,confirmed=True,
+                             current_archive=_private_archive(bootstrap(),catalog))
         context=pending["archive"]["continuation"]
         state["advisor_plan"]=plan
         state["advisor_saved_snapshot"]=None
@@ -114,12 +116,8 @@ def _archive_fingerprint(archive:dict)->str:
 
 
 def _decisions_fingerprint(archive: dict) -> str:
-    """Hash persisted user decisions; page and search changes are not edits."""
-    value = {key: val for key, val in archive.items()
-             if key not in ("exported_at", "continuation")}
-    raw = json.dumps(value, ensure_ascii=False, sort_keys=True,
-                     separators=(",", ":")).encode("utf-8")
-    return sha256(raw).hexdigest()
+    """The same canonical fingerprint used by archive previews."""
+    return persisted_data_fingerprint(archive)
 
 
 def _current_decisions_fingerprint(plan, catalog) -> str:
@@ -338,7 +336,8 @@ def render_continuity_panel(plan:dict,catalog:dict)->None:
             if st.button("Pré-visualizar recuperação",key="ux36_preview_button"):
                 try:
                     imported=import_archive(uploaded.getvalue(),catalog)
-                    review=preview_restore(plan,imported,catalog)
+                    review=preview_restore(plan,imported,catalog,
+                                           current_archive=_private_archive(plan,catalog))
                     st.session_state["ux36_review"]={
                         "archive":imported,"preview":review}
                     st.rerun()
@@ -348,7 +347,8 @@ def render_continuity_panel(plan:dict,catalog:dict)->None:
         if pending:
             import_archive_document=pending["archive"]
             try:
-                current_review=preview_restore(plan,import_archive_document,catalog)
+                current_review=preview_restore(plan,import_archive_document,catalog,
+                                                   current_archive=_private_archive(plan,catalog))
                 if (current_review["expected_current_fingerprint"]!=
                     pending["preview"]["expected_current_fingerprint"] or
                     current_review["expected_archive_fingerprint"]!=
@@ -365,9 +365,17 @@ def render_continuity_panel(plan:dict,catalog:dict)->None:
             st.caption("Lugares selecionados: "+str(summary["places_before"])+
                        " → "+str(summary["places_after"]))
             if summary["changed_fields"]:
-                st.caption("Campos que mudam: "+", ".join(summary["changed_fields"]))
-            else:
-                st.info("Nenhuma diferença nos campos principais.")
+                st.caption("Campos do plano que mudam: "+", ".join(summary["changed_fields"]))
+            if summary.get("auxiliary_changed_fields"):
+                st.caption("Outros dados que mudam: "+
+                           ", ".join(summary["auxiliary_changed_fields"]))
+            if summary.get("wishlist_changes"):
+                differences=summary["wishlist_changes"]
+                st.caption("Minha lista: "+str(differences["added"])+" adicionados, "+
+                           str(differences["removed"])+" removidos, "+
+                           str(differences["priority_changed"])+" prioridades alteradas.")
+            if not summary["changed_fields"] and not summary.get("auxiliary_changed_fields"):
+                st.info("Nenhuma diferença nos dados persistidos.")
             if summary["relation"]=="different_plan":
                 st.warning("**Esta cópia pertence a outro planejamento**. "
                            "Confirmar substituirá o plano desta sessão. "
