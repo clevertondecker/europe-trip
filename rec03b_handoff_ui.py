@@ -186,4 +186,6 @@ def render_contextual_map(plan):
                       for d,cell in candidate["evidence"].items()],hide_index=True,width="stretch")
         st.caption(result["limitation"])
     except (ValueError,ImportError,OSError,KeyError,TypeError):
+        import logging
+        logging.getLogger(__name__).exception("REC03B contextual map failed")
         st.error("Não foi possível carregar o mapa de pesquisa. O planejamento não mudou.")
