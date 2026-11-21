@@ -152,6 +152,9 @@ def render_wishlist_base_comparison(*, plan, discovery=None, research=None):
 
     # New read-only decision layer: never modifies choices or official TripPlan.
     decision = build_decision_readiness(result, discovery=discovery, research=research)
+    # Decision readiness evaluates historical evidence and verified logistics.
+    # An additional directional minimum must be visible, but must not be
+    # promoted into a confirmed return, timetable, or historical observation.
     st.markdown("#### O que já sabemos para decidir?")
     st.caption("Visitar um lugar, voltar de trem e morar na cidade-base são "
                "perguntas diferentes. Os dados ainda não comprovam nenhum "
@@ -194,6 +197,10 @@ def render_wishlist_base_comparison(*, plan, discovery=None, research=None):
                         "desconhecida") +
                        " · retorno/última milha: a verificar" +
                        " · estado temporal: " + journey["temporal_association_status"])
+            reference = enriched["cells"].get((journey["base_id"], journey["destination_id"]))
+            if reference and reference["category"] == "reference_only":
+                st.caption("Referência adicional de ida: " + reference["label"] +
+                           " · não é evidência histórica comparável nem confirma 2027.")
             if journey["association_reasons"]:
                 st.caption("Faltam: " + ", ".join(journey["association_reasons"]))
     with st.expander("Condições de moradia nas cidades-base", expanded=False):
@@ -333,5 +340,8 @@ def render_wishlist_base_comparison(*, plan, discovery=None, research=None):
                              "/mês. Valores não confirmados para 2027.")
                 else:
                     st.write("Moradia: sem amostras comparáveis documentadas.")
+                st.caption("Pendências abaixo refletem a cobertura histórica; "
+                           "a matriz acima também apresenta referências indicativas "
+                           "adicionais, que não comprovam retorno ou viabilidade.")
                 for item in summary["research_gaps"]:
                     st.markdown("- " + item)
