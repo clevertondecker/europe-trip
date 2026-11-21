@@ -132,5 +132,45 @@ class HandoffTests(unittest.TestCase):
         self.assertEqual(state["scenario_base_selected"],"metz")
 
 
+class HandoffAppTests(unittest.TestCase):
+    def test_real_app_suggestions_manual_and_planning_return(self):
+        from pathlib import Path
+        from streamlit.testing.v1 import AppTest
+        app=AppTest.from_file(str(Path(__file__).resolve().parents[1]/"app.py"),default_timeout=120).run()
+        self.assertFalse(app.exception,str(app.exception))
+        discovery=build_exploration_discovery()
+        wishes=empty_interests()
+        for d in ("paris","colmar","strasbourg","basel","lucerne","interlaken","angers"):
+            wishes=set_interest(wishes,d,"interested",discovery)
+        app.session_state["ux502_interests"]=deepcopy(wishes)
+        original=deepcopy(app.session_state["advisor_plan"])
+        def click(key):
+            app.button(key=key).click().run()
+            self.assertFalse(app.exception,str(app.exception))
+        click("ux_sidebar_nav_1")
+        app.segmented_control(key="ux_section").set_value("Comparar").run()
+        self.assertFalse(app.exception,str(app.exception))
+        app.radio(key="rec03a_activity_widget").set_value("Cidades sugeridas").run()
+        self.assertFalse(app.exception,str(app.exception))
+        click("rec03a_confirm_all")
+        scope=deepcopy(app.session_state[SCOPE])
+        app.multiselect(key="rec03a_handoff_base_selection_widget").set_value(["strasbourg","angers"]).run()
+        self.assertFalse(app.exception,str(app.exception))
+        click("rec03a_handoff_compare")
+        self.assertEqual(app.multiselect(key="ux503_bases").value,["strasbourg","angers"])
+        self.assertEqual(set(app.multiselect(key="ux503_visible_destinations").value),set(scope["destination_ids"]))
+        click("rec03a_handoff_back_manual")
+        self.assertEqual(app.session_state[SCOPE],scope)
+        self.assertEqual(app.multiselect(key="rec03a_handoff_base_selection_widget").value,["strasbourg","angers"])
+        click("rec03a_handoff_planning")
+        self.assertEqual(app.session_state["ux_section"],"Organizar viagem")
+        self.assertEqual(app.session_state["flow_journey_view"],"build")
+        self.assertEqual(app.session_state["advisor_plan"],original)
+        click("rec03a_handoff_back_planning")
+        self.assertEqual(app.session_state[SCOPE],scope)
+        self.assertEqual(app.session_state["advisor_plan"],original)
+        self.assertEqual(app.session_state["ux502_interests"],wishes)
+
+
 if __name__=="__main__":
     unittest.main()
