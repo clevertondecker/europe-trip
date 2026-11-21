@@ -128,6 +128,8 @@ class RecommendationAppTests(unittest.TestCase):
         a.radio(key="rec03a_activity_widget").set_value(MANUAL)
         self.run_ok(a)
         self.assertIsNotNone(a.multiselect(key="ux503_bases"))
+        a.multiselect(key="ux503_bases").set_value(["strasbourg","metz"])
+        self.run_ok(a)
         manual=list(a.session_state["ux503_bases"])
         a.radio(key="rec03a_activity_widget").set_value(SUGGESTED)
         self.run_ok(a)
@@ -179,7 +181,11 @@ class RecommendationAppTests(unittest.TestCase):
         self.run_ok(a)
         self.assertEqual(a.text_input(key="rec03a_search").value,"Angers")
         self.assertEqual(a.session_state["advisor_plan"],new_plan())
-        self.assertTrue(any("Acesso local a verificar" in x.value for x in a.markdown))
+        from base_recommendation_model import recommend_bases
+        result=recommend_bases(a.session_state["ux502_interests"],a.session_state[SCOPE],discovery=self.discovery)
+        angers=next(c for c in result["candidates"] if c["base_id"]=="angers")
+        self.assertEqual(angers["evidence"]["angers"]["category"],"local")
+        self.assertIsNone(angers["evidence"]["angers"]["display_min"])
 
     def test_loader_failure_and_identity_reset(self):
         a=self.make_app([("paris","must_visit")],"compare")
@@ -191,7 +197,7 @@ class RecommendationAppTests(unittest.TestCase):
         self.run_ok(a)
         a.session_state["test_identity"]="other"
         self.run_ok(a)
-        self.assertNotIn(SCOPE,list(a.session_state.filtered_state))
+        self.assertIsNone(a.session_state[SCOPE])
 
 
 if __name__=="__main__":
