@@ -261,6 +261,98 @@
       "last_mile_min": null,
       "seasonality_2027_verified": false,
       "notes": "Excursão regional; investigar transporte estação–atração e volta antes de agendar."
+    },
+    {
+      "id": "angers_terra",
+      "base_id": "angers",
+      "name": "Terra Botanica",
+      "place": "Angers",
+      "proximity": "local",
+      "source_url": "https://www.destination-angers.com/tourisme/organiser-son-sejour/activites-a-faire-a-angers/sites-visites-angers/",
+      "category": "garden",
+      "photo": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Terra%20Botanica%202017.08.23%20Angers%2046.jpg",
+        "source_page": "https://commons.wikimedia.org/wiki/File:Terra%20Botanica%202017.08.23%20Angers%2046.jpg",
+        "author": "Chabe01",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "verified_2026_11_21": true
+      },
+      "editorial_duration_min": null,
+      "price_eur": null,
+      "availability_autumn_2027_verified": false,
+      "last_mile_min": null,
+      "seasonality_2027_verified": false,
+      "notes": "Horários/ingressos sazonais a confirmar."
+    },
+    {
+      "id": "le_mans_epau",
+      "base_id": "le_mans",
+      "name": "Abbaye Royale de l'Épau",
+      "place": "Le Mans",
+      "proximity": "local",
+      "source_url": "https://lemans-tourisme.com/fr/abbaye-de-lepau.html",
+      "category": "heritage",
+      "photo": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Abbatiale%20de%20l'%C3%A9pau.JPG",
+        "source_page": "https://commons.wikimedia.org/wiki/File:Abbatiale%20de%20l'%C3%A9pau.JPG",
+        "author": "Benchaum",
+        "license": "CC BY-SA 3.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/3.0/",
+        "verified_2026_11_21": true
+      },
+      "editorial_duration_min": null,
+      "price_eur": null,
+      "availability_autumn_2027_verified": false,
+      "last_mile_min": null,
+      "seasonality_2027_verified": false,
+      "notes": "Horários/ingressos sazonais a confirmar."
+    },
+    {
+      "id": "annecy_menthon",
+      "base_id": "annecy",
+      "name": "Château de Menthon-Saint-Bernard",
+      "place": "Menthon-Saint-Bernard",
+      "proximity": "regional",
+      "source_url": "https://www.ville-annecy.fr/que-faire-autour-d-annecy/",
+      "category": "heritage",
+      "photo": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Ch%C3%A2teau-Menthon-Saint-Bernard.jpg",
+        "source_page": "https://commons.wikimedia.org/wiki/File:Ch%C3%A2teau-Menthon-Saint-Bernard.jpg",
+        "author": "Hamster hypertonique",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "verified_2026_11_21": true
+      },
+      "editorial_duration_min": null,
+      "price_eur": null,
+      "availability_autumn_2027_verified": false,
+      "last_mile_min": null,
+      "seasonality_2027_verified": false,
+      "notes": "Excursão com retorno e última milha ainda não verificados."
+    },
+    {
+      "id": "rennes_dinan",
+      "base_id": "rennes",
+      "name": "Rua Jerzual e centro medieval de Dinan",
+      "place": "Dinan",
+      "proximity": "regional",
+      "source_url": "https://www.dinan-capfrehel.com/nos-incontournables/dinan-cite-medievale-bretagne/",
+      "category": "heritage",
+      "photo": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Dinan%20Rue%20du%20Jerzual%201.jpg",
+        "source_page": "https://commons.wikimedia.org/wiki/File:Dinan%20Rue%20du%20Jerzual%201.jpg",
+        "author": "Zairon",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "verified_2026_11_21": true
+      },
+      "editorial_duration_min": null,
+      "price_eur": null,
+      "availability_autumn_2027_verified": false,
+      "last_mile_min": null,
+      "seasonality_2027_verified": false,
+      "notes": "Excursão com retorno e última milha ainda não verificados."
     }
   ],
   "routes": [
