@@ -14,6 +14,22 @@ def destination_card_view(plan:dict,catalog:dict,routes:dict,row:dict)->dict:
     lookup={a["id"]:a["name"] for a in catalog["attractions"]
             if a["destination_id"]==row["id"]}
     picked=list(row["attractions"])
+    if not picked:
+        # A confirmed destination without chosen attractions is a legitimate
+        # UX77 plan state, not an excursion ready for pricing.
+        # Do not invoke build_outing_guide: its 1..5-attraction contract is
+        # intentionally strict and must remain unchanged.
+        return {
+            "id":row["id"],"name":place["name"],"country":place["country"],
+            "photo":place.get("photo"),"attractions":[],"attraction_count":0,
+            "period":row["period"] if row["period"]!=UNASSIGNED else None,
+            "dates":list(row["exact_dates"]),
+            "organized":bool(row["exact_dates"]) or row["period"]!=UNASSIGNED,
+            "transport":"Trajeto a pesquisar após escolher atrações",
+            "cost":"Custos ainda não calculados; nenhuma tarifa confirmada",
+            "cost_complete":False,"reservation_confirmed":False,
+            "data_basis":"Destino escolhido, sem atrações nem reservas confirmadas",
+        }
     guide=build_outing_guide(plan,catalog,routes,row["id"],picked)
     route=guide["route"]
     minutes=guide["train_minutes_one_way"]
