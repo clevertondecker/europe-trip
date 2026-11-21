@@ -21,7 +21,7 @@ from planning_session import (active_plan,commit_outing,delete_outing,
                               schedule_package,unschedule_package)
 from planning_status import save_label,explain_storage_error
 from planning_store import sync_legacy_view
-from travel_advisor_ui import _owner_signed_in,_secure_save,_owner_config
+from travel_advisor_ui import _owner_signed_in,_secure_save,_owner_config,sync_identical_remote_plan
 from trip_plan_repository import GitHubPlanRepository, PlanConflictError
 from plan_reconciliation import compare_plans, plan_digest, prepare_reconciled_plan
 from attractions_model import load_base_routes,package_cost
@@ -543,38 +543,40 @@ def _save_panel(plan:dict,catalog:dict)->None:
     if not st.session_state.get("flow_save_open"):
         return
     with st.container(border=True):
-        st.markdown("#### Salvar e recuperar planejamento")
-        st.caption("As alterações são mantidas na sessão até salvar ou baixar um backup.")
-        st.download_button("Baixar backup JSON",data=json.dumps(
-            plan,ensure_ascii=False,indent=2),
-            file_name="nossa-europa-planejamento.json",
-            mime="application/json",key="flow_backup_download")
-        uploaded=st.file_uploader("Recuperar backup local (JSON)",
-                                  type=["json"],key="flow_import_json")
-        if uploaded is not None:
-            try:
-                candidate=json.loads(uploaded.getvalue().decode("utf-8"))
-                validate_flow_backup(candidate,catalog)
-            except (ValueError,KeyError,TypeError,UnicodeDecodeError) as exc:
-                st.error("Backup incompatível ou inválido. Nenhum dado foi substituído.")
-            else:
-                st.warning("Revisão do backup: "+
-                           str(len(selected_rows(candidate,catalog)))+
-                           " lugares. Restaurar substituirá o plano DESTA SESSÃO, "
-                           "sem modificar automaticamente arquivos do GitHub.")
-                if st.button("Confirmar recuperação nesta sessão",
-                             key="flow_import_confirm"):
-                    st.session_state["advisor_plan"]=candidate
-                    st.session_state["advisor_saved_snapshot"]=None
-                    st.session_state["advisor_github_sha"]=None
-                    st.session_state["advisor_autosave_pending"]=False
-                    st.session_state["advisor_autosave_optin"]=False
-                    st.session_state["advisor_local_changed"]=True
-                    sync_legacy_view(candidate,st.session_state)
-                    st.session_state["flow_notice"]=(
-                        "Backup recuperado nesta sessão; salve ou exporte para não perder.")
-                    st.session_state["flow_save_open"]=False
-                    st.rerun()
+        st.markdown("#### Salvar planejamento na nuvem")
+        st.caption("Priorize salvar online. O backup JSON está nas opções avançadas.")
+        with st.expander("Opções avançadas · backup JSON (opcional)", expanded=False):
+            st.caption("Use somente para recuperação manual. O salvamento principal é online.")
+            st.download_button("Baixar backup JSON",data=json.dumps(
+                plan,ensure_ascii=False,indent=2),
+                file_name="nossa-europa-planejamento.json",
+                mime="application/json",key="flow_backup_download")
+            uploaded=st.file_uploader("Recuperar backup local (JSON)",
+                                      type=["json"],key="flow_import_json")
+            if uploaded is not None:
+                try:
+                    candidate=json.loads(uploaded.getvalue().decode("utf-8"))
+                    validate_flow_backup(candidate,catalog)
+                except (ValueError,KeyError,TypeError,UnicodeDecodeError) as exc:
+                    st.error("Backup incompatível ou inválido. Nenhum dado foi substituído.")
+                else:
+                    st.warning("Revisão do backup: "+
+                               str(len(selected_rows(candidate,catalog)))+
+                               " lugares. Restaurar substituirá o plano DESTA SESSÃO, "
+                               "sem modificar automaticamente arquivos do GitHub.")
+                    if st.button("Confirmar recuperação nesta sessão",
+                                 key="flow_import_confirm"):
+                        st.session_state["advisor_plan"]=candidate
+                        st.session_state["advisor_saved_snapshot"]=None
+                        st.session_state["advisor_github_sha"]=None
+                        st.session_state["advisor_autosave_pending"]=False
+                        st.session_state["advisor_autosave_optin"]=False
+                        st.session_state["advisor_local_changed"]=True
+                        sync_legacy_view(candidate,st.session_state)
+                        st.session_state["flow_notice"]=(
+                            "Backup recuperado nesta sessão; salve ou exporte para não perder.")
+                        st.session_state["flow_save_open"]=False
+                        st.rerun()
         if _owner_signed_in():
             st.warning("O repositório GitHub deste aplicativo é PÚBLICO: "
                        "as escolhas gravadas ficam acessíveis a outras pessoas.")
@@ -632,7 +634,23 @@ def _save_panel(plan:dict,catalog:dict)->None:
                         if comparison["difference_count"] > len(comparison["different_fields"]):
                             st.warning("Há diferenças não exibidas. Baixe e revise os JSONs completos; a publicação fica bloqueada nesta tela.")
                     else:
-                        st.info("Os dados são iguais. É necessário reconciliar apenas a versão.")
+                        st.success("Planejamento idêntico ao já salvo no GitHub. "
+                                   "Pode sincronizar sem criar nova revisão.")
+                        if st.button("Reconhecer versão já salva",
+                                     key="flow_sync_identical"):
+                            try:
+                                sync_identical_remote_plan(plan, preview["sha"],
+                                                           preview["local_digest"])
+                            except Exception as exc:
+                                st.error(explain_storage_error(exc))
+                                st.session_state.pop("flow_reconcile_preview", None)
+                            else:
+                                st.session_state.pop("flow_reconcile_preview", None)
+                                st.session_state.pop("flow_reconcile_needed", None)
+                                st.session_state["flow_notice"] = (
+                                    "Planejamento já salvo: referência sincronizada sem novo commit.")
+                                st.session_state["flow_save_open"] = False
+                                st.rerun()
                     st.download_button("Baixar versão do GitHub",
                                        data=json.dumps(preview["remote"], ensure_ascii=False, indent=2),
                                        file_name="nossa-europa-versao-github.json",
@@ -640,12 +658,15 @@ def _save_panel(plan:dict,catalog:dict)->None:
                     st.warning("A confirmação publicará os dados LOCAIS. Diferenças da versão "
                                "remota serão substituídas no arquivo atual, mas permanecerão "
                                "no histórico do GitHub.")
-                    approved = st.checkbox(
-                        "Conferi as diferenças e autorizo publicar minha versão local",
-                        key="flow_reconcile_ack", value=False)
+                    if comparison["difference_count"] > 0:
+                        approved = st.checkbox(
+                            "Conferi as diferenças e autorizo publicar minha versão local",
+                            key="flow_reconcile_ack", value=False)
+                    else:
+                        approved = False
                     if st.button("Confirmar reconciliação e salvar",
                                  key="flow_reconcile_confirm",
-                                 disabled=not (approved and agree and
+                                 disabled=not (approved and agree and comparison["difference_count"] > 0 and
                                      comparison["difference_count"] <= len(comparison["different_fields"]))):
                         try:
                             if plan_digest(st.session_state["advisor_plan"]) != preview["local_digest"]:
