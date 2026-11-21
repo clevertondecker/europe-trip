@@ -106,6 +106,8 @@ def build_wishlist_matrix(interests: dict, base_ids: list[str], *,
                 "return_weekend_verified":False,
                 "local_access_verified":False,
                 "observations":deepcopy(observations),"divergent_sources":divergent,
+                "variation_status":projection_row["variation_status"],
+                "contradiction_confirmed":False,
                 "research_gaps":list(MISSING) if evidence["status"] != "local"
                                  else ["Acesso local, transporte urbano e última milha a verificar"],
             })
@@ -116,7 +118,7 @@ def build_wishlist_matrix(interests: dict, base_ids: list[str], *,
         if local:
             pending.append(f"Verificar acesso urbano em {local} destino(s) locais")
         if conflicts:
-            pending.append(f"Reconciliar fontes divergentes em {conflicts} rota(s)")
+            pending.append(f"Conferir condições de observações com tempos diferentes em {conflicts} rota(s)")
         pending += ["Confirmar retorno de fim de semana e última milha",
                     "Confirmar moradia mobiliada para as datas de 2027"]
         summaries.append({
