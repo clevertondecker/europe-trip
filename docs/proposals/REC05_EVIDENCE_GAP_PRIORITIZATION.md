@@ -17,3 +17,7 @@ Usar REC02/UX506/REC04 para selecionar poucos itens relevantes no contexto de ca
 
 ## Coordenação com a nova jornada Planejar (#195)
 Depende de #195, #190 e #191 integrados e validados. A revisão consolidada pode mostrar pendências básicas já sustentadas por dados canônicos; REC05 acrescentará priorização explicável de pesquisa, como ferramenta secundária, sem tornar pesquisa de transporte, custos, moradia ou datas pré-requisito de salvamento. Não duplicar lista, progresso ou editor; manter distinção wishlist/TripPlan/organização/persistência. Reutilizar escopo explícito REC02/03 e preservar desejos exploratórios DATA23. Testar que lacunas não impedem o fluxo wishlist → rascunho salvo, nenhum cálculo de evidência inventado e retorno mantém contexto. Sem execução de pesquisa em rerun, nenhuma implementação antecipada neste commit.
+
+
+## Gate após revisão de elegibilidade de Planejar
+Distinguir falta de suporte canônico para inclusão de lacuna de evidência ferroviária. A fila REC05 pode indicar pesquisa futura, mas não transformar ID exploratório em passeio elegível. Quando nenhum desejo puder ser incluído, oferecer pesquisa/revisão sem abrir montagem vazia. Rascunho existente deve continuar revisável e salvável sem datas, moradia ou tarifas confirmadas. Implementação somente após #195/#190/#191 integrados.
