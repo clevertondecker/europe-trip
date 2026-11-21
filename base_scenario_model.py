@@ -9,7 +9,7 @@ from base_explorer_model import load_exploration
 from base_research_expanded_model import load_research,load_rail
 
 
-def base_options(data: dict | None = None) -> list[dict]:
+def base_options(data: dict | None = None, *, include_candidates:bool=False) -> list[dict]:
     """One source for explored French bases; labels reflect evidence coverage."""
     source = data if data is not None else load_exploration()
     routes = source["routes"]
@@ -30,7 +30,7 @@ def base_options(data: dict | None = None) -> list[dict]:
         })
     seen={row["id"] for row in output}
     rail=load_rail()
-    for item in load_research(include_candidates=True)["cities"]:
+    for item in load_research(include_candidates=include_candidates)["cities"]:
         if item["id"] in seen:
             continue
         segments=[line for line in rail["segments"] if line["from"]==item["id"]]
@@ -58,7 +58,7 @@ def hypothetical_city_name(base_id: str, options: list[dict]) -> str:
 
 def expanded_rail_routes(city_id:str)->list[dict]:
     """Verified source excerpts only; never infer a connection or a return fare."""
-    choose_exploratory_base(city_id,base_options())
+    choose_exploratory_base(city_id,base_options(include_candidates=True))
     from data23_france_candidates_model import base_routes as candidate_base_routes
     candidate_rows=candidate_base_routes(city_id)
     if candidate_rows:
