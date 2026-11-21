@@ -34,6 +34,11 @@ class Data23DiscoveryOverlayTests(unittest.TestCase):
             self.assertFalse(item["verified_weekend_return"])
             self.assertIsNone(item["feasible_from_base"])
             self.assertTrue(item["attractions"])
+            self.assertEqual(item["planning_support"], "exploration_only")
+            self.assertIn(item["photo"]["subject"], [a["name"] for a in item["attractions"]])
+            self.assertTrue(item["photo"]["author"])
+            self.assertTrue(item["photo"]["license"])
+            self.assertTrue(item["photo"]["source_page"].startswith("https://commons.wikimedia.org/"))
             for attr in item["attractions"]:
                 self.assertEqual(attr["source_url"], sources[attr["id"]])
         self.assertFalse({"nantes", "tours", "chartres", "aix_les_bains",
@@ -46,6 +51,9 @@ class Data23DiscoveryOverlayTests(unittest.TestCase):
         restored = import_interests(export_interests(saved, catalog), catalog)
         self.assertEqual(restored, saved)
         self.assertEqual(original["items"], [])
+        revised = set_interest(saved, "paris", "interested", catalog)
+        self.assertEqual(import_interests(export_interests(revised, catalog), catalog), revised)
+        self.assertEqual(import_interests(export_interests(original, catalog), catalog), original)
         view = compare_wishlist_bases(restored, ["angers", "rennes"], discovery=catalog)
         enriched = decorate_comparison(view)
         cell = enriched["cells"][("angers", "saumur")]
