@@ -48,8 +48,9 @@ class DynamicBaseCatalogTests(unittest.TestCase):
                 self.assertEqual(profile["housing"]["historical_offer_count"],0)
 
     def test_other_pages_include_all_cities_and_no_official_promotion(self):
-        options={r["id"]:r for r in base_options()}
+        options={r["id"]:r for r in base_options(include_candidates=True)}
         self.assertTrue(REQUIRED_IDS <= set(options))
+        self.assertTrue(REQUIRED_IDS.isdisjoint({r["id"] for r in base_options()}))
         self.assertTrue(all(not options[x]["official_supported"] for x in REQUIRED_IDS))
         rows=coverage_matrix("general",study=self.research)
         self.assertEqual(len(rows),len(self.research["cities"]))
