@@ -11,7 +11,7 @@ from attractions_model import load_attractions,load_base_routes,package_cost,exc
 from travel_advisor import assess_plan,recommendations,objective_weights
 from travel_optimizer import propose_schedule
 from trip_plan_model import new_plan,validate_plan,with_revision,apply_proposal
-from trip_plan_repository import GitHubPlanRepository
+from trip_plan_repository import GitHubPlanRepository, PlanConflictError
 from plan_reconciliation import compare_plans, plan_digest, prepare_reconciled_plan
 from advisor_auth import is_verified_owner
 from planning_store import create_from_legacy,change_plan,sync_legacy_view
@@ -129,6 +129,22 @@ def _secure_save(plan, *, expected_sha_override=None):
     st.session_state["advisor_github_sha"]=next_sha
     st.session_state["advisor_saved_snapshot"]=deepcopy(plan)
     st.session_state["advisor_last_saved_at"]=datetime.now(timezone.utc).isoformat()
+
+def sync_identical_remote_plan(plan:dict, preview_sha:str, preview_digest:str)->None:
+    """Acknowledge an already-persisted GitHub plan without writing any commit."""
+    from plan_reconciliation import plan_digest, same_persisted_plan
+    cfg=_owner_config()
+    if not cfg["token"] or not _owner_signed_in(cfg):
+        raise PermissionError("Apenas o proprietário autenticado pode sincronizar o planejamento")
+    if plan_digest(plan) != preview_digest:
+        raise PlanConflictError("O planejamento local mudou. Compare novamente.")
+    remote,remote_sha=GitHubPlanRepository(cfg["token"]).load(plan["plan_id"])
+    if remote_sha != preview_sha or not same_persisted_plan(plan,remote):
+        raise PlanConflictError("A versão no GitHub mudou. Compare novamente.")
+    st.session_state["advisor_github_sha"]=remote_sha
+    st.session_state["advisor_saved_snapshot"]=deepcopy(remote)
+    st.session_state["advisor_last_saved_at"]=datetime.now(timezone.utc).isoformat()
+
 
 def _github_read_error(exc:Exception)->str:
     if isinstance(exc,HTTPError):
@@ -465,8 +481,21 @@ def render_advisor(trip_data:dict,sync_sources:dict,workspace_area:str='Meus pas
                                 if comparison["difference_count"] > len(comparison["different_fields"]):
                                     st.warning("Há diferenças não exibidas. Baixe e revise os JSONs completos; a publicação fica bloqueada nesta tela.")
                             else:
-                                st.info("Os dados são iguais; somente a referência de "
-                                        "versão precisa ser reconciliada.")
+                                st.success("Este planejamento já está salvo no GitHub. "
+                                           "Basta reconhecer a versão, sem criar commit.")
+                                if st.button("Sincronizar referência sem salvar novamente",
+                                             key="advisor_sync_identical"):
+                                    try:
+                                        sync_identical_remote_plan(p, preview["sha"],
+                                                                   preview["local_digest"])
+                                    except Exception as exc:
+                                        st.error(explain_storage_error(exc))
+                                        st.session_state.pop("advisor_reconcile_preview", None)
+                                    else:
+                                        st.session_state.pop("advisor_reconcile_preview", None)
+                                        st.session_state.pop("advisor_reconcile_needed", None)
+                                        st.success("Planejamento sincronizado: nenhum commit foi criado.")
+                                        st.rerun()
                             st.download_button(
                                 "Baixar versão do GitHub antes de decidir",
                                 data=json.dumps(preview["remote"], ensure_ascii=False, indent=2),
@@ -476,12 +505,15 @@ def render_advisor(trip_data:dict,sync_sources:dict,workspace_area:str='Meus pas
                                        "a próxima revisão no GitHub. Campos divergentes "
                                        "da versão remota serão substituídos no arquivo atual; "
                                        "a revisão anterior continuará no histórico Git.")
-                            approved = st.checkbox(
-                                "Comparei as duas versões e autorizo publicar meu planejamento local",
-                                key="advisor_reconcile_ack", value=False)
+                            if comparison["difference_count"] > 0:
+                                approved = st.checkbox(
+                                    "Comparei as duas versões e autorizo publicar meu planejamento local",
+                                    key="advisor_reconcile_ack", value=False)
+                            else:
+                                approved = False
                             if st.button("Confirmar reconciliação e salvar no GitHub",
                                          key="advisor_reconcile_confirm",
-                                         disabled=not (approved and
+                                         disabled=not (approved and comparison["difference_count"] > 0 and
                                              comparison["difference_count"] <= len(comparison["different_fields"]))):
                                 try:
                                     if plan_digest(st.session_state["advisor_plan"]) != preview["local_digest"]:

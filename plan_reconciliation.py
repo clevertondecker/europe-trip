@@ -76,3 +76,8 @@ def prepare_reconciled_plan(local: dict, remote: dict) -> dict:
     result["revision"] = max(local["revision"], remote["revision"]) + 1
     validate_plan(result)
     return result
+
+
+def same_persisted_plan(local: dict, remote: dict) -> bool:
+    """Equality for no-write reconciliation; includes plan ID and revision."""
+    return compare_plans(local, remote)["difference_count"] == 0
