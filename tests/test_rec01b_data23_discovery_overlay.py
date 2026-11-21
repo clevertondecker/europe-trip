@@ -44,6 +44,26 @@ class Data23DiscoveryOverlayTests(unittest.TestCase):
         self.assertFalse({"nantes", "tours", "chartres", "aix_les_bains",
                           "geneva", "chamonix"} & set(by_id))
 
+    def test_unsupported_planning_is_visible_in_projection_without_plan_mutation(self):
+        from ux61_destination_board_model import build_destination_board, organizer_wishlist_candidates
+        from attractions_model import load_attractions
+        from itinerary_flow_model import FRANCE_STAGE
+        from trip_plan_model import new_plan
+        discovery = build_exploration_discovery()
+        catalog = load_attractions()
+        plan = new_plan()
+        wishes = set_interest(empty_interests(), "saumur", "must_visit", discovery)
+        before = deepcopy((plan, wishes))
+        board = build_destination_board(wishes, plan, discovery, catalog)
+        row = next(r for r in board if r["id"] == "saumur")
+        self.assertTrue(row["wanted"])
+        self.assertFalse(row["planned"])
+        self.assertEqual(row["planning_support"], "exploration_only")
+        options = organizer_wishlist_candidates(wishes, plan, discovery, catalog, FRANCE_STAGE)
+        self.assertIn("saumur", {r["id"] for r in options["unsupported"]})
+        self.assertNotIn("saumur", {r["id"] for r in options["eligible"]})
+        self.assertEqual((plan, wishes), before)
+
     def test_wishlist_roundtrip_and_directional_reference(self):
         catalog = build_exploration_discovery()
         original = empty_interests()
