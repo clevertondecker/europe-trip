@@ -59,6 +59,20 @@ def hypothetical_city_name(base_id: str, options: list[dict]) -> str:
 def expanded_rail_routes(city_id:str)->list[dict]:
     """Verified source excerpts only; never infer a connection or a return fare."""
     choose_exploratory_base(city_id,base_options())
+    from data23_france_candidates_model import base_routes as candidate_base_routes
+    candidate_rows=candidate_base_routes(city_id)
+    if candidate_rows:
+        return [{
+            "destination_id":r["destination_id"],
+            "destination_name":r["destination_id"].replace("_"," ").title(),
+            "oneway_minutes":r["minimum_oneway_min"],
+            "fare_eur_person_oneway":None,
+            "source_url":r["source_url"],
+            "fare_source_url":None,
+            "basis_date":r["checked_at"],
+            "return_verified_2027":False,
+            "notes":r["notes"],
+        } for r in candidate_rows]
     return [
         {
             "destination_id":x["to"],
