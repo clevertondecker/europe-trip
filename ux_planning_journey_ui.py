@@ -183,7 +183,7 @@ def render_review(plan,catalog,view):
 def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx=6.3,chffx=7.1,*,summary_only=False):
     from continuity_ui import private_status_label
     from itinerary_flow_ui import (_render_organize,_render_add,_selected_stage,
-                                  _active_stage_changed,_stage_label,_show_add,_compact_budget)
+                                  _active_stage_changed,_stage_label,_show_add,_show_organize,_compact_budget)
     from ux61_destination_board_ui import render_destination_board
     from ux64_navigation_model import select_public_task
     from rec03a_session import request_navigation
@@ -302,16 +302,19 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
                                    selection_mode="single")
         if stage not in STAGES:
             stage=ITALY_STAGE
-        state["flow_organize_open"]=True
-        _render_organize(active_plan(),catalog,stage,show_wishlist=False,review_on_close=True)
+        if state.get("flow_add_open"):
+            st.button("Organizar períodos e datas",key="flow_go_calendar",on_click=_show_organize)
+            _render_add(active_plan(),catalog)
+        else:
+            state["flow_organize_open"]=True
+            _render_organize(active_plan(),catalog,stage,show_wishlist=False,review_on_close=True)
+            st.button("Adicionar passeio ou editar atrações",key="flow_add_open_button",on_click=_show_add)
         if st.checkbox("Ver calendário e agrupamento de visitas",key="flow_journey_calendar"):
             from ux63_timeline_ui import render_timeline
             render_timeline(active_plan(),catalog,stage)
             if stage==FRANCE_STAGE:
                 from ux48_weekend_groups_ui import render_weekend_planner
                 render_weekend_planner(active_plan(),catalog)
-        st.button("Adicionar passeio ou editar atrações",key="flow_add_open_button",on_click=_show_add)
-        _render_add(active_plan(),catalog)
         _selected_stage(view["rows"],stage,catalog)
         st.button("Revisar e salvar sem definir outras datas",key="flow_journey_skip_dates",
                   on_click=_show,args=("review",))

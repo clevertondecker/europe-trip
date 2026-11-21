@@ -65,13 +65,22 @@ def project_journey(plan: dict, interests: dict | None = None) -> dict:
         for index,step in enumerate(STEPS)
     ]
     remaining = {x["destination_id"] for x in active} - destinations
+    if remaining:
+        from attractions_model import load_attractions
+        from itinerary_flow_model import destinations as canonical_destinations
+        eligible_remaining=remaining & {d["id"] for d in canonical_destinations(load_attractions())}
+    else:
+        eligible_remaining=set()
     if not wishes and not outing_count:
         next_step = {"label":"Começar pelos destinos","id":"discover"}
         alternative_actions = []
+    elif not outing_count and not eligible_remaining:
+        next_step = {"label":"Revisar minha lista","id":"wishlist"}
+        alternative_actions = [{"label":"Descobrir destinos compatíveis","id":"discover"}]
     elif not outing_count:
         next_step = {"label":"Montar roteiro com meus destinos","id":"itinerary"}
         alternative_actions = [{"label":"Comparar cidades-base","id":"compare"}]
-    elif remaining:
+    elif eligible_remaining:
         next_step = {"label":"Adicionar destinos pendentes ao roteiro","id":"itinerary"}
         alternative_actions = [{"label":"Comparar cidades-base","id":"compare"}]
     else:
