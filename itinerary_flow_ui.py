@@ -492,7 +492,8 @@ def _render_organizer_wishlist(plan:dict,catalog:dict,stage:str)->None:
                 st.session_state["flow_notice"]=(
                     str(len(picked))+" destino(s) incluído(s) no roteiro sem data. "
                     "Salve sua viagem na nuvem para preservar as alterações.")
-                st.session_state.pop(select_key,None)
+                # Do not mutate a rendered widget key. On the next rerun the
+                # stale selection is filtered before the multiselect is created.
                 st.rerun()
             except (ValueError,KeyError) as exc:
                 st.error(str(exc))
