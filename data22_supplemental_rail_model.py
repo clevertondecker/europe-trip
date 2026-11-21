@@ -19,7 +19,7 @@ SOURCE_KINDS={
 SLUGS={
     "metz":"metz","strasbourg":"strasbourg","lille":"lille",
     "mulhouse":"mulhouse","nancy":"nancy","colmar":"colmar","basel":"bale",
-    "obernai":"obernai","lucerne":"lucerne",
+    "obernai":"obernai","lucerne":"lucerne","selestat":"selestat",
 }
 
 def _check_source(row):
