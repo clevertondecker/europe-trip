@@ -200,6 +200,8 @@ def opportunity_overview(base_id, *, macro=None,catalog=None,exploration=None,
     projection=decorate_comparison({"rows":projection_rows})
     for entry in entries:
         cell=projection["cells"][(origin,entry["destination_id"])]
+        entry["rail_variation_status"]=cell["variation_status"]
+        entry["rail_contradiction_confirmed"]=cell["contradiction_confirmed"]
         if cell["category"]=="reference_only":
             entry["status"]="indicative_rail_reference_only"
             entry["indicative_train_oneway_min"]=cell["display_min"]
@@ -209,13 +211,17 @@ def opportunity_overview(base_id, *, macro=None,catalog=None,exploration=None,
             entry["indicative_confidence"]=cell.get("confidence")
             entry["indicative_evidence_type"]=(
                 cell.get("gap_evidence_type")
-                or ("data13_directed_reference" if cell.get("data13_connectivity_applied")
+                or ("data23_candidate_reference" if cell.get("candidate_connectivity_applied")
+                    else "data22_supplemental_reference" if cell.get("supplemental_connectivity_applied")
+                    else "data13_directed_reference" if cell.get("data13_connectivity_applied")
                     else "data12_lille_reference" if cell.get("lille_connectivity_applied")
                     else "data11_priority_reference" if cell.get("priority_connectivity_applied")
                     else "data10_connectivity_reference" if cell.get("connectivity_applied")
                     else "routes7_reference"))
             entry["indicative_source_dataset"]=(
-                "data13_directed_connectivity_2026_11" if cell.get("data13_connectivity_applied")
+                "data23_france_base_candidates_2026_11" if cell.get("candidate_connectivity_applied")
+                else "data22_supplemental_rail_2026_11" if cell.get("supplemental_connectivity_applied")
+                else "data13_directed_connectivity_2026_11" if cell.get("data13_connectivity_applied")
                 else "data12_lille_connectivity_2026_11" if cell.get("lille_connectivity_applied")
                 else "data11_priority_connectivity_2026_11" if cell.get("priority_connectivity_applied")
                 else "data10_connectivity_2026_11" if cell.get("connectivity_applied")
