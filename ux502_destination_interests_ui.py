@@ -170,17 +170,20 @@ def render_wishlist(discovery) -> bool:
                 restored = validate_interests(pending_import, discovery)
                 restored["revision"] = max(current["revision"], restored["revision"]) + 1
                 _change(restored)
+                from rec03a_session import clear_recommendation_context
+                clear_recommendation_context(st.session_state)
                 st.session_state.pop("ux502_import_pending", None)
                 st.rerun()
 
     if view != "Minha lista":
         return False
     if active:
-        def open_comparison():
-            st.session_state["ux_area"] = "Explorar"
-            st.session_state["ux_section"] = "Comparar"
+        from rec03a_session import request_navigation
+        st.button("Encontrar cidades-base", key="rec03a_open_from_wishlist", type="primary",
+                  on_click=request_navigation,args=(st.session_state,"suggestions"))
         st.button("Comparar cidades-base para nossos destinos",
-                  key="ux503_open_from_wishlist", on_click=open_comparison)
+                  key="ux503_open_from_wishlist",
+                  on_click=request_navigation,args=(st.session_state,"manual"))
 
     if not items:
         st.info("Nenhum destino na lista. Use Descobrir lugares para adicionar.")
