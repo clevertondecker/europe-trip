@@ -25,6 +25,34 @@ def _show(action):
         state.pop("flow_edit_target",None)
 
 
+def request_planning(state, action="build", stage=None):
+    """Session-only intent shared by wishlist and future REC03B handoffs."""
+    if action not in ("build","organize","review") or stage not in (None,*STAGES):
+        raise ValueError("Encaminhamento inválido")
+    state["flow_journey_intent"]={"action":action,"stage":stage}
+
+
+def apply_planning_request(state):
+    intent=state.pop("flow_journey_intent",None)
+    if not isinstance(intent,dict):
+        return
+    action,stage=intent.get("action"),intent.get("stage")
+    if action not in ("build","organize","review") or stage not in (None,*STAGES):
+        return
+    from ux64_navigation_model import select_public_task
+    select_public_task(state,"Planejar","Organizar")
+    state[VIEW]=action
+    state["flow_journey_identity"]=(state.get("rec03a_identity"),active_plan()["plan_id"])
+    state["flow_organize_open"]=action=="organize"
+    state["flow_add_open"]=False
+    state["flow_save_open"]=False
+    state.pop("flow_edit_target",None)
+    state["ux_organize_view"]="Por período ou data"
+    if stage is not None:
+        state["flow_active_stage"]=stage
+        state["flow_stage"]=stage
+
+
 def _choose():
     from rec03a_session import request_navigation
     request_navigation(st.session_state,"wishlist")
@@ -48,6 +76,9 @@ def render_build(plan, catalog, view):
         eligible=view["batches"][stage]["eligible"]
         with st.container(border=True):
             st.markdown("**"+LABELS_STAGE[stage]+"**")
+            included=[row["name"] for row in view["rows"] if row["stage"]==stage]
+            if included:
+                st.caption("Já no roteiro: "+", ".join(included))
             if not eligible:
                 st.caption("Nenhum novo destino compatível nesta etapa.")
                 continue
@@ -81,6 +112,7 @@ def render_build(plan, catalog, view):
                     st.rerun()
                 except (ValueError,KeyError) as exc:
                     st.error(str(exc))
+    st.button("Cancelar seleção não confirmada",key="flow_journey_cancel_batch",on_click=_cancel_batch)
     if view["unsupported"]:
         with st.expander("Destinos ainda disponíveis somente para pesquisa"):
             st.write(", ".join(r["name"] for r in view["unsupported"]))
@@ -91,9 +123,17 @@ def render_build(plan, catalog, view):
         st.button("Revisar minha lista",key="flow_journey_edit_wishes",on_click=_choose)
 
 
+def _cancel_batch():
+    for key in list(st.session_state.keys()):
+        if key.startswith("flow_journey_batch_"):
+            st.session_state.pop(key,None)
+    _show("review")
+
+
 def render_review(plan,catalog,view):
     from continuity_ui import render_primary_private_save,render_continuity_panel
     st.markdown("#### Revisar e salvar meu rascunho")
+    st.caption(f'{plan["italy_days"]} dias de lua de mel · {plan["total_days"]-plan["italy_days"]} dias de temporada europeia · Base oficial de referência: {plan["base_city"]}. Nenhuma reserva confirmada.')
     if not view["rows"]:
         st.info("Nenhum destino incluído. Você pode manter sua lista de desejos sem inventar passeios.")
     for stage in STAGES:
@@ -110,8 +150,12 @@ def render_review(plan,catalog,view):
         st.info(f'{len(view["pending"])} destino(s) ainda sem período ou data. Isso não impede salvar o rascunho.')
     if view["eligible_count"]:
         st.caption(f'{view["eligible_count"]} desejo(s) compatíveis ainda não incluídos.')
+        for stage in STAGES:
+            if view["batches"][stage]["eligible"]:
+                st.write(LABELS_STAGE[stage]+": "+", ".join(r["name"] for r in view["batches"][stage]["eligible"]))
+        st.button("Voltar a incluir destinos",key="flow_journey_review_build",on_click=_show,args=("build",))
     if view["unsupported"]:
-        st.caption(f'{len(view["unsupported"])} desejo(s) ainda sem suporte de roteiro; permanecem na lista.')
+        st.caption("Somente pesquisa: "+", ".join(r["name"] for r in view["unsupported"]))
     st.caption("Retornos, reservas, moradia e custos de 2027 ainda precisam de confirmação. "
                "Salvar registra decisões, não confirma reservas.")
     st.button("Organizar períodos e datas (opcional)",key="flow_journey_review_organize",
@@ -120,7 +164,7 @@ def render_review(plan,catalog,view):
     render_continuity_panel(plan,catalog)
 
 
-def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx=6.3,chffx=7.1):
+def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx=6.3,chffx=7.1,*,summary_only=False):
     from continuity_ui import private_status_label
     from itinerary_flow_ui import (_render_organize,_render_add,_selected_stage,
                                   _active_stage_changed,_stage_label,_show_add,_compact_budget)
@@ -155,6 +199,34 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
     # Respect existing explicit edit deep links and the canonical organizer.
     if state.get("flow_edit_target") or state.get("flow_add_open"):
         state[VIEW]="organize"
+    if summary_only:
+        action=view["next"]
+        with st.container(border=True):
+            st.markdown("#### Continue de onde parou")
+            if action=="build":
+                st.write(f'{view["eligible_count"]} destinos elegíveis ainda não incluídos.')
+                label="Adicionar destinos pendentes ao roteiro" if counts["planned"] else "Montar roteiro com meus destinos"
+            elif action=="review":
+                st.write("Confira os destinos incluídos e salve seu rascunho.")
+                label="Revisar meu roteiro"
+            else:
+                st.write("Escolha os destinos que deseja conhecer.")
+                label="Escolher destinos"
+            st.button(label,key="flow_journey_primary",type="primary",
+                      on_click=_choose if action=="choose" else request_planning,
+                      args=() if action=="choose" else (state,action))
+        st.markdown("#### Etapas da jornada")
+        for step,title,status in view["steps"]:
+            st.markdown("**"+title+"**")
+            st.caption(status)
+        with st.expander("Ferramentas complementares"):
+            st.button("Encontrar cidades-base",key="flow_journey_suggestions",
+                      on_click=request_navigation,args=(state,"suggestions"))
+            st.button("Revisar orçamento",key="flow_journey_budget",
+                      on_click=select_public_task,args=(state,"Orçamento","Visão financeira"))
+            if st.checkbox("Consultar todos os destinos",key="flow_journey_board"):
+                render_destination_board(plan,catalog)
+        return
     action=state[VIEW] or view["next"]
     with st.container(border=True):
         st.markdown("#### Próxima ação")
@@ -201,7 +273,13 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
         if stage not in STAGES:
             stage=ITALY_STAGE
         state["flow_organize_open"]=True
-        _render_organize(active_plan(),catalog,stage,show_wishlist=False)
+        _render_organize(active_plan(),catalog,stage,show_wishlist=False,review_on_close=True)
+        if st.checkbox("Ver calendário e agrupamento de visitas",key="flow_journey_calendar"):
+            from ux63_timeline_ui import render_timeline
+            render_timeline(active_plan(),catalog,stage)
+            if stage==FRANCE_STAGE:
+                from ux48_weekend_groups_ui import render_weekend_planner
+                render_weekend_planner(active_plan(),catalog)
         st.button("Adicionar passeio ou editar atrações",key="flow_journey_add_outing",on_click=_show_add)
         _render_add(active_plan(),catalog)
         _selected_stage(view["rows"],stage,catalog)
