@@ -2,13 +2,13 @@
 
 **Projeto:** Nossa Europa 2027  
 **Repositório:** https://github.com/clevertondecker/europe-trip  
-**Estado:** proposta para revisão; não é implementação nem autorização de merge.
+**Estado:** proposta revisada após avaliação adversarial em 21/11/2026; não é implementação nem autorização de merge. A revisão restringe o MVP à logística e exige reprodução da triagem no REC01.
 
 Atue como Staff Software Engineer, Product/UX Engineer, Senior Python/Streamlit Engineer e especialista em sistemas de recomendação multicritério e qualidade de evidências. Antes de escrever código, inspecione o HEAD atualizado de main, os contratos e testes existentes. Confirme ou refute as premissas deste documento, registre divergências e preserve funcionalidades atuais. Execute em incrementos independentes, revisáveis, com CI verde. Não implemente todos os incrementos simultaneamente nem faça merge sem autorização.
 
-## 1. Problema e objetivo
+## 1. Problema e objetivo (MVP logístico)
 
-Hoje o usuário descobre atrações, registra destinos e prioridades, e escolhe manualmente 2–5 cidades para comparar. Queremos inverter essa dependência: sugerir automaticamente candidatas a partir dos destinos escolhidos, explicando adequação, cobertura, incertezas e compromissos entre logística, moradia e qualidade de vida. A pesquisa de cidades deve continuar dinâmica (34 candidatas no DATA23, nunca uma quantidade fixa no algoritmo). A escolha exploratória não equivale a confirmação de residência, reserva ou alteração do TripPlan.
+Hoje o usuário descobre atrações, registra destinos e prioridades, e escolhe manualmente 2–5 cidades para comparar. Queremos inverter essa dependência: sugerir automaticamente candidatas a partir dos destinos escolhidos, explicando referências logísticas, cobertura e incertezas; moradia e qualidade de vida são contexto complementar até serem comparáveis. A pesquisa de cidades deve continuar dinâmica (34 candidatas no DATA23, nunca uma quantidade fixa no algoritmo). A escolha exploratória não equivale a confirmação de residência, reserva ou alteração do TripPlan.
 
 Contexto: lua de mel na Itália seguida de temporada europeia com trabalho remoto, passeios sobretudo nos fins de semana, viagem após 04/09/2027. Datas, duração, valores e preferências atuais do plano devem ser lidos dos contratos existentes; não codificar premissas pessoais como regras universais. Priorizar acesso ferroviário, moradia mobiliada para dois adultos, conectividade para trabalho remoto e orçamento. Tratar Itália/lua de mel e temporada europeia como escopos distintos: não usar automaticamente destinos da lua de mel para sugerir a base da temporada.
 
@@ -21,44 +21,79 @@ Contexto: lua de mel na Itália seguida de temporada europeia com trabalho remot
 - Verificar módulos de orçamento, cenários, mapa, favoritos, roteiro e persistência, seus testes e documentação. Reutilizar caminhos canônicos de navegação e ações existentes.
 - Documentar conjunto real de destinos elegíveis, universo de bases, eventuais aliases/IDs, cobertura por categoria, limites de datas e quais cidades podem ser usadas em cenários versus oficializadas.
 
-## 3. Jornada e UX
+## 3. Jornada e UX (revisão adversarial)
 
-Manter áreas principais: Minha viagem, Explorar, Meu roteiro e Orçamento. Não criar uma quinta área ou editor paralelo.
+A UX64 está implementada: ux64_navigation_model.py define PUBLIC_AREAS=(Explorar, Planejar, Orçamento) e PUBLIC_TASKS; app.py importa public_area/select_public_area e render_public_task_tabs. ux_navigation.py mantém quatro áreas INTERNAS por compatibilidade. Não substituir o roteador, criar área/aba principal ou persistir outro estado de navegação.
 
-Fluxo flexível: Descobrir lugares → Minha lista → Encontrar cidade-base → Comparar alternativas → Simular estadia → Montar/organizar roteiro → Revisar orçamento e pendências. Permitir saltar, retornar e reavaliar sem perda de escolhas.
+Fluxo público: Explorar → Descobrir → Minha lista → Comparar bases (atividade interna Cidades sugeridas / Comparação personalizada) → Planejar → Meus destinos / Organizar → Orçamento. A visão geral de Planejar oferece atalhos contextuais. Cidades-base/fichas continuam acessíveis no fluxo já existente; pendências e decisões legadas não são removidas. Não bloquear montagem de roteiro nem marcar comparação como concluída por visita à tela.
 
-- Em Minha lista, exibir CTA principal "Encontrar cidades-base para nossos destinos"; manter comparação manual acessível. Se lista vazia ou toda descartada, orientar descoberta.
-- Na área Explorar → Comparar, disponibilizar atividades "Cidades sugeridas" e "Comparação personalizada", sem duplicar navegação. A entrada pelo CTA deve chegar diretamente na atividade sugerida; links legados continuam funcionando.
-- Na jornada inicial, oferecer sugestão como próximo passo quando existirem interesses relevantes; acesso à montagem do roteiro não deve ser bloqueado. Abrir uma tela não significa concluir uma decisão.
-- Começar com perfil equilibrado e apresentar resultados sem exigir formulário longo. Permitir perfis Logística, Economia, Vida cotidiana/trabalho remoto e Exploração internacional; configurações avançadas recolhidas, com explicação e reset.
-- Mostrar lista efetivamente avaliada (todos os destinos elegíveis, não apenas filtro visual de cinco destinos do UX503), prioridades, escopo temporada/Itália e opção de ajustar interesses na fonte canônica. Se não houver classificação de escopo existente, oferecer filtro explícito e transitório, com indicação clara, sem inferir escopo pela nacionalidade do destino nem duplicar lista persistida.
-- Mostrar poucas sugestões iniciais (por exemplo 3–5, adaptável à quantidade e evidência), razões concretas, métricas, lacunas, fotos com fallback/crédito quando disponíveis. Acesso a todas as candidatas, inclusive pouco pesquisadas. Não rotular uma vencedora quando as evidências não sustentarem isso.
-- Ações: abrir ficha da cidade, favoritar, selecionar 2–5 bases para comparador existente, voltar à lista, simular estadia, continuar roteiro. Transferir IDs e escopo selecionado, sem sobrescrever indiscriminadamente seleções manuais anteriores; oferecer ação explícita para substituir seleção.
-- Distinguir base de referência oficial, cenário exploratório e cidade candidata. Não oferecer confirmação inválida para candidatas não suportadas pelo TripPlan. Indicar limitações de forma acionável.
-- Layout responsivo, labels acessíveis, hierarquia clara, progressive disclosure, estados vazios/erro/baixa cobertura, sem depender exclusivamente de cor ou hover. Não repetir tabelas e informações em várias telas.
+- CTA "Encontrar cidades-base" em Minha lista e, quando houver interesses ativos, na visão geral. Entrar diretamente na atividade de sugestões em Comparar bases via select_public_task/set_task e intenção pré-widget existente. Um único seletor interno de atividade, sem rotas duplicadas. Preservar deep links e compatibilidade dos callbacks legados.
+- Exibir primeiro escopo de análise e resumo dos interesses; não exigir formulário de pesos. Mostrar cobertura, imperdíveis, exemplos de trajetos, evidências e pendências. Até 3–5 destaques quando úteis, acesso a todas as candidatas e comparação manual (2–5), sem apresentar ordenação como ranking global.
+- Fotos apenas com fontes/créditos/fallback existentes. Ações explícitas para abrir ficha, favoritar, selecionar para comparação, voltar à lista, simular se suportado e continuar roteiro. Transferir IDs e escopo selecionado sem destruir filtros manuais; pedir ação explícita antes de substituir seleção anterior.
+- Diferenciar base oficial, cenário e candidata exploratória. Não oferecer confirmação inválida. Progressive disclosure, layout responsivo, labels acessíveis, estados vazios/erro, sem depender de cor/hover.
 
-## 4. Motor de recomendação: sem falsa precisão
+### 3.1 Contrato de escopo (MVP)
+Wishlist v1 valida exatamente destination_id e priority por item, sem etapa; mudar schema afetaria importação, GCS, restauração e testes. Não modificar wishlist, TripPlan ou backups no MVP. Criar contrato puro, transitório recommendation_scope={stage, destination_ids}, stage inicialmente europe_season; destination_ids é conjunto ordenado/deduplicado de IDs ativos canônicos. Não inferir etapa por país, alocação histórica ou nome da cidade. Permitir que um destino italiano seja explicitamente incluído na temporada; o mesmo destino pode pertencer a qualquer cenário sem duplicar a wishlist.
+- Sem interesses ativos: no_destinations; com interesses e escopo ainda não escolhido/confirmado: scope_required. Mostrar todos os ativos pré-selecionáveis, com prioridades, CTA "Usar toda a lista para a temporada" e opção de remover desta análise. A confirmação é explícita mesmo se lista parecer homogênea. Escopo vazio mostra ação de seleção, não resultado.
+- Guardar escopo confirmado apenas em estado de sessão isolado, reconciliar contra lista atual por IDs e revision; destino removido/descartado sai, prioridade alterada recalcula, destino novo fica pendente de revisão do escopo (não misturar automaticamente etapas). Se sessão perdida/recarregamento sem estado, solicitar novamente. Nada de promessa de restauração entre dispositivos. Não armazenar apenas booleano de conclusão.
+- Passar escopo confirmado à comparação e simulações; comparação manual pode escolher sua própria seleção, rotulando claramente quando escopo difere. Não forçar mudança da wishlist nem filtros legados.
 
-### 4.1 Projeção canônica
-Generalizar internamente o cálculo usado pelo UX503 para qualquer quantidade válida de bases, mantendo limite visual 2–5 no comparador público e compatibilidade de contratos. Reusar precedência e overlays do rail_reference_projection_model; nenhuma nova fonte mutável, nem substituir snapshots históricos. Indexar por par direcional (base_id, destination_id), deduplicar aliases e preservar fonte, data, categoria, confiança, estação, divergência e limitações. Não deduzir rotas inversas nem percursos via terceiros.
+## 4. Motor de recomendação: MVP logístico, sem falsa precisão
 
-Separar: histórico documentado; referência indicativa da operadora; referência secundária; local com acesso pendente; sem tempo; divergência. Local não é zero minutos. Falta de informação não é inviabilidade e não é zero. Não imputar tempo, preço, frequência ou retorno. Não promover mínimo de ida a tempo típico porta a porta ou viabilidade de bate-volta. Dados 2026 não confirmam 2027. Manter cesta fixa comparável histórica de 15 destinos isolada da matriz personalizada.
+### 4.1 Universo e projeção
+Usar explicitamente load_research(include_candidates=True) para o universo de bases recomendáveis, validando unicidade de IDs canônicos. Todos entram na avaliação, inclusive sem rotas. Manter default histórico em outros consumidores e registrar diferenças de escopo. Centralizar o carregamento público de candidatas no ponto de entrada da projeção, não refatorar todos os loaders. Para destinos selecionáveis, usar build_exploration_discovery() e UX502. A auditoria abaixo encontrou 48 IDs nesse catálogo reconstruído e 34 bases; 9 de 10 destinos de trajetos DATA23 estão fora do catálogo atual. REC01 deve auditar esse descompasso e permitir inclusão das entradas DATA23 com identidade, país, atração/fonte de turismo e validações já exigidas, em overlay somente leitura se os dados sustentarem; se não sustentarem, reportar exatamente os IDs faltantes como backlog. Não promover automaticamente todos os endpoints ferroviários à wishlist nem modificar snapshots, catálogo oficial ou TripPlan. Testar restauração e deduplicação. Candidata com pouca cobertura nunca é excluída.
 
-### 4.2 Preferências e métricas
-Usar prioridades UX502: must_visit=5, interested=3, maybe=1, discarded excluído. Pesos são iniciais, explícitos, testáveis e não verdades universais. Para cada cidade separar:
-- cobertura ponderada de tempos = soma dos pesos dos destinos com duração utilizável / soma dos pesos dos destinos elegíveis para avaliação de deslocamento; explicitar tratamento separado de destinos locais e denominador; cobertura dos imperdíveis separadamente; contagem de históricos e indicativos, sem duplicar pares.
-- mínimo médio ponderado de ida para pares com duração conhecida (soma peso*minutos / soma pesos observados), sempre exibir denominador e avisar que não é tempo médio típico.
-- destinos com referência dentro de limiares configuráveis (60/120/180 minutos), distinguir contagem de deslocamentos ferroviários de destinos locais e pendências de retorno.
-- moradia (amostra histórica vs cotação real comparável para mesmo período, ocupação, taxas), custos de transporte comprovados, trabalho remoto, qualidade de vida e diversidade de países relevantes para os interesses selecionados. Não contar país como acessível se apenas houver indicação de ida; tratar como país com referência de ida. Evitar dupla contagem de localização internacional e logística.
-- preferências sugeridas por perfil (logística/moradia/vida cotidiana/diversidade): equilibrado 45/25/20/10; explorador 65/15/10/10; econômico 30/50/15/5; remoto 30/25/40/5. Validar pesos não negativos, soma positiva e normalização determinística. Expor apenas critérios efetivamente suportados. Não renormalizar pesos silenciosamente por cidade e assim beneficiar falta de dados.
+Extrair minimamente do UX503 uma projeção read-only para qualquer número de bases; limite 2–5 continua apenas no contrato manual. Reusar get_rail_evidence e decorate_comparison (incluindo precedência histórica, ROUTES7 corroborado, DATA9–13, DATA22 e DATA23). Além disso auditar dq32_macro_opportunities_model: ele já monta projection_rows e chama decorate_comparison; evitar terceira montagem de mesma matriz. Preservar todas as observações, categoria, origem/destino direcionais, fonte, datas, estações, divergências e limitações; não inferir reversos/retornos/frequência/tarifas. Cesta histórica de 15 é separada desta seleção.
 
-### 4.3 Comparabilidade, elegibilidade e incerteza
-Antes de ordenar, definir e documentar política de comparação previamente (limiares de cobertura, imperdíveis, qualidade de evidência, conjunto comum mínimo). Propor inicialmente cobertura ponderada >=80% e todos os imperdíveis com referência utilizável ou local explicitamente identificado como requisitos para destaque logístico preliminar, sujeitos à validação de sensibilidade. Não significam probabilidade de acerto nem viabilidade. Se insuficientes, listar alternativas para pesquisa, não vencedora.
-- Comparação de tempo deve usar o mesmo conjunto de destinos e pesos para todas as cidades comparadas, ou deixar diferença de denominador explícita e não ordenar médias como se fossem comparáveis. Não permitir um conjunto comum de apenas um destino induzir superioridade global; se conjuntos diferem, indicar insuficiência ou comparações condicionais claramente rotuladas.
-- Separar adequação, cobertura e qualidade da evidência; não misturar em percentual de confiança arbitrário. Não manipular duração com penalidade arbitrária por confiança.
-- Critérios sem métricas comparáveis (inclusive moradia para 2027 e vida cotidiana) permanecem indisponíveis, sem score geral artificial. Perfis servem para destacar evidências/pendências; se critério prioritário desconhecido, avisar que não se pode recomendar por ele. Não introduzir 0–100 de qualidade no MVP sem contrato e justificativa. Alternativas por objetivo e fronteira de Pareto somente sobre critérios, escopos e denominadores de fato comparáveis; se não forem, omitir. Empates estáveis, desempate transparente sem confundir ordenação visual com qualidade.
-- Explicar as razões por cidade com valores e fonte; exibir o que mudaria a conclusão, sem inventar probabilidades ou impacto causal. Cidades sem evidência ficam pesquisáveis. Sem ranking universal nem autoeleição.
-- Sensibilidade: validar resultados com mudanças de pesos, limiares, prioridades e cobertura; não esconder instabilidade. Política deve ser versionada em código/documentação, sem alterar schemas persistidos no MVP.
+### 4.2 Métricas e política de comparação
+MVP analisa logística de ida para destinos escolhidos. Moradia, trabalho remoto, vida cotidiana, preço e outros países aparecem como contexto com fonte e lacunas, não como score/recomendação econômica ou de trabalho remoto. Retirar presets multicritério e sliders do MVP; REC04 só os reintroduz quando houver medidas comparáveis, unidade, denominadores e política de dados ausentes justificadas. Não contar países como acessíveis/viáveis a partir de mínimo de ida.
+
+Pesos de prioridade 5/3/1 (imperdível/interessado/talvez) iniciais, descartado excluído. Sensibilidade 10/3/1 e 3/2/1 em testes; não expor controle de pesos na UI agora. Métricas por cidade:
+- Cobertura ponderada ferroviária = soma pesos dos pares com duração utilizável / soma pesos dos destinos não locais do escopo; sempre publicar numerador/denominador, contagem de locais e desconhecidos. Se denominador zero, cobertura não aplicável, resultado local separado (sem zero minutos).
+- Cobertura dos imperdíveis: tempos conhecidos, locais com acesso pendente e desconhecidos separados. Exibir contagem de históricos e indicativos/qualidade sem duplicar pares. Local reconhecido satisfaz identificação do destino, não comprovação de acesso.
+- Contagem de destinos com mínimos conhecidos até 60/120/180 min, rotulada como referência de ida e não bate-volta viável. Exemplos reais são destaque na UI; média ponderada dos mínimos publicados/conhecidos é secundária, com conjunto de destinos, pesos, denominador e fontes; nunca "tempo médio de viagem".
+- Comparações de duração somente para mesma lista de destinos não locais e mesmos pesos entre candidatas; comparações em subconjunto comum explicitamente condicionais, publicar IDs e cobertura; não comparar médias de conjuntos incompatíveis nem dar superioridade global a partir de um único destino comum. Se destinos locais diferem, apresentar separadamente, sem imputar 0; comparação de logística total pode ser indeterminada.
+- Histórico e mínimo indicativo/ fonte secundária mantêm categorias distintas; comparação com mistura de categorias é preliminar, não equivalência de serviço/estação/data; divergências sinalizadas. Nenhuma validação de ida/volta, última milha, serviço ou disponibilidade 2027.
+- Distinguir cobertura de adequação e qualidade; nenhum score composto 0–100, probabilidade de acerto ou peso renormalizado por cidade.
+
+### 4.3 Estados explícitos e critérios
+Estados do modelo, não somente da UI: no_destinations, scope_required, comparable, partial_evidence, insufficient_evidence. Definir resultado global e status por candidata (não avaliada se sem tempo nem local, parcial se há evidência mas manca requisito, comparável no subconjunto explicitado quando permitido). Estado global comparable exige pelo menos duas candidatas e critérios/conjunto comum explicitamente definidos; não significa logística comprovada. Uma base com dados completos sem outra equivalente continua alternativa individual. Local-only deve ser descrito separadamente. Retornar reasons, gaps, scope, contagens, conjunto comparado e versão de política.
+- Não fixar 80% como requisito global antes de validar experimento executável de REC01. Usar avaliação por níveis; todos os imperdíveis devem ter tempo conhecido ou ser local explicitamente identificado para destaque preliminar, mas retorno/última milha seguem pendentes. Cobertura de 60/70/80/90/100% é um indicador descritivo para calibrar destaque, não veto à exibição nem ranking. Começar por comparações de escopo completo entre bases com conjunto ferroviário igual, depois comparações condicionais somente sobre conjuntos comuns relevantes (>=2 destinos, explicitar os excluídos e não omitir imperdíveis para conclusão global). Lista de um destino admite comparação daquele trajeto, sem extrapolar.
+- Se não houver comparação adequada, mostrar de forma útil as referências existentes e pendências prioritárias; jamais inventar vencedora, penalizar ausência como impossibilidade, ou ocultar candidatas. Ordenação visual estável por critérios declarados, não pelo menor tempo médio parcial. Empates explícitos. Comparações e critérios qualitativos não são rankings globais.
+
+### 4.4 Feasibility assessment — revisão de 21/11/2026
+Triagem reproduzida sobre JSON reais de main: 30 bases históricas + 4 DATA23, 48 destinos do registro reconstruído (attractions_2027, exploration_bases_2027, cidades históricas e TRIP01), 581 pares direcionais únicos com duração positiva e URL https após precedência reproduzida em JavaScript; 571 pares dentro do universo base × destino selecionável (34 × 48 = 1.632 combinações brutas, antes de excluir locais). Usados os JSONs five_base_comparison_evidence, base_city_rail_evidence_expanded, base_destination_routes, dq30_mobility_pilot, exploration_bases, routes7_priority_reference (apenas fastest_provenance corroborated_city_level), rail_gap_enrichment e DATA10/11/12/13/22/23, em ordem de precedência. Não é execução do Python/validadores nem verificação editorial externa; REC01 deve reproduzir usando os loaders e a projeção real, pinando SHA e publicando script/teste reproduzível; diferenças de alias/schema/validação devem ser reconciliadas. Os números abaixo medem presença documental, não horários ou viabilidade.
+
+Cenários (I=5 imperdível, Q=3 quero conhecer, T=1 talvez):
+- FR: Paris I, Strasbourg I, Colmar Q, Nancy Q, Metz T.
+- Multi: Paris I, Cologne Q, Brussels Q, Basel I, Lucerne T.
+- Fronteira: Luxembourg City I, Trier Q, Saarbrucken T, Metz I.
+- Imperdíveis: Paris, Strasbourg, Brussels, Basel, Interlaken, Amsterdam, todos I.
+- Pequena: Paris I, Colmar Q, Basel T.
+- Grande: Paris I, Strasbourg I, Colmar Q, Brussels Q, Bruges T, Amsterdam I, Cologne Q, Aachen T, Luxembourg City Q, Basel I, Lucerne T, Interlaken Q.
+- Suplementar: Obernai I, Lucerne Q (os dois IDs TRIP01).
+
+Todas as listas usam IDs presentes no registro reconstruído. Cada cenário considera 34 bases. Cobertura limiar calculada sobre destinos não locais e exigindo todos os imperdíveis com tempo ou identificação local; 100% pode ter locais, por isso a coluna "todos com tempo, sem local" é mais restritiva. Sem tempo = 34 menos bases com pelo menos um tempo.
+
+| Cenário | Bases com tempo | Sem tempo | >=60% | >=70% | >=80% | >=90% | 100% | Todos com tempo, sem local | Pares históricos / indicativos / locais | Utilidade provável |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---|---|
+| FR | 31 | 3 | 28 | 26 | 24 | 19 | 18 | 14 | 13 / 118 / 4 | comparação preliminar completa de ida para subconjunto de bases |
+| Multi | 31 | 3 | 21 | 21 | 12 | 11 | 4 | 4 | 11 / 88 / 0 | comparação preliminar em quatro bases completas |
+| Fronteira | 27 | 7 | 19 | 17 | 4 | 4 | 4 | 2 | 8 / 45 / 4 | duas bases completas sem local; demais condicionais |
+| Imperdíveis | 31 | 3 | 5 | 5 | 5 | 5 | 5 | 4 | 20 / 115 / 1 | conjunto pequeno com referências completas; demais pendências |
+| Pequena | 31 | 3 | 28 | 26 | 26 | 21 | 21 | 20 | 6 / 73 / 1 | boa triagem preliminar, não logística completa |
+| Grande | 31 | 3 | 18 | 14 | 10 | 4 | 3 | 2 | 33 / 188 / 4 | duas bases completas sem local; comparações condicionais úteis |
+| Suplementar | 7 | 27 | 7 | 5 | 5 | 5 | 5 | 5 | 0 / 12 / 0 | cinco bases com mínimos indicativos dos dois destinos; 27 sem duração |
+
+Bases abaixo de 80% ou sem imperdíveis documentados: 10,22,30,29,8,24,29 respectivamente. Não confundir esse total com cidades inviáveis ou proibidas de comparar. Sensibilidade (número elegível a 80%; 5/3/1, 10/3/1, 3/2/1): FR 24/26/24; Multi 12/21/12; Fronteira 4/17/4; Imperdíveis 5/5/5; Pequena 26/26/26; Grande 10/14/10; Suplementar 5/5/5. Peso maior nos imperdíveis já exigidos pode inflar cobertura, sem adicionar evidência; justificar pesos e evitar limiar rígido.
+
+Exemplos de médias ponderadas de mínimos sobre o MESMO conjunto completo sem locais, apenas para demonstrar cálculo: Multi Strasbourg 133 min (3 históricos, 2 indicativos), Mulhouse 137 (2/3), Metz 154 (1/4); Grande Mulhouse 163 (7/5), Lille 194 (6/6); Suplementar Colmar 77, Strasbourg 79, Mulhouse 83 (todos só indicativos). Não são vencedoras nem tempo típico; origem/destino, estação, data, retornos e qualidade de fontes limitam a comparação.
+
+Moradia: 12 das 30 históricas têm amostras históricas, nenhuma tem cotação elegível 2027 no snapshot, novas candidatas não têm cotações verificadas. Vida cotidiana/trabalho remoto e custos totais não têm métricas comparáveis para universo integral; perfis Econômico/Remoto não sustentam ranking no MVP. A documentação base_coverage_model já exige critérios comparáveis e não produz score. Priorizar pesquisas de retorno/última milha, imperdíveis ausentes de candidatas bem documentadas e destinos suplementares; não confundir intenção com evidência.
+
+**Lacuna adicional P1:** DATA23 tem 10 pares, apenas Paris consta no registro atual: Saumur, Nantes, Tours, Chartres, Aix-les-Bains, Geneva, Chamonix, Saint-Malo, Dinan não entram na wishlist reconstruída. Angers, Annecy e Rennes têm referências fora do conjunto selecionável; Le Mans tem Paris. Não confundir candidatas pouco documentadas com integração completa; auditar os IDs no runtime antes de publicar resultados. Corrigir/reconciliar catálogo com fontes e validação de identidade em REC01 ou separar PR de dados explicitamente bloqueante para esse alcance. Não alterar snapshots. Priorizar os destinos que o usuário efetivamente seleciona.
+
+**Conclusão:** MVP logístico é viável com resultados preliminares; motor multicritério completo não é justificado agora. REC01 deve reproduzir a triagem, verificar denominadores comuns, executar análise de sensibilidade de limiares/pesos com os loaders reais, validar casos de catálogo misto e registrar SHA. Não iniciar REC02 sem evidência reproduzível. Se os resultados divergirem, corrigir especificação antes de implementação.
 
 ## 5. Arquitetura, segurança e performance
 
@@ -70,17 +105,17 @@ Funções puras e dependências injetáveis para testes; separar montagem de evi
 
 ## 6. Entregas incrementais propostas
 
-### REC01 — Matriz de evidências reutilizável (fundação)
-Extrair projeção de leitura para escala dinâmica; preservar contratos/políticas de UX503 e todos os snapshots. Testar paridade célula a célula com comparador, incluindo DATA23, overlays anteriores, retornos, localidades, conflitos e aliases. Relatar cobertura real da seleção de teste em todas as bases. Sem interface nova.
+### REC01 — Matriz de evidências e feasibility reproduzível (fundação)
+Extrair projeção compartilhada com UX503/DQ32; preservar contratos/snapshots. Testar paridade célula a célula, reconciliar catálogo DATA23, reproduzir os sete cenários com loaders Python reais e SHA pinado, calibrar limiares e confirmar o escopo explícito. Sem interface nova. Gate obrigatório para REC02.
 
 ### REC02 — Motor determinístico de recomendação
-Consumir REC01; implementar prioridades, preferências, cobertura, elegibilidade, métricas comparáveis, explicações e estados de insuficiência; testar sensibilidade e propriedades. Entregar exemplos reproduzíveis com dados reais e fixtures artificiais rotuladas. Não produzir score fictício. Sem mudança visual.
+Consumir REC01; implementar estados e métricas logísticas, prioridades, cobertura, comparações condicionais e razões. Sem score multicritério, perfis ou sliders. Testar sensibilidade e propriedades; produzir exemplos reproduzíveis. Sem mudança visual.
 
 ### REC03 — UX e jornada (MVP utilizável)
-Consumir REC02. Implementar CTA, atividade de sugestões na aba Comparar, cartões, perfis, controle de escopo, transferência de seleção para comparação/ficha, retorno a Minha lista, atalhos na jornada. Preservar rotas e estado existente. Validar desktop/mobile e acessibilidade. Sem alterar base oficial.
+Consumir REC02. Implementar CTA, atividade de sugestões na aba Comparar, cartões, controle de escopo, transferência de seleção para comparação/ficha, retorno a Minha lista, atalhos na jornada. Preservar rotas e estado existente. Validar desktop/mobile e acessibilidade. Sem alterar base oficial.
 
 ### REC04 — Simulações e orçamento
-Reusar cenários existentes, orçamento e mapa quando houver suporte; mostrar impacto financeiro comparável, origem de valores, moeda/unidade, datas, desconhecidos e limitações. Não criar conversões, estimativas ou cotações fictícias. Se base não for suportada por simulador, exibir motivo e ação de pesquisa, não bypass. Testar ida/volta entre cenário, sugestão, comparação e plano.
+Reusar cenários existentes, orçamento e mapa quando houver suporte; só considerar perfis econômicos/remotos e pesos multicritério após métricas comparáveis comprovadas; mostrar impacto financeiro comparável, origem de valores, moeda/unidade, datas, desconhecidos e limitações. Não criar conversões, estimativas ou cotações fictícias. Se base não for suportada por simulador, exibir motivo e ação de pesquisa, não bypass. Testar ida/volta entre cenário, sugestão, comparação e plano.
 
 ### REC05 — Pesquisa orientada à decisão e auditoria
 Gerar pendências derivadas e não persistidas: rotas imperdíveis faltantes, retornos, moradia e dados que impedem comparação. Priorizar por preferência e lacuna observável (não afirmar impacto quantitativo sem análise); reusar página Pendências. Documentar performance, dados críticos, limites e roadmap de enriquecimento; auditar jornada e regressões. Sem disparar pesquisa externa automaticamente.
@@ -108,7 +143,7 @@ Descrição do PR com objetivo, escopo, módulos, decisões arquiteturais, compo
 3. Como preservar todas as proveniências e evitar dupla contagem ou inconsistência entre UX503 e a recomendação?
 4. Quais perfis podem produzir recomendações reais com os dados atuais e quais devem exibir apenas pendências? Como apresentar isso sem frustrar o usuário?
 5. Como se encaixam favoritos, cenários, orçamento e candidatas não suportadas no plano oficial? Existe risco de duplicação de estado?
-6. O MVP REC01–03 é suficientemente pequeno e testável? Há melhor separação de dependências ou riscos de regressão?
+6. O MVP logístico REC01–03 é suficientemente pequeno e testável? Há melhor separação de dependências ou riscos de regressão?
 7. Que evidências e testes faltam para aprovar a implementação? Identificar P0/P1/P2, propostas concretas e itens conscientemente fora de escopo.
 
 **Resultado pretendido:** transformar pesquisa em apoio à decisão explicável, sem falsa precisão nem mutação silenciosa do planejamento. Este PR é somente o prompt para análise; a implementação futura depende de revisão.
