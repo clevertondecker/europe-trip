@@ -133,8 +133,8 @@ class Data13DirectedRailCoverageTests(unittest.TestCase):
                 self.assertFalse(row["weekend_return_verified"])
                 self.assertFalse(row["reachable_confirmed"])
         audit=audit_coverage()
-        self.assertEqual(audit["historical_plus_indicative"],557)
-        self.assertEqual(audit["unresearched"],793)
+        self.assertEqual(audit["historical_plus_indicative"],558)
+        self.assertEqual(audit["unresearched"],792)
 
     def test_data17_liege_rows_are_visible_in_discovery(self):
         expected={"dijon":301,"reims":233,"mulhouse":351,"besancon":455}
@@ -150,8 +150,8 @@ class Data13DirectedRailCoverageTests(unittest.TestCase):
                 self.assertFalse(record["reachable_confirmed"])
                 self.assertFalse(record["weekend_return_verified"])
         audit=audit_coverage()
-        self.assertEqual(audit["historical_plus_indicative"],557)
-        self.assertEqual(audit["unresearched"],793)
+        self.assertEqual(audit["historical_plus_indicative"],558)
+        self.assertEqual(audit["unresearched"],792)
 
     def test_data18_nancy_visible_in_actual_discovery_projection(self):
         expected={
@@ -178,8 +178,8 @@ class Data13DirectedRailCoverageTests(unittest.TestCase):
                 self.assertFalse(row["weekend_return_verified"])
                 self.assertFalse(row["reachable_confirmed"])
         audit=audit_coverage()
-        self.assertEqual(audit["historical_plus_indicative"],557)
-        self.assertEqual(audit["unresearched"],793)
+        self.assertEqual(audit["historical_plus_indicative"],558)
+        self.assertEqual(audit["unresearched"],792)
 
     def test_exact_matrix_and_target_gap_are_audited(self):
         out=audit_coverage()
