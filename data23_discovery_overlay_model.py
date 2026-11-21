@@ -45,6 +45,7 @@ def append_data23_destinations(discovery: dict, *, data=None) -> dict:
         group = groups.setdefault(destination_id, {
             "name": name, "country": country, "attractions": [],
             "source_url": attraction["source_url"],
+            "photo": {**deepcopy(attraction["photo"]), "subject": attraction["name"]},
         })
         group["attractions"].append({
             "id": attraction["id"],
@@ -72,9 +73,9 @@ def append_data23_destinations(discovery: dict, *, data=None) -> dict:
             "sources": ["data23_france_base_candidates_2026_11"],
             "attractions": attrs, "attraction_count": len(attrs),
             "categories": sorted({a["category"] for a in attrs}),
-            # Attraction photographs stay on the sourced city research cards;
-            # do not relabel them as destination-wide images.
-            "photo": None, "source_url": group["source_url"],
+            # Contextual photograph of a named attraction in this destination.
+            "photo": group["photo"], "source_url": group["source_url"],
+            "planning_support": "exploration_only",
             "research_status": "supplemental_attractions_documented",
             "feasible_from_base": None, "verified_weekend_return": False,
             "officially_selected": False,
