@@ -17,7 +17,7 @@ class PlanningJourneyTests(unittest.TestCase):
     def test_filled_wishlist_prioritizes_build_not_compare(self):
         plan=new_plan()
         wishes=empty_interests()
-        for d in ("paris","colmar","angers"):
+        for d in ("strasbourg","colmar","angers"):
             wishes=set_interest(wishes,d,"must_visit",self.discovery)
         before=deepcopy((plan,wishes))
         view=project_planning(plan,wishes,self.discovery,self.catalog)
@@ -26,7 +26,7 @@ class PlanningJourneyTests(unittest.TestCase):
         self.assertEqual(view["eligible_count"],2)
         self.assertEqual([r["id"] for r in view["unsupported"]],["angers"])
         self.assertEqual((plan,wishes),before)
-        added=add_undated_choices(plan,self.catalog,["paris","colmar"],FRANCE_STAGE)
+        added=add_undated_choices(plan,self.catalog,["strasbourg","colmar"],FRANCE_STAGE)
         review=project_planning(added,wishes,self.discovery,self.catalog)
         self.assertEqual(review["next"],"review")
         self.assertEqual(review["counts"]["planned"],2)
@@ -35,7 +35,7 @@ class PlanningJourneyTests(unittest.TestCase):
         self.assertFalse(review["private_saved"])
 
     def test_empty_wishlist_existing_draft_is_reviewable(self):
-        plan=add_undated_choices(new_plan(),self.catalog,["paris"],FRANCE_STAGE)
+        plan=add_undated_choices(new_plan(),self.catalog,["strasbourg"],FRANCE_STAGE)
         self.assertEqual(project_planning(plan,empty_interests(),self.discovery,self.catalog)["next"],"review")
 
     def test_navigation_intent_preserves_plan_and_rejects_account_change(self):
@@ -53,6 +53,29 @@ class PlanningJourneyTests(unittest.TestCase):
         self.assertEqual(state["flow_journey_view"],"build")
         self.assertEqual(state["advisor_plan"],before)
 
+    def test_all_eligibility_states(self):
+        plan=new_plan()
+        draft=add_undated_choices(plan,self.catalog,["colmar"],FRANCE_STAGE)
+        cases=[
+            (plan,[],"choose","empty",0),
+            (plan,["colmar"],"build","eligible_wishes",1),
+            (plan,["angers","paris"],"exploratory","exploratory_only",0),
+            (draft,[],"review","draft_without_wishes",0),
+            (draft,["colmar","strasbourg","angers"],"build","draft_with_pending",1),
+            (draft,["colmar","angers"],"review","draft_with_no_eligible_pending",0),
+            (draft,["angers"],"review","draft_with_no_eligible_pending",0),
+        ]
+        for p,ids,action,phase,count in cases:
+            with self.subTest(phase=phase,ids=ids):
+                w=empty_interests()
+                for d in ids:
+                    w=set_interest(w,d,"interested",self.discovery)
+                before=deepcopy((p,w))
+                view=project_planning(p,w,self.discovery,self.catalog)
+                self.assertEqual((view["next"],view["phase"],view["eligible_count"]),(action,phase,count))
+                self.assertEqual((p,w),before)
+                self.assertEqual(view["next"]=="build",count>0)
+
     def test_empty_plan_and_wishlist(self):
         view=project_planning(new_plan(),empty_interests(),self.discovery,self.catalog)
         self.assertEqual(view["next"],"choose")
@@ -64,7 +87,7 @@ class PlanningJourneyAppTests(unittest.TestCase):
         from unittest.mock import patch
         discovery=build_exploration_discovery()
         wishes=empty_interests()
-        for d in ("paris","colmar","angers"):
+        for d in ("strasbourg","colmar","angers"):
             wishes=set_interest(wishes,d,"must_visit",discovery)
         script="""
 import streamlit as st
@@ -90,7 +113,7 @@ render_planning_journey(active_plan(),load_attractions())
             app.button(key=key+"_all").click().run()
             self.assertFalse(app.exception,str(app.exception))
             self.assertEqual(app.session_state["advisor_plan"],plan)
-            self.assertEqual(set(app.multiselect(key=key).value),{"paris","colmar"})
+            self.assertEqual(set(app.multiselect(key=key).value),{"strasbourg","colmar"})
             app.button(key=key+"_confirm").click().run()
             self.assertFalse(app.exception,str(app.exception))
             current=app.session_state["advisor_plan"]

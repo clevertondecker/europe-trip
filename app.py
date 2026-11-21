@@ -87,6 +87,12 @@ sync_identity(st.session_state, identity_token(account_view_state(_rec_config, _
 apply_navigation_request(st.session_state)
 apply_recommendation_navigation(st.session_state)
 apply_planning_request(st.session_state)
+# Legacy outing handoffs must reach the single editor rather than the summary.
+if ((st.session_state.get("ux_area"),st.session_state.get("ux_section"))==("Meu roteiro","Meu planejamento")
+        and st.session_state.get("ux45_origin") and st.session_state.get("flow_edit_target")):
+    set_ux_task(st.session_state,"Meu roteiro","Organizar viagem")
+    st.session_state["flow_journey_view"]="organize"
+    st.session_state["ux_organize_view"]="Por período ou data"
 if st.session_state.pop("ux503_pending_return_to_wishlist", False):
     set_ux_task(st.session_state, "Explorar", "Passeios")
     st.session_state["ux502_view"] = "Minha lista"
@@ -1256,13 +1262,13 @@ elif page == "Roteiro":
         "Organizar viagem":"Organizar nossa viagem",
         "Melhorar meu roteiro":"Melhorar nosso roteiro",
     }.get(ux_section,"Meu roteiro")
-    if ux_section!="Meu planejamento":
+    if ux_section not in ("Meu planejamento","Organizar viagem"):
         st.markdown("<div class='page-eyebrow'>NOSSA EUROPA · "+escape(ux_area.upper())+"</div>"
                 "<div class='page-title'>"+escape(task_title)+"</div>"
                 "<div class='page-subtitle'>"+escape(
                     UX_DESCRIPTIONS.get((ux_area,ux_section),"Planeje sua viagem."))+
                 "</div>",unsafe_allow_html=True)
-    if ux_section!="Meu planejamento":
+    if ux_section not in ("Meu planejamento","Organizar viagem"):
         render_scenario_impact(active_plan(),data,
                                sync_sources["finance"]["status"]=="live")
     # UX 4.8: only task-based navigation is user-visible. Keep legacy routing

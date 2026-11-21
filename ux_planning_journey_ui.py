@@ -6,7 +6,7 @@ from itinerary_flow_model import ITALY_STAGE, FRANCE_STAGE, UNASSIGNED
 from planning_session import active_plan, commit_undated_destinations
 from ux502_destination_interests_model import empty_interests, LABELS
 from ux61_destination_board_ui import _discovery
-from ux_planning_journey_model import project_planning
+from ux_planning_journey_model import project_planning, clear_planning_context
 
 VIEW="flow_journey_view"
 STAGES=(ITALY_STAGE,FRANCE_STAGE)
@@ -46,6 +46,9 @@ def apply_planning_request(state):
         return
     from ux64_navigation_model import select_public_task
     select_public_task(state,"Planejar","Organizar")
+    identity=(state.get("rec03a_identity"),state["advisor_plan"]["plan_id"])
+    if state.get("flow_journey_identity")!=identity:
+        clear_planning_context(state)
     state[VIEW]=action
     state["flow_journey_identity"]=(state.get("rec03a_identity"),state["advisor_plan"]["plan_id"])
     state["flow_organize_open"]=action=="organize"
@@ -203,15 +206,15 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
     # Prevent stale bulk selections when an account or restored plan changes.
     identity=(state.get("rec03a_identity"),plan["plan_id"])
     if state.get("flow_journey_identity")!=identity:
-        for key in list(state.keys()):
-            if key.startswith("flow_journey_batch_") or key==VIEW:
-                state.pop(key,None)
+        clear_planning_context(state)
         state["flow_journey_identity"]=identity
     if state.get(VIEW) not in ("build","organize","review"):
         state[VIEW]=None
     # Respect existing explicit edit deep links and the canonical organizer.
     if state.get("flow_edit_target") or state.get("flow_add_open"):
         state[VIEW]="organize"
+    if state.get(VIEW)=="build" and not view["eligible_count"]:
+        state[VIEW]="review" if view["rows"] else None
     if summary_only:
         action=view["next"]
         with st.container(border=True):
@@ -219,6 +222,10 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
             if action=="build":
                 st.write(f'{view["eligible_count"]} destinos elegíveis ainda não incluídos.')
                 label="Adicionar destinos pendentes ao roteiro" if counts["planned"] else "Montar roteiro com meus destinos"
+            elif action=="exploratory":
+                st.write("Seus desejos são apenas exploratórios: ainda não possuem passeios compatíveis com o roteiro. Permanecem na lista.")
+                st.caption(", ".join(r["name"] for r in view["unsupported"]))
+                label="Revisar minha lista"
             elif action=="review":
                 st.write("Confira os destinos incluídos e salve seu rascunho.")
                 label="Revisar meu roteiro"
@@ -226,8 +233,8 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
                 st.write("Escolha os destinos que deseja conhecer.")
                 label="Escolher destinos"
             st.button(label,key="flow_journey_primary",type="primary",
-                      on_click=_discover if action=="choose" else request_planning,
-                      args=() if action=="choose" else (state,action))
+                      on_click=_discover if action=="choose" else _choose if action=="exploratory" else request_planning,
+                      args=() if action in ("choose","exploratory") else (state,action))
         st.markdown("#### Etapas da jornada")
         for step,title,status in view["steps"]:
             st.markdown("**"+title+"**")
@@ -244,12 +251,16 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
     with st.container(border=True):
         st.markdown("#### Próxima ação")
         descriptions={"choose":"Escolha os lugares que quer conhecer.",
+                      "exploratory":"Os lugares desejados ainda não têm passeios compatíveis. Continuam na sua lista.",
                       "build":f'{view["eligible_count"]} destino(s) compatíveis ainda podem entrar no roteiro.',
                       "organize":"Defina períodos ou datas se já souber. Você pode salvar sem organizar.",
                       "review":"Confira o que está incluído e salve suas escolhas, mesmo sem datas."}
         st.write(descriptions[action])
         if action=="choose":
             st.button(LABELS_ACTION[action],key="flow_journey_primary",type="primary",on_click=_discover)
+        elif action=="exploratory":
+            st.caption(", ".join(r["name"] for r in view["unsupported"]))
+            st.button("Revisar minha lista",key="flow_journey_primary",type="primary",on_click=_choose)
         elif action=="review" and state[VIEW]=="review":
             st.caption("A ação de salvamento está na revisão abaixo.")
         elif state[VIEW]=="build":
@@ -266,20 +277,26 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
             left.markdown("**"+title+"**")
             left.caption(status)
             right.button("Abrir",key="flow_journey_step_"+step,
-                         disabled=step=="organize" and not bool(view["rows"]),
+                         disabled=step=="build" and not view["eligible_count"],
                          on_click=_choose if step=="choose" else _show,
                          args=() if step=="choose" else (step,))
     note=state.pop("flow_journey_notice",None) or state.pop("flow_notice",None)
     if note:
         st.success(note)
+    origin=state.get("ux45_origin")
+    if origin and origin.get("destination_id"):
+        from itinerary_flow_ui import _ux45_return_to_research
+        st.button("Voltar à pesquisa de origem",key="ux45_back_to_origin",on_click=_ux45_return_to_research)
     if state[VIEW]=="build":
         render_build(plan,catalog,view)
     elif state[VIEW]=="review":
         render_review(plan,catalog,view)
     elif state[VIEW]=="organize":
         st.markdown("#### Organizar visitas")
+        st.caption("Escolha a etapa: Lua de mel na Itália ou Temporada europeia.")
         if state.get("flow_active_stage") not in STAGES:
-            state["flow_active_stage"]=ITALY_STAGE
+            stages={r["stage"] for r in view["rows"]}
+            state["flow_active_stage"]=next(iter(stages)) if len(stages)==1 else ITALY_STAGE
         stage=st.segmented_control("Etapa da viagem",list(STAGES),key="flow_active_stage",
                                    format_func=_stage_label,on_change=_active_stage_changed,
                                    selection_mode="single")
@@ -293,7 +310,7 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
             if stage==FRANCE_STAGE:
                 from ux48_weekend_groups_ui import render_weekend_planner
                 render_weekend_planner(active_plan(),catalog)
-        st.button("Adicionar passeio ou editar atrações",key="flow_journey_add_outing",on_click=_show_add)
+        st.button("Adicionar passeio ou editar atrações",key="flow_add_open_button",on_click=_show_add)
         _render_add(active_plan(),catalog)
         _selected_stage(view["rows"],stage,catalog)
         st.button("Revisar e salvar sem definir outras datas",key="flow_journey_skip_dates",

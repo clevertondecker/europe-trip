@@ -180,8 +180,22 @@ def render_wishlist(discovery) -> bool:
     if active:
         from rec03a_session import request_navigation
         from ux_planning_journey_ui import request_planning
-        st.button("Montar roteiro com meus destinos",key="flow_journey_from_wishlist",type="primary",
-                  on_click=request_planning,args=(st.session_state,"build"))
+        from ux_planning_journey_model import project_planning
+        from planning_session import active_plan
+        from attractions_model import load_attractions
+        planning=project_planning(active_plan(),current,discovery,load_attractions())
+        if planning["eligible_count"]:
+            st.button("Montar roteiro com meus destinos",key="flow_journey_from_wishlist",type="primary",
+                      on_click=request_planning,args=(st.session_state,"build"))
+        elif planning["rows"]:
+            st.button("Revisar meu roteiro",key="flow_journey_from_wishlist",type="primary",
+                      on_click=request_planning,args=(st.session_state,"review"))
+        else:
+            st.info("Os destinos desejados ainda não têm passeios compatíveis para inclusão. Eles continuam na sua lista.")
+            from ux504_guided_journey_ui import request_step
+            st.button("Descobrir destinos compatíveis",key="flow_journey_find_compatible",type="primary",
+                      on_click=request_step,args=("discover",))
+            # Discovery remains accessible in the existing task tabs.
         st.button("Encontrar cidades-base", key="rec03a_open_from_wishlist",
                   on_click=request_navigation,args=(st.session_state,"suggestions"))
         st.button("Comparar cidades-base para nossos destinos",
