@@ -29,12 +29,17 @@ def request_planning(state, action="build", stage=None):
     """Session-only intent shared by wishlist and future REC03B handoffs."""
     if action not in ("build","organize","review") or stage not in (None,*STAGES):
         raise ValueError("Encaminhamento inválido")
-    state["flow_journey_intent"]={"action":action,"stage":stage}
+    state["flow_journey_intent"]={"action":action,"stage":stage,
+                                  "identity":state.get("rec03a_identity"),
+                                  "plan_id":state.get("advisor_plan",{}).get("plan_id")}
 
 
 def apply_planning_request(state):
     intent=state.pop("flow_journey_intent",None)
     if not isinstance(intent,dict):
+        return
+    if (intent.get("identity")!=state.get("rec03a_identity") or
+            intent.get("plan_id")!=state.get("advisor_plan",{}).get("plan_id")):
         return
     action,stage=intent.get("action"),intent.get("stage")
     if action not in ("build","organize","review") or stage not in (None,*STAGES):
@@ -42,12 +47,13 @@ def apply_planning_request(state):
     from ux64_navigation_model import select_public_task
     select_public_task(state,"Planejar","Organizar")
     state[VIEW]=action
-    state["flow_journey_identity"]=(state.get("rec03a_identity"),active_plan()["plan_id"])
+    state["flow_journey_identity"]=(state.get("rec03a_identity"),state["advisor_plan"]["plan_id"])
     state["flow_organize_open"]=action=="organize"
     state["flow_add_open"]=False
     state["flow_save_open"]=False
     state.pop("flow_edit_target",None)
     state["ux_organize_view"]="Por período ou data"
+    state["flow_journey_stage_hint"]=stage
     if stage is not None:
         state["flow_active_stage"]=stage
         state["flow_stage"]=stage
@@ -56,6 +62,11 @@ def apply_planning_request(state):
 def _choose():
     from rec03a_session import request_navigation
     request_navigation(st.session_state,"wishlist")
+
+
+def _discover():
+    from ux504_guided_journey_ui import request_step
+    request_step("discover")
 
 
 def _select_all(key,ids):
@@ -72,7 +83,9 @@ def _selection(key,allowed):
 def render_build(plan, catalog, view):
     st.markdown("#### Montar roteiro a partir da minha lista")
     st.caption("Escolha em lote os lugares de cada etapa. Nenhuma data, atração ou reserva será inventada.")
-    for stage in STAGES:
+    stage_hint=st.session_state.get("flow_journey_stage_hint")
+    stages=tuple(sorted(STAGES,key=lambda stage:stage!=stage_hint))
+    for stage in stages:
         eligible=view["batches"][stage]["eligible"]
         with st.container(border=True):
             st.markdown("**"+LABELS_STAGE[stage]+"**")
@@ -213,7 +226,7 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
                 st.write("Escolha os destinos que deseja conhecer.")
                 label="Escolher destinos"
             st.button(label,key="flow_journey_primary",type="primary",
-                      on_click=_choose if action=="choose" else request_planning,
+                      on_click=_discover if action=="choose" else request_planning,
                       args=() if action=="choose" else (state,action))
         st.markdown("#### Etapas da jornada")
         for step,title,status in view["steps"]:
@@ -236,7 +249,7 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
                       "review":"Confira o que está incluído e salve suas escolhas, mesmo sem datas."}
         st.write(descriptions[action])
         if action=="choose":
-            st.button(LABELS_ACTION[action],key="flow_journey_primary",type="primary",on_click=_choose)
+            st.button(LABELS_ACTION[action],key="flow_journey_primary",type="primary",on_click=_discover)
         elif action=="review" and state[VIEW]=="review":
             st.caption("A ação de salvamento está na revisão abaixo.")
         elif state[VIEW]=="build":

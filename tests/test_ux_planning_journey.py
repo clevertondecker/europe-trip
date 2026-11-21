@@ -38,6 +38,21 @@ class PlanningJourneyTests(unittest.TestCase):
         plan=add_undated_choices(new_plan(),self.catalog,["paris"],FRANCE_STAGE)
         self.assertEqual(project_planning(plan,empty_interests(),self.discovery,self.catalog)["next"],"review")
 
+    def test_navigation_intent_preserves_plan_and_rejects_account_change(self):
+        from ux_planning_journey_ui import request_planning,apply_planning_request
+        state={"advisor_plan":new_plan(),"rec03a_identity":"owner"}
+        before=deepcopy(state["advisor_plan"])
+        request_planning(state,"build",FRANCE_STAGE)
+        apply_planning_request(state)
+        self.assertEqual(state["ux_section"],"Organizar viagem")
+        self.assertEqual(state["flow_journey_stage_hint"],FRANCE_STAGE)
+        self.assertEqual(state["advisor_plan"],before)
+        request_planning(state,"review")
+        state["rec03a_identity"]="other"
+        apply_planning_request(state)
+        self.assertEqual(state["flow_journey_view"],"build")
+        self.assertEqual(state["advisor_plan"],before)
+
     def test_empty_plan_and_wishlist(self):
         view=project_planning(new_plan(),empty_interests(),self.discovery,self.catalog)
         self.assertEqual(view["next"],"choose")
