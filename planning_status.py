@@ -14,7 +14,8 @@ def explain_storage_error(exc:Exception)->str:
     from urllib.error import HTTPError,URLError
     if isinstance(exc,HTTPError):
         if exc.code in (401,403):return "O acesso ao salvamento foi recusado. Verifique as permissões da conta."
-        if exc.code in (409,412,422):return "O GitHub recusou a atualização por conflito. Baixe um backup local e compare a versão remota antes de tentar novamente."
+        if exc.code in (409,412):return "O GitHub recusou a atualização por conflito. Baixe um backup local e compare a versão remota antes de tentar novamente."
+        if exc.code==422:return "O GitHub rejeitou a atualização (HTTP 422). Revise os dados antes de tentar novamente."
         if exc.code==404:return "Não foi possível encontrar esse planejamento. Selecione outro no Histórico."
         return "Serviço de salvamento indisponível. Seus dados continuam nesta sessão."
     from trip_plan_repository import PlanConflictError, PlanValidationError
