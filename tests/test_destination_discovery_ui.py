@@ -27,7 +27,7 @@ class DiscoveryUISmoke(unittest.TestCase):
                             for item in app.success))
         self.assertTrue(any("Projeção recalculada" in item.value for item in app.caption))
         app.button(key="discovery_go_my_outings").click().run()
-        self.assertEqual(app.session_state["ux_section"],"Meu planejamento")
+        self.assertEqual(app.session_state["ux_section"],"Organizar viagem")
         self.assertEqual(app.session_state["flow_active_destination"],"colmar")
         self.assertEqual(app.session_state["flow_active_stage"],"França")
         self.assertIn("flow_edit_save_colmar",{b.key for b in app.button})
