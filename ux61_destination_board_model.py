@@ -56,6 +56,31 @@ def build_destination_board(interests, plan, discovery, catalog, weekend_groups=
     return rows
 
 
+def organizer_wishlist_candidates(interests, plan, discovery, catalog, stage):
+    """Present wishlist-only places in the organizer, without confirming them.
+
+    A wishlist ID is promotable only if it matches a validated outing choice
+    in the current stage. Never guess an ID from similar names.
+    """
+    from itinerary_flow_model import destinations, ITALY_STAGE, FRANCE_STAGE
+    if stage not in (ITALY_STAGE, FRANCE_STAGE):
+        raise ValueError("Etapa de organização inválida")
+    choices = {row["id"]: row for row in destinations(catalog)}
+    board = build_destination_board(interests, plan, discovery, catalog)
+    result = {"eligible": [], "other_stage": [], "unsupported": []}
+    for row in board:
+        if not row["wanted"] or row["planned"]:
+            continue
+        choice = choices.get(row["id"])
+        if choice is None:
+            result["unsupported"].append(row)
+        elif choice["stage"] != stage:
+            result["other_stage"].append(row)
+        else:
+            result["eligible"].append(row)
+    return result
+
+
 def board_metrics(rows):
     """Avoid counting a wish as a confirmed visit or an undated group as dated."""
     return {
