@@ -4,7 +4,7 @@ import unittest
 from unittest.mock import patch
 
 from base_research_expanded_model import DATA as OLD_BASES,load_research,research_overview
-from city_profiles_model import load_profiles,profile_by_id
+from city_profiles_model import load_profiles,profile_by_id,compact_comparison
 from data23_france_candidates_model import (load_data23,validate_data23,
     base_attractions,base_routes,REQUIRED_IDS)
 from base_scenario_model import base_options,expanded_rail_routes
@@ -46,6 +46,45 @@ class DynamicBaseCatalogTests(unittest.TestCase):
                 self.assertIsNone(profile["quality_of_life"]["numeric_score"])
                 self.assertFalse(profile["housing"]["availability_2027_verified"])
                 self.assertEqual(profile["housing"]["historical_offer_count"],0)
+
+    def test_compact_comparison_tolerates_missing_optional_demographics(self):
+        data=load_profiles(canonical=self.research)
+        for city_id in ("angers", "le_mans", "annecy", "rennes"):
+            with self.subTest(city_id=city_id):
+                compact=compact_comparison(data,[city_id,"metz"])
+                self.assertEqual(compact[0]["População municipal (ano indicado)"],
+                                 "Não pesquisado")
+                self.assertEqual(compact[0]["Faixa observada EUR/mês"],
+                                 "Não pesquisado")
+        modified=deepcopy(data)
+        target=next(r for r in modified["cities"] if r["city_id"]=="angers")
+        target["demographics"]={}
+        self.assertEqual(compact_comparison(modified,["angers","metz"])[0]
+                         ["População municipal (ano indicado)"],"Não pesquisado")
+        target["demographics"]={"population_municipal":12345,"reference_year":2025}
+        self.assertEqual(compact_comparison(modified,["angers","metz"])[0]
+                         ["População municipal (ano indicado)"],"12345 (2025)")
+
+    def test_indicative_reference_remains_separate_from_historical_readiness(self):
+        discovery=build_destination_discovery()
+        for base_id,destination_id in (
+            ("le_mans","paris"),("angers","saumur"),
+            ("annecy","geneve"),("rennes","saint_malo")
+        ):
+            with self.subTest(base=base_id,destination=destination_id):
+                wishlist=set_interest(empty_interests(),destination_id,
+                                      "interested",discovery)
+                comparison=compare_wishlist_bases(
+                    wishlist,[base_id,"metz"],discovery=discovery,
+                    research=self.research)
+                enriched=decorate_comparison(comparison)
+                cell=enriched["cells"][(base_id,destination_id)]
+                self.assertEqual(cell["category"],"reference_only")
+                self.assertEqual(cell["display_basis"],"data23_candidate_reference")
+                self.assertFalse(cell["weekend_return_known"])
+                self.assertFalse(cell["valid_for_2027"])
+                self.assertEqual(comparison["summaries"][0]["documented_time_count"],0)
+                self.assertFalse(comparison["official_plan_modified"])
 
     def test_other_pages_include_all_cities_and_no_official_promotion(self):
         options={r["id"]:r for r in base_options(include_candidates=True)}
