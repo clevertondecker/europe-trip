@@ -48,6 +48,7 @@ def build_destination_board(interests, plan, discovery, catalog, weekend_groups=
             "organized": organized,
             "dated": bool(visit and visit["exact_dates"]),
             "stage": visit["stage"] if visit else None,
+            "planning_support": place.get("planning_support"),
         })
     order = {p: i for i, p in enumerate(PRIORITIES)}
     rows.sort(key=lambda r: (0 if r["planned"] else 1,

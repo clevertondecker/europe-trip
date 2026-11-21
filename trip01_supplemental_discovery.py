@@ -73,4 +73,5 @@ def build_exploration_discovery() -> dict:
     belong only to this user-facing exploratory projection.
     """
     from ux501_destination_discovery_model import build_destination_discovery
-    return append_trip01_candidates(build_destination_discovery())
+    from data23_discovery_overlay_model import append_data23_destinations
+    return append_data23_destinations(append_trip01_candidates(build_destination_discovery()))
