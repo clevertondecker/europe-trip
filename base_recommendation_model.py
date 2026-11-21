@@ -190,11 +190,22 @@ def evaluate_matrix(matrix, *, weights=None):
     # Separate global full-comparison status from useful conditional pair evidence.
     state = "comparable" if groups else ("partial_evidence" if any(known[b] or local[b] for b in bases)
                                           else "insufficient_evidence")
+    # Presentation order is by documentary question, not a city quality ranking.
+    sections = {"complete_reference_groups": [], "conditional_all_must_identified": [],
+                "conditional_must_pending": []}
+    for b,c in candidates.items():
+        if not c["highlight"]:
+            continue
+        section = ("complete_reference_groups" if c["highlight_kind"] == "complete_reference_group"
+                   else "conditional_must_pending" if c["must_visit"]["missing"]
+                   else "conditional_all_must_identified")
+        sections[section].append(b)
     return {"policy_version": POLICY_VERSION, "state": state,
             "criteria": deepcopy(CRITERIA), "weights": weights, "destinations": deepcopy(destinations),
             "candidates": list(candidates.values()), "complete_groups": groups,
             "conditional_comparisons": conditional,
             "highlight_ids": [b for b in bases if candidates[b]["highlight"]],
+            "highlight_sections": sections,
             "has_conditional_comparison": bool(conditional),
             "has_local_only": any(c["local_only"] for c in candidates.values()), "global_ranking": False,
             "official_plan_modified": False, "limitation": LIMITATION}
