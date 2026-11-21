@@ -53,7 +53,7 @@ def _render_destination_media(destination: dict, photo: dict | None) -> None:
         return
     if photo and photo.get("url"):
         url = escape(display_photo_url(photo["url"]), quote=True)
-        name = escape(destination["name"], quote=True)
+        name = escape(photo.get("subject") or destination["name"], quote=True)
         # CSS backgrounds do not produce broken-image glyphs. When the
         # resource fails, the visible placeholder remains deterministic.
         st.markdown(
@@ -204,7 +204,11 @@ def render_independent_destination_discovery(*, discovery=None) -> None:
                 with column:
                     photo = preferred_destination_photo(item, fallback_photos.get(item["id"]))
                     _render_destination_media(item,photo)
+                    if photo and photo.get("subject"):
+                        st.caption("Na foto: " + photo["subject"])
                     st.markdown("**"+item["name"]+"** · "+item["country"])
+                    if item.get("planning_support") == "exploration_only":
+                        st.caption("Pesquisa e comparação disponíveis; ainda não pode ser incluído no roteiro.")
                     if item["attraction_count"]:
                         names = [attr["name"] for attr in item["attractions"][:3]]
                         st.write(" · ".join(names))
