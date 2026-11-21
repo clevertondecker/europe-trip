@@ -593,76 +593,76 @@ def _save_panel(plan:dict,catalog:dict)->None:
                     st.error(explain_storage_error(exc))
                     if isinstance(exc, PlanConflictError):
                         st.session_state["flow_reconcile_needed"] = True
-        if st.session_state.get("flow_reconcile_needed"):
-            st.warning("A referência do GitHub está desatualizada ou ausente. "
-                       "Compare o planejamento local com o arquivo remoto para salvar com segurança.")
-        if st.button("Comparar planejamento local com GitHub",
-                     key="flow_compare_remote"):
-            try:
-                remote, remote_sha = GitHubPlanRepository(
-                    _owner_config()["token"]).load(plan["plan_id"])
-                comparison = compare_plans(plan, remote)
-                st.session_state["flow_reconcile_preview"] = {
-                    "remote": remote, "sha": remote_sha,
-                    "local_digest": comparison["local_digest"],
-                    "remote_digest": comparison["remote_digest"],
-                }
-                st.session_state.pop("flow_reconcile_ack", None)
-                st.rerun()
-            except Exception as exc:
-                st.error(explain_storage_error(exc))
-        preview = st.session_state.get("flow_reconcile_preview")
-        if preview is not None:
-            try:
-                comparison = compare_plans(plan, preview["remote"])
-                if (comparison["local_digest"] != preview["local_digest"]
-                        or comparison["remote_digest"] != preview["remote_digest"]):
-                    raise ValueError("O plano mudou desde a comparação; compare novamente.")
-            except (ValueError, KeyError, TypeError) as exc:
-                st.warning(str(exc))
-                st.session_state.pop("flow_reconcile_preview", None)
-            else:
-                st.caption("Revisão local " + str(comparison["local_revision"]) +
-                           " · GitHub " + str(comparison["remote_revision"]))
-                st.caption(str(comparison["difference_count"]) +
-                           " diferença(s) encontradas.")
-                if comparison["different_fields"]:
-                    st.dataframe(comparison["different_fields"], hide_index=True,
-                                 use_container_width=True)
-                    if comparison["difference_count"] > len(comparison["different_fields"]):
-                        st.warning("Há diferenças adicionais não exibidas; revise os JSONs completos.")
+            if st.session_state.get("flow_reconcile_needed"):
+                st.warning("A referência do GitHub está desatualizada ou ausente. "
+                           "Compare o planejamento local com o arquivo remoto para salvar com segurança.")
+            if st.button("Comparar planejamento local com GitHub",
+                         key="flow_compare_remote"):
+                try:
+                    remote, remote_sha = GitHubPlanRepository(
+                        _owner_config()["token"]).load(plan["plan_id"])
+                    comparison = compare_plans(plan, remote)
+                    st.session_state["flow_reconcile_preview"] = {
+                        "remote": remote, "sha": remote_sha,
+                        "local_digest": comparison["local_digest"],
+                        "remote_digest": comparison["remote_digest"],
+                    }
+                    st.session_state.pop("flow_reconcile_ack", None)
+                    st.rerun()
+                except Exception as exc:
+                    st.error(explain_storage_error(exc))
+            preview = st.session_state.get("flow_reconcile_preview")
+            if preview is not None:
+                try:
+                    comparison = compare_plans(plan, preview["remote"])
+                    if (comparison["local_digest"] != preview["local_digest"]
+                            or comparison["remote_digest"] != preview["remote_digest"]):
+                        raise ValueError("O plano mudou desde a comparação; compare novamente.")
+                except (ValueError, KeyError, TypeError) as exc:
+                    st.warning(str(exc))
+                    st.session_state.pop("flow_reconcile_preview", None)
                 else:
-                    st.info("Os dados são iguais. É necessário reconciliar apenas a versão.")
-                st.download_button("Baixar versão do GitHub",
-                                   data=json.dumps(preview["remote"], ensure_ascii=False, indent=2),
-                                   file_name="nossa-europa-versao-github.json",
-                                   mime="application/json", key="flow_remote_backup")
-                st.warning("A confirmação publicará os dados LOCAIS. Diferenças da versão "
-                           "remota serão substituídas no arquivo atual, mas permanecerão "
-                           "no histórico do GitHub.")
-                approved = st.checkbox(
-                    "Conferi as diferenças e autorizo publicar minha versão local",
-                    key="flow_reconcile_ack", value=False)
-                if st.button("Confirmar reconciliação e salvar",
-                             key="flow_reconcile_confirm", disabled=not (approved and agree)):
-                    try:
-                        if plan_digest(st.session_state["advisor_plan"]) != preview["local_digest"]:
-                            raise ValueError("O plano mudou desde a prévia. Compare novamente.")
-                        reconciled = prepare_reconciled_plan(plan, preview["remote"])
-                        st.session_state["advisor_public_repo_ack"] = True
-                        _secure_save(reconciled, expected_sha_override=preview["sha"])
-                    except Exception as exc:
-                        st.error(explain_storage_error(exc))
-                        st.session_state.pop("flow_reconcile_preview", None)
+                    st.caption("Revisão local " + str(comparison["local_revision"]) +
+                               " · GitHub " + str(comparison["remote_revision"]))
+                    st.caption(str(comparison["difference_count"]) +
+                               " diferença(s) encontradas.")
+                    if comparison["different_fields"]:
+                        st.dataframe(comparison["different_fields"], hide_index=True,
+                                     use_container_width=True)
+                        if comparison["difference_count"] > len(comparison["different_fields"]):
+                            st.warning("Há diferenças adicionais não exibidas; revise os JSONs completos.")
                     else:
-                        st.session_state["advisor_plan"] = reconciled
-                        st.session_state["advisor_local_changed"] = True
-                        st.session_state["ux36_cloud_dirty"] = True
-                        st.session_state.pop("flow_reconcile_preview", None)
-                        st.session_state.pop("flow_reconcile_needed", None)
-                        st.session_state["flow_notice"] = "Planejamento reconciliado e salvo no GitHub."
-                        st.session_state["flow_save_open"] = False
-                        st.rerun()
+                        st.info("Os dados são iguais. É necessário reconciliar apenas a versão.")
+                    st.download_button("Baixar versão do GitHub",
+                                       data=json.dumps(preview["remote"], ensure_ascii=False, indent=2),
+                                       file_name="nossa-europa-versao-github.json",
+                                       mime="application/json", key="flow_remote_backup")
+                    st.warning("A confirmação publicará os dados LOCAIS. Diferenças da versão "
+                               "remota serão substituídas no arquivo atual, mas permanecerão "
+                               "no histórico do GitHub.")
+                    approved = st.checkbox(
+                        "Conferi as diferenças e autorizo publicar minha versão local",
+                        key="flow_reconcile_ack", value=False)
+                    if st.button("Confirmar reconciliação e salvar",
+                                 key="flow_reconcile_confirm", disabled=not (approved and agree)):
+                        try:
+                            if plan_digest(st.session_state["advisor_plan"]) != preview["local_digest"]:
+                                raise ValueError("O plano mudou desde a prévia. Compare novamente.")
+                            reconciled = prepare_reconciled_plan(plan, preview["remote"])
+                            st.session_state["advisor_public_repo_ack"] = True
+                            _secure_save(reconciled, expected_sha_override=preview["sha"])
+                        except Exception as exc:
+                            st.error(explain_storage_error(exc))
+                            st.session_state.pop("flow_reconcile_preview", None)
+                        else:
+                            st.session_state["advisor_plan"] = reconciled
+                            st.session_state["advisor_local_changed"] = True
+                            st.session_state["ux36_cloud_dirty"] = True
+                            st.session_state.pop("flow_reconcile_preview", None)
+                            st.session_state.pop("flow_reconcile_needed", None)
+                            st.session_state["flow_notice"] = "Planejamento reconciliado e salvo no GitHub."
+                            st.session_state["flow_save_open"] = False
+                            st.rerun()
         else:
             st.info("Salvamento remoto disponível somente para o proprietário "
                     "autenticado. O backup JSON funciona sem login. "
