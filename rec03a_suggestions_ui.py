@@ -1,7 +1,11 @@
 """REC03A: session-only recommendation UI; no decisions or persistence."""
 from __future__ import annotations
 
+import logging
 import streamlit as st
+from rail_reference_projection_model import format_minutes
+
+_LOG = logging.getLogger(__name__)
 from base_recommendation_model import recommend_bases
 from base_research_expanded_model import load_research
 from recommendation_scope_model import confirm_scope
@@ -38,6 +42,7 @@ def _scope_select(ids, interests, discovery):
     st.session_state.pop(DRAFT, None)
     st.session_state.pop("rec03a_edit_scope", None)
     st.session_state.pop("rec03a_page", None)
+    st.session_state.pop("rec03a_page_shadow", None)
 
 
 def _draft_changed():
@@ -97,6 +102,29 @@ def _label_ids(ids,names):
     return ", ".join(names.get(x,x) for x in ids) or "Nenhum"
 
 
+def evidence_examples(candidate, destinations, limit=3):
+    """Presentation only: priority, then canonical ID; never sort by speed."""
+    priority = {"must_visit": 0, "interested": 1, "maybe": 2}
+    ordered = sorted(destinations, key=lambda d: (priority[d["priority"]], d["id"]))
+    return [(d["id"], candidate["evidence"][d["id"]]) for d in ordered
+            if candidate["evidence"][d["id"]]["category"] in ("historical","reference_only","local")][:limit]
+
+
+def _remember(widget, shadow):
+    st.session_state[shadow] = st.session_state[widget]
+
+
+def _restore_widget(widget, shadow, default, valid=None):
+    state=st.session_state
+    value=state.get(shadow,default)
+    if valid is not None and not valid(value):
+        value=default
+    if state.get(widget)!=value:
+        state[widget]=value
+    state[shadow]=value
+    return value
+
+
 def _card(candidate, result, names, cities, official, prefix):
     b = candidate["base_id"]
     meta = cities[b]
@@ -109,7 +137,15 @@ def _card(candidate, result, names, cities, official, prefix):
         known = candidate["known_destination_ids"]
         local = candidate["local_destination_ids"]
         missing = candidate["missing_destination_ids"]
+        examples=evidence_examples(candidate,result["destinations"])
+        for d,cell in examples:
+            category=cell["category"]
+            detail=("Acesso local a verificar" if category=="local" else
+                    format_minutes(cell["display_min"])+" · mínimo de ida publicado · "+
+                    ("histórico" if category=="historical" else "indicativo"))
+            st.write(names.get(d,d)+" — "+detail)
         st.caption(f"{len(known)} destinos com tempo · {len(local)} locais · {len(missing)} sem tempo")
+        st.caption("Retorno e horários de 2027 não confirmados.")
         must = candidate["must_visit"]
         if must["missing"]:
             st.write("Imperdíveis sem tempo: "+_label_ids(must["missing"],names))
@@ -120,7 +156,10 @@ def _card(candidate, result, names, cities, official, prefix):
                        " · Indicativos: "+str(candidate["indicative_count"]))
         if local:
             st.caption("Acesso local a verificar: "+_label_ids(local,names))
-        with st.expander("Entender referências e limitações"):
+        # An expander alone eagerly renders every child on each rerun.
+        # A keyed checkbox makes detailed provenance genuinely on demand.
+        detail_key="rec03a_details_"+prefix+"_"+b
+        if st.checkbox("Consultar referências e limitações",key=detail_key):
             coverage = candidate["weighted_coverage"]
             if coverage["value"] is not None:
                 st.write(f'Cobertura ponderada: {coverage["value"]:.0%} '
@@ -138,6 +177,11 @@ def _card(candidate, result, names, cities, official, prefix):
                 date=cell.get("gap_checked_at") or raw.get("source_date")
                 if date:
                     st.caption("Data registrada: "+str(date))
+                for observation in raw.get("observations",[]):
+                    st.caption("Observação original: "+str(observation.get("evidence_date") or "data não informada")+
+                               " · "+format_minutes(observation.get("minimum_oneway_min")))
+                    if observation.get("source_url"):
+                        st.link_button("Fonte da observação",observation["source_url"])
             st.caption(candidate["limitation"])
 
 
@@ -188,6 +232,7 @@ def render_suggestions(*, plan, discovery=None, research=None):
         result=recommend_bases(interests,checked["scope"],discovery=discovery,research=research)
         cities={x["id"]:x for x in research["cities"]}
     except Exception:
+        _LOG.exception("REC03A analysis failed")
         # No stale or empty-looking recommendations after a loader failure.
         st.error("Não foi possível carregar a análise. Suas escolhas permanecem intactas.")
         st.button("Tentar novamente",key="rec03a_retry")
@@ -207,16 +252,26 @@ def render_suggestions(*, plan, discovery=None, research=None):
     ordered_sections=(("Alternativas com evidências comparáveis",sections["complete_reference_groups"]),
                       ("Outras possibilidades para investigar",sections["conditional_all_must_identified"]+
                        sections["conditional_must_pending"]))
-    for label,ids in ordered_sections:
+    for index,(label,ids) in enumerate(ordered_sections):
         if ids:
             st.markdown("#### "+label)
-            for b in ids:
+            size=6
+            count=(len(ids)+size-1)//size
+            key="rec03a_highlight_page_"+str(index)
+            if not isinstance(st.session_state.get(key),int) or not 1<=st.session_state[key]<=count:
+                st.session_state[key]=1
+            page=st.number_input("Página de destaques "+str(index+1),1,count,step=1,key=key) if count>1 else 1
+            for b in ids[(page-1)*size:page*size]:
                 _card(candidates[b],result,names,cities,plan["base_city"],"highlight")
     _render_comparison_groups(result,names,cities)
     st.markdown("#### Todas as cidades-base")
-    text=st.text_input("Pesquisar cidade ou país",key="rec03a_search").strip().casefold()
-    category=st.selectbox("Disponibilidade de evidências",("Todas","Comparáveis","Condicionais","Para investigar"),
-                         key="rec03a_category")
+    _restore_widget("rec03a_search","rec03a_search_shadow","",lambda x:isinstance(x,str))
+    text=st.text_input("Pesquisar cidade ou país",key="rec03a_search",
+                       on_change=_remember,args=("rec03a_search","rec03a_search_shadow")).strip().casefold()
+    categories=("Todas","Comparáveis","Condicionais","Para investigar")
+    _restore_widget("rec03a_category","rec03a_category_shadow","Todas",lambda x:x in categories)
+    category=st.selectbox("Disponibilidade de evidências",categories,key="rec03a_category",
+                          on_change=_remember,args=("rec03a_category","rec03a_category_shadow"))
     groups={"Comparáveis":"comparable","Condicionais":"conditional","Para investigar":"investigate"}
     filtered=[c for c in result["candidates"] if
               (category=="Todas" or c["group"]==groups.get(category)) and
@@ -227,11 +282,14 @@ def render_suggestions(*, plan, discovery=None, research=None):
         return
     size=8
     pages=(len(filtered)+size-1)//size
-    if not isinstance(st.session_state.get("rec03a_page"),int) or not 1<=st.session_state["rec03a_page"]<=pages:
-        st.session_state["rec03a_page"]=1
-    page=st.number_input("Página",min_value=1,max_value=pages,step=1,key="rec03a_page")
+    _restore_widget("rec03a_page","rec03a_page_shadow",1,lambda x:type(x) is int and 1<=x<=pages)
+    page=st.number_input("Página",min_value=1,max_value=pages,step=1,key="rec03a_page",
+                         on_change=_remember,args=("rec03a_page","rec03a_page_shadow"))
     for c in filtered[(page-1)*size:page*size]:
-        _card(c,result,names,cities,plan["base_city"],"all")
+        if c["highlight"]:
+            st.write(cities[c["base_id"]]["name"]+" · "+cities[c["base_id"]]["country"]+" — também nos destaques acima")
+        else:
+            _card(c,result,names,cities,plan["base_city"],"all")
 
 
 def render_recommendation_activity(*,plan,discovery=None,research=None):
