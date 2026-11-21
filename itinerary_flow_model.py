@@ -68,9 +68,10 @@ def selected_rows(plan:dict,catalog:dict)->list[dict]:
     for item in plan.get("flexible_visits",[]):
         key=item["destination_id"]
         if key not in lookup:continue
-        if item["stage"]==FRANCE_STAGE and key not in plan.get("packages",{}):
-            continue  # The existing canonical outing editor removed this destination.
-        attractions=(plan["packages"][key] if item["stage"]==FRANCE_STAGE
+        if (item["stage"]==FRANCE_STAGE and key not in plan.get("packages",{})
+                and item["attractions"]):
+            continue  # Preserve reading older inconsistent drafts conservatively.
+        attractions=(plan["packages"].get(key,[]) if item["stage"]==FRANCE_STAGE
                      else item["attractions"])
         rows[key]={"id":key,"name":lookup[key]["name"],"stage":item["stage"],
                    "attractions":attractions,"period":item["period"],
@@ -103,7 +104,7 @@ def is_selected(plan:dict,dest_id:str)->bool:
 def _validated_choice(catalog:dict,dest_id:str,attractions:list[str],period:str)->dict:
     item=get_choice(catalog,dest_id)
     allowed={a["id"] for a in item["attractions"]}
-    if (not isinstance(attractions,list) or not 1<=len(attractions)<=5
+    if (not isinstance(attractions,list) or not 0<=len(attractions)<=5
         or len(attractions)!=len(set(attractions)) or not set(attractions)<=allowed):
         raise ValueError("Selecione de uma a cinco atrações válidas e distintas")
     if period not in period_options(item["stage"]):
@@ -127,7 +128,10 @@ def upsert_choice(plan:dict,catalog:dict,dest_id:str,
         if not set(attractions)<=allowed:
             raise ValueError("Atrações não pertencem ao destino")
         packages=deepcopy(plan["packages"])
-        packages[dest_id]=list(attractions)
+        if attractions:
+            packages[dest_id]=list(attractions)
+        else:
+            packages.pop(dest_id,None)
         updates["packages"]=packages
     return change_plan(plan,updates)
 
@@ -223,6 +227,7 @@ def validate_flow_backup(plan:dict,catalog:dict)->None:
                                 row["attractions"],row["period"])
         if {k:row[k] for k in clean}!=clean:
             raise ValueError("Etapa ou atração divergente do catálogo")
-        if row["stage"]==FRANCE_STAGE and plan["packages"].get(
-                row["destination_id"])!=row["attractions"]:
+        if row["stage"]==FRANCE_STAGE and (
+            (bool(row["attractions"]) and plan["packages"].get(row["destination_id"])!=row["attractions"])
+            or (not row["attractions"] and row["destination_id"] in plan["packages"])):
             raise ValueError("Passeio francês divergente entre calendário e roteiro")
