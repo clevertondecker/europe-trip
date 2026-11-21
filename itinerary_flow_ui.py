@@ -16,7 +16,7 @@ from itinerary_flow_model import (
     period_options,UNASSIGNED,ITALY_STAGE,FRANCE_STAGE,EUROPE_STAGE_LABEL,
     validate_flow_backup
 )
-from planning_session import (active_plan,commit_outing,delete_outing,
+from planning_session import (active_plan,commit_outing,commit_undated_destinations,delete_outing,
                               schedule_italy_visit,
                               schedule_package,unschedule_package)
 from planning_status import explain_storage_error
@@ -448,7 +448,7 @@ def _assert_organize_stage(catalog:dict,destination_id:str,stage:str)->None:
 
 
 def _render_organizer_wishlist(plan:dict,catalog:dict,stage:str)->None:
-    """Expose wishlist-only places without adding them to the official plan."""
+    """Promote several wishlist destinations explicitly, without dates."""
     from ux502_destination_interests_model import empty_interests, LABELS
     from ux61_destination_board_model import organizer_wishlist_candidates
     from ux61_destination_board_ui import _discovery
@@ -456,40 +456,51 @@ def _render_organizer_wishlist(plan:dict,catalog:dict,stage:str)->None:
     try:
         candidates=organizer_wishlist_candidates(wishes,plan,_discovery(),catalog,stage)
     except ValueError:
-        st.warning("A lista de lugares precisa ser revisada antes de organizar.")
+        st.warning("A lista de lugares precisa ser revisada antes de montar o roteiro.")
         return
     eligible=candidates["eligible"]
     if eligible:
-        st.markdown("**Da minha lista para o roteiro**")
-        st.caption("Estes são lugares desejados, não passeios confirmados. "
-                   "Escolha um para incluí-lo sem data, reservas ou atrações obrigatórias.")
+        st.markdown("##### Incluir lugares da minha lista")
+        st.caption("Selecione várias cidades para o roteiro, mesmo sem decidir "
+                   "as atrações, os períodos ou as datas. Nada será reservado.")
         by_id={row["id"]:row for row in eligible}
         select_key="flow_wishlist_to_plan_"+stage
-        # A destination may have been removed from the wishlist or added
-        # to TripPlan in another view. Never reuse a stale selectbox value.
-        if st.session_state.get(select_key) not in by_id:
-            st.session_state.pop(select_key,None)
-        selected=st.selectbox("Lugar da minha lista",list(by_id),
-            key=select_key,
+        # Widget values can outlive a plan edit or a wishlist removal.
+        current=st.session_state.get(select_key)
+        if current is not None:
+            if not isinstance(current,list):
+                st.session_state.pop(select_key,None)
+            else:
+                updated=[dest_id for dest_id in current if dest_id in by_id]
+                if updated!=current:
+                    st.session_state[select_key]=updated
+        picked=st.multiselect("Destinos para incluir no roteiro",
+            list(by_id),key=select_key,max_selections=50,
             format_func=lambda dest:by_id[dest]["name"]+" · "+
                 LABELS.get(by_id[dest]["priority"],"Quero conhecer"))
-        if st.button("Incluir no roteiro sem data",key="flow_wishlist_confirm_"+stage):
+        if st.button("Incluir selecionados no roteiro",type="primary",
+                     disabled=not bool(picked),key="flow_wishlist_confirm_"+stage):
             try:
-                _assert_organize_stage(catalog,selected,stage)
-                outcome=commit_outing(selected,[],UNASSIGNED,confirmed=True)
-                st.session_state["ux45_flow_result"]=asdict(outcome)
+                # Revalidate the wishlist against current state before writing.
+                latest=organizer_wishlist_candidates(
+                    st.session_state.get("ux502_interests",empty_interests()),
+                    active_plan(),_discovery(),catalog,stage)
+                available={row["id"] for row in latest["eligible"]}
+                if not set(picked)<=available:
+                    raise ValueError("Sua lista mudou; revise a seleção.")
+                commit_undated_destinations(list(picked),stage,confirmed=True)
                 st.session_state["flow_notice"]=(
-                    by_id[selected]["name"]+" incluído no roteiro. "
-                    "Você já pode organizar o período ou a data.")
-                st.session_state["flow_organize_destination"]=selected
+                    str(len(picked))+" destino(s) incluído(s) no roteiro sem data. "
+                    "Salve sua viagem na nuvem para preservar as alterações.")
+                st.session_state.pop(select_key,None)
                 st.rerun()
             except (ValueError,KeyError) as exc:
                 st.error(str(exc))
     if candidates["unsupported"]:
-        with st.expander("Lugares da lista sem passeio compatível ("+
+        with st.expander("Lugares sem passeio compatível ("+
                          str(len(candidates["unsupported"]))+")",expanded=False):
-            st.caption("Continuam na lista, mas não foram encontrados com o mesmo ID "
-                       "no catálogo de passeios. Não serão adicionados automaticamente.")
+            st.caption("Seus desejos continuam guardados na lista; "
+                       "nenhuma correspondência de ID será inventada.")
             st.write(", ".join(row["name"] for row in candidates["unsupported"][:15])+
                      ("…" if len(candidates["unsupported"])>15 else ""))
             st.button("Explorar passeios disponíveis",
@@ -497,7 +508,7 @@ def _render_organizer_wishlist(plan:dict,catalog:dict,stage:str)->None:
                       on_click=_navigate,args=("Explorar","Passeios"))
     if candidates["other_stage"]:
         st.caption(str(len(candidates["other_stage"]))+
-                   " lugar(es) da sua lista pertencem à outra etapa da viagem.")
+                   " destino(s) desejados pertencem à outra etapa.")
 
 
 def _render_organize(plan:dict,catalog:dict,stage:str)->None:
@@ -505,16 +516,17 @@ def _render_organize(plan:dict,catalog:dict,stage:str)->None:
     if not st.session_state.get("flow_organize_open",False):
         return
     with st.container(border=True):
-        st.markdown("#### Organizar os passeios")
-        st.caption("Escolha primeiro um período flexível ou, se já souber, "
-                   "uma data. Nenhuma das opções cria reservas.")
+        st.markdown("#### Montar meu roteiro")
+        st.caption("Inclua destinos agora e defina os dias só quando quiser. "
+                   "Você pode salvar o roteiro sem nenhuma data.")
         _render_organizer_wishlist(plan,catalog,stage)
         rows=selected_rows_for_stage(plan,catalog,stage)
         _reconcile_organize_state(st.session_state,rows,stage)
         if not rows:
-            st.info("Nenhum passeio italiano foi incluído ainda. Revise a proposta italiana para adicionar passeios." if stage==ITALY_STAGE
-                    else "Nenhum passeio selecionado na temporada europeia. Adicione lugares antes de organizar.")
+            st.info("Nenhum destino confirmado nesta etapa. Selecione lugares da lista acima "
+                    "ou explore destinos; você pode organizar as datas depois.")
         else:
+            st.markdown("##### Organizar períodos ou dias (opcional)")
             by_id={r["id"]:r for r in rows}
             dest_id=st.selectbox("Lugar do meu roteiro",list(by_id),
                                  format_func=lambda key:by_id[key]["name"],
@@ -798,10 +810,13 @@ def render_itinerary_workbench(plan:dict,catalog:dict,
     a,b,c=st.columns(3,gap="small")
     a.button("＋ Explorar e adicionar passeio",key="flow_add_open_button",
              on_click=_show_add,type="primary",width="stretch")
-    b.button("Organizar dias",key="flow_go_calendar",
+    b.button("Montar e organizar roteiro",key="flow_go_calendar",
              on_click=_show_organize,width="stretch")
     c.button("Salvar planejamento",key="flow_open_save",
              on_click=_show_save,width="stretch")
+    # Keep the organizer next to its triggering button, instead of placing
+    # it below the stage editor where the click can appear to do nothing.
+    _render_organize(active_plan(),catalog,stage)
     if st.session_state.get("flow_notice"):
         st.success(st.session_state.pop("flow_notice"))
     latest=st.session_state.pop("ux45_flow_result",None)
@@ -830,7 +845,6 @@ def render_itinerary_workbench(plan:dict,catalog:dict,
             and st.session_state.get("ux_area") in ("Meu roteiro","Planejar")):
         from ux63_timeline_ui import render_timeline
         render_timeline(active_plan(),catalog,stage)
-    _render_organize(active_plan(),catalog,stage)
     _save_panel(active_plan(),catalog)
     _selected_stage(selected_rows(active_plan(),catalog),stage,catalog)
     # Render the optional European planner AFTER the stage heading and outings.
