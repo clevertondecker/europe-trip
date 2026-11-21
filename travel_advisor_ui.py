@@ -213,7 +213,11 @@ def render_advisor(trip_data:dict,sync_sources:dict,workspace_area:str='Meus pas
 
     # Financial baseline: the excursion budget is already included in the total.
     selected=[x for group in p["packages"].values() for x in group]
-    cost=package_cost(catalog,routes,p["base_city"],selected)
+    from itinerary_flow_model import selected_rows, FRANCE_STAGE
+    selected_cities=[row["id"] for row in selected_rows(p,catalog)
+                     if row["stage"]==FRANCE_STAGE]
+    cost=package_cost(catalog,routes,p["base_city"],selected,
+                      planned_destination_ids=selected_cities)
     with st.expander("Câmbio e aluguel (hipóteses)",expanded=False):
         fxcol1,fxcol2=st.columns(2)
         with fxcol1: eurfx=st.number_input("R$/€ hipotético",4.,10.,6.3,.05,key="advisor_eurfx")
