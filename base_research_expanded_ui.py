@@ -181,22 +181,27 @@ def _candidate_media_and_logistics(city_id:str)->None:
     st.markdown("#### Atrações para conhecer")
     st.caption("Fotografias licenciadas e fontes oficiais. A visita não é uma reserva; "
                "bilhetes, acesso local e funcionamento no outono de 2027 ainda pendem de confirmação.")
-    for attraction in attractions:
-        with st.container(border=True):
-            left,right=st.columns([1,2])
-            with left:
-                st.markdown(_candidate_photo_markup(attraction["photo"],attraction["name"]),
-                            unsafe_allow_html=True)
-                credit=photo_credit(attraction["photo"])
-                if credit:
-                    st.caption(credit)
-            with right:
-                st.markdown("**"+attraction["name"]+"**")
-                st.caption(attraction["place"]+" · "+
-                    ("Passeio local" if attraction["proximity"]=="local"
-                     else "Excursão nas redondezas"))
-                st.write(attraction["notes"])
-                st.markdown("[Fonte turística]("+attraction["source_url"]+")")
+    for proximity,title in (("local","Atrações na cidade"),("regional","Passeios nas redondezas")):
+        group=[a for a in attractions if (a["proximity"]=="local") == (proximity=="local")]
+        if not group:
+            continue
+        with st.expander(title+f" ({len(group)})",expanded=proximity=="local"):
+            for attraction in group:
+                with st.container(border=True):
+                    left,right=st.columns([1,2])
+                    with left:
+                        st.markdown(_candidate_photo_markup(attraction["photo"],attraction["name"]),
+                                    unsafe_allow_html=True)
+                        credit=photo_credit(attraction["photo"])
+                        if credit:
+                            st.caption(credit)
+                    with right:
+                        st.markdown("**"+attraction["name"]+"**")
+                        st.caption(attraction["place"]+" · "+
+                            ("Passeio local" if attraction["proximity"]=="local"
+                             else "Excursão nas redondezas"))
+                        st.write(attraction["notes"])
+                        st.markdown("[Fonte turística]("+attraction["source_url"]+")")
     st.markdown("#### Tempos ferroviários pesquisados a partir desta base")
     st.caption("Mínimos de ida publicados em 2026, estação a estação; não são "
                "tempos porta a porta e não confirmam retorno aos fins de semana de 2027.")
@@ -228,8 +233,12 @@ def _explore_city(study,rail,five)->None:
     a,b=st.columns(2)
     a.metric("Anúncios de 2026",h["count"])
     documented=next(r for r in coverage_matrix("general",study=study) if r["id"]==selected)
-    b.metric("Tempos ferroviários pesquisados",
-             str(documented["route_basket_with_time"])+"/15")
+    b.metric("Tempos na cesta histórica comparável",
+             str(documented["route_basket_with_time"])+"/"+str(documented["route_basket_total"]))
+    additional=base_routes(selected)
+    if additional:
+        st.caption(f"{len(additional)} referências adicionais de ida (DATA23), "
+                   "fora da métrica histórica; retorno e 2027 não confirmados.")
     _city_profile(selected,study)
     _candidate_media_and_logistics(selected)
     _city_housing(city)
