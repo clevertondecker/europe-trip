@@ -30,7 +30,7 @@ def _format_brl(value:float)->str:
 
 
 def _base_name(data:dict,base_id:str)->str:
-    b=next(x for x in base_options(data) if x["id"]==base_id)
+    b=next(x for x in base_options(data,include_candidates=True) if x["id"]==base_id)
     return place_label(b["name"],b["country"])
 
 
@@ -139,7 +139,7 @@ def _nearby(data:dict,base_id:str)->None:
 
 
 def _comparison(data:dict)->None:
-    names={b["id"]:_base_name(data,b["id"]) for b in base_options(data)}
+    names={b["id"]:_base_name(data,b["id"]) for b in base_options(data,include_candidates=True)}
     supported={b["id"] for b in data["bases"]}
     places={d["id"]:place_label(d["name"],d["country"]) for d in data["destinations"]}
     bases=st.multiselect("Quais bases comparar?",
@@ -234,7 +234,7 @@ def _choose_base(data:dict,plan:dict,base_id:str)->None:
 
 def _split_stay(data:dict,plan:dict,trip_data:dict,finance_live:bool,
                 eurfx:float)->None:
-    names={b["id"]:_base_name(data,b["id"]) for b in base_options(data)}
+    names={b["id"]:_base_name(data,b["id"]) for b in base_options(data,include_candidates=True)}
     days=(st.session_state.get("ux_days",plan["total_days"]-plan["italy_days"])
           if st.session_state.get("ux_mode")=="Simulação"
           else plan["total_days"]-plan["italy_days"])
@@ -393,7 +393,7 @@ def render_base_explorer(plan:dict,trip_data:dict,finance_live:bool,
         # UX 4.2: one task selector, while all legacy research tools remain reachable.
         from base_research_expanded_ui import render_expanded_research
         from ux42_city_navigation import ACTIVITIES, normalize_activity
-        study_options=base_options(data)
+        study_options=base_options(data,include_candidates=True)
         official=plan["base_city"]
         names={item["id"]:_base_name(data,item["id"]) for item in study_options}
         current=normalize_activity(st.session_state.get("ux42_city_activity"))
@@ -440,7 +440,7 @@ def render_base_explorer(plan:dict,trip_data:dict,finance_live:bool,
     st.caption("Compare corredores de viagem e cidades francesas antes de decidir. "
                "Todas as tarifas/tempos são referências de 2026; nenhuma passagem "
                "ou aluguel mobiliado foi confirmado para setembro–novembro de 2027.")
-    options=base_options(data)
+    options=base_options(data,include_candidates=True)
     names={b["id"]:_base_name(data,b["id"]) for b in options}
     _scenario_backups(plan,options)
     active=plan["base_city"]
