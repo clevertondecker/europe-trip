@@ -88,6 +88,12 @@ def render_manual_context(selected=None,visible=None):
     if not isinstance(context,dict) or context.get("kind")!="manual":
         return
     if selected is None:
+        valid,_,_=context_for("manual")
+        if valid is None:
+            state.pop(CONTEXT,None)
+            st.caption("O escopo da análise mudou. Os filtros manuais atuais são independentes.")
+            return
+    if selected is None:
         st.caption("Comparação aberta a partir das sugestões. Os filtros são de pesquisa, não do roteiro.")
         st.button("Voltar às cidades sugeridas",key="rec03a_handoff_back_manual",
                   on_click=return_to_suggestions)
@@ -148,7 +154,7 @@ def render_profile_context(plan):
               on_click=queue_handoff,args=(st.session_state,"map",[base]))
     # Reuse the existing full profile renderer, without writing scenario_base_selected.
     from base_research_expanded_ui import render_expanded_research
-    render_expanded_research(activity_override="Explorar uma cidade",compact=True)
+    render_expanded_research(activity_override="Explorar uma cidade",compact=True,fixed_city=base)
     return True
 
 

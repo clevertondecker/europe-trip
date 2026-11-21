@@ -162,6 +162,20 @@ class HandoffAppTests(unittest.TestCase):
         click("rec03a_handoff_back_manual")
         self.assertEqual(app.session_state[SCOPE],scope)
         self.assertEqual(app.multiselect(key="rec03a_handoff_base_selection_widget").value,["strasbourg","angers"])
+        # Open a real candidate profile and its map, with the same scope.
+        buttons=[b for b in app.button if b.key and b.key.startswith("rec03a_handoff_profile_")]
+        self.assertTrue(buttons)
+        key=buttons[0].key
+        base=next(x["id"] for x in load_research(include_candidates=True)["cities"]
+                  if key.endswith("_"+x["id"]))
+        click(key)
+        self.assertEqual(app.session_state[CONTEXT]["base_ids"],[base])
+        self.assertFalse(any(w.key=="expanded_bases_detail_city" for w in app.selectbox))
+        click("rec03a_handoff_profile_map")
+        self.assertEqual(app.session_state[CONTEXT]["kind"],"map")
+        self.assertFalse(app.error,str(app.error))
+        click("rec03a_handoff_back_map")
+        self.assertEqual(app.session_state[SCOPE],scope)
         click("rec03a_handoff_planning")
         self.assertEqual(app.session_state["ux_section"],"Organizar viagem")
         self.assertEqual(app.session_state["flow_journey_view"],"build")
