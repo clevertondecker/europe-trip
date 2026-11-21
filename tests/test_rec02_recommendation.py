@@ -309,6 +309,32 @@ class RealRecommendationTests(unittest.TestCase):
                 self.assertFalse(result["global_ranking"])
         self.assertEqual(plan,original_plan)
 
+    def test_ux503_same_scope_preserves_cells_and_recalculates_priorities(self):
+        from ux503_destination_base_comparison_model import compare_wishlist_bases
+        from routes7_comparison_projection import decorate_comparison
+        items=[("paris","must_visit"),("colmar","interested"),("basel","maybe")]
+        wishes=empty_interests()
+        for d,p in items:
+            wishes=set_interest(wishes,d,p,self.discovery)
+        ids=[d for d,_ in items]
+        scope=confirm_scope(wishes,ids,self.discovery)
+        kwargs=dict(discovery=self.discovery,research=self.research,
+                    rail=self.rail,exploration=self.exploration)
+        full=recommend_bases(wishes,scope,**kwargs)
+        raw=compare_wishlist_bases(wishes,["strasbourg","mulhouse"],
+                                   visible_destination_ids=ids,**kwargs)
+        manual=evaluate_matrix({"comparison":raw,"evidence":decorate_comparison(raw)})
+        indexed={c["base_id"]:c for c in full["candidates"]}
+        for c in manual["candidates"]:
+            for key in ("evidence","raw_rail_evidence","weighted_coverage","weighted_minimum_oneway"):
+                self.assertEqual(c[key],indexed[c["base_id"]][key])
+        edited=set_interest(wishes,"basel","must_visit",self.discovery)
+        updated=recommend_bases(edited,scope,**kwargs)
+        self.assertEqual(updated["scope"]["destination_ids"],scope["destination_ids"])
+        self.assertEqual(next(d["priority"] for d in updated["destinations"] if d["id"]=="basel"),"must_visit")
+        self.assertEqual(scope["snapshot"]["revision"],wishes["revision"])
+        self.assertFalse(updated["official_plan_modified"])
+
     def test_diagnostics_real_and_expanded_synthetic(self):
         import json
         from rec02_diagnostics import run_diagnostics
