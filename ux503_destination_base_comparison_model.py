@@ -22,7 +22,7 @@ def compare_wishlist_bases(interests: dict, base_ids: list[str], *,
                            visible_destination_ids=None) -> dict:
     """Compare exactly the same active wishlist across 2–5 researched bases."""
     discovery = discovery if discovery is not None else build_destination_discovery()
-    research = research if research is not None else load_research()
+    research = research if research is not None else load_research(include_candidates=True)
     cities = {row["id"]: row for row in research["cities"]}
     if (not isinstance(base_ids, list) or not 2 <= len(base_ids) <= 5
             or any(not isinstance(x, str) or x not in cities for x in base_ids)
