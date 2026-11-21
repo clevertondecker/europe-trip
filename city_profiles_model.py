@@ -108,8 +108,9 @@ def compact_comparison(data:dict,city_ids:list[str])->list[dict]:
             "Cidade":row["name"],
             "País":row["country"],
             "População municipal (ano indicado)":
-                (str(row["demographics"]["population_municipal"])+" ("+str(row["demographics"]["reference_year"])+")")
-                if row.get("demographics",{}).get("population_municipal") is not None else "Não pesquisado",
+                (str((row.get("demographics") or {})["population_municipal"])+" ("+
+                 str((row.get("demographics") or {})["reference_year"])+")")
+                if (row.get("demographics") or {}).get("population_municipal") is not None else "Não pesquisado",
             "Corredor":row["corridor"],
             "Moradia: amostras 2026":house["historical_offer_count"],
             "Faixa observada EUR/mês":
