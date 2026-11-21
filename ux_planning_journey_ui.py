@@ -21,6 +21,8 @@ def _show(action):
     state["flow_organize_open"]=action=="organize"
     state["flow_add_open"]=False
     state["flow_save_open"]=False
+    if action!="organize":
+        state.pop("flow_edit_target",None)
 
 
 def _choose():
@@ -124,6 +126,7 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
                                   _active_stage_changed,_stage_label,_show_add,_compact_budget)
     from ux61_destination_board_ui import render_destination_board
     from ux64_navigation_model import select_public_task
+    from rec03a_session import request_navigation
     label,hint=private_status_label(("Rascunho nesta sessão","Salve quando quiser; datas são opcionais."))
     try:
         view=project_planning(plan,st.session_state.get("ux502_interests",empty_interests()),
@@ -140,6 +143,13 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
     b.metric("Incluídos",counts["planned"])
     c.metric("Organizados",counts["organized"])
     state=st.session_state
+    # Prevent stale bulk selections when an account or restored plan changes.
+    identity=(state.get("rec03a_identity"),plan["plan_id"])
+    if state.get("flow_journey_identity")!=identity:
+        for key in list(state.keys()):
+            if key.startswith("flow_journey_batch_") or key==VIEW:
+                state.pop(key,None)
+        state["flow_journey_identity"]=identity
     if state.get(VIEW) not in ("build","organize","review"):
         state[VIEW]=None
     # Respect existing explicit edit deep links and the canonical organizer.
@@ -157,6 +167,10 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
             st.button(LABELS_ACTION[action],key="flow_journey_primary",type="primary",on_click=_choose)
         elif action=="review" and state[VIEW]=="review":
             st.caption("A ação de salvamento está na revisão abaixo.")
+        elif state[VIEW]=="build":
+            st.caption("Confirme os destinos selecionados na montagem abaixo.")
+        elif state[VIEW]=="organize":
+            st.button("Revisar e salvar rascunho",key="flow_journey_primary",type="primary",on_click=_show,args=("review",))
         else:
             st.button(LABELS_ACTION[action],key="flow_journey_primary",type="primary",
                       on_click=_show,args=(action,))
@@ -195,7 +209,7 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
                   on_click=_show,args=("review",))
     with st.expander("Ferramentas complementares",expanded=False):
         st.button("Encontrar cidades-base",key="flow_journey_suggestions",
-                  on_click=__import__("rec03a_session").request_navigation,args=(state,"suggestions"))
+                  on_click=request_navigation,args=(state,"suggestions"))
         st.button("Revisar orçamento",key="flow_journey_budget",
                   on_click=select_public_task,args=(state,"Orçamento","Visão financeira"))
         if st.checkbox("Consultar todos os destinos e suas situações",key="flow_journey_board"):

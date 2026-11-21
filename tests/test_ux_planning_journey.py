@@ -43,5 +43,51 @@ class PlanningJourneyTests(unittest.TestCase):
         self.assertEqual(view["next"],"choose")
         self.assertEqual(view["counts"]["planned"],0)
 
+class PlanningJourneyAppTests(unittest.TestCase):
+    def test_bulk_confirm_and_review_without_navigation(self):
+        from streamlit.testing.v1 import AppTest
+        from unittest.mock import patch
+        discovery=build_exploration_discovery()
+        wishes=empty_interests()
+        for d in ("paris","colmar","angers"):
+            wishes=set_interest(wishes,d,"must_visit",discovery)
+        script="""
+import streamlit as st
+from attractions_model import load_attractions
+from planning_session import active_plan
+from ux_planning_journey_ui import render_planning_journey
+render_planning_journey(active_plan(),load_attractions())
+"""
+        app=AppTest.from_string(script,default_timeout=90)
+        plan=new_plan()
+        app.session_state["advisor_plan"]=deepcopy(plan)
+        app.session_state["ux502_interests"]=deepcopy(wishes)
+        app.session_state["ux_area"]="Meu roteiro"
+        app.session_state["ux_section"]="Meu planejamento"
+        # No real cloud write; test the existing canonical review/save surface.
+        with patch("continuity_ui._private_store",return_value=None):
+            app.run()
+            self.assertFalse(app.exception,str(app.exception))
+            self.assertEqual(app.button(key="flow_journey_primary").label,"Montar meu roteiro")
+            app.button(key="flow_journey_primary").click().run()
+            self.assertFalse(app.exception,str(app.exception))
+            key="flow_journey_batch_"+FRANCE_STAGE
+            app.button(key=key+"_all").click().run()
+            self.assertFalse(app.exception,str(app.exception))
+            self.assertEqual(app.session_state["advisor_plan"],plan)
+            self.assertEqual(set(app.multiselect(key=key).value),{"paris","colmar"})
+            app.button(key=key+"_confirm").click().run()
+            self.assertFalse(app.exception,str(app.exception))
+            current=app.session_state["advisor_plan"]
+            self.assertEqual(current["revision"],plan["revision"]+1)
+            self.assertEqual(current["base_city"],plan["base_city"])
+            self.assertEqual(current["assignments"],{})
+            self.assertEqual(app.session_state["ux502_interests"],wishes)
+            self.assertEqual(app.session_state["flow_journey_view"],"review")
+            self.assertEqual(app.session_state["ux_area"],"Meu roteiro")
+            self.assertEqual(app.session_state["ux_section"],"Meu planejamento")
+            self.assertTrue(any("Revisar e salvar meu rascunho" in x.value for x in app.markdown))
+            self.assertTrue(any("Nuvem privada" in x.value for x in app.warning))
+
 if __name__=="__main__":
     unittest.main()
