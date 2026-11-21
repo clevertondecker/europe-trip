@@ -28,6 +28,11 @@ SCENARIOS = {
               ("luxembourg_city", Q), ("basel", I), ("lucerne", T), ("interlaken", Q)],
     "supplemental": [("obernai", I), ("lucerne", Q)],
 }
+DATA23_SCENARIOS = {
+    "data23_a": [("angers", I), ("saumur", Q), ("rennes", I), ("saint_malo", Q)],
+    "data23_b": [("annecy", I), ("dinan", Q), ("strasbourg", Q), ("paris", I)],
+    "data23_mixed": [("saumur", I), ("saint_malo", Q), ("colmar", Q), ("paris", I), ("dinan", T)],
+}
 WEIGHTS = ((5, 3, 1), (10, 3, 1), (3, 2, 1))
 THRESHOLDS = (60, 70, 80, 90, 100)
 
@@ -39,11 +44,18 @@ def coverage_report(matrix: dict) -> dict:
     bases = comparison["base_ids"]
     counts = Counter(c["category"] for c in cells.values())
     candidates = []
+    gaps = Counter()
+    must_gaps = Counter()
     for base in bases:
         selected = [(d, cells[(base, d["id"])]) for d in destinations]
         known = [(d, c) for d, c in selected if c["category"] in ("historical", "reference_only")]
         nonlocal_rows = [(d, c) for d, c in selected if c["category"] != "local"]
         must_covered = all(c["category"] != "no_time" for d, c in selected if d["priority"] == I)
+        for d, c in selected:
+            if c["category"] == "no_time":
+                gaps[d["id"]] += 1
+                if d["priority"] == I:
+                    must_gaps[d["id"]] += 1
         fractions = []
         for weights in WEIGHTS:
             weight = dict(zip((I, Q, T), weights))
@@ -54,13 +66,30 @@ def coverage_report(matrix: dict) -> dict:
             "base_id": base, "known": len(known), "local": len(selected)-len(nonlocal_rows),
             "must_covered": must_covered, "fractions": fractions,
             "complete_without_local": len(known) == len(selected),
+            "identified": len(known) + len(selected)-len(nonlocal_rows),
+            "must_count": sum(d["priority"] == I for d, _ in selected),
+            "must_identified": sum(d["priority"] == I and c["category"] != "no_time" for d, c in selected),
         })
     def eligible(index, threshold):
         return sum(c["must_covered"] and c["fractions"][index] is not None
                    and c["fractions"][index] >= Fraction(threshold, 100)
                    for c in candidates)
     with_time = sum(c["known"] > 0 for c in candidates)
+    complete = [c["base_id"] for c in candidates if c["complete_without_local"]]
+    # Strict common full-scope time group; descriptive only, not 2027 feasibility.
+    comparable = len(complete) if len(complete) >= 2 else 0
     return {
+        "coverage_by_base": [{
+            "base_id": c["base_id"],
+            "weighted_coverage_pct": (round(float(c["fractions"][0])*100, 2)
+                                      if c["fractions"][0] is not None else None),
+            "must_identified": c["must_identified"], "must_total": c["must_count"],
+        } for c in candidates],
+        "strict_complete_group_count": comparable,
+        "partial_evidence_count": sum(c["identified"] > 0 for c in candidates)-comparable,
+        "insufficient_evidence_count": sum(c["identified"] == 0 for c in candidates),
+        "top_missing_destinations": sorted(gaps.items(), key=lambda x: (-x[1], x[0])),
+        "must_missing_destinations": sorted(must_gaps.items(), key=lambda x: (-x[1], x[0])),
         "bases": len(bases), "destinations": len(destinations),
         "with_time": with_time, "without_time": len(bases)-with_time,
         "categories": {k: counts[k] for k in ("historical", "reference_only", "local", "no_time")},
@@ -83,14 +112,20 @@ def run_assessment() -> dict:
             interests, [d for d, _ in items], discovery=discovery, research=research,
             rail=rail, exploration=exploration))
     missing = sorted({r["destination_id"] for r in load_data23()["routes"]} - valid)
+    active_scenarios = {**SCENARIOS, **DATA23_SCENARIOS}
+    skipped = {name: sorted({d for d, _ in items}-valid)
+               for name, items in active_scenarios.items()
+               if any(d not in valid for d, _ in items)}
     return {
+        "skipped_scenarios_missing_ids": skipped,
         "candidate_count": len(candidate_ids(research)),
         "selectable_destination_count": len(valid),
         "data23_missing_destination_ids": missing,
         "housing_cities_with_historical_offers": sum(bool(c["housing_offers"]) for c in research["cities"]),
         "housing_cities_with_eligible_2027_quotes": sum(c["eligible_2027_quotes"] > 0 for c in research["cities"]),
         "overall": evaluate([(d, Q) for d in sorted(valid)]),
-        "scenarios": {name: evaluate(items) for name, items in SCENARIOS.items()},
+        "scenarios": {name: evaluate(items) for name, items in active_scenarios.items()
+                      if name not in skipped},
         "limitations": "Documentary outbound evidence only; not a ranking or verified return.",
     }
 
