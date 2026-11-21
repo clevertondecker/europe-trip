@@ -34,13 +34,18 @@ def base_options(data: dict | None = None, *, include_candidates:bool=False) -> 
         if item["id"] in seen:
             continue
         segments=[line for line in rail["segments"] if line["from"]==item["id"]]
+        from data23_france_candidates_model import base_routes as candidate_base_routes
+        historical_destinations={line["to"] for line in segments}
+        additional=[r for r in candidate_base_routes(item["id"])
+                    if r["destination_id"] not in historical_destinations]
         output.append({
             "id":item["id"],"name":item["name"],"country":item["country"],
             "official_supported":False,
-            "routes":len(segments),
-            "time_coverage":sum(x.get("fastest_minutes") is not None for x in segments),
+            "routes":len(segments)+len(additional),
+            "time_coverage":sum(x.get("fastest_minutes") is not None for x in segments)+len(additional),
             "fare_coverage":sum(x.get("advertised_fare_from_eur_person_oneway") is not None for x in segments),
             "research_status":("Amostra ferroviária parcial" if segments
+                               else "Referências indicativas de ida" if additional
                                else "Pesquisa ampliada · rotas não catalogadas"),
         })
     return output
