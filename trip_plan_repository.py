@@ -44,6 +44,14 @@ def order_saved_plans(plan_ids:list[str], commits:list[dict])->list[dict]:
     return result
 
 
+class PlanConflictError(ValueError):
+    """An optimistic-lock or revision mismatch; never overwrite automatically."""
+
+
+class PlanValidationError(ValueError):
+    """A plan failed local validation before any remote write."""
+
+
 class GitHubPlanRepository:
     def __init__(self, token:str,repo:str=REPO):
         if not token or repo!=REPO: raise ValueError("Configured GitHub repository and token required")
@@ -113,9 +121,12 @@ class GitHubPlanRepository:
         return data
 
     def save(self,plan:dict,expected_sha:str|None)->str:
-        validate_plan(plan)
-        ensure_public_plan_is_minimal(plan)
-        path=safe_path(plan["plan_id"])
+        try:
+            validate_plan(plan)
+            ensure_public_plan_is_minimal(plan)
+            path=safe_path(plan["plan_id"])
+        except (ValueError, KeyError, TypeError) as exc:
+            raise PlanValidationError(str(exc)) from exc
         try:
             existing=self.load(plan["plan_id"])
         except HTTPError as exc:
@@ -123,13 +134,13 @@ class GitHubPlanRepository:
             existing=None
         if existing is None:
             if expected_sha is not None:
-                raise ValueError("New plan must not supply a previous SHA")
+                raise PlanConflictError("O plano ainda não existe remotamente, mas esta sessão possui uma versão antiga. Recarregue antes de salvar.")
         else:
             old,actual_sha=existing
             if expected_sha!=actual_sha:
-                raise ValueError("Repository changed: load latest before saving")
+                raise PlanConflictError("A versão no GitHub mudou desde a última leitura. Baixe seu backup e compare a versão remota.")
             if plan["revision"]<=old["revision"]:
-                raise ValueError("Revision must be greater than the stored plan revision")
+                raise PlanConflictError("A revisão local não é posterior à salva no GitHub. Recarregue o planejamento e revise suas mudanças.")
         encoded=base64.b64encode(
             (json.dumps(plan,ensure_ascii=False,indent=2)+"\n").encode("utf-8")).decode("ascii")
         payload={"message":"Update travel plan "+plan["plan_id"]+" r"+str(plan["revision"]),
@@ -138,6 +149,6 @@ class GitHubPlanRepository:
         try:
             response=self._request(path,"PUT",payload)
         except HTTPError as exc:
-            if exc.code in (409,422):raise ValueError("GitHub revision conflict") from exc
+            if exc.code in (409,422):raise PlanConflictError("O GitHub recusou a gravação por conflito de versão. Exporte um backup e recarregue o plano.") from exc
             raise
         return response["content"]["sha"]
