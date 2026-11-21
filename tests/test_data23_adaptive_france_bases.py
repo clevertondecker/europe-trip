@@ -110,5 +110,25 @@ class DynamicBaseCatalogTests(unittest.TestCase):
         self.assertEqual(plan,plan_before)
 
 
+class DynamicCandidateUIRegressionTests(unittest.TestCase):
+    @patch("base_research_expanded_ui._candidate_photo_markup",
+           return_value="<div>Fotografia licenciada</div>")
+    def test_new_base_detail_renders_and_cannot_change_saved_plan(self, photo):
+        from pathlib import Path
+        from streamlit.testing.v1 import AppTest
+        app=AppTest.from_file(str(Path(__file__).resolve().parents[1]/"app.py"),
+                              default_timeout=120).run()
+        original=deepcopy(app.session_state["advisor_plan"])
+        app.button(key="ux_sidebar_nav_1").click().run()
+        app.segmented_control(key="ux_section").set_value("Cidades-base").run()
+        app.segmented_control(key="ux42_city_activity").set_value(
+            "Explorar cidades").run()
+        app.selectbox(key="expanded_bases_detail_city").set_value("angers").run()
+        self.assertFalse(app.exception,[e.message for e in app.exception])
+        self.assertEqual(app.session_state["advisor_plan"],original)
+        self.assertEqual(app.session_state["expanded_bases_detail_city"],"angers")
+        self.assertTrue(photo.called)
+
+
 if __name__=="__main__":
     unittest.main()
