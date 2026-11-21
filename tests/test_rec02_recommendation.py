@@ -122,6 +122,108 @@ class RecommendationPolicyTests(unittest.TestCase):
         reordered["comparison"]["destinations"].reverse()
         self.assertEqual(evaluate_matrix(reordered),first)
 
+    def assert_omission_partition(self, group, matrix):
+        scope = {d["id"] for d in matrix["comparison"]["destinations"]}
+        common = set(group["destination_ids"])
+        omitted = set(group["omitted_destination_ids"])
+        self.assertEqual(common | omitted, scope)
+        self.assertFalse(common & omitted)
+        for b in group["base_ids"]:
+            known = group["known_not_compared_by_base"][b]
+            missing = group["missing_time_by_base"][b]
+            local = group["local_destination_ids_by_base"][b]
+            parts = [known, missing, local]
+            self.assertTrue(all(len(x) == len(set(x)) for x in parts))
+            self.assertEqual(set(known + missing + local), omitted)
+            self.assertEqual(sum(map(len, parts)), len(omitted))
+            self.assertEqual(group["omitted_by_base"][b], sorted(known + missing))
+            for d in known:
+                self.assertIn(matrix["evidence"]["cells"][b,d]["category"],
+                              ("historical","reference_only"))
+            for d in missing:
+                self.assertEqual(matrix["evidence"]["cells"][b,d]["category"],"no_time")
+            for d in local:
+                self.assertEqual(matrix["evidence"]["cells"][b,d]["category"],"local")
+
+    def test_conditional_omissions_distinguish_own_time_local_and_unknown(self):
+        m=fixture({"a":{"paris":60,"basel":90,"colmar":40,"local":"local","missing":None},
+                   "b":{"paris":80,"basel":110,"colmar":None,"local":(20,),"missing":None}},
+                  {"colmar":"must_visit","local":"must_visit"})
+        g=evaluate_matrix(m)["conditional_comparisons"][0]
+        self.assertEqual(g["destination_ids"],["basel","paris"])
+        self.assertEqual(g["known_not_compared_by_base"],{"a":["colmar"],"b":["local"]})
+        self.assertEqual(g["missing_time_by_base"],{"a":["missing"],"b":["colmar","missing"]})
+        self.assertEqual(g["local_destination_ids_by_base"],{"a":["local"],"b":[]})
+        self.assertEqual(g["must_visit_omitted"],["colmar","local"])
+        self.assert_omission_partition(g,m)
+
+    def test_complete_groups_only_omit_local_access(self):
+        m=fixture({"a":{"x":10,"y":20,"z":"local"},"b":{"x":15,"y":25,"z":"local"}},
+                  {"z":"must_visit"})
+        g=evaluate_matrix(m)["complete_groups"][0]
+        self.assert_omission_partition(g,m)
+        self.assertEqual(g["known_not_compared_by_base"],{"a":[],"b":[]})
+        self.assertEqual(g["missing_time_by_base"],{"a":[],"b":[]})
+        self.assertEqual(g["local_destination_ids_by_base"],{"a":["z"],"b":["z"]})
+        self.assertEqual(g["must_visit_omitted"],["z"])
+        self.assertFalse(g["total_logistics_decidable"])
+
+    def test_equal_coverage_unequal_documentary_categories_preserve_time_ties(self):
+        m=fixture({"a":{"x":(10,),"y":(20,)},"b":{"x":10,"y":20}})
+        result=evaluate_matrix(m)
+        a,b=result["candidates"]
+        self.assertEqual(a["weighted_coverage"],b["weighted_coverage"])
+        self.assertEqual((a["historical_count"],a["indicative_count"]),(0,2))
+        self.assertEqual((b["historical_count"],b["indicative_count"]),(2,0))
+        group=result["complete_groups"][0]
+        self.assertEqual(group["lowest_on_this_set"],["a","b"])
+        self.assertEqual(group["compared_category_counts_by_base"],{
+            "a":{"historical":0,"reference_only":2},"b":{"historical":2,"reference_only":0}})
+        self.assertTrue(group["mixed_evidence"])
+        for obj in (result,a,b,group):
+            self.assertFalse(obj["logistics_reliability_decidable"])
+            self.assertIn("não robustez documental",obj["coverage_limitation"])
+            self.assertIn("retorno",obj["limitation"])
+
+    def test_more_indicative_references_is_not_a_quality_win(self):
+        m=fixture({"a":{str(i):(30,) for i in range(5)},
+                   "b":{str(i):50 for i in range(4)}})
+        result=evaluate_matrix(m)
+        a,b=result["candidates"]
+        self.assertGreater(a["weighted_coverage"]["value"],b["weighted_coverage"]["value"])
+        self.assertEqual(a["historical_count"],0)
+        self.assertEqual(b["historical_count"],4)
+        self.assertEqual(result["highlight_ids"],["a"])
+        self.assertIn("fronteira_documental_do_escopo",a["reasons"])
+        self.assertFalse(a["logistics_reliability_decidable"])
+        self.assertFalse(b["logistics_reliability_decidable"])
+        self.assertFalse(result["global_ranking"])
+
+    def test_partial_frontier_and_raw_provenance_stay_distinct(self):
+        m=fixture({"a":{"x":(10,),"y":(20,),"z":(30,)},
+                   "b":{"x":20,"y":30,"w":40}})
+        cell=m["evidence"]["cells"]["a","x"]
+        cell.update(source_url="https://example.com/reference",gap_checked_at="2026-11-01",
+                    weekend_return_known=False,variation_status="conditions_unresolved")
+        raw={"base_id":"a","destination_id":"x","source_date":"2026-10-01",
+             "return_weekend_verified":False,"observations":[
+                 {"minimum_oneway_min":10,"source_url":"https://example.com/one","evidence_date":"2026-10-01"},
+                 {"minimum_oneway_min":15,"source_url":"https://example.com/two","evidence_date":"2026-10-02"}]}
+        m["comparison"]["rows"]=[raw]
+        before=deepcopy(m)
+        result=evaluate_matrix(m)
+        self.assertEqual(result["highlight_ids"],["a","b"])
+        self.assertFalse(result["complete_groups"])
+        group=result["conditional_comparisons"][0]
+        self.assert_omission_partition(group,m)
+        a=result["candidates"][0]
+        self.assertEqual(a["evidence"]["x"],cell)
+        self.assertEqual(a["raw_rail_evidence"]["x"],raw)
+        self.assertFalse(a["evidence"]["x"]["weekend_return_known"])
+        self.assertEqual(m,before)
+        a["raw_rail_evidence"]["x"]["observations"].clear()
+        self.assertEqual(m,before)
+
     def test_invalid_matrix_fails_closed(self):
         m=fixture({"a":{"x":10},"b":{"x":20}})
         del m["evidence"]["cells"]["b","x"]
@@ -192,6 +294,15 @@ class RealRecommendationTests(unittest.TestCase):
                     self.assertEqual(None if value is None else round(value*100,2),coverage[c["base_id"]])
                     for d,cell in c["evidence"].items():
                         self.assertEqual(cell,matrix["evidence"]["cells"][c["base_id"],d])
+                by_pair={(row["base_id"],row["destination_id"]):row
+                         for row in matrix["comparison"]["rows"]}
+                for c in result["candidates"]:
+                    for d,row in c["raw_rail_evidence"].items():
+                        self.assertEqual(row,by_pair[c["base_id"],d])
+                    self.assertEqual(set(c["raw_rail_evidence"]),set(c["evidence"]))
+                    self.assertFalse(c["logistics_reliability_decidable"])
+                for group in result["complete_groups"]+result["conditional_comparisons"]:
+                    RecommendationPolicyTests().assert_omission_partition(group,matrix)
                 self.assertEqual((wishes,scope),before)
                 self.assertEqual(result,recommend_bases(wishes,scope,**kwargs))
                 self.assertFalse(result["official_plan_modified"])
