@@ -19,7 +19,10 @@ class CloudOnlyItineraryPanelTests(unittest.TestCase):
     def test_private_save_is_primary(self):
         source=inspect.getsource(_save_panel)
         self.assertIn("render_primary_private_save(plan, catalog)", source)
-        self.assertIn("Avançado · publicar no GitHub público", source)
+        self.assertNotIn("Avançado · publicar no GitHub público", source)
+        self.assertNotIn("flow_save_confirm", source)
+        self.assertNotIn("flow_compare_remote", source)
+        self.assertNotIn("_secure_save(", source)
         self.assertNotIn("backup JSON (opcional)", source)
 
 
