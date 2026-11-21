@@ -53,9 +53,8 @@ def _commit(next_plan:dict)->dict:
     st.session_state.pop("advisor_proposals",None)
     st.session_state["advisor_local_changed"]=True
     st.session_state["ux36_cloud_dirty"]=True
-    if st.session_state.get("advisor_autosave_optin") and st.session_state.get(
-        "advisor_public_repo_ack"):
-        st.session_state["advisor_autosave_pending"]=True
+    # UX75: changes never queue automatic publication to a public repository.
+    st.session_state["advisor_autosave_pending"]=False
     return next_plan
 
 def accept_approved_plan(next_plan:dict)->dict:
