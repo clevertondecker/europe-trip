@@ -130,5 +130,53 @@ def run_assessment() -> dict:
     }
 
 
+def run_benchmark() -> dict:
+    """Report real and synthetic sizes separately; no private cache."""
+    from time import perf_counter
+    import tracemalloc
+    from copy import deepcopy
+
+    research = load_research(include_candidates=True)
+    discovery = build_exploration_discovery()
+    rail, exploration = load_rail_evidence(), load_exploration()
+    ids = sorted(d["id"] for d in discovery["destinations"])
+    results = {}
+    for label, count in (("small", 3), ("medium", 12),
+                         ("all_real", len(ids)), ("synthetic_200", 200)):
+        catalog = deepcopy(discovery)
+        selected = ids[:count]
+        if label == "synthetic_200":
+            extras = ["rec01_synthetic_"+str(i) for i in range(count-len(ids))]
+            catalog["destinations"].extend({"id": d, "name": d, "country": "Synthetic"}
+                                           for d in extras)
+            selected = ids + extras
+        wishes = empty_interests()
+        for d in selected:
+            wishes = set_interest(wishes, d, Q, catalog)
+        timings, peaks = [], []
+        prior = None
+        for _ in range(2):
+            tracemalloc.start()
+            started = perf_counter()
+            try:
+                matrix = build_recommendation_matrix(wishes, selected, discovery=catalog,
+                            research=research, rail=rail, exploration=exploration)
+                timings.append(round(perf_counter()-started, 4))
+                peaks.append(round(tracemalloc.get_traced_memory()[1]/1024/1024, 2))
+            finally:
+                tracemalloc.stop()
+            signature = [(key, cell["category"], cell["display_min"])
+                         for key, cell in matrix["evidence"]["cells"].items()]
+            if prior is not None and signature != prior:
+                raise AssertionError("Non-deterministic matrix projection")
+            prior = signature
+        results[label] = {"destinations": len(selected), "bases": len(research["cities"]),
+                          "cells": len(prior), "seconds_with_tracing": timings,
+                          "peak_mib_traced": peaks, "synthetic": label == "synthetic_200"}
+    return results
+
+
 if __name__ == "__main__":
-    print(json.dumps(run_assessment(), ensure_ascii=False, indent=2))
+    import sys
+    output = run_benchmark() if "--benchmark" in sys.argv else run_assessment()
+    print(json.dumps(output, ensure_ascii=False, indent=2))
