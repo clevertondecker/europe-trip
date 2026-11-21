@@ -95,18 +95,9 @@ st.session_state.setdefault("ux_days_value",st.session_state["ux_days"])
 st.session_state.setdefault("unified_stay",st.session_state["ux_days"])
 if st.session_state.get("scenario_sidebar")!=_candidate:
     st.session_state["scenario_sidebar"]=_candidate
-if st.session_state.pop("advisor_autosave_pending",False):
-    if (st.session_state.get("advisor_autosave_optin")
-            and st.session_state.get("advisor_public_repo_ack")
-            and _owner_signed_in()):
-        try:
-            _secure_save(active_plan())
-            st.session_state["advisor_autosave_notice"]="Planejamento salvo automaticamente."
-        except Exception:
-            # Do not retry writes silently, and never claim success.
-            st.session_state["advisor_autosave_error"]=(
-                "Não foi possível salvar automaticamente. Suas escolhas continuam nesta sessão. "
-                "Use Salvar planejamento para tentar novamente.")
+# UX75: clear any stale legacy public-autosave intent without publishing.
+st.session_state.pop("advisor_autosave_pending", None)
+st.session_state["advisor_autosave_optin"] = False
 autosave_private_if_requested(load_attractions())
 data = load_data()
 
