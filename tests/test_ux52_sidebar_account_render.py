@@ -80,15 +80,17 @@ class SidebarAccountRenderIntegration(unittest.TestCase):
                ("Ainda não salvo","Salvo em espaço privado"))
         for fallback,shown in cases:
             with self.subTest(shown=shown),\
-                 patch("planning_session.active_plan",return_value=self.session["advisor_plan"]),\
-                 patch("planning_status.save_label",return_value=(fallback,"detail")) as save,\
+                 patch("planning_status.save_label",return_value=(fallback,"detail")) as legacy_save,\
                  patch("continuity_ui.private_status_label",return_value=(shown,"detail")) as private,\
                  patch.object(ui.st,"session_state",dict(self.session)):
                 self.assertEqual(ui._saving_status(),shown)
-                save.assert_called_once()
-                private.assert_called_once()
+                legacy_save.assert_not_called()
+                private.assert_called_once_with((
+                    "Apenas nesta sessão",
+                    "O GitHub público não confirma salvamento na nuvem privada"))
     def test_save_status_logs_only_safe_error_type(self):
-        with patch("planning_session.active_plan",side_effect=RuntimeError("TOKEN_MUST_NOT_LOG")),\
+        with patch("continuity_ui.private_status_label",
+                   side_effect=RuntimeError("TOKEN_MUST_NOT_LOG")),\
              self.assertLogs("sidebar_account_ui","WARNING") as lines:
             result=ui._saving_status()
         self.assertEqual(result,"Status de salvamento indisponível")
