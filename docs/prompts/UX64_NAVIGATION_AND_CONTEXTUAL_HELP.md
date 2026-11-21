@@ -50,6 +50,25 @@ Não introduzir uma quarta área `Ferramentas`: recursos antigos ficam em expand
 - Fase C: esconder elementos redundantes atrás de controles contextuais, auditar funcionalidade por funcionalidade e remover mensagens técnicas duplicadas.
 Não atualizar área persistida em arquivos antigos de forma destrutiva; converter para nova rota no carregamento.
 
+## Gate P1 — Normalizar backups antigos ANTES de validar navegação
+
+**Problema comprovado na leitura de código:** `continuity_archive_model.validate_continuation()` compara `area` e `section` diretamente contra `ux_navigation.AREAS/SECTIONS`, **antes** de `ux_navigation.apply()` ou `bootstrap()`. Se a nova UX remover os valores `Minha viagem` e `Meu roteiro` dos enums, um arquivo válido da versão anterior será rejeitado integralmente em `validate_archive()`, sem chance de roteamento por `TASK_ALIASES`.
+
+### Contrato de migração
+1. Criar uma função pura, com comportamento **versionado e idempotente**, p.ex. `normalize_legacy_continuation(context, from_version)`, que reconheça pares legados `(area, section)` e valores de `organize_view` e `calendar_stage`. Aplicar a normalização na importação do arquivo **antes** da validação que exige o novo `AREAS/SECTIONS`. Rejeitar áreas realmente desconhecidas; não mapear todo erro para `Planejar` silenciosamente.
+2. Preservar os dados originais do TripPlan, `destination_interests`, grupos, estudos, datas e revisão; converter **somente o contexto de navegação reconhecido**, com registro legível da conversão quando pertinente. Não alterar bytes do arquivo de origem automaticamente; ao reexportar, seguir política de schema/compatibilidade declarada.
+3. Tratar `ux36_pending_restore`, `continuity_ui.restore_private_on_start()`, `apply_pending_restore()`, `continuity_archive_model.validate_continuation()/validate_archive()/preview_restore()/confirm_restore()`, `ux_navigation.from_legacy()/bootstrap()/apply()/set_task()` e `ux504_guided_journey_model.navigation_request()/apply_navigation_request()` com o **mesmo mapeamento** e sem criar segundo roteador.
+4. Priorizar validação dos dados de viagem **independentemente da tela ativa**: contexto apontando para destino de edição que foi removido deve gerar fallback seguro ao painel `Planejar → Meus destinos`, com aviso, sem rejeitar todo arquivo de dados válido. Não usar fallback permissivo para destino_id desconhecido no TripPlan.
+5. Documentar o comportamento das 13 abas de origem **incluindo estados secundários**: pesquisa ampliada, guias especializados, Itália/França, modo/calendário, `flow_active_destination`, busca, comparação, orçamento, identidade e login/logout. Normalizar antes de instanciar widgets Streamlit; reconciliar `main_navigation`, `itinerary_section`, `ux_area` e `ux_section` sem key conflict.
+6. Qualquer alteração de `continuation` por migração **não** conta como edição substantiva no indicador global do #170. A migração pode mudar a tela de retomada, mas nunca fingir que alterou visitas ou foi salva no GCS.
+
+### Testes de cadeia completa
+- **GIVEN** backup GCS/JSON antigo com `Minha viagem/Resumo`, `Minha viagem/Pendências`, `Meu roteiro/Meu planejamento`, `Meu roteiro/Organizar viagem` e `Meu roteiro/Melhorar meu roteiro` **WHEN** importo **THEN** normalização → validação → prévia → confirmação → bootstrap → renderização chegam às novas telas sem perder dados.
+- **GIVEN** arquivo com modo `Calendário completo`, semana e estágio definidos **WHEN** restauro **THEN** a visualização correspondente é acessível e os widgets não lançam `StreamlitAPIException`.
+- **GIVEN** contexto legível mas destino ativo ausente no plano **WHEN** restauro **THEN** os dados continuam recuperáveis e o editor usa fallback contextual explícito, sem selecionar outro destino aleatório.
+- **GIVEN** área inválida/injetada **WHEN** importo **THEN** rejeição permanece, sem converter para default nem ignorar arquivo hostil.
+- **GIVEN** backup atual sob três áreas **WHEN** normalizo repetidas vezes **THEN** o resultado é idêntico (idempotência), com invariantes do TripPlan preservados.
+
 ## Given / When / Then
 - **GIVEN** sessão em antiga `Minha viagem/Pendências` **WHEN** usuário abre bookmark ou restaura backup **THEN** navega para `Planejar/Visão geral/Pendências` sem perder contexto.
 - **GIVEN** antiga `Meu roteiro/Melhorar meu roteiro/Guias especializados` **WHEN** uso alias **THEN** guia equivalente continua acessível em contexto avançado.
