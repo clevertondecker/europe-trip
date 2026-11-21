@@ -12,6 +12,7 @@ from travel_advisor import assess_plan,recommendations,objective_weights
 from travel_optimizer import propose_schedule
 from trip_plan_model import new_plan,validate_plan,with_revision,apply_proposal
 from trip_plan_repository import GitHubPlanRepository
+from plan_reconciliation import compare_plans, plan_digest, prepare_reconciled_plan
 from advisor_auth import is_verified_owner
 from planning_store import create_from_legacy,change_plan,sync_legacy_view
 from catalog_plan_validation import validate_catalog_packages
@@ -116,13 +117,14 @@ def _owner_signed_in(cfg=None):
     except (AttributeError,KeyError,TypeError):
         return False
 
-def _secure_save(plan):
+def _secure_save(plan, *, expected_sha_override=None):
     cfg=_owner_config()
     if not cfg["token"] or not _owner_signed_in(cfg):
         raise PermissionError("Only the verified OIDC owner may write to GitHub")
     if not st.session_state.get("advisor_public_repo_ack"):
         raise PermissionError("Owner must acknowledge public repository visibility")
-    sha=st.session_state.get("advisor_github_sha")
+    sha=(expected_sha_override if expected_sha_override is not None
+         else st.session_state.get("advisor_github_sha"))
     next_sha=GitHubPlanRepository(cfg["token"]).save(plan,sha)
     st.session_state["advisor_github_sha"]=next_sha
     st.session_state["advisor_saved_snapshot"]=deepcopy(plan)
@@ -396,6 +398,7 @@ def render_advisor(trip_data:dict,sync_sources:dict,workspace_area:str='Meus pas
                                 st.error(explain_storage_error(exc))
                                 from trip_plan_repository import PlanConflictError, PlanValidationError
                                 if isinstance(exc, PlanConflictError):
+                                    st.session_state["advisor_reconcile_needed"]=True
                                     st.info("O planejamento desta sessão foi preservado. "
                                             "Baixe o backup JSON acima antes de abrir a versão "
                                             "remota em outra sessão e comparar as diferenças.")
@@ -419,6 +422,87 @@ def render_advisor(trip_data:dict,sync_sources:dict,workspace_area:str='Meus pas
                                     _stage_plan_restore(loaded,sha)
                             except Exception as exc:
                                 st.error(_github_read_error(exc))
+                    # Explicit comparison only: never infer a missing SHA from a
+                    # private/JSON restore, and never silently overwrite GitHub.
+                    st.markdown("#### Comparar meu planejamento com o GitHub")
+                    if st.session_state.get("advisor_reconcile_needed"):
+                        st.warning("Existe uma divergência de versões. Compare os dois "
+                                   "planejamentos antes de tentar publicar novamente.")
+                    if st.button("Comparar versão local e GitHub",
+                                 key="advisor_compare_remote"):
+                        try:
+                            remote, remote_sha = GitHubPlanRepository(cfg["token"]).load(p["plan_id"])
+                            comparison = compare_plans(p, remote)
+                            st.session_state["advisor_reconcile_preview"] = {
+                                "remote": remote, "sha": remote_sha,
+                                "local_digest": comparison["local_digest"],
+                                "remote_digest": comparison["remote_digest"],
+                            }
+                            st.session_state.pop("advisor_reconcile_ack", None)
+                            st.rerun()
+                        except HTTPError as exc:
+                            st.error(_github_read_error(exc))
+                        except (ValueError, KeyError, TypeError) as exc:
+                            st.error("Não foi possível comparar os planejamentos: " + str(exc))
+                    preview = st.session_state.get("advisor_reconcile_preview")
+                    if preview is not None:
+                        try:
+                            comparison = compare_plans(p, preview["remote"])
+                            if (comparison["local_digest"] != preview["local_digest"]
+                                    or comparison["remote_digest"] != preview["remote_digest"]):
+                                raise ValueError("O planejamento local mudou desde a comparação. Compare novamente.")
+                        except (ValueError, KeyError, TypeError) as exc:
+                            st.warning(str(exc))
+                            st.session_state.pop("advisor_reconcile_preview", None)
+                        else:
+                            st.caption("Revisão local " + str(comparison["local_revision"]) +
+                                       " · revisão no GitHub " + str(comparison["remote_revision"]))
+                            st.write(str(comparison["difference_count"]) +
+                                     " campo(s) diferente(s) entre esta sessão e o GitHub.")
+                            if comparison["different_fields"]:
+                                st.dataframe(comparison["different_fields"],
+                                             hide_index=True, use_container_width=True)
+                                if comparison["difference_count"] > len(comparison["different_fields"]):
+                                    st.warning("Há diferenças não exibidas. Baixe e revise os JSONs completos; a publicação fica bloqueada nesta tela.")
+                            else:
+                                st.info("Os dados são iguais; somente a referência de "
+                                        "versão precisa ser reconciliada.")
+                            st.download_button(
+                                "Baixar versão do GitHub antes de decidir",
+                                data=json.dumps(preview["remote"], ensure_ascii=False, indent=2),
+                                file_name="planejamento-github-antes-reconciliacao.json",
+                                mime="application/json", key="advisor_reconcile_remote_backup")
+                            st.warning("A confirmação abaixo publica o conteúdo LOCAL como "
+                                       "a próxima revisão no GitHub. Campos divergentes "
+                                       "da versão remota serão substituídos no arquivo atual; "
+                                       "a revisão anterior continuará no histórico Git.")
+                            approved = st.checkbox(
+                                "Comparei as duas versões e autorizo publicar meu planejamento local",
+                                key="advisor_reconcile_ack", value=False)
+                            if st.button("Confirmar reconciliação e salvar no GitHub",
+                                         key="advisor_reconcile_confirm",
+                                         disabled=not (approved and
+                                             comparison["difference_count"] <= len(comparison["different_fields"]))):
+                                try:
+                                    if plan_digest(st.session_state["advisor_plan"]) != preview["local_digest"]:
+                                        raise ValueError("O plano mudou após a prévia. Compare novamente.")
+                                    # The repository reloads the SHA before PUT, so a
+                                    # concurrent writer still makes this fail closed.
+                                    reconciled = prepare_reconciled_plan(p, preview["remote"])
+                                    _secure_save(reconciled, expected_sha_override=preview["sha"])
+                                except Exception as exc:
+                                    st.error(explain_storage_error(exc))
+                                    st.session_state["advisor_reconcile_needed"] = True
+                                    st.session_state.pop("advisor_reconcile_preview", None)
+                                else:
+                                    st.session_state["advisor_plan"] = reconciled
+                                    st.session_state["advisor_local_changed"] = True
+                                    st.session_state["ux36_cloud_dirty"] = True
+                                    st.session_state.pop("advisor_reconcile_needed", None)
+                                    st.session_state.pop("advisor_reconcile_preview", None)
+                                    st.session_state.pop("advisor_saved_plans", None)
+                                    st.success("Revisão reconciliada e confirmada pelo GitHub.")
+                                    st.rerun()
                     with st.container(border=True):
                         if st.button("Atualizar lista de planos salvos",key="advisor_refresh_saved"):
                             try:
