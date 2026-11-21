@@ -1,53 +1,69 @@
-# PROMPT DE IMPLEMENTAÇÃO — UX 6.4
+# UX 6.4 — Nova arquitetura de informação em três áreas
 
-**Situação:** apenas especificação para revisão; **não implementado**.
-**Prioridade:** P1
-**Dependência:** Planejado após UX 6.1–6.3, com atenção a compatibilidade de deep links e widget keys.
+**Status:** PROMPT REVISADO; sem implementação. **P1**.
+**Veredito do review:** REDESENHAR. A especificação antiga impunha 4 áreas; a direção aprovada é **Explorar · Planejar · Orçamento**.
+**Dependências:** UX 6.1 e 6.2 definem a visão/estado dos destinos; UX 6.3 define a organização. Refazer navegação por último, mantendo aliases durante a transição. UX 6.5 provê indicador global, sem depender de nova navegação.
 
-## Papel do agente
-Atue como Staff Software Engineer, Senior Python/Streamlit Engineer, UX/Product Engineer e Data Integrity Reviewer.
+## Papel
+Atue como Principal Product Designer, Senior UX Researcher, Staff Streamlit/Python Engineer e Compatibility Reviewer.
 
-## Objetivo
-Reduzir duplicidades e termos técnicos mantendo quatro áreas reconhecíveis e um caminho progressivo 'Descobrir → Lista → Planejar → Organizar → Orçamento'.
+## Critério central
+Usuário deve conseguir descobrir, planejar, organizar e revisar orçamento **sem aprender nomes de módulos** ou seguir um wizard linear. Três áreas de primeiro nível:
+1. **Explorar** — Descobrir cidades/passeios, Minha lista, Comparar bases, Mapa. Pesquisa avançada de cidades-base e guias no contexto da busca, não em uma área "Roteiro" paralela.
+2. **Planejar** — Visão geral da viagem e próxima ação contextual, Meus destinos/visitas, Organizar (timeline + calendário). Pendências, decisões, propostas italianas e sugestões aparecem como conteúdos contextuais.
+3. **Orçamento** — Visão financeira e Simulações; detalhamento e fontes expansíveis. Um *resumo de orçamento* acompanha Explorar/Planejar; custo não é um passo final obrigatório.
 
-## O que implementar
-1. Preservar 4 áreas principais: Minha viagem, Explorar, Meu roteiro, Orçamento. Reorganizar subabas em:
-   - Minha viagem: 'Resumo' com próxima ação real, pendências e decisões em seções contextuais;
-   - Explorar: 'Descobrir', 'Minha lista', 'Comparar bases', 'Mapa' (pesquisa de cidades-base disponível nesta área, sem novo roteador paralelo);
-   - Meu roteiro: 'Meu planejamento', 'Calendário' — 'Melhorar meu roteiro' migra para sugestões contextuais e ferramentas avançadas;
-   - Orçamento: 'Visão financeira', 'Simulações' e detalhamento expansível.
-2. Construir uma matriz das 13 abas atuais e ferramentas legadas (ux_navigation.py, app.py), com destino futuro de cada uma. Não eliminar cálculos, informações históricas, pesquisas, guias especializados ou funcionalidades de edição; mover para contexto ou 'Ferramentas avançadas'.
-3. Remover jargão da navegação: DATA16, IDs de pesquisas, 'referências indicativas', 'revisão do inventário' devem ser explicados em linguagem de viagem, mantendo metadados e fontes para auditoria nos detalhes.
-4. A ação prioritária em cada estado deve ser contextual e HONESTA: sem wishlist → Descobrir; com wishlist/sem passeios → Escolher atrações; com passeios sem data → Organizar; com roteiro organizado → Revisar custos e pendências. Nunca dizer 'comparação concluída' por só visitar página.
-5. Incluir explicações claras das diferenças 'Quero conhecer' vs 'No meu roteiro' vs 'Organizado' vs 'Reservado'; estado Reservado exige evidência externa, nunca inferido.
-6. Garantir responsividade, acessibilidade e não perda de contexto entre abas. Atualização das seções sem resetar filtros, staged widgets ou duplicar campos controlados pelo Streamlit.
-7. Atualizar TASK_ALIASES, deep links e roteamento legado; preservar bookmarks existentes e passar pelo bootstrap/aplicação pré-widgets.
-8. Se alguma aba ainda não tem substituto funcional, manter link contextual ao legado e registrar a lacuna, em vez de removê-la.
+Não introduzir uma quarta área `Ferramentas`: recursos antigos ficam em expander/atalhos apropriados. O painel inicial deve ser `Planejar → Visão geral`. Mudança visual não altera decisões no TripPlan.
 
-## Pontos atuais
-- ux_navigation.py (AREAS, SECTIONS, TASK_ALIASES, route(), from_legacy())
-- app.py (roteador, secundários, ferramentas legadas)
-- ux504_guided_journey_model.py / ux504_guided_journey_ui.py
-- planning_context_ui.py
-- ux501/ux502/ux503, itinerary_flow_ui.py, budget_sections_ui.py
-- Assets CSS e documentação existente de UX
+## Migração explícita de todas as 13 abas atuais
+| Atual | Novo destino recomendado | Preservação |
+|---|---|---|
+| Minha viagem → Resumo | Planejar → Visão geral | Jornada, status, próxima ação real |
+| Minha viagem → Pendências | Planejar → Visão geral → Pendências | Fontes e ações pendentes |
+| Minha viagem → Decisões | Planejar → Visão geral → Decisões | Histórico e evidências |
+| Explorar → Cidades-base | Explorar → Comparar bases → Pesquisar bases | Pesquisa, filtros, detalhes |
+| Explorar → Comparar | Explorar → Comparar bases | Cenários, cobertura e rotas |
+| Explorar → Passeios | Explorar → Descobrir / Minha lista | Descoberta e wishlist não duplicada |
+| Explorar → Mapa | Explorar → Mapa | Visão geográfica e links |
+| Meu roteiro → Meu planejamento | Planejar → Meus destinos | Projeção + editor canônico |
+| Meu roteiro → Organizar viagem | Planejar → Organizar | Timeline, fins de semana, calendário |
+| Meu roteiro → Melhorar meu roteiro | Planejar → Meus destinos → Sugestões | Recomendações, Itália, comparadores avançados |
+| Orçamento → Resumo financeiro | Orçamento → Visão financeira | Teto, margem, fontes |
+| Orçamento → Simulações | Orçamento → Simulações | Simuladores e consultor |
+| Orçamento → Detalhamento | Orçamento → Visão financeira → Detalhamento | Rubricas e rastreabilidade |
 
-## Critérios de aceite e testes
-- Matriz de migração 100% das abas/links pré-existentes e seus novos destinos.
-- Navegação de todos os estados da jornada sem abas vazias; breadcrumbs corretos e retorno ao contexto.
-- Busca, filtros e lista preservados ao alternar Brasil/Itália/temporada, cidade-base, simulação, calendário, orçamento e voltar.
-- Modo avançado preserva pesquisas e comparadores históricos.
-- Tests AppTest com navegação por teclado/sem login/owner e testes de chaves de widgets pré-render.
-- Nenhuma alteração de TripPlan por navegação ou somente por abrir telas.
+## Decisões de UX e restrições
+1. **Jornada contextual, não linear.** Mostrar `Próxima ação útil` de acordo com dados reais: lista vazia → `Descobrir destinos`; destinos desejados, 0 visitas → `Planejar uma cidade` OU `Comparar bases`; visitas sem datas → `Organizar passeios`; visitas organizadas → `Revisar custos e pendências`. Nunca inferir `comparação concluída`, `reservado` ou `orçamento aprovado` por acesso à tela.
+2. **Uma visão de destinos** em Planejar, consumindo a projeção UX 6.1, sem uma duplicação visual separada de Minha lista; qualquer destino com status desejado/planejado/organizado aparece uma vez.
+3. **Atrações opcionais** (UX 6.2): não redirecionar o usuário obrigatoriamente a escolher 1–5 atrações para simplesmente marcar a cidade como planejada.
+4. Mostrar `Quero conhecer`, `No roteiro`, `Organizado` como estados progressivos e não confundir com reservas.
+5. Resumo de custos sempre acessível nas três áreas, sem bloquear a exploração. Simulações em modo hipotético não editam o teto ou base oficiais por padrão.
+6. Transferir `DATA16`, `DATA17`, `referências indicativas`, IDs técnicos e avisos de pesquisa para metadados/expansões; traduzir em linguagem normal: `Outras atrações próximas`, `Trem: tempo pesquisado`, `Horários a confirmar`, `Fontes`.
+7. Preservar guias de Itália, França, calendário de pesquisa, transporte e comparadores antigos em `Mais detalhes` ou `Ferramentas avançadas` **com inventário de cada rota**. Nenhuma função removida só porque não é usada na experiência principal.
+8. **Navegação segura Streamlit:** atualizar `ux_navigation.AREAS`, `SECTIONS`, `TASK_ALIASES`, `route()`, `from_legacy()`, `bootstrap()` e `apply()` considerando aliases de área/aba (não apenas seção); compatibilidade com `main_navigation`, `itinerary_section`, `guide_section`, `ux_area`, `ux_section`, widgets/URLs antigos e contexto restaurado do arquivo GCS. Resolver solicitações de nav antes de instanciar widgets. Não criar segundo router.
+9. Estado visual deve ser restaurável depois de rerun, mudança de país/base/mode, login/deslogin e retorno do editor sem apagar filtros, seleções ou scroll desnecessariamente.
+10. **Acessibilidade/mobile:** tabs roláveis ou menus sem aglomerar 5 botões largos; labels claros, ordem de foco, contraste e expander com indicação; nunca depender apenas da cor. Mostrar espaço de pesquisa sem placeholders vazios excessivos.
 
-## Contexto e regras obrigatórias
-Repositório: https://github.com/clevertondecker/europe-trip
-Produto: Nossa Europa 2027 (Streamlit/Python), lua de mel na Itália + temporada europeia.
-Este PR foi aberto **somente com este prompt**, para review do escopo. Ainda não há implementação funcional. Após aprovação explícita, implementar **nesta branch** e executar testes/CI. Não fazer merge de PR apenas documental.
-- TripPlan continua a única fonte autoritativa de passeios confirmados no plano; preferências e pesquisas não são reservas.
-- Preservar IDs existentes, compatibilidade de dados/arquivos, isolamento de fontes, fluxos de autenticação, regressões e segurança.
-- Sem inventar custos, trens, horários, disponibilidade de 2027, fotos/licenças ou estado de decisão.
-- Evitar novos editores paralelos, duplicação de estado de Streamlit e alterações não solicitadas no planejamento oficial.
-- Verificar os contratos e os testes existentes antes de editar; adicionar testes de domínio + AppTest; testar troca de etapa Itália/França, restauração, navegação e histórico onde aplicável.
-- Rever a branch contra main antes de implementar, pois estes cinco PRs são independentes e poderão ser executados sequencialmente.
-- Entregar implementação + explicação da UX + testes + riscos e limitações. Não fazer merge até revisão e autorização posteriores.
+## Estratégia incremental (obrigatória)
+- Fase A: matriz de rotas e aliases, testes de compatibilidade e projeções de navegação sem alterar UI.
+- Fase B: reordenar interface em 3 áreas preservando mapeamento antigo como camada de compatibilidade.
+- Fase C: esconder elementos redundantes atrás de controles contextuais, auditar funcionalidade por funcionalidade e remover mensagens técnicas duplicadas.
+Não atualizar área persistida em arquivos antigos de forma destrutiva; converter para nova rota no carregamento.
+
+## Given / When / Then
+- **GIVEN** sessão em antiga `Minha viagem/Pendências` **WHEN** usuário abre bookmark ou restaura backup **THEN** navega para `Planejar/Visão geral/Pendências` sem perder contexto.
+- **GIVEN** antiga `Meu roteiro/Melhorar meu roteiro/Guias especializados` **WHEN** uso alias **THEN** guia equivalente continua acessível em contexto avançado.
+- **GIVEN** 6 cidades desejadas e nenhuma visita **WHEN** entro em Planejar **THEN** vejo meus destinos e ações `Planejar cidade` e `Comparar bases`, não sequência obrigatória.
+- **GIVEN** altero cidade-base de simulação **WHEN** retorno de Explorar **THEN** base oficial e TripPlan seguem idênticos.
+- **GIVEN** abro resumo do orçamento durante descoberta **WHEN** consulto ou altero cenário hipotético **THEN** consigo continuar pesquisa e custo não sobrescreve teto oficial.
+- **GIVEN** volto do calendário avançado **WHEN** retorno à visita anterior **THEN** mesma etapa/destino e drafts, sem KeyError de widget no Streamlit.
+- **GIVEN** abro um deep link antigo de qualquer uma das 13 abas **WHEN** o roteador inicializa **THEN** a ferramenta está disponível, sem aba vazia e com redirecionamento previsível.
+- **GIVEN** toco em link de fontes/pesquisas **WHEN** abro detalhes **THEN** encontro evidências e nomes compreensíveis.
+
+## Arquivos e testes
+`ux_navigation.py`, `app.py`, `ux504_guided_journey_model.py`, `ux504_guided_journey_ui.py`, `planning_context_ui.py`, `ux501/ux502/ux503`, `itinerary_flow_ui.py`, `budget_sections_ui.py`, CSS e testes.
+
+Testes unitários de **todos os 13 mapeamentos** de abas e aliases, configuração de navegação inicial, continuação GCS JSON legado, view modes, deep links, estado dos filtros e comparação; AppTest de cada área, responsividade/teclado sem duplicação de widgets ou navegação involuntária; assert de ausência de escrita em TripPlan/GCS/GitHub por mudar de área. Rotas antigas devem ter testes de regressão e documentação de redirecionamento.
+
+## Regras globais
+TripPlan autoridade de visitas; wishlist autoridade de interesses; sem duplicação de persistência, preços ou logística inventados; reservar é externo e exige evidência. Salvamento privado GCS ≠ login Google ≠ GitHub público. Esta branch contém somente prompt, não implementação nem autorização para merge. Revisar dependências contra main após UX 6.1–6.3, executar CI e obter novo review.
