@@ -1,50 +1,58 @@
-# PROMPT DE IMPLEMENTAÇÃO — UX 6.5
+# UX 6.5 — Salvamento como responsabilidade transversal da viagem
 
-**Situação:** apenas especificação para revisão; **não implementado**.
-**Prioridade:** P0
-**Dependência:** Pode ser implementado em paralelo após alinhar projeção de UX 6.1; rebase antes de implementação.
+**Status:** PROMPT REVISADO; sem implementação. **Prioridade P0 (integridade/confiabilidade)**.
+**Veredito adversarial:** REDESENHAR. Um painel de salvamento é útil como detalhe/recuperação, mas não deve virar aba obrigatória nem nova etapa de viagem.
+**Dependências:** pode iniciar auditoria técnica já; integrar projeção UX 6.1 e evolução de contrato UX 6.2 após ambas serem revisadas. Não misturar atualização do schema do TripPlan com uma refatoração do armazenamento sem migração e rollback separados.
 
-## Papel do agente
-Atue como Staff Software Engineer, Senior Python/Streamlit Engineer, UX/Product Engineer e Data Integrity Reviewer.
+## Papel
+Atue como Principal Product Designer, Staff Security/Backend Engineer, Senior Streamlit Engineer e Data Persistence Reviewer.
 
-## Objetivo
-Criar uma experiência de salvamento e recuperação fácil de entender para wishlist e roteiro, sem confundir login Google, armazenamento privado GCS e publicação pública no GitHub.
+## Experiência recomendada
+Um **indicador global discreto** sempre visível nas três áreas **Explorar, Planejar e Orçamento**, ligado ao estado efetivo da cópia privada, com ação `Salvar minha viagem` quando necessário. Estados compreensíveis:
+- `Alterações somente nesta sessão` — ainda não confirmadas remotamente.
+- `Salvo no espaço privado` — GCS confirmou gravação da **mesma versão/fingerprint** atual.
+- `Salvando…` somente durante ação de gravação em curso.
+- `Falha ao salvar — exporte backup` — preserva rascunho, nunca afirma sucesso.
+- `Outra sessão alterou a viagem` — conflito, oferecer opções seguras de comparar/restaurar.
+- `Espaço privado não configurado` — login Google pode estar ativo, mas bucket/credencial não disponível.
+- `Não autenticado` — apresentar login/backup sem alegar persistência.
 
-## O que implementar
-1. Auditar e documentar operações existentes de UX502 lista, continuity_ui, continuity_archive_model, private_continuity_store.py, sidebar_account_ui.py, _secure_save() e fluxo público GitHub. Distinguir claramente três coisas: **login OIDC Google**, **cópia privada em GCS**, **publicação deliberada no GitHub público**. Login ≠ autorização adicional do bucket ≠ salvamento confirmado.
-2. Criar um painel único de status de armazenamento, calculado de confirmação efetiva do servidor e fingerprints de arquivo/lista/plano. Exibir estado por tipo: 'Alterações nesta sessão', 'Salvo no espaço privado', 'Falhou — exporte backup', 'Conflito de versões', 'Nuvem não configurada'.
-3. Priorizar botão 'Salvar minha viagem em espaço privado', preservando o arquivo versionado que contém TripPlan, wishlist, estudos, calendário e agrupamentos; não criar novo esquema independente sem justificação e plano de migração. Salvar apenas interesses também deve continuar seguro e explícito.
-4. Manter a exportação JSON local e restauração com preview/consentimento antes de substituir a sessão. Em caso de falha, conservar a sessão e oferecer backup sem alegar persistência.
-5. A gravação em GitHub público deve permanecer avançada, identificada como PUBLICAÇÃO PÚBLICA, sempre com consentimento explícito e sem mudar por acidente a versão privada ou o TripPlan.
-6. Diagnóstico: manter os detalhes técnicos seguros no log interno (classe de erro, estágio, status HTTP, identificador de correlação, sem tokens, e-mails, JSON privado, credenciais), mas mensagem prática para usuário; diferenciar erro de validação de destino, falha GCS, 403/404, 409/412 conflito, autenticação e timeouts.
-7. Revisar falhas anteriores: destino suplementar (Obernai) rejeitado na serialização; fluxo 404 '/api/v2/subdomain/user/details' NÃO deve ser atribuído ao save sem evidência de origem; relatar como hipótese externa não comprovada. Não desabilitar validações para 'fazer funcionar'.
-8. Preservar mecanismo de gerações GCS (optimistic concurrency) e isolamento por proprietário; nunca sobrescrever arquivo remoto com versão diferente, nem fazer retry silencioso que destrua mudanças.
-9. Mensagens de Google conectado/conta autorizada não devem induzir a achar que o arquivo foi salvo no Drive; o projeto utiliza GCS privado.
+**Não** exigir que o usuário atravesse uma página de `Salvamento` para prosseguir. Ao clicar no status, abrir painel contextual com data da última confirmação, tipo de backup, `Salvar agora`, `Baixar backup JSON`, `Ver/restaurar versão` se houver versão verificável, e explicação dos serviços. Never show "salvo" only because Google OIDC is authorized.
 
-## Pontos atuais
-- continuity_ui.py (save_private_now, restore_private_on_start, autosave_private_if_requested)
-- continuity_archive_model.py
-- private_continuity_store.py, sidebar_account_ui.py
-- ux502_destination_interests_ui.py / ux502_destination_interests_model.py
-- travel_advisor_ui.py (autenticação e operações de GitHub)
-- app.py / st.secrets
+## Arquitetura e regras
+1. **Três camadas distintas:** (i) login/OIDC Streamlit Google para identificar owner, (ii) GCS privado com service account e bucket configurado e isolamento por usuário, (iii) GitHub público com consentimento específico de publicação. Não chamar GCS de `Google Drive`. Não publicar dados privados por engano em GitHub.
+2. Único arquivo de continuidade versionado deve incluir TripPlan, wishlist, estudos, calendário, agrupamentos, contexto e valores aplicáveis. Reutilizar `continuity_archive_model.make_archive`, `validate_archive`, `continuity_ui.save_private_now`; não criar `wishlist_save.json` paralelo nem cópias silenciosas.
+3. **Default: salvar manualmente**, com um botão claro `Salvar minha viagem`. Autosave privado só após opt-in explícito, com limitação de frequência, escrita idempotente, controle de versão e possibilidade de desativar; sem escrita automática no GitHub público. Não habilitar via mera navegação.
+4. Confirmar sucesso **somente** depois da resposta de `PrivateArchiveStore.save` e generation validada; recalcular fingerprint a partir do arquivo efetivamente gravado e refletir alterações posteriores. Se a escrita falhar após preparar JSON, preservar `advisor_plan`, `ux502_interests`, calendário e geração conhecida.
+5. Continuar usando `ifGenerationMatch` do GCS e optimistic concurrency: 409/412 → não sobrescrever, não perder alteração, oferecer `Recarregar e comparar` e `Exportar minha versão`, com revisão antes de substituir.
+6. **Recuperação**: preview de diferenças (plano, destinos, prioridades, datas, grupos) antes de restaurar; ação explícita de confirmação. Não substituir planos diferentes/versões sem comparação. Tratar arquivo legado que não possui wishlist; validar arquivo com novos destinos e, após UX 6.2, novas visitas de zero atrações sem aceitar IDs arbitrários.
+7. Tamanho e schema: preservar o limite atual de 450k bytes (ou justificar aumento com teste de custo e segurança), `ARCHIVE_SCHEMA=1` atual quando não houver necessidade de versão; qualquer mudança deve ter parser retrocompatível + migração explicitada, fixture e rollback.
+8. **Diagnóstico sem vazamento**: categorizar (a) validação local de cidade/arquivo, (b) indisponibilidade de bucket/credencial, (c) falha de sessão/owner, (d) HTTP 403/404/timeout no endpoint **storage.googleapis.com** de metadados/upload, (e) conflito 409/412, (f) resposta de sucesso divergente. Mostrar mensagem prática e um identificador local opcional, sem expor tokens, e-mails, IDs do bucket, segredo, conteúdo do arquivo, contatos ou payload de viagem em log público.
+9. O `404 /api/v2/subdomain/user/details` apresentado anteriormente não é prova de falha GCS: o caminho do storage é `storage.googleapis.com/storage/v1` e `/upload/storage/v1`. Checar **origem** da solicitação antes de atribuir causa. Não adicionar workaround de permissão baseado nesse 404 externo.
+10. Ação `Publicar no GitHub público` deve ficar em **Ferramentas avançadas**, com consentimento inequívoco por operação e explicação do que ficará acessível. **Nunca** confluir `Salvei minha viagem` com `Publiquei o planejamento`.
+11. Status por objeto/escopo: o arquivo privado inclui múltiplos tipos de dado. Se salvou somente uma exportação JSON no navegador, status é `Backup baixado`, não `Nuvem confirmada`. Se plano mudou desde a última geração, status volta a `Alterações somente nesta sessão`.
+12. Após login/logout e novas sessões, restaurar em momento seguro do Streamlit (antes da criação de widgets), sem sobrescrever um draft local modificado durante render. Confirmar GCS independente da UI.
 
-## Critérios de aceite e testes
-- Sessão autenticada com lista de 6 (incluindo Obernai) + zero passeios; salvar GCS mock confirmado → sessão nova restaura lista e os metadados corretos.
-- Alterar prioridades e incluir passeio → salvar → restaurar respeita revisões, não duplica, não perde preferências.
-- Falha de bucket, credencial, token, HTTP 403/404, timeout, archive inválido, excesso de tamanho, conflitos 409/412 → mensagem clara; sem sucesso falso ou perda de dados.
-- 404 externo não relacionado não é erroneamente atribuído a GCS; instrução de diagnóstico por URL e origem.
-- GitHub público nunca recebe dados da lista/roteiro sem confirmação expressa. Testes de segurança e regressão da autenticação.
-- Auditoria explícita de UX para desktop/mobile e acessibilidade, backups locais, rotas e renovação de sessão.
+## Comparação das opções
+**A — incremental:** novo painel com botões separados para wishlist e roteiro em cada aba. Pouca mudança, mas perpetua incerteza e duplicação.
+**B — recomendada:** indicador transversal + controle contextual de `Salvar minha viagem` + recuperação/backup em painel secundário, reutilizando o arquivo versionado. Não criar uma tela obrigatória.
 
-## Contexto e regras obrigatórias
-Repositório: https://github.com/clevertondecker/europe-trip
-Produto: Nossa Europa 2027 (Streamlit/Python), lua de mel na Itália + temporada europeia.
-Este PR foi aberto **somente com este prompt**, para review do escopo. Ainda não há implementação funcional. Após aprovação explícita, implementar **nesta branch** e executar testes/CI. Não fazer merge de PR apenas documental.
-- TripPlan continua a única fonte autoritativa de passeios confirmados no plano; preferências e pesquisas não são reservas.
-- Preservar IDs existentes, compatibilidade de dados/arquivos, isolamento de fontes, fluxos de autenticação, regressões e segurança.
-- Sem inventar custos, trens, horários, disponibilidade de 2027, fotos/licenças ou estado de decisão.
-- Evitar novos editores paralelos, duplicação de estado de Streamlit e alterações não solicitadas no planejamento oficial.
-- Verificar os contratos e os testes existentes antes de editar; adicionar testes de domínio + AppTest; testar troca de etapa Itália/França, restauração, navegação e histórico onde aplicável.
-- Rever a branch contra main antes de implementar, pois estes cinco PRs são independentes e poderão ser executados sequencialmente.
-- Entregar implementação + explicação da UX + testes + riscos e limitações. Não fazer merge até revisão e autorização posteriores.
+## Cenários Given / When / Then
+- **GIVEN** owner logado + bucket configurado, wishlist de 6 incluindo Obernai, nenhum passeio **WHEN** salvo **THEN** GCS confirma geração e o indicador mostra `Salvo no espaço privado`, sem publicações GitHub; nova sessão restaura lista.
+- **GIVEN** existe visita sem atrações no TripPlan (UX 6.2) **WHEN** salvo e restauro **THEN** IDs, zero atrações, datas e estado permanecem válidos; sem se converter em seleção fictícia.
+- **GIVEN** altero prioridade ou crio passeio depois do último save **WHEN** volto ao painel **THEN** status regressa para `Alterações somente nesta sessão` até confirmação de nova geração.
+- **GIVEN** apenas realizei login Google **WHEN** não há bucket/credencial **THEN** não aparece `Salvo`, há instrução de backup local.
+- **GIVEN** outra sessão incrementou a geração GCS **WHEN** tento salvar **THEN** recebo conflito legível, não há overwrite/retry cego e posso exportar meu rascunho.
+- **GIVEN** falha por 403/404/timeout na API GCS **WHEN** clico `Salvar` **THEN** o rascunho fica intacto e o status indica falha; não confundir com 404 externo do Streamlit.
+- **GIVEN** não estou logado **WHEN** baixo JSON **THEN** backup local funciona, sem fingir gravação em nuvem.
+- **GIVEN** arquivo remoto é de outro `plan_id` ou mais antigo **WHEN** peço restauração **THEN** vejo diffs e confirmo separadamente, sem perder a versão atual.
+- **GIVEN** escolho publicar no GitHub público **WHEN** não marco ciência explícita dos riscos **THEN** operação de publicação fica indisponível.
+- **GIVEN** opt-in de autosave privado **WHEN** edito repetidamente **THEN** existe debounce/limitação com confirmação real e recuperação de conflitos; desativar não apaga dados.
+
+## Arquivos e testes
+`continuity_ui.py`, `continuity_archive_model.py`, `private_continuity_store.py`, `ux502_destination_interests_ui.py`, `ux502_destination_interests_model.py`, `sidebar_account_ui.py`, `travel_advisor_ui.py`, `app.py`, `planning_session.py`, `ux_navigation.py`.
+
+Teste unitário do status derivado de fingerprint+GCS generation; GCS mock owner+nonowner, 200/201, 403/404, 409/412, timeout, invalidez de JSON, limites de tamanho, login expirado, tentativas de acesso a objetos de outros owners, redaction de logs; AppTest do indicador global nas 3 áreas e ações de recuperação, retorno após logout/login. Export/import/roundtrip de arquivo completo, com/sem wishlist, visitas futuras de zero atrações e legado de schema. Testes negativos garantindo nenhuma chamada pública no fluxo privado e nenhuma afirmação de sucesso antes de confirmação. Validar mobile/acessibilidade.
+
+## Direção transversal UX 6.0
+Arquitetura-alvo **Explorar · Planejar · Orçamento**, jornada não linear, status progressivos de destino e visita, sem etapas obrigatórias de save ou seleção de atrações. Manter snapshots, preços/rotas não verificados como desconhecidos. Esta branch permanece prompt de especificação; implementar somente após revisão e rodar CI antes de qualquer merge.
