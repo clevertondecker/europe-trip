@@ -13,14 +13,12 @@ import streamlit as st
 
 from itinerary_flow_model import (
     destinations,get_choice,selected_rows,selected_rows_for_stage,choice_counts,is_selected,
-    period_options,UNASSIGNED,ITALY_STAGE,FRANCE_STAGE,EUROPE_STAGE_LABEL,
-    validate_flow_backup
+    period_options,UNASSIGNED,ITALY_STAGE,FRANCE_STAGE,EUROPE_STAGE_LABEL
 )
 from planning_session import (active_plan,commit_outing,commit_undated_destinations,delete_outing,
                               schedule_italy_visit,
                               schedule_package,unschedule_package)
 from planning_status import explain_storage_error
-from planning_store import sync_legacy_view
 from travel_advisor_ui import _owner_signed_in,_secure_save,_owner_config,sync_identical_remote_plan
 from trip_plan_repository import GitHubPlanRepository, PlanConflictError
 from plan_reconciliation import compare_plans, plan_digest, prepare_reconciled_plan
