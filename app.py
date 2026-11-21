@@ -24,7 +24,7 @@ from attractions_ui import render_explorer
 from ux501_destination_discovery_ui import render_independent_destination_discovery
 from rec03a_suggestions_ui import render_recommendation_activity
 from rec03a_session import apply_navigation as apply_recommendation_navigation, sync_identity, identity_token, SUGGESTED
-from rec03b_handoff_ui import render_notice, render_profile_context, render_contextual_map
+from rec03b_handoff_ui import render_notice, render_profile_context, render_contextual_map, render_planning_return
 from rec03b_handoffs import CONTEXT
 from sidebar_account_ui import account_view_state, _logged_in_user
 from travel_advisor_ui import _owner_config
@@ -471,6 +471,9 @@ if (ux_area in ("Explorar","Orçamento") and
 # UX 6.4: three public areas with route IDs retained for saved workspaces.
 render_public_task_tabs()
 render_notice()
+if (st.session_state.get(CONTEXT) or {}).get("kind")=="planning" and (
+        ux_area=="Meu roteiro" or (ux_area,ux_section)==("Explorar","Passeios")):
+    render_planning_return()
 # Preserve the original contract: home has no extra legacy task selector.
 if ux_area!="Minha viagem" or ux_section!="Resumo":
     with st.expander("Atividades anteriores · avançado", expanded=False):

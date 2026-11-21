@@ -95,6 +95,32 @@ class HandoffTests(unittest.TestCase):
         self.assertNotIn(CONTEXT,state)
         self.assertNotIn(SCOPE,state)
 
+    def test_planning_handoff_uses_canonical_intent_without_including(self):
+        from ux_planning_journey_ui import apply_planning_request
+        state=self.state()
+        before=deepcopy(state)
+        queue_handoff(state,"planning",[])
+        self.assertEqual(self.apply(state),"planning")
+        self.assertEqual(state["flow_journey_intent"]["action"],"build")
+        self.assertEqual(state["flow_journey_intent"]["stage"],"França")
+        apply_planning_request(state)
+        self.assertEqual(state["ux_section"],"Organizar viagem")
+        self.assertEqual(state["flow_journey_view"],"build")
+        for key in ("advisor_plan","ux502_interests","scenario_base_selected","ux41_favorites","ux36_cloud_dirty",SCOPE):
+            self.assertEqual(state[key],before[key])
+
+    def test_exploratory_scope_does_not_open_empty_build(self):
+        state=self.state()
+        state[SCOPE]=confirm_scope(state["ux502_interests"],["paris","angers"],self.discovery)
+        before=deepcopy(state)
+        queue_handoff(state,"planning",[])
+        self.assertEqual(self.apply(state),"planning")
+        self.assertEqual(state["ux_area"],"Explorar")
+        self.assertEqual(state["ux502_view"],"Minha lista")
+        self.assertNotIn("flow_journey_intent",state)
+        self.assertEqual(state["advisor_plan"],before["advisor_plan"])
+        self.assertEqual(state["ux502_interests"],before["ux502_interests"])
+
     def test_reset_discards_pending_and_prior_context(self):
         state=self.state()
         queue_handoff(state,"manual",["angers","metz"])

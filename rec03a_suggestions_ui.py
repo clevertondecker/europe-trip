@@ -260,8 +260,9 @@ def render_suggestions(*, plan, discovery=None, research=None):
         st.info("Não há grupo completo equivalente. As possibilidades abaixo são condicionais.")
     if result["has_local_only"]:
         st.caption("Destinos locais são tratados separadamente; acesso urbano ainda não confirmado.")
-    from rec03b_handoff_ui import render_compare_selection
+    from rec03b_handoff_ui import render_compare_selection, render_planning_handoff
     render_compare_selection(result,cities)
+    render_planning_handoff(plan,interests=interests,discovery=discovery,research=research)
     candidates={c["base_id"]:c for c in result["candidates"]}
     sections=result["highlight_sections"]
     ordered_sections=(("Alternativas com evidências comparáveis",sections["complete_reference_groups"]),

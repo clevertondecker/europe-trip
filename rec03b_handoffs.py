@@ -34,15 +34,35 @@ def _ids(value, allowed, *, minimum=1, maximum=None):
 
 def validate_handoff(scope, interests, discovery, research, bases, kind):
     """Do not infer stages, include new interests or truncate a confirmed scope."""
-    if kind not in ("manual", "profile", "map"):
+    if kind not in ("manual", "profile", "map", "planning"):
         raise ValueError("Destino do encaminhamento inválido.")
     checked = reconcile_scope(interests, scope, discovery)
     if checked["state"] != "ready" or checked["scope"] != scope:
         raise ValueError("A lista mudou. Revise o escopo antes de continuar.")
     ids = {c["id"] for c in research["cities"]}
-    chosen = _ids(bases, ids, minimum=2 if kind=="manual" else 1,
-                  maximum=5 if kind=="manual" else 1)
+    if kind=="planning":
+        if bases!=[]:
+            raise ValueError("Planejamento não seleciona uma base.")
+        chosen=[]
+    else:
+        chosen = _ids(bases, ids, minimum=2 if kind=="manual" else 1,
+                      maximum=5 if kind=="manual" else 1)
     return {"kind":kind, "base_ids":chosen, "scope":deepcopy(scope)}
+
+
+def planning_handoff_projection(context, plan, interests, discovery, catalog):
+    """Use #195 eligibility, limited to the confirmed REC02 stage and scope."""
+    from itinerary_flow_model import FRANCE_STAGE
+    from ux_planning_journey_model import project_planning
+    view=project_planning(plan,interests,discovery,catalog)
+    wanted=set(context["scope"]["destination_ids"])
+    eligible=[r["id"] for r in view["batches"][FRANCE_STAGE]["eligible"] if r["id"] in wanted]
+    unsupported=[r["id"] for r in view["unsupported"] if r["id"] in wanted]
+    included=[r["id"] for r in view["rows"] if r["id"] in wanted]
+    other_stage=sorted(wanted-set(eligible)-set(unsupported)-set(included))
+    return {"eligible":eligible,"unsupported":unsupported,"included":included,
+            "other_stage":other_stage,
+            "action":"build" if eligible else "review" if view["rows"] else "wishlist"}
 
 
 def queue_handoff(state, kind, bases):
@@ -134,6 +154,16 @@ def apply_handoff(state, *, interests=None, discovery=None, research=None):
             set_task(state,"Explorar","Cidades-base")
             state["ux40_selected_city"]=context["base_ids"][0]
             state["expanded_bases_detail_city"]=context["base_ids"][0]
+        elif kind=="planning":
+            from attractions_model import load_attractions
+            from itinerary_flow_model import FRANCE_STAGE
+            from ux_planning_journey_ui import request_planning
+            plan=state["advisor_plan"]
+            projected=planning_handoff_projection(context,plan,interests,discovery,load_attractions())
+            if projected["action"]=="wishlist":
+                select_public_task(state,"Explorar","Minha lista")
+            else:
+                request_planning(state,projected["action"],FRANCE_STAGE)
         else:
             select_public_task(state,"Explorar","Mapa")
         state[CONTEXT]=context

@@ -4,7 +4,7 @@ from __future__ import annotations
 import streamlit as st
 from rec03b_handoffs import (
     CHOICE, CONTEXT, ERROR, PREVIOUS, queue_handoff, queue_restore_manual,
-    manual_selection, current_context, contextual_points,
+    manual_selection, current_context, contextual_points, planning_handoff_projection,
 )
 from rec03a_session import request_navigation, SCOPE
 from ux502_destination_interests_model import empty_interests
@@ -47,6 +47,31 @@ def render_compare_selection(result,cities):
               f" · {len(scope_ids)} destinos",
               key="rec03a_handoff_compare",disabled=not 2<=len(selected)<=5,
               on_click=queue_handoff,args=(state,"manual",list(selected)),type="primary")
+
+
+def render_planning_handoff(plan, *, interests, discovery, research):
+    from attractions_model import load_attractions
+    from rec03b_handoffs import validate_handoff
+    ctx=validate_handoff(st.session_state.get(SCOPE),interests,discovery,research,[],"planning")
+    view=planning_handoff_projection(ctx,plan,interests,discovery,load_attractions())
+    st.caption(f'{len(view["eligible"])} destinos do escopo podem entrar no roteiro · '
+               f'{len(view["included"])} já incluídos · '
+               f'{len(view["unsupported"])} somente pesquisa.')
+    if view["other_stage"]:
+        st.caption("Destinos de outra etapa permanecem disponíveis na lista.")
+    labels={"build":"Montar roteiro com meus destinos","review":"Revisar meu roteiro","wishlist":"Revisar minha lista"}
+    st.button(labels[view["action"]],key="rec03a_handoff_planning",
+              on_click=queue_handoff,args=(st.session_state,"planning",[]))
+    st.caption("Abre o planejador existente com a etapa europeia em destaque; "
+               "a inclusão depende de sua seleção e confirmação. Nenhuma base é escolhida.")
+
+
+def render_planning_return():
+    context,_,_=context_for("planning")
+    if context is not None:
+        st.button("Voltar às cidades sugeridas",key="rec03a_handoff_back_planning",
+                  on_click=return_to_suggestions)
+        st.caption("O escopo das sugestões foi preservado. A lista completa continua disponível no planejador.")
 
 
 def render_card_actions(base,prefix):
