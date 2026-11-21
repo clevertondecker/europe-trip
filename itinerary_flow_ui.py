@@ -464,8 +464,13 @@ def _render_organizer_wishlist(plan:dict,catalog:dict,stage:str)->None:
         st.caption("Estes são lugares desejados, não passeios confirmados. "
                    "Escolha um para incluí-lo sem data, reservas ou atrações obrigatórias.")
         by_id={row["id"]:row for row in eligible}
+        select_key="flow_wishlist_to_plan_"+stage
+        # A destination may have been removed from the wishlist or added
+        # to TripPlan in another view. Never reuse a stale selectbox value.
+        if st.session_state.get(select_key) not in by_id:
+            st.session_state.pop(select_key,None)
         selected=st.selectbox("Lugar da minha lista",list(by_id),
-            key="flow_wishlist_to_plan_"+stage,
+            key=select_key,
             format_func=lambda dest:by_id[dest]["name"]+" · "+
                 LABELS.get(by_id[dest]["priority"],"Quero conhecer"))
         if st.button("Incluir no roteiro sem data",key="flow_wishlist_confirm_"+stage):
