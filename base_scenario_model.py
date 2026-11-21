@@ -30,7 +30,7 @@ def base_options(data: dict | None = None) -> list[dict]:
         })
     seen={row["id"] for row in output}
     rail=load_rail()
-    for item in load_research()["cities"]:
+    for item in load_research(include_candidates=True)["cities"]:
         if item["id"] in seen:
             continue
         segments=[line for line in rail["segments"] if line["from"]==item["id"]]
