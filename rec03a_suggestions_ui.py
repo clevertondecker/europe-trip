@@ -235,6 +235,12 @@ def render_suggestions(*, plan, discovery=None, research=None):
         research=research if research is not None else load_research(include_candidates=True)
         result=recommend_bases(interests,checked["scope"],discovery=discovery,research=research)
         cities={x["id"]:x for x in research["cities"]}
+    except ImportError:
+        _LOG.exception("REC03A incompatible module version")
+        st.error("A análise de cidades sugeridas está temporariamente indisponível. "
+                 "Se o aplicativo acabou de ser atualizado, reinicie-o para carregar a versão atual. "
+                 "Sua lista e o planejamento permanecem intactos.")
+        return
     except Exception:
         _LOG.exception("REC03A analysis failed")
         # No stale or empty-looking recommendations after a loader failure.
