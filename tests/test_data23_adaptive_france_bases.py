@@ -1,0 +1,112 @@
+"""DATA23/UX78 regression coverage across candidate research, photos and railway comparisons."""
+from copy import deepcopy
+import unittest
+from unittest.mock import patch
+
+from base_research_expanded_model import DATA as OLD_BASES,load_research,research_overview
+from city_profiles_model import load_profiles,profile_by_id
+from data23_france_candidates_model import (load_data23,validate_data23,
+    base_attractions,base_routes,REQUIRED_IDS)
+from base_scenario_model import base_options
+from base_coverage_model import coverage_matrix
+from rail_reference_projection_model import decorate_comparison
+from trip_plan_model import new_plan
+from ux501_destination_discovery_model import build_destination_discovery
+from ux502_destination_interests_model import empty_interests,set_interest
+from ux503_destination_base_comparison_model import compare_wishlist_bases
+from ux47_photo_ui import photo_markup,photo_credit
+import json
+
+
+class DynamicBaseCatalogTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.data=load_data23()
+        cls.research=load_research()
+
+    def test_historical_snapshot_unchanged_and_four_candidates_visible(self):
+        historical=json.loads(OLD_BASES.read_text(encoding="utf-8"))
+        self.assertEqual(len(historical["cities"]),30)
+        ids=[x["id"] for x in self.research["cities"]]
+        self.assertEqual(len(ids),34)
+        self.assertEqual(len(set(ids)),34)
+        self.assertEqual(set(ids)-{x["id"] for x in historical["cities"]},REQUIRED_IDS)
+        self.assertEqual(research_overview(self.research)["candidate_count"],len(ids))
+        self.assertEqual(research_overview(self.research)["shortlist_count"],12)
+        self.assertEqual(research_overview(self.research)["three_eligible_2027_quotes"],0)
+
+    def test_dynamic_profile_coverage_matches_candidate_ids(self):
+        data=load_profiles(canonical=self.research)
+        self.assertEqual({x["city_id"] for x in data["cities"]},
+                         {x["id"] for x in self.research["cities"]})
+        for city_id in REQUIRED_IDS:
+            with self.subTest(city_id=city_id):
+                profile=profile_by_id(data,city_id)
+                self.assertFalse(profile["shortlist"])
+                self.assertIsNone(profile["quality_of_life"]["numeric_score"])
+                self.assertFalse(profile["housing"]["availability_2027_verified"])
+                self.assertEqual(profile["housing"]["historical_offer_count"],0)
+
+    def test_other_pages_include_all_cities_and_no_official_promotion(self):
+        options={r["id"]:r for r in base_options()}
+        self.assertTrue(REQUIRED_IDS <= set(options))
+        self.assertTrue(all(not options[x]["official_supported"] for x in REQUIRED_IDS))
+        rows=coverage_matrix("general")
+        self.assertEqual(len(rows),len(self.research["cities"]))
+        by_id={x["id"]:x for x in rows}
+        self.assertTrue(REQUIRED_IDS <= set(by_id))
+        self.assertTrue(all(by_id[x]["route_return_verified"]==0 for x in REQUIRED_IDS))
+
+    def test_photos_exist_for_every_attraction_and_are_credited(self):
+        self.assertEqual(len(self.data["attractions"]),8)
+        for a in self.data["attractions"]:
+            with self.subTest(a=a["id"]):
+                photo=a["photo"]
+                self.assertIn("Special:FilePath",photo_markup(photo,a["name"]))
+                credit=photo_credit(photo)
+                self.assertIn(photo["author"],credit)
+                self.assertIn(photo["license"],credit)
+                self.assertIn("Crédito",credit)
+
+    def test_all_four_have_photos_and_multiple_sourced_rail_options(self):
+        for city_id in REQUIRED_IDS:
+            with self.subTest(city_id=city_id):
+                self.assertGreaterEqual(len(base_attractions(city_id)),2)
+                self.assertGreaterEqual(len(base_routes(city_id)),2)
+                self.assertTrue(all(a["availability_autumn_2027_verified"] is False
+                                    for a in base_attractions(city_id)))
+
+    def test_reject_invented_booking_and_wrong_photo_source(self):
+        for scenario in ("availability","fake_photo","bad_author","wrong_direction"):
+            with self.subTest(scenario=scenario):
+                mutated=deepcopy(self.data)
+                if scenario=="availability":
+                    mutated["attractions"][0]["availability_autumn_2027_verified"]=True
+                if scenario=="fake_photo":
+                    mutated["attractions"][0]["photo"]["source_page"]="https://example.com/file"
+                if scenario=="bad_author":
+                    mutated["attractions"][0]["photo"]["author"]=""
+                if scenario=="wrong_direction":
+                    mutated["routes"][0]["source_url"]="https://www.sncf-connect.com/train/horaires/saumur/angers"
+                with self.assertRaises(ValueError):
+                    validate_data23(mutated)
+
+    def test_comparator_adds_new_bases_without_touching_tripplan(self):
+        discovery=build_destination_discovery()
+        wishlist=set_interest(empty_interests(),"paris","interested",discovery)
+        original=deepcopy(wishlist)
+        plan=new_plan(base="metz")
+        plan_before=deepcopy(plan)
+        comparison=compare_wishlist_bases(
+            wishlist,["le_mans","rennes","metz"],discovery=discovery,
+            research=self.research)
+        result=decorate_comparison(comparison)
+        self.assertEqual(result["cells"][("le_mans","paris")]["display_min"],56)
+        self.assertTrue(result["cells"][("le_mans","paris")]["candidate_connectivity_applied"])
+        self.assertTrue(result["cells"][("le_mans","paris")]["valid_for_2027"] is False)
+        self.assertEqual(wishlist,original)
+        self.assertEqual(plan,plan_before)
+
+
+if __name__=="__main__":
+    unittest.main()
