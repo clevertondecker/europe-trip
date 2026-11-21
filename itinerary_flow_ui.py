@@ -19,14 +19,14 @@ from itinerary_flow_model import (
 from planning_session import (active_plan,commit_outing,delete_outing,
                               schedule_italy_visit,
                               schedule_package,unschedule_package)
-from planning_status import save_label,explain_storage_error
+from planning_status import explain_storage_error
 from planning_store import sync_legacy_view
 from travel_advisor_ui import _owner_signed_in,_secure_save,_owner_config,sync_identical_remote_plan
 from trip_plan_repository import GitHubPlanRepository, PlanConflictError
 from plan_reconciliation import compare_plans, plan_digest, prepare_reconciled_plan
 from attractions_model import load_base_routes,package_cost
 from advisor_finance import advisor_projection
-from continuity_ui import render_primary_private_save
+from continuity_ui import render_primary_private_save, private_status_label
 
 
 def _navigate(area:str,task:str)->None:
@@ -708,11 +708,13 @@ def render_itinerary_workbench(plan:dict,catalog:dict,
     stats=choice_counts(plan,catalog)
     saved=st.session_state.get("advisor_saved_snapshot")
     signed_in=_owner_signed_in()
-    label,hint=save_label(plan,saved,signed_in)
+    # The itinerary status follows private cloud acknowledgement, never a
+    # previously published public GitHub plan.
+    label,hint=private_status_label(
+        ("Apenas nesta sessão", "Use Salvar minha viagem para confirmar na nuvem privada"))
     if not signed_in:
-        dirty=(saved!=plan) if saved is not None else plan["revision"]>0
-        label="Alterações não salvas" if dirty else "Ainda não salvo"
-        hint="Você pode baixar um backup local; armazenamento remoto exige autenticação"
+        label="Apenas nesta sessão"
+        hint="Entre com a conta autorizada para usar a nuvem privada"
     st.markdown("### Meu planejamento")
     st.caption("Organize a viagem sem precisar decidir datas e reservas agora.")
     if "flow_active_stage" not in st.session_state:
