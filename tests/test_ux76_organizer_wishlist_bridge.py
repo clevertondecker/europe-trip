@@ -87,12 +87,13 @@ class OrganizerIntegrationSmokeTests(WishlistOrganizerBridgeTests):
         from itinerary_flow_ui import _render_organizer_wishlist
         discovery.return_value=self.discovery
         st.session_state={"ux502_interests":self.wishes}
-        st.selectbox.return_value="colmar"
+        st.multiselect.return_value=["colmar"]
         st.button.return_value=False
         _render_organizer_wishlist(self.plan,self.catalog,FRANCE_STAGE)
-        self.assertEqual(st.selectbox.call_args.args[0],"Lugar da minha lista")
-        self.assertIn("colmar",st.selectbox.call_args.args[1])
-        st.button.assert_any_call("Incluir no roteiro sem data",
+        self.assertEqual(st.multiselect.call_args.args[0],"Destinos para incluir no roteiro")
+        self.assertIn("colmar",st.multiselect.call_args.args[1])
+        st.button.assert_any_call("Incluir selecionados no roteiro",
+                                  type="primary",disabled=False,
                                   key="flow_wishlist_confirm_França")
 
     @patch("ux61_destination_board_ui._discovery")
@@ -102,32 +103,30 @@ class OrganizerIntegrationSmokeTests(WishlistOrganizerBridgeTests):
         discovery.return_value=self.discovery
         st.session_state={
             "ux502_interests":self.wishes,
-            "flow_wishlist_to_plan_França":"no-longer-eligible",
+            "flow_wishlist_to_plan_França":["colmar","no-longer-eligible"],
         }
-        st.selectbox.return_value="colmar"
+        st.multiselect.return_value=["colmar"]
         st.button.return_value=False
         _render_organizer_wishlist(self.plan,self.catalog,FRANCE_STAGE)
-        self.assertNotIn("flow_wishlist_to_plan_França",st.session_state)
-        st.selectbox.assert_called_once()
-        self.assertEqual(st.selectbox.call_args.kwargs["key"],
+        self.assertEqual(st.session_state["flow_wishlist_to_plan_França"],["colmar"])
+        self.assertEqual(st.multiselect.call_args.kwargs["key"],
                          "flow_wishlist_to_plan_França")
 
     @patch("ux61_destination_board_ui._discovery")
-    @patch("itinerary_flow_ui.commit_outing")
+    @patch("itinerary_flow_ui.commit_undated_destinations")
+    @patch("itinerary_flow_ui.active_plan")
     @patch("itinerary_flow_ui.st")
-    def test_organizer_promotes_only_after_explicit_click(self, st, commit, discovery):
+    def test_organizer_promotes_only_after_explicit_click(self, st, active, commit, discovery):
         from itinerary_flow_ui import _render_organizer_wishlist
-        from ux45_outing_contract import OutingResult
         discovery.return_value=self.discovery
+        active.return_value=self.plan
         st.session_state={"ux502_interests":self.wishes}
-        st.selectbox.return_value="colmar"
+        st.multiselect.return_value=["colmar"]
         st.button.return_value=True
-        commit.return_value=OutingResult(
-            "added","colmar","Colmar",0,UNASSIGNED,(),True)
         _render_organizer_wishlist(self.plan,self.catalog,FRANCE_STAGE)
-        commit.assert_called_once_with("colmar",[],UNASSIGNED,confirmed=True)
+        commit.assert_called_once_with(["colmar"],FRANCE_STAGE,confirmed=True)
         st.rerun.assert_called_once()
-        self.assertEqual(st.session_state["flow_organize_destination"],"colmar")
+        self.assertIn("incluído",st.session_state["flow_notice"])
 
 
 if __name__=="__main__":

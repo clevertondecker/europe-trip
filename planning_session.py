@@ -91,6 +91,17 @@ def commit_outing(destination:str,attraction_ids:list[str],
     return result
 
 
+
+def commit_undated_destinations(destinations:list[str],stage:str,*,
+                                confirmed:bool=False)->dict:
+    """Single confirmed, atomic selection from wishlist to canonical TripPlan."""
+    if not confirmed:
+        raise ValueError("Confirme os destinos antes de incluir no roteiro")
+    from itinerary_flow_model import add_undated_choices
+    next_plan=add_undated_choices(bootstrap(),load_attractions(),destinations,stage)
+    return _commit(next_plan)
+
+
 def delete_outing(destination:str,*,confirmed:bool=False):
     """Explicit removal including assigned dates; Italy remains stage-specific."""
     from ux45_outing_contract import remove_outing
