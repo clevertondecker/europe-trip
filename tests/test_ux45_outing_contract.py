@@ -77,8 +77,10 @@ class SharedOutingContract(unittest.TestCase):
 
     def test_rejects_invalid_and_duplicate_attractions(self):
         plan=new_plan()
-        with self.assertRaises(ValueError):
-            apply_outing(plan,self.catalog,"colmar",[],confirmed=True)
+        # UX 6.2: a city can be planned before selecting any attraction.
+        empty,result=apply_outing(plan,self.catalog,"colmar",[],confirmed=True)
+        self.assertEqual(result.attraction_count,0)
+        self.assertNotIn("colmar",empty["packages"])
         with self.assertRaises(ValueError):
             apply_outing(plan,self.catalog,"colmar",["italy_rome__1"],confirmed=True)
         with self.assertRaises(ValueError):
