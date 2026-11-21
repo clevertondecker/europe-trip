@@ -113,6 +113,19 @@ def _archive_fingerprint(archive:dict)->str:
     return sha256(raw).hexdigest()
 
 
+def _decisions_fingerprint(archive: dict) -> str:
+    """Hash persisted user decisions; page and search changes are not edits."""
+    value = {key: val for key, val in archive.items()
+             if key not in ("exported_at", "continuation")}
+    raw = json.dumps(value, ensure_ascii=False, sort_keys=True,
+                     separators=(",", ":")).encode("utf-8")
+    return sha256(raw).hexdigest()
+
+
+def _current_decisions_fingerprint(plan, catalog) -> str:
+    return _decisions_fingerprint(_private_archive(plan, catalog))
+
+
 def _private_archive(plan, catalog):
     state = st.session_state
     from ux48_weekend_groups_model import reconcile_removed_outings
@@ -161,6 +174,7 @@ def restore_private_on_start(catalog):
         state["ux36_cloud_status"] = "Salvo em espaço privado"
         state["ux36_saved_plan_fingerprint"] = plan_fingerprint(plan)
         state["ux36_saved_archive_fingerprint"] = _archive_fingerprint(archive)
+        state["ux36_saved_decisions_fingerprint"] = _decisions_fingerprint(archive)
         state["ux36_cloud_dirty"] = False
         for target, source in (
             ("ux_area", "area"), ("ux_section", "section"),
@@ -193,7 +207,9 @@ def save_private_now(plan, catalog):
     state["ux36_cloud_generation"] = generation
     state["ux36_cloud_status"] = "Salvo em espaço privado"
     state["ux36_saved_plan_fingerprint"] = plan_fingerprint(plan)
-    state["ux36_saved_archive_fingerprint"] = _archive_fingerprint(import_archive(raw,catalog))
+    confirmed_archive = import_archive(raw, catalog)
+    state["ux36_saved_archive_fingerprint"] = _archive_fingerprint(confirmed_archive)
+    state["ux36_saved_decisions_fingerprint"] = _decisions_fingerprint(confirmed_archive)
     state["ux36_cloud_dirty"] = False
     state["ux502_private_saved_revision"] = state.get("ux502_interests",empty_interests())["revision"]
     state.pop("ux36_autosave_failed_fingerprint", None)
@@ -206,10 +222,12 @@ def autosave_private_if_requested(catalog):
     snapshot (or explicit manual retry) is allowed to try again.
     """
     state = st.session_state
-    if not state.get("ux36_private_autosave") or not state.get("ux36_cloud_dirty"):
+    if not state.get("ux36_private_autosave"):
         return
     try:
-        pending = _archive_fingerprint(_private_archive(state["advisor_plan"], catalog))
+        pending = _current_decisions_fingerprint(state["advisor_plan"], catalog)
+        if pending == state.get("ux36_saved_decisions_fingerprint"):
+            return
     except (ValueError, TypeError, KeyError):
         state["ux36_cloud_status"] = "Erro ao preparar; alterações apenas nesta sessão"
         state["ux36_cloud_dirty"] = True
@@ -239,13 +257,11 @@ def render_private_controls(plan, catalog):
     status = state.get("ux36_cloud_status", "Apenas nesta sessão")
     try:
         current = _private_archive(plan, catalog)
-        if (state.get("ux36_saved_archive_fingerprint") != _archive_fingerprint(current)
+        if (state.get("ux36_saved_decisions_fingerprint") != _decisions_fingerprint(current)
                 and status == "Salvo em espaço privado"):
             status = "Alterações não salvas"
     except (ValueError, TypeError, KeyError):
         status = "Dados locais precisam de revisão antes de salvar"
-    if state.get("ux36_cloud_dirty") and status == "Salvo em espaço privado":
-        status = "Alterações não salvas"
     st.caption("**Status privado:** " + status)
     if state.get("ux36_autosave_failed_fingerprint"):
         st.info("O salvamento automático não foi confirmado. Seus dados continuam nesta sessão. "
@@ -269,10 +285,16 @@ def render_private_controls(plan, catalog):
 def private_status_label(fallback):
     """Show private success only after a confirmed remote response."""
     state = st.session_state
-    if (state.get("ux36_cloud_status") == "Salvo em espaço privado"
-            and not state.get("ux36_cloud_dirty")
-            and state.get("ux36_saved_plan_fingerprint") == plan_fingerprint(bootstrap())):
-        return ("Salvo em espaço privado", "Recuperável após entrar com a conta autorizada")
+    if state.get("ux36_cloud_status") == "Salvo em espaço privado":
+        try:
+            from attractions_model import load_attractions
+            if state.get("ux36_saved_decisions_fingerprint") == _current_decisions_fingerprint(
+                    bootstrap(), load_attractions()):
+                return ("Salvo em espaço privado",
+                        "Recuperável após entrar com a conta autorizada")
+        except (ValueError, KeyError, TypeError):
+            pass
+        return ("Alterações apenas nesta sessão", "Salve uma cópia privada ou baixe o backup")
     if state.get("ux36_cloud_status", "").startswith(("Erro","Conflito")):
         return ("Alterações apenas nesta sessão", "Salve uma cópia privada ou baixe o backup")
     return fallback
