@@ -56,5 +56,11 @@ def apply_navigation(state):
 
 def reconcile_session_scope(state, interests, discovery):
     checked = reconcile_scope(interests, state.get(SCOPE), discovery)
+    previous=state.get(SCOPE)
     state[SCOPE] = checked["scope"]
+    if previous is not None and checked["scope"] is None:
+        # Stale document identity: do not carry even unconfirmed draft IDs over.
+        state.pop(DRAFT,None)
+        state.pop("rec03a_edit_scope",None)
+        state.pop("rec03a_scope_widget",None)
     return checked
