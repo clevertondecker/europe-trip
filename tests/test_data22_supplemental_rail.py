@@ -83,7 +83,6 @@ class Data22SupplementalRailTests(unittest.TestCase):
                 self.assertTrue(cell["supplemental_connectivity_applied"])
                 self.assertEqual(cell["category"],"reference_only")
                 self.assertFalse(cell["valid_for_2027"])
-                self.assertIn("fonte",cell["evidence_notes"].lower()) if False else None
         # Lille→Basel is an independently reviewed DATA13 record and does
         # not count as a supplemental destination in DATA22.
         cell=overlay["cells"][("lille","basel")]
@@ -110,12 +109,12 @@ class Data22SupplementalRailTests(unittest.TestCase):
         for x in ("obernai","lucerne"):
             wishes=set_interest(wishes,x,"interested",self.discovery)
         result=compare_wishlist_bases(
-            wishes,["nancy","colmar","basel"],discovery=self.discovery)
+            wishes,["nancy","colmar","selestat"],discovery=self.discovery)
         cells=decorate_comparison(result)["cells"]
         for pair,minutes in ((("nancy","obernai"),123),
                              (("colmar","obernai"),47),
                              (("colmar","lucerne"),126),
-                             (("basel","lucerne"),61)):
+                             (("selestat","obernai"),31)):
             self.assertEqual(cells[pair]["display_min"],minutes)
 
     def test_lille_basel_existing_inventory_uses_manifest_gating(self):
