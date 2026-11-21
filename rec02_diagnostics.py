@@ -41,7 +41,8 @@ def run_diagnostics():
             "candidates":len(result["candidates"]),
             "full_groups":len(result["complete_groups"]),
             "conditional_pairs":len(result["conditional_comparisons"]),
-            "highlights":[{k:c[k] for k in ("base_id","highlight_kind","reasons","weighted_coverage","must_visit")}
+            "highlights":[{k:c[k] for k in ("base_id","highlight_kind","reasons","weighted_coverage","must_visit",
+                                             "historical_count","indicative_count","logistics_reliability_decidable")}
                           for c in result["candidates"] if c["highlight"]],
         }
     benchmark = {}
