@@ -12,6 +12,7 @@ class CityProfilesTest(unittest.TestCase):
         self.data=load_profiles(canonical=self.canonical)
 
     def test_thirty_canonical_cities_and_twelve_finalists(self):
+        self.assertEqual(len(self.data["cities"]),len(self.canonical["cities"]))
         self.assertEqual(len(self.data["cities"]),30)
         self.assertEqual(sum(x["shortlist"] for x in self.data["cities"]),12)
         self.assertEqual({x["city_id"] for x in self.data["cities"]},

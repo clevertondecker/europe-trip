@@ -1,6 +1,6 @@
 """Public city profiles and provenance; never writes to TripPlan or GCS.
 
-The profile dataset supplements existing 30-city coverage; it does not replace
+The profile dataset supplements historical city coverage and supports new candidates;
 rail, housing or financial contracts and must not publish invented scores.
 """
 from __future__ import annotations
@@ -78,7 +78,17 @@ def validate_profiles(data:dict,canonical:dict|None=None)->dict:
 
 
 def load_profiles(path:Path=PATH,canonical:dict|None=None)->dict:
-    return validate_profiles(json.loads(path.read_text(encoding="utf-8")),canonical)
+    canonical=load_research() if canonical is None else canonical
+    source=json.loads(path.read_text(encoding="utf-8"))
+    # New candidates have verified minimal profile data, but no invented 2027
+    # rental quote or quality score. The historical profile file stays frozen.
+    if Path(path).resolve()==PATH.resolve():
+        from data23_france_candidates_model import base_profiles
+        known={r["city_id"] for r in source["cities"]}
+        valid={r["id"] for r in canonical["cities"]}
+        source["cities"].extend(r for r in base_profiles()
+                              if r["city_id"] in valid and r["city_id"] not in known)
+    return validate_profiles(source,canonical)
 
 
 def profile_by_id(data:dict,city_id:str)->dict:
@@ -98,8 +108,9 @@ def compact_comparison(data:dict,city_ids:list[str])->list[dict]:
             "Cidade":row["name"],
             "País":row["country"],
             "População municipal (ano indicado)":
-                (str(row["demographics"]["population_municipal"])+" ("+str(row["demographics"]["reference_year"])+")")
-                if row.get("demographics",{}).get("population_municipal") is not None else "Não pesquisado",
+                (str((row.get("demographics") or {})["population_municipal"])+" ("+
+                 str((row.get("demographics") or {})["reference_year"])+")")
+                if (row.get("demographics") or {}).get("population_municipal") is not None else "Não pesquisado",
             "Corredor":row["corridor"],
             "Moradia: amostras 2026":house["historical_offer_count"],
             "Faixa observada EUR/mês":
