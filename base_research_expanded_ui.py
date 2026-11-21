@@ -129,8 +129,8 @@ def _city_routes(city_id,five,rail):
                    "não foram comprovados; ida não implica bate-volta.")
 
 
-def _city_profile(city_id):
-    profiles=load_profiles()
+def _city_profile(city_id,study):
+    profiles=load_profiles(canonical=study)
     p=profile_by_id(profiles,city_id)
     st.markdown("**Contexto pesquisado:** "+p["summary"])
     pack=pack_for_city(load_city_packs(),city_id)
@@ -227,10 +227,10 @@ def _explore_city(study,rail,five)->None:
     st.caption(city["corridor"]+" · "+("Finalista" if city["shortlist"] else "Candidata"))
     a,b=st.columns(2)
     a.metric("Anúncios de 2026",h["count"])
-    documented=next(r for r in coverage_matrix("general") if r["id"]==selected)
+    documented=next(r for r in coverage_matrix("general",study=study) if r["id"]==selected)
     b.metric("Tempos ferroviários pesquisados",
              str(documented["route_basket_with_time"])+"/15")
-    _city_profile(selected)
+    _city_profile(selected,study)
     _candidate_media_and_logistics(selected)
     _city_housing(city)
     if not base_routes(selected):
@@ -240,7 +240,7 @@ def _explore_city(study,rail,five)->None:
                                     default="Geral",key="expanded_bases_rank_preset")
         preset_id={"Geral":"general","Econômico":"economy",
                    "Explorador":"explorer"}.get(preset,"general")
-        evaluation=next(r for r in coverage_matrix(preset_id) if r["id"]==selected)
+        evaluation=next(r for r in coverage_matrix(preset_id,study=study) if r["id"]==selected)
         weights=dict(zip(("Moradia temporária","Trens e conexões","Passeios viáveis",
                           "Custo dos passeios","Vida cotidiana/remoto",
                           "Países práticos"),PRESETS[preset_id]))
@@ -312,7 +312,7 @@ def _all_candidates(study)->None:
 
 
 def render_expanded_research(*,activity_override:str|None=None,compact:bool=False)->None:
-    study=load_research()
+    study=load_research(include_candidates=True)
     rail=load_rail()
     five=load_five_base_evidence()
     summary=research_overview(study)
