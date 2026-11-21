@@ -179,7 +179,10 @@ def render_wishlist(discovery) -> bool:
         return False
     if active:
         from rec03a_session import request_navigation
-        st.button("Encontrar cidades-base", key="rec03a_open_from_wishlist", type="primary",
+        from ux_planning_journey_ui import request_planning
+        st.button("Montar roteiro com meus destinos",key="flow_journey_from_wishlist",type="primary",
+                  on_click=request_planning,args=(st.session_state,"build"))
+        st.button("Encontrar cidades-base", key="rec03a_open_from_wishlist",
                   on_click=request_navigation,args=(st.session_state,"suggestions"))
         st.button("Comparar cidades-base para nossos destinos",
                   key="ux503_open_from_wishlist",

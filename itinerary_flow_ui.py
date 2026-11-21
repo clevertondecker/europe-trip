@@ -508,7 +508,7 @@ def _render_organizer_wishlist(plan:dict,catalog:dict,stage:str)->None:
                    " destino(s) desejados pertencem à outra etapa.")
 
 
-def _render_organize(plan:dict,catalog:dict,stage:str,*,show_wishlist:bool=True)->None:
+def _render_organize(plan:dict,catalog:dict,stage:str,*,show_wishlist:bool=True,review_on_close:bool=False)->None:
     """Organize by flexible period or precise day without leaving this editor."""
     if not st.session_state.get("flow_organize_open",False):
         return
@@ -601,6 +601,10 @@ def _render_organize(plan:dict,catalog:dict,stage:str,*,show_wishlist:bool=True)
                   on_click=_navigate,args=("Meu roteiro","Calendário"))
         if st.button("Concluir organização",key="flow_organize_close"):
             st.session_state["flow_organize_open"]=False
+            if review_on_close:
+                st.session_state["flow_journey_view"]="review"
+                st.session_state.pop("flow_edit_target",None)
+                st.session_state["flow_add_open"]=False
             st.rerun()
 
 

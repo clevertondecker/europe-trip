@@ -32,7 +32,7 @@ from ux64_navigation_model import public_area, select_public_area
 from ux64_navigation_ui import render_public_task_tabs
 from travel_dashboard_ui import render_trip_dashboard
 from itinerary_flow_ui import render_itinerary_workbench
-from ux_planning_journey_ui import render_planning_journey
+from ux_planning_journey_ui import render_planning_journey, apply_planning_request
 from smart_calendar_ui import render_smart_calendar
 from ux37_next_actions_ui import render_next_actions,render_return_to_summary
 from continuity_ui import (apply_pending_restore,render_continuity_panel,
@@ -86,6 +86,7 @@ _rec_user = (_logged_in_user() if _rec_config.get('google_configured') and _rec_
 sync_identity(st.session_state, identity_token(account_view_state(_rec_config, _rec_user), _rec_user))
 apply_navigation_request(st.session_state)
 apply_recommendation_navigation(st.session_state)
+apply_planning_request(st.session_state)
 if st.session_state.pop("ux503_pending_return_to_wishlist", False):
     set_ux_task(st.session_state, "Explorar", "Passeios")
     st.session_state["ux502_view"] = "Minha lista"
@@ -514,7 +515,7 @@ if page == "Visão geral":
     render_planning_journey(active_plan(),load_attractions(),data,
                             sync_sources["finance"]["status"]=="live",
                             st.session_state.get("advisor_eurfx",6.3),
-                            st.session_state.get("advisor_chffx",7.1))
+                            st.session_state.get("advisor_chffx",7.1),summary_only=True)
     with st.expander("Painéis anteriores, mapa, fontes e detalhes · avançado", expanded=False):
         st.divider()
         st.markdown("#### Informações e painéis complementares")
@@ -1289,11 +1290,16 @@ elif page == "Roteiro":
             render_planning_journey(active_plan(),load_attractions(),data,
                                     sync_sources["finance"]["status"]=="live",
                                     st.session_state.get("advisor_eurfx",6.3),
-                                    st.session_state.get("advisor_chffx",7.1))
+                                    st.session_state.get("advisor_chffx",7.1),summary_only=True)
         elif (ux_area,ux_section)==("Meu roteiro","Organizar viagem") and (
             st.session_state.get("ux_organize_view")=="Calendário inteligente"):
             render_smart_calendar(
                 active_plan(),load_attractions(),load_base_routes(),data,sync_sources)
+        elif (ux_area,ux_section)==("Meu roteiro","Organizar viagem"):
+            render_planning_journey(active_plan(),load_attractions(),data,
+                                    sync_sources["finance"]["status"]=="live",
+                                    st.session_state.get("advisor_eurfx",6.3),
+                                    st.session_state.get("advisor_chffx",7.1))
         else:
             render_itinerary_workbench(
                 active_plan(),load_attractions(),data,
