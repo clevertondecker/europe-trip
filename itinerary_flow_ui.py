@@ -491,6 +491,9 @@ def _render_organizer_wishlist(plan:dict,catalog:dict,stage:str)->None:
             except (ValueError,KeyError) as exc:
                 st.error(str(exc))
     if candidates["unsupported"]:
+        names = ", ".join(row["name"] for row in candidates["unsupported"])
+        st.info("Ainda não podem ser incluídos no roteiro: " + names +
+                ". Continuam disponíveis para pesquisa na sua lista.")
         with st.expander("Lugares sem passeio compatível ("+
                          str(len(candidates["unsupported"]))+")",expanded=False):
             st.caption("Seus desejos continuam guardados na lista; "

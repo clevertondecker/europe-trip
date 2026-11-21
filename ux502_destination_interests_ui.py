@@ -194,6 +194,8 @@ def render_wishlist(discovery) -> bool:
         with st.container(border=True):
             cols = st.columns([3, 2, 1])
             cols[0].markdown("**" + destination["name"] + "** · " + destination["country"])
+            if destination.get("planning_support") == "exploration_only":
+                cols[0].caption("Pesquisa e comparação; inclusão no roteiro ainda indisponível.")
             widget_key = "ux502_priority_" + destination_id + "_" + fingerprint
             cols[1].selectbox("Prioridade", PRIORITIES,
                                index=PRIORITIES.index(row["priority"]),
