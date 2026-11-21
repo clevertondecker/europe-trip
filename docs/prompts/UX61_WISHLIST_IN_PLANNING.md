@@ -17,7 +17,7 @@ O usuário salva Colmar, Obernai, Paris, Basel e Strasbourg na wishlist e vê `0
 - Destinos já confirmados no TripPlan aparecem uma vez, com detalhes de atração/período quando existirem. Remover interesse não apaga visita; remover visita (com confirmação, na UX 6.2) não apaga interesse.
 - Se houver nenhum destino, exibir estado vazio com uma ação `Explorar cidades`. Se houver dezenas, usar filtros e paginação sem repetição ou expander por cartão.
 - Ações **somente de navegação**, nesta fase: `Ver atrações`, `Comparar bases`, `Continuar planejando`. Não oferecer falsa ação `Adicionar ao roteiro` até UX 6.2 implementar a confirmação real. Pode indicar `Visita a planejar`.
-- A lista deve atualizar imediatamente após adicionar/remover/alterar prioridade ou importar/restaurar, sem botão `Sincronizar`. Preserve contexto ao alternar Espanha/Itália/temporada europeia? Não inventar etapa por heurística de país; as cidades da wishlist são destinos de exploração, e Itália usa catálogo de estágio diferente. `Sem etapa definida` é preferível à classificação falsa.
+- A lista deve atualizar imediatamente após adicionar/remover/alterar prioridade ou importar/restaurar, sem botão `Sincronizar`. Preservar contexto ao alternar etapa Itália/temporada europeia, país e filtros. Não inventar etapa por heurística de país; as cidades da wishlist são destinos de exploração, e Itália usa catálogo de estágio diferente. `Sem etapa definida` é preferível à classificação falsa.
 - Orçamento e logística podem ser consultados como contexto; nenhuma informação pesquisada equivale a logística confirmada.
 
 ## Modelo e limites
