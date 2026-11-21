@@ -47,7 +47,8 @@ def destinations(catalog:dict)->list[dict]:
                             if a["destination_id"]==d["id"]],
              "research":"Pesquisa de atrações"}
             for d in catalog["destinations"]]
-    return italy+france
+    from ux62_supplemental_outings import supplemental_choices
+    return italy+france+supplemental_choices()
 
 
 def get_choice(catalog:dict,dest_id:str)->dict:
