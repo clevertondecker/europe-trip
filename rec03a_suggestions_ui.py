@@ -191,18 +191,22 @@ def _render_comparison_groups(result,names,cities):
     highlights=set(result["highlight_ids"])
     groups=result["complete_groups"]
     conditional=result["conditional_comparisons"]
-    with st.expander("Como as referências foram comparadas"):
+    if st.checkbox("Como as referências foram comparadas", key="rec03a_groups_open"):
         for group in groups:
             st.write("Escopo completo: "+_label_ids(group["destination_ids"],names))
             st.caption("Bases: "+", ".join(cities[b]["name"] for b in group["base_ids"]))
         relevant=[g for g in conditional if highlights.intersection(g["base_ids"])]
         if relevant:
-            options=list(range(len(relevant)))
-            def label(i):
-                return " × ".join(cities[b]["name"] for b in relevant[i]["base_ids"])
+            by_pair={tuple(g["base_ids"]):g for g in relevant}
+            options=list(by_pair)
+            def label(pair):
+                return " × ".join(cities[b]["name"] for b in pair)
+            _restore_widget("rec03a_group","rec03a_group_shadow",options[0],
+                            lambda x:isinstance(x,tuple) and x in by_pair)
             selected=st.selectbox("Comparação condicional para consultar",options,
-                                  format_func=label,key="rec03a_group")
-            group=relevant[selected]
+                                  format_func=label,key="rec03a_group",
+                                  on_change=_remember,args=("rec03a_group","rec03a_group_shadow"))
+            group=by_pair[selected]
             st.write("Trajetos comparados: "+_label_ids(group["destination_ids"],names))
             st.caption("Fora do conjunto comum: "+_label_ids(group["omitted_destination_ids"],names))
             for b in group["base_ids"]:
@@ -240,6 +244,7 @@ def render_suggestions(*, plan, discovery=None, research=None):
     st.write("Temporada europeia · "+str(len(result["destinations"]))+" destinos considerados")
     st.caption(_label_ids([x["id"] for x in result["destinations"]],names))
     st.button("Editar destinos considerados",key="rec03a_edit",on_click=_edit)
+    st.button("Revisar prioridades na minha lista",key="rec03a_priorities",on_click=_go,args=("wishlist",))
     st.caption("Sugestões de pesquisa — não são reservas, decisão oficial ou garantia de viabilidade.")
     if result["state"]=="insufficient_evidence":
         st.info("Ainda não há referências suficientes. Consulte as cidades e as lacunas abaixo.")
@@ -258,9 +263,9 @@ def render_suggestions(*, plan, discovery=None, research=None):
             size=6
             count=(len(ids)+size-1)//size
             key="rec03a_highlight_page_"+str(index)
-            if not isinstance(st.session_state.get(key),int) or not 1<=st.session_state[key]<=count:
-                st.session_state[key]=1
-            page=st.number_input("Página de destaques "+str(index+1),1,count,step=1,key=key) if count>1 else 1
+            _restore_widget(key,key+"_shadow",1,lambda x:type(x) is int and 1<=x<=count)
+            page=st.number_input("Página de destaques "+str(index+1),1,count,step=1,key=key,
+                                 on_change=_remember,args=(key,key+"_shadow")) if count>1 else 1
             for b in ids[(page-1)*size:page*size]:
                 _card(candidates[b],result,names,cities,plan["base_city"],"highlight")
     _render_comparison_groups(result,names,cities)
@@ -287,7 +292,9 @@ def render_suggestions(*, plan, discovery=None, research=None):
                          on_change=_remember,args=("rec03a_page","rec03a_page_shadow"))
     for c in filtered[(page-1)*size:page*size]:
         if c["highlight"]:
-            st.write(cities[c["base_id"]]["name"]+" · "+cities[c["base_id"]]["country"]+" — também nos destaques acima")
+            with st.expander(cities[c["base_id"]]["name"]+" · destaque também listado acima"):
+                if st.checkbox("Consultar cartão",key="rec03a_all_card_"+c["base_id"]):
+                    _card(c,result,names,cities,plan["base_city"],"all")
         else:
             _card(c,result,names,cities,plan["base_city"],"all")
 
@@ -304,6 +311,7 @@ def render_recommendation_activity(*,plan,discovery=None,research=None):
     choice=st.radio("Tipo de comparação",ACTIVITIES,horizontal=True,
                     key="rec03a_activity_widget",on_change=changed)
     if choice==SUGGESTED:
+        # Cross-screen candidate handoffs, simulation and map belong to REC03B/REC04.
         render_suggestions(plan=plan,discovery=discovery,research=research)
     else:
         render_wishlist_base_comparison(plan=plan,discovery=discovery,research=research)
