@@ -33,6 +33,27 @@ Exemplo na etapa europeia:
 - **A — Incremental:** manter três controles independentes de período, calendário inteligente e calendário completo, com nomenclatura melhor. Barato, mas mantém duplicidade conceitual.
 - **B — Redesenho recomendado:** **timeline/lista autoritativa + visões alternativas**, com reutilização dos validadores atuais; maior custo de integração mas mais claro para uma temporada de 60 dias e trabalho remoto. Escolher B, migrando em duas etapas sem quebrar os calendários legados.
 
+## Contrato P1 — Cardinalidade diária e semântica de grupos
+
+### Regra atual preservada: um destino francês principal por dia
+- `TripPlan.assignments` é `date -> destination_id`. `planning_store.add_assignment()` rejeita nova cidade numa data já ocupada, e `calendar_assignment_validation.validate_new_assignments()` valida passeios franceses de **dia inteiro**, sem trabalho remoto ou instalação.
+- **Não mudar** nesta UX a cardinalidade do schema para lista de cidades/horários; um dia com dois destinos independentes não pode ser salvo como se fosse suportado. Se usuário tentar Basel + Colmar na mesma data, mostrar mensagem clara `Já existe um passeio principal neste dia` e oferecer mudar dia ou avaliar agrupamento; não simplesmente descartar escolha.
+- `ux48_weekend_groups_model` permite **vários destinos** em uma viagem de fim de semana, mas **não equivale a agendar vários `assignments` no mesmo dia**. Tratar o grupo como intenção de viagem/intervalo, conservar membros sem falsificar agenda diária. Um grupo sem data não deve ocupar calendário. Não atribuir horários manhã/tarde/noite nesta entrega.
+- Guardar a possibilidade futura de múltiplas visitas no mesmo dia como pesquisa/PR isolado, somente se cenários reais exigirem e com migração conjunta de calendário, custos, conflitos, relatórios e backup. **Não é requisito bloqueante** da UX 6.3 atual.
+
+### Regra de estado organizada vs agrupada
+- `Em grupo de viagem` = membro de `weekend_groups`. `Organizado temporalmente` = há período ou data confirmados pelo usuário, seja na visita ou no grupo; `Ainda não definido` não conta como período confirmado. `status=planejado` por si só não torna um grupo temporalmente organizado. Reservas externas permanecem não confirmadas.
+- Os indicadores `com período/data`, `sem data`, `em grupos` e `ocupação de dias` são métricas distintas. Contar cada destino/visita **uma vez** no painel e não duplicar ocupação entre membros de grupo e `assignments`.
+- Se um grupo tem **período flexível confirmado mas data exata vazia**, mostrar `Período definido · Data específica pendente` e contar como organizado por período, não como datado.
+- Se um grupo tem `start_date=None` e `period="Ainda não definido"`, mostrar `Agrupado · Período/data pendentes`. Isso não deve ser convertido implicitamente em evento.
+
+### Cenários críticos
+- **GIVEN** Colmar já ocupa 23/10/2027 **WHEN** tento agendar Basel como passeio principal no mesmo dia **THEN** recebo conflito legível, Colmar mantém sua data e Basel continua no roteiro sem data, sem novo assignment.
+- **GIVEN** grupo Basel + Lucerna sem período/data **WHEN** abro Planejar e calendário **THEN** aparece `Agrupado`, não `Organizado temporalmente`, sem ocupar fins de semana.
+- **GIVEN** grupo Basel + Lucerna com período `Trabalho remoto · fim de semana` e data pendente **WHEN** consulto métricas **THEN** período está definido, data específica não está e nenhuma ocupação exata é inventada.
+- **GIVEN** grupo datado com duas visitas e passeio diário independente **WHEN** renderizo calendário **THEN** agrupo visualmente sem contar ocupação duas vezes e valido conflitos sem fingir que o mesmo dia tem dois assignments.
+- **GIVEN** visita com zero atrações confirmada sob UX 6.2 **WHEN** adiciono data francesa disponível **THEN** o validador alterado no #171 permite agendar sem exigir `packages` fictício.
+
 ## Cenários Given / When / Then
 - **GIVEN** visitas confirmadas, 2 sem data, 1 com período, 1 datada e 1 agrupada **WHEN** abro Planejar → Organizar **THEN** todas aparecem uma vez no grupo correto; origem do dado está clara.
 - **GIVEN** destino apenas desejado **WHEN** abro calendário **THEN** não é contado como evento nem recebe data automaticamente.
