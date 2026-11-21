@@ -12,11 +12,14 @@ from trip01_supplemental_discovery import build_exploration_discovery
 
 POLICY_VERSION = "rec02-logistics-v1"
 LIMITATION = ("Mínimos publicados de ida, evidências históricas/indicativas; "
-              "retorno, última milha e horários de 2027 não confirmados.")
+              "retorno, frequência, última milha e horários de 2027 não confirmados.")
+COVERAGE_LIMITATION = ("Cobertura mede presença de referências, não robustez documental, "
+                       "confiabilidade logística, custo ou viabilidade. Histórico e "
+                       "indicativo são categorias distintas; não recebem nota de confiança.")
 CRITERIA = {
     "complete": "Mesmo conjunto completo de trajetos e destinos locais; menor média ponderada de mínimos, empates incluídos.",
     "conditional": "Interseção explícita de trajetos conhecidos; sem extrapolar para toda a lista.",
-    "investigation": "Fronteira de cobertura documental: outra base acrescenta evidência sem perder trajetos ou locais; em conjuntos idênticos, destacar menor mínimo ponderado no próprio subconjunto.",
+    "investigation": "Fronteira de presença documental: outra base acrescenta IDs com tempo ou local sem perder os mesmos IDs; não avalia a qualidade das fontes. Em conjuntos idênticos, destacar menor mínimo ponderado no próprio subconjunto.",
 }
 def _weights(weights):
     result = dict(DEFAULT_WEIGHTS if weights is None else weights)
@@ -42,16 +45,29 @@ def _comparison(ids, bases, cells, by_id, weights, local_sets, full):
     # Arithmetic exactness for ties, independently from displayed rounding.
     best = min(Fraction(x["numerator"], x["denominator"]) for x in measures.values())
     excluded = sorted(set(by_id) - set(ids))
+    # Partition the omitted scope by each base's own REC01 category. A known
+    # route can be omitted because the other base lacks a comparable time.
+    known_not_compared = {b: [d for d in excluded if cells[(b,d)]["category"] in TIMED]
+                          for b in bases}
+    missing_time = {b: [d for d in excluded if cells[(b,d)]["category"] == "no_time"]
+                    for b in bases}
     return {"kind": "complete" if full else "conditional",
             "base_ids": list(bases), "destination_ids": ids,
             "omitted_destination_ids": excluded,
-            "omitted_by_base": {b: sorted(set(excluded) - local_sets[b]) for b in bases},
+            # Compatibility: omitted NONLOCAL IDs, not missing evidence. Prefer the explicit partitions.
+            "omitted_by_base": {b: sorted(known_not_compared[b] + missing_time[b]) for b in bases},
+            "known_not_compared_by_base": known_not_compared,
+            "missing_time_by_base": missing_time,
             "local_destination_ids_by_base": {b: sorted(local_sets[b]) for b in bases},
             "must_visit_omitted": [d for d in excluded if by_id[d]["priority"] == "must_visit"],
             "weighted_minimum_oneway": measures,
             "lowest_on_this_set": [b for b in bases if Fraction(measures[b]["numerator"], measures[b]["denominator"]) == best],
             "evidence_categories_by_base": {b: {d: cells[(b,d)]["category"] for d in ids} for b in bases},
+            "compared_category_counts_by_base": {b: {k: sum(cells[(b,d)]["category"] == k for d in ids)
+                                                       for k in sorted(TIMED)} for b in bases},
             "mixed_evidence": len({cells[(b,d)]["category"] for b in bases for d in ids}) > 1,
+            "coverage_limitation": COVERAGE_LIMITATION,
+            "logistics_reliability_decidable": False,
             "total_logistics_decidable": False,
             "limitation": LIMITATION}
 
@@ -75,6 +91,9 @@ def evaluate_matrix(matrix, *, weights=None):
             or set(cells) != {(b,d) for b in bases for d in by_id}):
         raise ValueError("Matriz de evidências incompleta ou inválida")
     names = {s["base_id"]: s["base_name"] for s in raw.get("summaries", [])}
+    # Raw REC01 observations remain separate from chosen display evidence;
+    # historical provenance (date, source, variation) must not be overwritten by overlays.
+    raw_rows = {(row["base_id"], row["destination_id"]): row for row in raw.get("rows", [])}
     must = {d for d in by_id if by_id[d]["priority"] == "must_visit"}
     known, local, missing, candidates = {}, {}, {}, {}
     for b in bases:
@@ -97,12 +116,17 @@ def evaluate_matrix(matrix, *, weights=None):
                          "historical_count": sum(cells[(b,d)]["category"] == "historical" for d in by_id),
                          "indicative_count": sum(cells[(b,d)]["category"] == "reference_only" for d in by_id),
                          "weighted_coverage": _fraction_view(n,denom),
+                         "coverage_limitation": COVERAGE_LIMITATION,
+                         "logistics_reliability_decidable": False,
+                         "limitation": LIMITATION,
                          "must_visit": {"known": sorted(must & known[b]), "local": sorted(must & local[b]),
                                         "missing": sorted(must & missing[b])},
                          "minimum_oneway_within_minutes": min_counts,
                          "weighted_minimum_oneway": {**_mean(sorted(known[b]),cells,b,by_id,weights),
                                                      "destination_ids": sorted(known[b])},
                          "evidence": {d: deepcopy(cells[(b,d)]) for d in sorted(by_id)},
+                         "raw_rail_evidence": {d: deepcopy(raw_rows[(b,d)]) for d in sorted(by_id)
+                                               if (b,d) in raw_rows},
                          "local_only": bool(local[b]) and not known[b],
                          "all_destinations_local": local[b] == scope_ids,
                          "reasons": [], "highlight": False, "highlight_kind": None}
@@ -135,7 +159,9 @@ def evaluate_matrix(matrix, *, weights=None):
             g = _comparison(ids,[a,b],cells,by_id,weights,local,False)
             conditional.append(g)
             conditional_members.update((a,b))
-    # Coverage set inclusion, not cross-denominator comparison or a composite score.
+    # Coverage set inclusion ONLY: historical and indicative both mean a time
+    # is recorded, not that their source quality is equal. No quality dominance.
+    # No cross-denominator comparison or composite score.
     # Separate known and local to avoid treating access pending as a train duration.
     frontier = {b for b in bases if (known[b] or local[b]) and not any(
         known[b] <= known[a] and local[b] <= local[a]
@@ -208,7 +234,9 @@ def evaluate_matrix(matrix, *, weights=None):
             "highlight_sections": sections,
             "has_conditional_comparison": bool(conditional),
             "has_local_only": any(c["local_only"] for c in candidates.values()), "global_ranking": False,
-            "official_plan_modified": False, "limitation": LIMITATION}
+            "official_plan_modified": False, "limitation": LIMITATION,
+            "coverage_limitation": COVERAGE_LIMITATION,
+            "logistics_reliability_decidable": False}
 
 
 def recommend_bases(interests, scope=None, *, discovery=None, research=None, rail=None,
