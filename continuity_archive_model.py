@@ -174,7 +174,22 @@ def import_archive(blob:bytes,catalog:dict)->dict:
     return validate_archive(raw,catalog)
 
 
-def preview_restore(current:dict,archive:dict,catalog:dict)->dict:
+def persisted_data_fingerprint(archive:dict)->str:
+    """Identity of decisions included in a snapshot, independent of UI position."""
+    value={k:v for k,v in archive.items() if k not in ("exported_at","continuation")}
+    return sha256(_json_bytes(value)).hexdigest()
+
+
+def _interest_diff(before:dict,after:dict)->dict:
+    old={row["destination_id"]:row["priority"] for row in before.get("items",[])}
+    new={row["destination_id"]:row["priority"] for row in after.get("items",[])}
+    return {"added":len(set(new)-set(old)),
+            "removed":len(set(old)-set(new)),
+            "priority_changed":sum(old[k]!=new[k] for k in set(old)&set(new))}
+
+
+def preview_restore(current:dict,archive:dict,catalog:dict,
+                    current_archive:dict|None=None)->dict:
     validate_plan(current)
     incoming=validate_archive(archive,catalog)
     other=incoming["plan"]
@@ -182,9 +197,19 @@ def preview_restore(current:dict,archive:dict,catalog:dict)->dict:
     changed=sorted(k for k in set(current)|set(other)
                    if current.get(k)!=other.get(k) and
                    k not in ("revision","source_versions"))
+    existing=(validate_archive(current_archive,catalog)
+              if current_archive is not None else None)
+    auxiliary_fields=(sorted(k for k in
+        ("destination_interests","weekend_groups","city_favorites",
+         "city_studies","calendar_drafts")
+        if existing is not None and existing.get(k)!=incoming.get(k)))
+    wish_changes=(_interest_diff(existing["destination_interests"],
+                                 incoming["destination_interests"])
+                  if existing is not None else None)
+    has_changes=bool(changed or auxiliary_fields)
     relation=("same_plan_older" if same_id and other["revision"]<current["revision"]
               else "same_plan_same_revision_conflict" if same_id and
-                  other["revision"]==current["revision"] and changed
+                  other["revision"]==current["revision"] and has_changes
               else "same_plan_newer" if same_id and other["revision"]>current["revision"]
               else "different_plan" if not same_id
               else "same_plan_identical")
@@ -197,6 +222,10 @@ def preview_restore(current:dict,archive:dict,catalog:dict)->dict:
         "current_revision":current["revision"],
         "relation":relation,
         "changed_fields":changed,
+        "auxiliary_changed_fields":auxiliary_fields,
+        "wishlist_changes":wish_changes,
+        "expected_current_decisions_fingerprint":(
+            persisted_data_fingerprint(existing) if existing is not None else None),
         "places_before":len(selected_rows(current,catalog)),
         "places_after":len(selected_rows(other,catalog)),
         "archived_studies":len(incoming["city_studies"]),
@@ -207,13 +236,18 @@ def preview_restore(current:dict,archive:dict,catalog:dict)->dict:
 
 
 def confirm_restore(current:dict,archive:dict,review:dict,catalog:dict,
-                    *,confirmed:bool=False)->dict:
+                    *,confirmed:bool=False,current_archive:dict|None=None)->dict:
     """No write without explicit consent; reject stale preview and other file."""
     if not confirmed:return deepcopy(current)
     if (not isinstance(review,dict) or
         review.get("expected_current_fingerprint")!=plan_fingerprint(current) or
         review.get("current_plan_id")!=current["plan_id"]):
         raise ValueError("Seu plano mudou desde a revisão. Confira novamente")
+    if review.get("expected_current_decisions_fingerprint") is not None:
+        if current_archive is None or (
+            persisted_data_fingerprint(validate_archive(current_archive,catalog)) !=
+                review["expected_current_decisions_fingerprint"]):
+            raise ValueError("Destinos ou outros dados mudaram desde a prévia. Revise novamente")
     incoming=validate_archive(archive,catalog)
     if sha256(_json_bytes(incoming)).hexdigest()!=review.get("expected_archive_fingerprint"):
         raise ValueError("O arquivo foi alterado após a revisão; valide novamente")

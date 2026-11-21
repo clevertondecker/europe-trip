@@ -76,8 +76,11 @@ def remove_package(plan:dict,destination:str)->dict:
                               "flexible_visits":visits})
 
 def add_assignment(plan:dict,day:str,destination:str)->dict:
-    if destination not in plan["packages"]:
-        raise ValueError("Selecione atrações desse destino antes de agendar")
+    chosen = destination in plan["packages"] or any(
+        v["destination_id"] == destination and v["stage"] == "França"
+        for v in plan.get("flexible_visits", []))
+    if not chosen:
+        raise ValueError("Inclua a cidade no roteiro antes de agendar")
     date.fromisoformat(day)
     if day in plan["assignments"] and plan["assignments"][day]!=destination:
         raise ValueError("Já existe outro passeio neste dia")
@@ -91,7 +94,8 @@ def remove_assignment(plan:dict,day:str)->dict:
     return change_plan(plan,{"assignments":dates})
 
 def summary(plan:dict)->dict:
-    return {"destinations":len(plan["packages"]),
+    return {"destinations":len(set(plan["packages"]) | {
+                v["destination_id"] for v in plan.get("flexible_visits", [])}),
             "attractions":sum(len(x) for x in plan["packages"].values()),
             "scheduled_days":len(plan["assignments"]),
             "budget_scenario":plan["budget_scenario"],

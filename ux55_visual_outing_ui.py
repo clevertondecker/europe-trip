@@ -43,9 +43,16 @@ def destination_preview(dest: dict, catalog: dict) -> dict:
     """Read canonical destination/attraction details; never modify user selections."""
     canonical = (next((d for d in catalog["destinations"] if d["id"] == dest["id"]), None)
                  if dest["stage"] == FRANCE_STAGE else None)
-    source = canonical or {}
+    if canonical is None and dest["stage"] == FRANCE_STAGE:
+        from ux62_supplemental_outings import (supplemental_destination,
+                                               supplemental_attractions)
+        supplemental = supplemental_destination(dest["id"])
+    else:
+        supplemental = None
+    source = canonical or supplemental or {}
     attractions = ({a["id"]: a for a in catalog["attractions"]}
-                   if canonical else {})
+                   if canonical else {a["id"]: a for a in supplemental_attractions()}
+                   if supplemental else {})
     details = []
     for choice in dest["attractions"]:
         item = attractions.get(choice["id"], {})
