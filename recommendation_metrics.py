@@ -8,7 +8,12 @@ CATEGORIES = TIMED | {"local", "no_time"}
 
 
 def weighted_coverage(selected, weights=DEFAULT_WEIGHTS):
-    """selected is iterable[(destination metadata, REC01 cell)]. Local is not zero."""
+    """Measure presence of a timed reference, not evidence quality or feasibility.
+
+    Historical and indicative categories contribute equally to presence only;
+    callers retain category counts and provenance. Local is not a zero-minute
+    train trip and is excluded from the denominator.
+    """
     selected = list(selected)
     denominator = sum(weights[d["priority"]] for d, c in selected if c["category"] != "local")
     numerator = sum(weights[d["priority"]] for d, c in selected if c["category"] in TIMED)
