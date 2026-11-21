@@ -47,6 +47,7 @@ def public_task(legacy_area, legacy_section, wishlist_view=None):
 def select_public_task(state, area, task):
     if area not in PUBLIC_TASKS or task not in PUBLIC_TASKS[area]:
         raise ValueError("Área/atividade desconhecida")
+    state["ux64_public_task"] = task
     from ux_navigation import set_task
     if area=="Explorar" and task in ("Descobrir","Minha lista"):
         filters=dict(state.get("ux502_discovery_filters",{}))
