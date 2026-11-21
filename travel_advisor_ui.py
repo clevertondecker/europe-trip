@@ -463,8 +463,7 @@ def render_advisor(trip_data:dict,sync_sources:dict,workspace_area:str='Meus pas
                                 st.dataframe(comparison["different_fields"],
                                              hide_index=True, use_container_width=True)
                                 if comparison["difference_count"] > len(comparison["different_fields"]):
-                                    st.warning("Há mais diferenças do que o limite exibido. "
-                                               "Baixe as duas versões para comparação completa.")
+                                    st.warning("Há diferenças não exibidas. Baixe e revise os JSONs completos; a publicação fica bloqueada nesta tela.")
                             else:
                                 st.info("Os dados são iguais; somente a referência de "
                                         "versão precisa ser reconciliada.")
@@ -481,7 +480,9 @@ def render_advisor(trip_data:dict,sync_sources:dict,workspace_area:str='Meus pas
                                 "Comparei as duas versões e autorizo publicar meu planejamento local",
                                 key="advisor_reconcile_ack", value=False)
                             if st.button("Confirmar reconciliação e salvar no GitHub",
-                                         key="advisor_reconcile_confirm", disabled=not approved):
+                                         key="advisor_reconcile_confirm",
+                                         disabled=not (approved and
+                                             comparison["difference_count"] <= len(comparison["different_fields"]))):
                                 try:
                                     if plan_digest(st.session_state["advisor_plan"]) != preview["local_digest"]:
                                         raise ValueError("O plano mudou após a prévia. Compare novamente.")
