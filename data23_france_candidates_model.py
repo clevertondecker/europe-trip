@@ -65,7 +65,7 @@ def validate_data23(data:dict)->dict:
                 or not _safe_url(a.get("source_url"),{
                     "www.destination-angers.com","www.anjou-tourisme.com",
                     "www.lemans-tourisme.com","www.ville-annecy.fr",
-                    "www.tourisme-rennes.com","www.ter.sncf.com"})
+                    "www.tourisme-rennes.com","www.saint-malo-tourisme.com"})
                 or not isinstance(photo,dict)
                 or not _safe_url(photo.get("url"),WIKIMEDIA_HOSTS)
                 or not _safe_url(photo.get("source_page"),WIKIMEDIA_HOSTS)
@@ -91,8 +91,7 @@ def validate_data23(data:dict)->dict:
         url=r.get("source_url")
         if (key in pairs or key[0] not in REQUIRED_IDS or key[1] not in SLUGS
                 or not _safe_url(url,SOURCE_HOSTS)
-                or not any(urlsplit(url).path.endswith("/"+SLUGS[key[0]]+"/"+SLUGS[key[1]])
-                        for _ in (0,))
+                or not urlsplit(url).path.endswith("/"+SLUGS[key[0]]+"/"+SLUGS[key[1]])
                 or type(r.get("minimum_oneway_min")) is not int
                 or not 1<=r["minimum_oneway_min"]<=720
                 or r.get("reference_kind")!="official_operator_minimum"
