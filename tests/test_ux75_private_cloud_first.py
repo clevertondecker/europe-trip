@@ -81,5 +81,22 @@ class PrimaryPrivateSaveTests(unittest.TestCase):
         self.assertTrue(st.session_state["ux36_private_autosave"])
 
 
+class PublicAutosaveSafetyTests(unittest.TestCase):
+    @patch("planning_session.bootstrap", return_value={"revision": 0})
+    @patch("planning_session.sync_legacy_view")
+    @patch("planning_session.st")
+    def test_local_change_never_queues_public_autosave(self, st, sync, bootstrap):
+        from planning_session import _commit
+        st.session_state = {
+            "advisor_autosave_optin": True,
+            "advisor_public_repo_ack": True,
+            "advisor_autosave_pending": True,
+        }
+        next_plan = {"revision": 1}
+        self.assertEqual(_commit(next_plan), next_plan)
+        self.assertFalse(st.session_state["advisor_autosave_pending"])
+        self.assertTrue(st.session_state["ux36_cloud_dirty"])
+
+
 if __name__ == "__main__":
     unittest.main()
