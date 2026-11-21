@@ -127,5 +127,35 @@ render_planning_journey(active_plan(),load_attractions())
             self.assertTrue(any("Revisar e salvar meu rascunho" in x.value for x in app.markdown))
             self.assertTrue(any("Nuvem privada" in x.value for x in app.warning))
 
+    def test_exploratory_only_and_stale_build_have_no_empty_form(self):
+        from streamlit.testing.v1 import AppTest
+        from unittest.mock import patch
+        script="""
+import streamlit as st
+from attractions_model import load_attractions
+from planning_session import active_plan
+from ux_planning_journey_ui import render_planning_journey
+render_planning_journey(active_plan(),load_attractions(),summary_only=st.session_state.get("summary",False))
+"""
+        app=AppTest.from_string(script,default_timeout=90)
+        plan=new_plan()
+        wishes=set_interest(empty_interests(),"angers","must_visit")
+        app.session_state["advisor_plan"]=deepcopy(plan)
+        app.session_state["ux502_interests"]=deepcopy(wishes)
+        app.session_state["summary"]=True
+        with patch("continuity_ui._private_store",return_value=None):
+            app.run()
+            self.assertFalse(app.exception,str(app.exception))
+            self.assertEqual(app.button(key="flow_journey_primary").label,"Revisar minha lista")
+            app.session_state["summary"]=False
+            app.session_state["flow_journey_view"]="build"
+            app.run()
+            self.assertFalse(app.exception,str(app.exception))
+            self.assertEqual(app.button(key="flow_journey_primary").label,"Revisar minha lista")
+            self.assertTrue(app.button(key="flow_journey_step_build").disabled)
+            self.assertFalse(any(w.key.startswith("flow_journey_batch_") for w in app.multiselect if w.key))
+            self.assertEqual(app.session_state["advisor_plan"],plan)
+            self.assertEqual(app.session_state["ux502_interests"],wishes)
+
 if __name__=="__main__":
     unittest.main()

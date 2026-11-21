@@ -172,6 +172,8 @@ def render_wishlist(discovery) -> bool:
                 _change(restored)
                 from rec03a_session import clear_recommendation_context
                 clear_recommendation_context(st.session_state)
+                from ux_planning_journey_model import clear_planning_context
+                clear_planning_context(st.session_state)
                 st.session_state.pop("ux502_import_pending", None)
                 st.rerun()
 
