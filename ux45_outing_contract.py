@@ -51,8 +51,6 @@ def apply_outing(plan:dict,catalog:dict,destination_id:str,attractions:list[str]
     if not confirmed:
         raise ValueError("Confirme a inclusão ou atualização antes de aplicar")
     info=preview_outing(plan,catalog,destination_id,attractions,period)
-    if not info["selected_attractions"]:
-        raise ValueError("Escolha pelo menos uma atração")
     if (info["already_exists"] and
         existing_choice(plan,catalog,destination_id)["attractions"]==info["selected_attractions"] and
         existing_choice(plan,catalog,destination_id)["period"]==info["period"]):
