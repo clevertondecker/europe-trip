@@ -66,7 +66,9 @@ class PlanningUXFlowTests(unittest.TestCase):
             state["advisor_autosave_optin"]=True
             state["advisor_public_repo_ack"]=True
             planning_session.update_fields(profile="balanced")
-            self.assertTrue(state.get("advisor_autosave_pending"))
+            # UX75: even an old opt-in to public autosave must not queue
+            # publication. The explicit private opt-in is handled separately.
+            self.assertFalse(state.get("advisor_autosave_pending",False))
             self.assertEqual(state["advisor_plan"]["revision"],2)
 
 if __name__=="__main__":unittest.main()
