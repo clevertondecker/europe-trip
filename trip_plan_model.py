@@ -83,7 +83,7 @@ def validate_plan(plan:dict,known_attractions:set[str]|None=None)->None:
         if (not isinstance(destination,str) or len(destination)>80 or
             not destination.replace("_","").replace("-","").isalnum() or
             destination in seen or stage not in ("Itália","França") or
-            not isinstance(choices,list) or not 1<=len(choices)<=5 or
+            not isinstance(choices,list) or not 0<=len(choices)<=5 or
             not all(isinstance(a,str) and 0<len(a)<=100 for a in choices) or
             len(set(choices))!=len(choices) or
             not isinstance(period,str) or len(period)>80):

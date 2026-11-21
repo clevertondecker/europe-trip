@@ -23,8 +23,11 @@ def validate_new_assignments(plan:dict, assignments:dict, *,
             continue  # Preserve load/edit compatibility with older saved plans.
         if not isinstance(day,str) or day not in schedule:
             raise ValueError("Passeio fora das datas da viagem")
-        if dest not in plan["packages"] or not plan["packages"][dest]:
-            raise ValueError("Passeio agendado sem atrações selecionadas")
+        eligible = dest in plan["packages"] or any(
+            v["destination_id"] == dest and v["stage"] == "França"
+            for v in plan.get("flexible_visits", []))
+        if not eligible:
+            raise ValueError("Passeio agendado sem cidade incluída no roteiro")
         row=schedule[day]
         if (row["stage"]!="França" or row["activity"]=="Instalação" or
                 "Trabalho remoto" in row["activity"]):

@@ -183,7 +183,7 @@ def _render_add(plan:dict,catalog:dict)->None:
             from ux55_visual_outing_ui import render_destination_preview
             render_destination_preview(dest,catalog,st.session_state[pick_key])
             st.markdown("##### Escolha as atrações para este passeio")
-            picked=st.multiselect("Atrações desejadas (1 a 5)",list(labels),
+            picked=st.multiselect("Atrações desejadas (opcionais, até 5)",list(labels),
                                   format_func=lambda key:labels[key],
                                   key=pick_key,max_selections=5,
                                   on_change=_picks_changed,args=(dest_id,))
@@ -200,8 +200,8 @@ def _render_add(plan:dict,catalog:dict)->None:
             st.caption("Sem data obrigatória · Não adiciona reservas nem "
                        "altera o roteiro de outra cidade-base.")
             if not already:
-                if st.button("Adicionar ao roteiro",type="primary",
-                             key="flow_add_confirm",disabled=not picked):
+                if st.button("Adicionar cidade ao roteiro",type="primary",
+                             key="flow_add_confirm"):
                     try:
                         outcome=commit_outing(dest_id,picked,period,confirmed=True)
                         st.session_state["ux45_flow_result"]=asdict(outcome)
@@ -212,8 +212,7 @@ def _render_add(plan:dict,catalog:dict)->None:
                     except (ValueError,KeyError) as exc:
                         st.error(str(exc))
             else:
-                if st.button("Atualizar atrações e período",key="flow_add_update",
-                             disabled=not picked):
+                if st.button("Atualizar atrações e período",key="flow_add_update"):
                     try:
                         outcome=commit_outing(dest_id,picked,period,confirmed=True)
                         st.session_state["ux45_flow_result"]=asdict(outcome)
@@ -244,7 +243,7 @@ def _edit_destination(row:dict,catalog:dict)->None:
         a,b=st.columns(2)
         with a:
             if st.button("Salvar alterações",key="flow_edit_save_"+row["id"],
-                         disabled=not attractions,width="stretch"):
+                         width="stretch"):
                 try:
                     outcome=commit_outing(row["id"],attractions,chosen,confirmed=True)
                     st.session_state["ux45_flow_result"]=asdict(outcome)
@@ -381,8 +380,11 @@ def _compact_budget(plan:dict,catalog:dict,trip_data:dict,
         return
     try:
         selected=[a for group in plan["packages"].values() for a in group]
+        scheduled_cities=[row["id"] for row in selected_rows(plan,catalog)
+                          if row["stage"]==FRANCE_STAGE]
         historical=package_cost(catalog,load_base_routes(),
-                                plan["base_city"],selected)
+                                plan["base_city"],selected,
+                                planned_destination_ids=scheduled_cities)
         snapshot=advisor_projection(trip_data,finance_live,plan,historical,
                                     eurfx,chffx,False)
     except (ValueError,KeyError,TypeError):

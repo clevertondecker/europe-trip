@@ -128,27 +128,40 @@ def attraction_cost(ticket: dict, people: int = 2) -> float | None:
 
 
 def package_cost(attractions: dict, routes: dict, base: str,
-                 chosen_attraction_ids: list[str], travelers: int = 2) -> dict:
+                 chosen_attraction_ids: list[str], travelers: int = 2, *,
+                 planned_destination_ids: list[str] | None = None) -> dict:
     """One round-trip intercity fare per destination, never per attraction."""
     if travelers < 1 or travelers > 20:
         raise ValueError("Número de viajantes inválido")
     if len(set(chosen_attraction_ids)) != len(chosen_attraction_ids):
         raise ValueError("Atração selecionada duas vezes")
     index = {a["id"]:a for a in attractions["attractions"]}
+    from ux62_supplemental_outings import supplemental_attractions
+    index.update({a["id"]:a for a in supplemental_attractions()})
     if not set(chosen_attraction_ids) <= set(index):
         raise ValueError("Atração não cadastrada")
     grouped = defaultdict(list)
     for key in chosen_attraction_ids:
         grouped[index[key]["destination_id"]].append(index[key])
+    if planned_destination_ids is not None:
+        from ux62_supplemental_outings import supplemental_allowed
+        known = {d["id"] for d in attractions["destinations"]}
+        for destination_id in planned_destination_ids:
+            if destination_id not in known and supplemental_allowed(destination_id) is None:
+                raise ValueError("Cidade planejada não cadastrada")
+            grouped.setdefault(destination_id, [])
     amounts = {"EUR":0.0, "CHF":0.0}
     missing = []
     conditional = []
     breakdown = []
     for dest, items in grouped.items():
-        route = route_for(routes,base,dest)
+        try:
+            route = route_for(routes,base,dest)
+        except ValueError:
+            route = None  # Newly researched city: no historical rail fare.
         if base == dest:
             missing.append(f"Transporte urbano em {dest}")
-        elif route["fare_eur_person_oneway"] is None:
+        elif route is None or route["fare_eur_person_oneway"] is None:
             missing.append(f"Transporte entre {base} e {dest}")
         else:
             # The return fare is only illustrative; the 2027 return is unconfirmed.
@@ -158,6 +171,8 @@ def package_cost(attractions: dict, routes: dict, base: str,
                               "known_eur":price, "condition":route["fare_type"]})
             if route["fare_type"]=="discount_carte_fluo":
                 conditional.append(f"{base} ↔ {dest}: Carte Fluo não incluída")
+        if not items:
+            missing.append(f"Atividades a definir em {dest}")
         for item in items:
             price = attraction_cost(item["ticket"],travelers)
             if price is None:
@@ -172,7 +187,7 @@ def package_cost(attractions: dict, routes: dict, base: str,
             "conditional":sorted(set(conditional)),
             "by_destination":{k:[a["id"] for a in v] for k,v in grouped.items()},
             "breakdown":breakdown,
-            "complete":not missing and bool(chosen_attraction_ids),
+            "complete":not missing and bool(grouped),
             "selected_count":len(chosen_attraction_ids)}
 
 
