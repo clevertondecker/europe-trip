@@ -28,3 +28,9 @@
 
 ## Critério de aceite
 Um backup local de um plano cujo ID já está salvo no GitHub pode ser comparado e publicado **apenas após autorização explícita**. Uma gravação concorrente rejeita a publicação sem alterar a cópia local.
+
+## Revisão de integração após captura de tela
+- A tela **Etapa 2 · Temporada europeia / Salvar e recuperar planejamento** é renderizada por `itinerary_flow_ui._save_panel`, não por `travel_advisor_ui.render_advisor`.
+- O fluxo de comparação e confirmação foi integrado também ao painel real e fica restrito ao proprietário autenticado.
+- Quando mais de 100 campos diferem, o resumo é incompleto e o botão de publicação permanece desabilitado; os arquivos JSON podem ser baixados para revisão completa.
+- O PR não deve ser integrado antes de CI verde e revisão de segurança/Streamlit.
