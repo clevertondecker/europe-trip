@@ -16,16 +16,17 @@ class ExpandedBaseResearchModelTests(unittest.TestCase):
         self.study=load_research()
         self.rail=load_rail()
 
-    def test_thirty_candidates_twelve_shortlisted_and_no_2027_claim(self):
+    def test_adaptive_candidate_count_and_no_2027_claim(self):
         result=research_overview(self.study)
-        self.assertEqual(result["candidate_count"],30)
+        self.assertEqual(result["candidate_count"],len(self.study["cities"]))
+        self.assertEqual(result["candidate_count"],34)
         self.assertEqual(result["shortlist_count"],12)
         self.assertEqual(result["housing_offer_count"],35)
         self.assertEqual(result["three_observed_offers"],11)
         self.assertEqual(result["three_eligible_2027_quotes"],0)
         self.assertEqual(result["ranking_ready_count"],0)
         self.assertEqual(result["country_counts"],
-                         {"França":16,"Alemanha":9,"Bélgica":3,"Luxemburgo":2})
+                         {"França":20,"Alemanha":9,"Bélgica":3,"Luxemburgo":2})
         self.assertTrue(all(c["ranking_status"]=="not_decision_ready"
                             for c in self.study["cities"]))
 
