@@ -20,6 +20,7 @@ from rail_evidence_unified_model import (
     canonical_place, load_rail_evidence,
 )
 from evidence_query_model import get_rail_evidence
+from rail_pair_projection_model import pair_projection_row
 from rail_reference_projection_model import decorate_comparison
 
 DEFAULT=Path(__file__).resolve().parent/"data"/"dq32_macro_tourism_2026_11.json"
@@ -171,13 +172,7 @@ def opportunity_overview(base_id, *, macro=None,catalog=None,exploration=None,
         source=evidence["source_url"]
         checked=evidence["source_date"]
         dataset=evidence["source_dataset"]
-        projection_rows.append({
-            "base_id":origin, "destination_id":dest_id,
-            "evidence_status":evidence["status"],
-            "minimum_oneway_min":minutes,
-            "source_url":source,
-            "divergent_sources":False,
-        })
+        projection_rows.append(pair_projection_row(origin, dest_id, evidence))
         attrs=local_new.get(dest_id,[])+catalog_attractions.get(dest_id,[])
         canonical_count=len(catalog_attractions.get(dest_id,[]))
         new_count=len(local_new.get(dest_id,[]))
