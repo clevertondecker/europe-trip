@@ -28,6 +28,26 @@ O usuário salva Colmar, Obernai, Paris, Basel e Strasbourg na wishlist e vê `0
 5. Reutilizar `ux502_destination_interests_model.py`, `trip01_supplemental_discovery.py`, `itinerary_flow_ui.py` / `ux504_guided_journey_model.py`. Não criar novo editor nem novo repositório de dados.
 6. Acesso antigo `Explorar → Passeios → Minha lista` e `Meu roteiro → Meu planejamento` permanece funcional; o novo painel deve consumir a **mesma projeção**.
 
+## Ajustes de UX P1/P2 — Estado inequívoco e densidade visual
+
+### Semântica de estados: agrupado não é agendado
+- O board lê as facetas de destino de fontes diferentes, sem misturá-las: `Quero conhecer` da wishlist, `No roteiro` do TripPlan, `Atrações escolhidas` quando presentes, `Em grupo de viagem` quando houver vínculo em `ux48_weekend_groups`, e `Organizado temporalmente` **somente** quando houver período ou data definidos para a visita ou grupo. `Reservado` nunca decorre dessas operações.
+- Um grupo `Fim de semana na Suíça` com Basel + Lucerna mas sem período/data deve aparecer como **`No roteiro · Em grupo · Data pendente`**, e **não** aumentar o indicador `visitas com período/data`. A propriedade `status=planejado` no grupo não constitui, sozinha, data confirmada.
+- Separar nos testes: métricas de destinos desejados, visitas no roteiro, visitas com atrações, agrupadas e **organizadas temporalmente**. Evitar duas contagens da mesma visita e evitar usar `len(packages)` como total de destinos após UX 6.2.
+- Os estados coexistem como facetas; não modelá-los como enum único que perde prioridade, agrupamento ou data. As linhas podem mostrar texto composto curto, sem vários badges coloridos.
+
+### Progressive disclosure e escalabilidade
+- **Padrão recomendado: linhas compactas** com nome, país, estado principal e **uma ação contextual**; fotos e créditos, ingressos, horários, fontes, dados de trem e detalhes de atrações ficam em expansão/página de detalhe. Sem foto grande ou seis controles por item na vista de 200 destinos.
+- Filtros por estado/prioridade/país, busca e paginação/limite de renderização; carga incremental determinística. Não renderizar centenas de `st.expander` e widgets independentes antes de filtro e paginação.
+- No mobile, priorizar leitura rápida, labels e navegação por teclado; a ação primária muda conforme estado: `Pesquisar` para desejado, `Revisar atrações` para planejado, `Organizar` para visita confirmada sem data. Ações secundárias acessíveis nos detalhes.
+- Números e estados precisam ser **iguais** entre visualização compacta/detalhada, tela de Explorar e Planejar; nunca manter dados duplicados para facilitar cartão.
+
+### Aceites
+- **GIVEN** Basel e Lucerna vinculadas em grupo com `start_date=None` e período `Ainda não definido` **WHEN** abro o board **THEN** aparecem `Em grupo` e `Data pendente`, sem contar como organizadas temporalmente.
+- **GIVEN** 200 desejos **WHEN** entro via mobile **THEN** filtros/paginação limitam widgets renderizados, cada linha tem ação principal clara e detalhes só sob demanda.
+- **GIVEN** Colmar em wishlist, TripPlan e grupo datado **WHEN** consulto contadores **THEN** é um destino, uma visita e uma única ocupação temporal conforme definição canônica.
+- **GIVEN** usuário expande detalhes **WHEN** fecha e retorna após comparar cidades-base **THEN** o estado de pesquisa relevante é preservado, sem escrever TripPlan.
+
 ## Cenários Given / When / Then
 - **GIVEN** wishlist com 5 ou 6 destinos incluindo Obernai **WHEN** abro Meu planejamento **THEN** os interesses aparecem sem recadastro, há 0 visitas se TripPlan vazio, e nenhum commit.
 - **GIVEN** Colmar existe na wishlist e no TripPlan **WHEN** renderizo as duas superfícies **THEN** aparece uma única entrada por destino e os dois aspectos de estado são visíveis.
