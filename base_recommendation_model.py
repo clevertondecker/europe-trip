@@ -16,7 +16,7 @@ LIMITATION = ("Mínimos publicados de ida, evidências históricas/indicativas; 
 CRITERIA = {
     "complete": "Mesmo conjunto completo de trajetos e destinos locais; menor média ponderada de mínimos, empates incluídos.",
     "conditional": "Interseção explícita de trajetos conhecidos; sem extrapolar para toda a lista.",
-    "investigation": "Fronteira de cobertura documental: outra base só supera se documenta todos os mesmos trajetos e locais e acrescenta evidência.",
+    "investigation": "Fronteira de cobertura documental: outra base acrescenta evidência sem perder trajetos ou locais; em conjuntos idênticos, destacar menor mínimo ponderado no próprio subconjunto.",
 }
 def _weights(weights):
     result = dict(DEFAULT_WEIGHTS if weights is None else weights)
@@ -104,6 +104,7 @@ def evaluate_matrix(matrix, *, weights=None):
                                                      "destination_ids": sorted(known[b])},
                          "evidence": {d: deepcopy(cells[(b,d)]) for d in sorted(by_id)},
                          "local_only": bool(local[b]) and not known[b],
+                         "all_destinations_local": local[b] == scope_ids,
                          "reasons": [], "highlight": False, "highlight_kind": None}
     full_groups = defaultdict(list)
     minimum_common = 1 if len(by_id) == 1 else 2
@@ -136,6 +137,22 @@ def evaluate_matrix(matrix, *, weights=None):
             conditional_members.update((a,b))
     # Coverage set inclusion, not cross-denominator comparison or a composite score.
     # Separate known and local to avoid treating access pending as a train duration.
+    frontier = {b for b in bases if (known[b] or local[b]) and not any(
+        known[b] <= known[a] and local[b] <= local[a]
+        and (known[b] != known[a] or local[b] != local[a]) for a in bases if a != b)}
+    # When frontier candidates have the same documented set AND same local
+    # set, give a useful conditional reference highlight instead of alphabetic
+    # selection. Omitted mandatory destinations remain explicit; no global win.
+    equivalent_frontier = defaultdict(list)
+    for b in sorted(frontier - complete_members):
+        equivalent_frontier[(tuple(sorted(known[b])),tuple(sorted(local[b])))].append(b)
+    conditional_highlights = set()
+    for (ids,_), members in equivalent_frontier.items():
+        if len(members) >= 2 and len(ids) >= minimum_common:
+            comparison = _comparison(ids,members,cells,by_id,weights,local,False)
+            conditional_highlights.update(comparison["lowest_on_this_set"])
+        else:
+            conditional_highlights.update(members)
     for b,c in candidates.items():
         if b in complete_members:
             c["group"] = "comparable"
@@ -145,16 +162,17 @@ def evaluate_matrix(matrix, *, weights=None):
             c["group"] = "investigate"
         c["comparable"] = b in complete_members or b in conditional_members
         if known[b] or local[b]:
-            dominated = any(known[b] <= known[a] and local[b] <= local[a]
-                            and (known[b] != known[a] or local[b] != local[a]) for a in bases if a != b)
-            # Every non-dominated alternative remains a contextual research candidate.
             # No conditional time victory is promoted to an overall highlight.
-            if b not in complete_members and not dominated:
+            if b in conditional_highlights:
                 c["highlight"] = True
                 c["highlight_kind"] = ("individual_complete" if not missing[b] and known[b]
                                        else "local_investigation" if c["local_only"]
                                        else "conditional_investigation")
                 c["reasons"].append("fronteira_documental_do_escopo")
+                if len(known[b]) >= minimum_common and any(
+                        a != b and known[a] == known[b] and local[a] == local[b]
+                        for a in frontier):
+                    c["reasons"].append("menor_minimo_ponderado_no_mesmo_subconjunto")
             if not (must & missing[b]):
                 c["reasons"].append("imperdiveis_identificados")
             else:
