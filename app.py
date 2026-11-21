@@ -459,12 +459,12 @@ if (ux_area in ("Explorar","Orçamento") and
 
 # UX 6.4: three public areas with route IDs retained for saved workspaces.
 render_public_task_tabs()
-# Keep the original task widget in advanced mode for legacy deep links and
-# automation users. It shares the existing ux_section key and authoritative route.
-with st.expander("Atividades anteriores · avançado", expanded=False):
-    st.segmented_control("Atividade legada",list(UX_SECTIONS[ux_area]),
-                         key="ux_section",on_change=_ux_section_changed,
-                         selection_mode="single")
+# Preserve the original contract: home has no extra legacy task selector.
+if ux_area!="Minha viagem" or ux_section!="Resumo":
+    with st.expander("Atividades anteriores · avançado", expanded=False):
+        st.segmented_control("Atividade legada",list(UX_SECTIONS[ux_area]),
+                             key="ux_section",on_change=_ux_section_changed,
+                             selection_mode="single")
 if ux_area=="Meu roteiro" and ux_section=="Organizar viagem":
     st.segmented_control("Como organizar?",
                          ["Por período ou data","Calendário inteligente","Calendário completo"],
