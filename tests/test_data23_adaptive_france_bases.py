@@ -58,7 +58,7 @@ class DynamicBaseCatalogTests(unittest.TestCase):
         self.assertTrue(all(by_id[x]["route_return_verified"]==0 for x in REQUIRED_IDS))
 
     def test_photos_exist_for_every_attraction_and_are_credited(self):
-        self.assertEqual(len(self.data["attractions"]),8)
+        self.assertEqual(len(self.data["attractions"]),12)
         for a in self.data["attractions"]:
             with self.subTest(a=a["id"]):
                 photo=a["photo"]
@@ -71,7 +71,7 @@ class DynamicBaseCatalogTests(unittest.TestCase):
     def test_all_four_have_photos_and_multiple_sourced_rail_options(self):
         for city_id in REQUIRED_IDS:
             with self.subTest(city_id=city_id):
-                self.assertGreaterEqual(len(base_attractions(city_id)),2)
+                self.assertGreaterEqual(len(base_attractions(city_id)),3)
                 self.assertGreaterEqual(len(base_routes(city_id)),2)
                 self.assertTrue(all(a["availability_autumn_2027_verified"] is False
                                     for a in base_attractions(city_id)))
