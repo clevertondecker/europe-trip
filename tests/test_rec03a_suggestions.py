@@ -171,6 +171,7 @@ class RecommendationAppTests(unittest.TestCase):
 
     def test_data23_and_local_and_filter_preservation(self):
         a=self.make_app([("angers","must_visit"),("saint_malo","interested"),("paris","maybe")],"compare")
+        original_plan=deepcopy(a.session_state["advisor_plan"])
         self.click(a,"rec03a_confirm_all")
         self.assertEqual(a.session_state[SCOPE]["destination_ids"],["angers","paris","saint_malo"])
         a.text_input(key="rec03a_search").set_value("Angers")
@@ -180,7 +181,7 @@ class RecommendationAppTests(unittest.TestCase):
         a.radio(key="rec03a_activity_widget").set_value(SUGGESTED)
         self.run_ok(a)
         self.assertEqual(a.text_input(key="rec03a_search").value,"Angers")
-        self.assertEqual(a.session_state["advisor_plan"],new_plan())
+        self.assertEqual(a.session_state["advisor_plan"],original_plan)
         from base_recommendation_model import recommend_bases
         result=recommend_bases(a.session_state["ux502_interests"],a.session_state[SCOPE],discovery=self.discovery)
         angers=next(c for c in result["candidates"] if c["base_id"]=="angers")
@@ -197,7 +198,15 @@ class RecommendationAppTests(unittest.TestCase):
         self.run_ok(a)
         a.session_state["test_identity"]="other"
         self.run_ok(a)
-        self.assertIsNone(a.session_state[SCOPE])
+        self.assertNotIn(SCOPE,a.session_state.filtered_state)
+        self.assertNotIn(DRAFT,a.session_state.filtered_state)
+        self.assertEqual(a.session_state[ACTIVITY],MANUAL)
+        a.radio(key="rec03a_activity_widget").set_value(SUGGESTED)
+        with patch("rec03a_suggestions_ui.recommend_bases") as engine:
+            self.run_ok(a)
+            self.assertIsNone(a.session_state[SCOPE])
+            self.assertIsNotNone(a.button(key="rec03a_confirm_all"))
+            engine.assert_not_called()
 
 
 if __name__=="__main__":
