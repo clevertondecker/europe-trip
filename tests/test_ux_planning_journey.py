@@ -126,6 +126,28 @@ render_planning_journey(active_plan(),load_attractions())
             self.assertEqual(app.session_state["ux_section"],"Meu planejamento")
             self.assertTrue(any("Revisar e salvar meu rascunho" in x.value for x in app.markdown))
             self.assertTrue(any("Nuvem privada" in x.value for x in app.warning))
+        # Run the existing persistence adapter using only a mock store.
+        from unittest.mock import MagicMock
+        from private_continuity_store import StorageConflict
+        store=MagicMock()
+        store.save.side_effect=StorageConflict("conflito simulado")
+        with patch("continuity_ui._private_store",return_value=store):
+            app.run()
+            self.assertFalse(app.exception,str(app.exception))
+            app.button(key="ux75_private_save_now").click().run()
+            self.assertFalse(app.exception,str(app.exception))
+            self.assertTrue(app.session_state["ux36_cloud_status"].startswith("Conflito"))
+            self.assertEqual(app.session_state["advisor_plan"],current)
+            self.assertTrue(app.session_state["ux36_cloud_dirty"])
+            store.save.side_effect=None
+            store.save.return_value=123
+            app.button(key="ux75_private_save_now").click().run()
+            self.assertFalse(app.exception,str(app.exception))
+            self.assertEqual(app.session_state["ux36_cloud_status"],"Salvo em espaço privado")
+            self.assertFalse(app.session_state["ux36_cloud_dirty"])
+            self.assertEqual(app.session_state["advisor_plan"],current)
+            self.assertEqual(app.session_state["ux502_interests"],wishes)
+            self.assertEqual(store.save.call_count,2)
 
     def test_exploratory_only_and_stale_build_have_no_empty_form(self):
         from streamlit.testing.v1 import AppTest

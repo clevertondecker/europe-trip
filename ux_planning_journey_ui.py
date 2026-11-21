@@ -148,17 +148,23 @@ def _cancel_batch():
 
 def render_review(plan,catalog,view):
     from continuity_ui import render_primary_private_save,render_continuity_panel
+    from itinerary_flow_model import get_choice
     st.markdown("#### Revisar e salvar meu rascunho")
     st.caption(f'{plan["italy_days"]} dias de lua de mel · {plan["total_days"]-plan["italy_days"]} dias de temporada europeia · Base oficial de referência: {plan["base_city"]}. Nenhuma reserva confirmada.')
     if not view["rows"]:
         st.info("Nenhum destino incluído. Você pode manter sua lista de desejos sem inventar passeios.")
     for stage in STAGES:
-        st.markdown("**"+LABELS_STAGE[stage]+"**")
         rows=[r for r in view["rows"] if r["stage"]==stage]
+        st.markdown("**"+LABELS_STAGE[stage]+" · "+str(len(rows))+" destinos**")
         if rows:
-            st.dataframe([{"Destino":r["name"],"Atrações":len(r["attractions"]),
+            def attraction_names(row):
+                choice=get_choice(catalog,row["id"])
+                names={a["id"]:a["name"] for a in choice["attractions"]}
+                return ", ".join(names.get(a,a) for a in row["attractions"]) or "A definir"
+            st.dataframe([{"Destino":r["name"],"Atrações":attraction_names(r),
                            "Período":r["period"] if r["period"]!=UNASSIGNED else "A definir",
-                           "Datas":", ".join(r["exact_dates"]) or "A definir"}
+                           "Datas":", ".join(r["exact_dates"]) or "A definir",
+                           "Estado":"Organizado" if r["period"]!=UNASSIGNED or r["exact_dates"] else "Incluído · a organizar"}
                           for r in rows],hide_index=True,width="stretch")
         else:
             st.caption("Nenhum destino incluído nesta etapa.")
