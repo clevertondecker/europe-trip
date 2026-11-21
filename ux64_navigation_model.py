@@ -48,6 +48,12 @@ def select_public_task(state, area, task):
     if area not in PUBLIC_TASKS or task not in PUBLIC_TASKS[area]:
         raise ValueError("Área/atividade desconhecida")
     from ux_navigation import set_task
+    if area=="Explorar" and task in ("Descobrir","Minha lista"):
+        filters=dict(state.get("ux502_discovery_filters",{}))
+        filters.update({key:state[key] for key in
+                        ("ux501_country","ux501_categories","ux501_search","ux501_page")
+                        if key in state})
+        state["ux502_discovery_filters"]=filters
     target_area,target_section=TARGETS[(area,task)]
     set_task(state,target_area,target_section)
     if (area,task)==("Explorar","Minha lista"):
