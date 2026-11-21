@@ -25,6 +25,8 @@ from ux501_destination_discovery_ui import render_independent_destination_discov
 from ux503_destination_base_comparison_ui import render_wishlist_base_comparison
 from travel_advisor_ui import render_advisor, _recover_saved_plan, _secure_save, _owner_signed_in
 from sidebar_account_ui import render_sidebar_account
+from ux64_navigation_model import public_area, select_public_area
+from ux64_navigation_ui import render_public_task_tabs
 from travel_dashboard_ui import render_trip_dashboard
 from itinerary_flow_ui import render_itinerary_workbench
 from smart_calendar_ui import render_smart_calendar
@@ -251,10 +253,18 @@ def _ux_area_changed() -> None:
     st.session_state.pop("flow_edit_target",None)
     set_ux_area(st.session_state,st.session_state["ux_area"])
 
+def _ux64_legacy_sidebar_clicked(area: str) -> None:
+    # Original indexed controls remain reachable in advanced navigation.
+    st.session_state.pop("ux45_origin", None)
+    st.session_state.pop("flow_edit_target", None)
+    set_ux_area(st.session_state, area)
+
+
 def _ux_sidebar_button_clicked(area: str) -> None:
-    """Native navigation buttons reuse the existing ux_area router and callback."""
-    st.session_state["ux_area"] = area
-    _ux_area_changed()
+    """Public navigation uses the preexisting legacy router, not a second plan."""
+    st.session_state.pop("ux45_origin",None)
+    st.session_state.pop("flow_edit_target",None)
+    select_public_area(st.session_state,area)
 
 
 def _ux_section_changed() -> None:
@@ -341,15 +351,14 @@ with st.sidebar:
     # visible active state without relying on Streamlit radio DOM internals.
     # UX_AREAS and ux_area remain the only navigation source of truth.
     sidebar_items = (
-        ("Minha viagem", "Minha viagem", ":material/home:"),
-        ("Explorar", "Explorar destinos", ":material/explore:"),
-        ("Meu roteiro", "Meu roteiro", ":material/calendar_month:"),
+        ("Explorar", "Explorar", ":material/explore:"),
+        ("Planejar", "Planejar", ":material/calendar_month:"),
         ("Orçamento", "Orçamento", ":material/account_balance_wallet:"),
     )
     with st.container(gap="xxsmall"):
         for index, (area, label, icon) in enumerate(sidebar_items):
-            selected = st.session_state["ux_area"] == area
-            st.button(label, key=f"ux_sidebar_nav_{index}",
+            selected = public_area(st.session_state["ux_area"]) == area
+            st.button(label, key=f"ux64_sidebar_nav_{index}",
                       type="primary" if selected else "secondary",
                       icon=icon, width="stretch",
                       help=("Seção atual: " if selected else "Abrir seção: ") + label,
@@ -415,6 +424,11 @@ with st.sidebar:
         st.radio("Acesso à navegação anterior", list(LEGACY_PAGES),
                  key="main_navigation", on_change=_ux_legacy_page_changed)
         st.caption("Acesso avançado às pesquisas e ferramentas anteriores.")
+        # Compatibility: old indexed controls still work, but are not top-level tabs.
+        for old_index,old_area in enumerate(("Minha viagem","Explorar",
+                                             "Meu roteiro","Orçamento")):
+            st.button("Abrir "+old_area,key=f"ux_sidebar_nav_{old_index}",
+                      on_click=_ux64_legacy_sidebar_clicked,args=(old_area,))
     st.caption("ⓘ Planejamento em andamento")
 
 # One configuration/comparison entrypoint. The TripPlan is the only official
@@ -446,18 +460,14 @@ if (ux_area in ("Explorar","Orçamento") and
                       city=st.session_state.get("flow_return_city"),
                       show_return=True)
 
-# Three itinerary activities. Specialist tools stay available contextually.
+# UX 6.4: three public areas with route IDs retained for saved workspaces.
+render_public_task_tabs()
+# Preserve the original contract: home has no extra legacy task selector.
 if ux_area!="Minha viagem" or ux_section!="Resumo":
-    st.segmented_control("Atividade" if ux_area=="Meu roteiro" else "Área: "+ux_area,
-                         list(UX_SECTIONS[ux_area]),
-                         key="ux_section",on_change=_ux_section_changed,
-                         format_func=(lambda value: {
-                             "Passeios":"Descobrir lugares / Minha lista",
-                             "Comparar":"Comparar cidades-base",
-                             "Cidades-base":"Pesquisas avançadas",
-                             "Mapa":"Mapa",
-                         }.get(value,value)) if ux_area=="Explorar" else None,
-                         selection_mode="single")
+    with st.expander("Atividades anteriores · avançado", expanded=False):
+        st.segmented_control("Atividade legada",list(UX_SECTIONS[ux_area]),
+                             key="ux_section",on_change=_ux_section_changed,
+                             selection_mode="single")
 if ux_area=="Meu roteiro" and ux_section=="Organizar viagem":
     st.segmented_control("Como organizar?",
                          ["Por período ou data","Calendário inteligente","Calendário completo"],

@@ -56,6 +56,11 @@ def validate_continuation(context:dict,plan:dict,catalog:dict)->dict:
         "calendar_stage":context.get("calendar_stage","Itália"),
     }
     area=values["area"];section=values["section"]
+    # Accept both old persisted routes and new public task names before validation.
+    from ux64_navigation_model import TARGETS
+    if (area,section) in TARGETS:
+        values["area"],values["section"]=TARGETS[(area,section)]
+        area,section=values["area"],values["section"]
     if area not in AREAS or section not in SECTIONS[area]:
         raise ValueError("Área ou tarefa do contexto não existe mais")
     if values["stage"] not in ("Itália","França") or values["calendar_stage"] not in ("Itália","França"):
