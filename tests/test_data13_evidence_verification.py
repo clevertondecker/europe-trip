@@ -23,13 +23,13 @@ class Data13EvidenceVerificationTests(unittest.TestCase):
     def test_full_manifest_is_explicit_and_unverified_are_not_displayed(self):
         displayed, audit=vetted_overlay_by_pair(self.records,MANIFEST)
         self.assertEqual(audit["research_rows"],377)
-        self.assertEqual(audit["verified_displayable"],376)
+        self.assertEqual(audit["verified_displayable"],377)
         self.assertEqual(audit["pending_source_review"],0)
         self.assertEqual(displayed[("aachen","lille")]["minimum_oneway_min"],134)
         self.assertEqual(len(displayed),len(self.records))
         actual=load_data13()
-        self.assertEqual(len(actual["records"]),376)
-        self.assertEqual(len(actual["by_pair"]),376)
+        self.assertEqual(len(actual["records"]),377)
+        self.assertEqual(len(actual["by_pair"]),377)
 
     def test_data15_batch1_source_verified_directional_minima(self):
         import csv
