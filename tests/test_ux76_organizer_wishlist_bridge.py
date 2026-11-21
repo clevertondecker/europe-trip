@@ -96,6 +96,23 @@ class OrganizerIntegrationSmokeTests(WishlistOrganizerBridgeTests):
                                   key="flow_wishlist_confirm_França")
 
     @patch("ux61_destination_board_ui._discovery")
+    @patch("itinerary_flow_ui.st")
+    def test_removed_wishlist_entry_clears_stale_widget_selection(self, st, discovery):
+        from itinerary_flow_ui import _render_organizer_wishlist
+        discovery.return_value=self.discovery
+        st.session_state={
+            "ux502_interests":self.wishes,
+            "flow_wishlist_to_plan_França":"no-longer-eligible",
+        }
+        st.selectbox.return_value="colmar"
+        st.button.return_value=False
+        _render_organizer_wishlist(self.plan,self.catalog,FRANCE_STAGE)
+        self.assertNotIn("flow_wishlist_to_plan_França",st.session_state)
+        st.selectbox.assert_called_once()
+        self.assertEqual(st.selectbox.call_args.kwargs["key"],
+                         "flow_wishlist_to_plan_França")
+
+    @patch("ux61_destination_board_ui._discovery")
     @patch("itinerary_flow_ui.commit_outing")
     @patch("itinerary_flow_ui.st")
     def test_organizer_promotes_only_after_explicit_click(self, st, commit, discovery):
