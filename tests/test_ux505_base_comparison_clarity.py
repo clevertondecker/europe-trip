@@ -76,9 +76,9 @@ class InterpretiveComparisonTests(TestCase):
         self.assertEqual(matrix_cell(result["rows"][0]),"35 min · ida histórica")
         self.assertEqual(matrix_cell(result["rows"][1]),"Local — acesso a verificar")
         self.assertEqual(matrix_cell(result["rows"][2]),
-                         "Pesquisa parcial · tempo não identificado · fontes divergentes")
+                         "Pesquisa parcial · tempo não identificado · tempos publicados diferentes")
         self.assertEqual(matrix_cell(result["rows"][3]),"Tempo não pesquisado")
-        self.assertIn("tempos divergentes"," ".join(missing_research(result)))
+        self.assertIn("tempos publicados diferentes"," ".join(missing_research(result)))
         self.assertIn("acesso local"," ".join(missing_research(result)).lower())
 
     def test_findings_describe_observations_without_electing_base(self):
@@ -154,7 +154,7 @@ class ComparisonPresentationAppTests(TestCase):
                         if "Destino · prioridade" in f.value.columns)
             cells=" ".join(str(x) for x in matrix.to_numpy().flatten())
             self.assertIn("Local — acesso a verificar",cells)
-            self.assertIn("fontes divergentes",cells)
+            self.assertIn("tempos publicados diferentes",cells)
             self.assertIn("Tempo não pesquisado",cells)
             self.assertEqual(app.session_state["advisor_plan"],plan)
             self.assertEqual(app.session_state["ux502_interests"],wishes)
