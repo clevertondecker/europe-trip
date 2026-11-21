@@ -239,7 +239,7 @@ def decorate_comparison(result, *, references=None, gap_overlay=None,
             category = "historical"
             label = f'{format_minutes(evidence["display_min"])} · histórico'
             if row.get("divergent_sources"):
-                label += " · fontes divergentes"
+                label += " · tempos publicados diferentes"
             if evidence.get("reference_differs_from_legacy"):
                 label += " · outra referência indicativa"
         elif basis == "gap_reference":
@@ -310,6 +310,8 @@ def decorate_comparison(result, *, references=None, gap_overlay=None,
             "category": category, "label": label, "typical_label": average_label,
             "historical_source_url": row["source_url"],
             "legacy_divergent_sources": bool(row.get("divergent_sources")),
+            "variation_status": row.get("variation_status", "conditions_unresolved" if row.get("divergent_sources") else "not_observed"),
+            "contradiction_confirmed": False,
             "gap_applied": basis == "gap_reference",
             "connectivity_applied": basis == "data10_reference",
             "priority_connectivity_applied": basis == "data11_reference",

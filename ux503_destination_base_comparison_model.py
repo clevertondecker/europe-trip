@@ -12,6 +12,7 @@ from ux502_destination_interests_model import (
 from evidence_query_model import get_rail_evidence
 from rail_evidence_unified_model import load_rail_evidence
 from base_explorer_model import load_exploration
+from rail_pair_projection_model import pair_projection_row
 
 MISSING = ("Retorno de fim de semana não confirmado",
            "Acesso urbano e última milha a verificar")
@@ -20,14 +21,30 @@ MISSING = ("Retorno de fim de semana não confirmado",
 def compare_wishlist_bases(interests: dict, base_ids: list[str], *,
                            discovery=None, research=None, rail=None, exploration=None,
                            visible_destination_ids=None) -> dict:
-    """Compare exactly the same active wishlist across 2–5 researched bases."""
+    """Manual comparison keeps its public two-to-five base contract."""
+    if not isinstance(base_ids, list) or not 2 <= len(base_ids) <= 5:
+        raise ValueError("Selecione de 2 a 5 cidades-base pesquisadas, sem duplicações")
+    return build_wishlist_matrix(
+        interests, base_ids, discovery=discovery, research=research, rail=rail,
+        exploration=exploration, visible_destination_ids=visible_destination_ids)
+
+
+def build_wishlist_matrix(interests: dict, base_ids: list[str], *,
+                          discovery=None, research=None, rail=None, exploration=None,
+                          visible_destination_ids=None) -> dict:
+    """Read-only historical matrix for any nonempty distinct candidate set.
+
+    The manual UI limit belongs to compare_wishlist_bases, not this projection.
+    The default discovery remains legacy-compatible; callers provide an explicit
+    exploratory catalog when evaluating supplemental destinations.
+    """
     discovery = discovery if discovery is not None else build_destination_discovery()
     research = research if research is not None else load_research(include_candidates=True)
     cities = {row["id"]: row for row in research["cities"]}
-    if (not isinstance(base_ids, list) or not 2 <= len(base_ids) <= 5
+    if (not isinstance(base_ids, list) or not base_ids
             or any(not isinstance(x, str) or x not in cities for x in base_ids)
             or len(base_ids) != len(set(base_ids))):
-        raise ValueError("Selecione de 2 a 5 cidades-base pesquisadas, sem duplicações")
+        raise ValueError("Selecione cidades-base pesquisadas, sem duplicações")
     ordered = ordered_interests(interests, discovery)
     active = selected_destinations_for_comparison(interests, discovery)
     names = {x["id"]: x for x in discovery["destinations"]}
@@ -59,10 +76,8 @@ def compare_wishlist_bases(interests: dict, base_ids: list[str], *,
             evidence = get_rail_evidence(
                 base_id, destination["id"], rail=rail, exploration=exploration)
             observations = evidence["observations"]
-            times = {r.get("minimum_oneway_min") for r in observations
-                     if type(r.get("minimum_oneway_min")) is int and
-                     r["minimum_oneway_min"] > 0}
-            divergent = len(times) > 1
+            projection_row = pair_projection_row(base_id, destination["id"], evidence)
+            divergent = projection_row["divergent_sources"]
             if evidence["status"] == "local":
                 local += 1
                 status = "Local — acesso a verificar"
@@ -91,6 +106,8 @@ def compare_wishlist_bases(interests: dict, base_ids: list[str], *,
                 "return_weekend_verified":False,
                 "local_access_verified":False,
                 "observations":deepcopy(observations),"divergent_sources":divergent,
+                "variation_status":projection_row["variation_status"],
+                "contradiction_confirmed":False,
                 "research_gaps":list(MISSING) if evidence["status"] != "local"
                                  else ["Acesso local, transporte urbano e última milha a verificar"],
             })
@@ -101,7 +118,7 @@ def compare_wishlist_bases(interests: dict, base_ids: list[str], *,
         if local:
             pending.append(f"Verificar acesso urbano em {local} destino(s) locais")
         if conflicts:
-            pending.append(f"Reconciliar fontes divergentes em {conflicts} rota(s)")
+            pending.append(f"Conferir condições de observações com tempos diferentes em {conflicts} rota(s)")
         pending += ["Confirmar retorno de fim de semana e última milha",
                     "Confirmar moradia mobiliada para as datas de 2027"]
         summaries.append({

@@ -72,6 +72,23 @@ class MacroOpportunityTests(unittest.TestCase):
         self.assertIsNone(brussels["full_trip_cost_eur"])
         self.assertIsNone(brussels["walk_between_attractions_m"])
 
+    def test_strasbourg_colmar_matches_manual_evidence_without_contradiction_claim(self):
+        from ux501_destination_discovery_model import build_destination_discovery
+        from ux502_destination_interests_model import empty_interests, set_interest
+        from ux503_destination_base_comparison_model import compare_wishlist_bases
+        from rail_reference_projection_model import decorate_comparison
+        discovery = build_destination_discovery()
+        wishes = set_interest(empty_interests(), "colmar", "must_visit", discovery)
+        comparison = decorate_comparison(compare_wishlist_bases(
+            wishes, ["strasbourg", "metz"], discovery=discovery))
+        cell = comparison["cells"][("strasbourg", "colmar")]
+        row = next(x for x in self.get("strasbourg")["destinations"]
+                   if x["destination_id"] == "colmar")
+        self.assertEqual(row["minimum_train_oneway_min"], cell["display_min"])
+        self.assertEqual(row["rail_variation_status"], cell["variation_status"])
+        self.assertFalse(row["rail_contradiction_confirmed"])
+        self.assertFalse(row["weekend_return_verified"])
+
     def test_missing_time_is_unknown_not_impossible(self):
         city=self.get("freiburg")
         self.assertTrue(city["unresearched_destinations"])

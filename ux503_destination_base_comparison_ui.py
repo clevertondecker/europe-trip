@@ -304,8 +304,8 @@ def render_wishlist_base_comparison(*, plan, discovery=None, research=None):
                                str(route["source_date"] or "Data desconhecida"))
                     st.caption("Retorno de fim de semana e última milha: não confirmados.")
                     if route["divergent_sources"]:
-                        st.warning("O histórico contém serviços/observações divergentes. "
-                                   "Consultar as condições antes de comparar.")
+                        st.caption("Há tempos publicados diferentes; podem representar serviços ou datas distintos. "
+                                   "As condições não permitem concluir contradição.")
                     historical_url = item.get("historical_source_url")
                     reference_url = item.get("reference_source_url")
                     if historical_url:
