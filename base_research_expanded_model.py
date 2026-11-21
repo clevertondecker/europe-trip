@@ -25,11 +25,11 @@ COUNTRY_FLAGS={"França":"🇫🇷","Alemanha":"🇩🇪","Bélgica":"🇧🇪",
                "Luxemburgo":"🇱🇺"}
 
 
-def load_research(path:Path=DATA)->dict:
+def load_research(path:Path=DATA, *, include_candidates:bool=False)->dict:
     data=json.loads(path.read_text(encoding="utf-8"))
     # Keep the historical 30-city snapshot immutable. Current default research
     # view overlays newer, independently sourced candidate batches.
-    if Path(path).resolve()==DATA.resolve():
+    if include_candidates and Path(path).resolve()==DATA.resolve():
         from data23_france_candidates_model import candidate_bases
         data["cities"].extend(candidate_bases())
     cities=data["cities"]
