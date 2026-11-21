@@ -22,7 +22,10 @@ from calendar_model import calendar_plan
 from route_preview import route_endpoints
 from attractions_ui import render_explorer
 from ux501_destination_discovery_ui import render_independent_destination_discovery
-from ux503_destination_base_comparison_ui import render_wishlist_base_comparison
+from rec03a_suggestions_ui import render_recommendation_activity
+from rec03a_session import apply_navigation as apply_recommendation_navigation, sync_identity, identity_token, SUGGESTED
+from sidebar_account_ui import account_view_state, _logged_in_user
+from travel_advisor_ui import _owner_config
 from travel_advisor_ui import render_advisor, _recover_saved_plan, _secure_save, _owner_signed_in
 from sidebar_account_ui import render_sidebar_account
 from ux64_navigation_model import public_area, select_public_area
@@ -77,7 +80,11 @@ if restored_days is not None:
     st.session_state["ux_days"]=max(40,min(80,int(restored_days)))
     st.session_state["unified_stay"]=st.session_state["ux_days"]
 bootstrap_ux(st.session_state)
+_rec_config = _owner_config()
+_rec_user = (_logged_in_user() if _rec_config.get('google_configured') and _rec_config.get('owner_email') else None)
+sync_identity(st.session_state, identity_token(account_view_state(_rec_config, _rec_user), _rec_user))
 apply_navigation_request(st.session_state)
+apply_recommendation_navigation(st.session_state)
 if st.session_state.pop("ux503_pending_return_to_wishlist", False):
     set_ux_task(st.session_state, "Explorar", "Passeios")
     st.session_state["ux502_view"] = "Minha lista"
@@ -758,7 +765,7 @@ elif page == "Mapa & destinos":
 
 elif page == "Comparar cidades":
     st.markdown("## Comparar cidades-base")
-    render_wishlist_base_comparison(plan=active_plan())
+    _rec_activity = render_recommendation_activity(plan=active_plan())
     render_contextual_shortcuts("comparison")
     with st.expander("Análises antigas de cidades-base · avançado", expanded=False):
         st.caption("Ferramentas anteriores preservadas para consultas adicionais.")
