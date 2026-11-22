@@ -82,7 +82,7 @@ if st.session_state.pop("ux503_pending_return_to_wishlist", False):
     set_ux_task(st.session_state, "Explorar", "Passeios")
     st.session_state["ux502_view"] = "Minha lista"
 # One global exploratory base, separate from the approved TripPlan.
-_all_bases=base_options()
+_all_bases=base_options(include_candidates=True)
 _base_details={item["id"]:item for item in _all_bases}
 _candidate=st.session_state.get("scenario_base_selected",active_plan()["base_city"])
 if _candidate not in _base_details:
@@ -224,7 +224,7 @@ def navigate_to_consultor() -> None:
 def simulate_city_in_budget(city_name: str) -> None:
     """Carry a hypothetical base to the finance page, without approving D-004."""
     st.session_state["unified_city"] = city_name
-    candidates={x["name"]:x["id"] for x in base_options()}
+    candidates={x["name"]:x["id"] for x in base_options(include_candidates=True)}
     if city_name in candidates:
         st.session_state["scenario_base_selected"]=candidates[city_name]
     st.session_state["unified_override_rent"] = True
@@ -782,7 +782,7 @@ elif page == "Comparar cidades":
 
             import pandas as pd
             city_data = load_cities()
-            all_exploratory_bases=base_options()
+            all_exploratory_bases=base_options(include_candidates=True)
             compare_names={item["id"]:item["name"] for item in all_exploratory_bases}
             current_candidate=st.session_state.get("scenario_base_selected",active_plan()["base_city"])
             if current_candidate not in compare_names:
