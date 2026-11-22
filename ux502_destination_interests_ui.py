@@ -229,6 +229,11 @@ def render_wishlist(discovery) -> bool:
         # The manual comparator is still reachable from advanced navigation.
         st.button("Comparar cidades-base", key="rec03a_open_from_wishlist",
                   on_click=request_navigation,args=(st.session_state,"suggestions"))
+        # Historic UX503 journeys and deep links remain available on demand,
+        # not as a second competing action in the main wishlist.
+        with st.expander("Comparação personalizada anterior · avançado"):
+            st.button("Abrir comparação personalizada",key="ux503_open_from_wishlist",
+                      on_click=request_navigation,args=(st.session_state,"manual"))
 
     if not items:
         st.info("Nenhum destino na lista. Use Descobrir lugares para adicionar.")
