@@ -187,12 +187,24 @@ class PrivateWishlistPersistenceTests(unittest.TestCase):
         app.session_state["ux502_interests"]=deepcopy(self.interests)
         fake=Mock()
         fake.save.side_effect=StorageConflict("stale")
-        with patch.object(continuity_ui,"_private_store",return_value=fake):
+        with patch.object(continuity_ui,"_private_store",return_value=fake), \
+             patch("ux502_destination_interests_ui.st.download_button") as download, \
+             patch("ux502_destination_interests_ui.st.file_uploader") as upload:
             app.run()
+            # Check rendered controls, not just session keys.
+            self.assertFalse(any(c.kwargs.get("key")=="ux502_download"
+                                 for c in download.call_args_list))
+            self.assertFalse(any(c.kwargs.get("key")=="ux502_upload"
+                                 for c in upload.call_args_list))
             self.assertFalse(any("Lista salva no armazenamento privado" in x.value for x in app.success))
             app.button(key="ux502_cloud_save").click().run()
         self.assertFalse(any("Lista salva no armazenamento privado" in x.value for x in app.success))
         self.assertTrue(app.session_state.get("ux36_cloud_dirty",False))
+        with patch.object(continuity_ui,"_private_store",return_value=fake), \
+             patch("ux502_destination_interests_ui.st.download_button") as download:
+            app.run()
+            self.assertTrue(any(c.kwargs.get("key")=="ux502_download"
+                                for c in download.call_args_list))
         fake.save.side_effect=None
         fake.save.return_value=8
         with patch.object(continuity_ui,"_private_store",return_value=fake):
@@ -201,6 +213,39 @@ class PrivateWishlistPersistenceTests(unittest.TestCase):
         self.assertEqual(app.session_state["ux502_private_saved_revision"],self.interests["revision"])
         self.assertFalse(app.session_state["ux36_cloud_dirty"])
         self.assertEqual(app.session_state["ux502_status"], "Salvo no armazenamento privado")
+
+
+    def test_local_export_is_reachable_when_store_unavailable(self):
+        from unittest.mock import patch
+        import continuity_ui
+        app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
+        app.button(key="ux_sidebar_nav_1").click().run()
+        app.segmented_control(key="ux_section").set_value("Passeios").run()
+        app.session_state["ux502_interests"]=deepcopy(self.interests)
+        with patch.object(continuity_ui,"_private_store",return_value=None), \
+             patch("ux502_destination_interests_ui.st.download_button") as download:
+            app.run()
+            self.assertFalse(app.exception,[x.message for x in app.exception])
+            self.assertTrue(any(c.kwargs.get("key")=="ux502_download"
+                                for c in download.call_args_list))
+
+    def test_legacy_wishlist_import_is_available_on_demand(self):
+        from unittest.mock import Mock,patch
+        import continuity_ui
+        app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
+        app.button(key="ux_sidebar_nav_1").click().run()
+        app.segmented_control(key="ux_section").set_value("Passeios").run()
+        app.session_state["ux502_interests"]=deepcopy(self.interests)
+        store=Mock()
+        with patch.object(continuity_ui,"_private_store",return_value=store):
+            app.run()
+            self.assertFalse(app.exception,[x.message for x in app.exception])
+            with patch("ux502_destination_interests_ui.st.file_uploader") as uploader:
+                app.checkbox(key="ux502_legacy_import_open").check().run()
+                self.assertFalse(app.exception,[x.message for x in app.exception])
+                self.assertTrue(any(c.kwargs.get("key")=="ux502_upload"
+                                    for c in uploader.call_args_list))
+            self.assertTrue(app.session_state["ux502_legacy_import_open"])
 
 
 if __name__=="__main__":
