@@ -14,8 +14,7 @@ class HomeContextTests(unittest.TestCase):
         self.assertNotIn("scenario_sidebar",{x.key for x in at.selectbox})
         self.assertNotIn("ux_days",{x.key for x in at.number_input})
         self.assertNotIn("ux_mode",{x.key for x in at.segmented_control})
-        # Legacy task selector remains in collapsed sidebar tools, not the public header.
-        self.assertIn("ux_section",{x.key for x in at.segmented_control})
+        self.assertNotIn("ux_section",{x.key for x in at.segmented_control})
         self.assertIn("home_continue_bases",{x.key for x in at.button})
         visible=" ".join(x.value for x in at.caption)
         self.assertIn("Roteiro oficial",visible)
