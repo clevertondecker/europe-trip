@@ -532,3 +532,122 @@ padding:17px 20px;margin:0 0 10px;}
   aspect-ratio: 16 / 9;
   object-fit: cover;
 }
+
+
+/* Journey UI redesign: intentionally scoped to planning components. The
+   host controls remain native Streamlit widgets with keyboard/focus semantics. */
+.journey-header {
+  display:flex;align-items:center;justify-content:space-between;gap:20px;
+  padding:clamp(20px,3vw,30px);margin:8px 0 18px;
+  border:1px solid #DFE9ED;border-radius:21px;
+  background:linear-gradient(110deg,#F0F7F8 0%,#FAFCFE 78%);
+}
+.journey-header__eyebrow {
+  font-size:.69rem;letter-spacing:.13em;font-weight:800;color:#387C82;
+}
+.journey-header h1 {
+  font-family:'Playfair Display',Georgia,serif !important;
+  font-size:clamp(1.9rem,3vw,2.65rem) !important;
+  line-height:1.14;margin:9px 0 8px;color:var(--ui-heading) !important;
+}
+.journey-header__save {margin:0;color:#536E7B;font-size:.87rem;line-height:1.6;}
+.journey-header__dot {display:inline-block;width:7px;height:7px;background:#2E7668;
+  border-radius:100%;margin-right:9px;vertical-align:middle;}
+.journey-header__tag {font-size:.77rem;font-weight:700;color:#3A6C73;
+  padding:9px 14px;border:1px solid #CEE0E4;background:#FFF;border-radius:30px;
+  white-space:nowrap;}
+.journey-stat {
+  display:flex;gap:16px;align-items:center;min-height:136px;padding:19px 21px;
+  border:1px solid #DFE8EC;border-radius:16px;background:#FFF;
+  box-shadow:0 5px 18px rgba(18,52,63,.035);margin-bottom:8px;
+}
+.journey-stat--highlight {
+  background:linear-gradient(145deg,#E7F5FA,#F5FCFF);
+  border-color:#62A9C2;box-shadow:0 6px 18px rgba(20,102,138,.08);
+}
+.journey-stat__icon {display:grid;place-items:center;flex:0 0 45px;height:45px;
+  border-radius:13px;background:#EAF1F2;color:#19526A;font-size:1.65rem;}
+.journey-stat--highlight .journey-stat__icon {background:#CDEAF3;}
+.journey-stat__content {display:flex;flex-direction:column;gap:3px;min-width:0;}
+.journey-stat__label {font-size:.84rem;color:#436372;font-weight:750;}
+.journey-stat__value {font-size:2.1rem;line-height:1.1;letter-spacing:-.04em;color:#173D50;}
+.journey-stat small {font-size:.75rem;color:#6A7E87;}
+[class*="st-key-flow_journey_next"] {
+  border-radius:20px;padding:clamp(22px,3.3vw,38px);
+  margin:10px 0 24px;color:#FFF;overflow:hidden;
+  background:radial-gradient(circle at 98% 0%,rgba(85,184,197,.23),transparent 37%),
+    linear-gradient(115deg,#153F51 0%,#17647A 100%);
+  box-shadow:0 11px 25px rgba(19,65,82,.12);
+}
+.journey-next__content {max-width:820px;}
+.journey-next__eyebrow {display:block;color:#BCE8E7;font-weight:800;
+  letter-spacing:.11em;font-size:.75rem;margin-bottom:11px;}
+.journey-next__content h2 {font-family:'DM Sans',system-ui,sans-serif !important;
+  color:#FFF !important;font-size:clamp(1.22rem,2.3vw,1.75rem) !important;
+  line-height:1.32;font-weight:750;margin:0 0 8px;}
+.journey-next__content p {color:#E3F1F3;font-size:.94rem;line-height:1.55;margin:0 0 13px;}
+[class*="st-key-flow_journey_next"] [data-testid="stCaptionContainer"] {color:#E3F1F3 !important;}
+[class*="st-key-flow_journey_next"] [data-testid="stButton"] button {
+  background:#FFF !important;color:#15516B !important;border:1px solid #FFF !important;
+  min-height:45px;font-weight:800 !important;border-radius:10px !important;
+}
+[class*="st-key-flow_journey_next"] [data-testid="stButton"] button:hover {
+  background:#E4F5FA !important;color:#103D53 !important;
+}
+.journey-next__anchor {display:inline-block;padding:10px 17px;border-radius:10px;
+  background:#FFF;color:#15516B !important;text-decoration:none !important;
+  font-weight:800;min-height:44px;line-height:24px;}
+.journey-next__anchor:hover {background:#E4F5FA;}
+.journey-next__anchor:focus-visible {outline:3px solid #D6F6FB;outline-offset:3px;}
+.journey-section-title {margin:17px 0 17px;}
+.journey-section-title>span {font-size:.69rem;font-weight:800;color:#358078;
+  letter-spacing:.13em;}
+.journey-section-title h2 {font-family:'Playfair Display',Georgia,serif !important;
+  font-size:clamp(1.45rem,2.2vw,1.85rem) !important;color:var(--ui-heading) !important;
+  margin:4px 0;}
+.journey-section-title p {color:#657B86;font-size:.89rem;margin:0;}
+[class*="st-key-flow_journey_step_card_"] {
+  border:1px solid #E0E8EC;background:#FFF;border-radius:14px;
+  padding:13px 16px;margin:0 0 9px;box-shadow:0 4px 14px rgba(21,54,64,.028);
+}
+[class*="st-key-flow_journey_step_card_active_"] {
+  border-color:#8AC6DB;background:linear-gradient(95deg,#EAF7FB,#F8FCFE);
+  box-shadow:0 5px 18px rgba(20,110,146,.065);
+}
+.journey-step {display:flex;align-items:center;gap:15px;min-width:0;}
+.journey-step__number {display:grid;place-items:center;flex:0 0 36px;height:36px;
+  border-radius:100%;background:#EDF1F3;border:1px solid #D7E0E5;
+  color:#4C6571;font-weight:800;}
+[class*="st-key-flow_journey_step_card_active_"] .journey-step__number {
+  background:#176B80;color:#FFF;border-color:#176B80;
+}
+.journey-step__copy {display:flex;flex-direction:column;gap:3px;min-width:0;}
+.journey-step__copy strong {font-size:.99rem;color:#193E50;line-height:1.35;}
+.journey-step__copy small {font-size:.79rem;color:#5F7885;overflow-wrap:anywhere;}
+.journey-step__status {font-size:.73rem;color:#58727B;font-weight:700;}
+[class*="st-key-flow_journey_step_card_active_"] .journey-step__status {color:#176B80;}
+[class*="st-key-flow_journey_step_card_"] [data-testid="stButton"] button {
+  min-height:43px;border-radius:10px !important;font-weight:700;
+}
+[class*="st-key-flow_journey_step_card_active_"] [data-testid="stButton"] button {
+  background:#17647A;color:#FFF;border-color:#17647A;
+}
+[class*="st-key-flow_journey_step_card_active_"] [data-testid="stButton"] button:hover {
+  background:#124C60;color:#FFF;
+}
+@media (max-width: 780px) {
+  .journey-header {align-items:flex-start;flex-direction:column;}
+  .journey-header__tag {white-space:normal;}
+  .journey-stat {min-height:115px;padding:14px;gap:10px;}
+  .journey-stat__icon {flex-basis:38px;height:38px;font-size:1.3rem;}
+  .journey-stat__value {font-size:1.7rem;}
+}
+@media (max-width: 680px) {
+  .journey-header {margin-bottom:12px;padding:18px;}
+  .journey-header__save {overflow-wrap:anywhere;}
+  .journey-stat {min-height:0;margin-bottom:4px;}
+  [class*="st-key-flow_journey_next"] {padding:21px 18px;margin:8px 0 18px;}
+  .journey-next__content h2 {font-size:1.23rem !important;}
+  [class*="st-key-flow_journey_step_card_"] {padding:13px 14px;}
+  [class*="st-key-flow_journey_step_card_"] [data-testid="stButton"] button {width:100%;}
+}

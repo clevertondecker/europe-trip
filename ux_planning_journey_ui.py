@@ -7,6 +7,9 @@ from planning_session import active_plan, commit_undated_destinations
 from ux502_destination_interests_model import empty_interests, LABELS
 from ux61_destination_board_ui import _discovery
 from ux_planning_journey_model import project_planning, clear_planning_context
+from ux_planning_journey_presentation import (
+    project_visual_state, header_html, metric_html, next_html, step_html,
+)
 
 VIEW="flow_journey_view"
 STAGES=(ITALY_STAGE,FRANCE_STAGE)
@@ -203,13 +206,7 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
         st.error("A lista precisa de revisão. Seu roteiro foi preservado.")
         st.button("Abrir minha lista",key="flow_journey_invalid",on_click=_choose)
         return
-    st.markdown("## Meu roteiro")
-    st.caption(label+" · "+hint)
     counts=view["counts"]
-    a,b,c=st.columns(3)
-    a.metric("Desejados",counts["wished"])
-    b.metric("Incluídos",counts["planned"])
-    c.metric("Organizados",counts["organized"])
     state=st.session_state
     # Prevent stale bulk selections when an account or restored plan changes.
     identity=(state.get("rec03a_identity"),plan["plan_id"])
@@ -223,6 +220,11 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
         state[VIEW]="organize"
     if state.get(VIEW)=="build" and not view["eligible_count"]:
         state[VIEW]="review" if view["rows"] else None
+    visual=project_visual_state(view,label,focused=state[VIEW])
+    st.markdown(header_html(label,hint),unsafe_allow_html=True)
+    metric_columns=st.columns(3,gap="small")
+    for column,metric in zip(metric_columns,visual["metrics"]):
+        column.markdown(metric_html(metric),unsafe_allow_html=True)
     if summary_only:
         action=view["next"]
         with st.container(border=True):
@@ -255,39 +257,42 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
             if st.checkbox("Consultar todos os destinos",key="flow_journey_board"):
                 render_destination_board(plan,catalog)
         return
-    action=state[VIEW] or view["next"]
-    with st.container(border=True):
-        st.markdown("#### Próxima ação")
-        descriptions={"choose":"Escolha os lugares que quer conhecer.",
-                      "exploratory":"Os lugares desejados ainda não têm passeios compatíveis. Continuam na sua lista.",
-                      "build":f'{view["eligible_count"]} destino(s) compatíveis ainda podem entrar no roteiro.',
-                      "organize":"Defina períodos ou datas se já souber. Você pode salvar sem organizar.",
-                      "review":"Confira o que está incluído e salve suas escolhas, mesmo sem datas."}
-        st.write(descriptions[action])
+    action=visual["action"]
+    with st.container(key="flow_journey_next"):
+        st.markdown(next_html(visual),unsafe_allow_html=True)
         if action=="choose":
-            st.button(LABELS_ACTION[action],key="flow_journey_primary",type="primary",on_click=_discover)
+            st.button(LABELS_ACTION[action],key="flow_journey_primary",
+                      type="primary",on_click=_discover)
         elif action=="exploratory":
             st.caption(", ".join(r["name"] for r in view["unsupported"]))
-            st.button("Revisar minha lista",key="flow_journey_primary",type="primary",on_click=_choose)
+            st.button("Revisar minha lista",key="flow_journey_primary",
+                      type="primary",on_click=_choose)
         elif action=="review" and state[VIEW]=="review":
-            st.caption("A ação de salvamento está na revisão abaixo.")
-        elif state[VIEW]=="build":
-            st.caption("Confirme os destinos selecionados na montagem abaixo.")
-        elif state[VIEW]=="organize":
-            st.button("Revisar e salvar rascunho",key="flow_journey_primary",type="primary",on_click=_show,args=("review",))
+            st.markdown('<a class="journey-next__anchor" href="#journey-review-anchor">'
+                        'Ir para a revisão ↓</a>',unsafe_allow_html=True)
+        elif action=="build" and state[VIEW]=="build":
+            st.markdown('<a class="journey-next__anchor" href="#journey-build-anchor">'
+                        'Ir para a seleção de destinos ↓</a>',unsafe_allow_html=True)
+        elif action=="organize" and state[VIEW]=="organize":
+            st.button("Revisar e salvar rascunho",key="flow_journey_primary",
+                      type="primary",on_click=_show,args=("review",))
         else:
-            st.button(LABELS_ACTION[action],key="flow_journey_primary",type="primary",
-                      on_click=_show,args=(action,))
-    st.markdown("#### Etapas da jornada")
-    for step,title,status in view["steps"]:
-        with st.container():
-            left,right=st.columns([3,1],vertical_alignment="center")
-            left.markdown("**"+title+"**")
-            left.caption(status)
-            right.button("Abrir",key="flow_journey_step_"+step,
-                         disabled=step=="build" and not view["eligible_count"],
-                         on_click=_choose if step=="choose" else _show,
-                         args=() if step=="choose" else (step,))
+            st.button(LABELS_ACTION[action],key="flow_journey_primary",
+                      type="primary",on_click=_show,args=(action,))
+    st.markdown(
+        '<div class="journey-section-title"><span>SEU CAMINHO</span>'
+        '<h2>Etapas da jornada</h2>'
+        '<p>Continue quando quiser. Organizar datas é opcional para salvar um rascunho.</p>'
+        '</div>',unsafe_allow_html=True)
+    for step in visual["steps"]:
+        card_key="flow_journey_step_card_"+("active_" if step["active"] else "quiet_")+step["id"]
+        with st.container(key=card_key):
+            left,right=st.columns([4.5,1.5],vertical_alignment="center")
+            left.markdown(step_html(step),unsafe_allow_html=True)
+            right.button(step["button"],key="flow_journey_step_"+step["id"],
+                         disabled=step["disabled"],use_container_width=True,
+                         on_click=_choose if step["id"]=="choose" else _show,
+                         args=() if step["id"]=="choose" else (step["id"],))
     note=state.pop("flow_journey_notice",None) or state.pop("flow_notice",None)
     if note:
         st.success(note)
@@ -296,10 +301,13 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
         from itinerary_flow_ui import _ux45_return_to_research
         st.button("Voltar à pesquisa de origem",key="ux45_back_to_origin",on_click=_ux45_return_to_research)
     if state[VIEW]=="build":
+        st.markdown('<span id="journey-build-anchor"></span>',unsafe_allow_html=True)
         render_build(plan,catalog,view)
     elif state[VIEW]=="review":
+        st.markdown('<span id="journey-review-anchor"></span>',unsafe_allow_html=True)
         render_review(plan,catalog,view)
     elif state[VIEW]=="organize":
+        st.markdown('<span id="journey-organize-anchor"></span>',unsafe_allow_html=True)
         st.markdown("#### Organizar visitas")
         st.caption("Escolha a etapa: Lua de mel na Itália ou Temporada europeia.")
         if state.get("flow_active_stage") not in STAGES:
