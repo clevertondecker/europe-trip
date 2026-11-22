@@ -93,6 +93,7 @@ class QuickComparisonAppTests(unittest.TestCase):
         wishes=set_interest(wishes,"paris","interested",self.discovery)
         app.session_state["ux502_interests"]=wishes
         app.session_state["advisor_plan"]=new_plan()
+        plan_before=deepcopy(app.session_state["advisor_plan"])
         app.session_state["rec03a_identity"]="unconfigured"
         app.run()
         app.button(key="rec03a_confirm_subset").click().run()
@@ -108,7 +109,7 @@ class QuickComparisonAppTests(unittest.TestCase):
         selected=deepcopy(app.session_state.get("rec03b_selected_base_ids",[]))
         app.text_input(key="rec03a_search").set_value("Metz").run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
-        self.assertEqual(app.session_state["advisor_plan"],new_plan())
+        self.assertEqual(app.session_state["advisor_plan"],plan_before)
         self.assertEqual(len([x for x in app.dataframe
                               if x.key=="rec03a_quick_matrix"]),1)
 
