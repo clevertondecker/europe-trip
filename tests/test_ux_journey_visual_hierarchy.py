@@ -49,6 +49,9 @@ class PlanningVisualProjectionTests(unittest.TestCase):
         saved = project_visual_state(raw, "Salvo em espaço privado")
         self.assertEqual(saved["steps"][3]["status"], "Etapa em foco")
         self.assertEqual(saved["steps"][3]["detail"], "Salvo em espaço privado")
+        self.assertEqual(saved["primary_label"], "Continuar planejamento")
+        self.assertIn("Seu rascunho está salvo", saved["headline"])
+        self.assertEqual(saved["steps"][3]["button"], "Revisar")
         not_saved = project_visual_state(raw, "Alterações apenas nesta sessão")
         self.assertEqual(not_saved["steps"][3]["detail"], "Rascunho pode ser salvo")
 

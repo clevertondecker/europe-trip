@@ -42,6 +42,10 @@ def project_visual_state(view: dict, storage_label: str, focused: str | None = N
         ),
     }
     headline, explanation = descriptions[action]
+    if saved and action == "review":
+        headline = "Seu rascunho está salvo em espaço privado."
+        explanation = ("Continue planejando quando quiser. Salvar o roteiro "
+                       "não confirma viagens ou reservas.")
     highlight = "wished" if action in ("choose", "exploratory", "build") and planned == 0 else (
         "planned" if action in ("build", "organize") else "organized"
     )
@@ -61,7 +65,7 @@ def project_visual_state(view: dict, storage_label: str, focused: str | None = N
          "Organizar", False),
         ("review", "Revisar e salvar", storage_label if saved else
          ("Rascunho pode ser salvo" if planned else "Nenhum destino incluído"),
-         "Revisar e salvar", False),
+         "Revisar" if saved else "Revisar e salvar", False),
     ]
     steps = []
     for number, (step, title, detail, button, disabled) in enumerate(step_info, 1):
@@ -83,7 +87,8 @@ def project_visual_state(view: dict, storage_label: str, focused: str | None = N
                       "button": button, "disabled": disabled,
                       "status": status, "active": step == current_step})
     return {"action": action, "current_step": current_step, "headline": headline,
-            "explanation": explanation, "metrics": metrics, "steps": steps}
+            "explanation": explanation, "metrics": metrics, "steps": steps,
+            "primary_label": "Continuar planejamento" if saved and action == "review" else None}
 
 
 def header_html(storage_label: str, storage_hint: str) -> str:
