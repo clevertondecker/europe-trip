@@ -1,42 +1,55 @@
-# UX85 — Entrada guiada para Comparar bases | Prompt de implementação
+# UX85 revisado — Uma entrada, cidades sugeridas e seleção direta | PR #201
+
+> **Escopo consolidado:** UX85 + UX86 (antigo PR #202). Esta versão substitui o fluxo guiado em etapas, o modo manual como escolha principal e a proposta de criar uma shortlist separada. **É uma especificação para implementação futura, não código implementado.**
 
 ## Papel e objetivo
-Atue como Staff Python/Streamlit Engineer, Principal Product Designer, Accessibility Engineer e Code Reviewer. No repositório clevertondecker/europe-trip, transformar a porta de entrada Explorar > Comparar bases em uma jornada clara e ÚNICA, preservando os dois motores existentes e o histórico de seleção, sem reescrever REC02/REC03.
+Atue como Principal Product Designer, Staff Python/Streamlit Engineer e especialista em acessibilidade. No repositório \`clevertondecker/europe-trip\`, torne **Explorar > Comparar bases** compreensível sem conhecer REC02, REC03A ou o conceito de "modo personalizado".
 
-## Auditoria antes de editar
-Ler o HEAD atualizado e revisar rec03a_suggestions_ui.py, rec03a_session.py, rec03b_handoff_ui.py, rec03b_handoffs.py, ux503_destination_base_comparison_ui.py, ux64_navigation_model.py, ux64_navigation_ui.py, ux502_destination_interests_ui.py, ux_shared_ui_presentation.py e respectivos testes AppTest. Confirmar a ordem e estrutura DOM real: app.py renderiza os controles públicos UX64 antes de render_recommendation_activity(). Não assumir que o HEAD continua igual ao planejamento.
+**Meta observável:** alguém com destinos já escolhidos deve conseguir ver quais cidades-base vale investigar e por quê, sem escolher entre modos nem repetir uma confirmação válida.
 
-## Problemas atuais confirmados
-- A atividade pública única Comparar bases contém um radio técnico entre Comparação personalizada e Cidades sugeridas; dois caminhos diferentes aparecem como tarefas concorrentes.
-- Há cabeçalho visual compartilhado no modo manual, mas o modo Cidades sugeridas ainda usa título genérico e vários controles sem hierarquia.
-- A seleção de destinos é exposta antes da pergunta principal; há ações de retorno/revisão repetidas e banners que competem com o resumo.
-- A análise é de uma temporada confirmada (REC02 scope): não se deve reconstituir esse escopo silenciosamente a partir de país, estágio, filtros temporários ou lista desatualizada.
+## Evidências do HEAD auditado (2026-11-22)
+- \`rec03a_suggestions_ui.py\` usa \`st.radio("Tipo de comparação", ACTIVITIES)\`, inicializa \`MANUAL\` para novas sessões, traz múltiplos controles em \`_render_scope\` e repete cidades em destaques/listagem.
+- \`rec03b_handoff_ui.render_compare_selection\` possui um segundo \`st.multiselect\` e uma CTA para entrar na comparação manual. \`rec03b_handoffs.CHOICE\` já guarda a seleção de cidades.
+- \`app.py\` (no HEAD auditado) mostra "Ajustes avançados da simulação" antes das abas, "Atividades anteriores · avançado" antes dos resultados e um título duplicado em \`page == "Comparar cidades"\`.
+- \`recommendation_scope_model.confirm_scope/reconcile_scope\` preserva um contrato necessário: novos destinos da wishlist não entram em escopo confirmado sem aprovação; alterações de prioridade existentes podem reconciliar sem nova pergunta.
+- O resultado REC02 é orientação de pesquisa, NÃO um ranking global de viabilidade, de custo ou uma cidade oficialmente escolhida.
 
-## Contrato de UI proposto (P1)
-1. UMA entrada pública Explorar > Comparar bases, com UM page_header UX81 e descrição curta: 'Encontre cidades estratégicas para investigar saindo dos destinos que você escolheu'. Evitar outro título/hero no interior de render_suggestions() ou render_wishlist_base_comparison_ui().
-2. Resumo visível: 'Temporada europeia · N destinos considerados' + chips acessíveis de destinos já confirmados. Ações secundárias ao lado: 'Editar destinos' e 'Voltar à minha lista'. Não colocar quatro botões verticalmente antes do resultado.
-3. Estado sem escopo confirmado ou stale: usar a própria _render_scope e confirm_scope, com explicação do impacto. Só analisar com confirmação explícita; preview opcional não equivale a confirmação.
-4. Após confirmação: exibir base candidates primeiro, depois seleção para comparação, com um único CTA primário real. Não misturar ranking/seleção com alterações oficiais.
-5. Ocultar o radio de modos no fluxo principal e disponibilizar 'Personalizar comparação' no espaço avançado, sem apagar valores MANUAL, SUGGESTED, ACTIVITIES ou rec03a_activity_widget. Usuários retornando à comparação manual devem recuperar a seleção anterior. Não criar um segundo roteador.
-6. Separar conteúdo do usuário de 'Ferramentas avançadas' e não puxar os ajustes avançados da simulação para o topo da tela de comparação. Detalhes REC05 permanecem acessíveis sob demanda.
-7. Definir/explicitar a escolha do modo inicial para NOVAS sessões sem substituir contextos ativos. Manter o modo atual se o usuário estiver retomando uma comparação ou um handoff REC03B.
-8. Fazer a orquestração em rec03a_suggestions_ui.py e apresentação auxiliar *somente se justificado*, alimentada por projeções canônicas. Não duplicar dados em session_state, não persistir escolhas exploratórias.
+**Audite novamente o HEAD do PR ao implementar**. Inspecione \`rec03a_suggestions_ui.py\`, \`rec03a_session.py\`, \`rec03b_handoff_ui.py\`, \`rec03b_handoffs.py\`, \`recommendation_scope_model.py\`, \`base_recommendation_model.py\`, \`ux503_destination_base_comparison_ui.py\`, \`ux64_navigation_model.py\`, \`ux_shared_ui_presentation.py\`, \`app.py\` e os testes REC03A/REC03B/UX503/UX64.
 
-## Compatibilidade e estados
-- Preservar public task UX64: Explorar > Comparar bases e TARGETS legado.
-- Respeitar rec03a_scope, rec03a_draft, identidade, pending_ids, no_destinations, ready, erro do carregamento e mudanças da wishlist.
-- Preservar ux503_bases/ux503_visible_destinations, PREVIOUS e retorno de REC03B.
-- Voltar de mapa/perfil/orçamento deve manter contexto validado, ou explicar quando escopo expirar.
-- Zero-state: sem destinos, todos descartados, escopo com interesse novo, pesquisa indisponível, dados parciais.
+## O fluxo obrigatório (SEM wizard)
+1. A atividade **Comparar bases** exibe **um só** \`page_header\` UX81, uma frase sobre a pesquisa e um resumo compacto dos destinos considerados.
+2. **Escopo já confirmado e reconciliado (\`ready\`):** mostrar imediatamente as cidades candidatas. **Sem** novo formulário, "Continuar", rádio de modo ou confirmação.
+3. **Primeiro acesso ou escopo inválido:** propor visualmente os destinos ativos da wishlist em uma seleção editável (não confirmar automaticamente). Explicar que a pesquisa considera somente essa seleção e que ela não altera o roteiro. **Uma única CTA** "Analisar estes destinos" chama o \`confirm_scope()\` existente. Não selecionar implicitamente a etapa por país ou inferir que Itália/França são equivalentes ao estágio \`europe_season\`.
+4. **Wishlist modificada:** \`reconcile_scope()\` decide. Novos ativos aparecem como **pendentes de revisão**, sem entrar silenciosamente; removidos saem do escopo sem inclusão de substitutos; somente alteração de prioridade não deve exigir uma nova confirmação sem necessidade. Identidade/documento incompatível invalida a análise. Exibir uma ação para revisar as mudanças, sem descartar silenciosamente escolhas válidas.
+5. **Resultados:** cada cidade aparece **uma única vez**, incluindo aquelas presentes em múltiplos destaques REC02. Ordem/grupos obedecem às projeções existentes, sem criar score, ranking ou "cidade vencedora" por contagem de fontes.
+6. Card compacto por cidade: (a) nome e país; (b) justificativa curta fundamentada no motivo existente; (c) presença de evidência como **histórico, indicativo, local e sem tempo** separadamente; (d) principal lacuna de pesquisa; (e) controle de **selecionar para comparar**. Tempos e fontes detalhados ficam disponíveis na comparação ou no detalhe contextual, sem ocultar a ressalva essencial.
+7. **Selecionar cidades no próprio resultado** com \`rec03b_handoffs.CHOICE\` como única seleção de bases. A mesma escolha alimentará a matriz do UX87 (PR #203). Não criar estrutura \`shortlist\` adicional, segundo multiselect obrigatório, novo state manager nem cópia da seleção no TripPlan.
+8. A seleção de **uma cidade** já permite explorar perfil, mapa ou simulação pelo handoff canônico (aprimoramento final no PR #203). **Duas cidades** bastam para habilitar a comparação; até **cinco** pelo contrato de comparação existente. Não exigir três; não truncar uma seleção anterior de 4–5. Não disparar comparação/simulação como efeito colateral de renderização.
+9. A experiência principal usa um único conjunto de resultados; **não expor radio público entre SUGGESTED/MANUAL**. Preservar \`ACTIVITY\`, \`MANUAL\`, \`SUGGESTED\`, \`rec03a_activity_widget\`, handoffs e seleção manual anteriores como **compatibilidade interna**, com retorno/recuperação explícitos se aplicáveis; não transformar "personalizada" em uma segunda jornada obrigatória dentro de expander.
+10. **\`app.py\` faz parte do escopo:** remover títulos duplicados e impedir que "Ajustes avançados da simulação", "Atividades anteriores · avançado" e outros blocos técnicos apareçam ANTES dos resultados de Comparar bases. Preservar acesso às ferramentas legadas quando requisitadas, mas não mantê-las no caminho principal nem criar mais um menu genérico de controle.
+11. Ações de retorno à wishlist e edição dos destinos ficam junto ao contexto do escopo, sem botões verticalmente repetidos. Pesquisa REC05 e metodologia podem estar abaixo dos resultados; manter avisos essenciais à vista, não esconder toda a incerteza.
 
-## Testes
-1. AppTest cold start, seleção de escopo e sessão restaurada com modo manual.
-2. Uma única hierarquia de cabeçalho, uma CTA primária por estado; sem duplicação de componentes/IDs.
-3. Switch guiado -> manual -> guiado -> wishlist preserva estado e filtros.
-4. Identidade alterada/escopo invalidado não mostra resultados antigos nem muda TripPlan.
-5. Clique em callback legítimo; não escrever em TripPlan, ux502_interests, favorites, persisted budget ao renderizar.
-6. Preservar deep links e testes existentes (tests/test_rec03a_suggestions.py, tests/test_rec03b_handoffs.py, tests/test_ux503_destination_base_comparison.py, tests/test_ux64_public_navigation.py).
-7. Visual real 1440/768/390 px, foco visível e leitura sem rolagem horizontal da página.
+## Contratos de estado e de arquitetura — não negociáveis
+- \`TripPlan\`, \`ux502_interests\`, revisões de wishlist, \`advisor_plan\`, fontes e orçamento oficial são somente leitura durante pesquisa e seleção de cidades.
+- Preservar \`rec03a_scope\`, \`rec03a_draft\`, \`rec03a_activity\`, \`rec03a_navigation_intent\`, \`rec03a_identity\`, \`rec03a_handoff_base_selection\` (\`CHOICE\`), \`CONTEXT\`, \`PREVIOUS\`, \`MANUAL_KEYS\`, \`ux503_bases\` e \`ux503_visible_destinations\`, sem novos IDs que representem a mesma seleção.
+- Respeitar \`confirm_scope()\`, \`reconcile_scope()\`, REC02 e UX64; não alterar \`TARGETS\`, classes de evidência, pesos, cálculo de mínimos, URLs de fonte ou prioridades.
+- Se o modo manual legado possuir filtros diferentes, não sobrescrever nem perder filtros salvos. Preservar \`PREVIOUS\` e o caminho de recuperação.
+- Mudança de identidade, documento ou conta invalida contextos transitórios; nunca renderizar análise de pessoa/escopo anterior.
+- \`page_header\`, \`section_heading\`, \`kpi_cards\` e variantes UX81 são os únicos padrões visuais reutilizados. HTML dinâmico escapado, CTA nativa e foco WCAG AA.
 
-## Qualidade e entrega
-Implementar código/testes nesta mesma branch após autorização, não apenas alterar prompts; CI no HEAD; logar screenshot ou ausência explícita. Não alterar algoritmos, tempos, scores, fontes, confirm_scope nem schemas. Não marcar como pronto para merge enquanto não houver implementação e testes. NÃO FAZER MERGE AUTOMÁTICO.
+## Limite de entrega entre PRs
+Este PR entrega **a porta de entrada, o escopo, os cartões únicos e a seleção direta**. A matriz automática sob a seleção e as ações/retornos financeiros completos pertencem ao **UX87 consolidado (#203)**. O #201 deve demonstrar valor sozinho: cidades sugeridas visíveis sem entrar em fluxo manual. **Não** criar uma tela transitória "passo 1/4"; preparar um contrato único de seleção que o #203 possa consumir sem nova confirmação.
+
+## Testes obrigatórios de comportamento
+- Cold start com wishlist: uma confirmação de escopo, resultados sem escolha de modo.
+- Acesso com escopo \`ready\`: resultados imediatos sem repetição de confirmação.
+- Escopo vazio, nenhum ativo, seleção de apenas 1 destino, \`pending_ids\`, nova wishlist, removidos, somente mudança de prioridade, revision backwards ou documento restaurado, mudança de identidade.
+- Cada ID de cidade só aparece uma vez no resultado; casos \`complete\`, \`conditional\`, \`investigation\`, sem histórico, local-only, sem tempo.
+- Seleção por card 0,1,2,3,5,6 candidatas disponíveis; máximo 5 para comparação, 2 suficiente; CHOICE é autoritativo; sem multiselect concorrente.
+- Alternar/retomar comparação manual legado, preservar \`PREVIOUS\`, \`MANUAL_KEYS\`, IDs de callback existentes e filtros.
+- Nenhuma renderização escreve \`TripPlan\`, wishlist, favorita ou orçamento; ausência de botões fictícios HTML; no máximo uma CTA principal contextual.
+- \`app.py\`: nenhum título/expander global de simulação ou ferramentas antigas antes dos resultados em Comparar bases.
+- AppTests + \`python -m compileall -q .\` + \`python -m unittest discover -s tests -v\` + CI no HEAD. Verificar realmente em navegador a 1440/768/390 px, foco, disabled, overflow, regressões e captura de tela; se indisponível, dizer **não validado**.
+
+## Entrega / restrições
+Modificar apenas a camada de apresentação e orquestração e os testes pertinentes; não refatorar REC01/REC02, persistência, cálculos ou UX64. Após revisar o prompt, implementar na **branch existente do #201**, mantendo draft até testes. **Não criar PR novo; não fazer merge automático; não declarar implementação pronta com base na pipeline documental.**
