@@ -189,6 +189,10 @@ class PrivateWishlistPersistenceTests(unittest.TestCase):
         fake.save.side_effect=StorageConflict("stale")
         with patch.object(continuity_ui,"_private_store",return_value=fake):
             app.run()
+            # A configured private store owns routine wishlist saves; no
+            # duplicate JSON transfer controls in the everyday journey.
+            self.assertFalse(any(x.key=="ux502_download" for x in app.button))
+            self.assertFalse(any(x.key=="ux502_upload" for x in app.get("file_uploader")))
             self.assertFalse(any("Lista salva no armazenamento privado" in x.value for x in app.success))
             app.button(key="ux502_cloud_save").click().run()
         self.assertFalse(any("Lista salva no armazenamento privado" in x.value for x in app.success))
