@@ -7,6 +7,7 @@ from planning_session import active_plan, commit_undated_destinations
 from ux502_destination_interests_model import empty_interests, LABELS
 from ux61_destination_board_ui import _discovery
 from ux_planning_journey_model import project_planning, clear_planning_context
+from ux_shared_ui_presentation import section_heading
 from ux_planning_journey_presentation import (
     project_visual_state, header_html, metric_html, next_html, step_html,
 )
@@ -291,11 +292,10 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
             st.button(visual["primary_label"] or LABELS_ACTION[action],
                       key="flow_journey_primary",type="primary",
                       on_click=_show,args=(action,))
-    st.markdown(
-        '<div class="journey-section-title"><span>SEU CAMINHO</span>'
-        '<h2>Etapas da jornada</h2>'
-        '<p>Continue quando quiser. Organizar datas é opcional para salvar um rascunho.</p>'
-        '</div>',unsafe_allow_html=True)
+    st.markdown(section_heading(
+        "SEU CAMINHO", "Etapas da jornada",
+        "Continue quando quiser. Organizar datas é opcional para salvar um rascunho."
+    ), unsafe_allow_html=True)
     for step in visual["steps"]:
         card_key="flow_journey_step_card_"+("active_" if step["active"] else "quiet_")+step["id"]
         with st.container(key=card_key):
