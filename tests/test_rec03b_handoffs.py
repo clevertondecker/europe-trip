@@ -173,7 +173,16 @@ class HandoffAppTests(unittest.TestCase):
         self.assertFalse(any(w.key=="expanded_bases_detail_city" for w in app.selectbox))
         click("rec03a_handoff_profile_map")
         self.assertEqual(app.session_state[CONTEXT]["kind"],"map")
-        self.assertFalse(app.error,str(app.error))
+        # The sidebar reports missing optional Drive credentials in CI.
+        # Assert the actual map body, not unrelated synchronization diagnostics.
+        errors=[e.value for e in app.error]
+        sidebar_errors=[e.value for e in app.sidebar.error]
+        from collections import Counter
+        body_errors=list((Counter(errors)-Counter(sidebar_errors)).elements())
+        self.assertFalse(body_errors, str(errors))
+        self.assertTrue(any("Mapa das alternativas" in m.value for m in app.markdown))
+        self.assertTrue(app.get("deck_gl_json_chart"), "Contextual map not rendered")
+        self.assertTrue(app.dataframe, "Rail evidence table not rendered")
         click("rec03a_handoff_back_map")
         self.assertEqual(app.session_state[SCOPE],scope)
         click("rec03a_handoff_planning")
