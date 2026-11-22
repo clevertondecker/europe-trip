@@ -30,3 +30,42 @@ def render_simulation_context(plan):
                     on_click=return_to_source,args=(state,))
         right.button("Ver orçamento oficial",key="rec04_return_to_official",
                      on_click=return_to_official,args=(state,))
+
+
+def render_optional_housing_commitments(fx,city_id):
+    """Opt-in, city-scoped and hypothetical; None means not provided."""
+    from rec04_housing_costs import housing_cashflow
+    with st.expander("Caução reembolsável e taxas separadas (opcional)"):
+        st.caption("Informe somente valores conhecidos ou hipóteses explícitas para "
+                   "o casal. O desconhecido permanece não informado; nenhuma "
+                   "caução é considerada despesa.")
+        checked=st.checkbox("Simular caução e taxas desta cidade",
+                            key="rec04_housing_terms_"+city_id)
+        fee=deposit=None
+        if checked:
+            fee=st.number_input("Taxas únicas não reembolsáveis (€)",
+                                min_value=0.,max_value=10000.,value=0.,step=50.,
+                                key="rec04_fees_"+city_id)
+            deposit=st.number_input("Caução reembolsável (€)",
+                                    min_value=0.,max_value=15000.,value=0.,step=50.,
+                                    key="rec04_deposit_"+city_id)
+            st.caption("Taxas são somadas uma vez ao custo total; caução somente "
+                       "ao desembolso inicial, antes do eventual reembolso.")
+    return housing_cashflow(fx_brl_per_eur=fx,fees_eur=fee,
+                            refundable_deposit_eur=deposit)
+
+
+def render_housing_cashflow_note(result, terms):
+    from rec04_housing_costs import housing_cashflow
+    if terms["refundable_deposit_brl"] is None:
+        st.caption("Caução reembolsável e taxas não informadas: o total não "
+                   "representa o caixa necessário ao entrar na moradia.")
+        return
+    gross=round(result["total"]+terms["refundable_deposit_brl"],2)
+    st.caption("Taxa não reembolsável hipotética incluída UMA vez no total: R$ "+
+               f'{terms["one_time_fee_expense_brl"]:,.2f}'+
+               " · caução reembolsável fora do custo: R$ "+
+               f'{terms["refundable_deposit_brl"]:,.2f}')
+    st.info("Desembolso bruto de referência incluindo caução: R$ "+
+            f'{gross:,.2f}'+
+            ". Valor não é cotação final; a caução poderá ser devolvida conforme contrato.")

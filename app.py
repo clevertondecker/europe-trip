@@ -27,7 +27,7 @@ from rec03a_session import apply_navigation as apply_recommendation_navigation, 
 from rec03b_handoff_ui import render_notice, render_profile_context, render_contextual_map, render_planning_return
 from rec03b_handoffs import CONTEXT
 from rec04_simulation_handoff import apply_simulation_request
-from rec04_simulation_ui import render_simulation_context
+from rec04_simulation_ui import (render_simulation_context,render_optional_housing_commitments,render_housing_cashflow_note)
 from sidebar_account_ui import account_view_state, _logged_in_user
 from travel_advisor_ui import _owner_config
 from travel_advisor_ui import render_advisor, _recover_saved_plan, _secure_save, _owner_signed_in
@@ -1685,6 +1685,7 @@ elif page == "Orçamento":
                 rent_delta=st.number_input("Variação em taxas/moradia (R$)",
                                            min_value=-int(minimum_rent),max_value=10000,
                                            value=0,step=250,key="unified_rent_extra")
+        housing_terms=render_optional_housing_commitments(fx,selected_base_id)
         # Reference is intentionally only a known ticket subtotal. It must never
         # replace the entire tour allowance nor create a discount for missing quotes.
         catalog_extra=0.0
@@ -1737,7 +1738,8 @@ elif page == "Orçamento":
             outing_couple_eur=spend,fx_brl_per_eur=fx,
             rent_override_eur_month=quoted_rent,flight_delta_brl=flight_delta,
             excursions_delta_brl=excursions_delta+catalog_extra,local_transport_delta_brl=transit_delta,
-            rent_delta_brl=rent_delta)
+            rent_delta_brl=rent_delta+(housing_terms["one_time_fee_expense_brl"] or 0.))
+        render_housing_cashflow_note(result,housing_terms)
         stats=[
             ("Total projetado",money_brl(result["total"]),"Viagem completa · estimativa"),
             ("Margem até o teto",money_brl(result["margin"]),"Reserva de emergência já incluída"),
