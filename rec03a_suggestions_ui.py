@@ -144,8 +144,63 @@ def _restore_widget(widget, shadow, default, valid=None):
     return value
 
 
+def _overview_cell(cell):
+    """Evidence category plus minimum ONE-WAY time; no inferred round trip."""
+    category = cell["category"]
+    if category == "historical":
+        return "Histórico · " + format_minutes(cell["display_min"])
+    if category == "reference_only":
+        return "Indicativo · " + format_minutes(cell["display_min"])
+    if category == "local":
+        return "Local · acesso pendente"
+    return "Sem tempo pesquisado"
+
+
+def comparison_overview_rows(result, names, cities, base_ids):
+    """Project identical confirmed destinations across each visible base.
+
+    This is a view only: no ranking, no average across different subsets,
+    no assumed return journey, and no new selection state.
+    """
+    candidates = {row["base_id"]: row for row in result["candidates"]}
+    chosen = [base for base in dict.fromkeys(base_ids) if base in candidates]
+    rows = []
+    for destination in result["destinations"]:
+        destination_id = destination["id"]
+        label = names.get(destination_id, destination_id)
+        if destination["priority"] == "must_visit":
+            label = "★ " + label
+        record = {"Destino desejado": label}
+        for base in chosen:
+            meta = cities[base]
+            heading = meta["name"] + " · " + meta["country"]
+            record[heading] = _overview_cell(candidates[base]["evidence"][destination_id])
+        rows.append(record)
+    return rows
+
+
+def _render_quick_comparison(result, names, cities, base_ids):
+    if not base_ids:
+        return
+    st.markdown(section_heading(
+        "VISÃO LADO A LADO", "Mesmos destinos, cidades diferentes",
+        "Compare o tempo mínimo de ida disponível para cada destino do escopo confirmado.",
+        variant="compact",
+    ), unsafe_allow_html=True)
+    rows = comparison_overview_rows(result,names,cities,base_ids)
+    if not rows:
+        st.info("Nenhum destino confirmado neste escopo.")
+        return
+    st.dataframe(rows,hide_index=True,use_container_width=True,
+                 height=min(480,70+37*len(rows)),key="rec03a_quick_matrix")
+    st.caption("★ Imperdível · Histórico = registro anterior · Indicativo = referência "
+               "não confirmada · Local = acesso urbano a verificar. "
+               "Tempos exibidos são mínimos de ida, não duração de ida e volta. "
+               "Sem tempo pesquisado não significa viagem inviável.")
+
+
 def _card(candidate, result, names, cities, official, options):
-    """One card per city, with CHOICE as the only base-selection state."""
+    """Compact choice card; documentary details stay available on demand."""
     from rec03b_handoff_ui import render_card_choice
 
     base=candidate["base_id"]
@@ -153,24 +208,27 @@ def _card(candidate, result, names, cities, official, options):
     with st.container(border=True):
         st.markdown("**"+meta["name"]+"** · "+meta["country"]+
                     (" · Base oficial de referência" if base==official else ""))
-        reasons=candidate["reasons"]
-        st.write(_REASON.get(reasons[0],"Alternativa para investigação.") if reasons
-                 else "Alternativa para investigar com os dados disponíveis.")
-        st.caption(f'{candidate["historical_count"]} trajetos com dados históricos · '
-                   f'{candidate["indicative_count"]} com referências indicativas')
-        st.caption(f'{len(candidate["local_destination_ids"])} destinos com acesso local a verificar · '
-                   f'{len(candidate["missing_destination_ids"])} sem tempo pesquisado')
+        st.caption(f'{candidate["historical_count"]} históricos · '
+                   f'{candidate["indicative_count"]} indicativos · '
+                   f'{len(candidate["local_destination_ids"])} locais pendentes · '
+                   f'{len(candidate["missing_destination_ids"])} sem tempo')
         missing=candidate["must_visit"]["missing"]
         if missing:
-            st.write("**O que falta pesquisar?** Tempos para os imperdíveis: "+
-                     _label_ids(missing,names)+".")
-        elif candidate["local_destination_ids"]:
-            st.write("**O que falta pesquisar?** Acesso dentro da cidade e última milha.")
-        else:
-            st.write("**O que falta pesquisar?** Retorno, acesso às atrações e horários de 2027.")
-        st.caption("Referências de ida pesquisadas; não são duração total nem preços confirmados.")
+            st.caption("Imperdíveis sem tempo pesquisado: "+_label_ids(missing,names))
         render_card_choice(base,options)
-        if st.checkbox("Ver evidências e limitações",key="rec03a_details_"+base):
+        if st.checkbox("Por que investigar? Ver evidências e limitações",
+                       key="rec03a_details_"+base):
+            reasons=candidate["reasons"]
+            st.write(_REASON.get(reasons[0],"Alternativa para investigação.") if reasons
+                     else "Alternativa para investigar com os dados disponíveis.")
+            if missing:
+                st.write("**O que falta pesquisar?** Tempos para os imperdíveis: "+
+                         _label_ids(missing,names)+".")
+            elif candidate["local_destination_ids"]:
+                st.write("**O que falta pesquisar?** Acesso dentro da cidade e última milha.")
+            else:
+                st.write("**O que falta pesquisar?** Retorno, acesso às atrações e horários de 2027.")
+            st.caption("Referências de ida pesquisadas; não são duração total nem preços confirmados.")
             coverage=candidate["weighted_coverage"]
             if coverage["value"] is not None:
                 st.write(f'Cobertura documental ponderada: {coverage["value"]:.0%} '
@@ -192,8 +250,8 @@ def _card(candidate, result, names, cities, official, options):
                     st.caption("Data registrada: "+str(date))
                 for observation in raw.get("observations",[]):
                     st.caption("Observação original: "+
-                               str(observation.get("evidence_date") or "data não informada")+
-                               " · "+format_minutes(observation.get("minimum_oneway_min")))
+                               str(observation.get("evidence_date") or "data não informada")
+                               +" · "+format_minutes(observation.get("minimum_oneway_min")))
                     if observation.get("source_url"):
                         st.link_button("Fonte da observação",observation["source_url"])
             st.caption(candidate["limitation"])
@@ -351,11 +409,15 @@ def render_suggestions(*,plan,discovery=None,research=None):
             page=st.number_input("Página",min_value=1,max_value=pages,step=1,
                                  key="rec03a_page",on_change=_remember,
                                  args=("rec03a_page","rec03a_page_shadow"))
-            for candidate in filtered[(page-1)*size:page*size]:
+            visible = filtered[(page-1)*size:page*size]
+            _render_quick_comparison(result,names,cities,
+                                     [candidate["base_id"] for candidate in visible])
+            for candidate in visible:
                 _card(candidate,result,names,cities,plan["base_city"],options)
         else:
             st.info("Nenhuma cidade corresponde aos filtros.")
     elif featured:
+        _render_quick_comparison(result,names,cities,featured)
         for base in featured:
             _card(by_id[base],result,names,cities,plan["base_city"],options)
     else:
