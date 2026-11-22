@@ -90,33 +90,37 @@ def render_card_choice(base, options):
                    "compare logo após estes cartões.")
 
 
-def render_card_selection_summary(result,cities):
-    """Visible selected bases and one temporary, validated UX503 handoff.
-
-    UX87 will replace the CTA with an inline matrix and KEEP CHOICE unchanged.
-    """
+def render_card_selection_summary(result, cities):
+    """CHOICE is the only comparison selection; focus is for optional actions."""
     options=[c["base_id"] for c in result["candidates"]]
-    selected=selected_card_bases(st.session_state,options)
+    selected=selected_card_bases(st.session_state, options)
     st.markdown("#### Cidades selecionadas")
-    if selected:
-        st.write(" · ".join(cities[b]["name"] for b in selected))
-        st.caption(f"{len(selected)} de até 5 bases selecionadas · pesquisa, não decisão oficial.")
-    else:
-        st.caption("Selecione cidades diretamente nos cartões abaixo. Duas bastam para comparar.")
+    if not selected:
+        st.caption("Selecione cidades nos cartões. Com duas ou mais, "
+                   "a comparação aparece aqui sem outra confirmação.")
+        return
+    st.write(" · ".join(cities[b]["name"] for b in selected))
+    st.caption(f"{len(selected)} de até 5 cidades selecionadas · pesquisa, não decisão oficial.")
     if len(selected)==1:
-        st.caption("Você já pode conhecer ou simular essa cidade sem selecionar uma segunda.")
-    elif len(selected)>5:
-        st.warning("Há mais de cinco cidades selecionadas; revise para comparar.")
-    if 2<=len(selected)<=5:
-        previous=manual_selection(st.session_state)
-        if previous:
-            st.caption("A comparação detalhada usará estes destinos e cidades. "
-                       "Filtros manuais anteriores poderão ser recuperados.")
-        st.button(
-            f"Comparar {len(selected)} cidades com os destinos escolhidos",
-            key="rec03a_handoff_compare",type="primary",
-            on_click=queue_handoff,args=(st.session_state,"manual",list(selected)),
-        )
+        st.caption("Você já pode investigar esta cidade sem selecionar outra.")
+    elif 2<=len(selected)<=5:
+        st.caption("A comparação dos destinos aparece logo abaixo, na mesma página.")
+    else:
+        st.warning("Revise a seleção para ficar com até cinco cidades.")
+        return
+    if len(selected)>1:
+        key="rec03a_focus_city"
+        if st.session_state.get(key) not in selected:
+            st.session_state[key]=selected[0]
+        focus=st.selectbox(
+            "Cidade para investigar individualmente",selected,
+            key=key,format_func=lambda city:cities[city]["name"],
+            help="Isso não altera as cidades selecionadas para comparar.")
+    else:
+        focus=selected[0]
+    with st.expander("Conhecer cidade, mapa e custos"):
+        render_card_actions(focus,"card")
+
 
 def render_planning_handoff(plan, *, interests, discovery, research):
     from attractions_model import load_attractions
@@ -144,14 +148,23 @@ def render_planning_return():
 
 
 def render_card_actions(base,prefix):
+    from rec04_candidate_capabilities import capability_for
     from rec04_simulation_handoff import request_simulation
+    cap=capability_for(base)
     a,b,c=st.columns(3)
     a.button("Conhecer cidade",key=f"rec03a_handoff_profile_{prefix}_{base}",
              on_click=queue_handoff,args=(st.session_state,"profile",[base]))
     b.button("Ver no mapa",key=f"rec03a_handoff_map_{prefix}_{base}",
              on_click=queue_handoff,args=(st.session_state,"map",[base]))
-    c.button("Simular esta cidade",key=f"rec04_simulate_{prefix}_{base}",
+    c.button("Simular custo",key=f"rec04_simulate_{prefix}_{base}",
+             disabled=not cap["scenario_selectable"],
              on_click=request_simulation,args=(st.session_state,base,"suggestions"))
+    if cap["scenario_selectable"]:
+        st.caption(cap["budget_note"])
+        if not cap["rental_quote_2027_available"]:
+            st.caption("Aluguel e caução de 2027 ainda não foram cotados.")
+    else:
+        st.caption("Ainda não há cenário de custos disponível para esta cidade.")
 
 
 def render_manual_context(selected=None,visible=None):

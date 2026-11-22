@@ -151,6 +151,11 @@ class SimulationAppTests(unittest.TestCase):
         app.segmented_control(key="ux_section").set_value("Comparar").run()
         app.button(key="rec03a_confirm_subset").click().run()
         self.assertFalse(app.exception,str(app.exception))
+        # City actions appear only when a city is selected for investigation.
+        candidate=next(x.key for x in app.checkbox if x.key and
+                       x.key.startswith("rec03a_pick_"))
+        app.checkbox(key=candidate).check().run()
+        self.assertFalse(app.exception,str(app.exception))
         btn=next(x for x in app.button
                  if x.key and x.key.startswith("rec04_simulate_") and
                  x.key!="rec04_simulate_profile")

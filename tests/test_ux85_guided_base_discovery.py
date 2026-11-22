@@ -117,7 +117,7 @@ class GuidedComparisonTests(unittest.TestCase):
                         source.index("render_card_selection_summary(result,cities)"))
         self.assertIn("size=4",source)
 
-    def test_two_highlight_cards_reveal_one_comparison_cta(self):
+    def test_two_highlight_cards_show_inline_comparison(self):
         a=self.app()
         a.button(key="rec03a_confirm_subset").click().run()
         self.assertFalse(a.exception,[x.message for x in a.exception])
@@ -127,14 +127,42 @@ class GuidedComparisonTests(unittest.TestCase):
             a.checkbox(key=key).check().run()
             self.assertFalse(a.exception,[x.message for x in a.exception])
         self.assertEqual(len(a.session_state[CHOICE]),2)
-        actions=[x for x in a.button if x.key=="rec03a_handoff_compare"]
-        self.assertEqual(len(actions),1)
-        self.assertIn("2 cidades",actions[0].label)
+        self.assertFalse(any(x.key=="rec03a_handoff_compare" for x in a.button))
+        self.assertTrue(any(x.key=="rec03a_inline_matrix" for x in a.checkbox))
+        a.checkbox(key="rec03a_inline_matrix").check().run()
+        self.assertFalse(a.exception,[x.message for x in a.exception])
+        self.assertTrue(a.dataframe)
         self.assertEqual(len([x for x in a.multiselect
                               if x.key==CHOICE+"_widget"]),0)
         captions=" ".join(x.value for x in a.caption)
         self.assertIn("trajetos com dados históricos",captions)
         self.assertIn("referências indicativas",captions)
+
+    def test_comparison_auto_appears_for_three_and_five_bases(self):
+        a=self.app()
+        a.button(key="rec03a_confirm_subset").click().run()
+        self.assertFalse(a.exception,[x.message for x in a.exception])
+        from base_research_expanded_model import load_research
+        candidates=[c["id"] for c in load_research(include_candidates=True)["cities"]]
+        for n in (3,5):
+            with self.subTest(n=n):
+                a.session_state[CHOICE]=candidates[:n]
+                a.run()
+                self.assertFalse(a.exception,[x.message for x in a.exception])
+                self.assertEqual(a.session_state[CHOICE],candidates[:n])
+                self.assertTrue(any(x.key=="rec03a_inline_matrix" for x in a.checkbox))
+                self.assertFalse(any(x.key=="rec03a_handoff_compare" for x in a.button))
+                self.assertFalse(any(x.key==CHOICE+"_widget" for x in a.multiselect))
+                self.assertEqual(len([x for x in a.selectbox
+                                      if x.key=="rec03a_focus_city"]),1)
+        a.session_state[CHOICE]=[]
+        a.run()
+        self.assertFalse(a.exception,[x.message for x in a.exception])
+        self.assertFalse(any(x.key=="rec03a_inline_matrix" for x in a.checkbox))
+        a.session_state[CHOICE]=candidates[:1]
+        a.run()
+        self.assertFalse(a.exception,[x.message for x in a.exception])
+        self.assertFalse(any(x.key=="rec03a_inline_matrix" for x in a.checkbox))
 
     def test_other_city_selection_survives_filters_and_browse_switch(self):
         a=self.app()
@@ -150,11 +178,11 @@ class GuidedComparisonTests(unittest.TestCase):
         self.assertFalse(a.exception,[x.message for x in a.exception])
         selected=list(a.session_state[CHOICE])
         self.assertEqual(set(selected),{first.removeprefix("rec03a_pick_"),other})
-        self.assertEqual(len([x for x in a.button if x.key=="rec03a_handoff_compare"]),1)
+        self.assertTrue(any(x.key=="rec03a_inline_matrix" for x in a.checkbox))
         a.checkbox(key="rec03a_show_all").uncheck().run()
         self.assertFalse(a.exception,[x.message for x in a.exception])
         self.assertEqual(a.session_state[CHOICE],selected)
-        self.assertEqual(len([x for x in a.button if x.key=="rec03a_handoff_compare"]),1)
+        self.assertTrue(any(x.key=="rec03a_inline_matrix" for x in a.checkbox))
 
     def test_selection_below_filter_remains_authoritative(self):
         a=self.app()
