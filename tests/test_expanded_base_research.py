@@ -16,8 +16,9 @@ class ExpandedBaseResearchModelTests(unittest.TestCase):
         self.study=load_research()
         self.rail=load_rail()
 
-    def test_thirty_candidates_twelve_shortlisted_and_no_2027_claim(self):
+    def test_historical_candidate_snapshot_and_no_2027_claim(self):
         result=research_overview(self.study)
+        self.assertEqual(result["candidate_count"],len(self.study["cities"]))
         self.assertEqual(result["candidate_count"],30)
         self.assertEqual(result["shortlist_count"],12)
         self.assertEqual(result["housing_offer_count"],35)

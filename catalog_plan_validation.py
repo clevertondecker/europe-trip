@@ -4,7 +4,11 @@ from __future__ import annotations
 
 def allowed_attractions(catalog:dict,destination:str)->set[str]:
     if destination not in {d["id"] for d in catalog["destinations"]}:
-        raise ValueError("Destino não consta do catálogo")
+        from ux62_supplemental_outings import supplemental_allowed
+        allowed = supplemental_allowed(destination)
+        if allowed is None:
+            raise ValueError("Destino não consta do catálogo")
+        return allowed
     return {a["id"] for a in catalog["attractions"]
             if a["destination_id"]==destination}
 

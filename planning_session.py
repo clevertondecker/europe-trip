@@ -53,9 +53,8 @@ def _commit(next_plan:dict)->dict:
     st.session_state.pop("advisor_proposals",None)
     st.session_state["advisor_local_changed"]=True
     st.session_state["ux36_cloud_dirty"]=True
-    if st.session_state.get("advisor_autosave_optin") and st.session_state.get(
-        "advisor_public_repo_ack"):
-        st.session_state["advisor_autosave_pending"]=True
+    # UX75: changes never queue automatic publication to a public repository.
+    st.session_state["advisor_autosave_pending"]=False
     return next_plan
 
 def accept_approved_plan(next_plan:dict)->dict:
@@ -90,6 +89,17 @@ def commit_outing(destination:str,attraction_ids:list[str],
                                   attraction_ids,period,confirmed=confirmed)
     _commit(next_plan)
     return result
+
+
+
+def commit_undated_destinations(destinations:list[str],stage:str,*,
+                                confirmed:bool=False)->dict:
+    """Single confirmed, atomic selection from wishlist to canonical TripPlan."""
+    if not confirmed:
+        raise ValueError("Confirme os destinos antes de incluir no roteiro")
+    from itinerary_flow_model import add_undated_choices
+    next_plan=add_undated_choices(bootstrap(),load_attractions(),destinations,stage)
+    return _commit(next_plan)
 
 
 def delete_outing(destination:str,*,confirmed:bool=False):

@@ -15,6 +15,7 @@ from destination_photo_assets import (local_destination_photo, preferred_destina
 from ux501_destination_discovery_model import (
     build_destination_discovery, filter_destinations,
 )
+from trip01_supplemental_discovery import build_exploration_discovery
 from ux502_destination_interests_ui import render_wishlist,add_destination
 from data8_tourism_ui import render_data8_destination_preview
 
@@ -22,7 +23,7 @@ from data8_tourism_ui import render_data8_destination_preview
 
 @st.cache_data(show_spinner=False)
 def _cached_discovery():
-    return build_destination_discovery()
+    return build_exploration_discovery()
 
 
 
@@ -52,7 +53,7 @@ def _render_destination_media(destination: dict, photo: dict | None) -> None:
         return
     if photo and photo.get("url"):
         url = escape(display_photo_url(photo["url"]), quote=True)
-        name = escape(destination["name"], quote=True)
+        name = escape(photo.get("subject") or destination["name"], quote=True)
         # CSS backgrounds do not produce broken-image glyphs. When the
         # resource fails, the visible placeholder remains deterministic.
         st.markdown(
@@ -90,6 +91,11 @@ def _render_destination_media(destination: dict, photo: dict | None) -> None:
             '<span style="font-size:1.8rem" aria-hidden="true">⌖</span>'
             f'<span style="font-weight:600">{name}</span>'
             '<small>Foto a pesquisar</small></div>',unsafe_allow_html=True)
+
+
+def _destination_rows(items: list[dict], size: int = 3) -> list[list[dict]]:
+    """Return only populated destination rows, keeping the catalog order."""
+    return [items[i:i+size] for i in range(0, len(items), size)]
 
 
 def render_independent_destination_discovery(*, discovery=None) -> None:
@@ -186,17 +192,23 @@ def render_independent_destination_discovery(*, discovery=None) -> None:
                     for item in subset if not item.get("photo")}
     missing_on_page = tuple((item["id"],item["name"]) for item in subset
                             if not item.get("photo") and
-                            not local_photos.get(item["id"]))
+                            not local_photos.get(item["id"]) and
+                            item.get("research_status") != "supplemental_attractions_documented")
     fallback_photos = (_cached_visible_photos(missing_on_page)
                        if missing_on_page else {})
-    for idx in range(0, len(subset), 3):
-        with st.container(key=f"ux53_row_destinations_{idx}"):
-            columns = st.columns(3, border=True)
-            for column, item in zip(columns, subset[idx:idx+3]):
+    for row_index, row_items in enumerate(_destination_rows(subset)):
+        with st.container(key=f"ux53_row_destinations_{row_index * 3}"):
+            # Avoid empty bordered cards for searches returning 1 or 2 places.
+            columns = st.columns(len(row_items), border=True)
+            for column, item in zip(columns, row_items):
                 with column:
                     photo = preferred_destination_photo(item, fallback_photos.get(item["id"]))
                     _render_destination_media(item,photo)
+                    if photo and photo.get("subject"):
+                        st.caption("Na foto: " + photo["subject"])
                     st.markdown("**"+item["name"]+"** · "+item["country"])
+                    if item.get("planning_support") == "exploration_only":
+                        st.caption("Pesquisa e comparação disponíveis; ainda não pode ser incluído no roteiro.")
                     if item["attraction_count"]:
                         names = [attr["name"] for attr in item["attractions"][:3]]
                         st.write(" · ".join(names))

@@ -47,7 +47,8 @@ def destinations(catalog:dict)->list[dict]:
                             if a["destination_id"]==d["id"]],
              "research":"Pesquisa de atrações"}
             for d in catalog["destinations"]]
-    return italy+france
+    from ux62_supplemental_outings import supplemental_choices
+    return italy+france+supplemental_choices()
 
 
 def get_choice(catalog:dict,dest_id:str)->dict:
@@ -68,9 +69,10 @@ def selected_rows(plan:dict,catalog:dict)->list[dict]:
     for item in plan.get("flexible_visits",[]):
         key=item["destination_id"]
         if key not in lookup:continue
-        if item["stage"]==FRANCE_STAGE and key not in plan.get("packages",{}):
-            continue  # The existing canonical outing editor removed this destination.
-        attractions=(plan["packages"][key] if item["stage"]==FRANCE_STAGE
+        if (item["stage"]==FRANCE_STAGE and key not in plan.get("packages",{})
+                and item["attractions"]):
+            continue  # Preserve reading older inconsistent drafts conservatively.
+        attractions=(plan["packages"].get(key,[]) if item["stage"]==FRANCE_STAGE
                      else item["attractions"])
         rows[key]={"id":key,"name":lookup[key]["name"],"stage":item["stage"],
                    "attractions":attractions,"period":item["period"],
@@ -103,7 +105,7 @@ def is_selected(plan:dict,dest_id:str)->bool:
 def _validated_choice(catalog:dict,dest_id:str,attractions:list[str],period:str)->dict:
     item=get_choice(catalog,dest_id)
     allowed={a["id"] for a in item["attractions"]}
-    if (not isinstance(attractions,list) or not 1<=len(attractions)<=5
+    if (not isinstance(attractions,list) or not 0<=len(attractions)<=5
         or len(attractions)!=len(set(attractions)) or not set(attractions)<=allowed):
         raise ValueError("Selecione de uma a cinco atrações válidas e distintas")
     if period not in period_options(item["stage"]):
@@ -127,10 +129,42 @@ def upsert_choice(plan:dict,catalog:dict,dest_id:str,
         if not set(attractions)<=allowed:
             raise ValueError("Atrações não pertencem ao destino")
         packages=deepcopy(plan["packages"])
-        packages[dest_id]=list(attractions)
+        if attractions:
+            packages[dest_id]=list(attractions)
+        else:
+            packages.pop(dest_id,None)
         updates["packages"]=packages
     return change_plan(plan,updates)
 
+
+
+def add_undated_choices(plan:dict,catalog:dict,destination_ids:list[str],
+                        stage:str)->dict:
+    """Add multiple unplanned cities in one revision; no dates or bookings.
+
+    Build and validate the entire draft before a single canonical change,
+    so an invalid ID/stage never causes a partial addition.
+    """
+    if stage not in (ITALY_STAGE,FRANCE_STAGE):
+        raise ValueError("Etapa inválida")
+    if (not isinstance(destination_ids,list) or not destination_ids or
+            len(destination_ids)>50 or
+            len(set(destination_ids))!=len(destination_ids)):
+        raise ValueError("Selecione de 1 a 50 destinos distintos")
+    if any(is_selected(plan,dest_id) for dest_id in destination_ids):
+        raise ValueError("Algum destino já está no roteiro. Atualize sua seleção.")
+    choices=[_validated_choice(catalog,dest_id,[],UNASSIGNED)
+             for dest_id in destination_ids]
+    if any(choice["stage"]!=stage for choice in choices):
+        raise ValueError("Os destinos devem pertencer à etapa escolhida")
+    visits=deepcopy(plan.get("flexible_visits",[]))+choices
+    updates={"flexible_visits":visits}
+    if stage==FRANCE_STAGE:
+        # Empty attraction lists intentionally remain metadata-only; they can
+        # be populated later through the existing single outing editor.
+        # Do not create an empty package (which is not a confirmed excursion).
+        updates["packages"]=deepcopy(plan["packages"])
+    return change_plan(plan,updates)
 
 def remove_choice(plan:dict,catalog:dict,dest_id:str)->dict:
     stage=get_choice(catalog,dest_id)["stage"]
@@ -223,6 +257,7 @@ def validate_flow_backup(plan:dict,catalog:dict)->None:
                                 row["attractions"],row["period"])
         if {k:row[k] for k in clean}!=clean:
             raise ValueError("Etapa ou atração divergente do catálogo")
-        if row["stage"]==FRANCE_STAGE and plan["packages"].get(
-                row["destination_id"])!=row["attractions"]:
+        if row["stage"]==FRANCE_STAGE and (
+            (bool(row["attractions"]) and plan["packages"].get(row["destination_id"])!=row["attractions"])
+            or (not row["attractions"] and row["destination_id"] in plan["packages"])):
             raise ValueError("Passeio francês divergente entre calendário e roteiro")

@@ -130,6 +130,11 @@ def from_legacy(page: str, itinerary: str | None = None,
 def apply(state) -> tuple[str, str | None, str | None, str | None]:
     """Synchronize legacy keys BEFORE Streamlit instantiates corresponding widgets."""
     area = state.get("ux_area", AREAS[0])
+    from ux64_navigation_model import TARGETS
+    proposed=state.get("ux_section")
+    if (area,proposed) in TARGETS:
+        area,proposed=TARGETS[(area,proposed)]
+        state["ux_area"],state["ux_section"]=area,proposed
     if area not in SECTIONS:
         area = AREAS[0]
         state["ux_area"] = area

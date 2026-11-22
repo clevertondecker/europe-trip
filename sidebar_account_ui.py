@@ -48,10 +48,9 @@ def _saving_status() -> str:
     """Use the existing canonical storage labels; never infer saved from login."""
     try:
         from continuity_ui import private_status_label
-        from planning_status import save_label
-        from planning_session import active_plan
-        label, _ = private_status_label(save_label(
-            active_plan(), st.session_state.get("advisor_saved_snapshot"), True))
+        label, _ = private_status_label((
+            "Apenas nesta sessão",
+            "O GitHub público não confirma salvamento na nuvem privada"))
         return label
     except (AttributeError, KeyError, TypeError, ValueError, RuntimeError) as exc:
         # Exception class only: provider exceptions may contain sensitive content.

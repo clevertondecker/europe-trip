@@ -68,9 +68,23 @@ def render_wishlist(discovery) -> bool:
             st.session_state["ux502_transient_shadow"] = list(st.session_state["ux501_interest_session"])
         st.session_state["ux502_discovery_filters"] = snapshot
 
-    view = st.radio("Visualização", ("Descobrir lugares", "Minha lista"),
-                    horizontal=True, key="ux502_view",
-                    on_change=remember_discovery_filters)
+    def legacy_view_changed():
+        remember_discovery_filters()
+        if "ux64_public_task" in st.session_state:
+            st.session_state["ux64_public_task"]=(
+                "Minha lista" if st.session_state["ux502_view"]=="Minha lista"
+                else "Descobrir")
+    if "ux64_public_task" in st.session_state:
+        # Keep the original widget for existing bookmarks and navigation tests.
+        # Public task tabs remain the main way to switch views.
+        with st.expander("Visualização anterior · avançado", expanded=False):
+            view=st.radio("Visualização", ("Descobrir lugares", "Minha lista"),
+                          horizontal=True,key="ux502_view",
+                          on_change=legacy_view_changed)
+    else:
+        view = st.radio("Visualização", ("Descobrir lugares", "Minha lista"),
+                        horizontal=True, key="ux502_view",
+                        on_change=remember_discovery_filters)
     if view == "Descobrir lugares":
         if "ux501_interest_session" not in st.session_state and "ux502_transient_shadow" in st.session_state:
             st.session_state["ux501_interest_session"] = list(st.session_state["ux502_transient_shadow"])
@@ -156,17 +170,39 @@ def render_wishlist(discovery) -> bool:
                 restored = validate_interests(pending_import, discovery)
                 restored["revision"] = max(current["revision"], restored["revision"]) + 1
                 _change(restored)
+                from rec03a_session import clear_recommendation_context
+                clear_recommendation_context(st.session_state)
+                from ux_planning_journey_model import clear_planning_context
+                clear_planning_context(st.session_state)
                 st.session_state.pop("ux502_import_pending", None)
                 st.rerun()
 
     if view != "Minha lista":
         return False
     if active:
-        def open_comparison():
-            st.session_state["ux_area"] = "Explorar"
-            st.session_state["ux_section"] = "Comparar"
+        from rec03a_session import request_navigation
+        from ux_planning_journey_ui import request_planning
+        from ux_planning_journey_model import project_planning
+        from planning_session import active_plan
+        from attractions_model import load_attractions
+        planning=project_planning(active_plan(),current,discovery,load_attractions())
+        if planning["eligible_count"]:
+            st.button("Montar roteiro com meus destinos",key="flow_journey_from_wishlist",type="primary",
+                      on_click=request_planning,args=(st.session_state,"build"))
+        elif planning["rows"]:
+            st.button("Revisar meu roteiro",key="flow_journey_from_wishlist",type="primary",
+                      on_click=request_planning,args=(st.session_state,"review"))
+        else:
+            st.info("Os destinos desejados ainda não têm passeios compatíveis para inclusão. Eles continuam na sua lista.")
+            from ux504_guided_journey_ui import request_step
+            st.button("Descobrir destinos compatíveis",key="flow_journey_find_compatible",type="primary",
+                      on_click=request_step,args=("discover",))
+            # Discovery remains accessible in the existing task tabs.
+        st.button("Encontrar cidades-base", key="rec03a_open_from_wishlist",
+                  on_click=request_navigation,args=(st.session_state,"suggestions"))
         st.button("Comparar cidades-base para nossos destinos",
-                  key="ux503_open_from_wishlist", on_click=open_comparison)
+                  key="ux503_open_from_wishlist",
+                  on_click=request_navigation,args=(st.session_state,"manual"))
 
     if not items:
         st.info("Nenhum destino na lista. Use Descobrir lugares para adicionar.")
@@ -180,6 +216,8 @@ def render_wishlist(discovery) -> bool:
         with st.container(border=True):
             cols = st.columns([3, 2, 1])
             cols[0].markdown("**" + destination["name"] + "** · " + destination["country"])
+            if destination.get("planning_support") == "exploration_only":
+                cols[0].caption("Pesquisa e comparação; inclusão no roteiro ainda indisponível.")
             widget_key = "ux502_priority_" + destination_id + "_" + fingerprint
             cols[1].selectbox("Prioridade", PRIORITIES,
                                index=PRIORITIES.index(row["priority"]),

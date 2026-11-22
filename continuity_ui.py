@@ -13,6 +13,7 @@ import streamlit as st
 
 from continuity_archive_model import (
     make_archive,export_archive,import_archive,preview_restore,confirm_restore,plan_fingerprint,
+    persisted_data_fingerprint,
 )
 from planning_status import save_label
 from itinerary_flow_model import selected_rows
@@ -49,7 +50,8 @@ def apply_pending_restore(catalog:dict)->None:
     if pending is None:return
     try:
         plan=confirm_restore(bootstrap(),pending["archive"],pending["preview"],
-                             catalog,confirmed=True)
+                             catalog,confirmed=True,
+                             current_archive=_private_archive(bootstrap(),catalog))
         context=pending["archive"]["continuation"]
         state["advisor_plan"]=plan
         state["advisor_saved_snapshot"]=None
@@ -77,6 +79,10 @@ def apply_pending_restore(catalog:dict)->None:
         state["ux35_proposals"]=deepcopy(pending["archive"]["calendar_drafts"])
         state["ux41_favorites"]=list(pending["archive"].get("city_favorites",[]))
         state["ux502_interests"]=deepcopy(pending["archive"].get("destination_interests",empty_interests()))
+        from rec03a_session import clear_recommendation_context
+        clear_recommendation_context(state)
+        from ux_planning_journey_model import clear_planning_context
+        clear_planning_context(state)
         state["ux502_private_saved_revision"]=None
         state["ux48_weekend_groups"]=deepcopy(pending["archive"]["weekend_groups"])
         state.pop("ux35_review_proposal",None)
@@ -111,6 +117,15 @@ def _archive_fingerprint(archive:dict)->str:
     value={key:val for key,val in archive.items() if key!="exported_at"}
     raw=json.dumps(value,ensure_ascii=False,sort_keys=True,separators=(",",":")).encode("utf-8")
     return sha256(raw).hexdigest()
+
+
+def _decisions_fingerprint(archive: dict) -> str:
+    """The same canonical fingerprint used by archive previews."""
+    return persisted_data_fingerprint(archive)
+
+
+def _current_decisions_fingerprint(plan, catalog) -> str:
+    return _decisions_fingerprint(_private_archive(plan, catalog))
 
 
 def _private_archive(plan, catalog):
@@ -161,6 +176,7 @@ def restore_private_on_start(catalog):
         state["ux36_cloud_status"] = "Salvo em espaço privado"
         state["ux36_saved_plan_fingerprint"] = plan_fingerprint(plan)
         state["ux36_saved_archive_fingerprint"] = _archive_fingerprint(archive)
+        state["ux36_saved_decisions_fingerprint"] = _decisions_fingerprint(archive)
         state["ux36_cloud_dirty"] = False
         for target, source in (
             ("ux_area", "area"), ("ux_section", "section"),
@@ -176,6 +192,10 @@ def restore_private_on_start(catalog):
         state["ux35_proposals"] = deepcopy(archive["calendar_drafts"])
         state["ux41_favorites"] = list(archive.get("city_favorites",[]))
         state["ux502_interests"] = deepcopy(archive.get("destination_interests",empty_interests()))
+        from rec03a_session import clear_recommendation_context
+        clear_recommendation_context(state)
+        from ux_planning_journey_model import clear_planning_context
+        clear_planning_context(state)
         state["ux502_private_saved_revision"] = state["ux502_interests"]["revision"]
         state["ux48_weekend_groups"] = deepcopy(archive["weekend_groups"])
         sync_legacy_view(plan, state, include_controls=True)
@@ -193,7 +213,9 @@ def save_private_now(plan, catalog):
     state["ux36_cloud_generation"] = generation
     state["ux36_cloud_status"] = "Salvo em espaço privado"
     state["ux36_saved_plan_fingerprint"] = plan_fingerprint(plan)
-    state["ux36_saved_archive_fingerprint"] = _archive_fingerprint(import_archive(raw,catalog))
+    confirmed_archive = import_archive(raw, catalog)
+    state["ux36_saved_archive_fingerprint"] = _archive_fingerprint(confirmed_archive)
+    state["ux36_saved_decisions_fingerprint"] = _decisions_fingerprint(confirmed_archive)
     state["ux36_cloud_dirty"] = False
     state["ux502_private_saved_revision"] = state.get("ux502_interests",empty_interests())["revision"]
     state.pop("ux36_autosave_failed_fingerprint", None)
@@ -206,10 +228,12 @@ def autosave_private_if_requested(catalog):
     snapshot (or explicit manual retry) is allowed to try again.
     """
     state = st.session_state
-    if not state.get("ux36_private_autosave") or not state.get("ux36_cloud_dirty"):
+    if not state.get("ux36_private_autosave"):
         return
     try:
-        pending = _archive_fingerprint(_private_archive(state["advisor_plan"], catalog))
+        pending = _current_decisions_fingerprint(state["advisor_plan"], catalog)
+        if pending == state.get("ux36_saved_decisions_fingerprint"):
+            return
     except (ValueError, TypeError, KeyError):
         state["ux36_cloud_status"] = "Erro ao preparar; alterações apenas nesta sessão"
         state["ux36_cloud_dirty"] = True
@@ -239,13 +263,11 @@ def render_private_controls(plan, catalog):
     status = state.get("ux36_cloud_status", "Apenas nesta sessão")
     try:
         current = _private_archive(plan, catalog)
-        if (state.get("ux36_saved_archive_fingerprint") != _archive_fingerprint(current)
+        if (state.get("ux36_saved_decisions_fingerprint") != _decisions_fingerprint(current)
                 and status == "Salvo em espaço privado"):
             status = "Alterações não salvas"
     except (ValueError, TypeError, KeyError):
         status = "Dados locais precisam de revisão antes de salvar"
-    if state.get("ux36_cloud_dirty") and status == "Salvo em espaço privado":
-        status = "Alterações não salvas"
     st.caption("**Status privado:** " + status)
     if state.get("ux36_autosave_failed_fingerprint"):
         st.info("O salvamento automático não foi confirmado. Seus dados continuam nesta sessão. "
@@ -266,13 +288,131 @@ def render_private_controls(plan, catalog):
             st.error("Falha no armazenamento privado. Baixe uma cópia local.")
 
 
+def _ux75_private_autosave_changed():
+    """Explicit opt-in; never enable background public GitHub writes."""
+    st.session_state["ux36_private_autosave"] = bool(
+        st.session_state.get("ux75_private_autosave_toggle", False))
+
+
+def render_primary_private_save(plan, catalog) -> bool:
+    """Cloud-first save control; false means private storage is unavailable.
+
+    The GCS archive contains all persisted trip decisions, not only TripPlan.
+    This UI never writes to the public GitHub repository.
+    """
+    store = _private_store()
+    if store is None:
+        st.warning("Nuvem privada não configurada ou conta não autorizada. "
+                   "Nenhum salvamento privado foi realizado. "
+                   "Você ainda pode usar as opções avançadas.")
+        return False
+
+    state = st.session_state
+    try:
+        current_fingerprint = _current_decisions_fingerprint(plan, catalog)
+    except (ValueError, TypeError, KeyError):
+        st.error("Não foi possível validar os dados atuais. "
+                 "O planejamento permanece nesta sessão.")
+        return True
+
+    saved = state.get("ux36_saved_decisions_fingerprint")
+    status = state.get("ux36_cloud_status", "")
+    clean = saved is not None and saved == current_fingerprint
+    if status.startswith("Conflito"):
+        st.error("Outra sessão alterou a cópia privada. "
+                 "O planejamento atual foi preservado. "
+                 "Não é seguro sobrescrever automaticamente.")
+    elif status.startswith("Erro"):
+        st.warning("O último salvamento não foi confirmado. "
+                   "Suas alterações continuam nesta sessão.")
+    elif clean:
+        st.success("Salvo na nuvem privada. Suas escolhas estão disponíveis na próxima sessão.")
+    else:
+        st.info("Alterações ainda não salvas na nuvem privada.")
+
+    if "ux75_private_autosave_toggle" not in state:
+        state["ux75_private_autosave_toggle"] = bool(state.get("ux36_private_autosave", False))
+    st.checkbox("Salvar automaticamente minhas próximas alterações",
+                key="ux75_private_autosave_toggle",
+                on_change=_ux75_private_autosave_changed,
+                help="Opcional. Usa somente a nuvem privada e mantém o controle de versões.")
+    if st.button("Salvar minha viagem", key="ux75_private_save_now",
+                 type="primary", disabled=clean and status == "Salvo em espaço privado"):
+        # A manual click allows retry even when a previous autosave failed.
+        state.pop("ux36_autosave_failed_fingerprint", None)
+        try:
+            save_private_now(plan, catalog)
+        except StorageConflict:
+            state["ux36_cloud_dirty"] = True
+            state["ux36_cloud_status"] = "Conflito de versão; alterações apenas nesta sessão"
+            st.error("Outra sessão salvou uma versão diferente. "
+                     "Nada foi sobrescrito; preserve o rascunho e compare as versões.")
+        except (StorageUnavailable, ValueError, KeyError, TypeError):
+            state["ux36_cloud_dirty"] = True
+            state["ux36_cloud_status"] = "Erro ao salvar; alterações apenas nesta sessão"
+            st.error("Não foi possível confirmar o salvamento privado. "
+                     "Seu planejamento permanece nesta sessão.")
+        else:
+            st.success("Viagem salva com sucesso na nuvem privada.")
+    return True
+
+
+def render_global_private_save(plan, catalog):
+    """One compact, reusable save control; no automatic public GitHub writes."""
+    state = st.session_state
+    st.markdown("**Minha viagem · salvamento**")
+    store = _private_store()
+    if store is None:
+        st.caption("Somente nesta sessão · use o backup JSON. "
+                   "Login e espaço privado são configurações distintas.")
+        return
+    try:
+        dirty = (state.get("ux36_saved_decisions_fingerprint") !=
+                 _current_decisions_fingerprint(plan, catalog))
+    except (ValueError, TypeError, KeyError):
+        st.warning("Dados precisam de revisão antes de salvar.")
+        return
+    status = state.get("ux36_cloud_status", "")
+    if status.startswith("Conflito"):
+        st.warning("Outra sessão alterou a cópia privada.")
+    elif status.startswith("Erro"):
+        st.warning("Último salvamento falhou; alterações só nesta sessão.")
+    elif dirty:
+        st.caption("Alterações somente nesta sessão.")
+    else:
+        st.caption("Salvo no espaço privado · confirmado pelo servidor.")
+    if st.button("Salvar minha viagem", key="ux65_global_private_save",
+                 width="stretch", disabled=not dirty and
+                 status=="Salvo em espaço privado"):
+        try:
+            save_private_now(plan, catalog)
+        except StorageConflict:
+            state["ux36_cloud_status"] = "Conflito de versão; alterações apenas nesta sessão"
+            state["ux36_cloud_dirty"] = True
+            st.error("Outra sessão atualizou o arquivo. Exporte um backup antes de reconciliar.")
+        except (StorageUnavailable, ValueError, KeyError, TypeError):
+            state["ux36_cloud_status"] = "Erro ao salvar; alterações apenas nesta sessão"
+            state["ux36_cloud_dirty"] = True
+            st.error("Falha ao salvar. Seus dados continuam na sessão; baixe o backup.")
+        else:
+            st.success("Salvamento privado confirmado.")
+
+
 def private_status_label(fallback):
     """Show private success only after a confirmed remote response."""
     state = st.session_state
-    if (state.get("ux36_cloud_status") == "Salvo em espaço privado"
-            and not state.get("ux36_cloud_dirty")
-            and state.get("ux36_saved_plan_fingerprint") == plan_fingerprint(bootstrap())):
-        return ("Salvo em espaço privado", "Recuperável após entrar com a conta autorizada")
+    if state.get("ux36_cloud_status") == "Salvo em espaço privado":
+        if state.get("ux36_saved_decisions_fingerprint") is None:
+            return fallback  # Old session: no complete remote decision hash available.
+        try:
+            from attractions_model import load_attractions
+            if state.get("ux36_saved_decisions_fingerprint") == _current_decisions_fingerprint(
+                    bootstrap(), load_attractions()):
+                return ("Salvo em espaço privado",
+                        "Recuperável após entrar com a conta autorizada")
+        except (ValueError, KeyError, TypeError):
+            pass
+        return ("Alterações apenas nesta sessão", "Salve uma cópia privada ou baixe o backup")
     if state.get("ux36_cloud_status", "").startswith(("Erro","Conflito")):
         return ("Alterações apenas nesta sessão", "Salve uma cópia privada ou baixe o backup")
     return fallback
@@ -316,7 +456,8 @@ def render_continuity_panel(plan:dict,catalog:dict)->None:
             if st.button("Pré-visualizar recuperação",key="ux36_preview_button"):
                 try:
                     imported=import_archive(uploaded.getvalue(),catalog)
-                    review=preview_restore(plan,imported,catalog)
+                    review=preview_restore(plan,imported,catalog,
+                                           current_archive=_private_archive(plan,catalog))
                     st.session_state["ux36_review"]={
                         "archive":imported,"preview":review}
                     st.rerun()
@@ -326,7 +467,8 @@ def render_continuity_panel(plan:dict,catalog:dict)->None:
         if pending:
             import_archive_document=pending["archive"]
             try:
-                current_review=preview_restore(plan,import_archive_document,catalog)
+                current_review=preview_restore(plan,import_archive_document,catalog,
+                                                   current_archive=_private_archive(plan,catalog))
                 if (current_review["expected_current_fingerprint"]!=
                     pending["preview"]["expected_current_fingerprint"] or
                     current_review["expected_archive_fingerprint"]!=
@@ -343,9 +485,17 @@ def render_continuity_panel(plan:dict,catalog:dict)->None:
             st.caption("Lugares selecionados: "+str(summary["places_before"])+
                        " → "+str(summary["places_after"]))
             if summary["changed_fields"]:
-                st.caption("Campos que mudam: "+", ".join(summary["changed_fields"]))
-            else:
-                st.info("Nenhuma diferença nos campos principais.")
+                st.caption("Campos do plano que mudam: "+", ".join(summary["changed_fields"]))
+            if summary.get("auxiliary_changed_fields"):
+                st.caption("Outros dados que mudam: "+
+                           ", ".join(summary["auxiliary_changed_fields"]))
+            if summary.get("wishlist_changes"):
+                differences=summary["wishlist_changes"]
+                st.caption("Minha lista: "+str(differences["added"])+" adicionados, "+
+                           str(differences["removed"])+" removidos, "+
+                           str(differences["priority_changed"])+" prioridades alteradas.")
+            if not summary["changed_fields"] and not summary.get("auxiliary_changed_fields"):
+                st.info("Nenhuma diferença nos dados persistidos.")
             if summary["relation"]=="different_plan":
                 st.warning("**Esta cópia pertence a outro planejamento**. "
                            "Confirmar substituirá o plano desta sessão. "

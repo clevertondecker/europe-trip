@@ -38,7 +38,7 @@ def matrix_cell(row: dict) -> str:
     else:
         value = "Tempo não pesquisado"
     if row["divergent_sources"]:
-        value += " · fontes divergentes"
+        value += " · tempos publicados diferentes"
     return value
 
 
@@ -89,7 +89,7 @@ def missing_research(result: dict) -> list[str]:
         pending.append("Verificar transporte urbano e acesso local nos destinos "
                        "situados na própria cidade-base.")
     if any(r["divergent_sources"] for r in rows):
-        pending.append("Conferir as observações ferroviárias com tempos divergentes.")
+        pending.append("Conferir condições das observações com tempos publicados diferentes.")
     pending.extend([
         "Confirmar possibilidades de retorno nos fins de semana e última milha.",
         "Comparar moradia mobiliada, disponibilidade e custos em condições "

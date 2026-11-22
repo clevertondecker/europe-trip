@@ -2,7 +2,7 @@
 from __future__ import annotations
 import streamlit as st
 from base_research_expanded_model import load_research
-from ux501_destination_discovery_model import build_destination_discovery
+from trip01_supplemental_discovery import build_exploration_discovery
 from ux502_destination_interests_model import (
     empty_interests, ordered_interests, selected_destinations_for_comparison, LABELS,
 )
@@ -38,8 +38,8 @@ def _return_to_wishlist():
 
 
 def render_wishlist_base_comparison(*, plan, discovery=None, research=None):
-    discovery = discovery if discovery is not None else build_destination_discovery()
-    research = research if research is not None else load_research()
+    discovery = discovery if discovery is not None else build_exploration_discovery()
+    research = research if research is not None else load_research(include_candidates=True)
     st.markdown("### Como seria visitar nossos destinos a partir de cada cidade?")
     st.write("Compare os tempos de trem que já pesquisamos para diferentes "
              "cidades-base. Quando faltarem informações, mostramos o que "
@@ -71,6 +71,8 @@ def render_wishlist_base_comparison(*, plan, discovery=None, research=None):
         suffix = (" · " + ", ".join(tags)) if tags else ""
         return cities[city_id]["name"] + " · " + cities[city_id]["country"] + suffix
 
+    from rec03b_handoff_ui import render_manual_context
+    render_manual_context()
     st.markdown("#### 1. Onde poderíamos ficar?")
     selected = st.multiselect(
         "Cidades-base para comparar (2 a 5)",choices,
@@ -91,6 +93,11 @@ def render_wishlist_base_comparison(*, plan, discovery=None, research=None):
     except ValueError as exc:
         st.error("Lista de destinos incompatível: " + str(exc))
         return
+    exploratory = [d["name"] for d in discovery["destinations"]
+                   if d["id"] in active and d.get("planning_support") == "exploration_only"]
+    if exploratory:
+        st.caption("Somente pesquisa e comparação por enquanto: " + ", ".join(exploratory) +
+                   ". Ainda não podem ser incluídos no roteiro.")
     if not active:
         if ordered:
             st.info("Todos os destinos da lista foram descartados. "
@@ -117,6 +124,7 @@ def render_wishlist_base_comparison(*, plan, discovery=None, research=None):
         help="Filtra apenas esta tela. Não altera ou remove destinos da lista salva.")
     st.session_state["ux504_visible_destinations_shadow"] = list(selected_view)
     visible = [x for x in active if x in selected_view]
+    render_manual_context(selected,visible)
     st.caption(f"Exibindo {len(visible)} de {len(active)} destinos desejados. "
                "Este filtro não altera a lista salva.")
     if not visible:
@@ -152,6 +160,9 @@ def render_wishlist_base_comparison(*, plan, discovery=None, research=None):
 
     # New read-only decision layer: never modifies choices or official TripPlan.
     decision = build_decision_readiness(result, discovery=discovery, research=research)
+    # Decision readiness evaluates historical evidence and verified logistics.
+    # An additional directional minimum must be visible, but must not be
+    # promoted into a confirmed return, timetable, or historical observation.
     st.markdown("#### O que já sabemos para decidir?")
     st.caption("Visitar um lugar, voltar de trem e morar na cidade-base são "
                "perguntas diferentes. Os dados ainda não comprovam nenhum "
@@ -194,6 +205,10 @@ def render_wishlist_base_comparison(*, plan, discovery=None, research=None):
                         "desconhecida") +
                        " · retorno/última milha: a verificar" +
                        " · estado temporal: " + journey["temporal_association_status"])
+            reference = enriched["cells"].get((journey["base_id"], journey["destination_id"]))
+            if reference and reference["category"] == "reference_only":
+                st.caption("Referência adicional de ida: " + reference["label"] +
+                           " · não é evidência histórica comparável nem confirma 2027.")
             if journey["association_reasons"]:
                 st.caption("Faltam: " + ", ".join(journey["association_reasons"]))
     with st.expander("Condições de moradia nas cidades-base", expanded=False):
@@ -297,8 +312,8 @@ def render_wishlist_base_comparison(*, plan, discovery=None, research=None):
                                str(route["source_date"] or "Data desconhecida"))
                     st.caption("Retorno de fim de semana e última milha: não confirmados.")
                     if route["divergent_sources"]:
-                        st.warning("O histórico contém serviços/observações divergentes. "
-                                   "Consultar as condições antes de comparar.")
+                        st.caption("Há tempos publicados diferentes; podem representar serviços ou datas distintos. "
+                                   "As condições não permitem concluir contradição.")
                     historical_url = item.get("historical_source_url")
                     reference_url = item.get("reference_source_url")
                     if historical_url:
@@ -333,5 +348,8 @@ def render_wishlist_base_comparison(*, plan, discovery=None, research=None):
                              "/mês. Valores não confirmados para 2027.")
                 else:
                     st.write("Moradia: sem amostras comparáveis documentadas.")
+                st.caption("Pendências abaixo refletem a cobertura histórica; "
+                           "a matriz acima também apresenta referências indicativas "
+                           "adicionais, que não comprovam retorno ou viabilidade.")
                 for item in summary["research_gaps"]:
                     st.markdown("- " + item)

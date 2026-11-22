@@ -10,7 +10,8 @@ ROOT = Path(__file__).resolve().parents[1]
 def open_planning():
     at = AppTest.from_file(str(ROOT / "app.py"), default_timeout=110).run()
     at.button(key="ux_sidebar_nav_2").click().run()
-    at.segmented_control(key="ux_section").set_value("Meu planejamento").run()
+    at.segmented_control(key="ux_section").set_value("Organizar viagem").run()
+    at.button(key="flow_journey_step_organize").click().run()
     at.button(key="flow_add_open_button").click().run()
     return at
 
