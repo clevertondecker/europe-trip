@@ -30,6 +30,11 @@ def render_guided_home(plan: dict, interests: dict | None = None) -> None:
         st.button(alternative["label"] + " →",
                   key="ux504_next_alternative_"+alternative["id"],
                   on_click=request_step,args=(alternative["id"],))
+    if isinstance(interests,dict) and any(isinstance(x,dict) and x.get("priority")!="discarded"
+            for x in interests.get("items",[])):
+        from rec03a_session import request_navigation
+        st.button("Encontrar cidades-base para minha lista",key="rec03a_handoff_home",
+                  on_click=request_navigation,args=(st.session_state,"suggestions"))
     st.caption("A base oficial permanece como referência de trabalho; "
                "comparar alternativas não significa decidir onde morar.")
     st.markdown("#### Nosso caminho")

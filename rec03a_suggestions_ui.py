@@ -183,6 +183,8 @@ def _card(candidate, result, names, cities, official, prefix):
                     if observation.get("source_url"):
                         st.link_button("Fonte da observação",observation["source_url"])
             st.caption(candidate["limitation"])
+        from rec03b_handoff_ui import render_card_actions
+        render_card_actions(b,prefix)
 
 
 def _render_comparison_groups(result,names,cities):
@@ -258,6 +260,9 @@ def render_suggestions(*, plan, discovery=None, research=None):
         st.info("Não há grupo completo equivalente. As possibilidades abaixo são condicionais.")
     if result["has_local_only"]:
         st.caption("Destinos locais são tratados separadamente; acesso urbano ainda não confirmado.")
+    from rec03b_handoff_ui import render_compare_selection, render_planning_handoff
+    render_compare_selection(result,cities)
+    render_planning_handoff(plan,interests=interests,discovery=discovery,research=research)
     candidates={c["base_id"]:c for c in result["candidates"]}
     sections=result["highlight_sections"]
     ordered_sections=(("Alternativas com evidências comparáveis",sections["complete_reference_groups"]),
@@ -317,7 +322,7 @@ def render_recommendation_activity(*,plan,discovery=None,research=None):
     choice=st.radio("Tipo de comparação",ACTIVITIES,horizontal=True,
                     key="rec03a_activity_widget",on_change=changed)
     if choice==SUGGESTED:
-        # Cross-screen candidate handoffs, simulation and map belong to REC03B/REC04.
+        # Scenario and finance handoffs remain REC04.
         render_suggestions(plan=plan,discovery=discovery,research=research)
     else:
         render_wishlist_base_comparison(plan=plan,discovery=discovery,research=research)

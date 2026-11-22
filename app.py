@@ -24,6 +24,8 @@ from attractions_ui import render_explorer
 from ux501_destination_discovery_ui import render_independent_destination_discovery
 from rec03a_suggestions_ui import render_recommendation_activity
 from rec03a_session import apply_navigation as apply_recommendation_navigation, sync_identity, identity_token, SUGGESTED
+from rec03b_handoff_ui import render_notice, render_profile_context, render_contextual_map, render_planning_return
+from rec03b_handoffs import CONTEXT
 from sidebar_account_ui import account_view_state, _logged_in_user
 from travel_advisor_ui import _owner_config
 from travel_advisor_ui import render_advisor, _recover_saved_plan, _secure_save, _owner_signed_in
@@ -468,6 +470,10 @@ if (ux_area in ("Explorar","Orçamento") and
 
 # UX 6.4: three public areas with route IDs retained for saved workspaces.
 render_public_task_tabs()
+render_notice()
+if (st.session_state.get(CONTEXT) or {}).get("kind")=="planning" and (
+        ux_area=="Meu roteiro" or (ux_area,ux_section)==("Explorar","Passeios")):
+    render_planning_return()
 # Preserve the original contract: home has no extra legacy task selector.
 if ux_area!="Minha viagem" or ux_section!="Resumo":
     with st.expander("Atividades anteriores · avançado", expanded=False):
@@ -702,6 +708,12 @@ if page == "Visão geral":
         st.markdown("<div class='home-disclaimer'>Planejamento em desenvolvimento: voos, imóveis e passeios ainda não reservados. "
                     "As estimativas históricas não substituem cotações reais. Imagens ilustrativas: Wikimedia Commons e Unsplash.</div>",
                     unsafe_allow_html=True)
+
+elif page == "Mapa & destinos" and (st.session_state.get(CONTEXT) or {}).get("kind")=="map":
+    render_contextual_map(active_plan())
+    if st.button("Abrir mapa geral", key="rec03a_handoff_general_map"):
+        st.session_state.pop(CONTEXT,None)
+        st.rerun()
 
 elif page == "Mapa & destinos":
     st.markdown("<div class='page-eyebrow'>EXPLORAR · EUROPA 2027</div>"
@@ -1328,9 +1340,11 @@ elif page == "Roteiro":
             render_explorer(data,sync_sources,map_view)
 
     elif itinerary_section == "Explorar bases":
-        render_base_explorer(active_plan(),data,sync_sources["finance"]["status"]=="live",
-                             st.session_state.get("advisor_eurfx",6.3),
-                             focused=(ux_area=="Explorar" and ux_section=="Cidades-base"))
+        if ((st.session_state.get(CONTEXT) or {}).get("kind")!="profile"
+                or not render_profile_context(active_plan())):
+            render_base_explorer(active_plan(),data,sync_sources["finance"]["status"]=="live",
+                                 st.session_state.get("advisor_eurfx",6.3),
+                                 focused=(ux_area=="Explorar" and ux_section=="Cidades-base"))
 
     elif itinerary_section in ("Meus passeios","Descobrir","Orçamento","Calendário","Simular roteiros"):
         if itinerary_section=="Calendário":
