@@ -225,7 +225,7 @@ def render_independent_destination_discovery(*, discovery=None) -> None:
         st.caption("Os destinos ainda não representam reservas nem trajetos "
                    "ou custos confirmados para 2027.")
         cards = kpi_cards([
-            {"name":"Destinos","value":discovery["destination_count"],"icon":"◎",
+            {"name":"Destinos para descobrir","value":discovery["destination_count"],"icon":"◎",
              "hint":"Catálogo de pesquisa"},
             {"name":"Atrações","value":discovery["unique_attractions_count"],
              "icon":"◇","hint":"Sem duplicatas semânticas"},
