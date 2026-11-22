@@ -65,3 +65,27 @@ A fundação será **apresentação pura**, sem importar Streamlit, \`TripPlan\`
 - Testes: presença de classes/estados, escaping, contraste WCAG AA >= 4.5, contrato CSS10, AppTest de Meus destinos e resumo, largura 1440/768/390; se não houver navegador, anotar não validado.
 
 **Dependência da série:** só depois de implementação e integração deste PR em \`main\` realizar as integrações UX82/UX83/UX84. Sem merge automático e manter draft até os gates de aceite.
+
+---
+
+## UX81 P2 — Como usar `next_action` fora de Meu roteiro
+
+**Causa:** anteriormente, `strong` emitia texto branco, mas seu fundo dependia da key `flow_journey_next`. Agora a variante tem fundo, borda, padding, tipografia e responsividade próprios.
+
+**Uso autônomo:** chamar `st.markdown(next_action(title, explanation, variant="strong"), unsafe_allow_html=True)` em qualquer página. A classe `.ui-next-action--strong` define toda a superfície mesmo sem `st.container` nomeado.
+
+**Uso com CTA nativa e fundo único (recomendado):**
+
+```python
+with st.container(key="ui_action_shell_strong_explorar"):
+    st.markdown(next_action(title, explanation), unsafe_allow_html=True)
+    st.button("Continuar", key="explorar_cta", type="primary", on_click=callback)
+```
+
+O prefixo de key compartilhada `ui_action_shell_strong_` é um opt-in para agrupar a CTA nativa. Streamlit coloca Markdown e botões em elementos irmãos do DOM, portanto o CSS pinta somente o contêiner exterior e neutraliza fundo e padding do filho `.ui-next-action--strong`. **Não existe card duplo.** A key histórica `flow_journey_next` continua como shell compatível sem mudanças de callbacks.
+
+**Uso compacto:** `st.markdown(next_action(title, explanation, variant="compact"), unsafe_allow_html=True)` — estilo claro autocontido para Mapa, Comparar bases, Visão financeira e Simulações. Não introduz botão HTML fictício.
+
+**Testes e limites:** novos testes cobrem variante autônoma e compacta, neutralização do card interno, contraste >= 4,5:1 e botões nativos em AppTest; o controle de keyboard/focus/disabled é escopado a shells opt-in. **Navegador real (1440/768/390 px) não validado nesta execução**, portanto comparação visual com PR #196 permanece pendente. AppTest não mede layout CSS.
+
+**Dependentes:** #198, #199 e #200 podem reutilizar o mesmo contrato. O problema `summary_only=True` de Meus destinos (#199) continua pendente e fora do escopo deste PR.
