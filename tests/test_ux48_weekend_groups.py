@@ -186,16 +186,18 @@ class WeekendGroupUITests(unittest.TestCase):
         self.assertFalse(app.exception,[e.message for e in app.exception])
         self.assertFalse(any("Acesso a ferramentas antigas" in e.label
                              for e in app.expander))
+        app.button(key="flow_journey_step_organize").click().run()
         # Italy is the initial stage: the European weekend tool must be hidden.
         self.assertFalse(any("Organizar viagens de fim de semana" in m.value
                               for m in app.markdown))
         app.segmented_control(key="flow_active_stage").set_value("França").run()
+        app.checkbox(key="flow_journey_calendar").check().run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
         self.assertTrue(any("Organizar viagens de fim de semana" in m.value
                              for m in app.markdown))
         headings=[m.value for m in app.markdown]
         stage_pos=next(i for i,v in enumerate(headings)
-                       if "Etapa 2 · Temporada europeia" in v)
+                       if "Organizar visitas" in v)
         weekend_pos=next(i for i,v in enumerate(headings)
                          if "Organizar viagens de fim de semana" in v)
         self.assertLess(stage_pos,weekend_pos)

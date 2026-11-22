@@ -214,18 +214,24 @@ def _candidate_media_and_logistics(city_id:str)->None:
             "não suponha que ausência de dados signifique ausência de trem.")
 
 
-def _explore_city(study,rail,five)->None:
+def _explore_city(study,rail,five,*,fixed_city=None)->None:
     st.markdown("#### Explore uma cidade")
     options={c["id"]:c for c in study["cities"]}
-    _restore_widget("expanded_bases_detail_city","ux40_selected_city",next(iter(options)))
-    st.selectbox("Cidade para examinar",list(options),
-                 key="expanded_bases_detail_city",
-                 on_change=_save_widget,
-                 args=("expanded_bases_detail_city","ux40_selected_city"),
-                 format_func=lambda key:COUNTRY_FLAGS.get(options[key]["country"],"")+
-                                        " "+options[key]["name"])
-    selected=st.session_state["expanded_bases_detail_city"]
-    st.session_state["ux40_selected_city"]=selected
+    if fixed_city is not None:
+        if fixed_city not in options:
+            st.warning("Cidade não disponível para pesquisa.")
+            return
+        selected=fixed_city
+    else:
+        _restore_widget("expanded_bases_detail_city","ux40_selected_city",next(iter(options)))
+        st.selectbox("Cidade para examinar",list(options),
+                     key="expanded_bases_detail_city",
+                     on_change=_save_widget,
+                     args=("expanded_bases_detail_city","ux40_selected_city"),
+                     format_func=lambda key:COUNTRY_FLAGS.get(options[key]["country"],"")+
+                                            " "+options[key]["name"])
+        selected=st.session_state["expanded_bases_detail_city"]
+        st.session_state["ux40_selected_city"]=selected
     city=find_city(study,selected)
     h=observed_housing(city)
     st.markdown("#### "+city["name"]+" · "+city["country"])
@@ -265,10 +271,11 @@ def _explore_city(study,rail,five)->None:
             st.caption("• "+item)
         if city.get("screening_notes"):
             st.info(city["screening_notes"])
-    st.button("Voltar à comparação de favoritas",
-              key="ux40_back_compare",on_click=lambda:
-              st.session_state.update({"ux40_research_activity":"Comparar cidades",
-                                       "ux42_city_activity":"Comparar favoritas"}))
+    if fixed_city is None:
+        st.button("Voltar à comparação de favoritas",
+                  key="ux40_back_compare",on_click=lambda:
+                  st.session_state.update({"ux40_research_activity":"Comparar cidades",
+                                           "ux42_city_activity":"Comparar favoritas"}))
 
 
 def _all_candidates(study)->None:
@@ -320,7 +327,7 @@ def _all_candidates(study)->None:
                   on_click=_open_city,args=(key,))
 
 
-def render_expanded_research(*,activity_override:str|None=None,compact:bool=False)->None:
+def render_expanded_research(*,activity_override:str|None=None,compact:bool=False,fixed_city:str|None=None)->None:
     study=load_research(include_candidates=True)
     rail=load_rail()
     five=load_five_base_evidence()
@@ -329,8 +336,9 @@ def render_expanded_research(*,activity_override:str|None=None,compact:bool=Fals
         activity=activity_override or "Explorar uma cidade"
         if activity=="Explorar uma cidade":
             st.markdown("### Explorar cidades")
-            with st.expander("Ver todas as candidatas e filtrar por país ou região"):
-                _all_candidates(study)
+            if fixed_city is None:
+                with st.expander("Ver todas as candidatas e filtrar por país ou região"):
+                    _all_candidates(study)
         else:
             st.markdown("### Comparar favoritas")
     else:
@@ -351,7 +359,7 @@ def render_expanded_research(*,activity_override:str|None=None,compact:bool=Fals
         with st.expander("Referência: as cinco bases aprofundadas"):
             _five_city_comparison(study,five)
     elif activity=="Explorar uma cidade":
-        _explore_city(study,rail,five)
+        _explore_city(study,rail,five,fixed_city=fixed_city)
     else:
         _all_candidates(study)
     with st.expander("O que ainda não podemos confirmar · fontes e metodologia"):

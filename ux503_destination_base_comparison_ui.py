@@ -71,6 +71,8 @@ def render_wishlist_base_comparison(*, plan, discovery=None, research=None):
         suffix = (" · " + ", ".join(tags)) if tags else ""
         return cities[city_id]["name"] + " · " + cities[city_id]["country"] + suffix
 
+    from rec03b_handoff_ui import render_manual_context
+    render_manual_context()
     st.markdown("#### 1. Onde poderíamos ficar?")
     selected = st.multiselect(
         "Cidades-base para comparar (2 a 5)",choices,
@@ -122,6 +124,7 @@ def render_wishlist_base_comparison(*, plan, discovery=None, research=None):
         help="Filtra apenas esta tela. Não altera ou remove destinos da lista salva.")
     st.session_state["ux504_visible_destinations_shadow"] = list(selected_view)
     visible = [x for x in active if x in selected_view]
+    render_manual_context(selected,visible)
     st.caption(f"Exibindo {len(visible)} de {len(active)} destinos desejados. "
                "Este filtro não altera a lista salva.")
     if not visible:
