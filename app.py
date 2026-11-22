@@ -724,7 +724,7 @@ elif page == "Mapa & destinos" and (st.session_state.get(CONTEXT) or {}).get("ki
         st.rerun()
 
 elif page == "Mapa & destinos":
-    from ux93_map_projection import annotate_map_places,filter_map_places,unmapped_wishes
+    from ux93_map_projection import annotate_map_places,filter_map_places,unmapped_wishes,unmapped_planned_places
     from rail_evidence_unified_model import canonical_place
     from destination_photo_assets import preferred_destination_photo
     from ux501_destination_discovery_ui import _render_destination_media
@@ -752,6 +752,11 @@ elif page == "Mapa & destinos":
     if unavailable:
         st.caption(f'{len(unavailable)} destino(s) desejados ainda não possuem '
                    'coordenadas no mapa atual. Continuam salvos em Minha lista.')
+    outside=unmapped_planned_places(enriched_catalog,active_plan())
+    if outside:
+        st.warning(f'{len(outside)} visita(s) já incluídas no roteiro não possuem '
+                   'coordenadas verificadas neste mapa. O roteiro está preservado; '
+                   'consulte Planejar → Meus destinos para revisar.')
     st.markdown(section_heading("NAVEGUE PELO MAPA","Filtre os lugares",
                                 variant="compact"),unsafe_allow_html=True)
     a,b=st.columns([1,1],gap="medium")
