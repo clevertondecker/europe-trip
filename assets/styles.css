@@ -625,7 +625,7 @@ padding:17px 20px;margin:0 0 10px;}
 }
 .journey-step__copy {display:flex;flex-direction:column;gap:3px;min-width:0;}
 .journey-step__copy strong {font-size:.99rem;color:#193E50;line-height:1.35;}
-.journey-step__copy small {font-size:.79rem;color:#5F7885;overflow-wrap:anywhere;}
+.journey-step__copy small {font-size:.79rem;color:#4B6572;overflow-wrap:anywhere;}
 .journey-step__states {display:flex;flex-wrap:wrap;align-items:center;gap:5px 10px;}
 .journey-step__status {font-size:.73rem;color:#496571;font-weight:700;}
 .journey-step__focus {font-size:.72rem;color:#135568;background:#DCF0F5;
