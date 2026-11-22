@@ -103,15 +103,16 @@ def render_independent_destination_discovery(*, discovery=None) -> None:
     discovery = discovery if discovery is not None else _cached_discovery()
     destinations = discovery["destinations"]
     by_id = {item["id"]: item for item in destinations}
+    # Keep the page header ahead of filters and wishlist save tools.
+    if st.session_state.get("ux502_view","Descobrir lugares")!="Minha lista":
+        st.markdown(page_header(
+            "Descobrir destinos", "NOSSA EUROPA 2027 · EXPLORAR",
+            "Explore lugares e experiências antes de decidir a cidade-base da viagem.",
+            tag="Pesquisar e escolher", variant="compact",
+        ),unsafe_allow_html=True)
     show_list = render_wishlist(discovery)
     if show_list:
         return
-
-    st.markdown(page_header(
-        "Descobrir destinos", "NOSSA EUROPA 2027 · EXPLORAR",
-        "Explore lugares e experiências antes de decidir a cidade-base da viagem.",
-        tag="Pesquisar e escolher", variant="compact",
-    ),unsafe_allow_html=True)
     st.caption(
         "A cidade-base atual permanece no planejamento oficial como referência "
         "provisória. Esta descoberta não altera o TripPlan, não cria reservas "

@@ -91,31 +91,30 @@ def render_wishlist(discovery) -> bool:
         for key, value in st.session_state.get("ux502_discovery_filters", {}).items():
             if key not in st.session_state:
                 st.session_state[key] = value
-        # Discovery owns its own header and controls; the wishlist workspace is
-        # rendered only after explicitly selecting Minha lista.
-        return False
-    st.markdown(page_header(
-        "Minha lista", "NOSSA EUROPA 2027 · EXPLORAR",
-        "Classifique os destinos que queremos conhecer e transforme desejos em roteiro.",
-        tag="Da descoberta ao planejamento", variant="compact",
-    ),unsafe_allow_html=True)
+    if view == "Minha lista":
+        st.markdown(page_header(
+            "Minha lista", "NOSSA EUROPA 2027 · EXPLORAR",
+            "Classifique os destinos que queremos conhecer e transforme desejos em roteiro.",
+            tag="Da descoberta ao planejamento", variant="compact",
+        ),unsafe_allow_html=True)
     items = ordered_interests(current, discovery)
     active = [r for r in items if r["priority"] != "discarded"]
-    metrics=kpi_cards([
-        {"name":"Destinos desejados","value":len(active),"hint":"Na minha lista",
-         "icon":"◎","highlight":bool(active)},
-        {"name":"Imperdíveis","value":sum(r["priority"] == "must_visit" for r in items),
-         "hint":"Maior prioridade","icon":"★"},
-        {"name":"Quero conhecer","value":sum(r["priority"] == "interested" for r in items),
-         "hint":"Interesses","icon":"◇"},
-        {"name":"Talvez","value":sum(r["priority"] == "maybe" for r in items),
-         "hint":"Para avaliar","icon":"○"},
-    ])
-    with st.container(key="ux82_wishlist_metrics"):
-        for column,markup in zip(st.columns(4,gap="small"),metrics):
-            column.markdown(markup,unsafe_allow_html=True)
-    st.caption("São preferências de pesquisa, não passeios, reservas ou trajetos confirmados. "
-               "A cidade-base oficial e o TripPlan não são alterados.")
+    if view == "Minha lista":
+        metrics=kpi_cards([
+            {"name":"Destinos desejados","value":len(active),"hint":"Na minha lista",
+             "icon":"◎","highlight":bool(active)},
+            {"name":"Imperdíveis","value":sum(r["priority"] == "must_visit" for r in items),
+             "hint":"Maior prioridade","icon":"★"},
+            {"name":"Quero conhecer","value":sum(r["priority"] == "interested" for r in items),
+             "hint":"Interesses","icon":"◇"},
+            {"name":"Talvez","value":sum(r["priority"] == "maybe" for r in items),
+             "hint":"Para avaliar","icon":"○"},
+        ])
+        with st.container(key="ux82_wishlist_metrics"):
+            for column,markup in zip(st.columns(4,gap="small"),metrics):
+                column.markdown(markup,unsafe_allow_html=True)
+        st.caption("São preferências de pesquisa, não passeios, reservas ou trajetos confirmados. "
+                   "A cidade-base oficial e o TripPlan não são alterados.")
     transient = st.session_state.get("ux501_interest_session",
                                      st.session_state.get("ux502_transient_shadow", []))
     try:
