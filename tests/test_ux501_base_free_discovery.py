@@ -99,7 +99,7 @@ class BaseFreeDiscoveryAppTests(unittest.TestCase):
         app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
         app.segmented_control(key="ux_section").set_value("Passeios").run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
-        self.assertTrue(any("O que gostaríamos de conhecer?" in x.value
+        self.assertTrue(any("Descobrir destinos" in x.value
                             for x in app.markdown))
         # Popover keeps legacy widgets mounted for existing navigation and AppTests.
         self.assertTrue(any(x.key=="attractions_scenario_base"
@@ -150,10 +150,11 @@ class BaseFreeDiscoveryAppTests(unittest.TestCase):
         app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
         app.segmented_control(key="ux_section").set_value("Passeios").run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
-        self.assertTrue(any("O que gostaríamos de conhecer?" in x.value
+        self.assertTrue(any("Descobrir destinos" in x.value
                             for x in app.markdown))
-        self.assertTrue(any(x.label=="Destinos para descobrir"
-                            for x in app.metric))
+        self.assertTrue(any("Destinos para descobrir" in x.value
+                            and "ui-kpi-card" in x.value
+                            for x in app.markdown))
 
 
 if __name__=="__main__":
