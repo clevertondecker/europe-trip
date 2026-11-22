@@ -187,5 +187,51 @@ render_planning_journey(active_plan(),load_attractions(),summary_only=st.session
             self.assertEqual(app.session_state["advisor_plan"],plan)
             self.assertEqual(app.session_state["ux502_interests"],wishes)
 
+
+    def test_visual_journey_retains_canonical_navigation_and_compact_summary(self):
+        from streamlit.testing.v1 import AppTest
+        from unittest.mock import patch
+        script = """
+import streamlit as st
+from attractions_model import load_attractions
+from planning_session import active_plan
+from ux_planning_journey_ui import render_planning_journey
+render_planning_journey(active_plan(),load_attractions(),
+                        summary_only=st.session_state.get("summary",False))
+"""
+        app=AppTest.from_string(script,default_timeout=90)
+        app.session_state["advisor_plan"]=new_plan()
+        app.session_state["ux502_interests"]=set_interest(
+            empty_interests(),"strasbourg","must_visit",self.discovery)
+        with patch("continuity_ui._private_store",return_value=None):
+            app.session_state["summary"]=True
+            app.run()
+            self.assertFalse(app.exception,str(app.exception))
+            self.assertFalse(any("journey-header__eyebrow" in x.value
+                                 for x in app.markdown))
+            self.assertEqual(len(app.metric),3)
+            app.session_state["summary"]=False
+            app.run()
+            self.assertFalse(app.exception,str(app.exception))
+            self.assertTrue(any("journey-header__eyebrow" in x.value
+                                for x in app.markdown))
+            self.assertIn("flow_journey_step_review",{x.key for x in app.button})
+            self.assertIn("flow_journey_step_build",{x.key for x in app.button})
+            original=deepcopy(app.session_state["advisor_plan"])
+            app.button(key="flow_journey_step_review").click().run()
+            self.assertFalse(app.exception,str(app.exception))
+            self.assertEqual(app.session_state["flow_journey_view"],"review")
+            self.assertEqual(app.session_state["advisor_plan"],original)
+            self.assertTrue(any('href="#journey-review-anchor"' in x.value
+                                for x in app.markdown))
+            self.assertTrue(any('id="journey-review-anchor"' in x.value
+                                for x in app.markdown))
+            app.button(key="flow_journey_step_build").click().run()
+            self.assertFalse(app.exception,str(app.exception))
+            self.assertEqual(app.session_state["flow_journey_view"],"build")
+            self.assertTrue(any('href="#journey-build-anchor"' in x.value
+                                for x in app.markdown))
+            self.assertEqual(app.session_state["advisor_plan"],original)
+
 if __name__=="__main__":
     unittest.main()

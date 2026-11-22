@@ -230,10 +230,12 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
         b.metric("Incluídos",counts["planned"])
         c.metric("Organizados",counts["organized"])
     else:
-        st.markdown(header_html(label,hint),unsafe_allow_html=True)
-        metric_columns=st.columns(3,gap="small")
-        for column,metric in zip(metric_columns,visual["metrics"]):
-            column.markdown(metric_html(metric),unsafe_allow_html=True)
+        st.markdown(header_html(label,hint,saved=visual["saved"]),
+                    unsafe_allow_html=True)
+        with st.container(key="flow_journey_metrics"):
+            metric_columns=st.columns(3,gap="small")
+            for column,metric in zip(metric_columns,visual["metrics"]):
+                column.markdown(metric_html(metric),unsafe_allow_html=True)
     if summary_only:
         action=view["next"]
         with st.container(border=True):
@@ -283,8 +285,8 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
             st.markdown('<a class="journey-next__anchor" href="#journey-build-anchor">'
                         'Ir para a seleção de destinos ↓</a>',unsafe_allow_html=True)
         elif action=="organize" and state[VIEW]=="organize":
-            st.button("Revisar e salvar rascunho",key="flow_journey_primary",
-                      type="primary",on_click=_show,args=("review",))
+            st.markdown('<a class="journey-next__anchor" href="#journey-organize-anchor">'
+                        'Ir para a organização ↓</a>',unsafe_allow_html=True)
         else:
             st.button(visual["primary_label"] or LABELS_ACTION[action],
                       key="flow_journey_primary",type="primary",

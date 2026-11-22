@@ -46,9 +46,17 @@ def project_visual_state(view: dict, storage_label: str, focused: str | None = N
         headline = "Seu rascunho está salvo em espaço privado."
         explanation = ("Continue planejando quando quiser. Salvar o roteiro "
                        "não confirma viagens ou reservas.")
-    highlight = "wished" if action in ("choose", "exploratory", "build") and planned == 0 else (
-        "planned" if action in ("build", "organize") else "organized"
-    )
+    # Inclusion is primary when eligible wishes are pending; organizing is
+    # emphasized only while the user explicitly works on dated visits.
+    # Reviewing an undated draft must never highlight an empty organizer.
+    if eligible:
+        highlight = "planned"
+    elif action == "organize" and planned:
+        highlight = "organized"
+    elif not planned or action in ("choose", "exploratory"):
+        highlight = "wished"
+    else:
+        highlight = "planned"
     metrics = [
         {"id": "wished", "icon": "◎", "name": "Desejados", "value": wished,
          "hint": "Na minha lista", "highlight": highlight == "wished"},
@@ -57,46 +65,66 @@ def project_visual_state(view: dict, storage_label: str, focused: str | None = N
         {"id": "organized", "icon": "▤", "name": "Organizados", "value": organized,
          "hint": "Com período ou data", "highlight": highlight == "organized"},
     ]
+    if saved:
+        review_detail = "Salvo em espaço privado"
+    elif storage_label.startswith("Alterações"):
+        review_detail = storage_label
+    elif planned:
+        review_detail = "Rascunho pode ser salvo"
+    else:
+        review_detail = "Nenhum destino incluído"
+
     step_info = [
         ("choose", "Escolher destinos", f"{wished} desejados", "Ver destinos", False),
         ("build", "Montar roteiro", f"{planned} incluídos · {eligible} ainda compatíveis",
          "Montar roteiro", eligible == 0),
         ("organize", "Organizar visitas", f"{organized} com período ou data · opcional",
          "Organizar", False),
-        ("review", "Revisar e salvar", storage_label if saved else
-         ("Rascunho pode ser salvo" if planned else "Nenhum destino incluído"),
+        ("review", "Revisar e salvar", review_detail,
          "Revisar" if saved else "Revisar e salvar", False),
     ]
     steps = []
     for number, (step, title, detail, button, disabled) in enumerate(step_info, 1):
-        if step == "build" and disabled:
-            status = "Sem novos destinos compatíveis" if planned else "Sem destinos compatíveis"
-        elif step == current_step:
-            status = "Etapa em foco"
-        elif step == "choose" and wished:
-            status = "Lista iniciada"
-        elif step == "build" and planned:
-            status = "Rascunho iniciado"
-        elif step == "organize" and organized:
-            status = "Visitas organizadas"
-        elif step == "review" and saved:
-            status = "Salvo"
+        # The persistent/derived state and the open panel are independent:
+        # e.g. "Salvo em espaço privado" AND "Em foco" are both displayed.
+        if step == "choose":
+            status = "Lista iniciada" if wished else "Disponível"
+        elif step == "build":
+            status = ("Indisponível · sem novos destinos compatíveis" if disabled else
+                      "Rascunho iniciado" if planned else "Disponível para incluir")
+        elif step == "organize":
+            status = ("Visitas organizadas · opcional" if organized else
+                      "Ainda sem datas · opcional" if planned else
+                      "Opcional · sem visitas incluídas")
+        elif saved:
+            status = "Salvo em espaço privado"
+        elif storage_label.startswith("Alterações"):
+            status = "Alterações não salvas"
+        elif planned:
+            status = "Rascunho local a revisar"
         else:
-            status = "Disponível"
-        steps.append({"id": step, "number": number, "title": title, "detail": detail,
-                      "button": button, "disabled": disabled,
-                      "status": status, "active": step == current_step})
-    return {"action": action, "current_step": current_step, "headline": headline,
-            "explanation": explanation, "metrics": metrics, "steps": steps,
-            "primary_label": "Continuar planejamento" if saved and action == "review" else None}
+            status = "Disponível · sem destinos incluídos"
+        steps.append({
+            "id": step, "number": number, "title": title, "detail": detail,
+            "button": button, "disabled": disabled, "status": status,
+            "active": step == current_step,
+        })
+    return {
+        "action": action, "current_step": current_step,
+        "headline": headline, "explanation": explanation,
+        "metrics": metrics, "steps": steps, "saved": saved,
+        "primary_label": "Continuar planejamento" if saved and action == "review" else None,
+    }
 
 
-def header_html(storage_label: str, storage_hint: str) -> str:
+def header_html(storage_label: str, storage_hint: str, *, saved: bool = False) -> str:
+    dot_class = "journey-header__dot--saved" if saved else "journey-header__dot--local"
     return (
         '<header class="journey-header" aria-label="Meu roteiro">'
         '<div><span class="journey-header__eyebrow">NOSSA EUROPA 2027 · PLANEJAMENTO</span>'
         '<h1>Meu roteiro</h1><p class="journey-header__save">'
-        f'<span class="journey-header__dot" aria-hidden="true"></span>{escape(storage_label)}'
+        f'<span class="journey-header__dot {dot_class}" aria-hidden="true"></span>'
+        f'{escape(storage_label)}'
         f'<span aria-hidden="true"> · </span>{escape(storage_hint)}</p></div>'
         '<span class="journey-header__tag">Da lista ao roteiro revisado</span>'
         '</header>'
@@ -125,12 +153,17 @@ def next_html(visual: dict) -> str:
 
 
 def step_html(step: dict) -> str:
+    current = ' aria-current="step"' if step["active"] else ""
+    unavailable = ' aria-disabled="true"' if step["disabled"] else ""
+    focus = ('<span class="journey-step__focus">Em foco</span>'
+             if step["active"] else "")
     return (
-        '<div class="journey-step">'
+        f'<div class="journey-step"{current}{unavailable}>'
         f'<span class="journey-step__number" aria-hidden="true">{step["number"]}</span>'
         '<div class="journey-step__copy">'
         f'<strong>{escape(step["title"])}</strong>'
         f'<small>{escape(step["detail"])}</small>'
+        '<div class="journey-step__states">'
         f'<span class="journey-step__status">{escape(step["status"])}</span>'
-        '</div></div>'
+        f'{focus}</div></div></div>'
     )
