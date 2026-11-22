@@ -686,3 +686,37 @@ padding:17px 20px;margin:0 0 10px;}
   }
   .journey-step__copy {overflow-wrap:anywhere;}
 }
+
+
+/* UX81: shared component variants using the same #196 journey CSS, not a
+   second theme. All new rules are scoped to the reusable component classes. */
+.ui-page-header__description {
+  color:#4B6572;font-size:.9rem;line-height:1.5;margin:4px 0 7px;
+}
+.ui-page-header--compact {
+  padding:16px 20px;min-height:0;margin:4px 0 12px;
+}
+.ui-page-header--compact h1 {font-size:clamp(1.4rem,2.2vw,1.9rem) !important;}
+.ui-page-header--compact .journey-header__tag {white-space:normal;}
+.ui-kpi-card .journey-stat__value {
+  overflow-wrap:anywhere;word-break:normal;font-variant-numeric:tabular-nums;
+}
+.ui-next-action--compact {
+  border:1px solid #CEE0E4;background:#EEF6F7;border-radius:13px;
+  padding:15px 18px;margin:4px 0 12px;max-width:none;
+}
+.ui-next-action--compact .journey-next__eyebrow {color:#245B6D;}
+.ui-next-action--compact h2 {
+  color:#163A4D !important;font-size:1.1rem !important;
+}
+.ui-next-action--compact p {color:#4B6572;margin-bottom:0;}
+.ui-section-heading--compact {margin:10px 0;}
+.ui-section-heading--compact h2 {font-size:1.35rem !important;}
+.ui-status-indicator--saved {color:#266653;}
+.ui-status-indicator--warning {color:#7B4A16;}
+.ui-status-indicator--disabled {color:#496571;}
+@media (max-width:700px) {
+  .ui-page-header--compact {padding:14px;}
+  .ui-next-action--compact {padding:13px 14px;}
+  .ui-kpi-card {min-width:0;}
+}
