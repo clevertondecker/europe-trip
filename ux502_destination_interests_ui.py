@@ -163,9 +163,10 @@ def render_wishlist(discovery) -> bool:
             # Discovery remains accessible in the existing task tabs.
         st.button("Comparar cidades-base", key="rec03a_open_from_wishlist",
                   on_click=request_navigation,args=(st.session_state,"suggestions"))
-        st.button("Comparar cidades-base para nossos destinos",
-                  key="ux503_open_from_wishlist",
-                  on_click=request_navigation,args=(st.session_state,"manual"))
+        with st.expander("Comparação personalizada anterior · avançado"):
+            st.button("Abrir comparação personalizada",
+                      key="ux503_open_from_wishlist",
+                      on_click=request_navigation,args=(st.session_state,"manual"))
 
     if not active:
         st.info("Nenhum destino desejado por enquanto. Explore as fotos e escolha o que interessa.")
