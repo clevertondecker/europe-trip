@@ -6,6 +6,7 @@ All user-visible dynamic text is HTML-escaped at the rendering boundary.
 from __future__ import annotations
 
 from html import escape
+from ux_shared_ui_presentation import page_header, kpi_cards, next_action, status_indicator
 
 
 def project_visual_state(view: dict, storage_label: str, focused: str | None = None) -> dict:
@@ -108,6 +109,10 @@ def project_visual_state(view: dict, storage_label: str, focused: str | None = N
             "id": step, "number": number, "title": title, "detail": detail,
             "button": button, "disabled": disabled, "status": status,
             "active": step == current_step,
+            "status_kind": ("disabled" if disabled else
+                            "saved" if step == "review" and saved else
+                            "warning" if step == "review" and storage_label.startswith("Alterações")
+                            else "neutral"),
         })
     return {
         "action": action, "current_step": current_step,
@@ -117,53 +122,34 @@ def project_visual_state(view: dict, storage_label: str, focused: str | None = N
     }
 
 
+
+# Existing UX81 integration wrappers retain legacy public names and selectors.
+# All generic markup is owned by ux_shared_ui_presentation (one library).
 def header_html(storage_label: str, storage_hint: str, *, saved: bool = False) -> str:
-    dot_class = "journey-header__dot--saved" if saved else "journey-header__dot--local"
-    return (
-        '<header class="journey-header" aria-label="Meu roteiro">'
-        '<div><span class="journey-header__eyebrow">NOSSA EUROPA 2027 · PLANEJAMENTO</span>'
-        '<h1>Meu roteiro</h1><p class="journey-header__save">'
-        f'<span class="journey-header__dot {dot_class}" aria-hidden="true"></span>'
-        f'{escape(storage_label)}'
-        f'<span aria-hidden="true"> · </span>{escape(storage_hint)}</p></div>'
-        '<span class="journey-header__tag">Da lista ao roteiro revisado</span>'
-        '</header>'
+    return page_header(
+        "Meu roteiro", "NOSSA EUROPA 2027 · PLANEJAMENTO",
+        status_label=storage_label, status_hint=storage_hint, saved=saved,
+        tag="Da lista ao roteiro revisado",
     )
 
 
 def metric_html(metric: dict) -> str:
-    modifier = " journey-stat--highlight" if metric["highlight"] else ""
-    return (
-        f'<div class="journey-stat{modifier}" aria-label="{escape(metric["name"])}: {metric["value"]}">'
-        f'<div class="journey-stat__icon" aria-hidden="true">{escape(metric["icon"])}</div>'
-        '<div class="journey-stat__content">'
-        f'<span class="journey-stat__label">{escape(metric["name"])}</span>'
-        f'<strong class="journey-stat__value">{metric["value"]}</strong>'
-        f'<small>{escape(metric["hint"])}</small></div></div>'
-    )
+    return kpi_cards((metric,))[0]
 
 
 def next_html(visual: dict) -> str:
-    return (
-        '<div class="journey-next__content"><span class="journey-next__eyebrow">'
-        '<span aria-hidden="true">✦</span> PRÓXIMA AÇÃO</span>'
-        f'<h2>{escape(visual["headline"])}</h2>'
-        f'<p>{escape(visual["explanation"])}</p></div>'
-    )
+    return next_action(visual["headline"], visual["explanation"])
 
 
 def step_html(step: dict) -> str:
     current = ' aria-current="step"' if step["active"] else ""
     unavailable = ' aria-disabled="true"' if step["disabled"] else ""
-    focus = ('<span class="journey-step__focus">Em foco</span>'
-             if step["active"] else "")
     return (
         f'<div class="journey-step"{current}{unavailable}>'
         f'<span class="journey-step__number" aria-hidden="true">{step["number"]}</span>'
         '<div class="journey-step__copy">'
         f'<strong>{escape(step["title"])}</strong>'
         f'<small>{escape(step["detail"])}</small>'
-        '<div class="journey-step__states">'
-        f'<span class="journey-step__status">{escape(step["status"])}</span>'
-        f'{focus}</div></div></div>'
+        f'{status_indicator(step["status"], active=step["active"], kind=step.get("status_kind", "neutral"))}'
+        '</div></div>'
     )
