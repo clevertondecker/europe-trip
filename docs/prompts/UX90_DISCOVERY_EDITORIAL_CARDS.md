@@ -12,8 +12,8 @@ Explorar → Descobrir exibe KPIs do catálogo, seleção temporária e textos t
 `app.py`, `ux501_destination_discovery_ui.py`, `ux501_destination_discovery_model.py`, `ux501_destination_photo_service.py`, `destination_photo_assets.py`, `ux47_photo_ui.py`, `ux502_destination_interests_ui.py`, `trip01_supplemental_discovery.py` e testes respectivos.
 
 ## Implementação solicitada
-1. A primeira área útil será **busca por destino/atração**, filtros por país/experiência e **grade de cartões fotográficos responsivos**; retirar KPIs, seleção temporária UX501 e textos técnicos do topo. Conservar função legada acessível de modo discreto.
-2. Cada cartão: foto com crédito/fonte/fallback, cidade + país/região, descrição objetiva de 1–2 linhas, perfil de experiência, **duração de visita apenas se documentada**, até três atrações e ações **Ver detalhes** / **Adicionar à minha lista**.
+1. A primeira área útil será **busca por destino/atração**, filtros por país/experiência e **grade de cartões fotográficos responsivos**; retirar KPIs, seleção temporária UX501 e textos técnicos do topo. **Não descartar o estado transitório `ux501_interest_session`**: manter reconciliação explícita de seleções ainda não persistidas em UX502, permitir importar escolhas temporárias sem sobrescrever prioridades existentes e preservar o resultado entre filtros, ida a detalhes e volta. Conservar ferramenta legada acessível discretamente.
+2. Cada cartão, sem crescimento excessivo: **foto + nome/localização + motivo curto para visitar + uma ação principal Adicionar à minha lista**; duração de visita ou até três atrações só se couberem de forma concisa e tiverem dados verificados. O detalhe completo fica sob demanda, acionado por nome/foto/link discreto, evitando dois botões primários.
 3. Detalhes dentro do contexto: atrações, fotos adicionais quando disponíveis, duração, passeios próximos, sazonalidade setembro–novembro/2027, tempo/custo de logística somente com fonte; distinguir deslocamento de tempo de visita. Dados ausentes aparecem como pendentes, nunca como zero.
 4. Adicionar à lista reutiliza exclusivamente wishlist UX502 (com feedback e prioridade), sem inserir no TripPlan. Voltar de detalhes/lista preserva busca, filtros, página e seleção.
 5. Fotos devem preservar autoria/licença/link e preferir arquivos locais ou API confiável; buscar mídia apenas para resultados visíveis e manter cache.
@@ -23,3 +23,8 @@ AppTests para 0/1/12/mais destinos, filtros combinados, paginação, feedback de
 
 ## Fora de escopo
 Sem alterar algoritmos de recomendação, modelos financeiros ou catálogo de pesquisa. Não criar galeria paralela à tela Descobrir.
+## Revisão cruzada e aceites adicionais
+- **Já existe:** grid paginada, fotos locais/Wikimedia com créditos e fallback, pesquisa/filtros, UX502 `add_destination` e links de fontes. Preservar, não criar outra galeria.
+- **Ajustar:** hierarquia visual e densidade dos cartões, conteúdo útil acima da dobra e reconciliação explícita da seleção temporária.
+- **Preservar:** filtros/página, `TripPlan` imutável, prioridade UX502 e procedência de fotos. **Desnecessário:** criar novas métricas, múltiplos CTAs ou fluxo de seleção paralelo.
+- Aceitar somente se as seleções temporárias já feitas permanecerem recuperáveis e se o usuário voltar dos detalhes com busca, filtros e página intactos.
