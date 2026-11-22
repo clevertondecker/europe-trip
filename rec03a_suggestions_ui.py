@@ -300,8 +300,11 @@ def render_suggestions(*,plan,discovery=None,research=None):
                 "Consulte as outras opções sem presumir uma vencedora.")
 
     remaining=[c for c in result["candidates"] if c["base_id"] not in set(featured)]
+    _restore_widget("rec03a_show_all","rec03a_show_all_shadow",False,
+                    lambda x:type(x) is bool)
     if remaining and st.checkbox(f"Ver todas as outras cidades ({len(remaining)})",
-                                 key="rec03a_show_all"):
+                                 key="rec03a_show_all",on_change=_remember,
+                                 args=("rec03a_show_all","rec03a_show_all_shadow")):
         st.markdown(section_heading(
             "MAIS ALTERNATIVAS", "Explore outras cidades-base",
             "Busca e filtros não alteram suas escolhas para comparação.",
