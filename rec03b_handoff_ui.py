@@ -49,6 +49,72 @@ def render_compare_selection(result,cities):
               on_click=queue_handoff,args=(state,"manual",list(selected)),type="primary")
 
 
+
+def selected_card_bases(state, options):
+    """Read-only validated CHOICE projection; do not mutate session on render."""
+    allowed=set(options)
+    raw=state.get(CHOICE, [])
+    return list(dict.fromkeys(x for x in raw if isinstance(x,str) and x in allowed)) \
+        if isinstance(raw,list) else []
+
+
+def _toggle_card_base(base, options):
+    """Native checkbox callback: CHOICE is the single ephemeral selection."""
+    state=st.session_state
+    selected=selected_card_bases(state,options)
+    wants=state.get("rec03a_pick_"+base,False)
+    if wants and base not in selected:
+        if len(selected)>=5:
+            state["rec03a_pick_"+base]=False
+            return
+        selected.append(base)
+    elif not wants:
+        selected=[x for x in selected if x!=base]
+    state[CHOICE]=selected
+
+
+def render_card_choice(base, options):
+    """A single card checkbox; never a parallel multiselect or persisted value."""
+    state=st.session_state
+    selected=selected_card_bases(state,options)
+    key="rec03a_pick_"+base
+    if state.get(key)!=(base in selected):
+        state[key]=base in selected
+    st.checkbox(
+        "Selecionar para comparar", key=key,
+        disabled=base not in selected and len(selected)>=5,
+        on_change=_toggle_card_base,args=(base,tuple(options)),
+    )
+
+
+def render_card_selection_summary(result,cities):
+    """Visible selected bases and one temporary, validated UX503 handoff.
+
+    UX87 will replace the CTA with an inline matrix and KEEP CHOICE unchanged.
+    """
+    options=[c["base_id"] for c in result["candidates"]]
+    selected=selected_card_bases(st.session_state,options)
+    st.markdown("#### Cidades selecionadas")
+    if selected:
+        st.write(" · ".join(cities[b]["name"] for b in selected))
+        st.caption(f"{len(selected)} de até 5 bases selecionadas · pesquisa, não decisão oficial.")
+    else:
+        st.caption("Selecione cidades diretamente nos cartões abaixo. Duas bastam para comparar.")
+    if len(selected)==1:
+        st.caption("Você já pode conhecer ou simular essa cidade sem selecionar uma segunda.")
+    elif len(selected)>5:
+        st.warning("Há mais de cinco cidades selecionadas; revise para comparar.")
+    if 2<=len(selected)<=5:
+        previous=manual_selection(st.session_state)
+        if previous:
+            st.caption("A comparação detalhada usará estes destinos e cidades. "
+                       "Filtros manuais anteriores poderão ser recuperados.")
+        st.button(
+            f"Comparar {len(selected)} cidades com os destinos escolhidos",
+            key="rec03a_handoff_compare",type="primary",
+            on_click=queue_handoff,args=(st.session_state,"manual",list(selected)),
+        )
+
 def render_planning_handoff(plan, *, interests, discovery, research):
     from attractions_model import load_attractions
     from rec03b_handoffs import validate_handoff
