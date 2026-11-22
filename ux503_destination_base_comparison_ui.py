@@ -11,6 +11,7 @@ from ux506_decision_readiness_projection import build_decision_readiness
 from routes7_comparison_projection import decorate_comparison
 from data8_tourism_ui import render_composed_attraction_details, render_data8_cost_simulator
 from ux_navigation import set_task
+from ux_shared_ui_presentation import page_header, kpi_cards, section_heading
 from ux505_base_comparison_presentation import (
     comparison_overview, matrix_cell, known_findings, missing_research,
 )
@@ -40,10 +41,11 @@ def _return_to_wishlist():
 def render_wishlist_base_comparison(*, plan, discovery=None, research=None):
     discovery = discovery if discovery is not None else build_exploration_discovery()
     research = research if research is not None else load_research(include_candidates=True)
-    st.markdown("### Como seria visitar nossos destinos a partir de cada cidade?")
-    st.write("Compare os tempos de trem que já pesquisamos para diferentes "
-             "cidades-base. Quando faltarem informações, mostramos o que "
-             "ainda precisa ser investigado.")
+    st.markdown(page_header(
+        "Comparar cidades-base", "NOSSA EUROPA 2027 · EXPLORAR",
+        "Compare os deslocamentos pesquisados sem decidir antecipadamente a melhor base.",
+        tag="Pesquisa comparativa", variant="compact",
+    ),unsafe_allow_html=True)
     st.caption("Você escolhe as cidades-base e os destinos desta comparação. "
                "A tela não recomenda nem seleciona uma cidade vencedora.")
     interests = st.session_state.get("ux502_interests", empty_interests())
@@ -141,15 +143,27 @@ def render_wishlist_base_comparison(*, plan, discovery=None, research=None):
     # UI-only coverage of exactly the same selected base x destination matrix.
     # Keep canonical legacy coverage as a separate dimension in the details.
     enriched = decorate_comparison(result)
-    st.markdown("#### O que podemos concluir com os dados atuais?")
-    st.markdown("#### Resumo da comparação")
-    c1, c2, c3, c4 = st.columns(4)
-    c1.metric("Histórico de trem", enriched["historical"])
-    c2.metric("Referências indicativas", enriched["reference_only"])
-    c3.metric("Sem tempo", enriched["no_time"])
-    c4.metric("Deslocamento local", enriched["local"])
-    st.metric("Trajetos com tempo pesquisado",
-              enriched["historical"] + enriched["reference_only"])
+    st.markdown(section_heading(
+        "EVIDÊNCIAS DA MATRIZ", "O que sabemos até agora",
+        "Dados históricos, indicações e lacunas são categorias distintas.",
+        variant="compact",
+    ),unsafe_allow_html=True)
+    cards=kpi_cards([
+        {"name":"Histórico de trem","value":enriched["historical"],"icon":"▤",
+         "hint":"Registros históricos"},
+        {"name":"Referências indicativas","value":enriched["reference_only"],
+         "icon":"◈","hint":"Não confirmadas para 2027"},
+        {"name":"Sem tempo pesquisado","value":enriched["no_time"],"icon":"○",
+         "hint":"Tempo desconhecido"},
+        {"name":"Deslocamento local","value":enriched["local"],"icon":"⌖",
+         "hint":"Categoria própria"},
+    ])
+    with st.container(key="ux82_compare_metrics"):
+        for column,markup in zip(st.columns(4,gap="small"),cards):
+            column.markdown(markup,unsafe_allow_html=True)
+    st.caption("Trajetos com algum tempo pesquisado: "+
+               str(enriched["historical"]+enriched["reference_only"])+
+               " (histórico e referência indicativa não são equivalentes).")
     st.markdown("#### O que ainda precisamos pesquisar?")
     st.caption(
         f'{enriched["total"]} combinações: uma categoria por par. '

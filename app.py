@@ -49,6 +49,7 @@ from base_change_ui import render_base_change
 from city_decision_ui import render_city_decision
 from base_weight_coverage_ui import render_weight_coverage
 from budget_sections_ui import render_budget_summary, render_budget_details
+from ux_shared_ui_presentation import page_header, section_heading
 from base_scenario_model import base_options, choose_exploratory_base, hypothetical_city_name, expanded_rail_routes
 from base_research_expanded_model import load_research, find_city, observed_housing
 from base_scenario_ui import render_scenario_impact
@@ -719,29 +720,21 @@ elif page == "Mapa & destinos" and (st.session_state.get(CONTEXT) or {}).get("ki
         st.rerun()
 
 elif page == "Mapa & destinos":
-    st.markdown("<div class='page-eyebrow'>EXPLORAR · EUROPA 2027</div>"
-                "<div class='page-title'>Mapa & destinos</div>"
-                "<div class='page-subtitle'>Explore as cidades do planejamento, compare alternativas e "
-                "acompanhe o que foi proposto ou ainda está em avaliação.</div>", unsafe_allow_html=True)
+    st.markdown(page_header(
+        "Mapa e destinos", "NOSSA EUROPA 2027 · EXPLORAR",
+        "Explore referências geográficas e alternativas sem interpretar pontos como reservas.",
+        variant="compact",
+    ),unsafe_allow_html=True)
     enriched_catalog = build_catalog(data["places"],load_itinerary(),
                                      load_attractions()["destinations"])
     countries_all = sorted(set(p["country"] for p in enriched_catalog))
-    c1, c2, c3 = st.columns(3, gap="small")
-    with c1:
-        st.markdown(f"<div class='page-stat page-stat--blue'><div class='page-stat__label'>Destinos mapeados</div>"
-                    f"<div class='page-stat__value'>{len(enriched_catalog)}</div>"
-                    "<div class='page-stat__hint'>Referências geográficas</div></div>", unsafe_allow_html=True)
-    with c2:
-        st.markdown(f"<div class='page-stat page-stat--mint'><div class='page-stat__label'>Países</div>"
-                    f"<div class='page-stat__value'>{len(countries_all)}</div>"
-                    "<div class='page-stat__hint'>Candidatos e passeios</div></div>", unsafe_allow_html=True)
-    with c3:
-        candidates = sum(p["status"] == "candidata" for p in enriched_catalog)
-        st.markdown(f"<div class='page-stat page-stat--cream'><div class='page-stat__label'>Alternativas em avaliação</div>"
-                    f"<div class='page-stat__value'>{candidates}</div>"
-                    "<div class='page-stat__hint'>Sem escolha definitiva</div></div>", unsafe_allow_html=True)
-
-    st.markdown("<div class='page-section'>Filtre os destinos</div>", unsafe_allow_html=True)
+    # Compact factual summary: the map, not a row of tall KPIs, owns the fold.
+    candidates=sum(p["status"]=="candidata" for p in enriched_catalog)
+    st.caption(f"{len(enriched_catalog)} referências geográficas · "
+               f"{len(countries_all)} países · {candidates} alternativas em avaliação. "
+               "Não representam reservas nem itinerários confirmados.")
+    st.markdown(section_heading("NAVEGUE PELO MAPA","Filtre os destinos",
+                                variant="compact"),unsafe_allow_html=True)
     a,b = st.columns([1,1], gap="medium")
     with a:
         countries = st.multiselect("Países", countries_all, default=countries_all, key="map_countries")
@@ -760,7 +753,8 @@ elif page == "Mapa & destinos":
     st.caption("Passe o cursor sobre um ponto para ver o nome e a classificação. "
                "Os marcadores são referências geográficas, não rotas de transporte.")
 
-    st.markdown("<div class='page-section'>Conheça as opções</div>", unsafe_allow_html=True)
+    st.markdown(section_heading("DETALHES","Conheça as opções",
+                                variant="compact"),unsafe_allow_html=True)
     if current:
         for start_idx in range(0, len(current), 3):
             row = current[start_idx:start_idx+3]

@@ -17,6 +17,7 @@ from ux501_destination_discovery_model import (
 )
 from trip01_supplemental_discovery import build_exploration_discovery
 from ux502_destination_interests_ui import render_wishlist,add_destination
+from ux_shared_ui_presentation import page_header, kpi_cards, section_heading
 from data8_tourism_ui import render_data8_destination_preview
 
 
@@ -106,20 +107,27 @@ def render_independent_destination_discovery(*, discovery=None) -> None:
     if show_list:
         return
 
-    st.markdown("### O que gostaríamos de conhecer?")
-    st.write(
-        "Comece pelos lugares e experiências que interessam a vocês. "
-        "**Não é necessário escolher uma cidade-base agora.**"
-    )
+    st.markdown(page_header(
+        "Descobrir destinos", "NOSSA EUROPA 2027 · EXPLORAR",
+        "Explore lugares e experiências antes de decidir a cidade-base da viagem.",
+        tag="Pesquisar e escolher", variant="compact",
+    ),unsafe_allow_html=True)
     st.caption(
         "A cidade-base atual permanece no planejamento oficial como referência "
         "provisória. Esta descoberta não altera o TripPlan, não cria reservas "
         "e não confirma a viabilidade de passeios."
     )
-    a, b, c = st.columns(3)
-    a.metric("Destinos para descobrir", discovery["destination_count"])
-    b.metric("Atrações únicas identificadas", discovery["unique_attractions_count"])
-    c.metric("Países no catálogo", len(discovery["countries"]))
+    cards=kpi_cards([
+        {"name":"Destinos para descobrir","value":discovery["destination_count"],
+         "icon":"◎","hint":"Catálogo de pesquisa"},
+        {"name":"Atrações identificadas","value":discovery["unique_attractions_count"],
+         "icon":"◇","hint":"Sem equivalências duplicadas"},
+        {"name":"Países no catálogo","value":len(discovery["countries"]),
+         "icon":"◉","hint":"Locais pesquisados"},
+    ])
+    with st.container(key="ux82_discovery_metrics"):
+        for column,markup in zip(st.columns(3,gap="small"),cards):
+            column.markdown(markup,unsafe_allow_html=True)
     st.caption(
         "Atrações provenientes do catálogo histórico e da pesquisa DQ 3.2; "
         "equivalências semânticas são contadas uma única vez. "
@@ -152,6 +160,9 @@ def render_independent_destination_discovery(*, discovery=None) -> None:
             "introduzidas na etapa UX 5.0.2."
         )
 
+    st.markdown(section_heading("ENCONTRE SEU DESTINO","Filtre as opções",
+                                "Pesquise por país, experiência ou atração.",
+                                variant="compact"),unsafe_allow_html=True)
     col1, col2, col3 = st.columns([2, 2, 3])
     with col1:
         country = st.selectbox(
