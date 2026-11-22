@@ -159,3 +159,11 @@ render_research_result(st.session_state["result"],key="rec05_test",base_ids=["al
 
 if __name__=="__main__":
     unittest.main()
+
+
+class LiveBootstrapSmokeTests(unittest.TestCase):
+    def test_global_exploratory_catalog_bootstraps(self):
+        from base_scenario_model import base_options
+        catalog = base_options(include_candidates=True)
+        self.assertTrue(catalog)
+        self.assertIn('angers', {item['id'] for item in catalog})
