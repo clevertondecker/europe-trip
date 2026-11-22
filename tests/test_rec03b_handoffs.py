@@ -151,18 +151,26 @@ class HandoffAppTests(unittest.TestCase):
         click("ux_sidebar_nav_1")
         app.segmented_control(key="ux_section").set_value("Comparar").run()
         self.assertFalse(app.exception,str(app.exception))
-        app.radio(key="rec03a_activity_widget").set_value("Cidades sugeridas").run()
         self.assertFalse(app.exception,str(app.exception))
-        click("rec03a_confirm_all")
+        click("rec03a_confirm_subset")
         scope=deepcopy(app.session_state[SCOPE])
-        app.multiselect(key="rec03a_handoff_base_selection_widget").set_value(["strasbourg","angers"]).run()
-        self.assertFalse(app.exception,str(app.exception))
+        def choose_city(base):
+            key="rec03a_pick_"+base
+            if not any(x.key==key for x in app.checkbox):
+                if not app.checkbox(key="rec03a_show_all").value:
+                    app.checkbox(key="rec03a_show_all").check().run()
+                app.text_input(key="rec03a_search").set_value(base).run()
+            self.assertFalse(app.exception,str(app.exception))
+            app.checkbox(key=key).check().run()
+            self.assertFalse(app.exception,str(app.exception))
+        choose_city("strasbourg")
+        choose_city("angers")
         click("rec03a_handoff_compare")
         self.assertEqual(app.multiselect(key="ux503_bases").value,["strasbourg","angers"])
         self.assertEqual(set(app.multiselect(key="ux503_visible_destinations").value),set(scope["destination_ids"]))
         click("rec03a_handoff_back_manual")
         self.assertEqual(app.session_state[SCOPE],scope)
-        self.assertEqual(app.multiselect(key="rec03a_handoff_base_selection_widget").value,["strasbourg","angers"])
+        self.assertEqual(app.session_state["rec03a_handoff_base_selection"],["strasbourg","angers"])
         # Open a real candidate profile and its map, with the same scope.
         buttons=[b for b in app.button if b.key and b.key.startswith("rec03a_handoff_profile_")]
         self.assertTrue(buttons)
@@ -186,6 +194,7 @@ class HandoffAppTests(unittest.TestCase):
         self.assertTrue(app.dataframe, "Rail evidence table not rendered")
         click("rec03a_handoff_back_map")
         self.assertEqual(app.session_state[SCOPE],scope)
+        app.checkbox(key="rec03a_planning_open").check().run()
         click("rec03a_handoff_planning")
         self.assertEqual(app.session_state["ux_section"],"Meu planejamento")
         self.assertEqual(app.session_state["flow_journey_view"],"build")
