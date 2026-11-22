@@ -157,6 +157,44 @@ render_planning_journey(active_plan(),load_attractions())
             self.assertEqual(app.session_state["ux502_interests"],wishes)
             self.assertEqual(store.save.call_count,2)
 
+    def test_bulk_confirmation_with_public_tabs_does_not_mutate_rendered_widget(self):
+        from streamlit.testing.v1 import AppTest
+        from unittest.mock import patch
+        discovery=build_exploration_discovery()
+        wishes=empty_interests()
+        for destination in ("basel","colmar","interlaken","obernai","strasbourg"):
+            wishes=set_interest(wishes,destination,"interested",discovery)
+        script="""
+import streamlit as st
+from ux64_navigation_ui import render_public_task_tabs
+from ux_planning_journey_ui import render_planning_journey
+from attractions_model import load_attractions
+from planning_session import active_plan
+render_public_task_tabs()
+render_planning_journey(active_plan(),load_attractions())
+"""
+        app=AppTest.from_string(script,default_timeout=90)
+        plan=new_plan()
+        app.session_state["advisor_plan"]=deepcopy(plan)
+        app.session_state["ux502_interests"]=deepcopy(wishes)
+        app.session_state["ux_area"]="Meu roteiro"
+        app.session_state["ux_section"]="Meu planejamento"
+        with patch("continuity_ui._private_store",return_value=None):
+            app.run()
+            self.assertFalse(app.exception,str(app.exception))
+            app.button(key="flow_journey_primary").click().run()
+            self.assertFalse(app.exception,str(app.exception))
+            batch="flow_journey_batch_"+FRANCE_STAGE
+            app.button(key=batch+"_all").click().run()
+            self.assertFalse(app.exception,str(app.exception))
+            self.assertTrue(app.multiselect(key=batch).value)
+            app.button(key=batch+"_confirm").click().run()
+            self.assertFalse(app.exception,str(app.exception))
+            self.assertEqual(app.session_state["flow_journey_view"],"review")
+            self.assertEqual(app.session_state["ux_section"],"Meu planejamento")
+            self.assertEqual(app.session_state["advisor_plan"]["base_city"],plan["base_city"])
+            self.assertEqual(app.session_state["ux502_interests"],wishes)
+
     def test_exploratory_only_and_stale_build_have_no_empty_form(self):
         from streamlit.testing.v1 import AppTest
         from unittest.mock import patch

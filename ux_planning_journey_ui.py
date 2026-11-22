@@ -19,11 +19,11 @@ LABELS_ACTION={"choose":"Escolher destinos","build":"Montar meu roteiro",
                "organize":"Organizar visitas","review":"Revisar e salvar rascunho"}
 
 
-def _show(action):
+def _show(action, *, navigate=True):
     state=st.session_state
     # UX83: the same canonical flow lives in the public task responsible for it.
     # No separate TripPlan, session copy, or second organizer is introduced.
-    if action in ("build","review","organize"):
+    if navigate and action in ("build","review","organize"):
         from ux64_navigation_model import select_public_task
         destination="Organizar" if action=="organize" else "Meus destinos"
         select_public_task(state,"Planejar",destination)
@@ -135,7 +135,10 @@ def render_build(plan, catalog, view):
                     after=project_planning(active_plan(),st.session_state.get("ux502_interests",empty_interests()),
                                            _discovery(),catalog)
                     if not after["eligible_count"]:
-                        _show("review")
+                        # Already on Planejar > Meus destinos. The public task
+                        # widget was rendered earlier in this run, so never
+                        # mutate its key while handling an inline confirm.
+                        _show("review", navigate=False)
                     st.rerun()
                 except (ValueError,KeyError) as exc:
                     st.error(str(exc))
