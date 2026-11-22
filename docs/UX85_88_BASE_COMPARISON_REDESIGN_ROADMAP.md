@@ -1,29 +1,50 @@
-# Nossa Europa 2027 — Roadmap UX85–UX88 | Comparar cidades-base
+# Nossa Europa 2027 — Roadmap de simplificação: UX85 + UX87 (revisado)
 
-## Problema validado
-A tela pública Explorar > Comparar bases mistura duas atividades (Cidades sugeridas e Comparação personalizada), confirmação de escopo, matriz histórica, pesquisas pendentes, cards longos, seleção de bases e handoffs para mapa, perfil, orçamento e roteiro. A ordem atual esconde o objetivo principal.
+**Revisão adversarial:** 2026-11-22. Esta é uma especificação, sem implementação funcional nesta série de PRs.
 
-## Jornada-alvo
-1. Confirmar ou revisar os destinos da temporada europeia (sem inferir etapa pelo país).
-2. Conhecer bases candidatas com resumo documental curto, sem ranking global.
-3. Selecionar 2–3 bases para comparar lado a lado (até 5 no avançado).
-4. Avaliar matriz de tempos conhecidos, lacunas e limitações em escopo idêntico.
-5. Investigar uma base no mapa/perfil e simular custo; salvar qualquer decisão apenas pelo fluxo canônico.
+## Decisão de arquitetura
 
-## Quatro PRs, implementação serial
-- UX85 — Entrada única guiada, escopo e shell de navegação (P1)
-- UX86 — Cards de candidatas + seleção sem duplicação (P2; depende de UX85)
-- UX87 — Matriz lado a lado + evidência sob demanda (P3; depende de UX85/UX86)
-- UX88 — Ações contextuais, simulação REC04 e validação responsiva (P4; depende de UX87)
+A meta não é um wizard de quatro etapas. É eliminar decisões redundantes, reaproveitando os estados atuais. A jornada pública deve ser **uma única atividade Explorar > Comparar bases** na qual resultados são úteis antes de configurar ferramentas avançadas.
 
-Cada branch nasce da main atual apenas com o prompt. Implementar a sequência de forma serial e atualizar cada branch a partir da main após integração do PR anterior. As quatro propostas ficam em draft até o usuário fazer review dos prompts. NÃO interpretar CI verde dos prompts como CI da implementação.
+- **PR #201 / UX85 revisado (incorpora UX86 / #202):** entrada única, escopo confirmado sem burocracia, cidades mostradas uma vez e seleção no próprio resultado.
+- **PR #203 / UX87 revisado (incorpora UX88 / #204):** mesma seleção alimenta imediatamente a matriz; ações de perfil, mapa, simulação e retorno são opcionais e contextuais.
+- **PRs #202 e #204:** especificações originais absorvidas; históricos preservados, sem implementação adicional independente. Não abrir novos PRs.
 
-## Contratos não negociáveis
-- Preservar ux64_navigation_model.PUBLIC_TASKS e TARGETS, ux502_interests, rec03a_scope/DRAFT/ACTIVITY/INTENT/IDENTITY, rec03b_handoffs CHOICE/CONTEXT/PREVIOUS/MANUAL_KEYS, ux503_bases/ux503_visible_destinations, REC04 e TripPlan.
-- Projeções recomendadas pela REC02 NÃO provam viabilidade, custo total, última milha, retorno ou horários de 2027. Histórico, referência indicativa, acesso local e no_time são quatro conceitos distintos. Sem substituir desconhecido por zero, sem ranking arbitrário nem alegar reserva.
-- Nenhuma seleção de pesquisa altera base oficial, wishlist, roteiro ou orçamento persistidos. Alterações só em callbacks explícitos canônicos.
-- Design System UX81: page_header, section_heading, kpi_cards, next_action variantes fortes e compactas; nunca criar tema paralelo nem usar CSS global frágil.
-- Conteúdo importante antes de detalhes técnicos; mantenha acessibilidade WCAG AA, desktop/tablet/mobile 1440/768/390, foco/teclado e ausência de overflow na página.
+## Caminho mais curto
 
-## Testes e gates por PR
-Executar python -m compileall -q . e python -m unittest discover -s tests -v; verificar GitHub Actions no HEAD. Testar alternâncias manual/guiado, escopo editado/stale, OAuth/identidade, seleção, recuperação de filtros, categoria de evidência, fontes e REC03B/REC04. Exigir navegação real em navegador para validação visual; se indisponível registrar explicitamente.
+**Tenho destinos na wishlist → Comparar bases → Vejo cidades plausíveis e as razões.**
+
+- Escopo REC02 já válido: **zero confirmações** para ver sugestões.
+- Escopo ausente/inválido: os interesses ativos são uma **proposta editável**, não uma decisão autoaprovada; **uma** confirmação \`confirm_scope\`. A etapa \`europe_season\` nunca é inferida silenciosamente do país.
+- Duas cidades selecionadas: mostrar comparação **na mesma atividade**, sem segundo formulário, segundo modo ou CTA para abrir outra página.
+- Uma cidade selecionada: perfil/mapa/custo ficam opcionais e independentes da comparação.
+- Planejar e Orçamento continuam alcançáveis sem escolher base e sem completar qualquer fluxo linear.
+
+## Testes de aceitação da simplicidade
+
+| Situação | Resultado observável |
+|---|---|
+| Primeiro acesso com wishlist | Proposta de escopo editável, 1 CTA, sem rádio de modo |
+| Escopo válido retomado | Cidades exibidas imediatamente; sem confirmação repetida |
+| Wishlist alterada | Novos destinos aguardam revisão; atuais reconciliados conforme modelo |
+| Cidade com dados limitados | Lacunas visíveis, sem ranking ou zeros falsos |
+| Uma cidade selecionada | Investigar/simular opcionalmente; sem necessidade de segunda base |
+| Duas cidades selecionadas | Matriz atualizada na página, sem navegar/manual duplicado |
+| Quatro ou cinco cidades | Comparação possível segundo contrato existente |
+| Retorno de perfil/mapa/orçamento | Seleção e escopo válidos preservados no contexto de sessão |
+| Identidade/plano mudou | Contexto inválido tratado, sem dados antigos reaproveitados |
+| Retorno ao roteiro | Inclusão e salvamento sem datas seguem disponíveis |
+
+## Contratos e riscos
+- \`TripPlan\`, wishlist, recomendações REC02, \`confirm_scope/reconcile_scope\`, REC03A/REC03B, REC04, REC05 e UX64 permanecem intactos.
+- Nenhum ranking global ou equivalência indevida entre \`historical\`, \`reference_only\`, \`local\` e \`no_time\`.
+- \`app.py\` deve parar de antepor ajustes de simulação, barra de atividade legada e título duplicado aos resultados de comparação.
+- Evitar novo \`shortlist\` ou estados paralelos; usar \`rec03b_handoffs.CHOICE\` para bases e \`rec03a_scope\` para destinos.
+- Escopo e seleção de pesquisa são transitórios; não prometer persistência permanente nem decidir cidade-base oficial.
+- QA: compilação, suíte unittest, CI por HEAD, AppTest de continuidade e inspeção real de navegador a 1440/768/390. CI de PR documental não vale como implementação validada.
+
+## Sequência e status
+1. Usuário revisa e aprova a proposta simplificada dos PRs #201 e #203.
+2. Implementar e testar **#201**; só então considerar merge.
+3. Atualizar **#203** com a \`main\` após #201; implementar matriz e handoffs, testá-los, e entregar para review.
+4. Sem merge automático. Não alterar PRs históricos sem necessidade.
