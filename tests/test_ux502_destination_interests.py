@@ -240,8 +240,11 @@ class PrivateWishlistPersistenceTests(unittest.TestCase):
         with patch.object(continuity_ui,"_private_store",return_value=store):
             app.run()
             self.assertFalse(app.exception,[x.message for x in app.exception])
-            app.checkbox(key="ux502_legacy_import_open").check().run()
-            self.assertFalse(app.exception,[x.message for x in app.exception])
+            with patch("ux502_destination_interests_ui.st.file_uploader") as uploader:
+                app.checkbox(key="ux502_legacy_import_open").check().run()
+                self.assertFalse(app.exception,[x.message for x in app.exception])
+                self.assertTrue(any(c.kwargs.get("key")=="ux502_upload"
+                                    for c in uploader.call_args_list))
             self.assertTrue(app.session_state["ux502_legacy_import_open"])
 
 
