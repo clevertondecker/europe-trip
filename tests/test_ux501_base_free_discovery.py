@@ -145,6 +145,46 @@ class BaseFreeDiscoveryAppTests(unittest.TestCase):
         self.assertEqual(app.session_state["advisor_plan"],initial)
         self.assertFalse(app.session_state.get("advisor_autosave_pending",False))
 
+    def test_empty_filter_results_keep_transient_interests_recoverable(self):
+        app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
+        app.button(key="ux_sidebar_nav_1").click().run()
+        app.segmented_control(key="ux_section").set_value("Passeios").run()
+        app.multiselect(key="ux501_interest_session").set_value(["colmar"]).run()
+        app.text_input(key="ux501_search").set_value("inexistente-ux90-999").run()
+        self.assertFalse(app.exception,[x.message for x in app.exception])
+        self.assertIn("ux501_interest_session",{x.key for x in app.multiselect})
+        self.assertEqual(app.session_state["ux501_interest_session"],["colmar"])
+        app.text_input(key="ux501_search").set_value("").run()
+        self.assertEqual(app.session_state["ux501_interest_session"],["colmar"])
+
+    def test_discarded_card_reconsideration_without_plan_mutation(self):
+        from ux502_destination_interests_model import empty_interests,set_interest
+        app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
+        app.button(key="ux64_sidebar_nav_0").click().run()
+        app.segmented_control(key="ux64_public_task").set_value("Descobrir").run()
+        app.text_input(key="ux501_search").set_value("colmar").run()
+        plan=deepcopy(app.session_state["advisor_plan"])
+        self.assertIn("ux502_add_colmar",{x.key for x in app.button})
+        self.assertNotIn("ux502_restore_colmar",{x.key for x in app.button})
+        for priority in ("must_visit","interested","maybe"):
+            app.session_state["ux502_interests"]=set_interest(
+                empty_interests(),"colmar",priority)
+            app.run()
+            self.assertFalse(app.exception,[x.message for x in app.exception])
+            self.assertNotIn("ux502_add_colmar",{x.key for x in app.button})
+            self.assertNotIn("ux502_restore_colmar",{x.key for x in app.button})
+        app.session_state["ux502_interests"]=set_interest(
+            empty_interests(),"colmar","discarded")
+        app.run()
+        self.assertFalse(app.exception,[x.message for x in app.exception])
+        self.assertIn("ux502_restore_colmar",{x.key for x in app.button})
+        self.assertNotIn("ux502_add_colmar",{x.key for x in app.button})
+        app.button(key="ux502_restore_colmar").click().run()
+        self.assertFalse(app.exception,[x.message for x in app.exception])
+        self.assertEqual(app.session_state["ux502_interests"]["items"],
+                         [{"destination_id":"colmar","priority":"interested"}])
+        self.assertEqual(app.session_state["advisor_plan"],plan)
+
     def test_first_discovery_does_not_require_exploratory_base(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
         app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()

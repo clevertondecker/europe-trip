@@ -99,6 +99,37 @@ def _destination_rows(items: list[dict], size: int = 3) -> list[list[dict]]:
     return [items[i:i+size] for i in range(0, len(items), size)]
 
 
+def _destination_teaser(item: dict) -> str:
+    """Concise evidence-backed card copy; never invent visit duration or routes."""
+    attractions = [row["name"] for row in item.get("attractions", [])[:2]
+                   if row.get("name")]
+    if attractions:
+        return "Destaques: " + " · ".join(attractions)
+    categories = item.get("categories") or []
+    if categories:
+        return "Experiências: " + " · ".join(categories[:2])
+    return "Conheça este destino; atrações individuais ainda não pesquisadas."
+
+
+def _destination_wishlist_state(interests: dict | None, destination_id: str) -> str:
+    """Read the existing UX502 priority without treating discarded as active."""
+    for row in (interests or {}).get("items", []):
+        if row["destination_id"] == destination_id:
+            return "discarded" if row["priority"] == "discarded" else "saved"
+    return "new"
+
+
+def _render_previous_interest_picker(valid: list[str], by_id: dict) -> None:
+    """Retain the old selection widget even when a filter returns zero results."""
+    st.multiselect(
+        "Lugares que despertaram interesse nesta exploração",
+        options=valid,
+        format_func=lambda key: by_id[key]["name"]+" · "+by_id[key]["country"],
+        key="ux501_interest_session",
+        help="Somente nesta sessão. Não altera o roteiro oficial.",
+    )
+
+
 def render_independent_destination_discovery(*, discovery=None) -> None:
     discovery = discovery if discovery is not None else _cached_discovery()
     destinations = discovery["destinations"]
@@ -113,53 +144,14 @@ def render_independent_destination_discovery(*, discovery=None) -> None:
     show_list = render_wishlist(discovery)
     if show_list:
         return
-    st.caption(
-        "A cidade-base atual permanece no planejamento oficial como referência "
-        "provisória. Esta descoberta não altera o TripPlan, não cria reservas "
-        "e não confirma a viabilidade de passeios."
-    )
-    cards=kpi_cards([
-        {"name":"Destinos para descobrir","value":discovery["destination_count"],
-         "icon":"◎","hint":"Catálogo de pesquisa"},
-        {"name":"Atrações identificadas","value":discovery["unique_attractions_count"],
-         "icon":"◇","hint":"Sem equivalências duplicadas"},
-        {"name":"Países no catálogo","value":len(discovery["countries"]),
-         "icon":"◉","hint":"Locais pesquisados"},
-    ])
-    with st.container(key="ux82_discovery_metrics"):
-        for column,markup in zip(st.columns(3,gap="small"),cards):
-            column.markdown(markup,unsafe_allow_html=True)
-    st.caption(
-        "Atrações provenientes do catálogo histórico e da pesquisa DQ 3.2; "
-        "equivalências semânticas são contadas uma única vez. "
-        "Destinos sem atrações detalhadas continuam exploráveis."
-    )
-
+    # Keep existing transient interests recoverable, without putting their
+    # old editor ahead of the destination gallery.
     valid = list(by_id)
     selected = [key for key in st.session_state.get("ux501_interest_session", [])
                 if key in by_id]
-    # Do not sync to TripPlan, favorites, cloud storage or autosave.
-    if "ux501_interest_session" not in st.session_state:
+    if "ux501_interest_session" not in st.session_state or (
+            st.session_state["ux501_interest_session"] != selected):
         st.session_state["ux501_interest_session"] = selected
-    elif selected != st.session_state["ux501_interest_session"]:
-        st.session_state["ux501_interest_session"] = selected
-
-    st.caption("A seleção temporária da versão anterior pode ser incorporada "
-               "explicitamente em Minha lista; ela não é salva automaticamente.")
-    st.multiselect(
-        "Lugares que despertaram interesse nesta exploração",
-        options=valid,
-        format_func=lambda key: by_id[key]["name"]+" · "+by_id[key]["country"],
-        key="ux501_interest_session",
-        help="Seleção apenas nesta sessão; não é o roteiro oficial nem uma lista salva.",
-    )
-    selected = st.session_state["ux501_interest_session"]
-    if selected:
-        st.info(
-            f"{len(selected)} lugar(es) em observação nesta sessão. "
-            "A classificação e persistência dos destinos desejados serão "
-            "introduzidas na etapa UX 5.0.2."
-        )
 
     st.markdown(section_heading("ENCONTRE SEU DESTINO","Filtre as opções",
                                 "Pesquise por país, experiência ou atração.",
@@ -188,6 +180,8 @@ def render_independent_destination_discovery(*, discovery=None) -> None:
                "não uma lista de viagens ferroviárias confirmadas.")
     if not matches:
         st.info("Nenhum destino corresponde aos filtros. Experimente outra busca.")
+        with st.expander("Seleção temporária anterior · avançado",expanded=False):
+            _render_previous_interest_picker(valid,by_id)
         return
 
     page_size = 12
@@ -216,52 +210,59 @@ def render_independent_destination_discovery(*, discovery=None) -> None:
                 with column:
                     photo = preferred_destination_photo(item, fallback_photos.get(item["id"]))
                     _render_destination_media(item,photo)
-                    if photo and photo.get("subject"):
-                        st.caption("Na foto: " + photo["subject"])
                     st.markdown("**"+item["name"]+"** · "+item["country"])
-                    if item.get("planning_support") == "exploration_only":
-                        st.caption("Pesquisa e comparação disponíveis; ainda não pode ser incluído no roteiro.")
-                    if item["attraction_count"]:
-                        names = [attr["name"] for attr in item["attractions"][:3]]
-                        st.write(" · ".join(names))
-                        if item["attraction_count"] > 3:
-                            st.caption(
-                                f"+ {item['attraction_count']-3} atrações catalogadas")
+                    # A short, sourced reason to explore: only catalogued
+                    # attractions and categories, not invented editorial text.
+                    st.caption(_destination_teaser(item))
+                    state = _destination_wishlist_state(
+                        st.session_state.get("ux502_interests"), item["id"])
+                    if state == "saved":
+                        st.caption("✓ Na minha lista")
+                    elif state == "discarded":
+                        st.caption("Destino descartado anteriormente")
+                        st.button("Reconsiderar destino",
+                                  key="ux502_restore_"+item["id"],
+                                  use_container_width=True,
+                                  on_click=add_destination, args=(item["id"], discovery))
                     else:
-                        st.caption(
-                            "Destino conhecido; atrações individuais ainda "
-                            "não cadastradas nesta pesquisa.")
-                    if item["categories"]:
-                        st.caption("Experiências: "+", ".join(item["categories"][:3]))
-                    st.caption(
-                        "Pesquisa de atrações disponível" if item["attraction_count"]
-                        else "Pesquisa local a aprofundar")
+                        st.button("Adicionar à minha lista",
+                                  key="ux502_add_"+item["id"],
+                                  use_container_width=True,
+                                  on_click=add_destination, args=(item["id"], discovery))
                     with st.container(key=f"ux53_footer_destination_{item['id']}"):
-                        if item.get("source_url"):
-                            st.link_button("Consultar fonte turística", item["source_url"])
-                        with st.expander("Ver atrações e fontes"):
-                            if not item["attractions"]:
-                                st.caption("Nenhuma atração individual documentada.")
-                            for attraction in item["attractions"]:
-                                st.markdown(
-                                    "- ["+attraction["name"]+"]("+
-                                    attraction["source_url"]+") · "+
-                                    attraction["category"])
+                        with st.expander("Ver atrações e fontes · detalhes"):
+                            if photo and photo.get("subject"):
+                                st.caption("Na foto: "+photo["subject"])
+                            if item.get("planning_support") == "exploration_only":
+                                st.info("Disponível para pesquisar e comparar; ainda não pode ser incluído no roteiro.")
+                            if item["attractions"]:
+                                for attraction in item["attractions"]:
+                                    st.markdown("- ["+attraction["name"]+"]("+
+                                                attraction["source_url"]+") · "+
+                                                attraction["category"])
+                            else:
+                                st.caption("Atrações individuais ainda não cadastradas.")
+                            if item.get("source_url"):
+                                st.link_button("Consultar fonte turística",item["source_url"])
                             render_data8_destination_preview(
                                 item["id"], attraction_names={
-                                    a["id"]: a["name"] for a in item["attractions"]})
-                        saved = {r["destination_id"]: r["priority"] for r in
-                                 st.session_state.get("ux502_interests",{}).get("items",[])}
-                        if item["id"] in saved:
-                            st.caption("Na minha lista: " + saved[item["id"]].replace("_"," "))
-                        else:
-                            st.button("Adicionar à minha lista",
-                                      key="ux502_add_"+item["id"],
-                                      use_container_width=True,
-                                      on_click=add_destination, args=(item["id"], discovery))
+                                    a["id"]:a["name"] for a in item["attractions"]})
 
-    st.caption(
-        "Acesso ferroviário, retorno de fim de semana, última milha e custo "
-        "total não foram determinados por esta visualização. "
-        "Continue a pesquisa de passeios por cidade-base abaixo, se desejar."
-    )
+    with st.expander("Pesquisa do catálogo e seleção anterior · avançado", expanded=False):
+        st.caption("Os destinos ainda não representam reservas nem trajetos "
+                   "ou custos confirmados para 2027.")
+        cards = kpi_cards([
+            {"name":"Destinos para descobrir","value":discovery["destination_count"],"icon":"◎",
+             "hint":"Catálogo de pesquisa"},
+            {"name":"Atrações","value":discovery["unique_attractions_count"],
+             "icon":"◇","hint":"Sem duplicatas semânticas"},
+            {"name":"Países","value":len(discovery["countries"]),
+             "icon":"◉","hint":"Locais pesquisados"},
+        ])
+        with st.container(key="ux82_discovery_metrics"):
+            for column,markup in zip(st.columns(3,gap="small"),cards):
+                column.markdown(markup,unsafe_allow_html=True)
+        st.caption("Seleções temporárias anteriores não são a wishlist salva. "
+                   "Você pode reconciliá-las em Minha lista sem perder os dados.")
+        _render_previous_interest_picker(valid,by_id)
+
