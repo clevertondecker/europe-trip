@@ -2,10 +2,20 @@
 import unittest
 from unittest.mock import patch
 
-from ux501_destination_discovery_ui import _destination_rows
+from ux501_destination_discovery_ui import _destination_rows, _destination_teaser
 
 
 class DestinationCardGridTests(unittest.TestCase):
+    def test_card_summary_uses_documented_attractions_only(self):
+        self.assertEqual(_destination_teaser({
+            "attractions":[{"name":"Centro histórico"},{"name":"Museu"},
+                           {"name":"Praça"}],"categories":["Museus"]}),
+                         "Destaques: Centro histórico · Museu")
+        self.assertEqual(_destination_teaser({"attractions":[],"categories":["Natureza"]}),
+                         "Experiências: Natureza")
+        self.assertIn("ainda não pesquisadas",
+                      _destination_teaser({"attractions":[],"categories":[]}))
+
     def test_empty_results_have_no_rows(self):
         self.assertEqual(_destination_rows([]), [])
 
