@@ -725,13 +725,17 @@ elif page == "Mapa & destinos" and (st.session_state.get(CONTEXT) or {}).get("ki
 
 elif page == "Mapa & destinos":
     from ux93_map_projection import annotate_map_places,filter_map_places
+    from rail_evidence_unified_model import canonical_place
+    from destination_photo_assets import preferred_destination_photo
+    from ux501_destination_discovery_ui import _render_destination_media
     st.markdown(page_header(
         "Mapa e destinos", "NOSSA EUROPA 2027 · EXPLORAR",
         "Encontre seus desejos, visitas no roteiro e possíveis cidades-base no mesmo mapa.",
         variant="compact",
     ),unsafe_allow_html=True)
+    catalog_destinations = load_attractions()["destinations"]
     enriched_catalog = build_catalog(data["places"],load_itinerary(),
-                                     load_attractions()["destinations"])
+                                     catalog_destinations)
     enriched_catalog = annotate_map_places(
         enriched_catalog, st.session_state.get("ux502_interests"), active_plan())
     countries_all = sorted({p["country"] for p in enriched_catalog})
@@ -743,6 +747,14 @@ elif page == "Mapa & destinos":
         f'{counts["Base candidata"]} bases candidatas no catálogo. '
         "Nenhum marcador significa reserva confirmada."
     )
+    wishes = {canonical_place(item["destination_id"])
+              for item in st.session_state.get("ux502_interests",{}).get("items",[])
+              if item.get("priority") != "discarded"}
+    mapped = {canonical_place(row["id"]) for row in enriched_catalog}
+    unavailable = wishes - mapped
+    if unavailable:
+        st.caption(f'{len(unavailable)} destino(s) desejados ainda não possuem '
+                   'coordenadas no mapa atual. Continuam salvos em Minha lista.')
     st.markdown(section_heading("NAVEGUE PELO MAPA","Filtre os lugares",
                                 variant="compact"),unsafe_allow_html=True)
     a,b=st.columns([1,1],gap="medium")
@@ -778,6 +790,12 @@ elif page == "Mapa & destinos":
             st.markdown("#### "+chosen["name"]+" · "+chosen["country"])
             st.caption(chosen["ux93_group"]+" · "+
                        STATUS_LABEL[chosen["status"]])
+            editorial = next((row for row in catalog_destinations
+                              if canonical_place(row["id"]) == canonical_place(chosen_id)),None)
+            photo = preferred_destination_photo({
+                "id":chosen_id,"photo":editorial.get("photo") if editorial else None})
+            if photo:
+                _render_destination_media(chosen,photo)
             st.write(chosen.get("description") or "Descrição ainda não pesquisada.")
             if chosen.get("duration") and chosen["duration"]!="A verificar":
                 st.caption("Duração de referência: "+chosen["duration"]+
