@@ -51,9 +51,18 @@ class PublicWishlistJourneyAppTests(unittest.TestCase):
         self.assertEqual(plan["base_city"],original["base_city"])
         self.assertFalse(plan["assignments"])
         self.assertEqual(app.session_state["ux502_interests"],wishes)
-        # A real save adapter is already covered elsewhere; verify that the
-        # review exposes the one canonical save action, without any dates.
-        self.assertIn("ux75_private_save_now",{x.key for x in app.button})
+        # Confirm the actual store callback, not a UI-only success message.
+        private=MagicMock()
+        private.save.return_value=42
+        with patch("continuity_ui._private_store",return_value=private):
+            app.run()
+            self.assertIn("ux75_private_save_now",{x.key for x in app.button})
+            app.button(key="ux75_private_save_now").click().run()
+            self.assertFalse(app.exception,[x.message for x in app.exception])
+            self.assertEqual(app.session_state["ux36_cloud_status"],
+                             "Salvo em espaço privado")
+            self.assertFalse(app.session_state["ux36_cloud_dirty"])
+            private.save.assert_called_once()
         app.button(key="ux64_sidebar_nav_0").click().run()
         app.segmented_control(key="ux64_public_task").set_value("Minha lista").run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
