@@ -130,7 +130,11 @@
         "oeschinen"
       ],
       "confidence": "editorial_candidates_only",
-      "budget_total_brl": null
+      "budget_total_brl": null,
+      "noncanonical_italy_candidates": [
+        "pompeii",
+        "sorrento"
+      ]
     }
   ]
 }

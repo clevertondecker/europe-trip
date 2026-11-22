@@ -107,3 +107,27 @@ O PR **#152** foi integrado e documentou 36 imagens locais WebP e 10 destinos ex
 ## Próximo passo de decisão
 
 Escolher um cenário como **rascunho para teste**, sem decisão D-004, e completar primeiro preço de aluguel/voo e retorno ferroviário dos principais passeios. Só então calcular orçamento auditável e publicar um roteiro completo dia a dia no sistema.
+
+
+## Reconciliation / source-of-truth check (22/11/2026)
+
+This file remains a research-only editorial sample, NOT a TripPlan proposal
+approved by the couple. The current code contracts were checked against main
+`d9b6e38dbcf7e2c66dc89cd481fcec692fcc7288`:
+- Three France bases are among the four official-compatible IDs. This is a
+  mapping property only; it does **not** approve any of the three options.
+- Italy accommodation bases `rome`, `salerno`, `maiori`, and `naples`
+  have defined editorial places. `pompeii` and `sorrento` are **not**
+  catalogued as selectable itinerary places; they remain unindexed research
+  ideas and are explicitly listed in the fixture. Do not fabricate itinerary
+  IDs, tickets, photography or selectable cards for them.
+- France excursion IDs are tested against the active discovery/research
+  registry; this asserts identification, **not** railway return, last mile,
+  fare, or booking availability.
+- Budget totals remain `null`, and all arrival/departure dates are *illustrative*
+  for travel after the September 4 wedding. A scenario is not imported
+  automatically, does not alter D-004/D-005, and cannot overwrite a saved plan.
+- Automated tests now verify travel night arithmetic, recognized place IDs,
+  exploratory gaps and nonimportability. Live-browser image testing, live
+  transport and rental prices, and work-authorization assumptions remain
+  outside this PR and cannot be claimed as verified.
