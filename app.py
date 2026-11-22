@@ -476,11 +476,11 @@ if ux_area=="Orçamento" and ux_section=="Simulações":
     with st.expander("Ajustes avançados da simulação",expanded=False):
         st.segmented_control("Visualizar",["Oficial","Simulação"],
                              key="ux_mode",on_change=_ux_mode_changed)
-        st.selectbox("Cidade-base da simulação",list(_base_details),
-                     key="scenario_sidebar",on_change=_select_scenario_sidebar,
-                     disabled=st.session_state["ux_mode_value"]=="Oficial",
-                     format_func=lambda key:_base_details[key]["name"]+
-                                          " · "+_base_details[key]["country"])
+        # The canonical hypothetical base is selected by the budget activity.
+        # Keep the previous sidebar selector accessible only via Explorar ->
+        # Fontes e ferramentas; do not mount two city widgets in Simulações.
+        st.caption("Cidade-base hipotética: ajuste no simulador abaixo. "
+                   "O seletor anterior continua em Explorar → Fontes e ferramentas.")
         st.number_input("Dias na França (simulação)",
                         min_value=40,max_value=80,
                         key="ux_days",on_change=_ux_days_changed,
