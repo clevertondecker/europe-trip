@@ -109,6 +109,37 @@ class WorkflowAppTests(unittest.TestCase):
         self.assertFalse(at.exception,[e.message for e in at.exception])
         self.assertEqual(at.session_state["ux_section"],"Meu planejamento")
 
+    def test_open_forms_do_not_leak_into_explore(self):
+        at=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
+        original=deepcopy(at.session_state["advisor_plan"])
+        at.button(key="workflow_open_settings").click().run()
+        self.assertTrue(any(x.label=="Duração total (dias)" for x in at.number_input))
+        at.button(key="ux64_sidebar_nav_0").click().run()
+        self.assertFalse(at.exception,[x.message for x in at.exception])
+        self.assertNotIn("workflow_settings_save",{b.key for b in at.button})
+        self.assertFalse(any(x.label=="Duração total (dias)" for x in at.number_input))
+        at.button(key="ux64_sidebar_nav_1").click().run()
+        self.assertFalse(at.exception,[x.message for x in at.exception])
+        self.assertTrue(any(x.label=="Duração total (dias)" for x in at.number_input))
+        self.assertEqual(at.session_state["advisor_plan"],original)
+
+    def test_budget_form_does_not_leak_into_wishlist(self):
+        at=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
+        original=deepcopy(at.session_state["advisor_plan"])
+        at.button(key="ux64_sidebar_nav_2").click().run()
+        at.segmented_control(key="ux64_public_task").set_value("Simulações").run()
+        at.button(key="workflow_open_alternative").click().run()
+        self.assertIn("workflow_alt_base",{x.key for x in at.selectbox})
+        at.button(key="ux64_sidebar_nav_0").click().run()
+        at.segmented_control(key="ux64_public_task").set_value("Minha lista").run()
+        self.assertFalse(at.exception,[x.message for x in at.exception])
+        self.assertNotIn("workflow_alt_base",{x.key for x in at.selectbox})
+        self.assertEqual(at.session_state["advisor_plan"],original)
+        at.button(key="ux64_sidebar_nav_2").click().run()
+        at.segmented_control(key="ux64_public_task").set_value("Simulações").run()
+        self.assertFalse(at.exception,[x.message for x in at.exception])
+        self.assertIn("workflow_alt_base",{x.key for x in at.selectbox})
+
     def test_resume_from_saved_in_session_destination(self):
         at=AppTest.from_file(str(ROOT/"app.py"),default_timeout=105).run()
         at.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Meu roteiro"))).click().run()
