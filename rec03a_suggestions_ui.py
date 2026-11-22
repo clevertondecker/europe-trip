@@ -146,7 +146,7 @@ def _restore_widget(widget, shadow, default, valid=None):
 
 def _card(candidate, result, names, cities, official, options):
     """One card per city, with CHOICE as the only base-selection state."""
-    from rec03b_handoff_ui import render_card_choice, render_card_actions
+    from rec03b_handoff_ui import render_card_choice
 
     base=candidate["base_id"]
     meta=cities[base]
@@ -170,8 +170,6 @@ def _card(candidate, result, names, cities, official, options):
             st.write("**O que falta pesquisar?** Retorno, acesso às atrações e horários de 2027.")
         st.caption("Referências de ida pesquisadas; não são duração total nem preços confirmados.")
         render_card_choice(base,options)
-        with st.expander("Conhecer, ver no mapa ou simular esta cidade"):
-            render_card_actions(base,"card")
         if st.checkbox("Ver evidências e limitações",key="rec03a_details_"+base):
             coverage=candidate["weighted_coverage"]
             if coverage["value"] is not None:
@@ -364,9 +362,14 @@ def render_suggestions(*,plan,discovery=None,research=None):
         st.info("Não há destaques com referências suficientes para este escopo. "
                 "Use 'Ver todas as cidades' para explorar as alternativas.")
 
-    # Exactly one native CTA, always AFTER at most four visible cards.
-    # UX87 will replace this region with its inline matrix while keeping CHOICE.
+    # UX87 uses CHOICE and the confirmed scope; no second manual form.
     render_card_selection_summary(result,cities)
+    from rec03b_handoff_ui import selected_card_bases
+    from ux87_inline_base_comparison_ui import render_inline_comparison
+    selected=selected_card_bases(st.session_state,options)
+    if 2<=len(selected)<=5:
+        render_inline_comparison(interests,checked["scope"],selected,
+                                 discovery=discovery,research=research)
 
     if st.checkbox("Metodologia e pesquisas pendentes",
                    key="rec03a_research_open"):
