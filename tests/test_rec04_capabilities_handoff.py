@@ -161,7 +161,7 @@ class SimulationAppTests(unittest.TestCase):
         self.assertEqual(app.session_state["ux_mode"],"Simulação")
         self.assertIsNotNone(app.button(key="rec04_return_to_source"))
         self.assertEqual(app.session_state["advisor_plan"],plan)
-        self.assertEqual(app.session_state["ux41_favorites"],favorites)
+        self.assertEqual(app.session_state.get("ux41_favorites",[]),favorites)
         app.button(key="rec04_return_to_source").click().run()
         self.assertFalse(app.exception,str(app.exception))
         self.assertEqual(app.session_state["ux_section"],"Comparar")
