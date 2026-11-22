@@ -26,6 +26,8 @@ from rec03a_suggestions_ui import render_recommendation_activity
 from rec03a_session import apply_navigation as apply_recommendation_navigation, sync_identity, identity_token, SUGGESTED
 from rec03b_handoff_ui import render_notice, render_profile_context, render_contextual_map, render_planning_return
 from rec03b_handoffs import CONTEXT
+from rec04_simulation_handoff import apply_simulation_request
+from rec04_simulation_ui import render_simulation_context
 from sidebar_account_ui import account_view_state, _logged_in_user
 from travel_advisor_ui import _owner_config
 from travel_advisor_ui import render_advisor, _recover_saved_plan, _secure_save, _owner_signed_in
@@ -89,6 +91,7 @@ sync_identity(st.session_state, identity_token(account_view_state(_rec_config, _
 apply_navigation_request(st.session_state)
 apply_recommendation_navigation(st.session_state)
 apply_planning_request(st.session_state)
+apply_simulation_request(st.session_state)
 # Legacy outing handoffs must reach the single editor rather than the summary.
 if ((st.session_state.get("ux_area"),st.session_state.get("ux_section"))==("Meu roteiro","Meu planejamento")
         and st.session_state.get("ux45_origin") and st.session_state.get("flow_edit_target")):
@@ -1560,6 +1563,8 @@ elif page == "Roteiro":
             st.link_button("Planilha do cronograma no Drive",data["sources"]["spreadsheet"],use_container_width=True)
 
 elif page == "Orçamento":
+    if ux_section=="Simulações":
+        render_simulation_context(active_plan())
     live_finance=sync_sources["finance"]["status"]=="live"
     if ux_area=="Orçamento" and ux_section=="Resumo financeiro":
         render_budget_summary(data,active_plan(),live_finance)
