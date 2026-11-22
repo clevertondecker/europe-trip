@@ -221,10 +221,19 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
     if state.get(VIEW)=="build" and not view["eligible_count"]:
         state[VIEW]="review" if view["rows"] else None
     visual=project_visual_state(view,label,focused=state[VIEW])
-    st.markdown(header_html(label,hint),unsafe_allow_html=True)
-    metric_columns=st.columns(3,gap="small")
-    for column,metric in zip(metric_columns,visual["metrics"]):
-        column.markdown(metric_html(metric),unsafe_allow_html=True)
+    if summary_only:
+        # Keep the compact home summary unchanged; only redesign the full page.
+        st.markdown("## Meu roteiro")
+        st.caption(label+" · "+hint)
+        a,b,c=st.columns(3)
+        a.metric("Desejados",counts["wished"])
+        b.metric("Incluídos",counts["planned"])
+        c.metric("Organizados",counts["organized"])
+    else:
+        st.markdown(header_html(label,hint),unsafe_allow_html=True)
+        metric_columns=st.columns(3,gap="small")
+        for column,metric in zip(metric_columns,visual["metrics"]):
+            column.markdown(metric_html(metric),unsafe_allow_html=True)
     if summary_only:
         action=view["next"]
         with st.container(border=True):
