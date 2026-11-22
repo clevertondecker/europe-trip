@@ -148,7 +148,7 @@ def render_inline_comparison(interests, scope, selected, *, discovery, research)
                                LABELS[cell["category"]])
                     url = cell.get("source_url")
                     if url:
-                        st.link_button("Consultar fonte · " + projection["names"][base],
-                                       url)
+                        st.link_button("Fonte · " + projection["names"][base] +
+                                       " → " + d["name"], url)
                     else:
                         st.caption("Fonte de tempo não disponível para este trajeto.")
