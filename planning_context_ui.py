@@ -322,8 +322,17 @@ def render_context(plan:dict,*,area:str)->None:
 
     if planning or budget_simulation:
         names={x["id"]:x["name"] for x in base_options()}
-        st.caption("Plano de referência · "+names.get(plan["base_city"],plan["base_city"])
-                   +" · "+str(plan["total_days"])+" dias · Reservas não confirmadas")
+        if state.get("ux_mode_value")=="Simulação":
+            candidate=state.get("scenario_base_selected",plan["base_city"])
+            st.caption("Simulação ativa · "+names.get(candidate,candidate)
+                       +" · "+str(state.get("ux_days_value",
+                       plan["total_days"]-plan["italy_days"]))+" dias · Plano preservado")
+            if area=="Minha viagem":
+                st.button("Voltar ao oficial",key="ux_return_official",
+                          on_click=return_official_context)
+        else:
+            st.caption("Roteiro oficial · "+names.get(plan["base_city"],plan["base_city"])
+                       +" · "+str(plan["total_days"])+" dias · Reservas não confirmadas")
     if planning:
         st.button("Configurar minha viagem",key="workflow_open_settings",
                   on_click=show_settings)
