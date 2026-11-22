@@ -1,3 +1,6 @@
+> **SUBSTITUÍDO — escopo absorvido pelo PR #203 (UX87 revisado).**
+> Comparação contínua e simulação de cidade individual estão reunidas numa única entrega, sem etapa obrigatória nem CTA duplicada. Este texto abaixo é mantido apenas como histórico. **Não implementar este prompt isoladamente.**
+
 # UX88 — Ações contextuais, simulação de custo e QA visual | Prompt de implementação
 
 ## Missão
