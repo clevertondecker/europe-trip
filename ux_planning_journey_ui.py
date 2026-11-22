@@ -286,8 +286,9 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
             st.button("Revisar e salvar rascunho",key="flow_journey_primary",
                       type="primary",on_click=_show,args=("review",))
         else:
-            st.button(LABELS_ACTION[action],key="flow_journey_primary",
-                      type="primary",on_click=_show,args=(action,))
+            st.button(visual["primary_label"] or LABELS_ACTION[action],
+                      key="flow_journey_primary",type="primary",
+                      on_click=_show,args=(action,))
     st.markdown(
         '<div class="journey-section-title"><span>SEU CAMINHO</span>'
         '<h2>Etapas da jornada</h2>'
