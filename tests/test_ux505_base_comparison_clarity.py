@@ -96,6 +96,7 @@ class ComparisonPresentationAppTests(TestCase):
         app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
         if interests is not None:
             app.session_state["ux502_interests"]=interests
+        app.session_state["rec03a_activity"]="Comparação personalizada"
         app.segmented_control(key="ux_section").set_value("Comparar").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
         return app,before

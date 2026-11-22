@@ -58,6 +58,10 @@ def select_public_task(state, area, task):
     target_area,target_section=TARGETS[(area,task)]
     previous=(state.get("ux_area"),state.get("ux_section"))
     set_task(state,target_area,target_section)
+    if (area,task)==("Explorar","Comparar bases"):
+        # Public task navigation starts at suggestions; REC03B/manual intents
+        # deliberately override this *after* selecting the public task.
+        state["rec03a_activity"]="Cidades sugeridas"
     # UX83: public navigation switches the focused *panel*, not the saved data.
     # Intent handoffs override this with their explicit build/review/organize.
     if area=="Planejar" and task=="Organizar":
