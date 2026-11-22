@@ -182,6 +182,8 @@ def render_review(plan,catalog,view):
                "Salvar registra decisões, não confirma reservas.")
     st.button("Organizar períodos e datas (opcional)",key="flow_journey_review_organize",
               on_click=_show,args=("organize",),disabled=not bool(view["rows"]))
+    from rec05_priority_research_ui import render_research_from_session
+    render_research_from_session(key="rec05_plan")
     render_primary_private_save(plan,catalog)
     render_continuity_panel(plan,catalog)
 

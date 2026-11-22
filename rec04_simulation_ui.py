@@ -30,6 +30,8 @@ def render_simulation_context(plan):
                     on_click=return_to_source,args=(state,))
         right.button("Ver orçamento oficial",key="rec04_return_to_official",
                      on_click=return_to_official,args=(state,))
+        from rec05_priority_research_ui import render_research_from_session
+        render_research_from_session(key="rec05_budget",base_ids=[ctx["city_id"]])
 
 
 def render_optional_housing_commitments(fx,city_id):

@@ -161,6 +161,8 @@ def render_profile_context(plan):
     # Reuse the existing full profile renderer, without writing scenario_base_selected.
     from base_research_expanded_ui import render_expanded_research
     render_expanded_research(activity_override="Explorar uma cidade",compact=True,fixed_city=base)
+    from rec05_priority_research_ui import render_research_from_session
+    render_research_from_session(key="rec05_profile",base_ids=[base])
     return True
 
 
@@ -191,6 +193,8 @@ def render_contextual_map(plan):
         st.dataframe([{"Destino":names[d],"Referência de ida":cell["label"]}
                       for d,cell in candidate["evidence"].items()],hide_index=True,width="stretch")
         st.caption(result["limitation"])
+        from rec05_priority_research_ui import render_research_result
+        render_research_result(result,key="rec05_map",base_ids=[context["base_ids"][0]])
     except (ValueError,ImportError,OSError,KeyError,TypeError):
         import logging
         logging.getLogger(__name__).exception("REC03B contextual map failed")
