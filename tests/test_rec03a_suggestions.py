@@ -120,23 +120,24 @@ class RecommendationAppTests(unittest.TestCase):
         self.click(a,"rec03a_confirm_subset")
         self.assertEqual(a.session_state[SCOPE]["destination_ids"],["basel","paris"])
         self.click(a,"rec03a_edit")
-        self.click(a,"rec03a_clear_selection")
+        a.multiselect(key="rec03a_scope_widget").set_value([])
+        self.run_ok(a)
         self.assertEqual(a.session_state[DRAFT],[])
         self.assertEqual(a.session_state[SCOPE]["destination_ids"],["basel","paris"])
         self.click(a,"rec03a_cancel_edit")
         self.assertEqual(a.session_state[SCOPE]["destination_ids"],["basel","paris"])
-        a.radio(key="rec03a_activity_widget").set_value(MANUAL)
+        a.session_state[INTENT]="manual"
         self.run_ok(a)
         self.assertIsNotNone(a.multiselect(key="ux503_bases"))
         a.multiselect(key="ux503_bases").set_value(["strasbourg","metz"])
         self.run_ok(a)
         manual=list(a.session_state["ux503_bases"])
-        a.radio(key="rec03a_activity_widget").set_value(SUGGESTED)
+        a.session_state[INTENT]="suggestions"
         self.run_ok(a)
-        a.radio(key="rec03a_activity_widget").set_value(MANUAL)
+        a.session_state[INTENT]="manual"
         self.run_ok(a)
         self.assertEqual(a.session_state["ux503_bases"],manual)
-        a.radio(key="rec03a_activity_widget").set_value(SUGGESTED)
+        a.session_state[INTENT]="suggestions"
         self.run_ok(a)
         self.click(a,"rec03a_back_wishlist")
         self.assertEqual(a.session_state["ux502_view"],"Minha lista")
@@ -145,7 +146,7 @@ class RecommendationAppTests(unittest.TestCase):
 
     def test_scope_reconciles_real_edits_and_same_revision_replacement(self):
         a=self.make_app([("paris","interested"),("colmar","maybe")],"compare")
-        self.click(a,"rec03a_confirm_all")
+        self.click(a,"rec03a_confirm_subset")
         doc=a.session_state["ux502_interests"]
         edited=set_interest(doc,"paris","must_visit",self.discovery)
         a.session_state["ux502_interests"]=edited
@@ -172,13 +173,15 @@ class RecommendationAppTests(unittest.TestCase):
     def test_data23_and_local_and_filter_preservation(self):
         a=self.make_app([("angers","must_visit"),("saint_malo","interested"),("paris","maybe")],"compare")
         original_plan=deepcopy(a.session_state["advisor_plan"])
-        self.click(a,"rec03a_confirm_all")
+        self.click(a,"rec03a_confirm_subset")
         self.assertEqual(a.session_state[SCOPE]["destination_ids"],["angers","paris","saint_malo"])
+        a.checkbox(key="rec03a_show_all").check()
+        self.run_ok(a)
         a.text_input(key="rec03a_search").set_value("Angers")
         self.run_ok(a)
-        a.radio(key="rec03a_activity_widget").set_value(MANUAL)
+        a.session_state[INTENT]="manual"
         self.run_ok(a)
-        a.radio(key="rec03a_activity_widget").set_value(SUGGESTED)
+        a.session_state[INTENT]="suggestions"
         self.run_ok(a)
         self.assertEqual(a.text_input(key="rec03a_search").value,"Angers")
         self.assertEqual(a.session_state["advisor_plan"],original_plan)
@@ -190,7 +193,7 @@ class RecommendationAppTests(unittest.TestCase):
 
     def test_loader_failure_and_identity_reset(self):
         a=self.make_app([("paris","must_visit")],"compare")
-        self.click(a,"rec03a_confirm_all")
+        self.click(a,"rec03a_confirm_subset")
         with patch("rec03a_suggestions_ui.recommend_bases",side_effect=RuntimeError("loader failure")):
             self.run_ok(a)
             self.assertTrue(a.error)
@@ -198,15 +201,15 @@ class RecommendationAppTests(unittest.TestCase):
         self.run_ok(a)
         a.session_state["test_identity"]="other"
         self.run_ok(a)
-        for key in (SCOPE,DRAFT):
-            with self.assertRaises(KeyError):
-                _ = a.session_state[key]
-        self.assertEqual(a.session_state[ACTIVITY],MANUAL)
-        a.radio(key="rec03a_activity_widget").set_value(SUGGESTED)
+        # The safer default reopens a PROPOSED scope, never a confirmed one.
+        # Identity reset must not resurrect the previous analyzed scope.
+        self.assertIsNone(a.session_state[SCOPE])
+        self.assertEqual(a.session_state[DRAFT],["paris"])
+        self.assertEqual(a.session_state[ACTIVITY],SUGGESTED)
         with patch("rec03a_suggestions_ui.recommend_bases") as engine:
             self.run_ok(a)
             self.assertIsNone(a.session_state[SCOPE])
-            self.assertIsNotNone(a.button(key="rec03a_confirm_all"))
+            self.assertIsNotNone(a.button(key="rec03a_confirm_subset"))
             engine.assert_not_called()
 
 

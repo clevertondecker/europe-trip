@@ -149,8 +149,7 @@ class SimulationAppTests(unittest.TestCase):
         favorites=deepcopy(app.session_state.get("ux41_favorites",[]))
         app.button(key="ux_sidebar_nav_1").click().run()
         app.segmented_control(key="ux_section").set_value("Comparar").run()
-        app.radio(key="rec03a_activity_widget").set_value("Cidades sugeridas").run()
-        app.button(key="rec03a_confirm_all").click().run()
+        app.button(key="rec03a_confirm_subset").click().run()
         self.assertFalse(app.exception,str(app.exception))
         btn=next(x for x in app.button
                  if x.key and x.key.startswith("rec04_simulate_") and

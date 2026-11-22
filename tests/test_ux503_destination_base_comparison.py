@@ -167,6 +167,7 @@ class DestinationBaseComparisonAppTests(unittest.TestCase):
     def test_base_switch_limits_and_remove_official(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
         app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
+        app.session_state["rec03a_activity"]="Comparação personalizada"
         app.segmented_control(key="ux_section").set_value("Comparar").run()
         original=deepcopy(app.session_state["advisor_plan"])
         official=original["base_city"]
@@ -192,6 +193,7 @@ class DestinationBaseComparisonAppTests(unittest.TestCase):
     def test_display_filter_and_priority_updates_matrix(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
         app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
+        app.session_state["rec03a_activity"]="Comparação personalizada"
         app.segmented_control(key="ux_section").set_value("Comparar").run()
         original=deepcopy(app.session_state["advisor_plan"])
         wish=sample_wishes()
@@ -216,6 +218,7 @@ class DestinationBaseComparisonAppTests(unittest.TestCase):
     def test_compare_reflects_changed_priorities_and_favorites(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
         app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
+        app.session_state["rec03a_activity"]="Comparação personalizada"
         app.segmented_control(key="ux_section").set_value("Comparar").run()
         original=deepcopy(app.session_state["advisor_plan"])
         app.session_state["ux41_favorites"]=["lille"]

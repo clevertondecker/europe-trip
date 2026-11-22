@@ -34,6 +34,16 @@ class PublicNavigationTests(unittest.TestCase):
         self.assertEqual((state["ux_area"],state["ux_section"]),
                          ("Meu roteiro","Meu planejamento"))
 
+    def test_public_compare_focus_resets_manual_without_touching_selection(self):
+        state={"rec03a_activity":"Comparação personalizada",
+               "rec03a_handoff_base_selection":["metz","strasbourg"],
+               "rec03a_handoff_previous_manual":{"ux504_bases_shadow":["mulhouse","nancy"]}}
+        select_public_task(state,"Explorar","Comparar bases")
+        self.assertEqual(state["rec03a_activity"],"Cidades sugeridas")
+        self.assertEqual(state["rec03a_handoff_base_selection"],["metz","strasbourg"])
+        self.assertEqual(state["rec03a_handoff_previous_manual"],
+                         {"ux504_bases_shadow":["mulhouse","nancy"]})
+
     def test_unknown_task_fails_closed(self):
         with self.assertRaises(ValueError):
             select_public_task({},"Planejar","Delete all plans")
