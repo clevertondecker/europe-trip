@@ -437,6 +437,13 @@ with st.sidebar:
         st.radio("Acesso à navegação anterior", list(LEGACY_PAGES),
                  key="main_navigation", on_change=_ux_legacy_page_changed)
         st.caption("Acesso avançado às pesquisas e ferramentas anteriores.")
+        # Keep the legacy task widget reachable only in sidebar tools.
+        # Rendering it before the public tabs avoids duplicate navigation.
+        legacy_area=st.session_state.get("ux_area","Minha viagem")
+        if legacy_area in UX_SECTIONS:
+            st.segmented_control("Atividade legada",list(UX_SECTIONS[legacy_area]),
+                                 key="ux_section",on_change=_ux_section_changed,
+                                 selection_mode="single")
         # Compatibility: old indexed controls still work, but are not top-level tabs.
         for old_index,old_area in enumerate(("Minha viagem","Explorar",
                                              "Meu roteiro","Orçamento")):
@@ -450,9 +457,9 @@ official_id=active_plan()["base_city"]
 ux_area=st.session_state["ux_area"]
 ux_section=st.session_state["ux_section"]
 render_context(active_plan(),area=ux_area)
-# Legacy exploratory inputs are only shown on demand; they never change the
-# official TripPlan. Keeping them accessible preserves advanced comparisons.
-if ux_area=="Explorar" and ux_section!="Comparar":
+# Financial hypotheses belong to Orçamento → Simulações, not Explorar.
+# Reuse the same widget keys; never render this panel twice on a page.
+if ux_area=="Orçamento" and ux_section=="Simulações":
     with st.expander("Ajustes avançados da simulação",expanded=False):
         st.segmented_control("Visualizar",["Oficial","Simulação"],
                              key="ux_mode",on_change=_ux_mode_changed)
@@ -479,13 +486,6 @@ render_notice()
 if (st.session_state.get(CONTEXT) or {}).get("kind")=="planning" and (
         ux_area=="Meu roteiro" or (ux_area,ux_section)==("Explorar","Passeios")):
     render_planning_return()
-# Preserve the original contract: home has no extra legacy task selector.
-if ((ux_area!="Minha viagem" or ux_section!="Resumo") and
-    not (ux_area=="Explorar" and ux_section=="Comparar")):
-    with st.expander("Atividades anteriores · avançado", expanded=False):
-        st.segmented_control("Atividade legada",list(UX_SECTIONS[ux_area]),
-                             key="ux_section",on_change=_ux_section_changed,
-                             selection_mode="single")
 if ux_area=="Meu roteiro" and ux_section=="Organizar viagem":
     st.segmented_control("Como organizar?",
                          ["Por período ou data","Calendário inteligente","Calendário completo"],
@@ -793,24 +793,6 @@ elif page == "Comparar cidades":
     # Both legacy widgets retain their keys, callbacks and optional access.
     _rec_activity = render_recommendation_activity(plan=active_plan())
     render_contextual_shortcuts("comparison")
-    with st.expander("Atividades anteriores · avançado",expanded=False):
-        st.segmented_control("Atividade legada",list(UX_SECTIONS[ux_area]),
-                             key="ux_section",on_change=_ux_section_changed,
-                             selection_mode="single")
-    with st.expander("Ajustes avançados da simulação",expanded=False):
-        st.segmented_control("Visualizar",["Oficial","Simulação"],
-                             key="ux_mode",on_change=_ux_mode_changed)
-        st.selectbox("Cidade-base da simulação",list(_base_details),
-                     key="scenario_sidebar",on_change=_select_scenario_sidebar,
-                     disabled=st.session_state["ux_mode_value"]=="Oficial",
-                     format_func=lambda key:_base_details[key]["name"]+
-                                          " · "+_base_details[key]["country"])
-        st.number_input("Dias na França (simulação)",
-                        min_value=40,max_value=80,
-                        key="ux_days",on_change=_ux_days_changed,
-                        disabled=st.session_state["ux_mode_value"]=="Oficial")
-        st.caption("Entradas hipotéticas, não alteram o roteiro aprovado. "
-                   "Para alterar o plano oficial, use Configurar minha viagem.")
     with st.expander("Análises antigas de cidades-base · avançado", expanded=False):
         st.caption("Ferramentas anteriores preservadas para consultas adicionais.")
         compare_mode=st.segmented_control(
@@ -1287,6 +1269,8 @@ elif page == "Roteiro":
     # The page title follows the current task, rather than showing a giant
     # generic trip dashboard above every single tool.
     task_title={
+        "Passeios":"Minha lista" if st.session_state.get("ux502_view")=="Minha lista"
+                  else "Descobrir lugares",
         "Cidades-base":"Explorar cidades-base",
         "Passeios e destinos":"O que podemos conhecer?",
         "Mais pesquisas":"Detalhes das pesquisas",
@@ -1294,13 +1278,14 @@ elif page == "Roteiro":
         "Organizar viagem":"Organizar nossa viagem",
         "Melhorar meu roteiro":"Melhorar nosso roteiro",
     }.get(ux_section,"Meu roteiro")
-    if ux_section not in ("Meu planejamento","Organizar viagem"):
+    if ux_section not in ("Meu planejamento","Organizar viagem") and not (
+            ux_area=="Explorar" and ux_section=="Passeios"):
         st.markdown("<div class='page-eyebrow'>NOSSA EUROPA · "+escape(ux_area.upper())+"</div>"
                 "<div class='page-title'>"+escape(task_title)+"</div>"
                 "<div class='page-subtitle'>"+escape(
                     UX_DESCRIPTIONS.get((ux_area,ux_section),"Planeje sua viagem."))+
                 "</div>",unsafe_allow_html=True)
-    if ux_section not in ("Meu planejamento","Organizar viagem"):
+    if ux_area=="Meu roteiro" and ux_section not in ("Meu planejamento","Organizar viagem"):
         render_scenario_impact(active_plan(),data,
                                sync_sources["finance"]["status"]=="live")
     # UX 4.8: only task-based navigation is user-visible. Keep legacy routing
