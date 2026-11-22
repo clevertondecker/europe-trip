@@ -1,6 +1,6 @@
 # UX87 — Comparação perceptível e investigação contextual | PR #203
 
-> **Status:** especificação para implementação futura. UX88 (#204) está absorvido. Implementar **somente após #201 integrado à main**, consumindo `CHOICE` sem outro seletor. Nenhuma alteração funcional existe ainda nesta branch.
+> **Status (2026-11-22):** UX87 + UX88 implementados nesta branch para validação. O #201 já foi integrado à `main`. A comparação usa `CHOICE` e o escopo confirmado, sem outro seletor de bases; ver resultados de CI e pendências visuais antes de considerar o PR pronto.
 
 ## Objetivo
 Atue como Staff Streamlit Engineer, Principal Product Designer, Accessibility Reviewer e Finance UX Engineer. Em **Explorar > Comparar bases**, duas cidades selecionadas devem gerar imediatamente uma **resposta útil e visível**, seguida da matriz, sem outra confirmação, novo modo ou outro conjunto de destinos. Com uma cidade, o usuário pode conhecer perfil, mapa ou custo sem comparar.
