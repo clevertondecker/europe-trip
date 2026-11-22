@@ -112,7 +112,8 @@ class ComparisonPresentationAppTests(TestCase):
         self.assertIn("Comparar cidades-base",values)
         self.assertIn("O que sabemos até agora",values)
         self.assertIn("O que ainda precisamos pesquisar?",values)
-        self.assertIn("Trajetos com algum tempo pesquisado",values)
+        self.assertTrue(any("Trajetos com algum tempo pesquisado" in x.value
+                            for x in app.caption))
         self.assertIn("ui-kpi-card",values)
         self.assertTrue(app.dataframe)
         self.assertEqual(app.session_state["advisor_plan"],plan)
