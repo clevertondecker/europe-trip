@@ -440,7 +440,7 @@ with st.sidebar:
         # Keep the legacy task widget reachable only in sidebar tools.
         # Rendering it before the public tabs avoids duplicate navigation.
         legacy_area=st.session_state.get("ux_area","Minha viagem")
-        if legacy_area in UX_SECTIONS:
+        if legacy_area in UX_SECTIONS and (legacy_area!="Minha viagem" or st.session_state.get("ux_section")!="Resumo"):
             st.segmented_control("Atividade legada",list(UX_SECTIONS[legacy_area]),
                                  key="ux_section",on_change=_ux_section_changed,
                                  selection_mode="single")
