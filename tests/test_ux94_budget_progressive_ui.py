@@ -76,11 +76,13 @@ class BudgetProjectionEquivalenceTests(unittest.TestCase):
                     result=scenario_total(scenario,budget,french_days=days,
                             outings_weekly=2,outing_couple_eur=60,
                             fx_brl_per_eur=fx)
+                    # UI components are rounded individually to cents; the
+                    # engine totals the unrounded amounts before rounding.
                     self.assertAlmostEqual(
                         result["total"],
                         round(scenario["reported_total_brl"]
                               +sum(result["new_components"].values())
-                              -sum(budget["amounts"].values()),2))
+                              -sum(budget["amounts"].values()),2),delta=0.03)
                     self.assertAlmostEqual(result["margin"],
                         round(scenario["cap_brl"]-result["total"],2))
                     self.assertEqual(result["source"],"snapshot_2026")
