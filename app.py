@@ -444,6 +444,19 @@ with st.sidebar:
             st.segmented_control("Atividade legada",list(UX_SECTIONS[legacy_area]),
                                  key="ux_section",on_change=_ux_section_changed,
                                  selection_mode="single")
+        if legacy_area=="Explorar":
+            # Compatibility for old research/simulation deep links.
+            st.segmented_control("Visualizar",["Oficial","Simulação"],
+                                 key="ux_mode",on_change=_ux_mode_changed)
+            st.selectbox("Cidade-base da simulação",list(_base_details),
+                         key="scenario_sidebar",on_change=_select_scenario_sidebar,
+                         disabled=st.session_state["ux_mode_value"]=="Oficial",
+                         format_func=lambda key:_base_details[key]["name"]+
+                                            " · "+_base_details[key]["country"])
+            st.number_input("Dias na França (simulação)",
+                            min_value=40,max_value=80,
+                            key="ux_days",on_change=_ux_days_changed,
+                            disabled=st.session_state["ux_mode_value"]=="Oficial")
         # Compatibility: old indexed controls still work, but are not top-level tabs.
         for old_index,old_area in enumerate(("Minha viagem","Explorar",
                                              "Meu roteiro","Orçamento")):
