@@ -32,21 +32,21 @@ class JourneyProjectionTests(unittest.TestCase):
 
     def test_wishlist_vs_outings_vs_dates(self):
         plan=new_plan()
-        self.assertEqual(project_journey(plan,wished())["next"]["id"],"compare")
+        self.assertEqual(project_journey(plan,wished())["next"]["id"],"itinerary")
         changed=deepcopy(plan)
         changed["packages"]={"colmar":["colmar_little_venice"]}
         self.assertEqual(project_journey(changed,wished())["next"]["id"],"itinerary")
         changed["assignments"]={"2027-10-06":"colmar"}
         result=project_journey(changed,wished())
-        self.assertEqual(result["next"]["id"],"budget")
+        self.assertEqual(result["next"]["id"],"itinerary")
         self.assertIn("1 com data",result["steps"][3]["status"])
         self.assertFalse(result["base_decision_confirmed"])
 
     def test_two_paths_without_implicit_comparison_completion(self):
         view=project_journey(new_plan(),wished())
-        self.assertEqual(view["next"],{"label":"Comparar cidades-base","id":"compare"})
+        self.assertEqual(view["next"],{"label":"Montar roteiro com meus destinos","id":"itinerary"})
         self.assertEqual(view["alternatives"],[
-            {"label":"Começar a montar roteiro","id":"itinerary"}])
+            {"label":"Comparar cidades-base","id":"compare"}])
         self.assertFalse(view["comparison_concluded"])
         self.assertFalse(view["base_decision_confirmed"])
 
@@ -114,8 +114,8 @@ class JourneyAppTests(unittest.TestCase):
         app=self._home()
         original=deepcopy(app.session_state["advisor_plan"])
         self.assertEqual(app.session_state["ux_area"],"Minha viagem")
-        self.assertTrue(app.button(key="ux504_next_step"))
-        app.button(key="ux504_next_step").click().run()
+        self.assertTrue(app.button(key="flow_journey_primary"))
+        app.button(key="flow_journey_primary").click().run()
         self.assertEqual((app.session_state["ux_area"],app.session_state["ux_section"]),
                          ("Explorar","Passeios"))
         self.assertFalse(app.exception,[x.message for x in app.exception])
@@ -129,7 +129,10 @@ class JourneyAppTests(unittest.TestCase):
         plan=deepcopy(app.session_state["advisor_plan"])
         app.session_state["ux502_interests"]=wished()
         app.run()
-        app.button(key="ux504_next_step").click().run()
+        app.button(key="flow_journey_primary").click().run()
+        self.assertEqual(app.session_state["ux_section"],"Organizar viagem")
+        app.button(key="flow_journey_suggestions").click().run()
+        app.radio(key="rec03a_activity_widget").set_value("Comparação personalizada").run()
         self.assertEqual(app.session_state["ux_section"],"Comparar")
         app.button(key="ux503_back_to_wishes").click().run()
         self.assertEqual((app.session_state["ux_area"],app.session_state["ux_section"]),
@@ -141,14 +144,14 @@ class JourneyAppTests(unittest.TestCase):
     def test_itinerary_dates_budget_without_implicit_save(self):
         app=self._home()
         plan=deepcopy(app.session_state["advisor_plan"])
-        app.button(key="ux504_step_itinerary").click().run()
+        app.segmented_control(key="ux64_public_task").set_value("Meus destinos").run()
         self.assertEqual(app.session_state["ux_section"],"Meu planejamento")
         self.assertEqual(app.session_state["ux_area"],"Meu roteiro")
-        app.button(key="ux504_itinerary_to_dates").click().run()
+        app.segmented_control(key="ux64_public_task").set_value("Organizar").run()
         self.assertEqual(app.session_state["ux_section"],"Organizar viagem")
         # Return through the ordinary task navigation and go to budget.
         app.segmented_control(key="ux_section").set_value("Meu planejamento").run()
-        app.button(key="ux504_itinerary_to_budget").click().run()
+        app.button(key="flow_journey_budget").click().run()
         self.assertEqual((app.session_state["ux_area"],app.session_state["ux_section"]),
                          ("Orçamento","Resumo financeiro"))
         self.assertEqual(app.session_state["advisor_plan"],plan)
@@ -159,7 +162,7 @@ class JourneyAppTests(unittest.TestCase):
         plan=deepcopy(app.session_state["advisor_plan"])
         wishes=wished()
         # Descobrir -> Minha lista, preserving filters before widgets unmount.
-        app.button(key="ux504_step_discover").click().run()
+        app.button(key="flow_journey_primary").click().run()
         app.text_input(key="ux501_search").set_value("Colmar").run()
         app.button(key="ux504_discovery_to_wishlist").click().run()
         self.assertEqual(app.session_state["ux502_view"],"Minha lista")
@@ -175,9 +178,9 @@ class JourneyAppTests(unittest.TestCase):
         self.assertFalse(app.exception,[e.message for e in app.exception])
         # Comparar -> Montar roteiro -> Organizar datas -> Orçamento.
         app.button(key="ux504_compare_to_itinerary").click().run()
-        app.button(key="ux504_itinerary_to_dates").click().run()
+        app.segmented_control(key="ux64_public_task").set_value("Organizar").run()
         app.segmented_control(key="ux_section").set_value("Meu planejamento").run()
-        app.button(key="ux504_itinerary_to_budget").click().run()
+        app.button(key="flow_journey_budget").click().run()
         self.assertEqual(app.session_state["ux_area"],"Orçamento")
         # Back to comparison. Streamlit removes unmounted widget keys; the
         # view-only shadow must rehydrate the previously selected bases.
@@ -200,10 +203,10 @@ class JourneyAppTests(unittest.TestCase):
         plan=deepcopy(app.session_state["advisor_plan"])
         app.session_state["ux502_interests"]=wished()
         app.run()
-        app.button(key="ux504_next_alternative_itinerary").click().run()
+        app.button(key="flow_journey_primary").click().run()
         self.assertEqual(
             (app.session_state["ux_area"],app.session_state["ux_section"]),
-            ("Meu roteiro","Meu planejamento"))
+            ("Meu roteiro","Organizar viagem"))
         self.assertEqual(app.session_state["advisor_plan"],plan)
 
     def test_existing_plan_state_remains_authoritative(self):
@@ -214,8 +217,9 @@ class JourneyAppTests(unittest.TestCase):
         app.session_state["advisor_plan"]=plan
         app.session_state["ux502_interests"]=wished()
         app.run()
-        app.button(key="ux504_next_step").click().run()
-        self.assertEqual(app.session_state["ux_area"],"Orçamento")
+        app.button(key="flow_journey_primary").click().run()
+        self.assertEqual(app.session_state["ux_area"],"Meu roteiro")
+        self.assertEqual(app.session_state["ux_section"],"Organizar viagem")
         self.assertEqual(app.session_state["advisor_plan"],plan)
 
 

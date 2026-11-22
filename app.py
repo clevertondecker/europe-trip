@@ -22,13 +22,19 @@ from calendar_model import calendar_plan
 from route_preview import route_endpoints
 from attractions_ui import render_explorer
 from ux501_destination_discovery_ui import render_independent_destination_discovery
-from ux503_destination_base_comparison_ui import render_wishlist_base_comparison
+from rec03a_suggestions_ui import render_recommendation_activity
+from rec03a_session import apply_navigation as apply_recommendation_navigation, sync_identity, identity_token, SUGGESTED
+from rec03b_handoff_ui import render_notice, render_profile_context, render_contextual_map, render_planning_return
+from rec03b_handoffs import CONTEXT
+from sidebar_account_ui import account_view_state, _logged_in_user
+from travel_advisor_ui import _owner_config
 from travel_advisor_ui import render_advisor, _recover_saved_plan, _secure_save, _owner_signed_in
 from sidebar_account_ui import render_sidebar_account
 from ux64_navigation_model import public_area, select_public_area
 from ux64_navigation_ui import render_public_task_tabs
 from travel_dashboard_ui import render_trip_dashboard
 from itinerary_flow_ui import render_itinerary_workbench
+from ux_planning_journey_ui import render_planning_journey, apply_planning_request
 from smart_calendar_ui import render_smart_calendar
 from ux37_next_actions_ui import render_next_actions,render_return_to_summary
 from continuity_ui import (apply_pending_restore,render_continuity_panel,
@@ -77,7 +83,18 @@ if restored_days is not None:
     st.session_state["ux_days"]=max(40,min(80,int(restored_days)))
     st.session_state["unified_stay"]=st.session_state["ux_days"]
 bootstrap_ux(st.session_state)
+_rec_config = _owner_config()
+_rec_user = (_logged_in_user() if _rec_config.get('google_configured') and _rec_config.get('owner_email') else None)
+sync_identity(st.session_state, identity_token(account_view_state(_rec_config, _rec_user), _rec_user))
 apply_navigation_request(st.session_state)
+apply_recommendation_navigation(st.session_state)
+apply_planning_request(st.session_state)
+# Legacy outing handoffs must reach the single editor rather than the summary.
+if ((st.session_state.get("ux_area"),st.session_state.get("ux_section"))==("Meu roteiro","Meu planejamento")
+        and st.session_state.get("ux45_origin") and st.session_state.get("flow_edit_target")):
+    set_ux_task(st.session_state,"Meu roteiro","Organizar viagem")
+    st.session_state["flow_journey_view"]="organize"
+    st.session_state["ux_organize_view"]="Por período ou data"
 if st.session_state.pop("ux503_pending_return_to_wishlist", False):
     set_ux_task(st.session_state, "Explorar", "Passeios")
     st.session_state["ux502_view"] = "Minha lista"
@@ -453,6 +470,10 @@ if (ux_area in ("Explorar","Orçamento") and
 
 # UX 6.4: three public areas with route IDs retained for saved workspaces.
 render_public_task_tabs()
+render_notice()
+if (st.session_state.get(CONTEXT) or {}).get("kind")=="planning" and (
+        ux_area=="Meu roteiro" or (ux_area,ux_section)==("Explorar","Passeios")):
+    render_planning_return()
 # Preserve the original contract: home has no extra legacy task selector.
 if ux_area!="Minha viagem" or ux_section!="Resumo":
     with st.expander("Atividades anteriores · avançado", expanded=False):
@@ -503,13 +524,17 @@ if (ux_area=="Meu roteiro" and ux_section=="Melhorar meu roteiro" and
 if page != "Visão geral":
     render_return_to_summary()
 if page == "Visão geral":
-    render_guided_home(active_plan(),st.session_state.get("ux502_interests"))
+    render_planning_journey(active_plan(),load_attractions(),data,
+                            sync_sources["finance"]["status"]=="live",
+                            st.session_state.get("advisor_eurfx",6.3),
+                            st.session_state.get("advisor_chffx",7.1),summary_only=True)
     with st.expander("Painéis anteriores, mapa, fontes e detalhes · avançado", expanded=False):
         st.divider()
         st.markdown("#### Informações e painéis complementares")
         render_home_continue(active_plan())
         render_next_actions(active_plan(),load_attractions())
-        render_continuity_panel(active_plan(),load_attractions())
+        if st.session_state.get("flow_journey_view")!="review":
+            render_continuity_panel(active_plan(),load_attractions())
         st.markdown("""<div class="home-hero" role="region" aria-label="Apresentação da viagem">
           <div class="home-hero__content"><div class="home-hero__eyebrow">ITÁLIA → FRANÇA · 2027</div>
           <h1>Uma viagem para viver,<br>não só visitar.</h1>
@@ -684,6 +709,12 @@ if page == "Visão geral":
                     "As estimativas históricas não substituem cotações reais. Imagens ilustrativas: Wikimedia Commons e Unsplash.</div>",
                     unsafe_allow_html=True)
 
+elif page == "Mapa & destinos" and (st.session_state.get(CONTEXT) or {}).get("kind")=="map":
+    render_contextual_map(active_plan())
+    if st.button("Abrir mapa geral", key="rec03a_handoff_general_map"):
+        st.session_state.pop(CONTEXT,None)
+        st.rerun()
+
 elif page == "Mapa & destinos":
     st.markdown("<div class='page-eyebrow'>EXPLORAR · EUROPA 2027</div>"
                 "<div class='page-title'>Mapa & destinos</div>"
@@ -758,7 +789,7 @@ elif page == "Mapa & destinos":
 
 elif page == "Comparar cidades":
     st.markdown("## Comparar cidades-base")
-    render_wishlist_base_comparison(plan=active_plan())
+    _rec_activity = render_recommendation_activity(plan=active_plan())
     render_contextual_shortcuts("comparison")
     with st.expander("Análises antigas de cidades-base · avançado", expanded=False):
         st.caption("Ferramentas anteriores preservadas para consultas adicionais.")
@@ -1239,37 +1270,19 @@ elif page == "Roteiro":
         "Cidades-base":"Explorar cidades-base",
         "Passeios e destinos":"O que podemos conhecer?",
         "Mais pesquisas":"Detalhes das pesquisas",
-        "Meu planejamento":"Meu planejamento",
+        "Meu planejamento":"Meu roteiro",
         "Organizar viagem":"Organizar nossa viagem",
         "Melhorar meu roteiro":"Melhorar nosso roteiro",
     }.get(ux_section,"Meu roteiro")
-    st.markdown("<div class='page-eyebrow'>NOSSA EUROPA · "+escape(ux_area.upper())+"</div>"
+    if ux_section not in ("Meu planejamento","Organizar viagem"):
+        st.markdown("<div class='page-eyebrow'>NOSSA EUROPA · "+escape(ux_area.upper())+"</div>"
                 "<div class='page-title'>"+escape(task_title)+"</div>"
                 "<div class='page-subtitle'>"+escape(
                     UX_DESCRIPTIONS.get((ux_area,ux_section),"Planeje sua viagem."))+
                 "</div>",unsafe_allow_html=True)
-    if ux_section=="Meu planejamento":
-        c1,c2,c3,c4=st.columns(4,gap="small")
-        trip_metrics=[
-            ("Casamento","04/09/2027","Data fixa"),
-            ("Viagem completa","65–75 dias","Duração em estudo"),
-            ("Itália","~10 dias","Roma + Costa Amalfitana"),
-            ("França","~55–65 dias","Base ainda em avaliação")
-        ]
-        for col,(label,val,hint) in zip((c1,c2,c3,c4),trip_metrics):
-            with col:
-                st.markdown("<div class='page-stat page-stat--blue'>"
-                            f"<div class='page-stat__label'>{escape(label)}</div>"
-                            f"<div class='page-stat__value'>{escape(val)}</div>"
-                            f"<div class='page-stat__hint'>{escape(hint)}</div></div>",
-                            unsafe_allow_html=True)
-        st.markdown("<div class='page-alert page-alert--neutral'>"
-                    "Plano em estudo: Itália → França, sem reservas confirmadas. "
-                    "Férias iniciais de 20–30 dias; depois trabalho remoto sujeito "
-                    "à validação de regras locais.</div>",unsafe_allow_html=True)
-
-    render_scenario_impact(active_plan(),data,
-                           sync_sources["finance"]["status"]=="live")
+    if ux_section not in ("Meu planejamento","Organizar viagem"):
+        render_scenario_impact(active_plan(),data,
+                               sync_sources["finance"]["status"]=="live")
     # UX 4.8: only task-based navigation is user-visible. Keep legacy routing
     # adapter internally for old deep links and session-state compatibility.
     # The modern task selector resolves guide/research access without a second
@@ -1292,11 +1305,19 @@ elif page == "Roteiro":
 
     if itinerary_section == "Visão geral":
         if (ux_area,ux_section)==("Meu roteiro","Meu planejamento"):
-            render_contextual_shortcuts("itinerary")
-        if (ux_area,ux_section)==("Meu roteiro","Organizar viagem") and (
+            render_planning_journey(active_plan(),load_attractions(),data,
+                                    sync_sources["finance"]["status"]=="live",
+                                    st.session_state.get("advisor_eurfx",6.3),
+                                    st.session_state.get("advisor_chffx",7.1),summary_only=True)
+        elif (ux_area,ux_section)==("Meu roteiro","Organizar viagem") and (
             st.session_state.get("ux_organize_view")=="Calendário inteligente"):
             render_smart_calendar(
                 active_plan(),load_attractions(),load_base_routes(),data,sync_sources)
+        elif (ux_area,ux_section)==("Meu roteiro","Organizar viagem"):
+            render_planning_journey(active_plan(),load_attractions(),data,
+                                    sync_sources["finance"]["status"]=="live",
+                                    st.session_state.get("advisor_eurfx",6.3),
+                                    st.session_state.get("advisor_chffx",7.1))
         else:
             render_itinerary_workbench(
                 active_plan(),load_attractions(),data,
@@ -1319,9 +1340,11 @@ elif page == "Roteiro":
             render_explorer(data,sync_sources,map_view)
 
     elif itinerary_section == "Explorar bases":
-        render_base_explorer(active_plan(),data,sync_sources["finance"]["status"]=="live",
-                             st.session_state.get("advisor_eurfx",6.3),
-                             focused=(ux_area=="Explorar" and ux_section=="Cidades-base"))
+        if ((st.session_state.get(CONTEXT) or {}).get("kind")!="profile"
+                or not render_profile_context(active_plan())):
+            render_base_explorer(active_plan(),data,sync_sources["finance"]["status"]=="live",
+                                 st.session_state.get("advisor_eurfx",6.3),
+                                 focused=(ux_area=="Explorar" and ux_section=="Cidades-base"))
 
     elif itinerary_section in ("Meus passeios","Descobrir","Orçamento","Calendário","Simular roteiros"):
         if itinerary_section=="Calendário":
@@ -1594,8 +1617,6 @@ elif page == "Orçamento":
         with col4:
             fx = st.number_input("Câmbio simulado (R$/€)",4.0,10.0,6.3,0.05,key="unified_fx")
         with col5:
-            # Preserve the exploratory candidate in the finance preview.
-            # Missing local rental quotes remain explicitly unknown below.
             exploratory_options=base_options(include_candidates=True)
             city_ids=[item["id"] for item in exploratory_options]
             candidate=st.session_state.get("scenario_base_selected",active_plan()["base_city"])

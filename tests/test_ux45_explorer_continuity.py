@@ -31,7 +31,7 @@ class ExplorerOutingContinuity(unittest.TestCase):
         app.button(key="ux45_explore_to_planner").click().run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
         self.assertEqual(app.session_state["ux_area"],"Meu roteiro")
-        self.assertEqual(app.session_state["ux_section"],"Meu planejamento")
+        self.assertEqual(app.session_state["ux_section"],"Organizar viagem")
         self.assertIn("flow_edit_save_strasbourg",{b.key for b in app.button})
         self.assertIn("ux45_back_to_origin",{b.key for b in app.button})
         app.button(key="ux45_back_to_origin").click().run()
