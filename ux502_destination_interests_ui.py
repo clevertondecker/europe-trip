@@ -8,6 +8,7 @@ from ux502_destination_interests_model import (
     import_interests, selected_destinations_for_comparison,
 )
 from private_continuity_store import StorageConflict, StorageUnavailable
+from ux_shared_ui_presentation import page_header, kpi_cards, next_action
 
 
 def _current(discovery):
@@ -58,7 +59,6 @@ def render_wishlist(discovery) -> bool:
     if current is None:
         return False
     by_id = {row["id"]: row for row in discovery["destinations"]}
-    st.markdown("### Lugares que queremos conhecer")
     def remember_discovery_filters():
         keys = ("ux501_country", "ux501_categories", "ux501_search", "ux501_page")
         # Streamlit removes keys for controls not mounted in the alternate view.
@@ -91,15 +91,30 @@ def render_wishlist(discovery) -> bool:
         for key, value in st.session_state.get("ux502_discovery_filters", {}).items():
             if key not in st.session_state:
                 st.session_state[key] = value
+    if view == "Minha lista":
+        st.markdown(page_header(
+            "Minha lista", "NOSSA EUROPA 2027 · EXPLORAR",
+            "Classifique os destinos que queremos conhecer e transforme desejos em roteiro.",
+            tag="Da descoberta ao planejamento", variant="compact",
+        ),unsafe_allow_html=True)
     items = ordered_interests(current, discovery)
     active = [r for r in items if r["priority"] != "discarded"]
-    a, b, c, d = st.columns(4)
-    a.metric("Destinos desejados", len(active))
-    b.metric("Imperdíveis", sum(r["priority"] == "must_visit" for r in items))
-    c.metric("Quero conhecer", sum(r["priority"] == "interested" for r in items))
-    d.metric("Talvez", sum(r["priority"] == "maybe" for r in items))
-    st.caption("São preferências de pesquisa, não passeios, reservas ou trajetos confirmados. "
-               "A cidade-base oficial e o TripPlan não são alterados.")
+    if view == "Minha lista":
+        metrics=kpi_cards([
+            {"name":"Destinos desejados","value":len(active),"hint":"Na minha lista",
+             "icon":"◎","highlight":bool(active)},
+            {"name":"Imperdíveis","value":sum(r["priority"] == "must_visit" for r in items),
+             "hint":"Maior prioridade","icon":"★"},
+            {"name":"Quero conhecer","value":sum(r["priority"] == "interested" for r in items),
+             "hint":"Interesses","icon":"◇"},
+            {"name":"Talvez","value":sum(r["priority"] == "maybe" for r in items),
+             "hint":"Para avaliar","icon":"○"},
+        ])
+        with st.container(key="ux82_wishlist_metrics"):
+            for column,markup in zip(st.columns(4,gap="small"),metrics):
+                column.markdown(markup,unsafe_allow_html=True)
+        st.caption("São preferências de pesquisa, não passeios, reservas ou trajetos confirmados. "
+                   "A cidade-base oficial e o TripPlan não são alterados.")
     transient = st.session_state.get("ux501_interest_session",
                                      st.session_state.get("ux502_transient_shadow", []))
     try:
@@ -186,6 +201,18 @@ def render_wishlist(discovery) -> bool:
         from planning_session import active_plan
         from attractions_model import load_attractions
         planning=project_planning(active_plan(),current,discovery,load_attractions())
+        # This is presentation of the same authoritative action used by the
+        # existing CTA; do not recompute eligibility or introduce another state.
+        if planning["eligible_count"]:
+            headline="Destinos compatíveis prontos para o roteiro"
+            detail=f'{planning["eligible_count"]} destino(s) podem ser incluídos sem definir datas.'
+        elif planning["rows"]:
+            headline="Seu rascunho está pronto para revisão"
+            detail="Confira os destinos incluídos e salve suas escolhas."
+        else:
+            headline="Continue descobrindo destinos"
+            detail="Os desejos atuais ainda estão disponíveis somente para pesquisa."
+        st.markdown(next_action(headline,detail,variant="compact"),unsafe_allow_html=True)
         if planning["eligible_count"]:
             st.button("Montar roteiro com meus destinos",key="flow_journey_from_wishlist",type="primary",
                       on_click=request_planning,args=(st.session_state,"build"))
