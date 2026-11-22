@@ -19,7 +19,7 @@ def sync_city_widget(widget_key: str, choices: list[str]) -> None:
 def set_city_from_widget(widget_key: str) -> None:
     """Propagate a candidate to the shared context without changing TripPlan."""
     candidate = choose_exploratory_base(
-        st.session_state[widget_key], base_options())
+        st.session_state[widget_key], base_options(include_candidates=True))
     st.session_state["scenario_base_selected"] = candidate
     st.session_state["scenario_sidebar"] = candidate
     st.session_state["ux_last_candidate"] = candidate
