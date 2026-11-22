@@ -152,8 +152,9 @@ class BaseFreeDiscoveryAppTests(unittest.TestCase):
         self.assertFalse(app.exception,[x.message for x in app.exception])
         self.assertTrue(any("Descobrir destinos" in x.value
                             for x in app.markdown))
-        self.assertTrue(any(x.label=="Destinos para descobrir"
-                            for x in app.metric))
+        self.assertTrue(any("Destinos para descobrir" in x.value
+                            and "ui-kpi-card" in x.value
+                            for x in app.markdown))
 
 
 if __name__=="__main__":
