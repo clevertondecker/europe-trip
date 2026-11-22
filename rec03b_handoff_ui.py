@@ -148,14 +148,23 @@ def render_planning_return():
 
 
 def render_card_actions(base,prefix):
+    from rec04_candidate_capabilities import capability_for
     from rec04_simulation_handoff import request_simulation
+    cap=capability_for(base)
     a,b,c=st.columns(3)
     a.button("Conhecer cidade",key=f"rec03a_handoff_profile_{prefix}_{base}",
              on_click=queue_handoff,args=(st.session_state,"profile",[base]))
     b.button("Ver no mapa",key=f"rec03a_handoff_map_{prefix}_{base}",
              on_click=queue_handoff,args=(st.session_state,"map",[base]))
-    c.button("Simular esta cidade",key=f"rec04_simulate_{prefix}_{base}",
+    c.button("Simular custo",key=f"rec04_simulate_{prefix}_{base}",
+             disabled=not cap["scenario_selectable"],
              on_click=request_simulation,args=(st.session_state,base,"suggestions"))
+    if cap["scenario_selectable"]:
+        st.caption(cap["budget_note"])
+        if not cap["rental_quote_2027_available"]:
+            st.caption("Aluguel e caução de 2027 ainda não foram cotados.")
+    else:
+        st.caption("Ainda não há cenário de custos disponível para esta cidade.")
 
 
 def render_manual_context(selected=None,visible=None):
