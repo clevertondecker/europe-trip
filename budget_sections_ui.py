@@ -4,34 +4,61 @@ import streamlit as st
 from data_model import calculate_scenario, get_scenario, money_brl
 from unified_budget import resolve_french_budget
 from quote_research_ui import render_quotes_summary,render_quotes_details
+from ux_shared_ui_presentation import page_header, kpi_cards, next_action, section_heading
+from ux64_navigation_model import select_public_task
 
 
 def render_budget_summary(data:dict,plan:dict,finance_live:bool)->None:
-    st.markdown("### Orçamento da viagem")
+    st.markdown(page_header(
+        "Visão financeira", "NOSSA EUROPA 2027 · ORÇAMENTO",
+        "Consulte as estimativas e a margem do cenário oficial, sempre com contexto de fonte.",
+        tag="Valores de referência", variant="compact",
+    ),unsafe_allow_html=True)
     scenario=get_scenario(data,plan["budget_scenario"])
     baseline=calculate_scenario(scenario)
-    a,b,c=st.columns(3,gap="small")
-    a.metric("Teto planejado",money_brl(scenario["cap_brl"]))
-    b.metric("Total da referência",money_brl(baseline["total"]))
-    c.metric("Margem de referência",money_brl(baseline["balance"]))
+    cards=kpi_cards([
+        {"name":"Teto planejado","value":money_brl(scenario["cap_brl"]),
+         "hint":"Cenário oficial · não é gasto","icon":"◎","highlight":True},
+        {"name":"Total da referência","value":money_brl(baseline["total"]),
+         "hint":"Estimativa histórica","icon":"▤"},
+        {"name":"Margem de referência","value":money_brl(baseline["balance"]),
+         "hint":"Teto menos referência","icon":"◈"},
+    ])
+    with st.container(key="ux84_finance_metrics"):
+        for column,markup in zip(st.columns(3,gap="small"),cards):
+            column.markdown(markup,unsafe_allow_html=True)
     st.caption("Dois viajantes · Itália e França · valores de referência, "
                "não reservas nem preços finais de setembro–novembro de 2027.")
     if not finance_live:
         st.info("Dados financeiros em snapshot histórico. Confirme no Drive antes de reservar.")
-    st.markdown("**Principais despesas previstas**")
+    st.markdown(section_heading(
+        "DISTRIBUIÇÃO","Principais despesas previstas",
+        "Valores de referência por categoria, sem cotação definitiva.",
+        variant="compact",
+    ),unsafe_allow_html=True)
     st.dataframe([{"Categoria":row["name"],"Valor (R$)":round(row["amount"],2)}
                   for row in scenario["components"]],
                  hide_index=True,width="stretch",height=265)
     render_quotes_summary(data,plan,finance_live)
-    st.caption("Para testar outra cidade-base, duração, aluguel ou câmbio, "
-               "abra a aba **Simulações**. A referência oficial não muda ao simular.")
+    st.markdown(next_action(
+        "Compare cenários sem alterar o plano",
+        "Simule duração, cidade-base e gastos antes de confirmar decisões.",
+        variant="compact",
+    ),unsafe_allow_html=True)
+    st.button("Abrir simulações",key="ux84_go_simulations",type="primary",
+              on_click=select_public_task,args=(st.session_state,"Orçamento","Simulações"))
+    st.caption("A referência oficial não muda ao simular alternativas.")
 
 
 def render_budget_details(data:dict,plan:dict,finance_live:bool)->None:
     scenario=get_scenario(data,plan["budget_scenario"])
     baseline=calculate_scenario(scenario)
     french=resolve_french_budget(scenario,finance_live)
-    st.markdown("### Detalhamento e fontes")
+    st.markdown(page_header(
+        "Detalhamento financeiro", "NOSSA EUROPA 2027 · ORÇAMENTO",
+        "Consulte categorias, fontes e lacunas das estimativas cadastradas.",
+        variant="compact",
+    ),unsafe_allow_html=True)
     st.caption("Valores originais por categoria. As estimativas de uma simulação "
                "são exibidas na aba Simulações, sem sobrescrever o orçamento oficial.")
     labels={"rent":"Moradia","groceries":"Supermercado","dining":"Restaurantes e bares",
@@ -39,7 +66,10 @@ def render_budget_details(data:dict,plan:dict,finance_live:bool)->None:
     st.dataframe([{"Categoria":labels[k],"Verba francesa (R$)":round(french["amounts"][k],2)}
                   for k in ("rent","groceries","dining","transport","excursions")],
                  hide_index=True,width="stretch",height=240)
-    st.markdown("**Categorias da viagem completa**")
+    st.markdown(section_heading(
+        "CUSTOS POR CATEGORIA","Categorias da viagem completa",
+        variant="compact",
+    ),unsafe_allow_html=True)
     st.bar_chart([{"Categoria":r["name"],"Valor (R$)":r["amount"]}
                   for r in scenario["components"]],
                  x="Categoria",y="Valor (R$)",horizontal=True,height=325)
