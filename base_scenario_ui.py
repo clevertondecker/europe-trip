@@ -13,7 +13,7 @@ def render_scenario_impact(plan:dict,trip_data:dict,finance_live:bool)->None:
     selected=st.session_state.get("scenario_base_selected")
     if not selected or selected==plan["base_city"]:
         return
-    labels={x["id"]:x["name"] for x in base_options()}
+    labels={x["id"]:x["name"] for x in base_options(include_candidates=True)}
     with st.expander("Impacto hipotético · "+labels.get(selected,selected),expanded=False):
         result=scenario_impact(plan,trip_data,finance_live,selected,
              st.session_state.get("advisor_eurfx",6.3),

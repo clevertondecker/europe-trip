@@ -75,11 +75,14 @@ def render_planning_return():
 
 
 def render_card_actions(base,prefix):
-    a,b=st.columns(2)
+    from rec04_simulation_handoff import request_simulation
+    a,b,c=st.columns(3)
     a.button("Conhecer cidade",key=f"rec03a_handoff_profile_{prefix}_{base}",
              on_click=queue_handoff,args=(st.session_state,"profile",[base]))
     b.button("Ver no mapa",key=f"rec03a_handoff_map_{prefix}_{base}",
              on_click=queue_handoff,args=(st.session_state,"map",[base]))
+    c.button("Simular esta cidade",key=f"rec04_simulate_{prefix}_{base}",
+             on_click=request_simulation,args=(st.session_state,base,"suggestions"))
 
 
 def render_manual_context(selected=None,visible=None):
@@ -150,6 +153,9 @@ def render_profile_context(plan):
               on_click=_favorite,args=(base,research))
     if base not in favorites and len(favorites)>=MAX_FAVORITES:
         st.caption("Limite de favoritas atingido. Remova uma favorita antes de adicionar outra.")
+    from rec04_simulation_handoff import request_simulation
+    st.button("Simular esta cidade",key="rec04_simulate_profile",
+              on_click=request_simulation,args=(st.session_state,base,"profile"))
     st.button("Ver cidade e destinos no mapa",key="rec03a_handoff_profile_map",
               on_click=queue_handoff,args=(st.session_state,"map",[base]))
     # Reuse the existing full profile renderer, without writing scenario_base_selected.

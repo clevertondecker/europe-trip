@@ -26,6 +26,8 @@ from rec03a_suggestions_ui import render_recommendation_activity
 from rec03a_session import apply_navigation as apply_recommendation_navigation, sync_identity, identity_token, SUGGESTED
 from rec03b_handoff_ui import render_notice, render_profile_context, render_contextual_map, render_planning_return
 from rec03b_handoffs import CONTEXT
+from rec04_simulation_handoff import apply_simulation_request
+from rec04_simulation_ui import (render_simulation_context,render_optional_housing_commitments,render_housing_cashflow_note)
 from sidebar_account_ui import account_view_state, _logged_in_user
 from travel_advisor_ui import _owner_config
 from travel_advisor_ui import render_advisor, _recover_saved_plan, _secure_save, _owner_signed_in
@@ -89,6 +91,7 @@ sync_identity(st.session_state, identity_token(account_view_state(_rec_config, _
 apply_navigation_request(st.session_state)
 apply_recommendation_navigation(st.session_state)
 apply_planning_request(st.session_state)
+apply_simulation_request(st.session_state)
 # Legacy outing handoffs must reach the single editor rather than the summary.
 if ((st.session_state.get("ux_area"),st.session_state.get("ux_section"))==("Meu roteiro","Meu planejamento")
         and st.session_state.get("ux45_origin") and st.session_state.get("flow_edit_target")):
@@ -99,7 +102,7 @@ if st.session_state.pop("ux503_pending_return_to_wishlist", False):
     set_ux_task(st.session_state, "Explorar", "Passeios")
     st.session_state["ux502_view"] = "Minha lista"
 # One global exploratory base, separate from the approved TripPlan.
-_all_bases=base_options()
+_all_bases=base_options(include_candidates=True)
 _base_details={item["id"]:item for item in _all_bases}
 _candidate=st.session_state.get("scenario_base_selected",active_plan()["base_city"])
 if _candidate not in _base_details:
@@ -241,7 +244,7 @@ def navigate_to_consultor() -> None:
 def simulate_city_in_budget(city_name: str) -> None:
     """Carry a hypothetical base to the finance page, without approving D-004."""
     st.session_state["unified_city"] = city_name
-    candidates={x["name"]:x["id"] for x in base_options()}
+    candidates={x["name"]:x["id"] for x in base_options(include_candidates=True)}
     if city_name in candidates:
         st.session_state["scenario_base_selected"]=candidates[city_name]
     st.session_state["unified_override_rent"] = True
@@ -813,7 +816,7 @@ elif page == "Comparar cidades":
 
             import pandas as pd
             city_data = load_cities()
-            all_exploratory_bases=base_options()
+            all_exploratory_bases=base_options(include_candidates=True)
             compare_names={item["id"]:item["name"] for item in all_exploratory_bases}
             current_candidate=st.session_state.get("scenario_base_selected",active_plan()["base_city"])
             if current_candidate not in compare_names:
@@ -1560,6 +1563,8 @@ elif page == "Roteiro":
             st.link_button("Planilha do cronograma no Drive",data["sources"]["spreadsheet"],use_container_width=True)
 
 elif page == "Orçamento":
+    if ux_section=="Simulações":
+        render_simulation_context(active_plan())
     live_finance=sync_sources["finance"]["status"]=="live"
     if ux_area=="Orçamento" and ux_section=="Resumo financeiro":
         render_budget_summary(data,active_plan(),live_finance)
@@ -1617,7 +1622,7 @@ elif page == "Orçamento":
         with col4:
             fx = st.number_input("Câmbio simulado (R$/€)",4.0,10.0,6.3,0.05,key="unified_fx")
         with col5:
-            exploratory_options=base_options()
+            exploratory_options=base_options(include_candidates=True)
             city_ids=[item["id"] for item in exploratory_options]
             candidate=st.session_state.get("scenario_base_selected",active_plan()["base_city"])
             if candidate not in city_ids:
@@ -1680,6 +1685,7 @@ elif page == "Orçamento":
                 rent_delta=st.number_input("Variação em taxas/moradia (R$)",
                                            min_value=-int(minimum_rent),max_value=10000,
                                            value=0,step=250,key="unified_rent_extra")
+        housing_terms=render_optional_housing_commitments(fx,selected_base_id)
         # Reference is intentionally only a known ticket subtotal. It must never
         # replace the entire tour allowance nor create a discount for missing quotes.
         catalog_extra=0.0
@@ -1732,7 +1738,8 @@ elif page == "Orçamento":
             outing_couple_eur=spend,fx_brl_per_eur=fx,
             rent_override_eur_month=quoted_rent,flight_delta_brl=flight_delta,
             excursions_delta_brl=excursions_delta+catalog_extra,local_transport_delta_brl=transit_delta,
-            rent_delta_brl=rent_delta)
+            rent_delta_brl=rent_delta+(housing_terms["one_time_fee_expense_brl"] or 0.))
+        render_housing_cashflow_note(result,housing_terms)
         stats=[
             ("Total projetado",money_brl(result["total"]),"Viagem completa · estimativa"),
             ("Margem até o teto",money_brl(result["margin"]),"Reserva de emergência já incluída"),

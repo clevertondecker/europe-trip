@@ -1,0 +1,48 @@
+"""REC04: explicit candidate selection must not silently fall back to official base."""
+from unittest import TestCase
+from unittest.mock import patch
+
+import exploratory_selection as selection
+
+
+class CandidateSelectionTests(TestCase):
+    def test_candidate_selection_preserves_exploratory_state(self):
+        state = {"city_widget": "angers"}
+        options = [{"id": "mulhouse"}, {"id": "angers"}]
+        with patch.object(selection.st, "session_state", state), \
+             patch.object(selection, "base_options", return_value=options) as catalog:
+            selection.set_city_from_widget("city_widget")
+        catalog.assert_called_once_with(include_candidates=True)
+        self.assertEqual(state["scenario_base_selected"], "angers")
+        self.assertEqual(state["scenario_sidebar"], "angers")
+        self.assertEqual(state["ux_last_candidate"], "angers")
+        self.assertEqual(state["ux_pending_mode"], "Simulação")
+
+    def test_invalid_selection_fails_without_mutating_state(self):
+        state = {"city_widget": "invalid", "scenario_base_selected": "mulhouse"}
+        with patch.object(selection.st, "session_state", state), \
+             patch.object(selection, "base_options", return_value=[{"id": "mulhouse"}]):
+            with self.assertRaises(ValueError):
+                selection.set_city_from_widget("city_widget")
+        self.assertEqual(state["scenario_base_selected"], "mulhouse")
+        self.assertNotIn("ux_pending_mode", state)
+
+    def test_unsupported_candidate_impact_is_explicitly_partial(self):
+        from base_scenario_impact import scenario_impact
+        from unittest.mock import patch
+        with patch("base_scenario_impact.base_options",
+                   return_value=[{"id": "angers"}]) as catalog:
+            result = scenario_impact({"base_city": "mulhouse"}, {}, False, "angers")
+        catalog.assert_called_once_with(include_candidates=True)
+        self.assertEqual(result["city_id"], "angers")
+        self.assertIsNone(result["total_brl"])
+        self.assertIsNone(result["known_tickets_brl"])
+        self.assertFalse(result["ready"])
+        self.assertTrue(result["missing"])
+
+    def test_invalid_impact_candidate_rejected(self):
+        from base_scenario_impact import scenario_impact
+        with patch("base_scenario_impact.base_options",
+                   return_value=[{"id": "mulhouse"}]):
+            with self.assertRaises(ValueError):
+                scenario_impact({"base_city": "mulhouse"}, {}, False, "invalid")
