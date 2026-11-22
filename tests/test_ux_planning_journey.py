@@ -273,6 +273,47 @@ render_planning_journey(active_plan(),load_attractions(),
 
 
 
+    def test_save_without_dates_and_recovery_panel_are_directly_accessible(self):
+        from streamlit.testing.v1 import AppTest
+        from unittest.mock import patch,MagicMock
+        catalog=load_attractions()
+        plan=add_undated_choices(new_plan(),catalog,["strasbourg"],FRANCE_STAGE)
+        script="""
+import streamlit as st
+from attractions_model import load_attractions
+from planning_session import active_plan
+from ux_planning_journey_ui import render_planning_journey
+render_planning_journey(active_plan(),load_attractions())
+"""
+        app=AppTest.from_string(script,default_timeout=90)
+        app.session_state["advisor_plan"]=deepcopy(plan)
+        app.session_state["ux502_interests"]=empty_interests()
+        app.session_state["ux_area"]="Meu roteiro"
+        app.session_state["ux_section"]="Meu planejamento"
+        store=MagicMock()
+        store.save.return_value=17
+        with patch("continuity_ui._private_store",return_value=store):
+            app.run()
+            self.assertFalse(app.exception,[x.message for x in app.exception])
+            app.button(key="flow_journey_primary").click().run()
+            self.assertFalse(app.exception,[x.message for x in app.exception])
+            self.assertIn("ux75_private_save_now",{x.key for x in app.button})
+            self.assertIn("flow_journey_review_organize",{x.key for x in app.button})
+            self.assertEqual(
+                sum(x.label=="Recuperar ou guardar uma cópia privada"
+                    for x in app.expander),1)
+            self.assertEqual(app.session_state["advisor_plan"]["assignments"],{})
+            app.button(key="ux75_private_save_now").click().run()
+            self.assertFalse(app.exception,[x.message for x in app.exception])
+            self.assertEqual(app.session_state["ux36_cloud_status"],
+                             "Salvo em espaço privado")
+            self.assertEqual(app.session_state["advisor_plan"],plan)
+            app.button(key="flow_journey_review_organize").click().run()
+            self.assertFalse(app.exception,[x.message for x in app.exception])
+            self.assertEqual(app.session_state["flow_journey_view"],"organize")
+            self.assertEqual(app.session_state["advisor_plan"],plan)
+
+
 class PlanningUx83NavigationTests(unittest.TestCase):
     def test_public_tasks_target_only_their_own_canonical_activity(self):
         from ux64_navigation_model import select_public_task

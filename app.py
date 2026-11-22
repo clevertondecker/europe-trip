@@ -500,9 +500,12 @@ if (st.session_state.get(CONTEXT) or {}).get("kind")=="planning" and (
         ux_area=="Meu roteiro" or (ux_area,ux_section)==("Explorar","Passeios")):
     render_planning_return()
 if ux_area=="Meu roteiro" and ux_section=="Organizar viagem":
-    st.segmented_control("Como organizar?",
-                         ["Por período ou data","Calendário inteligente","Calendário completo"],
-                         key="ux_organize_view",on_change=_ux_aux_changed)
+    # A single organizer is the default. Advanced calendar views are optional,
+    # preserving their original callbacks and deep-link keys.
+    with st.expander("Outras visualizações de calendário · opcional",expanded=False):
+        st.segmented_control("Como organizar?",
+                             ["Por período ou data","Calendário inteligente","Calendário completo"],
+                             key="ux_organize_view",on_change=_ux_aux_changed)
 elif ux_area=="Meu roteiro" and ux_section=="Melhorar meu roteiro":
     st.selectbox("Escolha uma ferramenta de apoio",[
         "Descobrir","Simular roteiros","Itália",
