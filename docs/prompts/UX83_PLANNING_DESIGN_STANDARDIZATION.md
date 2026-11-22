@@ -46,3 +46,23 @@ Não modificar TripPlan, schema, selected_rows, commit_undated_destinations, pro
 
 ## Execução e aceite
 Implementar na própria branch depois da fundação, rodar python -m compileall -q . e python -m unittest discover -s tests -v, verificar GitHub Actions no HEAD e documentar prints antes/depois quando houver navegador. Se browser indisponível, relatar explicitamente. Testar que datas continuam opcionais para salvar. PR inicial é somente prompt, draft até implementação; não fazer merge automático.
+
+---
+
+## Revisão de arquitetura P1 — responsabilidades reais da navegação (bloqueante)
+
+**Auditoria do HEAD \`64497287\`:** \`ux64_navigation_model.PUBLIC_TASKS\` expõe Planejar = \`Visão geral\`, \`Meus destinos\`, \`Organizar\`. \`TARGETS\` mapeia essas atividades para \`("Minha viagem","Resumo")\`, \`("Meu roteiro","Meu planejamento")\`, \`("Meu roteiro","Organizar viagem")\`. **Preservar esse contrato**. Atualmente \`app.py\` renderiza \`render_planning_journey(..., summary_only=True)\` em Visão geral e também em Meus destinos, enquanto Organizar recebe a jornada completa no modo Por período ou data. Isso é o P1 a corrigir, não o comportamento esperado.
+
+### Contrato funcional obrigatório após implementação
+1. **Visão geral**: dashboard **compacto** com contagens canônicas, estado de armazenamento, próxima ação e atalhos; sem duplicar montagem/revisão. \`summary_only=True\` somente neste contexto.
+2. **Meus destinos**: tela de trabalho **completa** baseada na UI já integrada do #196; revisar wishlist/compatibilidade, montar por confirmação explícita, editar inclusão, revisar e salvar rascunho sem datas. Roteamento em \`app.py\` não pode usar \`summary_only=True\` nessa atividade. Reusar \`render_build\`, \`render_review\` e \`project_planning\`, sem novo editor.
+3. **Organizar**: visitas existentes por etapa/periodicidade/data, calendário e edição. Deve **não** ser o único caminho para montagem/revisão. Manter retorno contextual para revisão e salvar, incluindo rascunhos sem data. Se a reutilização de \`render_planning_journey\` for necessária, concentrar a apresentação no modo \`organize\` sem executar silenciosamente a seleção/montagem. Preservar os modos legados.
+
+### Regressões prioritárias
+- \`Planejar > Visão geral > Meus destinos > Organizar > Meus destinos\` conserva \`TripPlan\`, wishlist, filtros e seleções confirmadas.
+- \`Meus destinos\` expõe o editor completo, chaves \`flow_journey_*\`, inclusão explícita e revisão/salvamento sem datas.
+- \`Organizar\` não cria uma segunda montagem nem exige datas.
+- Deep links e \`TARGETS\` legados permanecem aceitos; nenhuma gravação por renderização.
+- Cabeçalho, estado e KPIs não se duplicam entre \`app.py\`, resumo e jornada completa.
+
+**Ordem de execução:** esta especificação corrigida pode ser commitada agora; **somente implementar após o #197 ser integrado à main**, atualizando o HEAD antes do trabalho. Não fazer merge automático. Enquanto só houver Markdown, manter draft e marcar status como *especificação corrigida, implementação pendente*.
