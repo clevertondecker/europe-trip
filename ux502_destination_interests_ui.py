@@ -243,11 +243,13 @@ def render_wishlist(discovery) -> bool:
             st.button("Descobrir destinos compatíveis",key="flow_journey_find_compatible",type="primary",
                       on_click=request_step,args=("discover",))
             # Discovery remains accessible in the existing task tabs.
-        st.button("Encontrar cidades-base", key="rec03a_open_from_wishlist",
+        # UX89: one optional guided entry; the previous manual comparator
+        # stays available on demand for historical planning workflows.
+        st.button("Comparar cidades-base", key="rec03a_open_from_wishlist",
                   on_click=request_navigation,args=(st.session_state,"suggestions"))
-        st.button("Comparar cidades-base para nossos destinos",
-                  key="ux503_open_from_wishlist",
-                  on_click=request_navigation,args=(st.session_state,"manual"))
+        with st.expander("Comparação personalizada anterior · avançado"):
+            st.button("Abrir comparação personalizada",key="ux503_open_from_wishlist",
+                      on_click=request_navigation,args=(st.session_state,"manual"))
 
     if not items:
         st.info("Nenhum destino na lista. Use Descobrir lugares para adicionar.")

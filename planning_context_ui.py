@@ -306,37 +306,47 @@ def return_official_context()->None:
 
 
 def render_context(plan:dict,*,area:str)->None:
-    """Compact entrypoint, and the *only* comprehensive configuration UI."""
-    names={x["id"]:x["name"] for x in base_options()}
-    viewing_simulation=st.session_state.get("ux_mode_value")=="Simulação"
-    selected=st.session_state.get("scenario_base_selected",plan["base_city"])
-    if viewing_simulation:
-        st.caption("**Simulação ativa** · "+names.get(selected,selected)+
-                   " · "+str(st.session_state.get("ux_days_value",
-                   plan["total_days"]-plan["italy_days"]))+
-                   " dias de temporada europeia · Plano atual preservado")
-        if area=="Minha viagem":
-            st.button("Voltar ao oficial",key="ux_return_official",
-                      on_click=return_official_context)
-    else:
-        st.caption("**Roteiro oficial** · "+names.get(plan["base_city"],plan["base_city"])+
-                   " · "+str(plan["total_days"]-plan["italy_days"])+
-                   " dias de temporada europeia · Reservas não confirmadas")
-    display="Meu plano · "+str(plan["total_days"])+" dias · Itália "+str(
-        plan["italy_days"])+" dias · "+BUDGET_LABELS[plan["budget_scenario"]]
-    if st.session_state.get("workflow_compare_open"):
-        display="Comparar alternativa · referência: "+display
-    st.caption(display)
-    a,b=st.columns([1,1.25])
-    a.button("Configurar minha viagem",key="workflow_open_settings",
-             on_click=show_settings,width="stretch")
-    b.button("Comparar alternativa",key="workflow_open_alternative",
-             on_click=show_alternative,width="stretch")
-    if st.session_state.pop("workflow_change_notice",None):
+    """Official settings in planning, alternative comparison in budget.
+
+    Previously these global controls appeared before Explore's own task
+    heading. Keep a safe path to already-open forms across navigation.
+    """
+    state=st.session_state
+    section=state.get("ux_section")
+    settings_open=bool(state.get("workflow_settings_open"))
+    alternative_open=bool(state.get("workflow_compare_open"))
+    planning=area in ("Minha viagem","Meu roteiro")
+    budget_simulation=area=="Orçamento" and section=="Simulações"
+    # Open forms belong to their originating activity. Keep unconfirmed
+    # widget/session state for a safe return, but never render it elsewhere.
+    if not (planning or budget_simulation):
+        return
+
+    if planning or budget_simulation:
+        names={x["id"]:x["name"] for x in base_options()}
+        if state.get("ux_mode_value")=="Simulação":
+            candidate=state.get("scenario_base_selected",plan["base_city"])
+            st.caption("Simulação ativa · "+names.get(candidate,candidate)
+                       +" · "+str(state.get("ux_days_value",
+                       plan["total_days"]-plan["italy_days"]))+" dias · Plano preservado")
+            if area=="Minha viagem":
+                st.button("Voltar ao oficial",key="ux_return_official",
+                          on_click=return_official_context)
+        else:
+            st.caption("Roteiro oficial · "+names.get(plan["base_city"],plan["base_city"])
+                       +" · "+str(plan["total_days"])+" dias · Reservas não confirmadas")
+    if planning:
+        st.button("Configurar minha viagem",key="workflow_open_settings",
+                  on_click=show_settings)
+    elif budget_simulation:
+        st.button("Comparar alternativa",key="workflow_open_alternative",
+                  on_click=show_alternative)
+
+    if state.pop("workflow_change_notice",None):
         st.success("Plano atualizado nesta sessão. Salve para manter a revisão.")
-    if st.session_state.get("workflow_settings_open"):
+    if planning and settings_open:
         _form_settings(active_plan())
-    elif st.session_state.get("workflow_compare_open"):
+    elif budget_simulation and alternative_open:
         _form_alternative(active_plan())
 
 
