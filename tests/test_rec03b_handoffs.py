@@ -134,6 +134,26 @@ class HandoffTests(unittest.TestCase):
 
 
 class HandoffAppTests(unittest.TestCase):
+
+    def test_manual_view_to_other_public_area_reopens_suggestions(self):
+        from pathlib import Path
+        from streamlit.testing.v1 import AppTest
+        app=AppTest.from_file(str(Path(__file__).resolve().parents[1]/"app.py"),
+                              default_timeout=120).run()
+        self.assertFalse(app.exception,str(app.exception))
+        app.button(key="ux_sidebar_nav_1").click().run()
+        app.session_state["rec03a_activity"]="Comparação personalizada"
+        app.segmented_control(key="ux_section").set_value("Comparar").run()
+        self.assertFalse(app.exception,str(app.exception))
+        self.assertEqual(sum(b.key=="rec03a_handoff_back_manual"
+                             for b in app.button),1)
+        app.segmented_control(key="ux64_public_task").set_value("Mapa").run()
+        self.assertFalse(app.exception,str(app.exception))
+        app.segmented_control(key="ux64_public_task").set_value("Comparar bases").run()
+        self.assertFalse(app.exception,str(app.exception))
+        self.assertEqual(app.session_state["rec03a_activity"],"Cidades sugeridas")
+        self.assertFalse(any(b.key=="rec03a_handoff_back_manual" for b in app.button))
+
     def test_real_app_suggestions_manual_and_planning_return(self):
         from pathlib import Path
         from streamlit.testing.v1 import AppTest
@@ -166,6 +186,9 @@ class HandoffAppTests(unittest.TestCase):
         choose_city("strasbourg")
         choose_city("angers")
         click("rec03a_handoff_compare")
+        self.assertEqual(sum(b.key=="rec03a_handoff_back_manual"
+                             for b in app.button),1)
+        self.assertFalse(any(b.key=="rec03a_manual_to_suggested" for b in app.button))
         self.assertEqual(app.multiselect(key="ux503_bases").value,["strasbourg","angers"])
         self.assertEqual(set(app.multiselect(key="ux503_visible_destinations").value),set(scope["destination_ids"]))
         click("rec03a_handoff_back_manual")

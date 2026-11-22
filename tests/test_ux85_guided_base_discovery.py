@@ -1,10 +1,11 @@
 """UX85: a simple, useful base-discovery entry without parallel selections."""
 import unittest
+import inspect
 from copy import deepcopy
 
 from streamlit.testing.v1 import AppTest
 
-from rec03a_suggestions_ui import _featured_ids
+from rec03a_suggestions_ui import _featured_ids, render_suggestions
 from rec03b_handoff_ui import selected_card_bases
 from rec03b_handoffs import CHOICE
 from trip01_supplemental_discovery import build_exploration_discovery
@@ -103,6 +104,57 @@ class GuidedComparisonTests(unittest.TestCase):
         a.run()
         self.assertFalse(a.exception,[x.message for x in a.exception])
         self.assertFalse(any(b.key=="rec03a_confirm_subset" for b in a.button))
+
+
+    def test_single_cta_follows_all_visible_cards_in_each_view(self):
+        # Structural guard for UX85's temporary native CTA; UX87 will replace
+        # this handoff region with inline comparison after the same cards.
+        source=inspect.getsource(render_suggestions)
+        self.assertEqual(source.count("render_card_selection_summary(result,cities)"),1)
+        self.assertLess(source.index("for candidate in filtered"),
+                        source.index("render_card_selection_summary(result,cities)"))
+        self.assertLess(source.index("for base in featured:"),
+                        source.index("render_card_selection_summary(result,cities)"))
+        self.assertIn("size=4",source)
+
+    def test_two_highlight_cards_reveal_one_comparison_cta(self):
+        a=self.app()
+        a.button(key="rec03a_confirm_subset").click().run()
+        self.assertFalse(a.exception,[x.message for x in a.exception])
+        keys=[x.key for x in a.checkbox if x.key and x.key.startswith("rec03a_pick_")]
+        self.assertGreaterEqual(len(keys),2)
+        for key in keys[:2]:
+            a.checkbox(key=key).check().run()
+            self.assertFalse(a.exception,[x.message for x in a.exception])
+        self.assertEqual(len(a.session_state[CHOICE]),2)
+        actions=[x for x in a.button if x.key=="rec03a_handoff_compare"]
+        self.assertEqual(len(actions),1)
+        self.assertIn("2 cidades",actions[0].label)
+        self.assertEqual(len([x for x in a.multiselect
+                              if x.key==CHOICE+"_widget"]),0)
+        captions=" ".join(x.value for x in a.caption)
+        self.assertIn("trajetos com dados históricos",captions)
+        self.assertIn("referências indicativas",captions)
+
+    def test_other_city_selection_survives_filters_and_browse_switch(self):
+        a=self.app()
+        a.button(key="rec03a_confirm_subset").click().run()
+        first=next(x.key for x in a.checkbox if x.key and x.key.startswith("rec03a_pick_"))
+        a.checkbox(key=first).check().run()
+        self.assertFalse(a.exception,[x.message for x in a.exception])
+        other="angers" if not first.endswith("_angers") else "metz"
+        a.checkbox(key="rec03a_show_all").check().run()
+        a.text_input(key="rec03a_search").set_value(other).run()
+        self.assertFalse(a.exception,[x.message for x in a.exception])
+        a.checkbox(key="rec03a_pick_"+other).check().run()
+        self.assertFalse(a.exception,[x.message for x in a.exception])
+        selected=list(a.session_state[CHOICE])
+        self.assertEqual(set(selected),{first.removeprefix("rec03a_pick_"),other})
+        self.assertEqual(len([x for x in a.button if x.key=="rec03a_handoff_compare"]),1)
+        a.checkbox(key="rec03a_show_all").uncheck().run()
+        self.assertFalse(a.exception,[x.message for x in a.exception])
+        self.assertEqual(a.session_state[CHOICE],selected)
+        self.assertEqual(len([x for x in a.button if x.key=="rec03a_handoff_compare"]),1)
 
     def test_selection_below_filter_remains_authoritative(self):
         a=self.app()
