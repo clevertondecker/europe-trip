@@ -22,6 +22,7 @@ from calendar_model import calendar_plan
 from route_preview import route_endpoints
 from attractions_ui import render_explorer
 from ux501_destination_discovery_ui import render_independent_destination_discovery
+from ux_shared_ui_presentation import page_header, section_heading
 from rec03a_suggestions_ui import render_recommendation_activity
 from rec03a_session import apply_navigation as apply_recommendation_navigation, sync_identity, identity_token, SUGGESTED
 from rec03b_handoff_ui import render_notice, render_profile_context, render_contextual_map, render_planning_return
@@ -49,7 +50,6 @@ from base_change_ui import render_base_change
 from city_decision_ui import render_city_decision
 from base_weight_coverage_ui import render_weight_coverage
 from budget_sections_ui import render_budget_summary, render_budget_details
-from ux_shared_ui_presentation import page_header, section_heading
 from base_scenario_model import base_options, choose_exploratory_base, hypothetical_city_name, expanded_rail_routes
 from base_research_expanded_model import load_research, find_city, observed_housing
 from base_scenario_ui import render_scenario_impact
