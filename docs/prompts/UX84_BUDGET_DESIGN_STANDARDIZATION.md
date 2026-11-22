@@ -45,3 +45,19 @@ UX64 define as únicas duas tarefas públicas: "Visão financeira" e "Simulaçõ
 
 ## Execução e aceite
 Implementar código nesta branch após UX81; tests: python -m compileall -q . e python -m unittest discover -s tests -v; GitHub Actions no HEAD e screenshots desktop/mobile. Um PR de design NÃO pode aprovar números ou preços por aparência. Registrar limitações reais e não fazer merge automático. Inicialmente este PR contém somente o prompt e permanece draft até implementação.
+
+---
+
+## Reconciliação do roteamento financeiro real (obrigatória)
+
+**Auditoria:** no HEAD integrado do PR #196, \`app.py\` possui \`elif page == "Orçamento"\` e as telas públicas \`("Orçamento","Resumo financeiro")\` e \`("Orçamento","Simulações")\`; \`budget_sections_ui.render_budget_summary\` cobre o resumo, **mas o fluxo completo de simulações permanece no próprio \`app.py\`**, incluindo seletor de teto \`60k/70k\`, \`unified_scenario\`, escolha de estilo e botão explícito \`budget_cap_confirm\`. Não supor que migrar somente \`budget_sections_ui.py\` padronize toda a área.
+
+### Gate de invariantes
+- Renderização da Visão financeira e da Simulação usa componentes UX81 sem reimplementar \`calculate_scenario\`, \`unified_budget\` ou o roteador UX64.
+- Alterar \`unified_scenario\`, \`unified_style\` ou inputs exploratórios **não altera \`active_plan()["budget_scenario"]\`**.
+- Alteração de teto oficial requer explicitamente \`budget_cap_confirm\` (nunca renderização automática).
+- Snapshot ≠ sincronização live; dados desconhecidos ≠ R$0; cotação histórica ≠ reserva; evitar arredondamento oculto ou truncamento de BRL na largura 390 px.
+- Manter fontes, cotações, alerts, tabela e gráficos acessíveis com legenda textual.
+- Testes AppTest de transição \`Visão financeira → Simulações → Visão financeira\`, invariância de cenário 60k/70k e modo Oficial/Simulação.
+
+**Bloqueio:** executar após fundação UX81 integrada na \`main\`; implementar preservando os fluxos reais de \`app.py\`, não criando nova regra financeira em componentes. Manter draft e não fazer merge automático.
