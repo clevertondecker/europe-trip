@@ -111,6 +111,17 @@ def _destination_teaser(item: dict) -> str:
     return "Conheça este destino; atrações individuais ainda não pesquisadas."
 
 
+def _render_previous_interest_picker(valid: list[str], by_id: dict) -> None:
+    """Retain the old selection widget even when a filter returns zero results."""
+    st.multiselect(
+        "Lugares que despertaram interesse nesta exploração",
+        options=valid,
+        format_func=lambda key: by_id[key]["name"]+" · "+by_id[key]["country"],
+        key="ux501_interest_session",
+        help="Somente nesta sessão. Não altera o roteiro oficial.",
+    )
+
+
 def render_independent_destination_discovery(*, discovery=None) -> None:
     discovery = discovery if discovery is not None else _cached_discovery()
     destinations = discovery["destinations"]
@@ -161,6 +172,8 @@ def render_independent_destination_discovery(*, discovery=None) -> None:
                "não uma lista de viagens ferroviárias confirmadas.")
     if not matches:
         st.info("Nenhum destino corresponde aos filtros. Experimente outra busca.")
+        with st.expander("Seleção temporária anterior · avançado",expanded=False):
+            _render_previous_interest_picker(valid,by_id)
         return
 
     page_size = 12
@@ -237,11 +250,5 @@ def render_independent_destination_discovery(*, discovery=None) -> None:
                 column.markdown(markup,unsafe_allow_html=True)
         st.caption("Seleções temporárias anteriores não são a wishlist salva. "
                    "Você pode reconciliá-las em Minha lista sem perder os dados.")
-        st.multiselect(
-            "Lugares que despertaram interesse nesta exploração",
-            options=valid,
-            format_func=lambda key: by_id[key]["name"]+" · "+by_id[key]["country"],
-            key="ux501_interest_session",
-            help="Somente nesta sessão. Não altera o roteiro oficial.",
-        )
+        _render_previous_interest_picker(valid,by_id)
 
