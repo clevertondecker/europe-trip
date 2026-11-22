@@ -14,8 +14,8 @@ Planejar combina Visão geral, Meus destinos, Organizar, três opções de calen
 ## Implementação solicitada
 1. **Visão geral**: status resumido, destinos/atrações escolhidos, progresso real, salvamento confirmado, apenas uma CTA **Continuar meu roteiro**. Painéis antigos sob demanda.
 2. **Meus destinos**: incluir a partir da wishlist, selecionar atrações, revisar e salvar sem exigir datas, cidade-base definitiva ou reservas. O usuário vê sempre a distinção desejado/incluído/organizado/reservado. Usar o único commit canônico de passeios e IDs existentes.
-3. **Organizar**: mostrar por padrão uma única interface de visitas por etapa Itália/temporada europeia, agrupando períodos/datas com edição contextual. Calendário inteligente/completo preservados como modos avançados, não planos alternativos. Períodos/datas são opcionais.
-4. Um CTA primário por fase: incluir, revisar, organizar ou salvar. Nunca duplicar editores nem atualizar widgets instanciados em rerun. Manter handoffs a Explorar, Comparar bases e Orçamento sem alterar o plano por acidente.
+3. **Organizar** é opcional: mostrar por padrão uma única interface de visitas por etapa Itália/temporada europeia, agrupando períodos/datas com edição contextual. Calendário inteligente/completo preservados como modos avançados, não planos alternativos. Períodos/datas são opcionais.
+4. Um CTA primário por fase: incluir → revisar → **salvar rascunho**. Organizar datas/períodos é **opcional antes OU depois do primeiro salvamento** e nunca bloqueia o CTA de salvar. Nunca duplicar editores nem atualizar widgets instanciados em rerun. Manter handoffs a Explorar, Comparar bases e Orçamento sem alterar o plano por acidente.
 5. Reconciliação de revisão e salvamento: conflito/erro têm feedback, rascunhos recuperáveis, confirmação real da nuvem e nenhuma perda silenciosa.
 
 ## Testes/aceite
@@ -23,3 +23,17 @@ Planejar combina Visão geral, Meus destinos, Organizar, três opções de calen
 
 ## Fora de escopo
 Não alterar semântica TripPlan nem implementar reservas reais.
+## Jornada principal obrigatória para aceite
+**Minha lista → Incluir destinos → Revisar → Salvar rascunho**. Datas, períodos, cidade-base final, pesquisa ferroviária, orçamento e atrações não definidas devem permanecer não obrigatórios. Depois do primeiro salvamento, permitir **Organizar** e salvar uma nova revisão sem sair da representação canônica.
+
+## Estados compreensíveis para o usuário
+- **Desejado:** guardado em UX502, não é visita incluída.
+- **Incluído:** registrado no roteiro editável; sem compromisso temporal.
+- **Organizado:** possui período/data atribuídos, mas ainda não é reserva.
+- **Reservado:** só quando existir evidência real de reserva; salvar rascunho jamais produz esse status.
+
+## Lacunas versus preservação
+- **Já existe:** planejador UX83, inclusão/edição canônicas, organização e salvamento privados. Não criar outro wizard ou editor.
+- **Ajustar:** reduzir apresentação redundante de etapas e escolher uma interface padrão de organização.
+- **Preservar:** calendário inteligente/completo acessíveis como recursos avançados, contratos de visita, datas opcionais e restauração.
+- **Desnecessário:** forçar calendário antes de salvar ou impor nova confirmação sem mudança de dados.
