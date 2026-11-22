@@ -138,13 +138,13 @@ def render_wishlist(discovery) -> bool:
     else:
         st.warning(st.session_state.get("ux502_status", "Alterações apenas nesta sessão. Salve ou exporte para recuperá-las."))
 
-    with st.expander("Salvar ou recuperar minha lista", expanded=(view == "Minha lista")):
+    with st.expander("Salvar minha lista", expanded=(view == "Minha lista")):
         from continuity_ui import _private_store, save_private_now
         from attractions_model import load_attractions
         store = _private_store()
         if store is None:
-            st.caption("Armazenamento privado indisponível: sem sincronização entre dispositivos. "
-                       "Use a exportação JSON abaixo.")
+            st.warning("Sem armazenamento privado disponível. Para não perder a lista, "
+                       "guarde uma cópia JSON local abaixo.")
         else:
             if st.button("Salvar lista na nuvem privada", key="ux502_cloud_save"):
                 try:
@@ -162,35 +162,53 @@ def render_wishlist(discovery) -> bool:
                     st.session_state["ux502_private_saved_revision"] = current["revision"]
                     st.session_state["ux502_status"] = "Salvo no armazenamento privado"
                     st.success("Salvamento privado confirmado pelo servidor.")
-        raw = export_interests(current, discovery)
-        st.download_button("Exportar lista JSON", raw, "nossa-europa-destinos-desejados.json",
-                           "application/json", key="ux502_download",
-                           on_click=_mark_exported, args=(current["revision"],))
-        st.caption("O arquivo exportado não significa que a nuvem foi atualizada.")
-        uploaded = st.file_uploader("Importar lista JSON", type=["json"],
-                                    key="ux502_upload")
-        if uploaded is not None and st.button("Analisar arquivo", key="ux502_import_preview"):
-            try:
-                incoming = import_interests(uploaded.getvalue(), discovery)
-            except ValueError as exc:
-                st.error(str(exc))
-            else:
-                st.session_state["ux502_import_pending"] = incoming
-        pending_import = st.session_state.get("ux502_import_pending")
-        if pending_import is not None:
-            st.warning(f"O arquivo contém {len(pending_import['items'])} preferências. "
-                       "Confirmar substituirá a lista atual nesta sessão (não na nuvem).")
-            if st.button("Confirmar substituição da lista", key="ux502_import_confirm"):
-                # A replaced document is still a local revision, not a remote save.
-                restored = validate_interests(pending_import, discovery)
-                restored["revision"] = max(current["revision"], restored["revision"]) + 1
-                _change(restored)
-                from rec03a_session import clear_recommendation_context
-                clear_recommendation_context(st.session_state)
-                from ux_planning_journey_model import clear_planning_context
-                clear_planning_context(st.session_state)
-                st.session_state.pop("ux502_import_pending", None)
-                st.rerun()
+            st.caption("Backup ou recuperação de emergência do planejamento completo: "
+                       "Planejar → Meus destinos → Recuperar ou guardar uma cópia privada.")
+        # Saving to a configured store is not proof of a successful write.
+        # Keep a lossless emergency export for confirmed failures/conflicts.
+        status = st.session_state.get("ux502_status", "")
+        emergency = (store is None or status.startswith(("Conflito", "Falha")))
+        if emergency:
+            st.warning("Alterações não confirmadas no armazenamento privado. "
+                       "Baixe uma cópia local antes de sair desta sessão.")
+            raw = export_interests(current, discovery)
+            st.download_button("Exportar lista JSON", raw, "nossa-europa-destinos-desejados.json",
+                               "application/json", key="ux502_download",
+                               on_click=_mark_exported, args=(current["revision"],))
+            st.caption("O arquivo exportado não significa que a nuvem foi atualizada.")
+
+        # Standalone wishlist JSON from older releases is not a whole-plan
+        # archive. Preserve validated, confirmed imports without showing a
+        # routine second save/restore workflow.
+        advanced = (store is None or st.checkbox(
+            "Recuperar arquivo antigo da lista (avançado)",
+            key="ux502_legacy_import_open"))
+        if advanced:
+            uploaded = st.file_uploader("Importar lista JSON", type=["json"],
+                                        key="ux502_upload")
+            if uploaded is not None and st.button("Analisar arquivo", key="ux502_import_preview"):
+                try:
+                    incoming = import_interests(uploaded.getvalue(), discovery)
+                except ValueError as exc:
+                    st.error(str(exc))
+                else:
+                    st.session_state["ux502_import_pending"] = incoming
+            pending_import = st.session_state.get("ux502_import_pending")
+            if pending_import is not None:
+                st.warning(f"O arquivo contém {len(pending_import['items'])} preferências. "
+                           "Confirmar substituirá a lista atual nesta sessão (não na nuvem).")
+                if st.button("Confirmar substituição da lista", key="ux502_import_confirm"):
+                    # A replaced document is still a local revision, not a remote save.
+                    restored = validate_interests(pending_import, discovery)
+                    restored["revision"] = max(current["revision"], restored["revision"]) + 1
+                    _change(restored)
+                    from rec03a_session import clear_recommendation_context
+                    clear_recommendation_context(st.session_state)
+                    from ux_planning_journey_model import clear_planning_context
+                    clear_planning_context(st.session_state)
+                    st.session_state.pop("ux502_import_pending", None)
+                    st.rerun()
+
 
     if view != "Minha lista":
         return False
@@ -225,12 +243,10 @@ def render_wishlist(discovery) -> bool:
             st.button("Descobrir destinos compatíveis",key="flow_journey_find_compatible",type="primary",
                       on_click=request_step,args=("discover",))
             # Discovery remains accessible in the existing task tabs.
-        # UX89: one optional entry into the guided UX87/UX88 comparison.
-        # The manual comparator is still reachable from advanced navigation.
+        # UX89: one optional guided entry; the previous manual comparator
+        # stays available on demand for historical planning workflows.
         st.button("Comparar cidades-base", key="rec03a_open_from_wishlist",
                   on_click=request_navigation,args=(st.session_state,"suggestions"))
-        # Historic UX503 journeys and deep links remain available on demand,
-        # not as a second competing action in the main wishlist.
         with st.expander("Comparação personalizada anterior · avançado"):
             st.button("Abrir comparação personalizada",key="ux503_open_from_wishlist",
                       on_click=request_navigation,args=(st.session_state,"manual"))
