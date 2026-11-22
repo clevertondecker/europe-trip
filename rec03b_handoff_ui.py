@@ -85,6 +85,9 @@ def render_card_choice(base, options):
         disabled=base not in selected and len(selected)>=5,
         on_change=_toggle_card_base,args=(base,tuple(options)),
     )
+    if base in selected and len(selected)>=2:
+        st.caption(f"{len(selected)} cidades selecionadas · "
+                   "compare logo após estes cartões.")
 
 
 def render_card_selection_summary(result,cities):
@@ -164,8 +167,7 @@ def render_manual_context(selected=None,visible=None):
             return
     if selected is None:
         st.caption("Comparação aberta a partir das sugestões. Os filtros são de pesquisa, não do roteiro.")
-        st.button("Voltar às cidades sugeridas",key="rec03a_handoff_back_manual",
-                  on_click=return_to_suggestions)
+        # The single return button belongs ABOVE the manual renderer in REC03A.
         if PREVIOUS in state:
             st.button("Recuperar comparação anterior",key="rec03a_handoff_restore_manual",
                       on_click=queue_restore_manual,args=(state,))

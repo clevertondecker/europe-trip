@@ -19,16 +19,35 @@ from ux503_destination_base_comparison_ui import render_wishlist_base_comparison
 from ux_shared_ui_presentation import page_header, section_heading
 
 _REASON = {
-    "menor_minimo_ponderado_no_mesmo_escopo_completo": "Menor mínimo ponderado de ida no mesmo conjunto completo de trajetos.",
-    "fronteira_documental_do_escopo": "Documentação útil que merece investigação; não é prova de melhor logística.",
-    "menor_minimo_ponderado_no_mesmo_subconjunto": "Menor mínimo ponderado de ida neste subconjunto equivalente, não na lista inteira.",
-    "imperdiveis_identificados": "Todos os destinos imperdíveis têm tempo registrado ou identificação local.",
-    "imperdiveis_com_evidencia_pendente": "Ainda há destinos imperdíveis sem tempo documentado.",
-    "acesso_local_a_verificar": "Acesso urbano e última milha ainda precisam ser verificados.",
-    "alternativa_individual_sem_grupo_completo": "Alternativa individual; não há grupo completo equivalente.",
-    "comparacao_condicional_disponivel": "Há comparação de trajetos em comum, com ressalvas.",
-    "sem_tempo_ou_identificacao_local": "Sem tempo ou identificação local documentados neste escopo.",
-    "destinos_com_tempo_pendente": "Há destinos sem tempo pesquisado.",
+    "menor_minimo_ponderado_no_mesmo_escopo_completo": (
+        "Entre alternativas com referências para os mesmos trajetos, "
+        "esta tem tempos mínimos de ida menores. A viagem completa ainda precisa ser verificada."
+    ),
+    "fronteira_documental_do_escopo": (
+        "Esta cidade reúne informações úteis de deslocamento, "
+        "mas isso não significa que seja a melhor opção."
+    ),
+    "menor_minimo_ponderado_no_mesmo_subconjunto": (
+        "Há tempos mínimos de ida menores nos trajetos pesquisados em comum. "
+        "Os demais destinos não entram nessa comparação."
+    ),
+    "imperdiveis_identificados": (
+        "Existem referências ou identificação local para todos os destinos imperdíveis."
+    ),
+    "imperdiveis_com_evidencia_pendente": (
+        "Ainda faltam informações para alguns destinos imperdíveis."
+    ),
+    "acesso_local_a_verificar": "O acesso dentro da cidade ainda precisa de confirmação.",
+    "alternativa_individual_sem_grupo_completo": (
+        "Esta cidade tem dados úteis, mas falta uma comparação equivalente com outras bases."
+    ),
+    "comparacao_condicional_disponivel": (
+        "Há referências para comparar alguns trajetos em comum, com ressalvas."
+    ),
+    "sem_tempo_ou_identificacao_local": (
+        "Ainda não temos tempos de deslocamento ou acesso local pesquisados nesta cidade."
+    ),
+    "destinos_com_tempo_pendente": "Há destinos sem tempo de deslocamento pesquisado.",
 }
 
 
@@ -137,16 +156,19 @@ def _card(candidate, result, names, cities, official, options):
         reasons=candidate["reasons"]
         st.write(_REASON.get(reasons[0],"Alternativa para investigação.") if reasons
                  else "Alternativa para investigar com os dados disponíveis.")
-        st.caption(f'{candidate["historical_count"]} histórico(s) · '
-                   f'{candidate["indicative_count"]} indicativo(s) · '
-                   f'{len(candidate["local_destination_ids"])} local(is) · '
-                   f'{len(candidate["missing_destination_ids"])} sem tempo')
+        st.caption(f'{candidate["historical_count"]} trajetos com dados históricos · '
+                   f'{candidate["indicative_count"]} com referências indicativas')
+        st.caption(f'{len(candidate["local_destination_ids"])} destinos com acesso local a verificar · '
+                   f'{len(candidate["missing_destination_ids"])} sem tempo pesquisado')
         missing=candidate["must_visit"]["missing"]
         if missing:
-            st.caption("Imperdíveis ainda sem tempo: "+_label_ids(missing,names))
+            st.write("**O que falta pesquisar?** Tempos para os imperdíveis: "+
+                     _label_ids(missing,names)+".")
         elif candidate["local_destination_ids"]:
-            st.caption("Acesso local e última milha ainda precisam de verificação.")
-        st.caption("Mínimos de ida pesquisados; retorno, horários e custos de 2027 não confirmados.")
+            st.write("**O que falta pesquisar?** Acesso dentro da cidade e última milha.")
+        else:
+            st.write("**O que falta pesquisar?** Retorno, acesso às atrações e horários de 2027.")
+        st.caption("Referências de ida pesquisadas; não são duração total nem preços confirmados.")
         render_card_choice(base,options)
         with st.expander("Conhecer, ver no mapa ou simular esta cidade"):
             render_card_actions(base,"card")
@@ -287,27 +309,21 @@ def render_suggestions(*,plan,discovery=None,research=None):
     by_id={c["base_id"]:c for c in result["candidates"]}
     st.markdown(section_heading(
         "SUGESTÕES DE PESQUISA", "Cidades que vale investigar",
-        "Destaques documentais REC02, não um ranking de moradia ou logística.",
+        "Cidades com referências úteis para começar. Não estão em ordem de preferência.",
         variant="compact",
     ),unsafe_allow_html=True)
-    render_card_selection_summary(result,cities)
     featured=_featured_ids(result)
-    if featured:
-        for base in featured:
-            _card(by_id[base],result,names,cities,plan["base_city"],options)
-    else:
-        st.info("Nenhuma cidade possui destaque documental neste escopo. "
-                "Consulte as outras opções sem presumir uma vencedora.")
-
-    remaining=[c for c in result["candidates"] if c["base_id"] not in set(featured)]
     _restore_widget("rec03a_show_all","rec03a_show_all_shadow",False,
                     lambda x:type(x) is bool)
-    if remaining and st.checkbox(f"Ver todas as outras cidades ({len(remaining)})",
-                                 key="rec03a_show_all",on_change=_remember,
-                                 args=("rec03a_show_all","rec03a_show_all_shadow")):
+    browsing=st.checkbox(f"Ver todas as cidades ({len(result['candidates'])})",
+                         key="rec03a_show_all",on_change=_remember,
+                         args=("rec03a_show_all","rec03a_show_all_shadow"))
+    if browsing:
+        # Browse INSTEAD OF highlighting the same IDs a second time.
+        # Four visible cards keep the sole comparison CTA close to the last choice.
         st.markdown(section_heading(
-            "MAIS ALTERNATIVAS", "Explore outras cidades-base",
-            "Busca e filtros não alteram suas escolhas para comparação.",
+            "TODAS AS ALTERNATIVAS", "Explore outras cidades-base",
+            "Busque por nome ou país. As cidades em destaque também estão aqui.",
             variant="compact",
         ),unsafe_allow_html=True)
         _restore_widget("rec03a_search","rec03a_search_shadow","",
@@ -323,14 +339,14 @@ def render_suggestions(*,plan,discovery=None,research=None):
                               args=("rec03a_category","rec03a_category_shadow"))
         groups={"Comparáveis":"comparable","Condicionais":"conditional",
                 "Para investigar":"investigate"}
-        filtered=[c for c in remaining if
+        filtered=[c for c in result["candidates"] if
                   (category=="Todas" or c["group"]==groups.get(category)) and
                   (not search or search in
                    (cities[c["base_id"]]["name"]+" "+
                     cities[c["base_id"]]["country"]).casefold())]
-        st.caption(f"{len(filtered)} de {len(remaining)} cidades-base adicionais.")
+        st.caption(f"{len(filtered)} de {len(result['candidates'])} cidades-base encontradas.")
         if filtered:
-            size=8
+            size=4
             pages=(len(filtered)+size-1)//size
             _restore_widget("rec03a_page","rec03a_page_shadow",1,
                             lambda x:type(x) is int and 1<=x<=pages)
@@ -341,6 +357,16 @@ def render_suggestions(*,plan,discovery=None,research=None):
                 _card(candidate,result,names,cities,plan["base_city"],options)
         else:
             st.info("Nenhuma cidade corresponde aos filtros.")
+    elif featured:
+        for base in featured:
+            _card(by_id[base],result,names,cities,plan["base_city"],options)
+    else:
+        st.info("Não há destaques com referências suficientes para este escopo. "
+                "Use 'Ver todas as cidades' para explorar as alternativas.")
+
+    # Exactly one native CTA, always AFTER at most four visible cards.
+    # UX87 will replace this region with its inline matrix while keeping CHOICE.
+    render_card_selection_summary(result,cities)
 
     if st.checkbox("Metodologia e pesquisas pendentes",
                    key="rec03a_research_open"):
@@ -359,10 +385,12 @@ def render_recommendation_activity(*,plan,discovery=None,research=None):
     if state.get(ACTIVITY) not in ACTIVITIES:
         state[ACTIVITY]=SUGGESTED
     if state[ACTIVITY]==MANUAL:
+        from rec03b_handoff_ui import return_to_suggestions
+        # Native return action appears BEFORE the lengthy legacy comparison.
+        st.button("Voltar às cidades sugeridas",key="rec03a_handoff_back_manual",
+                  on_click=return_to_suggestions)
         render_wishlist_base_comparison(plan=plan,discovery=discovery,
                                         research=research)
-        st.button("Voltar às cidades sugeridas",key="rec03a_manual_to_suggested",
-                  on_click=_go,args=("suggestions",))
     else:
         render_suggestions(plan=plan,discovery=discovery,research=research)
     return state[ACTIVITY]
