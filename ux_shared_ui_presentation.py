@@ -91,7 +91,17 @@ def next_action(
     variant: ActionVariant = "strong",
     eyebrow: str = "PRÓXIMA AÇÃO",
 ) -> str:
-    """Informational text ONLY. Native Streamlit renders the actual CTA."""
+    """Render escaped, self-contained strong or compact action content.
+
+    Strong works without ANY Streamlit key. For content + an interactive CTA
+    on one surface, use an opt-in shared shell:
+        with st.container(key="ui_action_shell_strong_explorar"):
+            st.markdown(next_action(title, detail), unsafe_allow_html=True)
+            st.button("Continuar", key="native_cta", type="primary")
+    The shell carries the surface and resets its inner strong content to
+    transparent. Legacy flow_journey_next is kept as a compatible shell.
+    Only native Streamlit widgets own interaction. Compact is self-styled.
+    """
     if variant not in ("strong", "compact"):
         raise ValueError("Unknown action variant")
     return (

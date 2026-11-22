@@ -574,27 +574,60 @@ padding:17px 20px;margin:0 0 10px;}
 .journey-stat__label {font-size:.84rem;color:#436372;font-weight:750;}
 .journey-stat__value {font-size:2.1rem;line-height:1.1;letter-spacing:-.04em;color:#173D50;}
 .journey-stat small {font-size:.75rem;color:#4B6572;}
-[class*="st-key-flow_journey_next"] {
+/* UX81 P2: the strong variant works by itself on any page.
+   A shared Streamlit key prefix is optional for grouping a NATIVE CTA;
+   legacy flow_journey_next remains a compatibility shell. */
+:is(
+  .ui-next-action--strong,
+  [class*="st-key-ui_action_shell_strong_"],
+  [class*="st-key-flow_journey_next"]
+) {
   border-radius:20px;padding:clamp(22px,3.3vw,38px);
   margin:10px 0 24px;color:#FFF;overflow:hidden;
   background:radial-gradient(circle at 98% 0%,rgba(85,184,197,.18),transparent 37%),
     linear-gradient(115deg,#153F51 0%,#124D60 100%);
   box-shadow:0 11px 25px rgba(19,65,82,.12);
 }
+/* Single visual surface: the keyed Streamlit wrapper owns the CTA, so its
+   child markup must not introduce another background, border or padding. */
+:is(
+  [class*="st-key-ui_action_shell_strong_"],
+  [class*="st-key-flow_journey_next"]
+) .ui-next-action--strong {
+  background:none;box-shadow:none;border:0;border-radius:0;
+  margin:0;padding:0;overflow:visible;max-width:820px;
+}
 .journey-next__content {max-width:820px;}
+.ui-next-action--strong {max-width:none;}
+.ui-next-action--strong h2, .ui-next-action--strong p {max-width:820px;}
 .journey-next__eyebrow {display:block;color:#BCE8E7;font-weight:800;
   letter-spacing:.11em;font-size:.75rem;margin-bottom:11px;}
 .journey-next__content h2 {font-family:'DM Sans',system-ui,sans-serif !important;
   color:#FFF !important;font-size:clamp(1.22rem,2.3vw,1.75rem) !important;
   line-height:1.32;font-weight:750;margin:0 0 8px;}
 .journey-next__content p {color:#E3F1F3;font-size:.94rem;line-height:1.55;margin:0 0 13px;}
-[class*="st-key-flow_journey_next"] [data-testid="stCaptionContainer"] {color:#E3F1F3 !important;}
-[class*="st-key-flow_journey_next"] [data-testid="stButton"] button {
+:is([class*="st-key-ui_action_shell_strong_"],
+    [class*="st-key-flow_journey_next"]) [data-testid="stCaptionContainer"] {
+  color:#E3F1F3 !important;
+}
+/* Only native Streamlit buttons in opt-in CTA shells are styled. */
+:is([class*="st-key-ui_action_shell_strong_"],
+    [class*="st-key-flow_journey_next"]) [data-testid="stButton"] button {
   background:#FFF !important;color:#15516B !important;border:1px solid #FFF !important;
   min-height:45px;font-weight:800 !important;border-radius:10px !important;
 }
-[class*="st-key-flow_journey_next"] [data-testid="stButton"] button:hover {
+:is([class*="st-key-ui_action_shell_strong_"],
+    [class*="st-key-flow_journey_next"]) [data-testid="stButton"] button:hover:not(:disabled) {
   background:#E4F5FA !important;color:#103D53 !important;
+}
+:is([class*="st-key-ui_action_shell_strong_"],
+    [class*="st-key-flow_journey_next"]) [data-testid="stButton"] button:focus-visible {
+  outline:3px solid #D6F6FB !important;outline-offset:3px !important;
+}
+:is([class*="st-key-ui_action_shell_strong_"],
+    [class*="st-key-flow_journey_next"]) [data-testid="stButton"] button:disabled {
+  opacity:1 !important;background:#DDECF0 !important;color:#395565 !important;
+  border-color:#DDECF0 !important;
 }
 .journey-next__anchor {display:inline-block;padding:10px 17px;border-radius:10px;
   background:#FFF;color:#15516B !important;text-decoration:none !important;
@@ -656,7 +689,11 @@ padding:17px 20px;margin:0 0 10px;}
   .journey-header {margin-bottom:12px;padding:18px;}
   .journey-header__save {overflow-wrap:anywhere;}
   .journey-stat {min-height:0;margin-bottom:4px;}
-  [class*="st-key-flow_journey_next"] {padding:21px 18px;margin:8px 0 18px;}
+  :is(.ui-next-action--strong,
+      [class*="st-key-ui_action_shell_strong_"],
+      [class*="st-key-flow_journey_next"]) {
+    padding:21px 18px;margin:8px 0 18px;
+  }
   .journey-next__content h2 {font-size:1.23rem !important;}
   [class*="st-key-flow_journey_step_card_"] {padding:13px 14px;}
   [class*="st-key-flow_journey_step_card_"] [data-testid="stButton"] button {width:100%;}
