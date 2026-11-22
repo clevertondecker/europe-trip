@@ -138,6 +138,32 @@ class GuidedComparisonTests(unittest.TestCase):
         self.assertIn("trajetos com dados históricos",captions)
         self.assertIn("referências indicativas",captions)
 
+    def test_comparison_auto_appears_for_three_and_five_bases(self):
+        a=self.app()
+        a.button(key="rec03a_confirm_subset").click().run()
+        self.assertFalse(a.exception,[x.message for x in a.exception])
+        from base_research_expanded_model import load_research
+        candidates=[c["id"] for c in load_research(include_candidates=True)["cities"]]
+        for n in (3,5):
+            with self.subTest(n=n):
+                a.session_state[CHOICE]=candidates[:n]
+                a.run()
+                self.assertFalse(a.exception,[x.message for x in a.exception])
+                self.assertEqual(a.session_state[CHOICE],candidates[:n])
+                self.assertTrue(any(x.key=="rec03a_inline_matrix" for x in a.checkbox))
+                self.assertFalse(any(x.key=="rec03a_handoff_compare" for x in a.button))
+                self.assertFalse(any(x.key==CHOICE+"_widget" for x in a.multiselect))
+                self.assertEqual(len([x for x in a.selectbox
+                                      if x.key=="rec03a_focus_city"]),1)
+        a.session_state[CHOICE]=[]
+        a.run()
+        self.assertFalse(a.exception,[x.message for x in a.exception])
+        self.assertFalse(any(x.key=="rec03a_inline_matrix" for x in a.checkbox))
+        a.session_state[CHOICE]=candidates[:1]
+        a.run()
+        self.assertFalse(a.exception,[x.message for x in a.exception])
+        self.assertFalse(any(x.key=="rec03a_inline_matrix" for x in a.checkbox))
+
     def test_other_city_selection_survives_filters_and_browse_switch(self):
         a=self.app()
         a.button(key="rec03a_confirm_subset").click().run()
