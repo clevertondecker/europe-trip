@@ -194,12 +194,15 @@ def render_review(plan,catalog,view):
         st.caption("Somente pesquisa: "+", ".join(r["name"] for r in view["unsupported"]))
     st.caption("Retornos, reservas, moradia e custos de 2027 ainda precisam de confirmação. "
                "Salvar registra decisões, não confirma reservas.")
+    # Finishing a useful draft does not require selecting days or opening
+    # research assistants. Keep the canonical cloud save in the primary path.
+    render_primary_private_save(plan,catalog)
     st.button("Organizar períodos e datas (opcional)",key="flow_journey_review_organize",
               on_click=_show,args=("organize",),disabled=not bool(view["rows"]))
-    from rec05_priority_research_ui import render_research_from_session
-    render_research_from_session(key="rec05_plan")
-    render_primary_private_save(plan,catalog)
-    render_continuity_panel(plan,catalog)
+    with st.expander("Pesquisa e recuperação complementar · opcional",expanded=False):
+        from rec05_priority_research_ui import render_research_from_session
+        render_research_from_session(key="rec05_plan")
+        render_continuity_panel(plan,catalog)
 
 
 def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx=6.3,chffx=7.1,*,summary_only=False):
@@ -273,10 +276,11 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
             st.button(label,key="flow_journey_primary",type="primary",
                       on_click=_discover if action=="choose" else _choose if action=="exploratory" else request_planning,
                       args=() if action in ("choose","exploratory") else (state,action))
-        st.markdown("#### Etapas da jornada")
-        for step,title,status in view["steps"]:
-            st.markdown("**"+title+"**")
-            st.caption(status)
+        with st.expander("Ver etapas da jornada · opcional",expanded=False):
+            st.markdown("#### Etapas da jornada")
+            for step,title,status in view["steps"]:
+                st.markdown("**"+title+"**")
+                st.caption(status)
         with st.expander("Ferramentas complementares"):
             st.button("Encontrar cidades-base",key="flow_journey_suggestions",
                       on_click=request_navigation,args=(state,"suggestions"))
@@ -308,19 +312,22 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
             st.button(visual["primary_label"] or LABELS_ACTION[action],
                       key="flow_journey_primary",type="primary",
                       on_click=_show,args=(action,))
-    st.markdown(section_heading(
-        "SEU CAMINHO", "Etapas da jornada",
-        "Continue quando quiser. Organizar datas é opcional para salvar um rascunho."
-    ), unsafe_allow_html=True)
-    for step in visual["steps"]:
-        card_key="flow_journey_step_card_"+("active_" if step["active"] else "quiet_")+step["id"]
-        with st.container(key=card_key):
-            left,right=st.columns([4.5,1.5],vertical_alignment="center")
-            left.markdown(step_html(step),unsafe_allow_html=True)
-            right.button(step["button"],key="flow_journey_step_"+step["id"],
-                         disabled=step["disabled"],use_container_width=True,
-                         on_click=_choose if step["id"]=="choose" else _show,
-                         args=() if step["id"]=="choose" else (step["id"],))
+    # One main next-action button remains above the active editor. Keep
+    # legacy step links as a secondary, non-competing escape hatch.
+    with st.expander("Acessar outras etapas · opcional",expanded=False):
+        st.markdown(section_heading(
+            "SEU CAMINHO", "Etapas da jornada",
+            "Continue quando quiser. Organizar datas é opcional para salvar um rascunho."
+        ), unsafe_allow_html=True)
+        for step in visual["steps"]:
+            card_key="flow_journey_step_card_"+("active_" if step["active"] else "quiet_")+step["id"]
+            with st.container(key=card_key):
+                left,right=st.columns([4.5,1.5],vertical_alignment="center")
+                left.markdown(step_html(step),unsafe_allow_html=True)
+                right.button(step["button"],key="flow_journey_step_"+step["id"],
+                             disabled=step["disabled"],use_container_width=True,
+                             on_click=_choose if step["id"]=="choose" else _show,
+                             args=() if step["id"]=="choose" else (step["id"],))
     note=state.pop("flow_journey_notice",None) or state.pop("flow_notice",None)
     if note:
         st.success(note)
