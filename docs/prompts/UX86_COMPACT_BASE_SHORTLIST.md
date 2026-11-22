@@ -1,3 +1,6 @@
+> **SUBSTITUÍDO — escopo absorvido pelo PR #201 (UX85 revisado).**
+> A abordagem atual não cria uma shortlist independente: seleciona cidades nos próprios resultados, reutilizando `rec03b_handoffs.CHOICE`. Este texto abaixo é mantido apenas como histórico. **Não implementar este prompt isoladamente.**
+
 # UX86 — Cards compactos e shortlist de cidades-base | Prompt de implementação
 
 ## Papel e objetivo
