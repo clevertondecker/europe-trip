@@ -111,6 +111,14 @@ def _destination_teaser(item: dict) -> str:
     return "Conheça este destino; atrações individuais ainda não pesquisadas."
 
 
+def _destination_wishlist_state(interests: dict | None, destination_id: str) -> str:
+    """Read the existing UX502 priority without treating discarded as active."""
+    for row in (interests or {}).get("items", []):
+        if row["destination_id"] == destination_id:
+            return "discarded" if row["priority"] == "discarded" else "saved"
+    return "new"
+
+
 def _render_previous_interest_picker(valid: list[str], by_id: dict) -> None:
     """Retain the old selection widget even when a filter returns zero results."""
     st.multiselect(
@@ -206,10 +214,16 @@ def render_independent_destination_discovery(*, discovery=None) -> None:
                     # A short, sourced reason to explore: only catalogued
                     # attractions and categories, not invented editorial text.
                     st.caption(_destination_teaser(item))
-                    saved = {r["destination_id"]: r["priority"] for r in
-                             st.session_state.get("ux502_interests",{}).get("items",[])}
-                    if item["id"] in saved:
+                    state = _destination_wishlist_state(
+                        st.session_state.get("ux502_interests"), item["id"])
+                    if state == "saved":
                         st.caption("✓ Na minha lista")
+                    elif state == "discarded":
+                        st.caption("Destino descartado anteriormente")
+                        st.button("Reconsiderar destino",
+                                  key="ux502_restore_"+item["id"],
+                                  use_container_width=True,
+                                  on_click=add_destination, args=(item["id"], discovery))
                     else:
                         st.button("Adicionar à minha lista",
                                   key="ux502_add_"+item["id"],
