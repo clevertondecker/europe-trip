@@ -125,66 +125,58 @@ def _restore_widget(widget, shadow, default, valid=None):
     return value
 
 
-def _card(candidate, result, names, cities, official, prefix):
-    b = candidate["base_id"]
-    meta = cities[b]
+def _card(candidate, result, names, cities, official, options):
+    """One card per city, with CHOICE as the only base-selection state."""
+    from rec03b_handoff_ui import render_card_choice, render_card_actions
+
+    base=candidate["base_id"]
+    meta=cities[base]
     with st.container(border=True):
         st.markdown("**"+meta["name"]+"** · "+meta["country"]+
-                    (" · Base oficial de referência" if b==official else ""))
-        reasons = candidate["reasons"]
-        if reasons:
-            st.write(_REASON.get(reasons[0], "Alternativa para investigação."))
-        known = candidate["known_destination_ids"]
-        local = candidate["local_destination_ids"]
-        missing = candidate["missing_destination_ids"]
-        examples=evidence_examples(candidate,result["destinations"])
-        for d,cell in examples:
-            category=cell["category"]
-            detail=("Acesso local a verificar" if category=="local" else
-                    format_minutes(cell["display_min"])+" · mínimo de ida publicado · "+
-                    ("histórico" if category=="historical" else "indicativo"))
-            st.write(names.get(d,d)+" — "+detail)
-        st.caption(f"{len(known)} destinos com tempo · {len(local)} locais · {len(missing)} sem tempo")
-        st.caption("Retorno e horários de 2027 não confirmados.")
-        must = candidate["must_visit"]
-        if must["missing"]:
-            st.write("Imperdíveis sem tempo: "+_label_ids(must["missing"],names))
-        elif must["known"] or must["local"]:
-            st.write("Imperdíveis identificados: "+_label_ids(must["known"]+must["local"],names))
-        if known:
-            st.caption("Históricos: "+str(candidate["historical_count"])+
-                       " · Indicativos: "+str(candidate["indicative_count"]))
-        if local:
-            st.caption("Acesso local a verificar: "+_label_ids(local,names))
-        # An expander alone eagerly renders every child on each rerun.
-        # A keyed checkbox makes detailed provenance genuinely on demand.
-        detail_key="rec03a_details_"+prefix+"_"+b
-        if st.checkbox("Consultar referências e limitações",key=detail_key):
-            coverage = candidate["weighted_coverage"]
+                    (" · Base oficial de referência" if base==official else ""))
+        reasons=candidate["reasons"]
+        st.write(_REASON.get(reasons[0],"Alternativa para investigação.") if reasons
+                 else "Alternativa para investigar com os dados disponíveis.")
+        st.caption(f'{candidate["historical_count"]} histórico(s) · '
+                   f'{candidate["indicative_count"]} indicativo(s) · '
+                   f'{len(candidate["local_destination_ids"])} local(is) · '
+                   f'{len(candidate["missing_destination_ids"])} sem tempo')
+        missing=candidate["must_visit"]["missing"]
+        if missing:
+            st.caption("Imperdíveis ainda sem tempo: "+_label_ids(missing,names))
+        elif candidate["local_destination_ids"]:
+            st.caption("Acesso local e última milha ainda precisam de verificação.")
+        st.caption("Mínimos de ida pesquisados; retorno, horários e custos de 2027 não confirmados.")
+        render_card_choice(base,options)
+        with st.expander("Conhecer, ver no mapa ou simular esta cidade"):
+            render_card_actions(base,"card")
+        if st.checkbox("Ver evidências e limitações",key="rec03a_details_"+base):
+            coverage=candidate["weighted_coverage"]
             if coverage["value"] is not None:
-                st.write(f'Cobertura ponderada: {coverage["value"]:.0%} '
+                st.write(f'Cobertura documental ponderada: {coverage["value"]:.0%} '
                          f'({coverage["numerator"]}/{coverage["denominator"]} pesos de destinos não locais).')
             else:
                 st.caption("Cobertura ferroviária não aplicável.")
             st.caption(candidate["coverage_limitation"])
             for reason in reasons[1:]:
                 st.write(_REASON.get(reason,"Informação a investigar."))
-            for d, cell in candidate["evidence"].items():
-                st.write(names.get(d,d)+" · "+cell.get("label","Sem referência"))
+            for destination,cell in candidate["evidence"].items():
+                st.write(names.get(destination,destination)+" · "+
+                         cell.get("label","Sem referência"))
                 if cell.get("source_url"):
-                    st.link_button("Fonte de "+names.get(d,d),cell["source_url"])
-                raw=candidate["raw_rail_evidence"].get(d,{})
+                    st.link_button("Fonte de "+names.get(destination,destination),
+                                   cell["source_url"])
+                raw=candidate["raw_rail_evidence"].get(destination,{})
                 date=cell.get("gap_checked_at") or raw.get("source_date")
                 if date:
                     st.caption("Data registrada: "+str(date))
                 for observation in raw.get("observations",[]):
-                    st.caption("Observação original: "+str(observation.get("evidence_date") or "data não informada")+
+                    st.caption("Observação original: "+
+                               str(observation.get("evidence_date") or "data não informada")+
                                " · "+format_minutes(observation.get("minimum_oneway_min")))
                     if observation.get("source_url"):
                         st.link_button("Fonte da observação",observation["source_url"])
             st.caption(candidate["limitation"])
-        from rec03b_handoff_ui import render_card_actions
-        render_card_actions(b,prefix)
 
 
 def _render_comparison_groups(result,names,cities):
