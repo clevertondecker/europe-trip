@@ -1,6 +1,6 @@
 # UX89 — Simplificar navegação e hierarquia sem novo redesign
 
-> **Status: proposta para review — NÃO IMPLEMENTAR neste PR.**
+> **Status: implementação incremental no PR #207 — aguardando revisão e validação.**
 > Repositório: `clevertondecker/europe-trip`. Dependência visual e funcional: UX64, UX81–UX88, UX83 e REC03. PR #206 trata separadamente do JSON redundante em Minha lista; não sobrepor mudanças.
 
 ## Papel e objetivo
@@ -46,7 +46,7 @@ O problema observado em **Explorar → Minha lista** é a concorrência entre mu
 - Não criar cópias locais do plano, pontuações, simulações ou estados paralelos.
 - Se a hierarquia puder ser corrigida com poucas condições de renderização, preferir isso a refatoração global em `app.py`.
 
-## Plano de implementação proposto (somente após review)
+## Plano de implementação e validação
 1. **P1 — origem dos conteúdos cruzados:** ajustar renderização condicional para cada atividade ter um único cabeçalho e conteúdo coerente. Verificar `Minha lista` → `Meu roteiro` e acessos de login/retorno.
 2. **P1 — reduzir duplicações acima da dobra:** ocultar/relocalizar simulação e navegação legada, mantendo pontos de acesso explícitos sem duplicar widgets.
 3. **P2 — ação contextual e copy:** destacar uma CTA primária por estado (ex.: descobrir, montar, revisar), consolidar descrições, manter orçamento/mapa/comparação opcionais.
@@ -82,4 +82,12 @@ Sem alteração em algoritmos ferroviários, cálculos financeiros, importadores
 ## Entrega da futura implementação
 Relatar: raiz de cada fricção, arquivos modificados, comportamento antes/depois, elementos removidos da visão cotidiana versus recursos preservados, cobertura de testes, CI, pendências visuais, regressões potenciais e recomendação de merge.
 
-**Pergunta de aprovação:** A jornada fica compreensível em três áreas e uma atividade por vez, sem perder nenhum recurso e sem um segundo conjunto de opções técnicas competindo com a ação principal?
+**Pergunta para o review final:** A jornada fica compreensível em três áreas e uma atividade por vez, sem perder nenhum recurso e sem um segundo conjunto de opções técnicas competindo com a ação principal?
+
+## Registro de implementação do PR #207
+- `app.py`: um só seletor de tarefa visível; painel técnico legado e ajustes hipotéticos acessíveis na barra lateral, sem bloquear Descobrir/Minha lista; retirado cabeçalho genérico da atividade Explorar/Passeios; filtros de cenário fora do caminho principal.
+- `planning_context_ui.py`: configuração explícita disponível em Planejar, comparação de alternativa em Orçamento/Simulações; forms anteriormente abertos continuam acessíveis até encerramento.
+- `ux502_destination_interests_ui.py`: entrada secundária única **Comparar cidades-base**, reutilizando o fluxo sugerido; sem segunda CTA manual concorrente.
+- `tests/test_ux64_public_navigation.py`: regressão AppTest de contexto e das nove atividades.
+- **Dependência:** #206 é independente, mas seu comportamento de backup deve ser conferido após a integração. Não copiar o código do #206 para este PR.
+- **Gate pendente:** CI completo do HEAD, revisão de regressões e navegador real 1440/768/390. Não declarar UX visualmente validada sem browser.
