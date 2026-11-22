@@ -14,7 +14,7 @@ SUPPORTED_ROUTE_BASES=frozenset({"mulhouse","strasbourg","metz","nancy"})
 def scenario_impact(plan:dict,trip_data:dict,finance_live:bool,base_id:str,
                     eurfx:float=6.3,chffx:float=7.1,
                     french_days:int|None=None)->dict:
-    choose_exploratory_base(base_id,base_options())
+    choose_exploratory_base(base_id,base_options(include_candidates=True))
     if base_id not in SUPPORTED_ROUTE_BASES:
         return {"city_id":base_id,"ready":False,"total_brl":None,
                 "known_tickets_brl":None,"missing":[
