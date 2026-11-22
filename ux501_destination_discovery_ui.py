@@ -203,7 +203,7 @@ def render_independent_destination_discovery(*, discovery=None) -> None:
                                   use_container_width=True,
                                   on_click=add_destination, args=(item["id"], discovery))
                     with st.container(key=f"ux53_footer_destination_{item['id']}"):
-                        with st.expander("Ver detalhes, atrações e fontes"):
+                        with st.expander("Ver atrações e fontes · detalhes"):
                             if photo and photo.get("subject"):
                                 st.caption("Na foto: "+photo["subject"])
                             if item.get("planning_support") == "exploration_only":
