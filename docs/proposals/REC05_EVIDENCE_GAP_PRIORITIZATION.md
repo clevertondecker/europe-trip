@@ -1,0 +1,48 @@
+# Prompt de implementação — Nossa Europa 2027
+Atue como Staff Software Engineer, Product/UX Engineer, Senior Python/Streamlit Engineer e Data Quality Engineer. PR draft de proposta, não implementação nem autorização de merge. Base auditada c313d70f75289fa4bb6f8cc9641f26b8fb573317. Leia docs/proposals/REC01_05_PERSONALIZED_BASE_RECOMMENDATION.md e os prompts #188–190. Antes de implementar, atualize a branch com main após dependências e confirme contratos/testes atuais. Preserve UX64, roteador, wishlist v1, TripPlan e backup privado; não criar editor, fonte de verdade ou estado persistido paralelo. Operações de leitura não alteram dados privados. Não inventar preços, tempos, retornos, viabilidade ou reservas 2027; sem score universal. Quantidades de cidades/destinos e layout adaptativos; desconhecido não é zero. Teste casos extremos, regressões, fluxo real e CI, registre HEAD e resultados. Não fazer merge sem autorização.
+
+## Dependência: REC02–REC04 integrados
+### Problema
+O diagnóstico integrado de #187 mostrou 574 pares com duração em 1870, 34 locais e 1262 sem tempo. Nos três cenários DATA23 não havia grupo completo comparável. A pesquisa mais útil não é preencher a matriz aleatoriamente, mas identificar lacunas decisivas para a seleção real. Seis endpoints ainda sem catálogo turístico: aix_les_bains, chamonix, chartres, geneva, nantes, tours (confirmar snapshot atual). Não confundir extensão do catálogo com evidência de rota, nem usar quantidade fixa como regra.
+### Implementação
+- Consumir resultado REC02 (células, escopo, pesos, razões, grupos comparáveis) e projeções UX506/REC04. Gerar fila explicável de pendências por candidata/destino e tipo de evidência: mínimo de ida ausente, retorno, estação/última milha, frequência/amostra, tarifa, moradia, condições e fonte. Prioridade baseada em imperdíveis e impacto documental demonstrável (ex.: completar grupo equivalente), nunca simular tempo inexistente nem probabilidade. Deduplicar tarefa por ID dirigido e tipo de evidência; registrar escopo, razões e lacunas. Distinguir problemas de cobertura, comparabilidade, dados desatualizados e erro de loader.
+- Dentro das telas atuais (Cidades sugeridas, ficha, Comparar, Planejar/Organizar e Simulações), apresentar resumos contextuais com ação de abrir detalhes/fontes existentes e lista priorizada, sem criar nova aba principal. Não duplicar inventário de pendências nem declarar pesquisa concluída por visita. Permitir voltar sem perder escopo; mudanças de wishlist recalculam. Dados privados não saem da sessão; nenhuma publicação automática.
+- Oferecer uma lista exportável de pesquisa sem dados pessoais (opcional, somente ação explícita); se exportada, indicar data, policy_version, IDs, fonte esperada e condição, jamais marcar como realizada. Não consultar APIs externas por rerun ou inventar URLs. Eventual coleta das seis localidades, expansão de rotas, fotos e preços em PR de dados separado, com fonte/data/direção/condição validadas e QA de imagens. Não modificar snapshots congelados. Separar pesquisa de transporte e integração canônica de passeio, que exige domínio próprio.
+### Testes
+Cenários reais 10 do diagnóstico e catálogo crescente, imperdível ausente vs talvez, diferença entre local e desconhecido, ida documentada sem retorno, falta de moradia, combinações incomparáveis, fontes conflitantes/variação legítima, sem evidência, empate, alteração/removidos/descartados, direção inversa, restore/isolamento, ausência de mutação. Medir determinismo, utilidade, complexidade sem gerar todas combinações exponenciais; demonstrar exemplos reproduzíveis em DATA23 e destinos legados. AppTest de abertura e retorno mantendo filtros, CI full. Entregar backlog de pesquisa fundamentado, não prometer cobertura artificial.
+
+## Refinamento: priorização e UX
+Usar REC02/UX506/REC04 para selecionar poucos itens relevantes no contexto de candidatas em investigação; inventário completo sob demanda. Priorizar imperdíveis, lacuna que impede comparação válida, retorno, última milha, moradia, evidência incompatível e desatualizada; razões concretas sem probabilidade ou ganho inventado. Não confundir múltiplos tempos legítimos com contradição. Deduplicar UX506 e planejamento; nenhuma rede em rerun. Não criar área de qualidade dos dados. Executar jornada completa 16 passos descrita no review (Paris/Colmar/Strasbourg/Basel/Lucerne/Interlaken com prioridades, variante DATA23), incluir resultados de simulação suportada/não suportada e retorno sem alteração da base oficial. Testes completos e UX visual quando possível.
+
+
+## Coordenação com a nova jornada Planejar (#195)
+Depende de #195, #190 e #191 integrados e validados. A revisão consolidada pode mostrar pendências básicas já sustentadas por dados canônicos; REC05 acrescentará priorização explicável de pesquisa, como ferramenta secundária, sem tornar pesquisa de transporte, custos, moradia ou datas pré-requisito de salvamento. Não duplicar lista, progresso ou editor; manter distinção wishlist/TripPlan/organização/persistência. Reutilizar escopo explícito REC02/03 e preservar desejos exploratórios DATA23. Testar que lacunas não impedem o fluxo wishlist → rascunho salvo, nenhum cálculo de evidência inventado e retorno mantém contexto. Sem execução de pesquisa em rerun, nenhuma implementação antecipada neste commit.
+
+
+## Gate após revisão de elegibilidade de Planejar
+Distinguir falta de suporte canônico para inclusão de lacuna de evidência ferroviária. A fila REC05 pode indicar pesquisa futura, mas não transformar ID exploratório em passeio elegível. Quando nenhum desejo puder ser incluído, oferecer pesquisa/revisão sem abrir montagem vazia. Rascunho existente deve continuar revisável e salvável sem datas, moradia ou tarifas confirmadas. Implementação somente após #195/#190/#191 integrados.
+
+
+## Implementação REC05 nesta branch (dependência REC04)
+- `rec05_priority_research_model.prioritize_research` consome projeção real REC02
+  e, quando disponíveis, status tipados UX506 e capacidade financeira REC04.
+  Distingue `no_time`, `reference_only`, histórico e local; nunca cria volta,
+  frequência, disponibilidade, preços de 2027 ou correlação artificial entre
+  fontes. Trabalho dirigido por cidade→destino, deduplicado por tipo e contexto.
+- A ordenação editorial de pendências prioriza `must_visit`, falta de tempo de
+  ida que impede a mesma cesta, retorno, última milha, tarifa, moradia,
+  conectividade e internet; não classifica melhor cidade nem representa
+  probabilidade de viagem. A moradia é tarefa por cidade, não por par de rota.
+- A interface é secundária em sugestões, comparador manual, ficha, mapa,
+  revisão e simulações. O cálculo extra nas telas sem REC02 já carregado é
+  opt-in por checkbox. O planejamento e o salvamento não ficam bloqueados.
+- Exportação explícita JSON somente com IDs, origem/destino, condição de
+  pesquisa, fonte observada e `research_state=not_performed`. Nenhum dado de
+  conta ou identificador de TripPlan sai da sessão; não há rede nem pesquisa
+  automática em reruns.
+- Testes cobrem dados reais REC02/DATA23, apenas local, ida sem volta, escopo
+  inválido, verificações UX506, fonte não HTTPS, exportação, prioridade,
+  estabilidade de ordenação, deduplicação e ausência de mutação.
+- PR empilhado sobre #191 porque REC04 ainda aguarda review. O CI de #192 contra
+  `main` testa a árvore integrada; comparar PR contra #191 para isolar o REC05.
+  Nenhum merge ou fechamento está autorizado.

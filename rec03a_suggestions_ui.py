@@ -263,6 +263,8 @@ def render_suggestions(*, plan, discovery=None, research=None):
     from rec03b_handoff_ui import render_compare_selection, render_planning_handoff
     render_compare_selection(result,cities)
     render_planning_handoff(plan,interests=interests,discovery=discovery,research=research)
+    from rec05_priority_research_ui import render_research_result
+    render_research_result(result,key="rec05_suggestions")
     candidates={c["base_id"]:c for c in result["candidates"]}
     sections=result["highlight_sections"]
     ordered_sections=(("Alternativas com evidências comparáveis",sections["complete_reference_groups"]),
