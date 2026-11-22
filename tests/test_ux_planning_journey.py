@@ -202,7 +202,7 @@ render_planning_journey(active_plan(),load_attractions(),
         app=AppTest.from_string(script,default_timeout=90)
         app.session_state["advisor_plan"]=new_plan()
         app.session_state["ux502_interests"]=set_interest(
-            empty_interests(),"strasbourg","must_visit",self.discovery)
+            empty_interests(),"strasbourg","must_visit",build_exploration_discovery())
         with patch("continuity_ui._private_store",return_value=None):
             app.session_state["summary"]=True
             app.run()
