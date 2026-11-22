@@ -71,6 +71,18 @@ class PublicWishlistJourneyAppTests(unittest.TestCase):
         self.assertEqual(app.button(key="flow_journey_from_wishlist").label,
                          "Revisar meu roteiro")
 
+    def test_discover_does_not_show_wishlist_save_or_recovery_controls(self):
+        app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
+        app.button(key="ux64_sidebar_nav_0").click().run()
+        app.segmented_control(key="ux64_public_task").set_value("Descobrir").run()
+        self.assertFalse(app.exception,[x.message for x in app.exception])
+        buttons={b.key for b in app.button}
+        self.assertNotIn("ux502_cloud_save",buttons)
+        self.assertNotIn("ux502_import_confirm",buttons)
+        self.assertNotIn("ux502_migrate",buttons)
+        self.assertIn("ux501_search",{x.key for x in app.text_input})
+        self.assertIn("ux501_country",{x.key for x in app.selectbox})
+
     def test_partial_draft_and_exploratory_only_keep_one_primary_action(self):
         discovery=build_exploration_discovery()
         catalog=load_attractions()
