@@ -199,10 +199,12 @@ def render_review(plan,catalog,view):
     render_primary_private_save(plan,catalog)
     st.button("Organizar períodos e datas (opcional)",key="flow_journey_review_organize",
               on_click=_show,args=("organize",),disabled=not bool(view["rows"]))
-    with st.expander("Pesquisa e recuperação complementar · opcional",expanded=False):
+    # The existing recovery panel is itself an expander. Keep it at the same
+    # level as the save action so emergency export is never nested twice.
+    render_continuity_panel(plan,catalog)
+    with st.expander("Pesquisa complementar · opcional",expanded=False):
         from rec05_priority_research_ui import render_research_from_session
         render_research_from_session(key="rec05_plan")
-        render_continuity_panel(plan,catalog)
 
 
 def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx=6.3,chffx=7.1,*,summary_only=False):
