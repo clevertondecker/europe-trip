@@ -268,7 +268,7 @@ class PlanningUx83NavigationTests(unittest.TestCase):
         self.assertIn('("Meu roteiro","Meu planejamento")',branch)
         self.assertNotIn('summary_only=True',branch)
         self.assertIn('summary_only=True',code[code.index('if page == "Visão geral":'):code.index('elif page == "Roteiro":')])
-        self.assertIn('flow_journey_view']="organize"',code)
+        self.assertIn('st.session_state["flow_journey_view"]="organize"',code)
 
     def test_organizer_header_and_review_are_same_shared_component(self):
         from ux_planning_journey_presentation import header_html
