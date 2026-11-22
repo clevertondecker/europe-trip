@@ -53,3 +53,18 @@ Implementar depois do UX81. Atualizar a branch a partir de main com UX81 integra
 Testar transição Descobrir -> Minha lista -> Comparar bases -> Mapa e retorno; filtros antes/depois da navegação; adicionar/retirar interesses; casos de cloud save e conflito; matriz read-only; fallback de fotos e mapas; foco e UI no mobile. Testes AppTest não provam layout, exigem evidência real em browser ou pendência declarada.
 
 Executar python -m compileall -q ., python -m unittest discover -s tests -v e CI no HEAD; revisar diff e corrigir regressões. Implementar código nesta branch, não somente design. Manter PR como draft até testes. Não fazer merge automático.
+
+---
+
+## Reconciliação de fluxo e precedência (obrigatória)
+
+**Estado atual:** PR somente de especificação. O código de \`ux502_destination_interests_ui.render_wishlist\` **já usa** \`project_planning\` para escolher o CTA contextual \`flow_journey_from_wishlist\`. Preservar essa regra canônica e NÃO construir uma nova função \`next_action\` que compute elegibilidade ou substitua \`project_planning\`. O componente UX81 recebe apenas copy/variant/estado projetado.
+
+Sequência a cobrir explicitamente:
+1. \`Descobrir → Minha lista → Descobrir\`: \`ux501_interest_session\` temporário, \`ux502_discovery_filters\` e \`ux502_interests\` permanecem coerentes; sem autosave implícito.
+2. \`Minha lista → Montar roteiro → Revisar\`: só destino elegível entra em \`TripPlan\` após confirmação explícita; dados exploratórios permanecem exploratórios; \`flow_journey_from_wishlist\` e salvar privado continuam com callbacks/keys originais.
+3. \`Comparar bases → Minha lista\`: filtros de \`ux503_bases\` e \`ux503_visible_destinations\` não reescrevem a wishlist; comparação permanece read-only.
+4. \`Mapa\`: usar a rota real e mapa real da \`main\` antes de editar; visual compactado sem ocupar a área principal com hero/KPIs.
+5. Evitar dois headers, status contraditórios e duas CTAs primárias na mesma viewport. Manter a consistência de \`page_header\`, \`kpi_cards\`, \`section_heading\` e variantes do UX81.
+
+**Bloqueio:** implementar apenas com UX81 integrado à \`main\`; revisar HEAD, atualizar branch e manter draft até testes no HEAD. Não fazer merge automático.
