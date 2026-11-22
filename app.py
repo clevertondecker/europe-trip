@@ -1632,95 +1632,95 @@ elif page == "Orçamento":
             for column,markup in zip(st.columns(3,gap="small"),sim_cards):
                 column.markdown(markup,unsafe_allow_html=True)
         st.markdown(section_heading(
-            "CONFIGURE SUA SIMULAÇÃO","Escolha o estilo de viagem",
-            "Alterações de simulação não são atualizações do orçamento oficial.",
+            "TESTE UMA ALTERNATIVA","Ajuste sua viagem sem alterar o plano oficial",
+            "Comece pela duração ou pela cidade-base. Personalize outros gastos se quiser.",
             variant="compact",
         ),unsafe_allow_html=True)
-        preset = st.segmented_control("Estilo",["Econômico","Equilibrado","Mais ativo","Personalizado"],
-            default="Equilibrado",key="unified_style",selection_mode="single")
-        profiles={"Econômico":(1,35),"Equilibrado":(2,60),"Mais ativo":(4,75)}
-        if preset in profiles and st.session_state.get("_unified_previous_style") != preset:
-            st.session_state["unified_outings"] = profiles[preset][0]
-            st.session_state["unified_outing_cost"] = profiles[preset][1]
-        st.session_state["_unified_previous_style"] = preset
-        col1,col2,col3 = st.columns(3,gap="medium")
-        with col1:
+        basic, advanced = st.tabs(["Principal","Personalizar gastos"])
+        with basic:
             stay = st.slider("Dias na França",min_value=40,max_value=80,
                              value=french["french_days"],step=1,key="unified_stay",
                              on_change=_ux_budget_days_changed)
-        with col2:
-            outings = st.slider("Saídas por semana",0,7,value=2,key="unified_outings")
-        with col3:
-            spend = st.slider("Gasto por saída (€ para o casal)",15,150,value=60,step=5,
-                              key="unified_outing_cost")
-        col4,col5 = st.columns(2,gap="medium")
-        with col4:
-            fx = st.number_input("Câmbio simulado (R$/€)",4.0,10.0,6.3,0.05,key="unified_fx")
-        with col5:
             exploratory_options=base_options(include_candidates=True)
             city_ids=[item["id"] for item in exploratory_options]
-            candidate=st.session_state.get("scenario_base_selected",active_plan()["base_city"])
-            if candidate not in city_ids:
-                candidate=active_plan()["base_city"]
-            selected_base_id=candidate
+            sync_city_widget("ux94_simulation_city",city_ids)
+            selected_base_id=st.selectbox(
+                "Cidade-base hipotética",city_ids,key="ux94_simulation_city",
+                format_func=lambda key:hypothetical_city_name(key,exploratory_options),
+                on_change=set_city_from_widget,args=("ux94_simulation_city",))
             selected_city=hypothetical_city_name(selected_base_id,exploratory_options)
-            st.markdown("**Cidade-base nesta análise:** "+selected_city)
-            st.caption("Use o seletor de cidade no cabeçalho para comparar outra base.")
-        st.caption("Esta cidade é uma simulação independente. "
-                   "O roteiro oficial permanece em "+active_plan()["base_city"].capitalize()+
-                   ". A ausência de aluguel pesquisado não significa custo zero.")
-        st.markdown("<div class='page-section'>Moradia e custos adicionais</div>",unsafe_allow_html=True)
-        st.caption("O aluguel da cidade é um valor de referência editorial de 2026, NÃO uma oferta para 2027. "
-                   "Ao preenchê-lo, ele **substitui** a verba de moradia — não é somado novamente.")
-        city_data_budget = load_cities()
-        selected_rent = next((float(c["reference_rent_eur"]) for c in
-                              city_data_budget["cities"] if c["name"] == selected_city
-                              and c.get("reference_rent_eur") is not None),None)
-        if selected_rent is None:
-            st.info("Aluguel mobiliado desta cidade: não cotado. "
-                    "O orçamento abaixo mantém a provisão oficial de hospedagem "
-                    "e não a apresenta como preço desta cidade.")
-        use_city_rent = st.checkbox("Informar aluguel mensal hipotético para esta cidade",
-                                    value=False,key="unified_override_rent")
-        quoted_rent = None
-        if use_city_rent:
-            input_rent=st.number_input(
-                "Aluguel hipotético (€ por mês, sem taxas)",
-                min_value=0.,max_value=6000.,
-                value=selected_rent if selected_rent is not None else 0.,
-                step=50.,key="unified_rent_month_"+selected_base_id)
-            if input_rent>0:
-                quoted_rent=float(input_rent)
-                st.caption("Provisão inserida manualmente. Não é uma cotação "
-                           "confirmada para setembro–novembro de 2027.")
-            else:
-                st.warning("Informe um aluguel maior que €0 para substituição. "
-                           "Até lá, a verba geral do orçamento permanece como provisão.")
-        with st.expander("Alterações adicionais às outras verbas"):
-            st.caption("Ajustes negativos representam economia. Nenhuma despesa final "
-                       "pode ficar abaixo de zero; os valores continuam hipóteses.")
-            flight_budget=next((row["amount"] for row in scenario["components"]
-                                if row["name"].startswith("Passagens e deslocamentos aéreos")),0)
-            ratio=stay/french["french_days"]
-            minimum_rent=(quoted_rent*(stay/30)*fx if quoted_rent is not None
-                          else french["amounts"]["rent"]*ratio)
-            extra1,extra2,extra3,extra4=st.columns(4,gap="small")
-            with extra1:
-                flight_delta=st.number_input("Variação em voos (R$)",min_value=-int(flight_budget),
-                                             max_value=25000,value=0,step=250,key="unified_flight_extra")
-            with extra2:
-                excursions_delta=st.number_input("Variação em passeios (R$)",
-                                                 min_value=-int(french["amounts"]["excursions"]*ratio),
-                                                 max_value=20000,value=0,step=250,key="unified_tour_extra")
-            with extra3:
-                transit_delta=st.number_input("Variação em transporte (R$)",
-                                              min_value=-int(french["amounts"]["transport"]*ratio),
-                                              max_value=10000,value=0,step=250,key="unified_transit_extra")
-            with extra4:
-                rent_delta=st.number_input("Variação em taxas/moradia (R$)",
-                                           min_value=-int(minimum_rent),max_value=10000,
-                                           value=0,step=250,key="unified_rent_extra")
-        housing_terms=render_optional_housing_commitments(fx,selected_base_id)
+            st.caption("Esta escolha é apenas para a simulação. "
+                       "O plano oficial continua em "+active_plan()["base_city"].capitalize()+".")
+            st.caption("Aluguel não pesquisado, retornos e bilhetes de 2027 "
+                       "não devem ser interpretados como custo zero.")
+        with advanced:
+            preset = st.segmented_control("Estilo",["Econômico","Equilibrado","Mais ativo","Personalizado"],
+                default="Equilibrado",key="unified_style",selection_mode="single")
+            profiles={"Econômico":(1,35),"Equilibrado":(2,60),"Mais ativo":(4,75)}
+            if preset in profiles and st.session_state.get("_unified_previous_style") != preset:
+                st.session_state["unified_outings"] = profiles[preset][0]
+                st.session_state["unified_outing_cost"] = profiles[preset][1]
+            st.session_state["_unified_previous_style"] = preset
+            outings = st.slider("Saídas por semana",0,7,value=2,key="unified_outings")
+            spend = st.slider("Gasto por saída (€ para o casal)",15,150,value=60,step=5,
+                              key="unified_outing_cost")
+            fx = st.number_input("Câmbio simulado (R$/€)",4.0,10.0,6.3,0.05,
+                                 key="unified_fx")
+            st.caption("Esta cidade é uma simulação independente. "
+                       "O roteiro oficial permanece em "+active_plan()["base_city"].capitalize()+
+                       ". A ausência de aluguel pesquisado não significa custo zero.")
+            st.markdown("<div class='page-section'>Moradia e custos adicionais</div>",unsafe_allow_html=True)
+            st.caption("O aluguel da cidade é um valor de referência editorial de 2026, NÃO uma oferta para 2027. "
+                       "Ao preenchê-lo, ele **substitui** a verba de moradia — não é somado novamente.")
+            city_data_budget = load_cities()
+            selected_rent = next((float(c["reference_rent_eur"]) for c in
+                                  city_data_budget["cities"] if c["name"] == selected_city
+                                  and c.get("reference_rent_eur") is not None),None)
+            if selected_rent is None:
+                st.info("Aluguel mobiliado desta cidade: não cotado. "
+                        "O orçamento abaixo mantém a provisão oficial de hospedagem "
+                        "e não a apresenta como preço desta cidade.")
+            use_city_rent = st.checkbox("Informar aluguel mensal hipotético para esta cidade",
+                                        value=False,key="unified_override_rent")
+            quoted_rent = None
+            if use_city_rent:
+                input_rent=st.number_input(
+                    "Aluguel hipotético (€ por mês, sem taxas)",
+                    min_value=0.,max_value=6000.,
+                    value=selected_rent if selected_rent is not None else 0.,
+                    step=50.,key="unified_rent_month_"+selected_base_id)
+                if input_rent>0:
+                    quoted_rent=float(input_rent)
+                    st.caption("Provisão inserida manualmente. Não é uma cotação "
+                               "confirmada para setembro–novembro de 2027.")
+                else:
+                    st.warning("Informe um aluguel maior que €0 para substituição. "
+                               "Até lá, a verba geral do orçamento permanece como provisão.")
+            with st.expander("Alterações adicionais às outras verbas"):
+                st.caption("Ajustes negativos representam economia. Nenhuma despesa final "
+                           "pode ficar abaixo de zero; os valores continuam hipóteses.")
+                flight_budget=next((row["amount"] for row in scenario["components"]
+                                    if row["name"].startswith("Passagens e deslocamentos aéreos")),0)
+                ratio=stay/french["french_days"]
+                minimum_rent=(quoted_rent*(stay/30)*fx if quoted_rent is not None
+                              else french["amounts"]["rent"]*ratio)
+                extra1,extra2,extra3,extra4=st.columns(4,gap="small")
+                with extra1:
+                    flight_delta=st.number_input("Variação em voos (R$)",min_value=-int(flight_budget),
+                                                 max_value=25000,value=0,step=250,key="unified_flight_extra")
+                with extra2:
+                    excursions_delta=st.number_input("Variação em passeios (R$)",
+                                                     min_value=-int(french["amounts"]["excursions"]*ratio),
+                                                     max_value=20000,value=0,step=250,key="unified_tour_extra")
+                with extra3:
+                    transit_delta=st.number_input("Variação em transporte (R$)",
+                                                  min_value=-int(french["amounts"]["transport"]*ratio),
+                                                  max_value=10000,value=0,step=250,key="unified_transit_extra")
+                with extra4:
+                    rent_delta=st.number_input("Variação em taxas/moradia (R$)",
+                                               min_value=-int(minimum_rent),max_value=10000,
+                                               value=0,step=250,key="unified_rent_extra")
+            housing_terms=render_optional_housing_commitments(fx,selected_base_id)
         # Reference is intentionally only a known ticket subtotal. It must never
         # replace the entire tour allowance nor create a discount for missing quotes.
         catalog_extra=0.0
