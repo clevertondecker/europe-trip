@@ -215,5 +215,35 @@ class PrivateWishlistPersistenceTests(unittest.TestCase):
         self.assertEqual(app.session_state["ux502_status"], "Salvo no armazenamento privado")
 
 
+    def test_local_export_is_reachable_when_store_unavailable(self):
+        from unittest.mock import patch
+        import continuity_ui
+        app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
+        app.button(key="ux_sidebar_nav_1").click().run()
+        app.segmented_control(key="ux_section").set_value("Passeios").run()
+        app.session_state["ux502_interests"]=deepcopy(self.interests)
+        with patch.object(continuity_ui,"_private_store",return_value=None), \
+             patch("ux502_destination_interests_ui.st.download_button") as download:
+            app.run()
+            self.assertFalse(app.exception,[x.message for x in app.exception])
+            self.assertTrue(any(c.kwargs.get("key")=="ux502_download"
+                                for c in download.call_args_list))
+
+    def test_legacy_wishlist_import_is_available_on_demand(self):
+        from unittest.mock import Mock,patch
+        import continuity_ui
+        app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
+        app.button(key="ux_sidebar_nav_1").click().run()
+        app.segmented_control(key="ux_section").set_value("Passeios").run()
+        app.session_state["ux502_interests"]=deepcopy(self.interests)
+        store=Mock()
+        with patch.object(continuity_ui,"_private_store",return_value=store):
+            app.run()
+            self.assertFalse(app.exception,[x.message for x in app.exception])
+            app.checkbox(key="ux502_legacy_import_open").check().run()
+            self.assertFalse(app.exception,[x.message for x in app.exception])
+            self.assertTrue(app.session_state["ux502_legacy_import_open"])
+
+
 if __name__=="__main__":
     unittest.main()
