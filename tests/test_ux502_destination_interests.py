@@ -187,16 +187,24 @@ class PrivateWishlistPersistenceTests(unittest.TestCase):
         app.session_state["ux502_interests"]=deepcopy(self.interests)
         fake=Mock()
         fake.save.side_effect=StorageConflict("stale")
-        with patch.object(continuity_ui,"_private_store",return_value=fake):
+        with patch.object(continuity_ui,"_private_store",return_value=fake), \
+             patch("ux502_destination_interests_ui.st.download_button") as download, \
+             patch("ux502_destination_interests_ui.st.file_uploader") as upload:
             app.run()
-            # A configured private store owns routine wishlist saves; no
-            # duplicate JSON transfer controls in the everyday journey.
-            self.assertNotIn("ux502_upload", app.session_state)
-            self.assertNotIn("ux502_import_pending", app.session_state)
+            # Check rendered controls, not just session keys.
+            self.assertFalse(any(c.kwargs.get("key")=="ux502_download"
+                                 for c in download.call_args_list))
+            self.assertFalse(any(c.kwargs.get("key")=="ux502_upload"
+                                 for c in upload.call_args_list))
             self.assertFalse(any("Lista salva no armazenamento privado" in x.value for x in app.success))
             app.button(key="ux502_cloud_save").click().run()
         self.assertFalse(any("Lista salva no armazenamento privado" in x.value for x in app.success))
         self.assertTrue(app.session_state.get("ux36_cloud_dirty",False))
+        with patch.object(continuity_ui,"_private_store",return_value=fake), \
+             patch("ux502_destination_interests_ui.st.download_button") as download:
+            app.run()
+            self.assertTrue(any(c.kwargs.get("key")=="ux502_download"
+                                for c in download.call_args_list))
         fake.save.side_effect=None
         fake.save.return_value=8
         with patch.object(continuity_ui,"_private_store",return_value=fake):
