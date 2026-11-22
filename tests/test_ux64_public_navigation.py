@@ -64,8 +64,12 @@ class ContextualActivityAppTests(unittest.TestCase):
                              for b in app.button))
         self.assertFalse(any(b.key=="workflow_open_settings"
                              for b in app.button))
-        self.assertFalse(any(b.key=="ux503_open_from_wishlist"
-                             for b in app.button))
+        self.assertEqual(
+            [b.label for b in app.button if b.key=="rec03a_open_from_wishlist"],
+            ["Comparar cidades-base"])
+        # Manual comparison remains in the advanced-only compatibility section.
+        self.assertTrue(any(b.key=="ux503_open_from_wishlist"
+                            for b in app.button))
         app.segmented_control(key="ux64_public_task").set_value("Descobrir").run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
         self.assertFalse(any("page-title'>Meu roteiro" in m.value
@@ -82,9 +86,10 @@ class ContextualActivityAppTests(unittest.TestCase):
                           ("Planejar","Organizar"),("Orçamento","Visão financeira"),
                           ("Orçamento","Simulações")):
             with self.subTest(area=area,task=task):
-                from ux64_navigation_model import select_public_task
-                select_public_task(app.session_state,area,task)
-                app.run()
+                target={"Explorar":1,"Planejar":2,"Orçamento":3}[area]
+                app.button(key="ux_sidebar_nav_"+str(target)).click().run()
+                self.assertFalse(app.exception,[x.message for x in app.exception])
+                app.segmented_control(key="ux64_public_task").set_value(task).run()
                 self.assertFalse(app.exception,[x.message for x in app.exception])
                 self.assertEqual(app.session_state["advisor_plan"],original)
 
