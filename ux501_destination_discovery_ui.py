@@ -204,7 +204,7 @@ def render_independent_destination_discovery(*, discovery=None) -> None:
                                   on_click=add_destination, args=(item["id"], discovery))
                     with st.container(key=f"ux53_footer_destination_{item['id']}"):
                         with st.expander("Ver detalhes, atrações e fontes"):
-                            if item.get("photo") and photo.get("subject"):
+                            if photo and photo.get("subject"):
                                 st.caption("Na foto: "+photo["subject"])
                             if item.get("planning_support") == "exploration_only":
                                 st.info("Disponível para pesquisar e comparar; ainda não pode ser incluído no roteiro.")
