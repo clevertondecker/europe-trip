@@ -40,3 +40,28 @@ Implementar código e testes NESTA branch. Rodar python -m compileall -q . e pyt
 
 ## Critérios de aceite / dependência
 Meus destinos continua funcional e visualmente equivalente, com componentes documentados e testados para reutilização. UX82, UX83 e UX84 devem CONSUMIR estes componentes, não replicar sua marcação/CSS. PR de especificação inicialmente draft; só marcar pronto para revisão após implementação e testes.
+
+---
+
+## Contratos públicos do componente compartilhado (revisão arquitetural)
+
+A fundação será **apresentação pura**, sem importar Streamlit, \`TripPlan\`, \`planning_store\`, \`continuity_ui\` ou serviços. O módulo compartilhado deve ter uma API estável e documentada, com dados vindos exclusivamente de projeções existentes. Nomes podem seguir convenção do projeto, mas os cinco contratos precisam existir:
+
+| Componente | Entrada mínima | Saída/variante | Responsabilidade |
+|---|---|---|---|
+| \`page_header\` | \`title: str\`, \`eyebrow: str\`, \`description: str = ""\`, \`status_label: str = ""\`, \`status_hint: str = ""\`, \`saved: bool = False\`, \`tag: str = ""\` | HTML escapado; \`standard/compact\` | Só apresenta contexto e persistência **já comprovada**; não deduz salvamento |
+| \`kpi_cards\` | \`metrics: Sequence[Mapping]\` contendo \`name\`, \`value\`, \`hint\`, \`icon\`, \`highlight\` | Sequência de cards HTML para \`st.columns\` responsivas | Não calcula nem inventa métricas; destaca somente conforme projeção |
+| \`next_action\` | \`headline: str\`, \`explanation: str\` | \`strong/compact\` ou ausente na página | Só conteúdo informativo: **CTA nativa é responsabilidade do chamador** |
+| \`section_heading\` | \`eyebrow: str\`, \`title: str\`, \`description: str = ""\` | \`standard/compact\` | Hierarquia editorial sem duplicar título de página |
+| \`status_indicator\` | \`status: str\`, \`active: bool = False\`, \`kind: str = "neutral"\` | Estado e marcação de foco **independentes** | Sem confundir dados salvos, alterações locais e navegação |
+
+### Responsabilidades e acessibilidade
+- HTML de saída deve escapar **todos** os campos dinâmicos, inclusive nomes, hints, valores e status; sem \`onclick\` HTML nem botão decorativo.
+- States de foco e persistência vêm de dados explícitos; não inferir sucesso privado por cor ou por presença de revisão.
+- Classes CSS escopadas a esses componentes, reutilizando os tokens e a paleta existentes de \`assets/styles.css\`; não criar \`:root\` novo ou um segundo CSS concorrente.
+- Fundir implementação de markup de \`ux_planning_journey_presentation.py\` aos contratos novos, deixando wrappers compatíveis somente quando protegidos por testes. **Não manter duas bibliotecas equivalentes.**
+- Preservar \`flow_journey_*\`, \`summary_only=True\`, \`render_build\`, \`render_review\`, \`_render_organize\`, mapeamentos UX64 e callbacks nativas.
+- \`strong\` só para a ação contextual principal; usar \`compact\` em mapa, comparação, orçamento denso. Cards mantêm hierarquia visual uniforme; estado não depende apenas de cor.
+- Testes: presença de classes/estados, escaping, contraste WCAG AA >= 4.5, contrato CSS10, AppTest de Meus destinos e resumo, largura 1440/768/390; se não houver navegador, anotar não validado.
+
+**Dependência da série:** só depois de implementação e integração deste PR em \`main\` realizar as integrações UX82/UX83/UX84. Sem merge automático e manter draft até os gates de aceite.
