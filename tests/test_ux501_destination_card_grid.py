@@ -2,7 +2,8 @@
 import unittest
 from unittest.mock import patch
 
-from ux501_destination_discovery_ui import (_destination_rows, _destination_teaser,\n                                            _destination_wishlist_state)
+from ux501_destination_discovery_ui import (_destination_rows, _destination_teaser,
+                                            _destination_wishlist_state)
 
 
 class DestinationCardGridTests(unittest.TestCase):
