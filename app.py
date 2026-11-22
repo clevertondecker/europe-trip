@@ -740,69 +740,101 @@ elif page == "Mapa & destinos" and (st.session_state.get(CONTEXT) or {}).get("ki
         st.rerun()
 
 elif page == "Mapa & destinos":
+    from ux93_map_projection import annotate_map_places,filter_map_places,unmapped_wishes,unmapped_planned_places
+    from rail_evidence_unified_model import canonical_place
+    from destination_photo_assets import preferred_destination_photo
+    from ux501_destination_discovery_ui import _render_destination_media
     st.markdown(page_header(
         "Mapa e destinos", "NOSSA EUROPA 2027 · EXPLORAR",
-        "Explore referências geográficas e alternativas sem interpretar pontos como reservas.",
+        "Encontre seus desejos, visitas no roteiro e possíveis cidades-base no mesmo mapa.",
         variant="compact",
     ),unsafe_allow_html=True)
+    catalog_destinations = load_attractions()["destinations"]
     enriched_catalog = build_catalog(data["places"],load_itinerary(),
-                                     load_attractions()["destinations"])
-    countries_all = sorted(set(p["country"] for p in enriched_catalog))
-    # Compact factual summary: the map, not a row of tall KPIs, owns the fold.
-    candidates=sum(p["status"]=="candidata" for p in enriched_catalog)
-    st.caption(f"{len(enriched_catalog)} referências geográficas · "
-               f"{len(countries_all)} países · {candidates} alternativas em avaliação. "
-               "Não representam reservas nem itinerários confirmados.")
-    st.markdown(section_heading("NAVEGUE PELO MAPA","Filtre os destinos",
+                                     catalog_destinations)
+    enriched_catalog = annotate_map_places(
+        enriched_catalog, st.session_state.get("ux502_interests"), active_plan())
+    countries_all = sorted({p["country"] for p in enriched_catalog})
+    counts = {group:sum(p["ux93_group"]==group for p in enriched_catalog)
+              for group in ("Na minha lista","No roteiro","Base candidata")}
+    st.caption(
+        f'{counts["Na minha lista"]} lugar(es) da lista · '
+        f'{counts["No roteiro"]} no roteiro · '
+        f'{counts["Base candidata"]} bases candidatas no catálogo. '
+        "Nenhum marcador significa reserva confirmada."
+    )
+    unavailable=unmapped_wishes(
+        enriched_catalog,st.session_state.get("ux502_interests"))
+    if unavailable:
+        st.caption(f'{len(unavailable)} destino(s) desejados ainda não possuem '
+                   'coordenadas no mapa atual. Continuam salvos em Minha lista.')
+    outside=unmapped_planned_places(enriched_catalog,active_plan())
+    if outside:
+        st.warning(f'{len(outside)} visita(s) já incluídas no roteiro não possuem '
+                   'coordenadas verificadas neste mapa. O roteiro está preservado; '
+                   'consulte Planejar → Meus destinos para revisar.')
+    st.markdown(section_heading("NAVEGUE PELO MAPA","Filtre os lugares",
                                 variant="compact"),unsafe_allow_html=True)
-    a,b = st.columns([1,1], gap="medium")
+    a,b=st.columns([1,1],gap="medium")
     with a:
-        countries = st.multiselect("Países", countries_all, default=countries_all, key="map_countries")
+        countries=st.multiselect("Países",countries_all,default=countries_all,
+                                 key="map_countries")
+        group=st.selectbox("Mostrar",["Todos","Na minha lista","No roteiro",
+                                     "Base candidata","Outros destinos"],
+                           key="ux93_map_focus")
     with b:
-        statuses = st.multiselect("Etapa de decisão", list(STATUS_LABEL.keys()),
-                                  default=list(STATUS_LABEL.keys()), format_func=lambda key: STATUS_LABEL[key],
-                                  key="map_statuses")
-    current = filter_catalog(enriched_catalog, countries=countries, statuses=statuses)
-    st.markdown(f"<div class='page-filter-hint'>{len(current)} destinos encontrados · "
-                "Os pontos não representam reservas, trajetos ou disponibilidade.</div>",
-                unsafe_allow_html=True)
+        statuses=st.multiselect("Etapa de decisão",list(STATUS_LABEL),
+                                default=list(STATUS_LABEL),
+                                format_func=lambda key:STATUS_LABEL[key],
+                                key="map_statuses")
+        stage=st.selectbox("Etapa da viagem",["Todas","Itália","Temporada europeia"],
+                           key="ux93_map_stage")
+    current=filter_map_places(
+        filter_catalog(enriched_catalog,countries=countries,statuses=statuses),
+        group=group,stage=stage)
+    st.caption(f"{len(current)} ponto(s) no mapa · cores refletem a pesquisa histórica; "
+               "o campo Mostrar distingue wishlist e roteiro. Não há trajetos desenhados.")
     if current:
-        map_view(current, 460, show_labels=False)
+        map_view(current,460,show_labels=False)
+        st.caption("Passe o cursor sobre um marcador para ver a classificação. "
+                   "Escolha um lugar abaixo para consultar seus detalhes.")
+        by_id={p["id"]:p for p in current}
+        chosen_id=st.selectbox("Detalhes de um lugar",list(by_id),
+                               format_func=lambda key:by_id[key]["name"]+
+                                  " · "+by_id[key]["country"],
+                               key="ux93_map_detail")
+        chosen=by_id[chosen_id]
+        with st.container(border=True):
+            st.markdown("#### "+chosen["name"]+" · "+chosen["country"])
+            st.caption(chosen["ux93_group"]+" · "+
+                       STATUS_LABEL[chosen["status"]])
+            editorial = next((row for row in catalog_destinations
+                              if canonical_place(row["id"]) == canonical_place(chosen_id)),None)
+            photo = preferred_destination_photo({
+                "id":chosen_id,"photo":editorial.get("photo") if editorial else None})
+            if photo:
+                _render_destination_media(chosen,photo)
+            st.write(chosen.get("description") or "Descrição ainda não pesquisada.")
+            if chosen.get("duration") and chosen["duration"]!="A verificar":
+                st.caption("Duração de referência: "+chosen["duration"]+
+                           " · não é tempo de trajeto.")
+            else:
+                st.caption("Duração ainda não verificada.")
+            source_url=data["sources"].get(chosen.get("source",""))
+            if chosen.get("source") in {"itinerary_research_2026",
+                                        "attractions_research_2026"}:
+                source_url="https://github.com/clevertondecker/europe-trip/blob/main/data/itinerary_options_2027.json"
+            if source_url:
+                st.link_button("Consultar fonte",source_url)
     else:
-        st.info("Nenhum ponto atende aos filtros. Reative uma seleção para exibir destinos.")
-    st.caption("Passe o cursor sobre um ponto para ver o nome e a classificação. "
-               "Os marcadores são referências geográficas, não rotas de transporte.")
-
-    st.markdown(section_heading("DETALHES","Conheça as opções",
-                                variant="compact"),unsafe_allow_html=True)
-    if current:
-        for start_idx in range(0, len(current), 3):
-            row = current[start_idx:start_idx+3]
-            for column, place in zip(st.columns(3, gap="medium"), row):
-                with column:
-                    tone = {"roteiro_proposto":"proposed", "candidata":"candidate", "opcional":"optional"}.get(place["status"], "optional")
-                    st.markdown(f"<div class='page-panel'>"
-                                f"<span class='page-chip page-chip--{tone}'>{escape(STATUS_LABEL[place['status']])}</span>"
-                                f"<div class='page-panel__title' style='margin-top:12px'>⌖ {escape(place['name'])}</div>"
-                                f"<div class='page-panel__meta'>{escape(place['country'])} · {escape(place['role'])}</div>"
-                                f"<p class='page-panel__desc'>{escape(place['description'])}</p>"
-                                f"<div class='page-panel__meta'>Duração: {escape(place['duration'])}</div></div>",
-                                unsafe_allow_html=True)
-                    source_url = data["sources"].get(place.get("source", ""))
-                    if place.get("source") in {"itinerary_research_2026",
-                                                 "attractions_research_2026"}:
-                        source_url = "https://github.com/clevertondecker/europe-trip/blob/main/data/itinerary_options_2027.json"
-                    if source_url:
-                        st.link_button("Consultar fonte", source_url, use_container_width=True)
-    else:
-        st.info("Nenhum destino corresponde aos filtros. Selecione mais países ou etapas.")
+        st.info("Nenhum ponto atende aos filtros. Ajuste país, tipo ou etapa para visualizar.")
     st.button("Explorar atrações turísticas por cidade-base →",
               on_click=navigate_to_attractions,use_container_width=True,
               key="map_go_attractions")
-    st.markdown("<div class='page-alert page-alert--neutral'>"
-                "Cidades e coordenadas vêm do catálogo unificado de pesquisas históricas; a decisão sobre uma cidade-base francesa "
-                "pode atualizar o status a partir do documento do Drive. Os demais pontos não são atualizados "
-                "automaticamente por cotações ou reservas.</div>", unsafe_allow_html=True)
+    with st.expander("Como interpretar o mapa",expanded=False):
+        st.caption("O mapa representa dados geográficos de pesquisa histórica. "
+                   "Desejado = wishlist; no roteiro = visita incluída; base candidata "
+                   "= opção em estudo. Reservas, horários e rotas não são inferidos.")
 
 elif page == "Comparar cidades":
     # UX85: the recommended task and its results come before technical tools.
