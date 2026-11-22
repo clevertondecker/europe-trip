@@ -724,7 +724,7 @@ elif page == "Mapa & destinos" and (st.session_state.get(CONTEXT) or {}).get("ki
         st.rerun()
 
 elif page == "Mapa & destinos":
-    from ux93_map_projection import annotate_map_places,filter_map_places
+    from ux93_map_projection import annotate_map_places,filter_map_places,unmapped_wishes
     from rail_evidence_unified_model import canonical_place
     from destination_photo_assets import preferred_destination_photo
     from ux501_destination_discovery_ui import _render_destination_media
@@ -747,11 +747,8 @@ elif page == "Mapa & destinos":
         f'{counts["Base candidata"]} bases candidatas no catálogo. '
         "Nenhum marcador significa reserva confirmada."
     )
-    wishes = {canonical_place(item["destination_id"])
-              for item in st.session_state.get("ux502_interests",{}).get("items",[])
-              if item.get("priority") != "discarded"}
-    mapped = {canonical_place(row["id"]) for row in enriched_catalog}
-    unavailable = wishes - mapped
+    unavailable=unmapped_wishes(
+        enriched_catalog,st.session_state.get("ux502_interests"))
     if unavailable:
         st.caption(f'{len(unavailable)} destino(s) desejados ainda não possuem '
                    'coordenadas no mapa atual. Continuam salvos em Minha lista.')
