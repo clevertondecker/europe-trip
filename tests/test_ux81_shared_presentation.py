@@ -83,6 +83,93 @@ class SharedPresentationTests(unittest.TestCase):
             **review, "active": True
         }))
 
+
+    def test_strong_variant_has_its_own_background_without_original_key(self):
+        html = next_action('<Planning>', 'Check & save', variant='strong')
+        self.assertIn('ui-next-action--strong', html)
+        self.assertIn('&lt;Planning&gt;', html)
+        self.assertIn('Check &amp; save', html)
+        self.assertNotIn('flow_journey_next', html)
+        self.assertNotIn('<button', html)
+        css = (Path(__file__).resolve().parents[1] / "assets" / "styles.css").read_text()
+        import re
+        self.assertRegex(css, r'(?s):is\(\s*\.ui-next-action--strong,'
+                              r'.*?\)\s*\{[^}]*background:radial-gradient')
+        self.assertIn('.ui-next-action--strong {max-width:none;}', css)
+
+    def test_strong_shared_and_legacy_cta_shells_never_nest_two_cards(self):
+        css = (Path(__file__).resolve().parents[1] / "assets" / "styles.css").read_text()
+        import re
+        reset = re.search(r'(?s):is\(\s*\[class\*="st-key-ui_action_shell_strong_"\],'
+                          r'\s*\[class\*="st-key-flow_journey_next"\]\s*\)'
+                          r'\s*\.ui-next-action--strong\s*\{([^}]+)\}', css)
+        self.assertIsNotNone(reset)
+        for style in ('background:none', 'box-shadow:none', 'border:0',
+                      'margin:0', 'padding:0', 'max-width:820px'):
+            self.assertIn(style, reset[1])
+        self.assertIn('[data-testid="stButton"] button:focus-visible', css)
+        self.assertIn('[data-testid="stButton"] button:disabled', css)
+        self.assertIn('button:hover:not(:disabled)', css)
+        self.assertEqual(css.count('background:radial-gradient(circle at 98%'), 1)
+
+    def test_compact_variant_and_aa_contrast_of_strong_compact_and_cta(self):
+        css = (Path(__file__).resolve().parents[1] / "assets" / "styles.css").read_text()
+        self.assertIn('ui-next-action--compact', next_action('A','B',variant='compact'))
+        self.assertIn('background:#EEF6F7', css)
+        self.assertIn('color:#163A4D', css)
+        self.assertIn('color:#4B6572', css)
+        def luminance(value):
+            v = value.lstrip('#')
+            channels = [int(v[n:n+2],16)/255 for n in (0,2,4)]
+            linear = [x/12.92 if x <= .04045 else ((x+.055)/1.055)**2.4
+                      for x in channels]
+            return sum(x*y for x,y in zip(linear,(.2126,.7152,.0722)))
+        def contrast(a,b):
+            x,y=sorted((luminance(a),luminance(b)),reverse=True)
+            return (x+.05)/(y+.05)
+        def overlay(fg,bg,alpha):
+            f=bytes.fromhex(fg.lstrip('#'))
+            b=bytes.fromhex(bg.lstrip('#'))
+            return '#'+''.join(f'{round(x*alpha+y*(1-alpha)):02x}'
+                              for x,y in zip(f,b))
+        brightest=overlay('#55B8C5','#124D60',.18)
+        for foreground,background in (
+            ('#BCE8E7',brightest),('#E3F1F3',brightest),
+            ('#FFFFFF',brightest),('#245B6D','#EEF6F7'),
+            ('#163A4D','#EEF6F7'),('#4B6572','#EEF6F7'),
+            ('#15516B','#FFFFFF'),('#395565','#DDECF0')
+        ):
+            with self.subTest(foreground=foreground,background=background):
+                self.assertGreaterEqual(contrast(foreground,background),4.5)
+
+    def test_native_cta_in_shared_and_original_shells_is_not_fake_html_button(self):
+        """AppTest checks callbacks/HTML structure; does NOT validate CSS pixels."""
+        from streamlit.testing.v1 import AppTest
+        script = '''
+import streamlit as st
+from ux_shared_ui_presentation import next_action
+with st.container(key="ui_action_shell_strong_explorar"):
+    st.markdown(next_action("Adicionar ao roteiro", "Escolha seus destinos"),
+                unsafe_allow_html=True)
+    st.button("Continuar", key="shared_native_cta", type="primary",
+              on_click=lambda: st.session_state.update(shared_clicked=True))
+with st.container(key="flow_journey_next"):
+    st.markdown(next_action("Meu roteiro", "Revisar rascunho"),
+                unsafe_allow_html=True)
+    st.button("Revisar", key="flow_journey_primary", type="primary")
+st.markdown(next_action("Resumo financeiro", "Comparar cenários", variant="compact"),
+            unsafe_allow_html=True)
+'''
+        app=AppTest.from_string(script,default_timeout=30).run()
+        self.assertFalse(app.exception,str(app.exception))
+        self.assertIn('shared_native_cta',{b.key for b in app.button})
+        self.assertIn('flow_journey_primary',{b.key for b in app.button})
+        self.assertEqual(sum('ui-next-action--strong' in m.value for m in app.markdown),2)
+        self.assertEqual(sum('ui-next-action--compact' in m.value for m in app.markdown),1)
+        app.button(key='shared_native_cta').click().run()
+        self.assertFalse(app.exception,str(app.exception))
+        self.assertTrue(app.session_state['shared_clicked'])
+
     def test_css_single_source_and_scoped_variants(self):
         css = (Path(__file__).resolve().parents[1] / "assets" / "styles.css").read_text()
         self.assertEqual(css.count(":root {"), 1)
