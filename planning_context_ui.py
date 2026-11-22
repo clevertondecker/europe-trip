@@ -317,7 +317,9 @@ def render_context(plan:dict,*,area:str)->None:
     alternative_open=bool(state.get("workflow_compare_open"))
     planning=area in ("Minha viagem","Meu roteiro")
     budget_simulation=area=="Orçamento" and section=="Simulações"
-    if not (planning or budget_simulation or settings_open or alternative_open):
+    # Open forms belong to their originating activity. Keep unconfirmed
+    # widget/session state for a safe return, but never render it elsewhere.
+    if not (planning or budget_simulation):
         return
 
     if planning or budget_simulation:
@@ -342,9 +344,9 @@ def render_context(plan:dict,*,area:str)->None:
 
     if state.pop("workflow_change_notice",None):
         st.success("Plano atualizado nesta sessão. Salve para manter a revisão.")
-    if settings_open:
+    if planning and settings_open:
         _form_settings(active_plan())
-    elif alternative_open:
+    elif budget_simulation and alternative_open:
         _form_alternative(active_plan())
 
 
