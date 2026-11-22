@@ -2,7 +2,7 @@
 import unittest
 from copy import deepcopy
 
-from ux93_map_projection import annotate_map_places,filter_map_places,map_identity,unmapped_wishes,ITALY_TO_MAP
+from ux93_map_projection import annotate_map_places,filter_map_places,map_identity,unmapped_wishes,unmapped_planned_places,ITALY_TO_MAP
 from trip_plan_model import new_plan
 
 
@@ -77,6 +77,13 @@ class MapDecisionProjectionTests(unittest.TestCase):
         self.assertIn("obernai",unmapped_wishes(real_places,wishes))
         self.assertNotIn("colmar",unmapped_wishes(real_places,wishes))
         self.assertFalse(unmapped_wishes(real_places,empty_interests()))
+        self.assertFalse(unmapped_planned_places(real_places,plan))
+        plan_with_unmapped=deepcopy(plan)
+        plan_with_unmapped["flexible_visits"].append({
+            "destination_id":"italy_ravello","stage":"Itália",
+            "attractions":[],"period":"Ainda não definido"})
+        self.assertEqual(unmapped_planned_places(real_places,plan_with_unmapped),
+                         {"italy_ravello"})
 
     def test_invalid_group_rejected_and_empty_selection_is_safe(self):
         with self.assertRaises(ValueError):
