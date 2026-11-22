@@ -145,6 +145,18 @@ class BaseFreeDiscoveryAppTests(unittest.TestCase):
         self.assertEqual(app.session_state["advisor_plan"],initial)
         self.assertFalse(app.session_state.get("advisor_autosave_pending",False))
 
+    def test_empty_filter_results_keep_transient_interests_recoverable(self):
+        app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
+        app.button(key="ux_sidebar_nav_1").click().run()
+        app.segmented_control(key="ux_section").set_value("Passeios").run()
+        app.multiselect(key="ux501_interest_session").set_value(["colmar"]).run()
+        app.text_input(key="ux501_search").set_value("inexistente-ux90-999").run()
+        self.assertFalse(app.exception,[x.message for x in app.exception])
+        self.assertIn("ux501_interest_session",{x.key for x in app.multiselect})
+        self.assertEqual(app.session_state["ux501_interest_session"],["colmar"])
+        app.text_input(key="ux501_search").set_value("").run()
+        self.assertEqual(app.session_state["ux501_interest_session"],["colmar"])
+
     def test_first_discovery_does_not_require_exploratory_base(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
         app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
