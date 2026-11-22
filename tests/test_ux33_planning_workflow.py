@@ -90,6 +90,9 @@ class WorkflowAppTests(unittest.TestCase):
         self.assertFalse(at.exception,[e.message for e in at.exception])
         self.assertTrue(any(x.label=="Duração total (dias)" for x in at.number_input))
         self.assertEqual(at.session_state["advisor_plan"],initial)
+        # The alternative form now belongs to Orçamento > Simulações.
+        at.button(key="ux_sidebar_nav_3").click().run()
+        at.segmented_control(key="ux64_public_task").set_value("Simulações").run()
         at.button(key="workflow_open_alternative").click().run()
         self.assertFalse(at.exception,[e.message for e in at.exception])
         at.selectbox(key="workflow_alt_base").set_value("offenburg").run()
