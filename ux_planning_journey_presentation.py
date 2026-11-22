@@ -65,7 +65,9 @@ def project_visual_state(view: dict, storage_label: str, focused: str | None = N
     ]
     steps = []
     for number, (step, title, detail, button, disabled) in enumerate(step_info, 1):
-        if step == current_step:
+        if step == "build" and disabled:
+            status = "Sem novos destinos compatíveis" if planned else "Sem destinos compatíveis"
+        elif step == current_step:
             status = "Etapa em foco"
         elif step == "choose" and wished:
             status = "Lista iniciada"
