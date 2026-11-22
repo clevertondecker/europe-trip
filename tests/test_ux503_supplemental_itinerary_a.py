@@ -49,6 +49,7 @@ class Trip01BrowseComparisonTests(unittest.TestCase):
         original_plan = deepcopy(app.session_state["advisor_plan"])
         app.session_state["ux502_interests"] = deepcopy(wishlist)
         app.button(key="ux_sidebar_nav_1").click().run()
+        app.session_state["rec03a_activity"]="Comparação personalizada"
         app.segmented_control(key="ux_section").set_value("Comparar").run()
         self.assertFalse(app.exception, [e.message for e in app.exception])
         self.assertFalse(any("Lista de destinos incompatível" in e.value
