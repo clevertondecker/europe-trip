@@ -13,8 +13,8 @@ Orçamento acumula seletores de modo oficial/simulação, ferramenta, cenário, 
 
 ## Implementação solicitada
 1. **Visão financeira** de leitura: teto oficial, projeção, margem, principais despesas, lacunas/fontes e CTA **Simular alternativa**. Não repetir o mesmo conjunto de números em múltiplos resumos.
-2. **Simulações**: uma identidade de cenário **Hipotético — não altera meu planejamento**. Controles principais: teto, dias, cidade-base candidata, aluguel e câmbio. Mostrar imediatamente total, margem, delta contra oficial e custos desconhecidos.
-3. Estilos, saídas por semana, taxas/caução, bilhetes, ajustes por categoria e consultor ficam em **Personalizar simulação** com contexto; não mostrar `ux_mode`, `ux_budget_view`, `unified_scenario`, `unified_style` e `workflow_open_alternative` como entradas concorrentes.
+2. **Simulações**: uma identidade de cenário **Hipotético — não altera meu planejamento**. Começar com a **pergunta concreta do usuário** (por exemplo, ‘quanto muda se eu ficar mais dias?’) e mostrar inicialmente somente 1–3 parâmetros relevantes à escolha. Teto, dias, cidade-base, aluguel e câmbio são capacidades existentes, **não cinco campos obrigatórios simultâneos**. Mostrar imediatamente total, margem, diferença versus oficial e custos desconhecidos; permitir expandir outros parâmetros quando necessários.
+3. Estilos, saídas por semana, taxas/caução, bilhetes, ajustes por categoria e consultor só ficam em **Personalizar simulação** quando relevantes ao cenário; não mostrar `ux_mode`, `ux_budget_view`, `unified_scenario`, `unified_style` e `workflow_open_alternative` como entradas concorrentes.
 4. Reusar cálculos, fontes e estados existentes, sem dupla contagem da verba de passeios, sem €0 para custos desconhecidos, e com moeda e referência temporal claras. Mudanças oficiais exigem pré-visualização e confirmação explícita, nunca efeito colateral de slider.
 5. Preservar compatibilidade com links antigos, modo do consultor, citações de 2026 e datas set–nov/2027 não cotadas.
 
@@ -23,3 +23,8 @@ R$60k/R$70k, 40–80 dias, bases alternativas, aluguel sem referência, FX, cust
 
 ## Fora de escopo
 Sem reescrever fórmulas/planilha oficial ou inventar cotações.
+## Salvaguardas da revisão
+- **Já existe:** visão financeira UX84, calculadoras/REC04, valores oficiais 60k/70k, simulação `unified_scenario` e fórmulas. Reutilizar sem novos modelos e sem nova entidade cenário.
+- **Ajustar:** legibilidade, hierarquia, campos progressivos e comparação com oficial por intenção de uso. **Preservar:** fontes, moedas, reservas, variação/custos desconhecidos e confirmação explícita de mudança oficial.
+- Não considerar custo desconhecido como zero, referência 2026 como cotação 2027 nem somar verba de passeios novamente.
+- Testar que troca de campo/estilo/câmbio, troca de tela e retorno ao cenário deixam o TripPlan intacto até confirmação explícita.
