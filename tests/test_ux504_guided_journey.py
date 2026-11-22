@@ -132,7 +132,8 @@ class JourneyAppTests(unittest.TestCase):
         app.button(key="flow_journey_primary").click().run()
         self.assertEqual(app.session_state["ux_section"],"Meu planejamento")
         app.button(key="flow_journey_suggestions").click().run()
-        app.radio(key="rec03a_activity_widget").set_value("Comparação personalizada").run()
+        app.session_state["rec03a_navigation_intent"]="manual"
+        app.run()
         self.assertEqual(app.session_state["ux_section"],"Comparar")
         app.button(key="ux503_back_to_wishes").click().run()
         self.assertEqual((app.session_state["ux_area"],app.session_state["ux_section"]),
