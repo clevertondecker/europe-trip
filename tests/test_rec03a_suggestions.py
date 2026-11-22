@@ -201,9 +201,10 @@ class RecommendationAppTests(unittest.TestCase):
         self.run_ok(a)
         a.session_state["test_identity"]="other"
         self.run_ok(a)
-        for key in (SCOPE,DRAFT):
-            with self.assertRaises(KeyError):
-                _ = a.session_state[key]
+        # The safer default reopens a PROPOSED scope, never a confirmed one.
+        # Identity reset must not resurrect the previous analyzed scope.
+        self.assertIsNone(a.session_state[SCOPE])
+        self.assertEqual(a.session_state[DRAFT],["paris"])
         self.assertEqual(a.session_state[ACTIVITY],SUGGESTED)
         with patch("rec03a_suggestions_ui.recommend_bases") as engine:
             self.run_ok(a)
