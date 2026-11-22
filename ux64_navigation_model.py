@@ -56,7 +56,15 @@ def select_public_task(state, area, task):
                         if key in state})
         state["ux502_discovery_filters"]=filters
     target_area,target_section=TARGETS[(area,task)]
+    previous=(state.get("ux_area"),state.get("ux_section"))
     set_task(state,target_area,target_section)
+    # UX83: public navigation switches the focused *panel*, not the saved data.
+    # Intent handoffs override this with their explicit build/review/organize.
+    if area=="Planejar" and task=="Organizar":
+        state["flow_journey_view"]="organize"
+    elif area=="Planejar" and task=="Meus destinos" and previous==(
+            "Meu roteiro","Organizar viagem"):
+        state["flow_journey_view"]=None
     if (area,task)==("Explorar","Minha lista"):
         state["ux502_view"]="Minha lista"
     elif (area,task)==("Explorar","Descobrir"):

@@ -104,7 +104,8 @@ class HandoffTests(unittest.TestCase):
         self.assertEqual(state["flow_journey_intent"]["action"],"build")
         self.assertEqual(state["flow_journey_intent"]["stage"],"França")
         apply_planning_request(state)
-        self.assertEqual(state["ux_section"],"Organizar viagem")
+        # UX83: inclusion/review has a dedicated public destination.
+        self.assertEqual(state["ux_section"],"Meu planejamento")
         self.assertEqual(state["flow_journey_view"],"build")
         for key in ("advisor_plan","ux502_interests","scenario_base_selected","ux41_favorites","ux36_cloud_dirty",SCOPE):
             self.assertEqual(state[key],before[key])
@@ -186,7 +187,7 @@ class HandoffAppTests(unittest.TestCase):
         click("rec03a_handoff_back_map")
         self.assertEqual(app.session_state[SCOPE],scope)
         click("rec03a_handoff_planning")
-        self.assertEqual(app.session_state["ux_section"],"Organizar viagem")
+        self.assertEqual(app.session_state["ux_section"],"Meu planejamento")
         self.assertEqual(app.session_state["flow_journey_view"],"build")
         self.assertEqual(app.session_state["advisor_plan"],original)
         click("rec03a_handoff_back_planning")

@@ -44,7 +44,7 @@ class PlanningJourneyTests(unittest.TestCase):
         before=deepcopy(state["advisor_plan"])
         request_planning(state,"build",FRANCE_STAGE)
         apply_planning_request(state)
-        self.assertEqual(state["ux_section"],"Organizar viagem")
+        self.assertEqual(state["ux_section"],"Meu planejamento")
         self.assertEqual(state["flow_journey_stage_hint"],FRANCE_STAGE)
         self.assertEqual(state["advisor_plan"],before)
         request_planning(state,"review")
@@ -232,6 +232,60 @@ render_planning_journey(active_plan(),load_attractions(),
             self.assertTrue(any('href="#journey-build-anchor"' in x.value
                                 for x in app.markdown))
             self.assertEqual(app.session_state["advisor_plan"],original)
+
+
+
+class PlanningUx83NavigationTests(unittest.TestCase):
+    def test_public_tasks_target_only_their_own_canonical_activity(self):
+        from ux64_navigation_model import select_public_task
+        from ux_planning_journey_ui import request_planning,apply_planning_request
+        state={"advisor_plan":new_plan(),"rec03a_identity":"owner"}
+        plan=deepcopy(state["advisor_plan"])
+        for action,expected in (
+                ("build","Meu planejamento"),("review","Meu planejamento"),
+                ("organize","Organizar viagem")):
+            with self.subTest(action=action):
+                request_planning(state,action)
+                apply_planning_request(state)
+                self.assertEqual(state["ux_area"],"Meu roteiro")
+                self.assertEqual(state["ux_section"],expected)
+                self.assertEqual(state["flow_journey_view"],action)
+                self.assertEqual(state["advisor_plan"],plan)
+        # Clicking public task tabs changes focus without touching the plan.
+        select_public_task(state,"Planejar","Meus destinos")
+        self.assertIsNone(state["flow_journey_view"])
+        select_public_task(state,"Planejar","Organizar")
+        self.assertEqual(state["flow_journey_view"],"organize")
+        self.assertEqual(state["advisor_plan"],plan)
+
+    def test_app_renders_full_editor_only_in_meus_destinos_not_summary(self):
+        from pathlib import Path
+        code=(Path(__file__).resolve().parents[1]/"app.py").read_text()
+        start=code.index('if itinerary_section == "Visão geral":')
+        end=code.index('    elif itinerary_section == "Itália":',start)
+        section=code[start:end]
+        branch=section.split('elif (ux_area,ux_section)==("Meu roteiro","Organizar viagem")')[0]
+        self.assertIn('("Meu roteiro","Meu planejamento")',branch)
+        self.assertNotIn('summary_only=True',branch)
+        self.assertIn('summary_only=True',code[code.index('if page == "Visão geral":'):code.index('elif page == "Roteiro":')])
+        self.assertIn('st.session_state["flow_journey_view"]="organize"',code)
+
+    def test_organizer_header_and_review_are_same_shared_component(self):
+        from ux_planning_journey_presentation import header_html
+        self.assertIn("Organizar nossa viagem",
+            header_html("Rascunho", "Local",title="Organizar nossa viagem",
+                        tag="Visitas por período ou data"))
+        self.assertIn("journey-header",header_html("Rascunho","Local"))
+        from ux_planning_journey_ui import _show
+        from unittest.mock import patch
+        with patch("ux_planning_journey_ui.st.session_state",{
+                "ux_area":"Meu roteiro","ux_section":"Organizar viagem"}) as state:
+            _show("review")
+            self.assertEqual(state["ux_section"],"Meu planejamento")
+            self.assertEqual(state["flow_journey_view"],"review")
+            _show("organize")
+            self.assertEqual(state["ux_section"],"Organizar viagem")
+            self.assertEqual(state["flow_journey_view"],"organize")
 
 if __name__=="__main__":
     unittest.main()

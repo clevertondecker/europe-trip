@@ -504,6 +504,8 @@ elif ux_area=="Orçamento" and ux_section=="Simulações":
 _organize_activity=(ux_area,ux_section)==("Meu roteiro","Organizar viagem")
 if _organize_activity and not st.session_state.get("_flow_organize_activity",False):
     st.session_state["flow_organize_open"]=True
+    # UX83: entering Organizar focuses the canonical organizer; no extra editor.
+    st.session_state["flow_journey_view"]="organize"
 st.session_state["_flow_organize_activity"]=_organize_activity
 page,itinerary_target,guide_target,base_target=ux_route(
     ux_area,ux_section,
@@ -1305,7 +1307,7 @@ elif page == "Roteiro":
             render_planning_journey(active_plan(),load_attractions(),data,
                                     sync_sources["finance"]["status"]=="live",
                                     st.session_state.get("advisor_eurfx",6.3),
-                                    st.session_state.get("advisor_chffx",7.1),summary_only=True)
+                                    st.session_state.get("advisor_chffx",7.1))
         elif (ux_area,ux_section)==("Meu roteiro","Organizar viagem") and (
             st.session_state.get("ux_organize_view")=="Calendário inteligente"):
             render_smart_calendar(

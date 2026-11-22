@@ -130,7 +130,7 @@ class JourneyAppTests(unittest.TestCase):
         app.session_state["ux502_interests"]=wished()
         app.run()
         app.button(key="flow_journey_primary").click().run()
-        self.assertEqual(app.session_state["ux_section"],"Organizar viagem")
+        self.assertEqual(app.session_state["ux_section"],"Meu planejamento")
         app.button(key="flow_journey_suggestions").click().run()
         app.radio(key="rec03a_activity_widget").set_value("Comparação personalizada").run()
         self.assertEqual(app.session_state["ux_section"],"Comparar")
@@ -206,7 +206,7 @@ class JourneyAppTests(unittest.TestCase):
         app.button(key="flow_journey_primary").click().run()
         self.assertEqual(
             (app.session_state["ux_area"],app.session_state["ux_section"]),
-            ("Meu roteiro","Organizar viagem"))
+            ("Meu roteiro","Meu planejamento"))
         self.assertEqual(app.session_state["advisor_plan"],plan)
 
     def test_existing_plan_state_remains_authoritative(self):
@@ -219,7 +219,7 @@ class JourneyAppTests(unittest.TestCase):
         app.run()
         app.button(key="flow_journey_primary").click().run()
         self.assertEqual(app.session_state["ux_area"],"Meu roteiro")
-        self.assertEqual(app.session_state["ux_section"],"Organizar viagem")
+        self.assertEqual(app.session_state["ux_section"],"Meu planejamento")
         self.assertEqual(app.session_state["advisor_plan"],plan)
 
 
