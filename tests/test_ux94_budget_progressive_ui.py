@@ -33,6 +33,34 @@ class ProgressiveBudgetAppTests(unittest.TestCase):
         self.assertEqual(app.session_state["advisor_plan"],official)
 
 
+    def test_simulation_navigation_to_map_compare_and_planning_preserves_choices(self):
+        from ux502_destination_interests_model import empty_interests,set_interest
+        wishes=set_interest(empty_interests(),"colmar","must_visit")
+        app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120)
+        app.session_state["ux502_interests"]=deepcopy(wishes)
+        app.run()
+        official=deepcopy(app.session_state["advisor_plan"])
+        app.button(key="ux64_sidebar_nav_2").click().run()
+        app.segmented_control(key="ux64_public_task").set_value("Simulações").run()
+        app.slider(key="unified_stay").set_value(68).run()
+        app.selectbox(key="ux94_simulation_city").set_value("nancy").run()
+        self.assertFalse(app.exception,[x.message for x in app.exception])
+        self.assertEqual(app.session_state["advisor_plan"],official)
+        self.assertEqual(app.session_state["ux502_interests"],wishes)
+        app.button(key="ux64_sidebar_nav_0").click().run()
+        app.segmented_control(key="ux64_public_task").set_value("Mapa").run()
+        self.assertFalse(app.exception,[x.message for x in app.exception])
+        self.assertEqual(app.session_state["advisor_plan"],official)
+        app.segmented_control(key="ux64_public_task").set_value("Comparar bases").run()
+        self.assertFalse(app.exception,[x.message for x in app.exception])
+        app.button(key="ux64_sidebar_nav_1").click().run()
+        app.segmented_control(key="ux64_public_task").set_value("Meus destinos").run()
+        self.assertFalse(app.exception,[x.message for x in app.exception])
+        self.assertEqual(app.session_state["advisor_plan"],official)
+        self.assertEqual(app.session_state["ux502_interests"],wishes)
+
+
+
 class BudgetProjectionEquivalenceTests(unittest.TestCase):
     def test_scenarios_60k_70k_durations_and_exchange_use_original_formula(self):
         from data_model import load_data,get_scenario
