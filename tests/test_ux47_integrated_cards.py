@@ -53,7 +53,8 @@ class IntegratedDestinationCardsTests(unittest.TestCase):
     def test_single_card_in_app_without_separate_gallery(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
         app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Meu roteiro"))).click().run()
-        app.segmented_control(key="ux_section").set_value("Meu planejamento").run()
+        app.segmented_control(key="ux_section").set_value("Organizar viagem").run()
+        app.button(key="flow_journey_step_organize").click().run()
         app.segmented_control(key="flow_active_stage").set_value("França").run()
         p=deepcopy(app.session_state["advisor_plan"])
         p["packages"]=self._plan(("colmar",))["packages"]
@@ -111,7 +112,8 @@ class IntegratedDestinationCardsTests(unittest.TestCase):
     def test_multiple_destinations_one_editor_each(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
         app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Meu roteiro"))).click().run()
-        app.segmented_control(key="ux_section").set_value("Meu planejamento").run()
+        app.segmented_control(key="ux_section").set_value("Organizar viagem").run()
+        app.button(key="flow_journey_step_organize").click().run()
         app.segmented_control(key="flow_active_stage").set_value("França").run()
         p=deepcopy(app.session_state["advisor_plan"])
         p["packages"]=self._plan(("colmar","strasbourg"))["packages"]

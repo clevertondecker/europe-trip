@@ -172,6 +172,8 @@ def render_wishlist(discovery) -> bool:
                 _change(restored)
                 from rec03a_session import clear_recommendation_context
                 clear_recommendation_context(st.session_state)
+                from ux_planning_journey_model import clear_planning_context
+                clear_planning_context(st.session_state)
                 st.session_state.pop("ux502_import_pending", None)
                 st.rerun()
 
@@ -179,7 +181,24 @@ def render_wishlist(discovery) -> bool:
         return False
     if active:
         from rec03a_session import request_navigation
-        st.button("Encontrar cidades-base", key="rec03a_open_from_wishlist", type="primary",
+        from ux_planning_journey_ui import request_planning
+        from ux_planning_journey_model import project_planning
+        from planning_session import active_plan
+        from attractions_model import load_attractions
+        planning=project_planning(active_plan(),current,discovery,load_attractions())
+        if planning["eligible_count"]:
+            st.button("Montar roteiro com meus destinos",key="flow_journey_from_wishlist",type="primary",
+                      on_click=request_planning,args=(st.session_state,"build"))
+        elif planning["rows"]:
+            st.button("Revisar meu roteiro",key="flow_journey_from_wishlist",type="primary",
+                      on_click=request_planning,args=(st.session_state,"review"))
+        else:
+            st.info("Os destinos desejados ainda não têm passeios compatíveis para inclusão. Eles continuam na sua lista.")
+            from ux504_guided_journey_ui import request_step
+            st.button("Descobrir destinos compatíveis",key="flow_journey_find_compatible",type="primary",
+                      on_click=request_step,args=("discover",))
+            # Discovery remains accessible in the existing task tabs.
+        st.button("Encontrar cidades-base", key="rec03a_open_from_wishlist",
                   on_click=request_navigation,args=(st.session_state,"suggestions"))
         st.button("Comparar cidades-base para nossos destinos",
                   key="ux503_open_from_wishlist",
