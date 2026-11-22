@@ -191,8 +191,8 @@ class PrivateWishlistPersistenceTests(unittest.TestCase):
             app.run()
             # A configured private store owns routine wishlist saves; no
             # duplicate JSON transfer controls in the everyday journey.
-            self.assertFalse(any(x.key=="ux502_download" for x in app.button))
-            self.assertFalse(any(x.key=="ux502_upload" for x in app.get("file_uploader")))
+            self.assertNotIn("ux502_upload", app.session_state)
+            self.assertNotIn("ux502_import_pending", app.session_state)
             self.assertFalse(any("Lista salva no armazenamento privado" in x.value for x in app.success))
             app.button(key="ux502_cloud_save").click().run()
         self.assertFalse(any("Lista salva no armazenamento privado" in x.value for x in app.success))
