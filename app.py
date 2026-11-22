@@ -499,9 +499,12 @@ elif ux_area=="Meu roteiro" and ux_section=="Melhorar meu roteiro":
         st.selectbox("Qual guia?",list(UX_GUIDES),
                      key="ux_guide_view",on_change=_ux_aux_changed)
 elif ux_area=="Orçamento" and ux_section=="Simulações":
-    st.segmented_control("Ferramenta de simulação",
-                         ["Simulação geral","Consultor de passeios"],
-                         key="ux_budget_view",on_change=_ux_aux_changed)
+    # Retain the legacy tool selector and callback, but it should not compete
+    # with the single budget scenario and hypothetical-base controls.
+    with st.expander("Outras ferramentas financeiras · avançado",expanded=False):
+        st.segmented_control("Ferramenta de simulação",
+                             ["Simulação geral","Consultor de passeios"],
+                             key="ux_budget_view",on_change=_ux_aux_changed)
 # Initialize the organizer on navigation entry, never on each Streamlit rerun.
 _organize_activity=(ux_area,ux_section)==("Meu roteiro","Organizar viagem")
 if _organize_activity and not st.session_state.get("_flow_organize_activity",False):
