@@ -64,6 +64,10 @@ class ContextualActivityAppTests(unittest.TestCase):
                              for b in app.button))
         self.assertFalse(any(b.key=="workflow_open_settings"
                              for b in app.button))
+        from ux502_destination_interests_model import empty_interests,set_interest
+        app.session_state["ux502_interests"]=set_interest(empty_interests(),"colmar","must_visit")
+        app.run()
+        self.assertFalse(app.exception,[x.message for x in app.exception])
         self.assertEqual(
             [b.label for b in app.button if b.key=="rec03a_open_from_wishlist"],
             ["Comparar cidades-base"])
