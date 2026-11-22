@@ -50,6 +50,7 @@ from base_change_ui import render_base_change
 from city_decision_ui import render_city_decision
 from base_weight_coverage_ui import render_weight_coverage
 from budget_sections_ui import render_budget_summary, render_budget_details
+from ux_shared_ui_presentation import page_header, kpi_cards, section_heading
 from base_scenario_model import base_options, choose_exploratory_base, hypothetical_city_name, expanded_rail_routes
 from base_research_expanded_model import load_research, find_city, observed_housing
 from base_scenario_ui import render_scenario_impact
@@ -1569,11 +1570,12 @@ elif page == "Orçamento":
     else:
 
         import pandas as pd
-        st.markdown("<div class='page-eyebrow'>PLANEJAMENTO FINANCEIRO · DOIS VIAJANTES</div>"
-                    "<div class='page-title'>Orçamento integrado</div>"
-                    "<div class='page-subtitle'>Uma única simulação para moradia, duração, restaurantes, "
-                    "transporte e passeios. Cada escolha substitui a verba prevista ou adiciona somente a diferença.</div>",
-                    unsafe_allow_html=True)
+        st.markdown(page_header(
+            "Simulações financeiras", "NOSSA EUROPA 2027 · ORÇAMENTO",
+            "Compare premissas para dois viajantes sem modificar o teto oficial "
+            "até uma confirmação explícita.",
+            tag="Cenários exploratórios", variant="compact",
+        ),unsafe_allow_html=True)
         live_finance = sync_sources["finance"]["status"] == "live"
         if not live_finance:
             st.warning("Financeiro em snapshot histórico. Verifique o Drive antes de decidir uma reserva.")
@@ -1596,7 +1598,24 @@ elif page == "Orçamento":
         scenario = get_scenario(data,scenario_id)
         baseline = calculate_scenario(scenario)
         french = resolve_french_budget(scenario,live_finance)
-        st.markdown("<div class='page-section'>Escolha o estilo de viagem</div>",unsafe_allow_html=True)
+        # Reuse the UX81 KPI cards; these are projections of the selected
+        # scenario, never evidence of purchased or booked travel.
+        sim_cards=kpi_cards([
+            {"name":"Teto simulado","value":money_brl(scenario["cap_brl"]),
+             "hint":"Cenário exploratório","icon":"◎","highlight":True},
+            {"name":"Total de referência","value":money_brl(baseline["total"]),
+             "hint":"Estimativa, não cotação","icon":"▤"},
+            {"name":"Margem projetada","value":money_brl(baseline["balance"]),
+             "hint":"Pode variar com preços reais","icon":"◈"},
+        ])
+        with st.container(key="ux84_simulation_metrics"):
+            for column,markup in zip(st.columns(3,gap="small"),sim_cards):
+                column.markdown(markup,unsafe_allow_html=True)
+        st.markdown(section_heading(
+            "CONFIGURE SUA SIMULAÇÃO","Escolha o estilo de viagem",
+            "Alterações de simulação não são atualizações do orçamento oficial.",
+            variant="compact",
+        ),unsafe_allow_html=True)
         preset = st.segmented_control("Estilo",["Econômico","Equilibrado","Mais ativo","Personalizado"],
             default="Equilibrado",key="unified_style",selection_mode="single")
         profiles={"Econômico":(1,35),"Equilibrado":(2,60),"Mais ativo":(4,75)}
