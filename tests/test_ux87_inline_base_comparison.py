@@ -69,6 +69,17 @@ class InlineProjectionContractTests(TestCase):
         self.assertEqual(compare.call_args.args[1],self.bases)
         decorate.assert_called_once()
 
+    def test_canonical_evidence_qualifiers_are_not_discarded(self):
+        cells=deepcopy(self.cells)
+        cells[("mulhouse","colmar")]["label"] = (
+            "18 min · histórico · tempos publicados diferentes")
+        cells[("mulhouse","basel")]["label"] = (
+            "~35 min · mínimo indicativo · estação pendente")
+        result,_,_=self.project(cells=cells)
+        self.assertIn("tempos publicados diferentes",
+                      result["table"][0]["Mulhouse"])
+        self.assertIn("estação pendente",result["table"][1]["Mulhouse"])
+
     def test_scope_expiry_blocks_projecting_old_data(self):
         for state in ("scope_required","no_destinations","pending"):
             with self.subTest(state=state):
