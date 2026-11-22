@@ -16,6 +16,7 @@ from ux502_destination_interests_model import (
 from rec03a_session import (SCOPE, DRAFT, ACTIVITY, ACTIVITIES, MANUAL, SUGGESTED,
                             request_navigation, reconcile_session_scope)
 from ux503_destination_base_comparison_ui import render_wishlist_base_comparison
+from ux_shared_ui_presentation import page_header, section_heading
 
 _REASON = {
     "menor_minimo_ponderado_no_mesmo_escopo_completo": "Menor mínimo ponderado de ida no mesmo conjunto completo de trajetos.",
@@ -65,9 +66,12 @@ def _render_scope(interests, discovery, active, names, checked):
     scope = checked["scope"]
     active_ids = [x["destination_id"] for x in active]
     priorities = {x["destination_id"]: LABELS[x["priority"]] for x in active}
-    st.markdown("#### Destinos da temporada europeia")
-    st.write("Escolha os destinos que serão usados para investigar onde ficar durante a temporada. "
-             "A lua de mel e a temporada são escolhas separadas; não inferimos a etapa pelo país.")
+    st.markdown(section_heading(
+        "CONFIRME O ESCOPO", "Quais destinos vamos considerar?",
+        "Escolha os lugares desta pesquisa, sem alterar a wishlist ou o roteiro.",
+        variant="compact",
+    ), unsafe_allow_html=True)
+    st.caption("A temporada não é inferida pelo país: revise o conjunto antes de analisar.")
     st.caption("Esta seleção não altera sua lista nem o roteiro. A análise vale somente nesta sessão.")
     if scope and scope.get("pending_ids"):
         st.info("Novos interesses precisam de revisão: " + ", ".join(names[x] for x in scope["pending_ids"]))
@@ -83,11 +87,7 @@ def _render_scope(interests, discovery, active, names, checked):
                    format_func=lambda x: names[x]+" · "+priorities[x],
                    key="rec03a_scope_widget", on_change=_draft_changed)
     st.caption(f"{len(draft)} de {len(active_ids)} destinos selecionados.")
-    st.button("Selecionar todos", key="rec03a_select_all", on_click=_draft_all, args=(active_ids,))
-    st.button("Limpar seleção", key="rec03a_clear_selection", on_click=_draft_all, args=([],))
-    st.button("Usar toda a lista para a temporada", key="rec03a_confirm_all", type="primary",
-              on_click=_scope_select, args=(active_ids,interests,discovery))
-    st.button("Analisar destinos selecionados", key="rec03a_confirm_subset",
+    st.button("Analisar estes destinos", key="rec03a_confirm_subset", type="primary",
               disabled=not draft, on_click=_scope_select, args=(draft,interests,discovery))
     if scope and scope.get("confirmed"):
         st.button("Cancelar edição do escopo", key="rec03a_cancel_edit", on_click=_cancel_edit)
