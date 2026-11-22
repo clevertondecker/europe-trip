@@ -42,6 +42,16 @@ def unmapped_wishes(places: list[dict], interests: dict | None) -> set[str]:
             and map_identity(row["destination_id"]) not in mapped}
 
 
+def unmapped_planned_places(places: list[dict], plan: dict) -> set[str]:
+    """Planned visits without established geometry are never silently hidden."""
+    mapped = {map_identity(row["id"]) for row in places}
+    selected = {row["destination_id"]
+                for row in plan.get("flexible_visits", [])
+                if isinstance(row.get("destination_id"), str)}
+    selected.update(key for key in plan.get("packages", {}) if isinstance(key,str))
+    return {key for key in selected if map_identity(key) not in mapped}
+
+
 GROUPS = ("Na minha lista", "No roteiro", "Base candidata", "Outros destinos")
 STAGES = {"Itália": "italy", "Temporada europeia": "france"}
 
