@@ -21,3 +21,28 @@ Depende de #195, #190 e #191 integrados e validados. A revisão consolidada pode
 
 ## Gate após revisão de elegibilidade de Planejar
 Distinguir falta de suporte canônico para inclusão de lacuna de evidência ferroviária. A fila REC05 pode indicar pesquisa futura, mas não transformar ID exploratório em passeio elegível. Quando nenhum desejo puder ser incluído, oferecer pesquisa/revisão sem abrir montagem vazia. Rascunho existente deve continuar revisável e salvável sem datas, moradia ou tarifas confirmadas. Implementação somente após #195/#190/#191 integrados.
+
+
+## Implementação REC05 nesta branch (dependência REC04)
+- `rec05_priority_research_model.prioritize_research` consome projeção real REC02
+  e, quando disponíveis, status tipados UX506 e capacidade financeira REC04.
+  Distingue `no_time`, `reference_only`, histórico e local; nunca cria volta,
+  frequência, disponibilidade, preços de 2027 ou correlação artificial entre
+  fontes. Trabalho dirigido por cidade→destino, deduplicado por tipo e contexto.
+- A ordenação editorial de pendências prioriza `must_visit`, falta de tempo de
+  ida que impede a mesma cesta, retorno, última milha, tarifa, moradia,
+  conectividade e internet; não classifica melhor cidade nem representa
+  probabilidade de viagem. A moradia é tarefa por cidade, não por par de rota.
+- A interface é secundária em sugestões, comparador manual, ficha, mapa,
+  revisão e simulações. O cálculo extra nas telas sem REC02 já carregado é
+  opt-in por checkbox. O planejamento e o salvamento não ficam bloqueados.
+- Exportação explícita JSON somente com IDs, origem/destino, condição de
+  pesquisa, fonte observada e `research_state=not_performed`. Nenhum dado de
+  conta ou identificador de TripPlan sai da sessão; não há rede nem pesquisa
+  automática em reruns.
+- Testes cobrem dados reais REC02/DATA23, apenas local, ida sem volta, escopo
+  inválido, verificações UX506, fonte não HTTPS, exportação, prioridade,
+  estabilidade de ordenação, deduplicação e ausência de mutação.
+- PR empilhado sobre #191 porque REC04 ainda aguarda review. O CI de #192 contra
+  `main` testa a árvore integrada; comparar PR contra #191 para isolar o REC05.
+  Nenhum merge ou fechamento está autorizado.
