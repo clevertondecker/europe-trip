@@ -22,6 +22,7 @@ from calendar_model import calendar_plan
 from route_preview import route_endpoints
 from attractions_ui import render_explorer
 from ux501_destination_discovery_ui import render_independent_destination_discovery
+from rec03a_suggestions_ui import render_recommendation_activity
 from rec03a_session import apply_navigation as apply_recommendation_navigation, sync_identity, identity_token, SUGGESTED
 from sidebar_account_ui import account_view_state, _logged_in_user
 from travel_advisor_ui import _owner_config
@@ -764,23 +765,7 @@ elif page == "Mapa & destinos":
 
 elif page == "Comparar cidades":
     st.markdown("## Comparar cidades-base")
-    # Optional recommendation presentation is isolated from global app startup.
-    try:
-        from rec03a_suggestions_ui import render_recommendation_activity
-    except ImportError:
-        import logging
-        logging.getLogger(__name__).exception("REC03A presentation import failed")
-        st.warning("Cidades sugeridas temporariamente indisponíveis. "
-                   "A comparação personalizada continua disponível se suas dependências estiverem carregadas.")
-        try:
-            from ux503_destination_base_comparison_ui import render_wishlist_base_comparison
-        except ImportError:
-            logging.getLogger(__name__).exception("UX503 presentation import failed")
-            st.error("Comparação temporariamente indisponível. Acesse as outras atividades normalmente.")
-        else:
-            render_wishlist_base_comparison(plan=active_plan())
-    else:
-        render_recommendation_activity(plan=active_plan())
+    _rec_activity = render_recommendation_activity(plan=active_plan())
     render_contextual_shortcuts("comparison")
     with st.expander("Análises antigas de cidades-base · avançado", expanded=False):
         st.caption("Ferramentas anteriores preservadas para consultas adicionais.")
