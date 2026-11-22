@@ -1,6 +1,6 @@
 # Nossa Europa 2027 — Decisão de UX | PRs #201 e #203
 
-**Status:** roadmap revisado, somente documentação. #202 está absorvido por #201; #204 por #203 (ambos permanecem fechados). Sem wizard, novo router, ranking ou seleção paralela.
+**Status:** UX85/#201 contém código funcional em validação; UX87/#203 continua como especificação dependente. #202 está absorvido por #201; #204 por #203 (ambos fechados). Sem wizard, novo router, ranking ou seleção paralela.
 
 ## Decisão de produto
 **Pergunta do usuário:** "Tenho destinos que gostaria de conhecer; quais cidades-base vale investigar para visitá-los?"

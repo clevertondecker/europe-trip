@@ -1,6 +1,6 @@
 # UX85 — Entrada única e seleção útil de cidades-base | PR #201
 
-> **Status:** especificação revisada para implementação futura. UX86 (#202) está absorvido. **Não existe código funcional novo nesta branch.**
+> **Status:** implementação funcional do UX85 aplicada nesta branch para revisão. UX86 (#202) está absorvido. A validação automatizada e visual do HEAD final deve ser conferida antes de aprovar o PR.
 
 ## Objetivo e critério de simplicidade
 Atue como Principal Product Designer, Staff Python/Streamlit Engineer e Accessibility Reviewer. Em **Explorar > Comparar bases**, responder: **"Dos destinos que desejo conhecer, quais cidades-base merecem investigação?"** Mostrar resultados úteis sem wizard, sem escolha de modo e sem duplicar escopo ou seleção.
