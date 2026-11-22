@@ -123,6 +123,19 @@ class WorkflowAppTests(unittest.TestCase):
         self.assertTrue(any(x.label=="Duração total (dias)" for x in at.number_input))
         self.assertEqual(at.session_state["advisor_plan"],original)
 
+    def test_budget_legacy_city_widget_is_not_competing_with_ux94(self):
+        app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
+        original=deepcopy(app.session_state["advisor_plan"])
+        app.button(key="ux64_sidebar_nav_2").click().run()
+        app.segmented_control(key="ux64_public_task").set_value("Simulações").run()
+        self.assertFalse(app.exception,[x.message for x in app.exception])
+        self.assertNotIn("scenario_sidebar",{x.key for x in app.selectbox})
+        self.assertEqual(app.session_state["advisor_plan"],original)
+        app.button(key="ux64_sidebar_nav_0").click().run()
+        self.assertFalse(app.exception,[x.message for x in app.exception])
+        self.assertIn("scenario_sidebar",{x.key for x in app.selectbox})
+        self.assertEqual(app.session_state["advisor_plan"],original)
+
     def test_budget_form_does_not_leak_into_wishlist(self):
         at=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
         original=deepcopy(at.session_state["advisor_plan"])
