@@ -125,11 +125,12 @@ def project_visual_state(view: dict, storage_label: str, focused: str | None = N
 
 # Existing UX81 integration wrappers retain legacy public names and selectors.
 # All generic markup is owned by ux_shared_ui_presentation (one library).
-def header_html(storage_label: str, storage_hint: str, *, saved: bool = False) -> str:
+def header_html(storage_label: str, storage_hint: str, *, saved: bool = False,
+                title: str = "Meu roteiro", tag: str = "Da lista ao roteiro revisado") -> str:
     return page_header(
-        "Meu roteiro", "NOSSA EUROPA 2027 · PLANEJAMENTO",
+        title, "NOSSA EUROPA 2027 · PLANEJAMENTO",
         status_label=storage_label, status_hint=storage_hint, saved=saved,
-        tag="Da lista ao roteiro revisado",
+        tag=tag,
     )
 
 

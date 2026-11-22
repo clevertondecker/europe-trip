@@ -21,6 +21,12 @@ LABELS_ACTION={"choose":"Escolher destinos","build":"Montar meu roteiro",
 
 def _show(action):
     state=st.session_state
+    # UX83: the same canonical flow lives in the public task responsible for it.
+    # No separate TripPlan, session copy, or second organizer is introduced.
+    if action in ("build","review","organize"):
+        from ux64_navigation_model import select_public_task
+        destination="Organizar" if action=="organize" else "Meus destinos"
+        select_public_task(state,"Planejar",destination)
     state[VIEW]=action
     state["flow_organize_open"]=action=="organize"
     state["flow_add_open"]=False
@@ -49,7 +55,8 @@ def apply_planning_request(state):
     if action not in ("build","organize","review") or stage not in (None,*STAGES):
         return
     from ux64_navigation_model import select_public_task
-    select_public_task(state,"Planejar","Organizar")
+    select_public_task(state,"Planejar",
+                       "Organizar" if action=="organize" else "Meus destinos")
     identity=(state.get("rec03a_identity"),state["advisor_plan"]["plan_id"])
     if state.get("flow_journey_identity")!=identity:
         clear_planning_context(state)
@@ -231,8 +238,14 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
         b.metric("Incluídos",counts["planned"])
         c.metric("Organizados",counts["organized"])
     else:
-        st.markdown(header_html(label,hint,saved=visual["saved"]),
-                    unsafe_allow_html=True)
+        organizing=(state.get("ux_area"),state.get("ux_section"))==(
+            "Meu roteiro","Organizar viagem")
+        st.markdown(header_html(
+            label,hint,saved=visual["saved"],
+            title="Organizar nossa viagem" if organizing else "Meu roteiro",
+            tag="Visitas por período ou data" if organizing
+                else "Da lista ao roteiro revisado",
+        ),unsafe_allow_html=True)
         with st.container(key="flow_journey_metrics"):
             metric_columns=st.columns(3,gap="small")
             for column,metric in zip(metric_columns,visual["metrics"]):
