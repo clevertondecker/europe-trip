@@ -115,30 +115,62 @@ def render_inline_comparison(interests, scope, selected, *, discovery, research)
         variant="compact",
     ), unsafe_allow_html=True)
     total = len(projection["destinations"])
-    for base in selected:
-        c = projection["counts"][base]
-        st.markdown("**" + projection["names"][base] + "**")
-        st.caption(
-            f'{c.get("historical", 0)} com dados históricos · '
-            f'{c.get("reference_only", 0)} com referências indicativas · '
-            f'{c.get("local", 0)} acessos locais a verificar · '
-            f'{c.get("no_time", 0)} sem tempo pesquisado'
+    # Compare the same dimension across all selected bases before showing
+    # per-city details. Text wraps naturally for 2–5 cities and small screens.
+    st.markdown("**O que está documentado em cada cidade**")
+    st.caption("Cobertura da pesquisa, não qualidade da logística nem indicação de vencedora.")
+    dimensions = (
+        ("historical", "Trajetos com dados históricos"),
+        ("reference_only", "Referências indicativas"),
+        ("local", "Acessos locais ainda não verificados"),
+        ("no_time", "Destinos sem tempo pesquisado"),
+    )
+    for category, title in dimensions:
+        comparison = " · ".join(
+            f'{projection["names"][base]}: {projection["counts"][base].get(category, 0)}'
+            for base in selected
         )
-        if projection["must_visit_without_time"][base]:
-            st.caption("Imperdíveis sem tempo pesquisado: " +
-                       ", ".join(projection["must_visit_without_time"][base]))
+        st.write(f"**{title}:** {comparison}")
+
+    st.markdown("**Destinos imperdíveis: o que sabemos e o que falta**")
+    must_visit = [d for d in projection["destinations"]
+                  if d["priority"] == "must_visit"]
+    if not must_visit:
+        st.caption("Nenhum destino está marcado como imperdível neste escopo.")
+    else:
+        for base in selected:
+            documented = [
+                d["name"] for d in must_visit
+                if projection["cells"][(base, d["id"])]["category"] in TIMED
+            ]
+            local = [
+                d["name"] for d in must_visit
+                if projection["cells"][(base, d["id"])]["category"] == "local"
+            ]
+            missing = projection["must_visit_without_time"][base]
+            st.write("**" + projection["names"][base] + "**")
+            st.caption("Referências de ida: " + (", ".join(documented) or "nenhuma")
+                       + " · Sem tempo pesquisado: " + (", ".join(missing) or "nenhum")
+                       + " · Acesso local pendente: " + (", ".join(local) or "nenhum"))
+
     shared = len(projection["common_timed_destination_ids"])
     if shared == 0:
-        st.warning("Ainda não temos dados de tempo em comum suficientes para comparar "
-                   "essas cidades de forma conclusiva.")
+        st.warning("Ainda não temos dados suficientes para comparar essas cidades "
+                   "de forma conclusiva. Nenhum destino tem tempo pesquisado em "
+                   "todas as cidades selecionadas.")
     elif shared < total:
-        st.info(f"Há tempos pesquisados em comum para {shared} de {total} destinos. "
-                "Os demais não entram em uma comparação direta de duração.")
+        comparable = [d["name"] for d in projection["destinations"]
+                      if d["id"] in projection["common_timed_destination_ids"]]
+        st.info(f"Há referências de ida para os mesmos {shared} de {total} destinos: "
+                + ", ".join(comparable)
+                + ". Os demais ainda não permitem comparação direta de tempos.")
     else:
-        st.info("Há tempos pesquisados para os mesmos destinos em todas as bases. "
-                "Isso não comprova retorno, tarifas, frequências ou melhor cidade.")
-    st.caption("Moradia, retorno ferroviário, último trecho e preços de 2027 seguem "
-               "pendentes de confirmação. Mais referências não significam melhor logística.")
+        st.info(f"Os {total} destinos possuem referências de ida em todas as cidades, "
+                "mas isso não comprova qual tem melhor logística.")
+    st.caption("Ausência de tempo pesquisado não significa rota inviável. "
+               "Retorno ferroviário, frequência, última milha, hospedagem e "
+               "preços de 2027 ainda precisam de confirmação. "
+               "Mínimos de ida não são duração total da viagem.")
 
     if st.checkbox("Ver matriz de trajetos por destino", key="rec03a_inline_matrix"):
         st.dataframe(projection["table"], hide_index=True, use_container_width=True)
