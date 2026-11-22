@@ -452,7 +452,7 @@ ux_section=st.session_state["ux_section"]
 render_context(active_plan(),area=ux_area)
 # Legacy exploratory inputs are only shown on demand; they never change the
 # official TripPlan. Keeping them accessible preserves advanced comparisons.
-if ux_area=="Explorar":
+if ux_area=="Explorar" and ux_section!="Comparar":
     with st.expander("Ajustes avançados da simulação",expanded=False):
         st.segmented_control("Visualizar",["Oficial","Simulação"],
                              key="ux_mode",on_change=_ux_mode_changed)
@@ -480,7 +480,8 @@ if (st.session_state.get(CONTEXT) or {}).get("kind")=="planning" and (
         ux_area=="Meu roteiro" or (ux_area,ux_section)==("Explorar","Passeios")):
     render_planning_return()
 # Preserve the original contract: home has no extra legacy task selector.
-if ux_area!="Minha viagem" or ux_section!="Resumo":
+if ((ux_area!="Minha viagem" or ux_section!="Resumo") and
+    not (ux_area=="Explorar" and ux_section=="Comparar")):
     with st.expander("Atividades anteriores · avançado", expanded=False):
         st.segmented_control("Atividade legada",list(UX_SECTIONS[ux_area]),
                              key="ux_section",on_change=_ux_section_changed,
@@ -788,9 +789,28 @@ elif page == "Mapa & destinos":
                 "automaticamente por cotações ou reservas.</div>", unsafe_allow_html=True)
 
 elif page == "Comparar cidades":
-    st.markdown("## Comparar cidades-base")
+    # UX85: the recommended task and its results come before technical tools.
+    # Both legacy widgets retain their keys, callbacks and optional access.
     _rec_activity = render_recommendation_activity(plan=active_plan())
     render_contextual_shortcuts("comparison")
+    with st.expander("Atividades anteriores · avançado",expanded=False):
+        st.segmented_control("Atividade legada",list(UX_SECTIONS[ux_area]),
+                             key="ux_section",on_change=_ux_section_changed,
+                             selection_mode="single")
+    with st.expander("Ajustes avançados da simulação",expanded=False):
+        st.segmented_control("Visualizar",["Oficial","Simulação"],
+                             key="ux_mode",on_change=_ux_mode_changed)
+        st.selectbox("Cidade-base da simulação",list(_base_details),
+                     key="scenario_sidebar",on_change=_select_scenario_sidebar,
+                     disabled=st.session_state["ux_mode_value"]=="Oficial",
+                     format_func=lambda key:_base_details[key]["name"]+
+                                          " · "+_base_details[key]["country"])
+        st.number_input("Dias na França (simulação)",
+                        min_value=40,max_value=80,
+                        key="ux_days",on_change=_ux_days_changed,
+                        disabled=st.session_state["ux_mode_value"]=="Oficial")
+        st.caption("Entradas hipotéticas, não alteram o roteiro aprovado. "
+                   "Para alterar o plano oficial, use Configurar minha viagem.")
     with st.expander("Análises antigas de cidades-base · avançado", expanded=False):
         st.caption("Ferramentas anteriores preservadas para consultas adicionais.")
         compare_mode=st.segmented_control(
