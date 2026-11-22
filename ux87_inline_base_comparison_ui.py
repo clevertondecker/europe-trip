@@ -76,8 +76,12 @@ def project_inline_comparison(interests, scope, base_ids, *, discovery, research
                 if type(minutes) is not int or minutes <= 0:
                     raise ValueError("Tempo pesquisado inconsistente.")
                 value = format_minutes(minutes)
-                label = (value + " · dado histórico" if category == "historical"
-                         else "~" + value + " · referência indicativa")
+                # Preserve the canonical evidence qualifier (including source
+                # conflicts and station ambiguity) instead of flattening it.
+                label = cell.get("label") or (
+                    value + " · dado histórico" if category == "historical"
+                    else "~" + value + " · referência indicativa"
+                )
             else:
                 if minutes is not None:
                     raise ValueError("Categoria sem tempo não pode ter minutos.")
@@ -146,9 +150,24 @@ def render_inline_comparison(interests, scope, selected, *, discovery, research)
                     cell = projection["cells"][(base, d["id"])]
                     st.caption(projection["names"][base] + " · " +
                                LABELS[cell["category"]])
+                    # Keep materially relevant caveats next to the source.
+                    # The underlying rail projection remains authoritative.
+                    for field, prefix in (
+                        ("station_caveat", "Estações"),
+                        ("evidence_notes", "Observação"),
+                    ):
+                        if cell.get(field):
+                            st.caption(prefix + ": " + str(cell[field]))
+                    checked_at = cell.get("gap_checked_at")
+                    if checked_at:
+                        st.caption("Fonte consultada em: " + str(checked_at))
+                    if cell.get("legacy_divergent_sources"):
+                        st.warning("Há tempos publicados divergentes para este trecho.")
                     url = cell.get("source_url")
                     if url:
                         st.link_button("Fonte · " + projection["names"][base] +
                                        " → " + d["name"], url)
-                    else:
+                    elif cell["category"] in TIMED:
                         st.caption("Fonte de tempo não disponível para este trajeto.")
+                    else:
+                        st.caption("Pesquisa de tempo ou acesso ainda pendente.")
