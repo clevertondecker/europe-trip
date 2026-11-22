@@ -1594,7 +1594,9 @@ elif page == "Orçamento":
         with col4:
             fx = st.number_input("Câmbio simulado (R$/€)",4.0,10.0,6.3,0.05,key="unified_fx")
         with col5:
-            exploratory_options=base_options()
+            # Preserve the exploratory candidate in the finance preview.
+            # Missing local rental quotes remain explicitly unknown below.
+            exploratory_options=base_options(include_candidates=True)
             city_ids=[item["id"] for item in exploratory_options]
             candidate=st.session_state.get("scenario_base_selected",active_plan()["base_city"])
             if candidate not in city_ids:
