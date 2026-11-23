@@ -1331,12 +1331,14 @@ elif page == "Roteiro":
     }.get(ux_section,"Meu roteiro")
     # A contextual city profile has its own title; suppress only this global heading.
     profile_context=st.session_state.get(CONTEXT)
-    individual_base_profile=(
-        ux_area=="Explorar" and ux_section=="Cidades-base"
-        and isinstance(profile_context,dict)
-        and profile_context.get("kind")=="profile"
-        and bool(profile_context.get("base_ids"))
-    )
+    individual_base_profile=False
+    if (ux_area=="Explorar" and ux_section=="Cidades-base"
+            and isinstance(profile_context,dict)
+            and profile_context.get("kind")=="profile"):
+        # Reuse REC03B's validated handoff instead of trusting stale session data.
+        # A stale/invalid profile must retain the normal page heading.
+        from rec03b_handoff_ui import context_for
+        individual_base_profile=context_for("profile")[0] is not None
     if not individual_base_profile and ux_section not in ("Meu planejamento","Organizar viagem") and not (
             ux_area=="Explorar" and ux_section=="Passeios"):
         st.markdown("<div class='page-eyebrow'>NOSSA EUROPA · "+escape(ux_area.upper())+"</div>"
