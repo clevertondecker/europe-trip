@@ -209,7 +209,7 @@ def _render_quick_comparison(result, names, cities, base_ids, selected=()):
     # Once CHOICE has enough bases for UX87, avoid a second open comparison.
     with st.container(key="ux96_preview_documentary"):
         with st.expander("Prévia das sugestões · não é sua seleção",
-                         expanded=not 2<=len(selected)<=5):
+                         expanded=False):
             st.markdown(section_heading(
                 "VISÃO DOCUMENTAL" if single else "PRÉVIA DE PESQUISA",title,
                 subtitle,variant="compact",
@@ -410,7 +410,10 @@ def render_suggestions(*,plan,discovery=None,research=None):
     ),unsafe_allow_html=True)
     selected=selected_card_bases(st.session_state,options)
     if len(selected)==1:
-        st.info("Uma cidade selecionada. Escolha outra nos cartões abaixo para comparar.")
+        st.info("Uma cidade selecionada. Conheça-a individualmente ou escolha outra nos cartões abaixo para comparar.")
+        from rec03b_handoff_ui import render_card_actions
+        st.caption("Investigar " + cities[selected[0]]["name"] + " sem alterar seu roteiro")
+        render_card_actions(selected[0],"card",emphasize_profile=True)
     if 2<=len(selected)<=5:
         from ux87_inline_base_comparison_ui import render_inline_comparison
         render_inline_comparison(interests,checked["scope"],selected,
@@ -492,7 +495,8 @@ def render_suggestions(*,plan,discovery=None,research=None):
                 "Use 'Ver todas as cidades' para explorar as alternativas.")
 
     # UX87 uses CHOICE and the confirmed scope; no second manual form.
-    render_card_selection_summary(result,cities,selection_already_shown=True)
+    if len(selected)!=1:
+        render_card_selection_summary(result,cities,selection_already_shown=True)
     if st.checkbox("Metodologia e pesquisas pendentes",
                    key="rec03a_research_open"):
         _render_comparison_groups(result,names,cities)
