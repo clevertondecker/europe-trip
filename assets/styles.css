@@ -1052,3 +1052,28 @@ div[class*="st-key-ux109-city-photo"] .ux100-photo-external{
 div[class*="st-key-ux109-city-photo"] [data-testid="stImage"] img{
  object-position:center 24%;
 }
+
+
+/* UX111: visible native selection controls and in-page comparison navigation. */
+div[class*="st-key-ux111-selection-toolbar"]{
+ background:linear-gradient(115deg,#F1F8F8,#FFFFFF);border-color:#BDDDE0;
+ border-radius:14px;min-width:0;
+}
+.ux111-primary-action,.ux111-secondary-action{
+ display:inline-flex;align-items:center;justify-content:center;
+ padding:9px 14px;border:1px solid #B8D1D7;border-radius:9px;
+ text-decoration:none!important;font-size:.86rem;font-weight:650;
+ margin:4px 10px 2px 0;min-height:38px;
+}
+.ux111-primary-action{background:#173E51;color:#FFFFFF!important;border-color:#173E51;}
+.ux111-secondary-action{background:#FFFFFF;color:#214A5D!important;}
+.ux111-primary-action:focus-visible,.ux111-secondary-action:focus-visible{
+ outline:3px solid #2A8D94;outline-offset:3px;
+}
+#ux111-comparison,#ux111-picker{scroll-margin-top:100px;}
+@media(max-width:650px){
+ .ux111-primary-action,.ux111-secondary-action{width:100%;margin:5px 0;}
+ div[class*="st-key-ux111-selection-toolbar"] [data-testid="stButton"] button{
+   white-space:normal;overflow-wrap:anywhere;
+ }
+}
