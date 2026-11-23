@@ -236,14 +236,30 @@ def render_profile_context(plan):
 
     st.button("← Voltar à comparação",key="rec03a_handoff_back_profile",
               on_click=return_to_suggestions)
-    st.markdown("## "+city["name"]+" · "+city["country"])
     status=("Base oficial atual" if base==plan["base_city"] else
             "Elegível para o fluxo oficial" if base in BASES else
             "Somente investigação")
     research_status="Finalista da pesquisa" if city["shortlist"] else "Candidata à pesquisa"
-    st.caption(city["corridor"]+" · "+research_status+" · "+status)
-    st.caption("Pesquise esta cidade e suas limitações antes de decidir se "
-               "faz sentido como base. Nenhuma ação aqui altera sua base oficial.")
+    # UX109: only packaged, licensed local bytes guarantee a reliable hero/fallback.
+    # Remote Commons images remain accessible in existing destination cards.
+    from destination_photo_assets import local_destination_photo
+    photo=local_destination_photo(base)
+    if photo:
+        heading,visual=st.columns([3,1.2],gap="medium",vertical_alignment="center")
+    else:
+        heading=st.container()
+    with heading:
+        st.markdown("## "+city["name"]+" · "+city["country"])
+        st.caption(city["corridor"]+" · "+research_status+" · "+status)
+        st.write("Investigue moradia, conexões e vida cotidiana antes de "
+                 "escolher uma cidade-base.")
+    if photo:
+        with visual:
+            with st.container(key="ux109-city-photo"):
+                st.image(photo["local_path"],width="stretch",
+                         alt=photo["alt"])
+                st.caption("Foto: "+photo["author"]+" · "+photo["license"])
+                st.link_button("Crédito e licença da fotografia",photo["source_page"])
 
     favorites=st.session_state.get("ux41_favorites",[])
     simulate,map_col,favorite=st.columns(3,gap="small")
@@ -262,11 +278,10 @@ def render_profile_context(plan):
                     use_container_width=True)
 
     if cap["scenario_selectable"]:
-        st.caption("Simulação hipotética: "+cap["budget_note"]+".")
+        st.caption("Simulação hipotética · "+cap["budget_note"]+
+                   ". Aluguel e caução de 2027 ainda não cotados.")
     else:
         st.caption("Simulação indisponível para esta cidade.")
-    if not cap["rental_quote_2027_available"]:
-        st.caption("Aluguel e caução para 2027 ainda não foram cotados.")
     if base not in favorites and len(favorites)>=MAX_FAVORITES:
         st.caption("Limite de favoritas atingido. Remova uma favorita antes de adicionar outra.")
 
