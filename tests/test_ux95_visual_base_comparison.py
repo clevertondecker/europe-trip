@@ -138,6 +138,17 @@ class QuickComparisonAppTests(unittest.TestCase):
         self.assertEqual(len([x for x in app.dataframe
                               if "Destino desejado" in x.value.columns]),1)
 
+    def test_documentary_preview_starts_collapsed_for_discovery(self):
+        # Streamlit executes content inside collapsed expanders, so test the
+        # configured initial state rather than dataframe presence in AppTest.
+        from pathlib import Path
+        source=(Path(__file__).resolve().parents[1] /
+                "rec03a_suggestions_ui.py").read_text()
+        preview=source.split("def _render_quick_comparison(",1)[1].split(
+            "\\ndef _card(",1)[0]
+        self.assertIn('expanded=False):',preview)
+        self.assertNotIn("expanded=not 2<=len(selected)<=5",preview)
+
     def test_selected_comparison_is_canonically_distinct_from_preview(self):
         app=AppTest.from_string(APP,default_timeout=120)
         wishes=empty_interests()
