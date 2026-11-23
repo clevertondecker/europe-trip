@@ -50,7 +50,7 @@ class VisualProjectionTests(unittest.TestCase):
                 self.assertEqual(html.count("<td>"),n*2)
                 self.assertEqual(html.count("1h15"),n*2)
                 self.assertIn("★",html)
-                self.assertIn("min",summary_panel_html(data))
+                self.assertIn("2 / 2",summary_panel_html(data))
                 self.assertEqual(data,before)
 
     def test_badges_are_semantic_and_unknown_has_no_implicit_zero(self):
