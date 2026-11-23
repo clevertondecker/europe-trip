@@ -281,6 +281,9 @@ def _render_profile_details(city,study,rail,five):
     st.markdown("#### Fontes e metodologia")
     p=profile_by_id(load_profiles(canonical=study),city_id)
     _city_sources(p)
+    st.caption("Limitações gerais: amostras de hospedagem não comprovam contrato para "
+               "56–60 noites, taxas ou internet em 2027; tempos de ida não confirmam "
+               "retorno nem última milha; dados faltantes não equivalem a zero.")
 
 
 def _explore_city(study,rail,five,*,fixed_city=None)->None:
@@ -437,13 +440,14 @@ def render_expanded_research(*,activity_override:str|None=None,compact:bool=Fals
         _explore_city(study,rail,five,fixed_city=fixed_city)
     else:
         _all_candidates(study)
-    with st.expander("O que ainda não podemos confirmar · fontes e metodologia"):
-        st.markdown("- **Hospedagem:** amostras não validam contrato para "
-                    "dois adultos, 56–60 noites, caução, taxas ou internet em 2027.\n"
-                    "- **Trens:** duração de ida não confirma volta, última milha "
-                    "nem preço total do casal em fim de semana.\n"
-                    "- **Comparação:** dados faltantes não equivalem a zero; "
-                    "não há nota de cidade ou vencedora definitiva.")
-        st.caption("O relatório original e seus filtros de 15 destinos permanecem "
-                   "sob detalhes da atividade Comparar cidades. "
-                   "Esta página apenas explora alternativas e não modifica o roteiro.")
+    if fixed_city is None:
+        with st.expander("O que ainda não podemos confirmar · fontes e metodologia"):
+            st.markdown("- **Hospedagem:** amostras não validam contrato para "
+                        "dois adultos, 56–60 noites, caução, taxas ou internet em 2027.\n"
+                        "- **Trens:** duração de ida não confirma volta, última milha "
+                        "nem preço total do casal em fim de semana.\n"
+                        "- **Comparação:** dados faltantes não equivalem a zero; "
+                        "não há nota de cidade ou vencedora definitiva.")
+            st.caption("O relatório original e seus filtros de 15 destinos permanecem "
+                       "sob detalhes da atividade Comparar cidades. "
+                       "Esta página apenas explora alternativas e não modifica o roteiro.")
