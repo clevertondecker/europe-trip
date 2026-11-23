@@ -110,13 +110,13 @@ class GuidedComparisonTests(unittest.TestCase):
         # Structural guard for UX85's temporary native CTA; UX87 will replace
         # this handoff region with inline comparison after the same cards.
         source=inspect.getsource(render_suggestions)
-        self.assertEqual(source.count("render_card_selection_summary(result,cities)"),1)
-        self.assertLess(source.index("for candidate in visible"),
-                        source.index("render_card_selection_summary(result,cities)"))
+        self.assertEqual(source.count("render_card_selection_summary(result,cities,selection_already_shown=True)"),1)
+        self.assertLess(source.index("for index,candidate in enumerate(visible):"),
+                        source.index("render_card_selection_summary(result,cities,selection_already_shown=True)"))
         self.assertLess(source.index("_render_quick_comparison(result,names,cities,"),
-                        source.index("for candidate in visible"))
-        self.assertLess(source.index("for base in featured:"),
-                        source.index("render_card_selection_summary(result,cities)"))
+                        source.index("for index,candidate in enumerate(visible):"))
+        self.assertLess(source.index("for index,base in enumerate(featured):"),
+                        source.index("render_card_selection_summary(result,cities,selection_already_shown=True)"))
         self.assertIn("size=4",source)
 
     def test_two_highlight_cards_show_inline_comparison(self):
@@ -136,9 +136,10 @@ class GuidedComparisonTests(unittest.TestCase):
         self.assertTrue(a.dataframe)
         self.assertEqual(len([x for x in a.multiselect
                               if x.key==CHOICE+"_widget"]),0)
-        captions=" ".join(x.value for x in a.caption)
-        self.assertIn("trajetos com dados históricos",captions)
-        self.assertIn("referências indicativas",captions)
+        city_headers=" ".join(x.value for x in a.markdown
+                              if "ux96-city-header" in x.value)
+        self.assertIn("Históricos",city_headers)
+        self.assertIn("Indicativos",city_headers)
 
     def test_comparison_auto_appears_for_three_and_five_bases(self):
         a=self.app()

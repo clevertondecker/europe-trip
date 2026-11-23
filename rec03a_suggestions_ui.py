@@ -232,17 +232,18 @@ def _card(candidate, result, names, cities, official, options):
 
     base=candidate["base_id"]
     meta=cities[base]
-    with st.container(border=True):
-        st.markdown("**"+meta["name"]+"** · "+meta["country"]+
-                    (" · Base oficial de referência" if base==official else ""))
-        st.caption(f'{candidate["historical_count"]} trajetos com dados históricos · '
-                   f'{candidate["indicative_count"]} com referências indicativas · '
-                   f'{len(candidate["local_destination_ids"])} locais pendentes · '
-                   f'{len(candidate["missing_destination_ids"])} sem tempo')
+    from rec03b_handoff_ui import selected_card_bases
+    from ux96_comparison_visual_ui import city_card_header
+    with st.container(border=True,key="ux96_city_"+base):
+        st.markdown(city_card_header(
+            candidate,meta,
+            is_selected=base in selected_card_bases(st.session_state,options),
+            is_official=base==official,
+        ),unsafe_allow_html=True)
         missing=candidate["must_visit"]["missing"]
         if missing:
             st.caption("Imperdíveis sem tempo pesquisado: "+_label_ids(missing,names))
-        render_card_choice(base,options)
+        render_card_choice(base,options,show_selection_hint=False)
         if st.checkbox("Por que investigar? Ver evidências e limitações",
                        key="rec03a_details_"+base):
             reasons=candidate["reasons"]
@@ -396,6 +397,11 @@ def render_suggestions(*,plan,discovery=None,research=None):
 
     options=[c["base_id"] for c in result["candidates"]]
     by_id={c["base_id"]:c for c in result["candidates"]}
+    from rec03b_handoff_ui import selected_card_bases
+    from ux96_comparison_visual_ui import selected_context
+    st.markdown(selected_context(
+        selected_card_bases(st.session_state,options),cities,len(result["destinations"])
+    ),unsafe_allow_html=True)
     st.markdown(section_heading(
         "SUGESTÕES DE PESQUISA", "Cidades que vale investigar",
         "Cidades com referências úteis para começar. Não estão em ordem de preferência.",
@@ -447,22 +453,26 @@ def render_suggestions(*,plan,discovery=None,research=None):
             _render_quick_comparison(result,names,cities,
                                      [candidate["base_id"] for candidate in visible],
                                      selected_card_bases(st.session_state,options))
-            for candidate in visible:
-                _card(candidate,result,names,cities,plan["base_city"],options)
+            columns=st.columns(2 if len(visible)>1 else 1,gap="medium")
+            for index,candidate in enumerate(visible):
+                with columns[index%len(columns)]:
+                    _card(candidate,result,names,cities,plan["base_city"],options)
         else:
             st.info("Nenhuma cidade corresponde aos filtros.")
     elif featured:
         from rec03b_handoff_ui import selected_card_bases
         _render_quick_comparison(result,names,cities,featured,
                                  selected_card_bases(st.session_state,options))
-        for base in featured:
-            _card(by_id[base],result,names,cities,plan["base_city"],options)
+        columns=st.columns(2 if len(featured)>1 else 1,gap="medium")
+        for index,base in enumerate(featured):
+            with columns[index%len(columns)]:
+                _card(by_id[base],result,names,cities,plan["base_city"],options)
     else:
         st.info("Não há destaques com referências suficientes para este escopo. "
                 "Use 'Ver todas as cidades' para explorar as alternativas.")
 
     # UX87 uses CHOICE and the confirmed scope; no second manual form.
-    render_card_selection_summary(result,cities)
+    render_card_selection_summary(result,cities,selection_already_shown=True)
     from rec03b_handoff_ui import selected_card_bases
     from ux87_inline_base_comparison_ui import render_inline_comparison
     selected=selected_card_bases(st.session_state,options)
