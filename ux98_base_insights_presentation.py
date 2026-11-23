@@ -7,9 +7,11 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 
-ADVANTAGES = {
+DOCUMENTED = {
     "imperdiveis_identificados": "Há referências ou identificação local para todos os destinos imperdíveis.",
     "comparacao_condicional_disponivel": "Existem trajetos em comum que podem ser comparados, com ressalvas.",
+}
+ADVANTAGES = {
     "menor_minimo_ponderado_no_mesmo_escopo_completo": (
         "Tempos mínimos de ida menores entre bases com o mesmo escopo documentado."
     ),
@@ -33,10 +35,14 @@ def project_base_insights(candidate: Mapping) -> dict:
     must_visit=candidate.get("must_visit") or {}
     has_must_visit=bool(must_visit.get("known") or must_visit.get("local") or
                         must_visit.get("missing"))
+    documented = [
+        {"code": code, "text": label}
+        for code, label in DOCUMENTED.items()
+        if code in reasons and (code!="imperdiveis_identificados" or has_must_visit)
+    ]
     advantages = [
         {"code": code, "text": label}
-        for code, label in ADVANTAGES.items()
-        if code in reasons and (code!="imperdiveis_identificados" or has_must_visit)
+        for code, label in ADVANTAGES.items() if code in reasons
     ]
     cautions = [
         {"code": code, "text": label}
@@ -50,7 +56,7 @@ def project_base_insights(candidate: Mapping) -> dict:
                          "text": "Acesso urbano e última milha precisam ser verificados."})
     cautions.append({"code": "rec02_limitations", "text": RETURN_CAUTION})
     neutral=([{"code": "no_proven_advantage",
-               "text": "Ainda não há vantagem comparativa comprovada para este escopo."}]
-             if not advantages else [])
+               "text": "Ainda não há evidências suficientes para destacar esta cidade."}]
+             if not advantages and not documented else [])
     return {"base_id": candidate["base_id"], "advantages": advantages,
-            "neutral": neutral, "cautions": cautions}
+            "documented": documented, "neutral": neutral, "cautions": cautions}
