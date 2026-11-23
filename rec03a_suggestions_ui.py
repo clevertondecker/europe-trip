@@ -410,10 +410,9 @@ def render_suggestions(*,plan,discovery=None,research=None):
         render_inline_comparison(interests,checked["scope"],selected,
                                  discovery=discovery,research=research)
         st.caption("Você pode ajustar as cidades selecionadas nos cartões abaixo.")
-        if st.checkbox("Continuar para montar roteiro",key="rec03a_planning_open"):
-            from rec03b_handoff_ui import render_planning_handoff
-            render_planning_handoff(plan,interests=interests,
-                                    discovery=discovery,research=research)
+        from rec03b_handoff_ui import render_planning_handoff
+        render_planning_handoff(plan,interests=interests,
+                                discovery=discovery,research=research)
 
     st.markdown(section_heading(
         "SUGESTÕES DE PESQUISA", "Cidades que vale investigar",
