@@ -403,8 +403,8 @@ def render_suggestions(*,plan,discovery=None,research=None):
         selected_card_bases(st.session_state,options),cities,len(result["destinations"])
     ),unsafe_allow_html=True)
     st.markdown(section_heading(
-        "SUGESTÕES DE PESQUISA", "Cidades que vale investigar",
-        "Cidades com referências úteis para começar. Não estão em ordem de preferência.",
+        "CIDADES-BASE SUGERIDAS", "Sugestões de bases para investigar",
+        "Estas alternativas vêm dos destinos confirmados e das referências de deslocamento disponíveis. Não são um ranking nem mudam seu roteiro.",
         variant="compact",
     ),unsafe_allow_html=True)
     featured=_featured_ids(result)
