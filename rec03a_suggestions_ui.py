@@ -235,6 +235,8 @@ def _card(candidate, result, names, cities, official, options):
     from rec03b_handoff_ui import selected_card_bases
     from ux96_comparison_visual_ui import city_card_header
     with st.container(border=True,key="ux96_city_"+base):
+        from ux100_base_card_photos import render_base_card_photo
+        render_base_card_photo(base,meta["name"])
         st.markdown(city_card_header(
             candidate,meta,
             is_selected=base in selected_card_bases(st.session_state,options),
