@@ -96,6 +96,16 @@ def _city_housing(city,*,profile_mode=False):
                         (item.get("listing_url") or item["catalogue_url"])+")")
             st.caption("Referência de 2026, sem confirmação de imóvel para "
                        "dois adultos por 56–60 noites em 2027.")
+        if profile_mode:
+            pack=pack_for_city(load_city_packs(),city["id"])
+            neighborhoods=pack["neighborhoods"] if pack else []
+            if neighborhoods:
+                st.markdown("**Bairros documentados**")
+                for item in neighborhoods:
+                    st.markdown("**"+item["name"]+"** · [Fonte local]("+
+                                item["source_url"]+")")
+            else:
+                st.caption("Bairros ainda sem referências específicas pesquisadas.")
 
 
 def _city_routes(city_id,five,rail,*,profile_mode=False):
@@ -149,10 +159,13 @@ def _city_profile(city_id,study,*,profile_mode=False):
                 st.markdown("[Fonte de custo]("+d["restaurant_source_url"]+")")
             else:
                 st.caption("Cesta de custo de vida equivalente: ainda não pesquisada.")
-            for n in pack["neighborhoods"]:
-                st.markdown("**"+n["name"]+"** · [Fonte local]("+n["source_url"]+")")
-            if not pack["neighborhoods"]:
-                st.caption("Sem bairro documentado nesta etapa.")
+            # In the individual profile, neighborhood sources are already
+            # placed under Moradia; keep the legacy independent explorer intact.
+            if not profile_mode:
+                for n in pack["neighborhoods"]:
+                    st.markdown("**"+n["name"]+"** · [Fonte local]("+n["source_url"]+")")
+                if not pack["neighborhoods"]:
+                    st.caption("Sem bairro documentado nesta etapa.")
             climate=pack["climate"]
             months=climate["months_9_10_11"]
             if months:
