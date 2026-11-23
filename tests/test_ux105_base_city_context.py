@@ -39,6 +39,19 @@ class CityContextTests(unittest.TestCase):
             with self.subTest(base=base):
                 self.assertTrue(any("2027" in gap for gap in context_for_base(base)["gaps"]))
 
+    def test_data23_rail_minima_remain_historical_context(self):
+        from data23_france_candidates_model import base_routes
+        for city in ("angers","annecy"):
+            routes=base_routes(city)
+            self.assertEqual(len(routes),3)
+            for route in routes:
+                self.assertEqual(route["reference_kind"],
+                                 "official_operator_minimum")
+                self.assertFalse(route["valid_for_2027"])
+                self.assertFalse(route["return_2027_verified"])
+                self.assertFalse(route["door_to_door_verified"])
+                self.assertTrue(route["source_url"].startswith("https://"))
+
     def test_photo_fallback_for_angers_and_annecy_is_city_matched(self):
         for base in ("angers","annecy"):
             with self.subTest(base=base):
