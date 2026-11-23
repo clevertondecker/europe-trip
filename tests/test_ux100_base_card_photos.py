@@ -25,6 +25,20 @@ class VerifiedBasePhotosTests(unittest.TestCase):
                     "https://creativecommons.org/licenses/"))
                 self.assertTrue(record["author"])
 
+    def test_local_image_passes_verified_alt_to_native_image(self):
+        from ux100_base_card_photos import render_base_card_photo
+        photo={"local_path":"test.webp", "alt":"Centro histórico de Lille",
+               "source_page":"https://commons.wikimedia.org/wiki/File:Lille.jpg",
+               "author":"Autor", "license":"CC BY-SA 4.0",
+               "license_url":"https://creativecommons.org/licenses/by-sa/4.0/"}
+        with patch("ux100_base_card_photos.base_card_photo_record",return_value=photo):
+            with patch("ux100_base_card_photos.st.container"):
+                with patch("ux100_base_card_photos.st.image") as image:
+                    with patch("ux100_base_card_photos.st.markdown"):
+                        render_base_card_photo("lille","Lille")
+        image.assert_called_once_with("test.webp",width="stretch",
+                                     alt="Centro histórico de Lille")
+
     def test_unknown_city_does_not_fetch_unrelated_photo(self):
         self.assertIsNone(base_card_photo_record("ux100_nonexistent_city"))
 
