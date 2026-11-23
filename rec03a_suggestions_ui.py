@@ -406,9 +406,21 @@ def render_suggestions(*,plan,discovery=None,research=None):
     st.markdown(selected_context(
         selected_card_bases(st.session_state,options),cities,len(result["destinations"])
     ),unsafe_allow_html=True)
+    selected=selected_card_bases(st.session_state,options)
+    if len(selected)==1:
+        st.info("Uma cidade selecionada. Escolha outra nos cartões abaixo para comparar.")
+    if 2<=len(selected)<=5:
+        from ux87_inline_base_comparison_ui import render_inline_comparison
+        render_inline_comparison(interests,checked["scope"],selected,
+                                 discovery=discovery,research=research)
+        st.caption("Você pode ajustar as cidades selecionadas nos cartões abaixo.")
+        from rec03b_handoff_ui import render_planning_handoff
+        render_planning_handoff(plan,interests=interests,
+                                discovery=discovery,research=research)
+
     st.markdown(section_heading(
-        "SUGESTÕES DE PESQUISA", "Cidades que vale investigar",
-        "Cidades com referências úteis para começar. Não estão em ordem de preferência.",
+        "CIDADES-BASE SUGERIDAS", "Sugestões de bases para investigar",
+        "Estas alternativas vêm dos destinos confirmados e das referências de deslocamento disponíveis. Não são um ranking nem mudam seu roteiro.",
         variant="compact",
     ),unsafe_allow_html=True)
     featured=_featured_ids(result)
@@ -479,22 +491,16 @@ def render_suggestions(*,plan,discovery=None,research=None):
 
     # UX87 uses CHOICE and the confirmed scope; no second manual form.
     render_card_selection_summary(result,cities,selection_already_shown=True)
-    from rec03b_handoff_ui import selected_card_bases
-    from ux87_inline_base_comparison_ui import render_inline_comparison
-    selected=selected_card_bases(st.session_state,options)
-    if 2<=len(selected)<=5:
-        render_inline_comparison(interests,checked["scope"],selected,
-                                 discovery=discovery,research=research)
-
     if st.checkbox("Metodologia e pesquisas pendentes",
                    key="rec03a_research_open"):
         _render_comparison_groups(result,names,cities)
         from rec05_priority_research_ui import render_research_result
         render_research_result(result,key="rec05_suggestions")
-    if st.checkbox("Continuar para o roteiro",key="rec03a_planning_open"):
-        from rec03b_handoff_ui import render_planning_handoff
-        render_planning_handoff(plan,interests=interests,
-                                discovery=discovery,research=research)
+    if len(selected)<2:
+        if st.checkbox("Continuar para o roteiro",key="rec03a_planning_open"):
+            from rec03b_handoff_ui import render_planning_handoff
+            render_planning_handoff(plan,interests=interests,
+                                    discovery=discovery,research=research)
 
 
 def render_recommendation_activity(*,plan,discovery=None,research=None):
