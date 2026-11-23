@@ -48,7 +48,7 @@ class VisualProjectionTests(unittest.TestCase):
                 self.assertIn('class="ux97-table"',html)
                 self.assertEqual(html.count("<tr>"),3)
                 self.assertEqual(html.count("<td>"),n*2)
-                self.assertEqual(html.count("1h15"),n*2)
+                self.assertEqual(html.count('<strong class="ux97-cell-time">1h15</strong>'),n*2)
                 self.assertIn("★",html)
                 self.assertIn("2 / 2",summary_panel_html(data))
                 self.assertEqual(data,before)
