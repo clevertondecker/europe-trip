@@ -53,6 +53,14 @@ class VisualProjectionTests(unittest.TestCase):
                 self.assertIn("2 / 2",summary_panel_html(data))
                 self.assertEqual(data,before)
 
+    def test_common_time_summary_requires_all_selected_bases(self):
+        data=fixture(3)
+        data["common_timed_destination_ids"]=["paris"]
+        html=summary_panel_html(data)
+        self.assertIn("1 / 2",html)
+        self.assertIn("em todas as bases selecionadas",html)
+        self.assertNotIn("nas duas ou mais bases",html)
+
     def test_badges_are_semantic_and_unknown_has_no_implicit_zero(self):
         expected=(("historical","Histórico"),("reference_only","Indicativo"),
                   ("local","Acesso local pendente"),("no_time","Sem tempo"))
@@ -117,6 +125,15 @@ class SelectedVisualAppTests(unittest.TestCase):
         self.assertEqual(len(app.session_state[CHOICE]),2)
         self.assertTrue(any("ux97-table" in m.value for m in app.markdown))
         self.assertTrue(any("ux97-metrics" in m.value for m in app.markdown))
+        rendered=[m.value for m in app.markdown]
+        self.assertLess(next(i for i,x in enumerate(rendered) if "ux97-table" in x),
+                        next(i for i,x in enumerate(rendered) if "Cidades que vale investigar" in x))
+        self.assertTrue(any(x.key=="rec03a_planning_open" for x in app.checkbox))
+        # Sources can be explored without first opening the technical matrix.
+        self.assertTrue(any(x.key=="rec03a_inline_sources" for x in app.checkbox))
+        app.checkbox(key="rec03a_inline_sources").check().run()
+        self.assertFalse(app.exception,[x.message for x in app.exception])
+        self.assertTrue(any("Fonte" in x.label for x in app.button))
         # The native UX87 technical table is still opt-in.
         self.assertTrue(any(x.key=="rec03a_inline_matrix" for x in app.checkbox))
         app.checkbox(key="rec03a_inline_matrix").check().run()
