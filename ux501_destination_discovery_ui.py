@@ -17,7 +17,7 @@ from ux501_destination_discovery_model import (
 )
 from trip01_supplemental_discovery import build_exploration_discovery
 from ux502_destination_interests_ui import render_wishlist,add_destination
-from ux_shared_ui_presentation import page_header, kpi_cards, section_heading
+from ux_shared_ui_presentation import page_header, section_heading
 from data8_tourism_ui import render_data8_destination_preview
 
 
@@ -119,17 +119,6 @@ def _destination_wishlist_state(interests: dict | None, destination_id: str) -> 
     return "new"
 
 
-def _render_previous_interest_picker(valid: list[str], by_id: dict) -> None:
-    """Retain the old selection widget even when a filter returns zero results."""
-    st.multiselect(
-        "Lugares que despertaram interesse nesta exploração",
-        options=valid,
-        format_func=lambda key: by_id[key]["name"]+" · "+by_id[key]["country"],
-        key="ux501_interest_session",
-        help="Somente nesta sessão. Não altera o roteiro oficial.",
-    )
-
-
 def render_independent_destination_discovery(*, discovery=None) -> None:
     discovery = discovery if discovery is not None else _cached_discovery()
     destinations = discovery["destinations"]
@@ -146,7 +135,6 @@ def render_independent_destination_discovery(*, discovery=None) -> None:
         return
     # Keep existing transient interests recoverable, without putting their
     # old editor ahead of the destination gallery.
-    valid = list(by_id)
     selected = [key for key in st.session_state.get("ux501_interest_session", [])
                 if key in by_id]
     if "ux501_interest_session" not in st.session_state or (
@@ -180,8 +168,6 @@ def render_independent_destination_discovery(*, discovery=None) -> None:
                "não uma lista de viagens ferroviárias confirmadas.")
     if not matches:
         st.info("Nenhum destino corresponde aos filtros. Experimente outra busca.")
-        with st.expander("Seleção temporária anterior · avançado",expanded=False):
-            _render_previous_interest_picker(valid,by_id)
         return
 
     page_size = 12
@@ -247,22 +233,3 @@ def render_independent_destination_discovery(*, discovery=None) -> None:
                             render_data8_destination_preview(
                                 item["id"], attraction_names={
                                     a["id"]:a["name"] for a in item["attractions"]})
-
-    with st.expander("Pesquisa do catálogo e seleção anterior · avançado", expanded=False):
-        st.caption("Os destinos ainda não representam reservas nem trajetos "
-                   "ou custos confirmados para 2027.")
-        cards = kpi_cards([
-            {"name":"Destinos para descobrir","value":discovery["destination_count"],"icon":"◎",
-             "hint":"Catálogo de pesquisa"},
-            {"name":"Atrações","value":discovery["unique_attractions_count"],
-             "icon":"◇","hint":"Sem duplicatas semânticas"},
-            {"name":"Países","value":len(discovery["countries"]),
-             "icon":"◉","hint":"Locais pesquisados"},
-        ])
-        with st.container(key="ux82_discovery_metrics"):
-            for column,markup in zip(st.columns(3,gap="small"),cards):
-                column.markdown(markup,unsafe_allow_html=True)
-        st.caption("Seleções temporárias anteriores não são a wishlist salva. "
-                   "Você pode reconciliá-las em Minha lista sem perder os dados.")
-        _render_previous_interest_picker(valid,by_id)
-

@@ -17,7 +17,9 @@ class ExplorerDesignConsistencyTests(unittest.TestCase):
                           ("Comparar bases",comparison),("Mapa",app)):
             with self.subTest(task=name):
                 self.assertIn("page_header(",code)
-        for code in (discovery,wishlist,comparison):
+        # Discovery intentionally uses a gallery, not the obsolete catalog KPI panel.
+        self.assertNotIn("kpi_cards(",discovery)
+        for code in (wishlist,comparison):
             self.assertIn("kpi_cards(",code)
         self.assertIn("next_action(",wishlist)
         self.assertIn('variant="compact"',app)
