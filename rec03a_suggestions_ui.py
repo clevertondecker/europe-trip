@@ -246,10 +246,14 @@ def _card(candidate, result, names, cities, official, options):
         from ux99_base_cards_presentation import insight_panels
         st.markdown(insight_panels(project_base_insights(candidate)),
                     unsafe_allow_html=True)
+        from ux105_base_city_context import render_base_context_summary
+        render_base_context_summary(base)
         missing=candidate["must_visit"]["missing"]
         render_card_choice(base,options,show_selection_hint=False)
         if st.checkbox("Por que investigar? Ver evidências e limitações",
                        key="rec03a_details_"+base):
+            from ux105_base_city_context import render_base_context_details
+            render_base_context_details(base)
             reasons=candidate["reasons"]
             st.write(_REASON.get(reasons[0],"Alternativa para investigação.") if reasons
                      else "Alternativa para investigar com os dados disponíveis.")
