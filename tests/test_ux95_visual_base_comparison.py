@@ -145,7 +145,7 @@ class QuickComparisonAppTests(unittest.TestCase):
         source=(Path(__file__).resolve().parents[1] /
                 "rec03a_suggestions_ui.py").read_text()
         preview=source.split("def _render_quick_comparison(",1)[1].split(
-            "\\ndef _card(",1)[0]
+            "\ndef _card(",1)[0]
         self.assertIn('expanded=False):',preview)
         self.assertNotIn("expanded=not 2<=len(selected)<=5",preview)
 
