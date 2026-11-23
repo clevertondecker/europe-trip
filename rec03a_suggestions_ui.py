@@ -207,24 +207,24 @@ def _render_quick_comparison(result, names, cities, base_ids, selected=()):
     subtitle=("Uma cidade visível no filtro; consulte os dados pesquisados."
               if single else "Estas são as cidades visíveis nesta página, não necessariamente as suas selecionadas.")
     # Once CHOICE has enough bases for UX87, avoid a second open comparison.
-    with st.expander("Prévia das sugestões · não é sua seleção",
-                     expanded=not 2<=len(selected)<=5):
-        st.markdown(section_heading(
-            "VISÃO DOCUMENTAL" if single else "PRÉVIA DE PESQUISA",title,
-            subtitle,variant="compact",
-        ),unsafe_allow_html=True)
-        rows=comparison_overview_rows(result,names,cities,base_ids)
-        if not rows:
-            st.info("Nenhum destino confirmado neste escopo.")
-            return
-        st.dataframe(rows,hide_index=True,width="stretch",
-                     height=min(450,70+37*len(rows)),key="rec03a_quick_matrix")
-        st.caption("★ Imperdível · Histórico = registro anterior · Indicativo = referência "
-                   "não confirmada · Local = acesso urbano a verificar. "
-                   "'Ver ressalvas' remete às evidências no cartão da cidade. "
-                   "Os tempos são mínimos de ida, não duração de ida e volta; "
-                   "sem tempo pesquisado não significa rota inviável.")
-
+    with st.container(key="ux96_preview_documentary"):
+        with st.expander("Prévia das sugestões · não é sua seleção",
+                         expanded=not 2<=len(selected)<=5):
+            st.markdown(section_heading(
+                "VISÃO DOCUMENTAL" if single else "PRÉVIA DE PESQUISA",title,
+                subtitle,variant="compact",
+            ),unsafe_allow_html=True)
+            rows=comparison_overview_rows(result,names,cities,base_ids)
+            if not rows:
+                st.info("Nenhum destino confirmado neste escopo.")
+                return
+            st.dataframe(rows,hide_index=True,width="stretch",
+                         height=min(450,70+37*len(rows)),key="rec03a_quick_matrix")
+            st.caption("★ Imperdível · Histórico = registro anterior · Indicativo = referência "
+                       "não confirmada · Local = acesso urbano a verificar. "
+                       "'Ver ressalvas' remete às evidências no cartão da cidade. "
+                       "Os tempos são mínimos de ida, não duração de ida e volta; "
+                       "sem tempo pesquisado não significa rota inviável.")
 
 def _card(candidate, result, names, cities, official, options):
     """Compact choice card; documentary details stay available on demand."""
