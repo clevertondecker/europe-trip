@@ -172,6 +172,57 @@ class ComparisonVisualIntegrationTests(unittest.TestCase):
         self.assertEqual(app.session_state[CHOICE],before)
         self._assert_unchanged(app,plan,wishes)
 
+    def test_five_choices_through_widgets_enforce_limit_and_allow_replacement(self):
+        app=self._confirmed_app()
+        plan=deepcopy(app.session_state["advisor_plan"])
+        wishes=deepcopy(app.session_state["ux502_interests"])
+        app.checkbox(key="rec03a_show_all").check().run()
+        picks=[x.key for x in app.checkbox if x.key and x.key.startswith("rec03a_pick_")]
+        self.assertEqual(len(picks),4)
+        chosen=[]
+        for key in picks:
+            self.assertFalse(app.checkbox(key=key).disabled)
+            app.checkbox(key=key).check().run()
+            chosen.append(key.removeprefix("rec03a_pick_"))
+            self.assertEqual(list(app.session_state[CHOICE]),chosen)
+            self.assertTrue(app.checkbox(key=key).value)
+            self._assert_unchanged(app,plan,wishes)
+
+        app.number_input(key="rec03a_page").set_value(2).run()
+        next_page=[x.key for x in app.checkbox
+                   if x.key and x.key.startswith("rec03a_pick_")]
+        self.assertGreaterEqual(len(next_page),2)
+        fifth,sixth=next_page[:2]
+        self.assertFalse(app.checkbox(key=fifth).disabled)
+        app.checkbox(key=fifth).check().run()
+        chosen.append(fifth.removeprefix("rec03a_pick_"))
+        self.assertEqual(list(app.session_state[CHOICE]),chosen)
+        self.assertEqual(len(chosen),5)
+        self.assertTrue(app.checkbox(key=fifth).value)
+        self.assertTrue(app.checkbox(key=sixth).disabled)
+        self.assertFalse(app.checkbox(key=sixth).value)
+        strip=self._selected_strip(app)
+        for base in chosen:
+            self.assertIn(base,app.session_state[CHOICE])
+        self.assertEqual(strip.count('class="ux96-selected-chip"'),5)
+        self.assertTrue(any(x.key=="rec03a_inline_matrix" for x in app.checkbox))
+        self._assert_unchanged(app,plan,wishes)
+
+        app.checkbox(key=fifth).uncheck().run()
+        chosen.remove(fifth.removeprefix("rec03a_pick_"))
+        self.assertEqual(list(app.session_state[CHOICE]),chosen)
+        self.assertFalse(app.checkbox(key=sixth).disabled)
+        app.checkbox(key=sixth).check().run()
+        chosen.append(sixth.removeprefix("rec03a_pick_"))
+        self.assertEqual(list(app.session_state[CHOICE]),chosen)
+        self.assertEqual(len(app.session_state[CHOICE]),5)
+        self.assertEqual(self._selected_strip(app).count('class="ux96-selected-chip"'),5)
+        self.assertTrue(any(x.key=="rec03a_inline_matrix" for x in app.checkbox))
+        app.run()
+        self.assertEqual(list(app.session_state[CHOICE]),chosen)
+        self.assertTrue(app.checkbox(key=sixth).value)
+        self._assert_unchanged(app,plan,wishes)
+
     def test_five_selected_cities_wrap_without_parallel_selection(self):
         from base_research_expanded_model import load_research
         app=self._confirmed_app()
