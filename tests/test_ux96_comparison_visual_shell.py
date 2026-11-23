@@ -157,7 +157,7 @@ class ComparisonVisualIntegrationTests(unittest.TestCase):
         self.assertTrue(any(x.label=="Conhecer cidade, mapa e custos" for x in app.expander))
         cards=[x.value for x in app.markdown if "ux96-city-header" in x.value]
         self.assertTrue(any("Metz" in x and "Selecionada" in x for x in cards))
-        self.assertTrue(any(x.key=="rec03a_inline_matrix" for x in app.checkbox))
+        self.assertTrue(any("ux97-table" in x.value for x in app.markdown))
         self.assertEqual(sum("#### Cidades selecionadas" in x.value
                              for x in app.markdown),0)
         self.assertFalse(any("2 de até 5 cidades selecionadas" in x.value
@@ -246,7 +246,7 @@ class ComparisonVisualIntegrationTests(unittest.TestCase):
         for base in chosen:
             self.assertIn(base,app.session_state[CHOICE])
         self.assertEqual(strip.count('class="ux96-selected-chip"'),5)
-        self.assertTrue(any(x.key=="rec03a_inline_matrix" for x in app.checkbox))
+        self.assertTrue(any("ux97-table" in x.value for x in app.markdown))
         self._assert_unchanged(app,plan,wishes)
 
         app.checkbox(key=fifth).uncheck().run()
@@ -258,7 +258,7 @@ class ComparisonVisualIntegrationTests(unittest.TestCase):
         self.assertEqual(list(app.session_state[CHOICE]),chosen)
         self.assertEqual(len(app.session_state[CHOICE]),5)
         self.assertEqual(self._selected_strip(app).count('class="ux96-selected-chip"'),5)
-        self.assertTrue(any(x.key=="rec03a_inline_matrix" for x in app.checkbox))
+        self.assertTrue(any("ux97-table" in x.value for x in app.markdown))
         app.run()
         self.assertEqual(list(app.session_state[CHOICE]),chosen)
         self.assertTrue(app.checkbox(key=sixth).value)
@@ -277,5 +277,5 @@ class ComparisonVisualIntegrationTests(unittest.TestCase):
             self.assertIn(base and next(x["name"] for x in
                 load_research(include_candidates=True)["cities"] if x["id"]==base),strip)
         self.assertEqual(len(app.session_state[CHOICE]),5)
-        self.assertTrue(any(x.key=="rec03a_inline_matrix" for x in app.checkbox))
+        self.assertTrue(any("ux97-table" in x.value for x in app.markdown))
         self._assert_unchanged(app,plan,wishes)
