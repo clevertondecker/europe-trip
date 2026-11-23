@@ -53,9 +53,9 @@ class UX109ProfileTests(unittest.TestCase):
         research=load_research(include_candidates=True)
         expected=profile_by_id(load_profiles(canonical=research),"mulhouse")["summary"]
         app=AppTest.from_string(
-            'from unittest.mock import patch\\n'
-            'from base_research_expanded_ui import render_expanded_research\\n'
-            'with patch("base_research_expanded_ui.pack_for_city",return_value=None):\\n'
+            'from unittest.mock import patch\n'
+            'from base_research_expanded_ui import render_expanded_research\n'
+            'with patch("base_research_expanded_ui.pack_for_city",return_value=None):\n'
             '    render_expanded_research(activity_override="Explorar uma cidade",'
             'compact=True,fixed_city="mulhouse")',
             default_timeout=120,
