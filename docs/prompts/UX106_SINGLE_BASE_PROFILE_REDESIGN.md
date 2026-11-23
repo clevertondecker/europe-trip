@@ -1,6 +1,6 @@
 # UX106 — Redesign consolidado da investigação individual de cidade-base
 
-> **STATUS: PROMPT PARA REVIEW.** Este PR apenas documenta a implementação proposta. **Nenhuma mudança funcional foi aplicada**. A execução depende de aprovação explícita; não tratar este PR documental como entrega visual concluída.
+> **STATUS: PLANO REVISADO PARA EXECUÇÃO INCREMENTAL.** Este PR apenas documenta a implementação proposta. **Nenhuma mudança funcional foi aplicada**. A execução depende de aprovação explícita; não tratar este PR documental como entrega visual concluída.
 
 **Repositório:** https://github.com/clevertondecker/europe-trip
 
@@ -8,7 +8,36 @@
 
 **Fluxo real:** `Explorar → Comparar bases → Cidade para investigar individualmente → Conhecer cidade`. `rec03b_handoff_ui.render_profile_context(plan)` obtém `CONTEXT` e a cidade fixa, mostra retorno/favorito/simulação/mapa e delega ao `base_research_expanded_ui.render_expanded_research(activity_override="Explorar uma cidade", compact=True, fixed_city=base)`. A página atual repete “Explorar cidades”, “Explore uma cidade” e o nome da cidade, deixa ações em coluna e organiza informação como uma longa pilha de expanders.
 
-## Resultado visual aprovado — estrutura, não imagem fictícia
+## DECISÃO APÓS REVIEW ADVERSARIAL — 23/11/2026 (PREVALECE SOBRE O ESBOÇO ORIGINAL)
+
+**Escopo aprovado para execução incremental:** **dois ciclos funcionais + QA**, sem um novo sistema de perfil. O esboço visual abaixo é referência de hierarquia, **não** uma checklist obrigatória de novos componentes.
+
+### Ciclo 1: retirar redundâncias e organizar as ações já existentes
+
+- No modo `fixed_city` e `compact=True`, suprimir apenas os títulos repetidos “Explorar cidades” e “Explore uma cidade”. Manter um único título com cidade e país, corredor e status correto.
+- Em `rec03b_handoff_ui.render_profile_context`, dispor ações reais (simulação, mapa, favorito e retorno) de modo agrupado, preservando chaves, callbacks e limites. A simulação hipotética continua disponível para candidatos com `scenario_selectable=True`, ainda que sem cotação de 2027; distinguir capacidade técnica de orçamento completo.
+- Não modificar os modos `fixed_city=None`, `compact=False` nem outros `activity_override`. Não alterar dados ou persistência.
+- Testes Streamlit AppTest para uma cidade oficial, uma cidade apenas exploratória, callbacks, favoritos e retorno, com regressão do explorador independente.
+
+### Ciclo 2: enxugar resumo e ordenar pesquisa
+
+- Manter **dois indicadores** reutilizados: anúncios **históricos de 2026** e “**X de Y destinos da pesquisa histórica com referência de tempo**”. Não adicionar KPI de corredor: ele aparece no cabeçalho.
+- Mostrar no máximo 2–3 fatos pesquisados e 2–3 pendências verificáveis, **sem converter volume de pesquisa em qualidade**. Reutilizar modelos existentes; não criar catálogo/editorial novo.
+- Organizar leitura em moradia, deslocamentos/passeios, vida cotidiana e fontes/metodologia usando renderizadores existentes; evitar accordions aninhados e repetição de URLs e atrações DATA23/UX105.
+- Fotografia **compacta e opcional**, apenas se o serviço atual fornecer fonte, autoria e licença e fallback testado; não fazer de um hero fotográfico alto uma dependência.
+- Preservar REC05 e as demais atividades do explorador.
+
+### Ciclo 3: QA (não é um terceiro redesign)
+
+- Unit/AppTests após cada ciclo e regressão completa: `python -m compileall -q .`, `python tools/validate_research_data.py`, `python -m unittest discover -s tests -v`.
+- Validar Streamlit real em 1440/768/390px, teclado e fontes. Não equiparar AppTest a QA visual.
+- Confirmar `CHOICE`, filtros, wishlist, `TripPlan`, simulação suportada/não suportada, favorito no limite, mapa/retorno, candidatos sem foto/moradia/tempo, `fixed_city=None` e REC05.
+
+**Estratégia:** preferencialmente dois PRs funcionais sequenciais (UX107 e UX108); nenhum merge automático. Concluir UX107 antes de começar mudanças compartilhadas de UX108. Não construir novos motores nem duplicar `render_expanded_research`.
+
+---
+
+## Esboço original — referência visual opcional, subordinada à decisão acima
 
 Implementar uma única **ficha editorial de cidade-base**, com visual profissional e responsivo, inspirada em aplicativos de viagem. A referência é *Strasbourg, França*. Números **3 anúncios históricos de 2026** e **10/15 tempos da cesta histórica** vieram da captura específica e **não devem ser hardcoded**. A mesma ficha deve atender Mulhouse e outras cidades, com dados reais, estados vazios e status corretos.
 
