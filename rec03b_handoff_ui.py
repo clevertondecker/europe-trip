@@ -73,7 +73,7 @@ def _toggle_card_base(base, options):
     state[CHOICE]=selected
 
 
-def render_card_choice(base, options):
+def render_card_choice(base, options, *, show_selection_hint=True):
     """A single card checkbox; never a parallel multiselect or persisted value."""
     state=st.session_state
     selected=selected_card_bases(state,options)
@@ -85,26 +85,31 @@ def render_card_choice(base, options):
         disabled=base not in selected and len(selected)>=5,
         on_change=_toggle_card_base,args=(base,tuple(options)),
     )
-    if base in selected and len(selected)>=2:
+    if show_selection_hint and base in selected and len(selected)>=2:
         st.caption(f"{len(selected)} cidades selecionadas · "
                    "compare logo após estes cartões.")
 
 
-def render_card_selection_summary(result, cities):
-    """CHOICE is the only comparison selection; focus is for optional actions."""
+def render_card_selection_summary(result, cities, *, selection_already_shown=False):
+    """Use CHOICE for contextual actions; do not repeat the UX96 selection strip."""
     options=[c["base_id"] for c in result["candidates"]]
     selected=selected_card_bases(st.session_state, options)
-    st.markdown("#### Cidades selecionadas")
+    if not selection_already_shown:
+        st.markdown("#### Cidades selecionadas")
     if not selected:
-        st.caption("Selecione cidades nos cartões. Com duas ou mais, "
-                   "a comparação aparece aqui sem outra confirmação.")
+        if not selection_already_shown:
+            st.caption("Selecione cidades nos cartões. Com duas ou mais, "
+                       "a comparação aparece aqui sem outra confirmação.")
         return
-    st.write(" · ".join(cities[b]["name"] for b in selected))
-    st.caption(f"{len(selected)} de até 5 cidades selecionadas · pesquisa, não decisão oficial.")
+    if not selection_already_shown:
+        st.write(" · ".join(cities[b]["name"] for b in selected))
+        st.caption(f"{len(selected)} de até 5 cidades selecionadas · pesquisa, não decisão oficial.")
     if len(selected)==1:
-        st.caption("Você já pode investigar esta cidade sem selecionar outra.")
+        if not selection_already_shown:
+            st.caption("Você já pode investigar esta cidade sem selecionar outra.")
     elif 2<=len(selected)<=5:
-        st.caption("A comparação dos destinos aparece logo abaixo, na mesma página.")
+        if not selection_already_shown:
+            st.caption("A comparação dos destinos aparece logo abaixo, na mesma página.")
     else:
         st.warning("Revise a seleção para ficar com até cinco cidades.")
         return
