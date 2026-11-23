@@ -111,11 +111,11 @@ class GuidedComparisonTests(unittest.TestCase):
         # this handoff region with inline comparison after the same cards.
         source=inspect.getsource(render_suggestions)
         self.assertEqual(source.count("render_card_selection_summary(result,cities,selection_already_shown=True)"),1)
-        self.assertLess(source.index("for candidate in visible"),
+        self.assertLess(source.index("for index,candidate in enumerate(visible):"),
                         source.index("render_card_selection_summary(result,cities,selection_already_shown=True)"))
         self.assertLess(source.index("_render_quick_comparison(result,names,cities,"),
-                        source.index("for candidate in visible"))
-        self.assertLess(source.index("for base in featured:"),
+                        source.index("for index,candidate in enumerate(visible):"))
+        self.assertLess(source.index("for index,base in enumerate(featured):"),
                         source.index("render_card_selection_summary(result,cities,selection_already_shown=True)"))
         self.assertIn("size=4",source)
 
