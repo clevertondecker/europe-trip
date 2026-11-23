@@ -14,6 +14,17 @@ class VerifiedBasePhotosTests(unittest.TestCase):
         self.assertTrue(result["author"])
         self.assertTrue(result["license"])
 
+    def test_catalog_photo_fallback_is_city_specific_and_licensed(self):
+        for city in ("mulhouse", "strasbourg", "metz", "nancy", "colmar"):
+            with self.subTest(city=city):
+                record=base_card_photo_record(city)
+                self.assertIsNotNone(record)
+                self.assertTrue(record["source_page"].startswith(
+                    "https://commons.wikimedia.org/wiki/File:"))
+                self.assertTrue(record["license_url"].startswith(
+                    "https://creativecommons.org/licenses/"))
+                self.assertTrue(record["author"])
+
     def test_unknown_city_does_not_fetch_unrelated_photo(self):
         self.assertIsNone(base_card_photo_record("ux100_nonexistent_city"))
 
