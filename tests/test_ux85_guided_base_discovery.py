@@ -110,7 +110,7 @@ class GuidedComparisonTests(unittest.TestCase):
         # Structural guard for UX85's temporary native CTA; UX87 will replace
         # this handoff region with inline comparison after the same cards.
         source=inspect.getsource(render_suggestions)
-        self.assertEqual(source.count("render_card_selection_summary(result,cities)"),1)
+        self.assertEqual(source.count("render_card_selection_summary(result,cities,selection_already_shown=True)"),1)
         self.assertLess(source.index("for candidate in visible"),
                         source.index("render_card_selection_summary(result,cities)"))
         self.assertLess(source.index("_render_quick_comparison(result,names,cities,"),
