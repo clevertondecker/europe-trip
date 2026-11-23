@@ -1,0 +1,181 @@
+{
+  "schema_version": 1,
+  "checked_at": "2026-11-23",
+  "policy": "Informações editoriais e operacionais documentadas, NÃO novas evidências ROUTES7 nem tempos para o escopo REC02. Horários, retorno, tarifas, última milha e operação em 2027 continuam não verificados.",
+  "cities": [
+    {
+      "id": "aachen",
+      "mobility": [
+        {
+          "label": "Rede ferroviária regional",
+          "detail": "A conexão RE18 integra o corredor Aachen–Heerlen–Maastricht–Liège, com alterações e obras possíveis.",
+          "source_url": "https://avv.de/files/avv/files/fahrplaene/linienfahrplaene/Bahnlinien/re18_arriva.pdf",
+          "kind": "service_reference"
+        },
+        {
+          "label": "Conexão a Colônia",
+          "detail": "A Deutsche Bahn publica opções ferroviárias Aachen–Köln; verificar o dia de viagem e o retorno.",
+          "source_url": "https://www.bahn.de/reisen/view/verbindung/aachen/koeln.shtml",
+          "kind": "service_reference"
+        }
+      ],
+      "attractions": [
+        {
+          "name": "Catedral de Aachen",
+          "detail": "Centro histórico; igreja associada a Carlos Magno e patrimônio UNESCO.",
+          "source_url": "https://www.aachen-tourismus.de/en/aachen-entdecken/sehenswuerdigkeiten/details/aachener-dom/"
+        },
+        {
+          "name": "Rathaus e Katschhof",
+          "detail": "Prefeitura histórica e praça central entre a prefeitura e a catedral.",
+          "source_url": "https://www.aachen-tourismus.de/en/aachen-entdecken/sehenswuerdigkeiten/details/aachener-rathaus/"
+        },
+        {
+          "name": "Carolus Thermen",
+          "detail": "Termas de Aachen; preços e horários dependem da data de visita.",
+          "source_url": "https://www.aachen-tourismus.de/en/aachen-entdecken/details/poi/carolus-thermen/"
+        }
+      ],
+      "gaps": [
+        "Horários e retorno em 2027 não verificados",
+        "Tarifas integradas e última milha não verificadas",
+        "Cobertura de trajetos do escopo REC02 continua parcial"
+      ]
+    },
+    {
+      "id": "angers",
+      "mobility": [
+        {
+          "label": "Centro e Château sem carro",
+          "detail": "O escritório de turismo documenta a ligação pedonal entre Angers Saint-Laud e o centro/Château.",
+          "source_url": "https://www.destination-angers.com/en/tourism/on-site/getting-around-angers/angers-without-car/soft-mobility-a-different-way-to-discover-angers/",
+          "kind": "urban_access"
+        },
+        {
+          "label": "Terra Botanica por bonde",
+          "detail": "O bonde A atende a parada Terra Botanica; verificar serviço e operação antes da viagem.",
+          "source_url": "https://www.destination-angers.com/tourisme/sur-place/se-deplacer-a-angers/angers-sans-voiture/mobilite-douce-decouvrez-angers-autrement/",
+          "kind": "urban_access"
+        },
+        {
+          "label": "Conexão com Saumur",
+          "detail": "A SNCF Connect publica uma referência para Angers–Saumur; conferir itinerários, frequência e retorno na data escolhida. A conexão Angers–Nantes está documentada separadamente no DATA23.",
+          "source_url": "https://www.sncf-connect.com/train/horaires/angers/saumur",
+          "kind": "service_reference"
+        }
+      ],
+      "attractions": [
+        {
+          "name": "Château d'Angers",
+          "detail": "Castelo e tapeçaria do Apocalipse; já cadastrado no estudo DATA23.",
+          "source_url": "https://www.destination-angers.com/en/tourism/plan-your-stay-in-angers-accommodation-activities-restaurants/things-to-do-in-angers/main-places-visit/"
+        },
+        {
+          "name": "Musée Jean-Lurçat",
+          "detail": "Museu dedicado à tapeçaria contemporânea no patrimônio histórico de Angers.",
+          "source_url": "https://www.destination-angers.com/tourisme/organiser-son-sejour/activites-a-faire-a-angers/sites-visites-angers/musees-angers/"
+        },
+        {
+          "name": "Terra Botanica",
+          "detail": "Parque temático sobre o mundo vegetal, já cadastrado no DATA23.",
+          "source_url": "https://www.destination-angers.com/tourisme/organiser-son-sejour/activites-a-faire-a-angers/toutes-activites-angers/terra-botanica-angers-fr-1617311/"
+        }
+      ],
+      "gaps": [
+        "Não há cotação de moradia mobiliada para setembro–novembro de 2027",
+        "Retorno ferroviário e frequência do fim de semana ainda não verificados",
+        "A rede local não comprova logística para destinos distantes do Vale do Loire"
+      ]
+    },
+    {
+      "id": "annecy",
+      "mobility": [
+        {
+          "label": "Rede urbana SIBRA",
+          "detail": "Linhas principais de ônibus conectam a estação de Annecy com bairros e polos de correspondência; verificar itinerários por data.",
+          "source_url": "https://www.sibra.fr/lignes-principales/",
+          "kind": "urban_access"
+        },
+        {
+          "label": "Ligação ferroviária com Genebra",
+          "detail": "A SNCF Connect publica horários Annecy–Genève; não inferir duração total, bilhete ou retorno de 2027.",
+          "source_url": "https://www.sncf-connect.com/train/horaires/annecy/geneve",
+          "kind": "service_reference"
+        },
+        {
+          "label": "Conexões regionais",
+          "detail": "Há ligações ferroviárias consultáveis entre Annecy e Lyon; confirmar transferências e frequência.",
+          "source_url": "https://www.sncf-connect.com/train/horaires/annecy/lyon",
+          "kind": "service_reference"
+        }
+      ],
+      "attractions": [
+        {
+          "name": "Palais de l'Île",
+          "detail": "Monumento histórico no centro antigo, já citado no DATA23.",
+          "source_url": "https://en.lac-annecy.com/cultural-heritage/palais-de-lile-annecy/"
+        },
+        {
+          "name": "Cidade antiga de Annecy",
+          "detail": "Canais, passagens históricas e entorno do Musée-Château.",
+          "source_url": "https://en.lac-annecy.com/must-sees/the-old-town-of-annecy/"
+        },
+        {
+          "name": "Lago de Annecy",
+          "detail": "Passeios pelas margens e natureza alpina; deslocamentos e sazonalidade variam conforme a atividade.",
+          "source_url": "https://en.lac-annecy.com/must-sees/"
+        }
+      ],
+      "gaps": [
+        "Não há cotação de aluguel 2027 nesta base de pesquisa",
+        "Sazonalidade, passeios no lago e conexões alpinas precisam validação",
+        "Última milha e retorno de trens para Genebra/Lyon não verificados"
+      ]
+    },
+    {
+      "id": "arlon",
+      "mobility": [
+        {
+          "label": "Corredor Arlon–Luxemburgo",
+          "detail": "A operadora SNCB documenta o eixo ferroviário Bruxelas–Namur–Arlon–Luxemburgo.",
+          "source_url": "https://www.belgiantrain.be/en/products/crossborder/luxembourg",
+          "kind": "service_reference"
+        },
+        {
+          "label": "Obras e alterações operacionais",
+          "detail": "A SNCB publica interrupções e serviços alternativos no eixo Luxemburgo; conferir a data específica.",
+          "source_url": "https://www.belgiantrain.be/fr/news/works-reseau-lux",
+          "kind": "operator_caveat"
+        },
+        {
+          "label": "Mobilidade no centro",
+          "detail": "O turismo local descreve acesso a pé, bicicleta e ônibus para os principais locais centrais.",
+          "source_url": "https://visitarlon.be/en/pratique/ville/",
+          "kind": "urban_access"
+        }
+      ],
+      "attractions": [
+        {
+          "name": "Museu Arqueológico",
+          "detail": "Coleção de vestígios da época galo-romana da cidade e região.",
+          "source_url": "https://visitarlon.be/en/activites/activites-culturelles/le-musee-archeologique/"
+        },
+        {
+          "name": "Saint-Donat e Belvédère",
+          "detail": "Área patrimonial no alto da cidade com vista panorâmica.",
+          "source_url": "https://visitarlon.be/en/decouvrir/a-ne-pas-manquer/saint-donat/"
+        },
+        {
+          "name": "Torres romanas",
+          "detail": "Vestígios de torres galo-romanas reconhecidos no patrimônio da Valônia.",
+          "source_url": "https://visitarlon.be/en/decouvrir/a-ne-pas-manquer/les-tours-romaines/"
+        }
+      ],
+      "gaps": [
+        "Obras podem afetar Arlon–Luxemburgo; operação em 2027 não verificada",
+        "Retorno noturno e bilhetes transfronteiriços não verificados",
+        "Moradia para curta duração em 2027 ainda não pesquisada"
+      ]
+    }
+  ]
+}

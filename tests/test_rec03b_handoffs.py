@@ -186,11 +186,10 @@ class HandoffAppTests(unittest.TestCase):
         choose_city("strasbourg")
         choose_city("angers")
         # UX87 comparison is visible in the suggested view without a handoff.
-        self.assertTrue(any(x.key=="rec03a_inline_matrix" for x in app.checkbox))
+        self.assertTrue(any("ux97-table" in m.value for m in app.markdown))
+        self.assertFalse(any(x.key=="rec03a_inline_matrix" for x in app.checkbox))
+        self.assertTrue(any(x.key=="rec03a_inline_sources" for x in app.checkbox))
         self.assertFalse(any(b.key=="rec03a_handoff_compare" for b in app.button))
-        app.checkbox(key="rec03a_inline_matrix").check().run()
-        self.assertFalse(app.exception,str(app.exception))
-        self.assertTrue(app.dataframe)
         # REC03B manual handoff remains supported as a legitimate legacy path.
         queue_handoff(app.session_state,"manual",["strasbourg","angers"])
         app.run()

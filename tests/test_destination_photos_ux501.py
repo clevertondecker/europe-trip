@@ -62,7 +62,7 @@ class DestinationPhotosTests(TestCase):
 
     def test_first_page_curated_photos_are_usable_without_external_apis(self):
         ids=["aachen","baden_baden","cologne","karlsruhe","kehl"]
-        self.assertEqual(set(ids),set(CURATED_COMMONS_FILES))
+        self.assertTrue(set(ids).issubset(set(CURATED_COMMONS_FILES)))
         rows=[{"id":key,"name":key,"photo":None} for key in ids]
         def offline(api,params):
             raise OSError("Wikimedia Actions are blocked on the server")
@@ -79,6 +79,22 @@ class DestinationPhotosTests(TestCase):
             self.assertTrue(photo["author"])
             self.assertTrue(photo["license"].startswith("CC BY-SA"))
         self.assertIsNone(curated_destination_photo("nonexistent"))
+
+    def test_angers_and_annecy_photos_have_verified_credits(self):
+        expected={
+            "angers":("Marom~commonswiki","CC BY-SA 3.0","/by-sa/3.0/"),
+            "annecy":("Guilhem Vellut","CC BY 2.0","/by/2.0/"),
+        }
+        for city,(author,license_name,license_path) in expected.items():
+            with self.subTest(city=city):
+                photo=curated_destination_photo(city)
+                self.assertEqual(photo["author"],author)
+                self.assertEqual(photo["license"],license_name)
+                self.assertIn(license_path,photo["license_url"])
+                self.assertTrue(photo["source_page"].startswith(
+                    "https://commons.wikimedia.org/wiki/File:"))
+                self.assertTrue(photo["url"].startswith(
+                    "https://commons.wikimedia.org/wiki/Special:FilePath/"))
 
     def test_verified_images_survive_partial_dynamic_failure(self):
         rows=[{"id":"aachen","name":"Aachen","photo":None},
