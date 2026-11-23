@@ -23,6 +23,16 @@ class BaseCardPresentationTests(unittest.TestCase):
         self.assertIn("Cuidado B",html)
         self.assertNotIn("Cuidado C",html)
 
+    def test_research_documentation_uses_neutral_not_green(self):
+        html=insight_panels({
+            "advantages":[],
+            "documented":[{"text":"Há referências de ida para alguns destinos"}],
+            "cautions":[{"text":"Retorno não verificado"}]})
+        self.assertIn("O que já foi pesquisado",html)
+        self.assertIn("ux99-insight--neutral",html)
+        self.assertNotIn("ux99-insight--pros",html)
+        self.assertNotIn("Vantagens comparativas",html)
+
     def test_pro_and_caution_panels_have_no_fake_interactivity(self):
         html=insight_panels({"advantages":[{"text":"Referências para imperdíveis"}],
                              "cautions":[{"text":"<b>Tempo pendente</b>"}]})

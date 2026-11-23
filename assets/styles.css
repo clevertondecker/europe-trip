@@ -943,6 +943,12 @@ div[class*="st-key-ux96_preview_documentary"] [data-testid="stExpander"] summary
  .ux97-table{min-width:570px;}
 }
 
+/* UX104: visually hidden but screen-reader-accessible table caveats. */
+.ux97-sr-only{
+ position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+ overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;
+}
+
 /* UX99: scoped, data-backed comparison panels; all actions remain native Streamlit. */
 .ux99-scope-strip{
  display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;

@@ -26,8 +26,10 @@ def insight_panels(insights: Mapping) -> str:
         return (f'<section class="ux99-insight ux99-insight--{kind}">'
                 f'<h4>{_safe(heading)}</h4><ul>{lines}</ul></section>')
     return ('<div class="ux99-insights" aria-label="Vantagens e pontos de atenção documentais">'
-            + (panel("pros", "Vantagens documentadas", insights["advantages"])
+            + (panel("pros", "Vantagens comparativas", insights["advantages"])
                if insights["advantages"] else "")
+            + (panel("neutral", "O que já foi pesquisado", insights.get("documented", []))
+               if insights.get("documented") else "")
             + (panel("neutral", "Evidências ainda insuficientes", insights.get("neutral", []))
                if insights.get("neutral") else "")
             + panel("cons", "Pontos de atenção", insights["cautions"])
