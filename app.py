@@ -1329,7 +1329,16 @@ elif page == "Roteiro":
         "Organizar viagem":"Organizar nossa viagem",
         "Melhorar meu roteiro":"Melhorar nosso roteiro",
     }.get(ux_section,"Meu roteiro")
-    if ux_section not in ("Meu planejamento","Organizar viagem") and not (
+    # A contextual city profile has its own title; suppress only this global heading.
+    profile_context=st.session_state.get(CONTEXT)
+    individual_base_profile=(
+        itinerary_section=="Explorar bases"
+        and ux_area=="Explorar" and ux_section=="Cidades-base"
+        and isinstance(profile_context,dict)
+        and profile_context.get("kind")=="profile"
+        and bool(profile_context.get("base_ids"))
+    )
+    if not individual_base_profile and ux_section not in ("Meu planejamento","Organizar viagem") and not (
             ux_area=="Explorar" and ux_section=="Passeios"):
         st.markdown("<div class='page-eyebrow'>NOSSA EUROPA · "+escape(ux_area.upper())+"</div>"
                 "<div class='page-title'>"+escape(task_title)+"</div>"
