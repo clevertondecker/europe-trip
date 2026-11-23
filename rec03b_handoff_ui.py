@@ -221,33 +221,59 @@ def _favorite(base,research):
 
 
 def render_profile_context(plan):
+    """A focused single-city research view; no parallel selection or plan edits."""
     from trip_plan_model import BASES
+    from rec04_candidate_capabilities import capability_for
+    from rec04_simulation_handoff import request_simulation
+    from ux41_favorites_model import MAX_FAVORITES
+
     context,_,research=context_for("profile")
     if context is None:
         return False
     base=context["base_ids"][0]
     city=next(c for c in research["cities"] if c["id"]==base)
-    st.button("Voltar às cidades sugeridas",key="rec03a_handoff_back_profile",
+    cap=capability_for(base, research=research)
+
+    st.button("← Voltar à comparação",key="rec03a_handoff_back_profile",
               on_click=return_to_suggestions)
-    st.caption("Cidade em pesquisa: "+city["name"]+
-               (" · base oficial atual" if base==plan["base_city"] else
-                " · elegível pelo fluxo oficial existente" if base in BASES else
-                " · somente exploração, não disponível para oficialização"))
-    from ux41_favorites_model import MAX_FAVORITES
+    st.markdown("## "+city["name"]+" · "+city["country"])
+    status=("Base oficial atual" if base==plan["base_city"] else
+            "Elegível para o fluxo oficial" if base in BASES else
+            "Somente investigação")
+    research_status="Finalista da pesquisa" if city["shortlist"] else "Candidata à pesquisa"
+    st.caption(city["corridor"]+" · "+research_status+" · "+status)
+    st.caption("Pesquise esta cidade e suas limitações antes de decidir se "
+               "faz sentido como base. Nenhuma ação aqui altera sua base oficial.")
+
     favorites=st.session_state.get("ux41_favorites",[])
-    st.button("Remover favorita" if base in favorites else "Adicionar às favoritas",
-              key="rec03a_handoff_favorite",disabled=base not in favorites and len(favorites)>=MAX_FAVORITES,
-              on_click=_favorite,args=(base,research))
+    simulate,map_col,favorite=st.columns(3,gap="small")
+    simulate.button("Simular esta cidade",key="rec04_simulate_profile",
+                    type="primary",disabled=not cap["scenario_selectable"],
+                    on_click=request_simulation,
+                    args=(st.session_state,base,"profile"),
+                    use_container_width=True)
+    map_col.button("Ver no mapa",key="rec03a_handoff_profile_map",
+                   on_click=queue_handoff,args=(st.session_state,"map",[base]),
+                   use_container_width=True)
+    favorite.button("Remover favorita" if base in favorites else "Adicionar às favoritas",
+                    key="rec03a_handoff_favorite",
+                    disabled=base not in favorites and len(favorites)>=MAX_FAVORITES,
+                    on_click=_favorite,args=(base,research),
+                    use_container_width=True)
+
+    if cap["scenario_selectable"]:
+        st.caption("Simulação hipotética: "+cap["budget_note"]+".")
+    else:
+        st.caption("Simulação indisponível para esta cidade.")
+    if not cap["rental_quote_2027_available"]:
+        st.caption("Aluguel e caução para 2027 ainda não foram cotados.")
     if base not in favorites and len(favorites)>=MAX_FAVORITES:
         st.caption("Limite de favoritas atingido. Remova uma favorita antes de adicionar outra.")
-    from rec04_simulation_handoff import request_simulation
-    st.button("Simular esta cidade",key="rec04_simulate_profile",
-              on_click=request_simulation,args=(st.session_state,base,"profile"))
-    st.button("Ver cidade e destinos no mapa",key="rec03a_handoff_profile_map",
-              on_click=queue_handoff,args=(st.session_state,"map",[base]))
-    # Reuse the existing full profile renderer, without writing scenario_base_selected.
+
+    # Keep the existing shared renderer and suppress only duplicate fixed-city headings.
     from base_research_expanded_ui import render_expanded_research
-    render_expanded_research(activity_override="Explorar uma cidade",compact=True,fixed_city=base)
+    render_expanded_research(activity_override="Explorar uma cidade",
+                             compact=True,fixed_city=base)
     from rec05_priority_research_ui import render_research_from_session
     render_research_from_session(key="rec05_profile",base_ids=[base])
     return True
