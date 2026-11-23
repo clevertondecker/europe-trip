@@ -62,12 +62,12 @@ def render_base_context_details(base_id: str) -> None:
     for index,item in enumerate(data["mobility"]):
         st.write(item["label"]+" — "+item["detail"])
         st.link_button("Fonte de transporte "+str(index+1),
-                       item["source_url"],key=f"ux105_transport_{base_id}_{index}")
+                       item["source_url"])
     st.markdown("**Atrações para investigar**")
     for index,item in enumerate(data["attractions"]):
         st.write(item["name"]+" — "+item["detail"])
         st.link_button("Fonte da atração "+str(index+1),
-                       item["source_url"],key=f"ux105_attraction_{base_id}_{index}")
+                       item["source_url"])
     st.markdown("**Ainda falta validar para 2027**")
     for item in data["gaps"]:
         st.caption("• "+item)
