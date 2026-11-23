@@ -29,19 +29,19 @@ def city_card_header(candidate: dict, city: dict, *, is_selected: bool = False,
         for kind,number,label in counts
     )
     flags=(
-        ('<span class="ux96-city-flag">Selecionada</span>' if is_selected else "")
+        ('<span class="ux96-city-flag ux96-city-flag--selected">Selecionada</span>' if is_selected else "")
         + ('<span class="ux96-city-flag ux96-city-flag--official">'
            'Base oficial</span>' if is_official else "")
     )
     return (
-        '<div class="ux96-city-header">'
+        '<div class="ux96-city-header" role="group" aria-label="Resumo da cidade-base">'
         '<div class="ux96-city-heading">'
         '<span class="ux96-city-icon" aria-hidden="true">▦</span>'
         '<div class="ux96-city-heading-copy">'
         f'<strong>{name}</strong><span>{country}</span>'
         '</div></div>'
         f'<div class="ux96-city-flags">{flags}</div>'
-        f'<div class="ux96-badges" aria-label="Cobertura de pesquisa">{badges}</div>'
+        f'<div class="ux96-badges" aria-label="Cobertura documental, não avaliação da cidade">{badges}</div>'
         '</div>'
     )
 
