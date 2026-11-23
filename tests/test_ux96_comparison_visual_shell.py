@@ -35,6 +35,20 @@ class ComparisonVisualShellTests(unittest.TestCase):
         self.assertNotIn("Selecionada",official)
         self.assertIn('aria-label="Cobertura documental, não avaliação da cidade"',selected)
 
+    def test_card_styles_do_not_target_unrelated_nested_wrappers(self):
+        from pathlib import Path
+        styles=(Path(__file__).resolve().parents[1]/"assets"/"styles.css").read_text()
+        polish=styles.split("/* UX96 polish",1)[1]
+        self.assertIn(
+            '[data-testid="stVerticalBlockBorderWrapper"]:has(.ux96-city-header)',
+            polish)
+        self.assertIn(
+            '[data-testid="stVerticalBlockBorderWrapper"]:has(.ux96-city-flag--selected)',
+            polish)
+        self.assertNotIn(
+            '[data-testid="stCheckbox"]{\\n  border-top:',polish)
+        self.assertIn("st-key-ux96_preview_documentary",polish)
+
     def test_escaped_city_and_country(self):
         html=city_card_header(self.candidate,
             {"name":"<script>alert(1)</script>","country":"FR & <BR>"})
