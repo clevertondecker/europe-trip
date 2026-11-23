@@ -142,7 +142,8 @@ class ComparisonVisualIntegrationTests(unittest.TestCase):
         app.checkbox(key="rec03a_pick_mulhouse").check().run()
         self.assertEqual(app.session_state[CHOICE],["mulhouse"])
         self.assertIn("Mulhouse",self._selected_strip(app))
-        self.assertTrue(any(x.label=="Conhecer cidade, mapa e custos" for x in app.expander))
+        self.assertTrue(any(x.key=="rec03a_handoff_profile_card_mulhouse" for x in app.button))
+        self.assertFalse(any(x.label=="Conhecer cidade, mapa e custos" for x in app.expander))
         self.assertFalse(any(x.key=="rec03a_inline_matrix" for x in app.checkbox))
         self._assert_unchanged(app,original_plan,original_wishes)
 
@@ -153,6 +154,7 @@ class ComparisonVisualIntegrationTests(unittest.TestCase):
         self.assertIn("Mulhouse",self._selected_strip(app))
         self.assertIn("Metz",self._selected_strip(app))
         self.assertTrue(app.checkbox(key="rec03a_pick_metz").value)
+        self.assertTrue(any(x.label=="Conhecer cidade, mapa e custos" for x in app.expander))
         cards=[x.value for x in app.markdown if "ux96-city-header" in x.value]
         self.assertTrue(any("Metz" in x and "Selecionada" in x for x in cards))
         self.assertTrue(any(x.key=="rec03a_inline_matrix" for x in app.checkbox))
