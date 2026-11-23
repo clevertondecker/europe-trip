@@ -144,8 +144,90 @@ def _restore_widget(widget, shadow, default, valid=None):
     return value
 
 
+def _overview_caveats(cell):
+    """Only factual qualifications from the existing canonical projection."""
+    caveats=[]
+    if cell.get("legacy_divergent_sources"):
+        caveats.append("Tempos publicados divergentes")
+    if cell.get("station_caveat") or cell.get("station_comparability")=="city_level_ambiguous":
+        caveats.append("Estações a verificar")
+    if cell.get("evidence_notes"):
+        caveats.append("Observações da fonte")
+    # The canonical label also carries qualifications not present as flags.
+    label=str(cell.get("label") or "").lower()
+    if any(word in label for word in ("outra referência", "fonte original não reproduzida")):
+        caveats.append("Ressalva documental")
+    return list(dict.fromkeys(caveats))
+
+
+def _overview_cell(cell):
+    """Short one-way evidence label with an accessible caveat indicator."""
+    category = cell["category"]
+    if category == "historical":
+        label="Histórico · "+format_minutes(cell["display_min"])
+    elif category == "reference_only":
+        label="Indicativo · "+format_minutes(cell["display_min"])
+    elif category == "local":
+        label="Local · acesso pendente"
+    else:
+        label="Sem tempo pesquisado"
+    return label + (" · ver ressalvas" if _overview_caveats(cell) else "")
+
+
+def comparison_overview_rows(result, names, cities, base_ids):
+    """Project identical confirmed destinations across each visible base.
+
+    This is a view only: no ranking, no average across different subsets,
+    no assumed return journey, and no new selection state.
+    """
+    candidates = {row["base_id"]: row for row in result["candidates"]}
+    chosen = [base for base in dict.fromkeys(base_ids) if base in candidates]
+    rows = []
+    for destination in result["destinations"]:
+        destination_id = destination["id"]
+        label = names.get(destination_id, destination_id)
+        if destination["priority"] == "must_visit":
+            label = "★ " + label
+        record = {"Destino desejado": label}
+        for base in chosen:
+            meta = cities[base]
+            heading = meta["name"] + " · " + meta["country"]
+            record[heading] = _overview_cell(candidates[base]["evidence"][destination_id])
+        rows.append(record)
+    return rows
+
+
+def _render_quick_comparison(result, names, cities, base_ids, selected=()):
+    """Discovery preview, not CHOICE. UX87 is authoritative for chosen cities."""
+    if not base_ids:
+        return
+    single=len(base_ids)==1
+    title=("Dados disponíveis para "+cities[base_ids[0]]["name"] if single
+           else "Prévia das cidades sugeridas")
+    subtitle=("Uma cidade visível no filtro; consulte os dados pesquisados."
+              if single else "Estas são as cidades visíveis nesta página, não necessariamente as suas selecionadas.")
+    # Once CHOICE has enough bases for UX87, avoid a second open comparison.
+    with st.expander("Prévia das sugestões · não é sua seleção",
+                     expanded=not 2<=len(selected)<=5):
+        st.markdown(section_heading(
+            "VISÃO DOCUMENTAL" if single else "PRÉVIA DE PESQUISA",title,
+            subtitle,variant="compact",
+        ),unsafe_allow_html=True)
+        rows=comparison_overview_rows(result,names,cities,base_ids)
+        if not rows:
+            st.info("Nenhum destino confirmado neste escopo.")
+            return
+        st.dataframe(rows,hide_index=True,width="stretch",
+                     height=min(450,70+37*len(rows)),key="rec03a_quick_matrix")
+        st.caption("★ Imperdível · Histórico = registro anterior · Indicativo = referência "
+                   "não confirmada · Local = acesso urbano a verificar. "
+                   "'Ver ressalvas' remete às evidências no cartão da cidade. "
+                   "Os tempos são mínimos de ida, não duração de ida e volta; "
+                   "sem tempo pesquisado não significa rota inviável.")
+
+
 def _card(candidate, result, names, cities, official, options):
-    """One card per city, with CHOICE as the only base-selection state."""
+    """Compact choice card; documentary details stay available on demand."""
     from rec03b_handoff_ui import render_card_choice
 
     base=candidate["base_id"]
@@ -153,24 +235,27 @@ def _card(candidate, result, names, cities, official, options):
     with st.container(border=True):
         st.markdown("**"+meta["name"]+"** · "+meta["country"]+
                     (" · Base oficial de referência" if base==official else ""))
-        reasons=candidate["reasons"]
-        st.write(_REASON.get(reasons[0],"Alternativa para investigação.") if reasons
-                 else "Alternativa para investigar com os dados disponíveis.")
         st.caption(f'{candidate["historical_count"]} trajetos com dados históricos · '
-                   f'{candidate["indicative_count"]} com referências indicativas')
-        st.caption(f'{len(candidate["local_destination_ids"])} destinos com acesso local a verificar · '
-                   f'{len(candidate["missing_destination_ids"])} sem tempo pesquisado')
+                   f'{candidate["indicative_count"]} com referências indicativas · '
+                   f'{len(candidate["local_destination_ids"])} locais pendentes · '
+                   f'{len(candidate["missing_destination_ids"])} sem tempo')
         missing=candidate["must_visit"]["missing"]
         if missing:
-            st.write("**O que falta pesquisar?** Tempos para os imperdíveis: "+
-                     _label_ids(missing,names)+".")
-        elif candidate["local_destination_ids"]:
-            st.write("**O que falta pesquisar?** Acesso dentro da cidade e última milha.")
-        else:
-            st.write("**O que falta pesquisar?** Retorno, acesso às atrações e horários de 2027.")
-        st.caption("Referências de ida pesquisadas; não são duração total nem preços confirmados.")
+            st.caption("Imperdíveis sem tempo pesquisado: "+_label_ids(missing,names))
         render_card_choice(base,options)
-        if st.checkbox("Ver evidências e limitações",key="rec03a_details_"+base):
+        if st.checkbox("Por que investigar? Ver evidências e limitações",
+                       key="rec03a_details_"+base):
+            reasons=candidate["reasons"]
+            st.write(_REASON.get(reasons[0],"Alternativa para investigação.") if reasons
+                     else "Alternativa para investigar com os dados disponíveis.")
+            if missing:
+                st.write("**O que falta pesquisar?** Tempos para os imperdíveis: "+
+                         _label_ids(missing,names)+".")
+            elif candidate["local_destination_ids"]:
+                st.write("**O que falta pesquisar?** Acesso dentro da cidade e última milha.")
+            else:
+                st.write("**O que falta pesquisar?** Retorno, acesso às atrações e horários de 2027.")
+            st.caption("Referências de ida pesquisadas; não são duração total nem preços confirmados.")
             coverage=candidate["weighted_coverage"]
             if coverage["value"] is not None:
                 st.write(f'Cobertura documental ponderada: {coverage["value"]:.0%} '
@@ -183,6 +268,12 @@ def _card(candidate, result, names, cities, official, options):
             for destination,cell in candidate["evidence"].items():
                 st.write(names.get(destination,destination)+" · "+
                          cell.get("label","Sem referência"))
+                for caveat in _overview_caveats(cell):
+                    st.caption("Ressalva: "+caveat)
+                for field,prefix in (("station_caveat","Estações"),
+                                     ("evidence_notes","Observação")):
+                    if cell.get(field):
+                        st.caption(prefix+": "+str(cell[field]))
                 if cell.get("source_url"):
                     st.link_button("Fonte de "+names.get(destination,destination),
                                    cell["source_url"])
@@ -192,8 +283,8 @@ def _card(candidate, result, names, cities, official, options):
                     st.caption("Data registrada: "+str(date))
                 for observation in raw.get("observations",[]):
                     st.caption("Observação original: "+
-                               str(observation.get("evidence_date") or "data não informada")+
-                               " · "+format_minutes(observation.get("minimum_oneway_min")))
+                               str(observation.get("evidence_date") or "data não informada")
+                               +" · "+format_minutes(observation.get("minimum_oneway_min")))
                     if observation.get("source_url"):
                         st.link_button("Fonte da observação",observation["source_url"])
             st.caption(candidate["limitation"])
@@ -351,11 +442,19 @@ def render_suggestions(*,plan,discovery=None,research=None):
             page=st.number_input("Página",min_value=1,max_value=pages,step=1,
                                  key="rec03a_page",on_change=_remember,
                                  args=("rec03a_page","rec03a_page_shadow"))
-            for candidate in filtered[(page-1)*size:page*size]:
+            visible = filtered[(page-1)*size:page*size]
+            from rec03b_handoff_ui import selected_card_bases
+            _render_quick_comparison(result,names,cities,
+                                     [candidate["base_id"] for candidate in visible],
+                                     selected_card_bases(st.session_state,options))
+            for candidate in visible:
                 _card(candidate,result,names,cities,plan["base_city"],options)
         else:
             st.info("Nenhuma cidade corresponde aos filtros.")
     elif featured:
+        from rec03b_handoff_ui import selected_card_bases
+        _render_quick_comparison(result,names,cities,featured,
+                                 selected_card_bases(st.session_state,options))
         for base in featured:
             _card(by_id[base],result,names,cities,plan["base_city"],options)
     else:
