@@ -45,6 +45,8 @@ ARTICLE_TITLES = {
 # live Wikipedia/Commons Action API call at render time. FilePath performs
 # the redirect to the actual hosted image; no local redistribution.
 CURATED_COMMONS_FILES = {
+    # UX110 display-only override: the historical source dataset stays frozen.
+    "colmar": ("Colmar Petite Venise 01.jpg", "Zairon", "CC BY-SA 4.0"),
     "aachen": ("Cathedral in Aachen.jpg", "Vitold Muratov", "CC BY-SA 4.0"),
     # Individual city IDs and Commons metadata verified 2026-11-23.
     "angers": ("Angers chateau.jpg", "Marom~commonswiki", "CC BY-SA 3.0"),
