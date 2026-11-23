@@ -58,8 +58,8 @@
           "kind": "urban_access"
         },
         {
-          "label": "Conexões com Nantes e Saumur",
-          "detail": "Existem páginas oficiais da SNCF Connect para as rotas Angers–Nantes e Angers–Saumur; duração atual e retorno devem ser consultados por data.",
+          "label": "Conexão com Saumur",
+          "detail": "A SNCF Connect publica uma referência para Angers–Saumur; conferir itinerários, frequência e retorno na data escolhida. A conexão Angers–Nantes está documentada separadamente no DATA23.",
           "source_url": "https://www.sncf-connect.com/train/horaires/angers/saumur",
           "kind": "service_reference"
         }
