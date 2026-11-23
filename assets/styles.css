@@ -1002,3 +1002,44 @@ div[class*="st-key-ux100_photo_"] [data-testid="stImage"] img{
 @media(max-width:650px){
  div[class*="st-key-ux100_photo_"] [data-testid="stImage"] img,.ux100-photo-fallback{height:165px;}
 }
+
+
+/* UX109: individual city profile only. Native controls remain interactive. */
+div[class*="st-key-ux109-kpi-"]{
+ background:linear-gradient(135deg,#F3F8F8,#FFFFFF);
+ border-radius:14px;
+ min-width:0;
+}
+div[class*="st-key-ux109-kpi-"] [data-testid="stMetric"]{
+ padding:5px 2px 0;
+}
+div[class*="st-key-ux109-kpi-"] [data-testid="stMetricValue"]{
+ font-size:clamp(1.5rem,2.2vw,2rem);
+ color:#153B4B;
+ font-weight:750;
+}
+div[class*="st-key-ux109-facts"]{
+ background:#F5FAF9;
+ border-color:#D4E8E5;
+ min-width:0;
+}
+div[class*="st-key-ux109-gaps"]{
+ background:#FFFAF2;
+ border-color:#EDDFC7;
+ min-width:0;
+}
+div[class*="st-key-ux109-city-photo"] [data-testid="stImage"] img{
+ width:100%;max-height:155px;object-fit:cover;
+ border-radius:12px;
+}
+div[class*="st-key-ux109-city-photo"] [data-testid="stCaptionContainer"]{
+ font-size:.7rem;overflow-wrap:anywhere;
+}
+@media(max-width:760px){
+ div[class*="st-key-ux109-city-photo"] [data-testid="stImage"] img{
+   max-height:185px;
+ }
+ div[class*="st-key-ux109-kpi-"] [data-testid="stMetricLabel"]{
+   overflow-wrap:anywhere;white-space:normal;
+ }
+}
