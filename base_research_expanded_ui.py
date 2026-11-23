@@ -148,6 +148,10 @@ def _city_profile(city_id,study,*,profile_mode=False):
     if not profile_mode:
         st.markdown("**Contexto pesquisado:** "+p["summary"])
     pack=pack_for_city(load_city_packs(),city_id)
+    if profile_mode and not pack:
+        with st.expander("Vida cotidiana, bairros e clima"):
+            st.write(p["summary"])
+            st.caption("Detalhes de custo, bairros e clima ainda não pesquisados.")
     if pack:
         with st.expander("Vida cotidiana, bairros e clima"):
             if profile_mode:
