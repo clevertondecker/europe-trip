@@ -99,7 +99,7 @@ class VisualProjectionTests(unittest.TestCase):
         cell["legacy_divergent_sources"]=True
         html=selected_matrix_html(data)
         self.assertIn("ux97-sr-only",html)
-        self.assertIn("aria-hidden=\\"true\\"",html)
+        self.assertIn('aria-hidden="true"',html)
         self.assertIn("Estações: Troca de estação &lt;script&gt;",html)
         self.assertIn("Confirmar o acesso em 2027",html)
         self.assertIn("referências divergentes",html)
