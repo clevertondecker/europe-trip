@@ -454,8 +454,8 @@ def render_suggestions(*,plan,discovery=None,research=None):
                                      [candidate["base_id"] for candidate in visible],
                                      selected_card_bases(st.session_state,options))
             columns=st.columns(2 if len(visible)>1 else 1,gap="medium")
-            for candidate in visible:
-                with columns[visible.index(candidate)%len(columns)]:
+            for index,candidate in enumerate(visible):
+                with columns[index%len(columns)]:
                     _card(candidate,result,names,cities,plan["base_city"],options)
         else:
             st.info("Nenhuma cidade corresponde aos filtros.")
@@ -464,8 +464,8 @@ def render_suggestions(*,plan,discovery=None,research=None):
         _render_quick_comparison(result,names,cities,featured,
                                  selected_card_bases(st.session_state,options))
         columns=st.columns(2 if len(featured)>1 else 1,gap="medium")
-        for base in featured:
-            with columns[featured.index(base)%len(columns)]:
+        for index,base in enumerate(featured):
+            with columns[index%len(columns)]:
                 _card(by_id[base],result,names,cities,plan["base_city"],options)
     else:
         st.info("Não há destaques com referências suficientes para este escopo. "
