@@ -182,34 +182,34 @@ def render_inline_comparison(interests, scope, selected, *, discovery, research)
                    "preços de 2027 ainda precisam de confirmação. "
                    "Mínimos de ida não são duração total da viagem.")
     
-    if st.checkbox("Ver tabela técnica e fontes por destino", key="rec03a_inline_matrix"):
+    st.caption("ⓘ nas células indica ressalva documental. Fontes e divergências estão disponíveis abaixo.")
+    if st.checkbox("Ver tabela técnica por destino", key="rec03a_inline_matrix"):
         st.dataframe(projection["table"], hide_index=True, width="stretch")
-        if st.checkbox("Consultar fontes e lacunas da matriz",
-                       key="rec03a_inline_sources"):
-            for d in projection["destinations"]:
-                st.markdown("**" + d["name"] + "**")
-                for base in selected:
-                    cell = projection["cells"][(base, d["id"])]
-                    st.caption(projection["names"][base] + " · " +
-                               LABELS[cell["category"]])
-                    # Keep materially relevant caveats next to the source.
-                    # The underlying rail projection remains authoritative.
-                    for field, prefix in (
-                        ("station_caveat", "Estações"),
-                        ("evidence_notes", "Observação"),
-                    ):
-                        if cell.get(field):
-                            st.caption(prefix + ": " + str(cell[field]))
-                    checked_at = cell.get("gap_checked_at")
-                    if checked_at:
-                        st.caption("Fonte consultada em: " + str(checked_at))
-                    if cell.get("legacy_divergent_sources"):
-                        st.warning("Há tempos publicados divergentes para este trecho.")
-                    url = cell.get("source_url")
-                    if url:
-                        st.link_button("Fonte · " + projection["names"][base] +
-                                       " → " + d["name"], url)
-                    elif cell["category"] in TIMED:
-                        st.caption("Fonte de tempo não disponível para este trajeto.")
-                    else:
-                        st.caption("Pesquisa de tempo ou acesso ainda pendente.")
+    # Sources no longer depend on first opening the technical matrix.
+    if st.checkbox("Consultar fontes e ressalvas dos trajetos",
+                   key="rec03a_inline_sources"):
+        for d in projection["destinations"]:
+            st.markdown("**" + d["name"] + "**")
+            for base in selected:
+                cell = projection["cells"][(base, d["id"])]
+                st.caption(projection["names"][base] + " · " +
+                           LABELS[cell["category"]])
+                for field, prefix in (
+                    ("station_caveat", "Estações"),
+                    ("evidence_notes", "Observação"),
+                ):
+                    if cell.get(field):
+                        st.caption(prefix + ": " + str(cell[field]))
+                checked_at = cell.get("gap_checked_at")
+                if checked_at:
+                    st.caption("Fonte consultada em: " + str(checked_at))
+                if cell.get("legacy_divergent_sources"):
+                    st.warning("Há tempos publicados divergentes para este trecho.")
+                url = cell.get("source_url")
+                if url:
+                    st.link_button("Fonte · " + projection["names"][base] +
+                                   " → " + d["name"], url)
+                elif cell["category"] in TIMED:
+                    st.caption("Fonte de tempo não disponível para este trajeto.")
+                else:
+                    st.caption("Pesquisa de tempo ou acesso ainda pendente.")
