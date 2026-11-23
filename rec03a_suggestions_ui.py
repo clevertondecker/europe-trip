@@ -240,9 +240,11 @@ def _card(candidate, result, names, cities, official, options):
             is_selected=base in selected_card_bases(st.session_state,options),
             is_official=base==official,
         ),unsafe_allow_html=True)
+        from ux98_base_insights_presentation import project_base_insights
+        from ux99_base_cards_presentation import insight_panels
+        st.markdown(insight_panels(project_base_insights(candidate)),
+                    unsafe_allow_html=True)
         missing=candidate["must_visit"]["missing"]
-        if missing:
-            st.caption("Imperdíveis sem tempo pesquisado: "+_label_ids(missing,names))
         render_card_choice(base,options,show_selection_hint=False)
         if st.checkbox("Por que investigar? Ver evidências e limitações",
                        key="rec03a_details_"+base):
@@ -381,7 +383,9 @@ def render_suggestions(*,plan,discovery=None,research=None):
         "Este conjunto foi confirmado para pesquisa, não para o roteiro oficial.",
         variant="compact",
     ),unsafe_allow_html=True)
-    st.caption(_label_ids([x["id"] for x in result["destinations"]],names))
+    from ux99_base_cards_presentation import scope_chips
+    st.markdown(scope_chips([x["id"] for x in result["destinations"]],names),
+                unsafe_allow_html=True)
     a,b=st.columns(2)
     a.button("Editar destinos",key="rec03a_edit",on_click=_edit)
     b.button("Minha lista",key="rec03a_back_wishlist",
@@ -465,20 +469,22 @@ def render_suggestions(*,plan,discovery=None,research=None):
             _render_quick_comparison(result,names,cities,
                                      [candidate["base_id"] for candidate in visible],
                                      selected_card_bases(st.session_state,options))
-            columns=st.columns(2 if len(visible)>1 else 1,gap="medium")
-            for index,candidate in enumerate(visible):
-                with columns[index%len(columns)]:
-                    _card(candidate,result,names,cities,plan["base_city"],options)
+            with st.container(key="ux99_base_gallery_all"):
+                columns=st.columns(min(2,len(visible)),gap="medium")
+                for index,candidate in enumerate(visible):
+                    with columns[index%len(columns)]:
+                        _card(candidate,result,names,cities,plan["base_city"],options)
         else:
             st.info("Nenhuma cidade corresponde aos filtros.")
     elif featured:
         from rec03b_handoff_ui import selected_card_bases
         _render_quick_comparison(result,names,cities,featured,
                                  selected_card_bases(st.session_state,options))
-        columns=st.columns(2 if len(featured)>1 else 1,gap="medium")
-        for index,base in enumerate(featured):
-            with columns[index%len(columns)]:
-                _card(by_id[base],result,names,cities,plan["base_city"],options)
+        with st.container(key="ux99_base_gallery_featured"):
+            columns=st.columns(min(2,len(featured)),gap="medium")
+            for index,base in enumerate(featured):
+                with columns[index%len(columns)]:
+                    _card(by_id[base],result,names,cities,plan["base_city"],options)
     else:
         st.info("Não há destaques com referências suficientes para este escopo. "
                 "Use 'Ver todas as cidades' para explorar as alternativas.")
