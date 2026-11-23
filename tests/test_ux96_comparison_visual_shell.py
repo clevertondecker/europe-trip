@@ -171,6 +171,22 @@ class ComparisonVisualIntegrationTests(unittest.TestCase):
         self.assertFalse(any(x.key=="rec03a_inline_matrix" for x in app.checkbox))
         self._assert_unchanged(app,original_plan,original_wishes)
 
+    def test_direct_one_city_action_uses_existing_handoff_without_plan_mutation(self):
+        from rec03b_handoffs import PENDING
+        app=self._confirmed_app()
+        original_plan=deepcopy(app.session_state["advisor_plan"])
+        original_wishes=deepcopy(app.session_state["ux502_interests"])
+        app.checkbox(key="rec03a_show_all").check().run()
+        app.text_input(key="rec03a_search").set_value("Mulhouse").run()
+        app.checkbox(key="rec03a_pick_mulhouse").check().run()
+        self.assertEqual(app.session_state[CHOICE],["mulhouse"])
+        app.button(key="rec03a_handoff_profile_card_mulhouse").click().run()
+        self.assertFalse(app.exception,[x.message for x in app.exception])
+        self.assertEqual(app.session_state[PENDING]["kind"],"profile")
+        self.assertEqual(app.session_state[PENDING]["base_ids"],["mulhouse"])
+        self.assertEqual(app.session_state[CHOICE],["mulhouse"])
+        self._assert_unchanged(app,original_plan,original_wishes)
+
     def test_search_and_pagination_preserve_off_page_choice_and_visual_state(self):
         app=self._confirmed_app()
         plan=deepcopy(app.session_state["advisor_plan"])
