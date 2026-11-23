@@ -856,20 +856,16 @@ div[class*="st-key-ux96_city_"] [data-testid="stVerticalBlockBorderWrapper"]{
 .ux96-badge--indicative{border-color:#BBD8F2;}
 .ux96-badge--local{border-color:#F2D9A8;}
 .ux96-badge--unknown{border-color:#D8DDE5;}
-div[class*="st-key-ux96_city_"] [data-testid="stVerticalBlockBorderWrapper"]{
+div[class*="st-key-ux96_city_"] [data-testid="stVerticalBlockBorderWrapper"]:has(.ux96-city-header){
   border:1px solid #D4E3EB;
   border-radius:18px;
   background:#FFFFFF;
   box-shadow:0 9px 24px rgba(26,63,81,.055);
   transition:border-color .15s ease,box-shadow .15s ease;
 }
-div[class*="st-key-ux96_city_"]:has(.ux96-city-flag--selected) [data-testid="stVerticalBlockBorderWrapper"]{
+div[class*="st-key-ux96_city_"] [data-testid="stVerticalBlockBorderWrapper"]:has(.ux96-city-flag--selected){
   border-color:#4FAD9B;
   box-shadow:0 0 0 1px #4FAD9B,0 9px 24px rgba(24,110,92,.085);
-}
-div[class*="st-key-ux96_city_"] [data-testid="stCheckbox"]{
-  border-top:1px solid #E8EEF2;
-  padding-top:8px;
 }
 div[class*="st-key-ux96_city_"] [data-testid="stCheckbox"] label{
   font-weight:600;
@@ -910,5 +906,5 @@ div[class*="st-key-ux96_preview_documentary"] [data-testid="stExpander"] summary
   .ux96-selection-total{width:100%;}
 }
 @media(prefers-reduced-motion:reduce){
-  div[class*="st-key-ux96_city_"] [data-testid="stVerticalBlockBorderWrapper"]{transition:none;}
+  div[class*="st-key-ux96_city_"] [data-testid="stVerticalBlockBorderWrapper"]:has(.ux96-city-header){transition:none;}
 }
