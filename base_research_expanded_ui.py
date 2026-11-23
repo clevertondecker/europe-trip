@@ -246,16 +246,21 @@ def _candidate_media_and_logistics(city_id:str)->None:
 def _profile_summary_facts(city,study):
     """At most one sourced fact per evidence category, never duplicated paraphrases."""
     profile=profile_by_id(load_profiles(canonical=study),city["id"])
+    # Prioritize practical decisions over demographics; all original evidence
+    # remains accessible in "Fontes e metodologia".
+    priorities=("transport","housing","remote_work","daily_costs",
+                "climate","quality_of_life")
     facts=[]
-    seen=set()
-    for item in profile["evidence"]:
-        category=item.get("section")
-        if (category not in ("transport","quality_of_life","remote_work","climate")
-                or category in seen or not item.get("summary") or
-                not item.get("source_url")):
-            continue
-        seen.add(category)
-        facts.append(item)
+    for category in priorities:
+        for item in profile["evidence"]:
+            summary=item.get("summary","")
+            if (item.get("section")!=category or not summary or
+                    not item.get("source_url") or
+                    any(word in summary.casefold() for word in
+                        ("população","densidade","recenseamento"))):
+                continue
+            facts.append(item)
+            break
         if len(facts)==2:
             break
     return facts
@@ -270,7 +275,7 @@ def _render_profile_summary(city,study):
         with st.container(key="ux109-facts",border=True):
             st.markdown("**Já documentado**")
             if not evidence:
-                st.caption("Ainda não há evidências urbanas específicas nesta pesquisa.")
+                st.caption("Ainda faltam referências práticas sobre mobilidade, moradia ou vida cotidiana. Os dados demográficos existentes ficam em Fontes e metodologia.")
             for item in evidence:
                 st.write(item["summary"])
                 st.link_button("Fonte: "+item["section"].replace("_"," "),
@@ -315,6 +320,7 @@ def _render_profile_details(city,study,rail,five):
         _city_routes(city_id,five,rail,profile_mode=True)
     _render_ux105_profile_context(city_id)
     _city_profile(city_id,study,profile_mode=True)
+    st.markdown("#### Pesquisa e documentação · opcional")
     p=profile_by_id(load_profiles(canonical=study),city_id)
     _city_sources(p,profile_mode=True)
     st.caption("Limitações gerais: amostras de hospedagem não comprovam contrato para "
@@ -357,13 +363,15 @@ def _explore_city(study,rail,five,*,fixed_city=None)->None:
         with a:
             with st.container(key="ux109-kpi-housing",border=True):
                 st.metric("Anúncios históricos de 2026",h["count"])
-                st.caption("Amostra documental, não imóveis disponíveis")
+                st.caption("Sem anúncios pesquisados nesta amostra — não significa falta de imóveis." if h["count"]==0 else
+                           "Amostra documental, não imóveis disponíveis")
         with b:
             with st.container(key="ux109-kpi-rail",border=True):
                 st.metric("Destinos com tempo pesquisado",
                           str(documented["route_basket_with_time"])+"/"+
                           str(documented["route_basket_total"]))
-                st.caption("Cesta histórica, não destinos do seu roteiro")
+                st.caption("Nenhum tempo documentado nesta cesta — não significa falta de trens." if documented["route_basket_with_time"]==0 else
+                           "Cesta histórica, não destinos do seu roteiro")
     additional=base_routes(selected)
     if additional:
         st.caption(f"{len(additional)} referências adicionais de ida (DATA23/2026), "
