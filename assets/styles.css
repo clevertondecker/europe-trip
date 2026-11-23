@@ -936,25 +936,10 @@ div[class*="st-key-ux96_preview_documentary"] [data-testid="stExpander"] summary
  font-size:.7rem;margin-right:8px;}
 .ux99-insight ul{padding-left:20px;margin:0;}
 .ux99-insight li{font-size:.79rem;line-height:1.5;margin:3px 0;overflow-wrap:anywhere;}
-/* Explicit scope: only native columns containing UX96 city cards. */
-div[class*="st-key-ux99_base_gallery_"] [data-testid="stHorizontalBlock"]:has(> [data-testid="stColumn"] div[class*="st-key-ux96_city_"]){
- align-items:stretch;
-}
-div[class*="st-key-ux99_base_gallery_"] [data-testid="stColumn"]:has(div[class*="st-key-ux96_city_"]){
- min-width:0;
-}
-@media(max-width:1120px){
- div[class*="st-key-ux99_base_gallery_"] [data-testid="stHorizontalBlock"]:has(> [data-testid="stColumn"] div[class*="st-key-ux96_city_"]){
-  flex-wrap:wrap !important;gap:14px !important;
- }
- div[class*="st-key-ux99_base_gallery_"] [data-testid="stColumn"]:has(div[class*="st-key-ux96_city_"]){
-  flex:1 1 calc(50% - 14px) !important;width:auto !important;min-width:min(100%,280px) !important;
- }
-}
+/* Native Streamlit columns remain authoritative for responsive layout. */
+.ux99-insight--neutral{background:#F2F5F7;color:#506875;border-color:#DDE5EA;}
 @media(max-width:650px){
  .ux99-scope-strip{padding:12px;gap:8px;}
  .ux99-scope-label{flex:1 0 100%;}
- div[class*="st-key-ux99_base_gallery_"] [data-testid="stColumn"]:has(div[class*="st-key-ux96_city_"]){
-  flex:1 1 100% !important;min-width:0 !important;
- }
+ .ux99-insight{padding:11px;}
 }
