@@ -88,10 +88,16 @@ def _remove_comparison_base(base,options):
 
 def render_selection_toolbar(options,cities):
     """Selection feedback adjacent to cards, not another multiselect."""
-    from html import escape
     selected=selected_card_bases(st.session_state,options)
     with st.container(key="ux111-selection-toolbar",border=True):
         st.markdown("**Sua comparação · "+str(len(selected))+" de 5 cidades selecionadas**")
+        feedback=st.session_state.get("ux111_last_selection")
+        if (isinstance(feedback,tuple) and len(feedback)==2
+                and feedback[0] in options
+                and (feedback[0] in selected)==feedback[1]):
+            st.caption(("✓ "+cities[feedback[0]]["name"]+" adicionada à comparação."
+                        if feedback[1] else
+                        "✓ "+cities[feedback[0]]["name"]+" removida da comparação."))
         if selected:
             st.caption(str(5-len(selected))+" vaga(s) restantes · alternativas de pesquisa, não roteiro oficial")
             # The native remove action is explicit and keyboard accessible.
