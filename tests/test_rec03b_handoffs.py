@@ -211,6 +211,14 @@ class HandoffAppTests(unittest.TestCase):
         click(key)
         self.assertEqual(app.session_state[CONTEXT]["base_ids"],[base])
         self.assertFalse(any(w.key=="expanded_bases_detail_city" for w in app.selectbox))
+        profile_titles=[m.value for m in app.markdown]
+        self.assertTrue(any(base.title() in x and "## " in x for x in profile_titles))
+        self.assertFalse(any("#### Explore uma cidade" in x for x in profile_titles))
+        self.assertFalse(any("### Explorar cidades" in x for x in profile_titles))
+        self.assertTrue(any(b.key=="rec04_simulate_profile" and not b.disabled
+                            for b in app.button))
+        self.assertTrue(any(b.key=="rec03a_handoff_favorite" for b in app.button))
+        self.assertEqual(app.session_state["advisor_plan"],original)
         click("rec03a_handoff_profile_map")
         self.assertEqual(app.session_state[CONTEXT]["kind"],"map")
         # The sidebar reports missing optional Drive credentials in CI.
