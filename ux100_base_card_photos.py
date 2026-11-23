@@ -38,7 +38,8 @@ def render_base_card_photo(base_id: str, name: str) -> None:
     photo = base_card_photo_record(base_id)
     with st.container(key="ux100_photo_" + base_id):
         if photo and photo.get("local_path"):
-            st.image(photo["local_path"], width="stretch")
+            st.image(photo["local_path"], width="stretch",
+                     alt=photo.get("alt") or "Fotografia de " + name)
         elif photo and photo.get("url"):
             url = _safe(photo["url"])
             st.markdown(
