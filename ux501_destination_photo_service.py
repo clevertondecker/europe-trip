@@ -46,6 +46,10 @@ ARTICLE_TITLES = {
 # the redirect to the actual hosted image; no local redistribution.
 CURATED_COMMONS_FILES = {
     "aachen": ("Cathedral in Aachen.jpg", "Vitold Muratov", "CC BY-SA 4.0"),
+    # Individual city IDs and Commons metadata verified 2026-11-23.
+    "angers": ("Angers chateau.jpg", "Marom~commonswiki", "CC BY-SA 3.0"),
+    "annecy": ("Canal @ Old Town @ Annecy (37981367642).jpg",
+               "Guilhem Vellut", "CC BY 2.0"),
     "baden_baden": ("Baden Baden - Lichtentaler Allee - View SE.jpg",
                    "Txllxt TxllxT", "CC BY-SA 4.0"),
     "cologne": ("Köln Cathedral, Germany.jpg", "AtmikaPaul", "CC BY-SA 4.0"),
@@ -68,7 +72,8 @@ def curated_destination_photo(destination_id: str) -> dict | None:
         "source_page":"https://commons.wikimedia.org/wiki/File:" + safe_filename,
         "author":author,
         "license":license_name,
-        "license_url":("https://creativecommons.org/licenses/by-sa/" +
+        "license_url":("https://creativecommons.org/licenses/" +
+                       ("by-sa/" if "BY-SA" in license_name else "by/") +
                        license_name.rsplit(" ",1)[-1] + "/"),
         "origin":"reviewed_commons_file",
     }
