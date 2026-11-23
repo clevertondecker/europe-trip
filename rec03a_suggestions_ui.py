@@ -207,24 +207,24 @@ def _render_quick_comparison(result, names, cities, base_ids, selected=()):
     subtitle=("Uma cidade visível no filtro; consulte os dados pesquisados."
               if single else "Estas são as cidades visíveis nesta página, não necessariamente as suas selecionadas.")
     # Once CHOICE has enough bases for UX87, avoid a second open comparison.
-    with st.expander("Prévia das sugestões · não é sua seleção",
-                     expanded=not 2<=len(selected)<=5):
-        st.markdown(section_heading(
-            "VISÃO DOCUMENTAL" if single else "PRÉVIA DE PESQUISA",title,
-            subtitle,variant="compact",
-        ),unsafe_allow_html=True)
-        rows=comparison_overview_rows(result,names,cities,base_ids)
-        if not rows:
-            st.info("Nenhum destino confirmado neste escopo.")
-            return
-        st.dataframe(rows,hide_index=True,width="stretch",
-                     height=min(450,70+37*len(rows)),key="rec03a_quick_matrix")
-        st.caption("★ Imperdível · Histórico = registro anterior · Indicativo = referência "
-                   "não confirmada · Local = acesso urbano a verificar. "
-                   "'Ver ressalvas' remete às evidências no cartão da cidade. "
-                   "Os tempos são mínimos de ida, não duração de ida e volta; "
-                   "sem tempo pesquisado não significa rota inviável.")
-
+    with st.container(key="ux96_preview_documentary"):
+        with st.expander("Prévia das sugestões · não é sua seleção",
+                         expanded=not 2<=len(selected)<=5):
+            st.markdown(section_heading(
+                "VISÃO DOCUMENTAL" if single else "PRÉVIA DE PESQUISA",title,
+                subtitle,variant="compact",
+            ),unsafe_allow_html=True)
+            rows=comparison_overview_rows(result,names,cities,base_ids)
+            if not rows:
+                st.info("Nenhum destino confirmado neste escopo.")
+                return
+            st.dataframe(rows,hide_index=True,width="stretch",
+                         height=min(450,70+37*len(rows)),key="rec03a_quick_matrix")
+            st.caption("★ Imperdível · Histórico = registro anterior · Indicativo = referência "
+                       "não confirmada · Local = acesso urbano a verificar. "
+                       "'Ver ressalvas' remete às evidências no cartão da cidade. "
+                       "Os tempos são mínimos de ida, não duração de ida e volta; "
+                       "sem tempo pesquisado não significa rota inviável.")
 
 def _card(candidate, result, names, cities, official, options):
     """Compact choice card; documentary details stay available on demand."""
@@ -243,7 +243,7 @@ def _card(candidate, result, names, cities, official, options):
         missing=candidate["must_visit"]["missing"]
         if missing:
             st.caption("Imperdíveis sem tempo pesquisado: "+_label_ids(missing,names))
-        render_card_choice(base,options)
+        render_card_choice(base,options,show_selection_hint=False)
         if st.checkbox("Por que investigar? Ver evidências e limitações",
                        key="rec03a_details_"+base):
             reasons=candidate["reasons"]
@@ -402,6 +402,19 @@ def render_suggestions(*,plan,discovery=None,research=None):
     st.markdown(selected_context(
         selected_card_bases(st.session_state,options),cities,len(result["destinations"])
     ),unsafe_allow_html=True)
+    selected=selected_card_bases(st.session_state,options)
+    if len(selected)==1:
+        st.info("Uma cidade selecionada. Escolha outra nos cartões abaixo para comparar.")
+    if 2<=len(selected)<=5:
+        from ux87_inline_base_comparison_ui import render_inline_comparison
+        render_inline_comparison(interests,checked["scope"],selected,
+                                 discovery=discovery,research=research)
+        st.caption("Você pode ajustar as cidades selecionadas nos cartões abaixo.")
+        if st.checkbox("Continuar para montar roteiro",key="rec03a_planning_open"):
+            from rec03b_handoff_ui import render_planning_handoff
+            render_planning_handoff(plan,interests=interests,
+                                    discovery=discovery,research=research)
+
     st.markdown(section_heading(
         "SUGESTÕES DE PESQUISA", "Cidades que vale investigar",
         "Cidades com referências úteis para começar. Não estão em ordem de preferência.",
@@ -454,8 +467,8 @@ def render_suggestions(*,plan,discovery=None,research=None):
                                      [candidate["base_id"] for candidate in visible],
                                      selected_card_bases(st.session_state,options))
             columns=st.columns(2 if len(visible)>1 else 1,gap="medium")
-            for candidate in visible:
-                with columns[visible.index(candidate)%len(columns)]:
+            for index,candidate in enumerate(visible):
+                with columns[index%len(columns)]:
                     _card(candidate,result,names,cities,plan["base_city"],options)
         else:
             st.info("Nenhuma cidade corresponde aos filtros.")
@@ -464,31 +477,25 @@ def render_suggestions(*,plan,discovery=None,research=None):
         _render_quick_comparison(result,names,cities,featured,
                                  selected_card_bases(st.session_state,options))
         columns=st.columns(2 if len(featured)>1 else 1,gap="medium")
-        for base in featured:
-            with columns[featured.index(base)%len(columns)]:
+        for index,base in enumerate(featured):
+            with columns[index%len(columns)]:
                 _card(by_id[base],result,names,cities,plan["base_city"],options)
     else:
         st.info("Não há destaques com referências suficientes para este escopo. "
                 "Use 'Ver todas as cidades' para explorar as alternativas.")
 
     # UX87 uses CHOICE and the confirmed scope; no second manual form.
-    render_card_selection_summary(result,cities)
-    from rec03b_handoff_ui import selected_card_bases
-    from ux87_inline_base_comparison_ui import render_inline_comparison
-    selected=selected_card_bases(st.session_state,options)
-    if 2<=len(selected)<=5:
-        render_inline_comparison(interests,checked["scope"],selected,
-                                 discovery=discovery,research=research)
-
+    render_card_selection_summary(result,cities,selection_already_shown=True)
     if st.checkbox("Metodologia e pesquisas pendentes",
                    key="rec03a_research_open"):
         _render_comparison_groups(result,names,cities)
         from rec05_priority_research_ui import render_research_result
         render_research_result(result,key="rec05_suggestions")
-    if st.checkbox("Continuar para o roteiro",key="rec03a_planning_open"):
-        from rec03b_handoff_ui import render_planning_handoff
-        render_planning_handoff(plan,interests=interests,
-                                discovery=discovery,research=research)
+    if len(selected)<2:
+        if st.checkbox("Continuar para o roteiro",key="rec03a_planning_open"):
+            from rec03b_handoff_ui import render_planning_handoff
+            render_planning_handoff(plan,interests=interests,
+                                    discovery=discovery,research=research)
 
 
 def render_recommendation_activity(*,plan,discovery=None,research=None):
