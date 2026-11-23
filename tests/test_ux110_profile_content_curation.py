@@ -61,7 +61,7 @@ class UX110CurationTests(unittest.TestCase):
         ).run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
         self.assertEqual(app.metric[0].label,"Anúncios históricos de 2026")
-        self.assertIn("cesta histórica",app.metric[1].label.lower())
+        self.assertEqual(app.metric[1].label,"Destinos da pesquisa histórica com referência de tempo")
 
 
 if __name__=="__main__":
