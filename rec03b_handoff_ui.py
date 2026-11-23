@@ -152,12 +152,13 @@ def render_planning_return():
         st.caption("O escopo das sugestões foi preservado. A lista completa continua disponível no planejador.")
 
 
-def render_card_actions(base,prefix):
+def render_card_actions(base,prefix,*,emphasize_profile=False):
     from rec04_candidate_capabilities import capability_for
     from rec04_simulation_handoff import request_simulation
     cap=capability_for(base)
     a,b,c=st.columns(3)
     a.button("Conhecer cidade",key=f"rec03a_handoff_profile_{prefix}_{base}",
+             type="primary" if emphasize_profile else "secondary",
              on_click=queue_handoff,args=(st.session_state,"profile",[base]))
     b.button("Ver no mapa",key=f"rec03a_handoff_map_{prefix}_{base}",
              on_click=queue_handoff,args=(st.session_state,"map",[base]))
