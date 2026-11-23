@@ -62,6 +62,7 @@ def _toggle_card_base(base, options):
     """Native checkbox callback: CHOICE is the single ephemeral selection."""
     state=st.session_state
     selected=selected_card_bases(state,options)
+    before=list(selected)
     wants=state.get("rec03a_pick_"+base,False)
     if wants and base not in selected:
         if len(selected)>=5:
@@ -71,6 +72,46 @@ def _toggle_card_base(base, options):
     elif not wants:
         selected=[x for x in selected if x!=base]
     state[CHOICE]=selected
+    # Feedback is transient UI metadata; CHOICE remains the only selection.
+    if selected != before:
+        state["ux111_last_selection"]=(base,base in selected)
+
+
+def _remove_comparison_base(base,options):
+    """Remove from CHOICE; card checkbox is reconciled on the next rerun."""
+    state=st.session_state
+    selected=selected_card_bases(state,options)
+    if base in selected:
+        state[CHOICE]=[item for item in selected if item!=base]
+        state["ux111_last_selection"]=(base,False)
+
+
+def render_selection_toolbar(options,cities):
+    """Selection feedback adjacent to cards, not another multiselect."""
+    from html import escape
+    selected=selected_card_bases(st.session_state,options)
+    with st.container(key="ux111-selection-toolbar",border=True):
+        st.markdown("**Sua comparação · "+str(len(selected))+" de 5 cidades selecionadas**")
+        if selected:
+            st.caption(str(5-len(selected))+" vaga(s) restantes · alternativas de pesquisa, não roteiro oficial")
+            # The native remove action is explicit and keyboard accessible.
+            columns=st.columns(min(3,len(selected)))
+            for i,base in enumerate(selected):
+                with columns[i%len(columns)]:
+                    st.button("✕ "+cities[base]["name"],
+                              key="ux111_remove_"+base,
+                              help="Remover "+cities[base]["name"]+" da comparação",
+                              on_click=_remove_comparison_base,
+                              args=(base,tuple(options)),use_container_width=True)
+        else:
+            st.caption("Selecione uma cidade nos cartões para iniciar.")
+        if len(selected)<2:
+            st.info("Escolha pelo menos duas cidades para ver a comparação.")
+        else:
+            st.markdown('<a class="ux111-primary-action" href="#ux111-comparison">'
+                        'Ver comparação atualizada ↗</a>',unsafe_allow_html=True)
+        st.markdown('<a class="ux111-secondary-action" href="#ux111-picker">'
+                    'Adicionar outras cidades</a>',unsafe_allow_html=True)
 
 
 def render_card_choice(base, options, *, show_selection_hint=True):
@@ -85,9 +126,16 @@ def render_card_choice(base, options, *, show_selection_hint=True):
         disabled=base not in selected and len(selected)>=5,
         on_change=_toggle_card_base,args=(base,tuple(options)),
     )
-    if show_selection_hint and base in selected and len(selected)>=2:
-        st.caption(f"{len(selected)} cidades selecionadas · "
-                   "compare logo após estes cartões.")
+    feedback=state.get("ux111_last_selection")
+    if feedback and feedback[0]==base:
+        st.caption(("✓ Adicionada" if feedback[1] else "Removida")+
+                   " à comparação · "+str(len(selected))+" de 5 selecionadas")
+    elif base in selected:
+        st.caption("✓ Nesta comparação · "+str(len(selected))+" de 5 selecionadas")
+    if base in selected and len(selected)>=2:
+        st.markdown('[Ver comparação atualizada](#ux111-comparison)')
+    elif show_selection_hint and base in selected:
+        st.caption("Selecione mais uma cidade para comparar.")
 
 
 def render_card_selection_summary(result, cities, *, selection_already_shown=False):
