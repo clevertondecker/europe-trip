@@ -240,10 +240,10 @@ def render_profile_context(plan):
             "Elegível para o fluxo oficial" if base in BASES else
             "Somente investigação")
     research_status="Finalista da pesquisa" if city["shortlist"] else "Candidata à pesquisa"
-    # UX109: only packaged, licensed local bytes guarantee a reliable hero/fallback.
-    # Remote Commons images remain accessible in existing destination cards.
-    from destination_photo_assets import local_destination_photo
-    photo=local_destination_photo(base)
+    # Reuse the validated city-ID photo service; local bytes take precedence.
+    # Its existing CSS fallback remains legible if external Commons fails.
+    from ux100_base_card_photos import base_card_photo_record,render_base_card_photo
+    photo=base_card_photo_record(base)
     if photo:
         heading,visual=st.columns([3,1.2],gap="medium",vertical_alignment="center")
     else:
@@ -256,10 +256,7 @@ def render_profile_context(plan):
     if photo:
         with visual:
             with st.container(key="ux109-city-photo"):
-                st.image(photo["local_path"],width="stretch",
-                         alt=photo["alt"])
-                st.caption("Foto: "+photo["author"]+" · "+photo["license"])
-                st.link_button("Crédito e licença da fotografia",photo["source_page"])
+                render_base_card_photo(base,city["name"])
 
     favorites=st.session_state.get("ux41_favorites",[])
     simulate,map_col,favorite=st.columns(3,gap="small")
