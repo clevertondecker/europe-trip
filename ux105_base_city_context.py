@@ -63,6 +63,24 @@ def render_base_context_details(base_id: str) -> None:
         st.write(item["label"]+" — "+item["detail"])
         st.link_button("Fonte de transporte "+str(index+1),
                        item["source_url"])
+    if base_id in ("angers","annecy"):
+        # DATA23 is an existing validated 2026 source, not REC02's current
+        # user-scope time matrix. Never promote these minima to 2027 schedules.
+        from data23_france_candidates_model import base_routes
+        routes=base_routes(base_id)
+        if routes:
+            labels={"saumur":"Saumur","nantes":"Nantes","tours":"Tours",
+                    "aix_les_bains":"Aix-les-Bains","geneva":"Genebra",
+                    "chamonix":"Chamonix"}
+            st.markdown("**Conexões ferroviárias regionais (mínimos publicados em 2026)**")
+            for index,route in enumerate(routes):
+                destination=labels.get(route["destination_id"],route["destination_id"])
+                st.write(destination+" — mínimo de ida publicado: "+
+                         str(route["minimum_oneway_min"])+" min")
+                st.link_button("Fonte ferroviária "+str(index+1),
+                               route["source_url"])
+            st.caption("DATA23: mínimos de ida consultados em 2026, não tempos típicos "
+                       "porta a porta. Retorno, tarifa e validade em 2027 não confirmados.")
     st.markdown("**Atrações para investigar**")
     for index,item in enumerate(data["attractions"]):
         st.write(item["name"]+" — "+item["detail"])
