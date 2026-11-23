@@ -91,6 +91,24 @@ class BaseFreeDiscoveryTests(unittest.TestCase):
                 self.assertTrue(attr["id"])
 
 
+class LegacySelectionRecoveryTests(unittest.TestCase):
+    def test_widget_state_is_mirrored_before_cleanup_and_restored_after(self):
+        from ux502_destination_interests_ui import _recover_previous_session_interests
+        state={"ux501_interest_session":["colmar","lille"]}
+        _recover_previous_session_interests(state)
+        self.assertEqual(state["ux502_transient_shadow"],["colmar","lille"])
+        # Simulate Streamlit cleanup when the obsolete multiselect is unmounted.
+        state.pop("ux501_interest_session")
+        _recover_previous_session_interests(state)
+        self.assertEqual(state["ux501_interest_session"],["colmar","lille"])
+
+    def test_empty_old_widget_does_not_erase_recoverable_selection(self):
+        from ux502_destination_interests_ui import _recover_previous_session_interests
+        state={"ux501_interest_session":[],
+               "ux502_transient_shadow":["colmar"]}
+        _recover_previous_session_interests(state)
+        self.assertEqual(state["ux502_transient_shadow"],["colmar"])
+
 class BaseFreeDiscoveryAppTests(unittest.TestCase):
     def test_discover_without_switching_base_and_leave_tripplan_untouched(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
@@ -128,6 +146,7 @@ class BaseFreeDiscoveryAppTests(unittest.TestCase):
         app.text_input(key="ux501_search").set_value("casemates").run()
         app.text_input(key="ux501_search").set_value("").run()
         self.assertEqual(app.session_state["ux501_interest_session"],chosen)
+        self.assertEqual(app.session_state["ux502_transient_shadow"],chosen)
         app.radio(key="ux502_view").set_value("Minha lista").run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
         self.assertIn("ux502_migrate",{x.key for x in app.button})
