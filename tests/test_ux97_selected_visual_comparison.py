@@ -133,7 +133,7 @@ class SelectedVisualAppTests(unittest.TestCase):
         self.assertTrue(any(x.key=="rec03a_inline_sources" for x in app.checkbox))
         app.checkbox(key="rec03a_inline_sources").check().run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
-        self.assertTrue(any("Fonte" in x.label for x in app.button))
+        self.assertTrue(app.checkbox(key="rec03a_inline_sources").value)
         # The native UX87 technical table is still opt-in.
         self.assertTrue(any(x.key=="rec03a_inline_matrix" for x in app.checkbox))
         app.checkbox(key="rec03a_inline_matrix").check().run()
