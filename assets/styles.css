@@ -1043,3 +1043,12 @@ div[class*="st-key-ux109-city-photo"] [data-testid="stCaptionContainer"]{
    overflow-wrap:anywhere;white-space:normal;
  }
 }
+
+
+/* UX110: show architecture in the shallow city-identity strip, not just water. */
+div[class*="st-key-ux109-city-photo"] .ux100-photo-external{
+ background-position:center 24%;
+}
+div[class*="st-key-ux109-city-photo"] [data-testid="stImage"] img{
+ object-position:center 24%;
+}
