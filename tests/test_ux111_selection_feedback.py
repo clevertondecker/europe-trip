@@ -65,7 +65,7 @@ class UX111SelectionTests(unittest.TestCase):
 
     def test_removed_or_invalid_ids_are_never_shown_in_projection(self):
         app=self.app(("strasbourg","unknown","strasbourg","colmar"))
-        self.assertEqual(len(app.button(key="ux111_remove_strasbourg")),1)
+        self.assertEqual(sum(b.key=="ux111_remove_strasbourg" for b in app.button),1)
         self.assertFalse(any(b.key=="ux111_remove_unknown" for b in app.button))
 
 
