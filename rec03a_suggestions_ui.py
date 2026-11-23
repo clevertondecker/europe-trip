@@ -243,7 +243,7 @@ def _card(candidate, result, names, cities, official, options):
         missing=candidate["must_visit"]["missing"]
         if missing:
             st.caption("Imperdíveis sem tempo pesquisado: "+_label_ids(missing,names))
-        render_card_choice(base,options)
+        render_card_choice(base,options,show_selection_hint=False)
         if st.checkbox("Por que investigar? Ver evidências e limitações",
                        key="rec03a_details_"+base):
             reasons=candidate["reasons"]
@@ -472,7 +472,7 @@ def render_suggestions(*,plan,discovery=None,research=None):
                 "Use 'Ver todas as cidades' para explorar as alternativas.")
 
     # UX87 uses CHOICE and the confirmed scope; no second manual form.
-    render_card_selection_summary(result,cities)
+    render_card_selection_summary(result,cities,selection_already_shown=True)
     from rec03b_handoff_ui import selected_card_bases
     from ux87_inline_base_comparison_ui import render_inline_comparison
     selected=selected_card_bases(st.session_state,options)
