@@ -1332,8 +1332,7 @@ elif page == "Roteiro":
     # A contextual city profile has its own title; suppress only this global heading.
     profile_context=st.session_state.get(CONTEXT)
     individual_base_profile=(
-        itinerary_section=="Explorar bases"
-        and ux_area=="Explorar" and ux_section=="Cidades-base"
+        ux_area=="Explorar" and ux_section=="Cidades-base"
         and isinstance(profile_context,dict)
         and profile_context.get("kind")=="profile"
         and bool(profile_context.get("base_ids"))
