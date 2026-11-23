@@ -81,9 +81,11 @@ def _five_city_comparison(study, five)->None:
         render_five_base_study()
 
 
-def _city_housing(city):
+def _city_housing(city,*,profile_mode=False):
     offers=city["housing_offers"]
-    with st.expander("Moradia · anúncios históricos ("+str(len(offers))+")"):
+    with st.expander(("Moradia e bairros · "+str(len(offers))+" anúncios históricos")
+                     if profile_mode else
+                     "Moradia · anúncios históricos ("+str(len(offers))+")"):
         if not offers:
             st.info("Ainda não há anúncios individuais pesquisados.")
         for item in offers:
@@ -96,9 +98,10 @@ def _city_housing(city):
                        "dois adultos por 56–60 noites em 2027.")
 
 
-def _city_routes(city_id,five,rail):
+def _city_routes(city_id,five,rail,*,profile_mode=False):
     destinations={x["id"]:x for x in five["common_destinations"]}
-    with st.expander("Trens e passeios · tempos e fontes"):
+    with st.expander("Trens, logística e passeios" if profile_mode else
+                     "Trens e passeios · tempos e fontes"):
         if city_id in BASE_IDS:
             for key,place in destinations.items():
                 route=route_observation(five,city_id,key)
@@ -132,10 +135,13 @@ def _city_routes(city_id,five,rail):
 def _city_profile(city_id,study,*,profile_mode=False):
     profiles=load_profiles(canonical=study)
     p=profile_by_id(profiles,city_id)
-    st.markdown("**Contexto pesquisado:** "+p["summary"])
+    if not profile_mode:
+        st.markdown("**Contexto pesquisado:** "+p["summary"])
     pack=pack_for_city(load_city_packs(),city_id)
     if pack:
         with st.expander("Vida cotidiana, bairros e clima"):
+            if profile_mode:
+                st.write(p["summary"])
             d=pack["daily_life"]
             if d["restaurant_two_midrange_eur_2026"] is not None:
                 st.caption("Restaurante para dois · referência colaborativa de 2026: "+
@@ -164,8 +170,9 @@ def _city_profile(city_id,study,*,profile_mode=False):
         _city_sources(p)
 
 
-def _city_sources(profile):
-    with st.expander("Fontes públicas e limitações"):
+def _city_sources(profile,*,profile_mode=False):
+    with st.expander("Fontes e metodologia" if profile_mode else
+                     "Fontes públicas e limitações"):
         for item in profile["evidence"]:
             st.markdown("• "+item["summary"]+" · [Fonte]("+item["source_url"]+")")
         st.caption("O número de fontes não é nota de qualidade. Valores históricos "
@@ -219,30 +226,45 @@ def _candidate_media_and_logistics(city_id:str)->None:
             "não suponha que ausência de dados signifique ausência de trem.")
 
 
+def _profile_summary_facts(city,study):
+    """At most one sourced fact per evidence category, never duplicated paraphrases."""
+    profile=profile_by_id(load_profiles(canonical=study),city["id"])
+    facts=[]
+    seen=set()
+    for item in profile["evidence"]:
+        category=item.get("section")
+        if (category not in ("transport","quality_of_life","remote_work","climate")
+                or category in seen or not item.get("summary") or
+                not item.get("source_url")):
+            continue
+        seen.add(category)
+        facts.append(item)
+        if len(facts)==2:
+            break
+    return facts
+
+
 def _render_profile_summary(city,study):
-    """Concise facts, never a rating, price quote or itinerary decision."""
-    p=profile_by_id(load_profiles(canonical=study),city["id"])
-    evidence=[item for item in p["evidence"]
-              if item.get("section") in ("transport","quality_of_life","remote_work")
-              and item.get("summary") and item.get("source_url")]
-    st.markdown("#### O que sabemos e o que falta confirmar?")
+    """Two compact source-backed research facets; no quality/ranking claims."""
+    evidence=_profile_summary_facts(city,study)
+    st.markdown("#### Pesquisa em resumo")
     left,right=st.columns(2,gap="medium")
     with left:
-        with st.container(border=True):
-            st.markdown("**Referências documentadas**")
-            if evidence:
-                for item in evidence[:2]:
-                    st.write(item["summary"])
-                    st.markdown("[Consultar fonte]("+item["source_url"]+")")
-            else:
-                st.caption("Contexto urbano específico ainda não pesquisado.")
+        with st.container(key="ux109-facts",border=True):
+            st.markdown("**Já documentado**")
+            if not evidence:
+                st.caption("Ainda não há evidências urbanas específicas nesta pesquisa.")
+            for item in evidence:
+                st.write(item["summary"])
+                st.link_button("Fonte: "+item["section"].replace("_"," "),
+                               item["source_url"])
     with right:
-        with st.container(border=True):
-            st.markdown("**Ainda precisa confirmar**")
-            for note in decision_readiness(city)["reasons"][:3]:
-                st.write("• "+note)
-    st.caption("Cobertura e anúncios históricos de 2026 representam pesquisa, "
-               "não qualidade da cidade ou disponibilidade para 2027.")
+        with st.container(key="ux109-gaps",border=True):
+            st.markdown("**Ainda pendente para 2027**")
+            st.write("• Moradia: disponibilidade, contrato, taxas e caução.")
+            st.write("• Transporte: retorno, frequência e última milha.")
+    st.caption("As referências históricas descrevem o avanço da pesquisa; "
+               "não são notas de qualidade da cidade ou cotações para 2027.")
 
 
 def _render_ux105_profile_context(city_id):
@@ -267,20 +289,17 @@ def _render_ux105_profile_context(city_id):
 def _render_profile_details(city,study,rail,five):
     """Reuse the existing renderers in decision-oriented order."""
     city_id=city["id"]
-    st.markdown("### Explore os detalhes")
-    st.markdown("#### Moradia e custo observado")
-    _city_housing(city)
-    st.markdown("#### Trens, logística e passeios")
+    st.markdown("### Investigue por assunto")
+    _city_housing(city,profile_mode=True)
     if base_routes(city_id):
+        # DATA23 has attractions with imagery and regional rail references.
         _candidate_media_and_logistics(city_id)
     else:
-        _city_routes(city_id,five,rail)
+        _city_routes(city_id,five,rail,profile_mode=True)
     _render_ux105_profile_context(city_id)
-    st.markdown("#### Vida cotidiana, bairros e clima")
     _city_profile(city_id,study,profile_mode=True)
-    st.markdown("#### Fontes e metodologia")
     p=profile_by_id(load_profiles(canonical=study),city_id)
-    _city_sources(p)
+    _city_sources(p,profile_mode=True)
     st.caption("Limitações gerais: amostras de hospedagem não comprovam contrato para "
                "56–60 noites, taxas ou internet em 2027; tempos de ida não confirmam "
                "retorno nem última milha; dados faltantes não equivalem a zero.")
@@ -310,11 +329,24 @@ def _explore_city(study,rail,five,*,fixed_city=None)->None:
     if fixed_city is None:
         st.markdown("#### "+city["name"]+" · "+city["country"])
         st.caption(city["corridor"]+" · "+("Finalista" if city["shortlist"] else "Candidata"))
-    a,b=st.columns(2)
-    a.metric("Anúncios históricos de 2026",h["count"])
     documented=next(r for r in coverage_matrix("general",study=study) if r["id"]==selected)
-    b.metric("Destinos da pesquisa histórica com referência de tempo",
-             str(documented["route_basket_with_time"])+"/"+str(documented["route_basket_total"]))
+    if fixed_city is None:
+        a,b=st.columns(2)
+        a.metric("Anúncios históricos de 2026",h["count"])
+        b.metric("Destinos da pesquisa histórica com referência de tempo",
+                 str(documented["route_basket_with_time"])+"/"+str(documented["route_basket_total"]))
+    else:
+        a,b=st.columns(2,gap="medium")
+        with a:
+            with st.container(key="ux109-kpi-housing",border=True):
+                st.metric("Anúncios históricos de 2026",h["count"])
+                st.caption("Amostra documental, não imóveis disponíveis")
+        with b:
+            with st.container(key="ux109-kpi-rail",border=True):
+                st.metric("Destinos com tempo pesquisado",
+                          str(documented["route_basket_with_time"])+"/"+
+                          str(documented["route_basket_total"]))
+                st.caption("Cesta histórica, não destinos do seu roteiro")
     additional=base_routes(selected)
     if additional:
         st.caption(f"{len(additional)} referências adicionais de ida (DATA23/2026), "
