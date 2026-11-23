@@ -12,7 +12,7 @@ class BaseInsightsTests(unittest.TestCase):
         return value
 
     def test_complete_scope_pros_are_source_coded_and_read_only(self):
-        source = self.candidate(reasons=[
+        source = self.candidate(must_visit={"known":["paris"],"local":[],"missing":[]},reasons=[
             "imperdiveis_identificados", "comparacao_condicional_disponivel",
             "menor_minimo_ponderado_no_mesmo_subconjunto"])
         before = deepcopy(source)
@@ -38,13 +38,27 @@ class BaseInsightsTests(unittest.TestCase):
 
     def test_no_evidence_is_neutral_not_fabricated(self):
         result = project_base_insights(self.candidate())
-        self.assertEqual(result["advantages"][0]["code"], "no_proven_advantage")
-        self.assertEqual(len(result["advantages"]), 1)
+        self.assertEqual(result["advantages"], [])
+        self.assertEqual(result["neutral"][0]["code"], "no_proven_advantage")
         self.assertEqual(result["cautions"][-1]["code"], "rec02_limitations")
+
+    def test_no_must_visit_scope_does_not_claim_must_visit_coverage(self):
+        result=project_base_insights(self.candidate(
+            reasons=["imperdiveis_identificados"],
+            must_visit={"known":[],"local":[],"missing":[]}))
+        self.assertFalse(any(item["code"]=="imperdiveis_identificados"
+                             for item in result["advantages"]))
+        self.assertTrue(result["neutral"])
+        result_with_must=project_base_insights(self.candidate(
+            reasons=["imperdiveis_identificados"],
+            must_visit={"known":["paris"],"local":[],"missing":[]}))
+        self.assertIn("imperdiveis_identificados",
+                      [x["code"] for x in result_with_must["advantages"]])
 
     def test_unknown_reasons_are_never_turn_into_claims(self):
         result = project_base_insights(self.candidate(reasons=["unknown", "fronteira_documental_do_escopo"]))
-        self.assertEqual(result["advantages"][0]["code"], "no_proven_advantage")
+        self.assertEqual(result["advantages"], [])
+        self.assertEqual(result["neutral"][0]["code"], "no_proven_advantage")
 
 if __name__ == "__main__":
     unittest.main()
