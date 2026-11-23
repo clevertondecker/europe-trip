@@ -22,10 +22,13 @@ def scope_chips(destination_ids: list[str], names: Mapping[str, str]) -> str:
 def insight_panels(insights: Mapping) -> str:
     """Static HTML; native Streamlit owns every selection and action."""
     def panel(kind: str, heading: str, items: list[dict]) -> str:
-        lines = "".join(f'<li>{_safe(item["text"])}</li>' for item in items)
+        lines = "".join(f'<li>{_safe(item["text"])}</li>' for item in items[:2])
         return (f'<section class="ux99-insight ux99-insight--{kind}">'
                 f'<h4>{_safe(heading)}</h4><ul>{lines}</ul></section>')
     return ('<div class="ux99-insights" aria-label="Vantagens e pontos de atenção documentais">'
-            + panel("pros", "Vantagens documentadas", insights["advantages"])
+            + (panel("pros", "Vantagens documentadas", insights["advantages"])
+               if insights["advantages"] else "")
+            + (panel("neutral", "Evidências ainda insuficientes", insights.get("neutral", []))
+               if insights.get("neutral") else "")
             + panel("cons", "Pontos de atenção", insights["cautions"])
             + '</div>')
