@@ -19,9 +19,10 @@ class BaseInsightsTests(unittest.TestCase):
         projection = project_base_insights(source)
         self.assertEqual(source, before)
         self.assertEqual(projection["base_id"], "metz")
+        self.assertEqual([x["code"] for x in projection["documented"]],
+            ["imperdiveis_identificados", "comparacao_condicional_disponivel"])
         self.assertEqual([x["code"] for x in projection["advantages"]],
-            ["imperdiveis_identificados", "comparacao_condicional_disponivel",
-             "menor_minimo_ponderado_no_mesmo_subconjunto"])
+            ["menor_minimo_ponderado_no_mesmo_subconjunto"])
         self.assertNotIn("hospedagem", str(projection).lower())
         self.assertNotIn("melhor cidade", str(projection).lower())
 
@@ -53,7 +54,22 @@ class BaseInsightsTests(unittest.TestCase):
             reasons=["imperdiveis_identificados"],
             must_visit={"known":["paris"],"local":[],"missing":[]}))
         self.assertIn("imperdiveis_identificados",
-                      [x["code"] for x in result_with_must["advantages"]])
+                      [x["code"] for x in result_with_must["documented"]])
+        self.assertNotIn("imperdiveis_identificados",
+                         [x["code"] for x in result_with_must["advantages"]])
+
+    def test_research_coverage_is_not_fabricated_as_comparative_benefit(self):
+        source=self.candidate(
+            must_visit={"known":["paris"],"local":[],"missing":[]},
+            reasons=["imperdiveis_identificados",
+                     "comparacao_condicional_disponivel"])
+        result=project_base_insights(source)
+        self.assertEqual(result["advantages"],[])
+        self.assertEqual([item["code"] for item in result["documented"]],
+                         ["imperdiveis_identificados",
+                          "comparacao_condicional_disponivel"])
+        self.assertFalse(result["neutral"])
+        self.assertEqual(result["cautions"][-1]["code"],"rec02_limitations")
 
     def test_unknown_reasons_are_never_turn_into_claims(self):
         result = project_base_insights(self.candidate(reasons=["unknown", "fronteira_documental_do_escopo"]))
