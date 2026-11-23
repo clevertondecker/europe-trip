@@ -114,92 +114,102 @@ def render_inline_comparison(interests, scope, selected, *, discovery, research)
         "Referências de ida para os mesmos destinos; não são deslocamentos totais nem horários de 2027.",
         variant="compact",
     ), unsafe_allow_html=True)
-    total = len(projection["destinations"])
-    # Compare the same dimension across all selected bases before showing
-    # per-city details. Text wraps naturally for 2–5 cities and small screens.
-    st.markdown("**O que está documentado em cada cidade**")
-    st.caption("Cobertura da pesquisa, não qualidade da logística nem indicação de vencedora.")
-    dimensions = (
-        ("historical", "Trajetos com dados históricos"),
-        ("reference_only", "Referências indicativas"),
-        ("local", "Acessos locais ainda não verificados"),
-        ("no_time", "Destinos sem tempo pesquisado"),
-    )
-    for category, title in dimensions:
-        comparison = " · ".join(
-            f'{projection["names"][base]}: {projection["counts"][base].get(category, 0)}'
-            for base in selected
+    from ux97_comparison_visual_ui import selected_matrix_html, summary_panel_html
+    main,aside=st.columns([3,1],gap="medium")
+    with main:
+        st.markdown(selected_matrix_html(projection),unsafe_allow_html=True)
+    with aside:
+        st.markdown(summary_panel_html(projection),unsafe_allow_html=True)
+
+    # Keep historical explanatory information, without making the main
+    # decision screen a long chain of paragraphs and counters.
+    with st.expander("O que sabemos e o que falta · detalhes",expanded=False):
+        total = len(projection["destinations"])
+        # Compare the same dimension across all selected bases before showing
+        # per-city details. Text wraps naturally for 2–5 cities and small screens.
+        st.markdown("**O que está documentado em cada cidade**")
+        st.caption("Cobertura da pesquisa, não qualidade da logística nem indicação de vencedora.")
+        dimensions = (
+            ("historical", "Trajetos com dados históricos"),
+            ("reference_only", "Referências indicativas"),
+            ("local", "Acessos locais ainda não verificados"),
+            ("no_time", "Destinos sem tempo pesquisado"),
         )
-        st.write(f"**{title}:** {comparison}")
-
-    st.markdown("**Destinos imperdíveis: o que sabemos e o que falta**")
-    must_visit = [d for d in projection["destinations"]
-                  if d["priority"] == "must_visit"]
-    if not must_visit:
-        st.caption("Nenhum destino está marcado como imperdível neste escopo.")
-    else:
-        for base in selected:
-            documented = [
-                d["name"] for d in must_visit
-                if projection["cells"][(base, d["id"])]["category"] in TIMED
-            ]
-            local = [
-                d["name"] for d in must_visit
-                if projection["cells"][(base, d["id"])]["category"] == "local"
-            ]
-            missing = projection["must_visit_without_time"][base]
-            st.write("**" + projection["names"][base] + "**")
-            st.caption("Referências de ida: " + (", ".join(documented) or "nenhuma")
-                       + " · Sem tempo pesquisado: " + (", ".join(missing) or "nenhum")
-                       + " · Acesso local pendente: " + (", ".join(local) or "nenhum"))
-
-    shared = len(projection["common_timed_destination_ids"])
-    if shared == 0:
-        st.warning("Ainda não temos dados suficientes para comparar essas cidades "
-                   "de forma conclusiva. Nenhum destino tem tempo pesquisado em "
-                   "todas as cidades selecionadas.")
-    elif shared < total:
-        comparable = [d["name"] for d in projection["destinations"]
-                      if d["id"] in projection["common_timed_destination_ids"]]
-        st.info(f"Há referências de ida para os mesmos {shared} de {total} destinos: "
-                + ", ".join(comparable)
-                + ". Os demais ainda não permitem comparação direta de tempos.")
-    else:
-        st.info(f"Os {total} destinos possuem referências de ida em todas as cidades, "
-                "mas isso não comprova qual tem melhor logística.")
-    st.caption("Ausência de tempo pesquisado não significa rota inviável. "
-               "Retorno ferroviário, frequência, última milha, hospedagem e "
-               "preços de 2027 ainda precisam de confirmação. "
-               "Mínimos de ida não são duração total da viagem.")
-
-    if st.checkbox("Ver matriz de trajetos por destino", key="rec03a_inline_matrix"):
-        st.dataframe(projection["table"], hide_index=True, use_container_width=True)
-        if st.checkbox("Consultar fontes e lacunas da matriz",
-                       key="rec03a_inline_sources"):
-            for d in projection["destinations"]:
-                st.markdown("**" + d["name"] + "**")
-                for base in selected:
-                    cell = projection["cells"][(base, d["id"])]
-                    st.caption(projection["names"][base] + " · " +
-                               LABELS[cell["category"]])
-                    # Keep materially relevant caveats next to the source.
-                    # The underlying rail projection remains authoritative.
-                    for field, prefix in (
-                        ("station_caveat", "Estações"),
-                        ("evidence_notes", "Observação"),
-                    ):
-                        if cell.get(field):
-                            st.caption(prefix + ": " + str(cell[field]))
-                    checked_at = cell.get("gap_checked_at")
-                    if checked_at:
-                        st.caption("Fonte consultada em: " + str(checked_at))
-                    if cell.get("legacy_divergent_sources"):
-                        st.warning("Há tempos publicados divergentes para este trecho.")
-                    url = cell.get("source_url")
-                    if url:
-                        st.link_button("Fonte · " + projection["names"][base] +
-                                       " → " + d["name"], url)
-                    elif cell["category"] in TIMED:
-                        st.caption("Fonte de tempo não disponível para este trajeto.")
-                    else:
-                        st.caption("Pesquisa de tempo ou acesso ainda pendente.")
+        for category, title in dimensions:
+            comparison = " · ".join(
+                f'{projection["names"][base]}: {projection["counts"][base].get(category, 0)}'
+                for base in selected
+            )
+            st.write(f"**{title}:** {comparison}")
+    
+        st.markdown("**Destinos imperdíveis: o que sabemos e o que falta**")
+        must_visit = [d for d in projection["destinations"]
+                      if d["priority"] == "must_visit"]
+        if not must_visit:
+            st.caption("Nenhum destino está marcado como imperdível neste escopo.")
+        else:
+            for base in selected:
+                documented = [
+                    d["name"] for d in must_visit
+                    if projection["cells"][(base, d["id"])]["category"] in TIMED
+                ]
+                local = [
+                    d["name"] for d in must_visit
+                    if projection["cells"][(base, d["id"])]["category"] == "local"
+                ]
+                missing = projection["must_visit_without_time"][base]
+                st.write("**" + projection["names"][base] + "**")
+                st.caption("Referências de ida: " + (", ".join(documented) or "nenhuma")
+                           + " · Sem tempo pesquisado: " + (", ".join(missing) or "nenhum")
+                           + " · Acesso local pendente: " + (", ".join(local) or "nenhum"))
+    
+        shared = len(projection["common_timed_destination_ids"])
+        if shared == 0:
+            st.warning("Ainda não temos dados suficientes para comparar essas cidades "
+                       "de forma conclusiva. Nenhum destino tem tempo pesquisado em "
+                       "todas as cidades selecionadas.")
+        elif shared < total:
+            comparable = [d["name"] for d in projection["destinations"]
+                          if d["id"] in projection["common_timed_destination_ids"]]
+            st.info(f"Há referências de ida para os mesmos {shared} de {total} destinos: "
+                    + ", ".join(comparable)
+                    + ". Os demais ainda não permitem comparação direta de tempos.")
+        else:
+            st.info(f"Os {total} destinos possuem referências de ida em todas as cidades, "
+                    "mas isso não comprova qual tem melhor logística.")
+        st.caption("Ausência de tempo pesquisado não significa rota inviável. "
+                   "Retorno ferroviário, frequência, última milha, hospedagem e "
+                   "preços de 2027 ainda precisam de confirmação. "
+                   "Mínimos de ida não são duração total da viagem.")
+    
+    st.caption("ⓘ nas células indica ressalva documental. Fontes e divergências estão disponíveis abaixo.")
+    if st.checkbox("Ver tabela técnica por destino", key="rec03a_inline_matrix"):
+        st.dataframe(projection["table"], hide_index=True, width="stretch")
+    # Sources no longer depend on first opening the technical matrix.
+    if st.checkbox("Consultar fontes e ressalvas dos trajetos",
+                   key="rec03a_inline_sources"):
+        for d in projection["destinations"]:
+            st.markdown("**" + d["name"] + "**")
+            for base in selected:
+                cell = projection["cells"][(base, d["id"])]
+                st.caption(projection["names"][base] + " · " +
+                           LABELS[cell["category"]])
+                for field, prefix in (
+                    ("station_caveat", "Estações"),
+                    ("evidence_notes", "Observação"),
+                ):
+                    if cell.get(field):
+                        st.caption(prefix + ": " + str(cell[field]))
+                checked_at = cell.get("gap_checked_at")
+                if checked_at:
+                    st.caption("Fonte consultada em: " + str(checked_at))
+                if cell.get("legacy_divergent_sources"):
+                    st.warning("Há tempos publicados divergentes para este trecho.")
+                url = cell.get("source_url")
+                if url:
+                    st.link_button("Fonte · " + projection["names"][base] +
+                                   " → " + d["name"], url)
+                elif cell["category"] in TIMED:
+                    st.caption("Fonte de tempo não disponível para este trajeto.")
+                else:
+                    st.caption("Pesquisa de tempo ou acesso ainda pendente.")
