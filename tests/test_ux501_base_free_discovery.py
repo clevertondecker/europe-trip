@@ -91,68 +91,82 @@ class BaseFreeDiscoveryTests(unittest.TestCase):
                 self.assertTrue(attr["id"])
 
 
+class LegacySelectionRecoveryTests(unittest.TestCase):
+    def test_widget_state_is_mirrored_before_cleanup_and_restored_after(self):
+        from ux502_destination_interests_ui import _recover_previous_session_interests
+        state={"ux501_interest_session":["colmar","lille"]}
+        _recover_previous_session_interests(state)
+        self.assertEqual(state["ux502_transient_shadow"],["colmar","lille"])
+        # Simulate Streamlit cleanup when the obsolete multiselect is unmounted.
+        state.pop("ux501_interest_session")
+        _recover_previous_session_interests(state)
+        self.assertEqual(state["ux501_interest_session"],["colmar","lille"])
+
+    def test_empty_old_widget_does_not_erase_recoverable_selection(self):
+        from ux502_destination_interests_ui import _recover_previous_session_interests
+        state={"ux501_interest_session":[],
+               "ux502_transient_shadow":["colmar"]}
+        _recover_previous_session_interests(state)
+        self.assertEqual(state["ux502_transient_shadow"],["colmar"])
+
 class BaseFreeDiscoveryAppTests(unittest.TestCase):
     def test_discover_without_switching_base_and_leave_tripplan_untouched(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
         initial=deepcopy(app.session_state["advisor_plan"])
-        app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
+        app.button(key="ux_sidebar_nav_1").click().run()
         app.segmented_control(key="ux_section").set_value("Passeios").run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
-        self.assertTrue(any("Descobrir destinos" in x.value
-                            for x in app.markdown))
-        # Popover keeps legacy widgets mounted for existing navigation and AppTests.
-        self.assertTrue(any(x.key=="attractions_scenario_base"
-                            for x in app.selectbox))
-        self.assertEqual(app.session_state["advisor_plan"],initial)
-        app.multiselect(key="ux501_interest_session").set_value(
-            ["colmar","lille","brussels","basel","bruges_be"]).run()
-        self.assertFalse(app.exception,[x.message for x in app.exception])
-        self.assertEqual(app.session_state["advisor_plan"],initial)
-        self.assertFalse(app.session_state.get("advisor_autosave_pending",False))
-        self.assertEqual(app.session_state["ux501_interest_session"],
-                         ["colmar","lille","brussels","basel","bruges_be"])
-
+        self.assertTrue(any("Descobrir destinos" in x.value for x in app.markdown))
+        self.assertFalse(any(x.key=="ux501_interest_session" for x in app.multiselect))
+        self.assertFalse(any("Pesquisa do catálogo e seleção anterior" in x.label
+                             for x in app.expander))
+        # Other legacy itinerary widgets belong to a separate compatibility path.
+        self.assertTrue(any(x.key=="attractions_scenario_base" for x in app.selectbox))
         app.selectbox(key="ux501_country").set_value("Bélgica").run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
         self.assertEqual(app.session_state["advisor_plan"],initial)
-        app.selectbox(key="attractions_scenario_base").set_value("lille").run()
-        self.assertFalse(app.exception,[x.message for x in app.exception])
-        self.assertEqual(app.session_state["advisor_plan"],initial)
+        self.assertFalse(app.session_state.get("advisor_autosave_pending",False))
 
-    def test_interests_survive_pagination_and_filters(self):
+    def test_previous_interests_survive_navigation_and_reconcile_in_wishlist(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
         initial=deepcopy(app.session_state["advisor_plan"])
-        app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
+        app.button(key="ux_sidebar_nav_1").click().run()
         app.segmented_control(key="ux_section").set_value("Passeios").run()
         chosen=["colmar","lille","brussels","basel","bruges_be"]
-        app.multiselect(key="ux501_interest_session").set_value(chosen).run()
+        # Previously saved session-only choices must remain recoverable
+        # even though the obsolete editor is no longer rendered.
+        app.session_state["ux501_interest_session"]=list(chosen)
+        app.run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
-        self.assertGreater(len(app.selectbox(key="ux501_page").options),1)
+        self.assertFalse(any(x.key=="ux501_interest_session" for x in app.multiselect))
         app.selectbox(key="ux501_page").set_value(2).run()
-        self.assertFalse(app.exception,[x.message for x in app.exception])
-        self.assertEqual(app.session_state["ux501_interest_session"],chosen)
         app.selectbox(key="ux501_country").set_value("Bélgica").run()
-        self.assertFalse(app.exception,[x.message for x in app.exception])
-        self.assertEqual(app.session_state["ux501_page"],1)
-        self.assertEqual(app.session_state["ux501_interest_session"],chosen)
         app.selectbox(key="ux501_country").set_value("Todos os países").run()
         app.text_input(key="ux501_search").set_value("casemates").run()
-        self.assertFalse(app.exception,[x.message for x in app.exception])
-        self.assertEqual(app.session_state["ux501_interest_session"],chosen)
         app.text_input(key="ux501_search").set_value("").run()
         self.assertEqual(app.session_state["ux501_interest_session"],chosen)
+        self.assertEqual(app.session_state["ux502_transient_shadow"],chosen)
+        app.radio(key="ux502_view").set_value("Minha lista").run()
+        self.assertFalse(app.exception,[x.message for x in app.exception])
+        self.assertIn("ux502_migrate",{x.key for x in app.button})
+        app.button(key="ux502_migrate").click().run()
+        self.assertFalse(app.exception,[x.message for x in app.exception])
+        self.assertEqual(
+            {x["destination_id"] for x in app.session_state["ux502_interests"]["items"]},
+            set(chosen))
         self.assertEqual(app.session_state["advisor_plan"],initial)
         self.assertFalse(app.session_state.get("advisor_autosave_pending",False))
 
-    def test_empty_filter_results_keep_transient_interests_recoverable(self):
+    def test_empty_filter_results_preserve_legacy_session_choices(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
         app.button(key="ux_sidebar_nav_1").click().run()
         app.segmented_control(key="ux_section").set_value("Passeios").run()
-        app.multiselect(key="ux501_interest_session").set_value(["colmar"]).run()
+        app.session_state["ux501_interest_session"]=["colmar"]
+        app.run()
         app.text_input(key="ux501_search").set_value("inexistente-ux90-999").run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
-        self.assertIn("ux501_interest_session",{x.key for x in app.multiselect})
+        self.assertFalse(any(x.key=="ux501_interest_session" for x in app.multiselect))
         self.assertEqual(app.session_state["ux501_interest_session"],["colmar"])
         app.text_input(key="ux501_search").set_value("").run()
         self.assertEqual(app.session_state["ux501_interest_session"],["colmar"])
@@ -187,14 +201,15 @@ class BaseFreeDiscoveryAppTests(unittest.TestCase):
 
     def test_first_discovery_does_not_require_exploratory_base(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
-        app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
+        app.button(key="ux_sidebar_nav_1").click().run()
         app.segmented_control(key="ux_section").set_value("Passeios").run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
-        self.assertTrue(any("Descobrir destinos" in x.value
-                            for x in app.markdown))
-        self.assertTrue(any("Destinos para descobrir" in x.value
-                            and "ui-kpi-card" in x.value
-                            for x in app.markdown))
+        self.assertTrue(any("Descobrir destinos" in x.value for x in app.markdown))
+        self.assertFalse(any("Destinos para descobrir" in x.value
+                             and "ui-kpi-card" in x.value
+                             for x in app.markdown))
+        self.assertTrue(any(x.key=="ux501_search" for x in app.text_input))
+        self.assertTrue(any(x.key=="ux501_country" for x in app.selectbox))
 
 
 if __name__=="__main__":

@@ -53,19 +53,34 @@ def _remove(destination_id, discovery):
         _change(remove_interest(current, destination_id, discovery))
 
 
+def _recover_previous_session_interests(state) -> None:
+    """Move obsolete widget-owned selection to stable existing shadow storage.
+
+    On the first render after upgrading from the old UI, Streamlit may delete
+    the multiselect widget key at end-of-run. Mirror it before widget cleanup.
+    Never overwrite a previously recovered nonempty list with an empty value.
+    """
+    previous=state.get("ux501_interest_session")
+    shadow=state.get("ux502_transient_shadow")
+    if isinstance(previous,(list,tuple)) and previous:
+        state["ux502_transient_shadow"]=list(previous)
+    elif shadow and "ux501_interest_session" not in state:
+        state["ux501_interest_session"]=list(shadow)
+
+
 def render_wishlist(discovery) -> bool:
     """Render controls and return True when 'Minha lista' is the selected view."""
     current = _current(discovery)
     if current is None:
         return False
+    _recover_previous_session_interests(st.session_state)
     by_id = {row["id"]: row for row in discovery["destinations"]}
     def remember_discovery_filters():
         keys = ("ux501_country", "ux501_categories", "ux501_search", "ux501_page")
         # Streamlit removes keys for controls not mounted in the alternate view.
         snapshot = st.session_state.get("ux502_discovery_filters", {}).copy()
         snapshot.update({key: st.session_state[key] for key in keys if key in st.session_state})
-        if "ux501_interest_session" in st.session_state:
-            st.session_state["ux502_transient_shadow"] = list(st.session_state["ux501_interest_session"])
+        _recover_previous_session_interests(st.session_state)
         st.session_state["ux502_discovery_filters"] = snapshot
 
     def legacy_view_changed():
