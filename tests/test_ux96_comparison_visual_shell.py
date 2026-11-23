@@ -26,6 +26,15 @@ class ComparisonVisualShellTests(unittest.TestCase):
         self.assertNotIn("melhor",html.lower())
         self.assertNotIn("Reservada",html)
 
+    def test_selected_and_official_are_distinct_visual_states(self):
+        selected=city_card_header(self.candidate,self.city,is_selected=True)
+        official=city_card_header(self.candidate,self.city,is_official=True)
+        self.assertIn("ux96-city-flag--selected",selected)
+        self.assertNotIn("Base oficial",selected)
+        self.assertIn("ux96-city-flag--official",official)
+        self.assertNotIn("Selecionada",official)
+        self.assertIn('aria-label="Cobertura documental, não avaliação da cidade"',selected)
+
     def test_escaped_city_and_country(self):
         html=city_card_header(self.candidate,
             {"name":"<script>alert(1)</script>","country":"FR & <BR>"})
