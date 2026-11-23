@@ -108,7 +108,7 @@ def summary_panel_html(projection: dict) -> str:
         '<p class="ux97-subtle">Cobertura da pesquisa, não classificação '
         'das cidades.</p><div class="ux97-metrics">'
         f'<div class="ux97-metric"><strong>{common} / {total}</strong>'
-        '<span>Destinos com ida pesquisada nas duas ou mais bases</span></div>'
+        '<span>Destinos com ida pesquisada em todas as bases selecionadas</span></div>'
         f'<div class="ux97-metric"><strong>{covered} / {possible}</strong>'
         '<span>Referências de tempo existentes no escopo</span></div>'
         f'<div class="ux97-metric"><strong>{local}</strong>'
