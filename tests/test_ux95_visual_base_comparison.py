@@ -169,7 +169,7 @@ class QuickComparisonAppTests(unittest.TestCase):
         app.checkbox(key=picks[1]).check().run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
         self.assertEqual(len(app.session_state[CHOICE]),2)
-        self.assertTrue(any(x.key=="rec03a_inline_matrix" for x in app.checkbox))
+        self.assertTrue(any("ux97-table" in x.value for x in app.markdown))
         self.assertTrue(any("SUA COMPARAÇÃO" in x.value for x in app.markdown))
         self.assertEqual(len([x for x in app.multiselect if x.key==CHOICE+"_widget"]),0)
         self.assertEqual(app.session_state["advisor_plan"],plan)
