@@ -215,7 +215,8 @@ def _candidate_media_and_logistics(city_id:str)->None:
 
 
 def _explore_city(study,rail,five,*,fixed_city=None)->None:
-    st.markdown("#### Explore uma cidade")
+    if fixed_city is None:
+        st.markdown("#### Explore uma cidade")
     options={c["id"]:c for c in study["cities"]}
     if fixed_city is not None:
         if fixed_city not in options:
@@ -234,8 +235,9 @@ def _explore_city(study,rail,five,*,fixed_city=None)->None:
         st.session_state["ux40_selected_city"]=selected
     city=find_city(study,selected)
     h=observed_housing(city)
-    st.markdown("#### "+city["name"]+" · "+city["country"])
-    st.caption(city["corridor"]+" · "+("Finalista" if city["shortlist"] else "Candidata"))
+    if fixed_city is None:
+        st.markdown("#### "+city["name"]+" · "+city["country"])
+        st.caption(city["corridor"]+" · "+("Finalista" if city["shortlist"] else "Candidata"))
     a,b=st.columns(2)
     a.metric("Anúncios de 2026",h["count"])
     documented=next(r for r in coverage_matrix("general",study=study) if r["id"]==selected)
@@ -335,8 +337,8 @@ def render_expanded_research(*,activity_override:str|None=None,compact:bool=Fals
     if compact:
         activity=activity_override or "Explorar uma cidade"
         if activity=="Explorar uma cidade":
-            st.markdown("### Explorar cidades")
             if fixed_city is None:
+                st.markdown("### Explorar cidades")
                 with st.expander("Ver todas as candidatas e filtrar por país ou região"):
                     _all_candidates(study)
         else:
