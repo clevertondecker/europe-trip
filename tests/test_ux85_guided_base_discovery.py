@@ -136,9 +136,10 @@ class GuidedComparisonTests(unittest.TestCase):
         self.assertTrue(a.dataframe)
         self.assertEqual(len([x for x in a.multiselect
                               if x.key==CHOICE+"_widget"]),0)
-        captions=" ".join(x.value for x in a.caption)
-        self.assertIn("trajetos com dados históricos",captions)
-        self.assertIn("referências indicativas",captions)
+        city_headers=" ".join(x.value for x in a.markdown
+                              if "ux96-city-header" in x.value)
+        self.assertIn("Históricos",city_headers)
+        self.assertIn("Indicativos",city_headers)
 
     def test_comparison_auto_appears_for_three_and_five_bases(self):
         a=self.app()
