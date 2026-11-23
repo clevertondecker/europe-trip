@@ -9,7 +9,7 @@ A tela real após UX95 exibe muitos blocos de texto e checkboxes; o esboço visu
 1. Faixa de contexto com **as bases selecionadas em CHOICE** e contagem do escopo REC03A. A faixa é somente projeção, não novo multiselect.
 2. Cartões de cidade em grade responsiva com nome real, país, estado selecionado, referência à base oficial e quatro classes da evidência: histórico, indicativo, local pendente e sem tempo.
 3. Preservar checkbox nativo `render_card_choice()` com chave `rec03a_pick_<id>`, até cinco cidades, navegação, busca/paginação e detalhes/fonte `rec03a_details_<id>`. Não disfarçar um componente HTML estático como botão.
-4. CSS com classes `ux96-*` e `ux97-*` **escopadas**; sem alterar regras globais ou adicionar dependências de JS/React.
+4. CSS com classes `ux96-*` **escopadas e efetivamente usadas**; a matriz e os estilos `ux97-*` pertencem ao PR UX97, sem antecipação neste PR. Não alterar regras globais nem adicionar dependências de JS/React.
 5. Não inventar fotografia; se futuramente houver imagem real licenciada, ela só poderá ser mostrada com fonte, crédito, fallback e cobertura verificados, em PR separado.
 
 ## Critérios observáveis
@@ -22,7 +22,7 @@ A tela real após UX95 exibe muitos blocos de texto e checkboxes; o esboço visu
 - Validar visualmente em navegador **real**: AppTest e CI não são screenshots.
 
 ## Dependência
-UX97 (PR seguinte, criado sobre esta branch) tratará **a comparação das cidades selecionadas UX87** como matriz principal sempre aberta, resumo de evidências e fontes progressivas. Não implementar outra comparação nem ranking aqui.
+UX97 (PR #216, criado sobre esta branch; deve declarar seus próprios estilos ao ser atualizado) tratará **a comparação das cidades selecionadas UX87** como matriz principal sempre aberta, resumo de evidências e fontes progressivas. Não implementar outra comparação nem ranking aqui.
 
 ## Estado
 Implementação inicial incluída nesta branch; manter PR em draft até pipeline e review visual. Não fazer merge sem autorização.
