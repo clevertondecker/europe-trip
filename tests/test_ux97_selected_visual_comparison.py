@@ -152,11 +152,10 @@ class SelectedVisualAppTests(unittest.TestCase):
         app.checkbox(key="rec03a_inline_sources").check().run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
         self.assertTrue(app.checkbox(key="rec03a_inline_sources").value)
-        # The native UX87 technical table is still opt-in.
-        self.assertTrue(any(x.key=="rec03a_inline_matrix" for x in app.checkbox))
-        app.checkbox(key="rec03a_inline_matrix").check().run()
-        self.assertFalse(app.exception,[x.message for x in app.exception])
-        self.assertGreaterEqual(len(app.dataframe),1)
+        # UX97 is the only displayed travel-time comparison table.
+        # Raw projection data and native documentary sources still exist.
+        self.assertFalse(any(x.key=="rec03a_inline_matrix" for x in app.checkbox))
+        self.assertEqual(sum("ux97-table" in m.value for m in app.markdown),1)
         self.assertEqual(app.session_state["advisor_plan"],plan)
         self.assertEqual(app.session_state["ux502_interests"],wishes)
 
