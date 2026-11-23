@@ -909,6 +909,40 @@ div[class*="st-key-ux96_preview_documentary"] [data-testid="stExpander"] summary
   div[class*="st-key-ux96_city_"] [data-testid="stVerticalBlockBorderWrapper"]:has(.ux96-city-header){transition:none;}
 }
 
+/* The selected preview and UX87 matrix share these visual tokens. */
+.ux97-panel{background:#fff;border:1px solid #DEE9F0;border-radius:15px;padding:17px 19px;}
+.ux97-section-title{font-weight:800;font-size:1.03rem;color:#16364B;margin:0 0 6px;}
+.ux97-subtle{color:#697F8F;font-size:.78rem;line-height:1.55;}
+.ux97-scroll{max-width:100%;overflow-x:auto;overscroll-behavior-inline:contain;border:1px solid #DFE8F0;border-radius:12px;}
+.ux97-table{width:100%;min-width:520px;border-spacing:0;border-collapse:separate;font-size:.82rem;}
+.ux97-table thead th{position:sticky;top:0;z-index:1;background:#EDF5FA;color:#214358;font-weight:800;text-align:left;padding:12px 13px;border-bottom:1px solid #DBE7EE;}
+.ux97-table th:first-child,.ux97-table td:first-child{position:sticky;left:0;z-index:2;background:#fff;min-width:142px;border-right:1px solid #E4ECF2;}
+.ux97-table thead th:first-child{z-index:3;background:#EDF5FA;}
+.ux97-table tbody tr:nth-child(even) td{background:#F9FBFE;}
+.ux97-table tbody tr:nth-child(even) td:first-child{background:#F9FBFE;}
+.ux97-table tbody td{padding:12px 13px;border-bottom:1px solid #E8EDF3;vertical-align:middle;line-height:1.35;}
+.ux97-table tbody tr:last-child td{border-bottom:0;}
+.ux97-destination{font-weight:750;color:#21445A;}
+.ux97-star{color:#BF8B24;}
+.ux97-cell{display:flex;flex-wrap:wrap;gap:5px;align-items:center;}
+.ux97-cell-time{font-weight:800;color:#193E53;white-space:nowrap;}
+.ux97-status{display:inline-block;padding:3px 7px;border-radius:7px;font-size:.68rem;font-weight:800;white-space:nowrap;}
+.ux97-status--historical{background:#DCF3E5;color:#1F6140;}
+.ux97-status--reference_only{background:#E2F0FE;color:#225B93;}
+.ux97-status--local{background:#FFF0D5;color:#865B17;}
+.ux97-status--no_time{background:#EDF0F4;color:#586B79;}
+.ux97-cell-note{font-size:.73rem;color:#6A7D8B;}
+.ux97-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:12px 0;}
+.ux97-metric{background:#F5F9FC;border:1px solid #E6EEF4;border-radius:10px;padding:10px;}
+.ux97-metric strong{display:block;font-size:1.14rem;color:#173A50;}
+.ux97-metric span{font-size:.72rem;color:#627D8C;}
+.ux97-alert{font-size:.8rem;line-height:1.5;border-radius:9px;padding:10px 12px;margin-top:10px;background:#FFF6E8;color:#755726;}
+.ux97-footnote{margin-top:10px;font-size:.76rem;color:#667F8D;line-height:1.5;}
+@media(max-width:760px){
+ .ux97-panel{padding:12px;}
+ .ux97-table{min-width:570px;}
+}
+
 /* UX99: scoped, data-backed comparison panels; all actions remain native Streamlit. */
 .ux99-scope-strip{
  display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;
