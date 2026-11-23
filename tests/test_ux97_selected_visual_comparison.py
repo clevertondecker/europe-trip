@@ -91,6 +91,23 @@ class VisualProjectionTests(unittest.TestCase):
         self.assertIn("ⓘ",result)
         self.assertIn("role=\"region\"",result)
 
+    def test_station_caveat_is_readable_without_hover_and_escaped(self):
+        data=fixture(2)
+        cell=data["cells"][(data["base_ids"][0],"paris")]
+        cell["station_caveat"]="Troca de estação <script>alert(1)</script>"
+        cell["evidence_notes"]="Confirmar o acesso em 2027"
+        cell["legacy_divergent_sources"]=True
+        html=selected_matrix_html(data)
+        self.assertIn("ux97-sr-only",html)
+        self.assertIn("aria-hidden=\\"true\\"",html)
+        self.assertIn("Estações: Troca de estação &lt;script&gt;",html)
+        self.assertIn("Confirmar o acesso em 2027",html)
+        self.assertIn("referências divergentes",html)
+        self.assertNotIn("<script>",html)
+        # The cell remains read-only and sources stay in the native panel.
+        self.assertNotIn("<button",html)
+        self.assertNotIn("onclick=",html)
+
     def test_reject_invalid_scope_or_duplicate_cells(self):
         data=fixture(2)
         data["cells"].pop((data["base_ids"][0],"paris"))
