@@ -908,3 +908,53 @@ div[class*="st-key-ux96_preview_documentary"] [data-testid="stExpander"] summary
 @media(prefers-reduced-motion:reduce){
   div[class*="st-key-ux96_city_"] [data-testid="stVerticalBlockBorderWrapper"]:has(.ux96-city-header){transition:none;}
 }
+
+/* UX99: scoped, data-backed comparison panels; all actions remain native Streamlit. */
+.ux99-scope-strip{
+ display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;
+ padding:14px 17px;border:1px solid #D2E5EA;border-radius:15px;
+ background:linear-gradient(110deg,#F0F8F8,#FFF);
+ margin:5px 0 15px;
+}
+.ux99-scope-label{display:flex;flex-direction:column;gap:2px;min-width:155px;}
+.ux99-scope-label strong{color:#153C4B;font-size:1rem;}
+.ux99-scope-label span{color:#5B7782;font-size:.78rem;line-height:1.4;}
+.ux99-destination-chips{display:flex;flex:1;flex-wrap:wrap;gap:7px;min-width:0;}
+.ux99-destination-chip{
+ display:inline-block;background:#E4F3F2;color:#17555F;border:1px solid #D1E8E8;
+ border-radius:999px;font-size:.81rem;font-weight:650;padding:6px 11px;
+ overflow-wrap:anywhere;
+}
+.ux99-insights{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;margin:5px 0 12px;}
+.ux99-insight{border-radius:12px;padding:12px 13px;border:1px solid transparent;min-width:0;}
+.ux99-insight--pros{background:#ECF8F0;border-color:#D1EAD8;color:#215B41;}
+.ux99-insight--cons{background:#FFF4E5;border-color:#F2DFC0;color:#80501D;}
+.ux99-insight h4{font-weight:760;font-size:.9rem;line-height:1.3;margin:0 0 7px;}
+.ux99-insight--pros h4::before{content:"✓";margin-right:8px;}
+.ux99-insight--cons h4::before{content:"!";display:inline-flex;align-items:center;justify-content:center;
+ width:16px;height:16px;border:1.4px solid currentColor;border-radius:50%;
+ font-size:.7rem;margin-right:8px;}
+.ux99-insight ul{padding-left:20px;margin:0;}
+.ux99-insight li{font-size:.79rem;line-height:1.5;margin:3px 0;overflow-wrap:anywhere;}
+/* Explicit scope: only native columns containing UX96 city cards. */
+div[class*="st-key-ux99_base_gallery_"] [data-testid="stHorizontalBlock"]:has(> [data-testid="stColumn"] div[class*="st-key-ux96_city_"]){
+ align-items:stretch;
+}
+div[class*="st-key-ux99_base_gallery_"] [data-testid="stColumn"]:has(div[class*="st-key-ux96_city_"]){
+ min-width:0;
+}
+@media(max-width:1120px){
+ div[class*="st-key-ux99_base_gallery_"] [data-testid="stHorizontalBlock"]:has(> [data-testid="stColumn"] div[class*="st-key-ux96_city_"]){
+  flex-wrap:wrap !important;gap:14px !important;
+ }
+ div[class*="st-key-ux99_base_gallery_"] [data-testid="stColumn"]:has(div[class*="st-key-ux96_city_"]){
+  flex:1 1 calc(50% - 14px) !important;width:auto !important;min-width:min(100%,280px) !important;
+ }
+}
+@media(max-width:650px){
+ .ux99-scope-strip{padding:12px;gap:8px;}
+ .ux99-scope-label{flex:1 0 100%;}
+ div[class*="st-key-ux99_base_gallery_"] [data-testid="stColumn"]:has(div[class*="st-key-ux96_city_"]){
+  flex:1 1 100% !important;min-width:0 !important;
+ }
+}
