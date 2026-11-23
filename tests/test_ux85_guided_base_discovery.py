@@ -130,10 +130,9 @@ class GuidedComparisonTests(unittest.TestCase):
             self.assertFalse(a.exception,[x.message for x in a.exception])
         self.assertEqual(len(a.session_state[CHOICE]),2)
         self.assertFalse(any(x.key=="rec03a_handoff_compare" for x in a.button))
-        self.assertTrue(any(x.key=="rec03a_inline_matrix" for x in a.checkbox))
-        a.checkbox(key="rec03a_inline_matrix").check().run()
-        self.assertFalse(a.exception,[x.message for x in a.exception])
-        self.assertTrue(a.dataframe)
+        self.assertTrue(any("ux97-table" in x.value for x in a.markdown))
+        self.assertFalse(any(x.key=="rec03a_inline_matrix" for x in a.checkbox))
+        self.assertTrue(any(x.key=="rec03a_inline_sources" for x in a.checkbox))
         self.assertEqual(len([x for x in a.multiselect
                               if x.key==CHOICE+"_widget"]),0)
         city_headers=" ".join(x.value for x in a.markdown
@@ -153,7 +152,7 @@ class GuidedComparisonTests(unittest.TestCase):
                 a.run()
                 self.assertFalse(a.exception,[x.message for x in a.exception])
                 self.assertEqual(a.session_state[CHOICE],candidates[:n])
-                self.assertTrue(any(x.key=="rec03a_inline_matrix" for x in a.checkbox))
+                self.assertTrue(any("ux97-table" in x.value for x in a.markdown))
                 self.assertFalse(any(x.key=="rec03a_handoff_compare" for x in a.button))
                 self.assertFalse(any(x.key==CHOICE+"_widget" for x in a.multiselect))
                 self.assertEqual(len([x for x in a.selectbox
@@ -181,11 +180,11 @@ class GuidedComparisonTests(unittest.TestCase):
         self.assertFalse(a.exception,[x.message for x in a.exception])
         selected=list(a.session_state[CHOICE])
         self.assertEqual(set(selected),{first.removeprefix("rec03a_pick_"),other})
-        self.assertTrue(any(x.key=="rec03a_inline_matrix" for x in a.checkbox))
+        self.assertTrue(any("ux97-table" in x.value for x in a.markdown))
         a.checkbox(key="rec03a_show_all").uncheck().run()
         self.assertFalse(a.exception,[x.message for x in a.exception])
         self.assertEqual(a.session_state[CHOICE],selected)
-        self.assertTrue(any(x.key=="rec03a_inline_matrix" for x in a.checkbox))
+        self.assertTrue(any("ux97-table" in x.value for x in a.markdown))
 
     def test_selection_below_filter_remains_authoritative(self):
         a=self.app()
