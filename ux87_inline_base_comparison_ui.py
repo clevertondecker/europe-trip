@@ -183,8 +183,6 @@ def render_inline_comparison(interests, scope, selected, *, discovery, research)
                    "Mínimos de ida não são duração total da viagem.")
     
     st.caption("ⓘ nas células indica ressalva documental. Fontes e divergências estão disponíveis abaixo.")
-    if st.checkbox("Ver tabela técnica por destino", key="rec03a_inline_matrix"):
-        st.dataframe(projection["table"], hide_index=True, width="stretch")
     # Sources no longer depend on first opening the technical matrix.
     if st.checkbox("Consultar fontes e ressalvas dos trajetos",
                    key="rec03a_inline_sources"):
