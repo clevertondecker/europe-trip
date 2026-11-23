@@ -6,18 +6,31 @@ catalog. No generic image search or external API on reruns.
 from __future__ import annotations
 
 from html import escape
+from functools import lru_cache
 import streamlit as st
 from destination_photo_assets import local_destination_photo
 from ux501_destination_photo_service import curated_destination_photo
+from attractions_model import load_attractions
 
 
 def _safe(value) -> str:
     return escape(str(value), quote=True)
 
 
+@lru_cache(maxsize=1)
+def _existing_catalog_photos() -> dict:
+    """Only catalog-validated, city-ID-matched Commons photo records."""
+    return {item["id"]: item["photo"] for item in load_attractions()["destinations"]
+            if item.get("photo") and
+            item["photo"].get("license_url", "").startswith(
+                "https://creativecommons.org/licenses/")}
+
+
 def base_card_photo_record(base_id: str) -> dict | None:
-    """Return verified metadata, or None. Never substitute a nearby city."""
-    return local_destination_photo(base_id) or curated_destination_photo(base_id)
+    """Local licensed bytes, then reviewed Commons, then canonical catalog."""
+    return (local_destination_photo(base_id)
+            or curated_destination_photo(base_id)
+            or _existing_catalog_photos().get(base_id))
 
 
 def render_base_card_photo(base_id: str, name: str) -> None:
