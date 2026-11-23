@@ -42,8 +42,24 @@ def _cell_html(cell: dict) -> str:
         or cell.get("station_comparability")=="city_level_ambiguous"
     )
     details=_safe(cell.get("label") or LABELS[kind])
-    note=('<span class="ux97-cell-note" aria-label="Há ressalvas documentais">'
-          'ⓘ</span>' if notes else "")
+    qualifiers=[]
+    if cell.get("station_caveat"):
+        qualifiers.append("Estações: "+str(cell["station_caveat"]))
+    if cell.get("evidence_notes"):
+        qualifiers.append("Observação: "+str(cell["evidence_notes"]))
+    if cell.get("legacy_divergent_sources"):
+        qualifiers.append("Existem referências divergentes para este trajeto")
+    if cell.get("station_comparability")=="city_level_ambiguous":
+        qualifiers.append("Comparabilidade das estações ainda não confirmada")
+    # The visible icon is decorative: screen readers receive the actual caveats
+    # within the table cell, not only a generic tooltip or separate expander.
+    note=(
+        '<span class="ux97-cell-note" aria-hidden="true">ⓘ</span>'
+        '<span class="ux97-sr-only">Ressalvas: '
+        +_safe("; ".join(qualifiers) if qualifiers else
+               "Há ressalvas documentais. Consulte as fontes abaixo")
+        +'.</span>'
+    ) if notes else ""
     return (
         '<div class="ux97-cell" title="'+details+'">'
         +amount+f'<span class="ux97-status ux97-status--{kind}">'
