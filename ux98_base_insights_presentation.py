@@ -30,9 +30,13 @@ RETURN_CAUTION = ("Horários, retorno e custos de 2027 ainda não estão confirm
 def project_base_insights(candidate: Mapping) -> dict:
     """Return stable evidence-backed display items without extrapolating."""
     reasons = set(candidate.get("reasons") or [])
+    must_visit=candidate.get("must_visit") or {}
+    has_must_visit=bool(must_visit.get("known") or must_visit.get("local") or
+                        must_visit.get("missing"))
     advantages = [
         {"code": code, "text": label}
-        for code, label in ADVANTAGES.items() if code in reasons
+        for code, label in ADVANTAGES.items()
+        if code in reasons and (code!="imperdiveis_identificados" or has_must_visit)
     ]
     cautions = [
         {"code": code, "text": label}
@@ -45,8 +49,8 @@ def project_base_insights(candidate: Mapping) -> dict:
         cautions.append({"code": "local_destination_ids",
                          "text": "Acesso urbano e última milha precisam ser verificados."})
     cautions.append({"code": "rec02_limitations", "text": RETURN_CAUTION})
-    if not advantages:
-        advantages = [{"code": "no_proven_advantage",
-                       "text": "Ainda não há vantagem comparativa comprovada para este escopo."}]
+    neutral=([{"code": "no_proven_advantage",
+               "text": "Ainda não há vantagem comparativa comprovada para este escopo."}]
+             if not advantages else [])
     return {"base_id": candidate["base_id"], "advantages": advantages,
-            "cautions": cautions}
+            "neutral": neutral, "cautions": cautions}
