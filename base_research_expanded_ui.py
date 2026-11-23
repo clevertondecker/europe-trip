@@ -129,7 +129,7 @@ def _city_routes(city_id,five,rail):
                    "não foram comprovados; ida não implica bate-volta.")
 
 
-def _city_profile(city_id,study):
+def _city_profile(city_id,study,*,profile_mode=False):
     profiles=load_profiles(canonical=study)
     p=profile_by_id(profiles,city_id)
     st.markdown("**Contexto pesquisado:** "+p["summary"])
@@ -160,8 +160,13 @@ def _city_profile(city_id,study):
                 st.markdown("[Fonte climatológica]("+climate["source_url"]+")")
             else:
                 st.caption("Normais climáticas comparáveis: pendentes.")
+    if not profile_mode:
+        _city_sources(p)
+
+
+def _city_sources(profile):
     with st.expander("Fontes públicas e limitações"):
-        for item in p["evidence"]:
+        for item in profile["evidence"]:
             st.markdown("• "+item["summary"]+" · [Fonte]("+item["source_url"]+")")
         st.caption("O número de fontes não é nota de qualidade. Valores históricos "
                    "e informações faltantes permanecem identificados.")
@@ -214,6 +219,70 @@ def _candidate_media_and_logistics(city_id:str)->None:
             "não suponha que ausência de dados signifique ausência de trem.")
 
 
+def _render_profile_summary(city,study):
+    """Concise facts, never a rating, price quote or itinerary decision."""
+    p=profile_by_id(load_profiles(canonical=study),city["id"])
+    evidence=[item for item in p["evidence"]
+              if item.get("section") in ("transport","quality_of_life","remote_work")
+              and item.get("summary") and item.get("source_url")]
+    st.markdown("#### O que sabemos e o que falta confirmar?")
+    left,right=st.columns(2,gap="medium")
+    with left:
+        with st.container(border=True):
+            st.markdown("**Referências documentadas**")
+            if evidence:
+                for item in evidence[:2]:
+                    st.write(item["summary"])
+                    st.markdown("[Consultar fonte]("+item["source_url"]+")")
+            else:
+                st.caption("Contexto urbano específico ainda não pesquisado.")
+    with right:
+        with st.container(border=True):
+            st.markdown("**Ainda precisa confirmar**")
+            for note in decision_readiness(city)["reasons"][:3]:
+                st.write("• "+note)
+    st.caption("Cobertura e anúncios históricos de 2026 representam pesquisa, "
+               "não qualidade da cidade ou disponibilidade para 2027.")
+
+
+def _render_ux105_profile_context(city_id):
+    """Surface UX105 mobility without re-rendering DATA23 regional rail."""
+    from ux105_base_city_context import context_for_base
+    context=context_for_base(city_id)
+    if context is None:
+        return
+    with st.expander("Mobilidade local e atrações complementares"):
+        for item in context["mobility"]:
+            st.write(item["label"]+" — "+item["detail"])
+            st.markdown("[Fonte de transporte]("+item["source_url"]+")")
+        known={item["name"].casefold() for item in base_attractions(city_id)}
+        for item in context["attractions"]:
+            if item["name"].casefold() not in known:
+                st.write(item["name"]+" — "+item["detail"])
+                st.markdown("[Fonte da atração]("+item["source_url"]+")")
+        st.caption("Referências locais não confirmam horários, volta, tarifas ou "
+                   "disponibilidade de 2027.")
+
+
+def _render_profile_details(city,study,rail,five):
+    """Reuse the existing renderers in decision-oriented order."""
+    city_id=city["id"]
+    st.markdown("### Explore os detalhes")
+    st.markdown("#### Moradia e custo observado")
+    _city_housing(city)
+    st.markdown("#### Trens, logística e passeios")
+    if base_routes(city_id):
+        _candidate_media_and_logistics(city_id)
+    else:
+        _city_routes(city_id,five,rail)
+    _render_ux105_profile_context(city_id)
+    st.markdown("#### Vida cotidiana, bairros e clima")
+    _city_profile(city_id,study,profile_mode=True)
+    st.markdown("#### Fontes e metodologia")
+    p=profile_by_id(load_profiles(canonical=study),city_id)
+    _city_sources(p)
+
+
 def _explore_city(study,rail,five,*,fixed_city=None)->None:
     if fixed_city is None:
         st.markdown("#### Explore uma cidade")
@@ -239,19 +308,23 @@ def _explore_city(study,rail,five,*,fixed_city=None)->None:
         st.markdown("#### "+city["name"]+" · "+city["country"])
         st.caption(city["corridor"]+" · "+("Finalista" if city["shortlist"] else "Candidata"))
     a,b=st.columns(2)
-    a.metric("Anúncios de 2026",h["count"])
+    a.metric("Anúncios históricos de 2026",h["count"])
     documented=next(r for r in coverage_matrix("general",study=study) if r["id"]==selected)
-    b.metric("Tempos na cesta histórica comparável",
+    b.metric("Destinos da pesquisa histórica com referência de tempo",
              str(documented["route_basket_with_time"])+"/"+str(documented["route_basket_total"]))
     additional=base_routes(selected)
     if additional:
-        st.caption(f"{len(additional)} referências adicionais de ida (DATA23), "
-                   "fora da métrica histórica; retorno e 2027 não confirmados.")
-    _city_profile(selected,study)
-    _candidate_media_and_logistics(selected)
-    _city_housing(city)
-    if not base_routes(selected):
-        _city_routes(selected,five,rail)
+        st.caption(f"{len(additional)} referências adicionais de ida (DATA23/2026), "
+                   "fora da cesta histórica; retorno e 2027 não confirmados.")
+    if fixed_city is None:
+        _city_profile(selected,study)
+        _candidate_media_and_logistics(selected)
+        _city_housing(city)
+        if not base_routes(selected):
+            _city_routes(selected,five,rail)
+    else:
+        _render_profile_summary(city,study)
+        _render_profile_details(city,study,rail,five)
     with st.expander("Pesquisa técnica · critérios, pesos e pontuação indisponível"):
         preset=st.segmented_control("Ponderação",["Geral","Econômico","Explorador"],
                                     default="Geral",key="expanded_bases_rank_preset")
