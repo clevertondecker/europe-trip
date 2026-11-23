@@ -37,22 +37,24 @@ class ProfileResearchTests(unittest.TestCase):
             f'{expected["route_basket_with_time"]}/{expected["route_basket_total"]}'
         )
         self.assertIn("históricos de 2026",app.metric[0].label)
-        self.assertIn("pesquisa histórica",app.metric[1].label)
+        self.assertIn("tempo pesquisado",app.metric[1].label)
         labels=[m.value for m in app.markdown]
-        sections=["Moradia e custo observado","Trens, logística e passeios",
+        self.assertIn("### Investigue por assunto",labels)
+        sections=["Moradia e bairros","Trens, logística e passeios",
                   "Vida cotidiana, bairros e clima","Fontes e metodologia"]
-        positions=[next(i for i,value in enumerate(labels) if value=="#### "+name)
-                   for name in sections]
-        self.assertEqual(positions,sorted(positions))
-        self.assertTrue(any("Referências documentadas" in m.value for m in app.markdown))
-        self.assertTrue(any("Ainda precisa confirmar" in m.value for m in app.markdown))
+        expander_labels=[x.label for x in app.expander]
+        for item in sections:
+            self.assertTrue(any(item in x for x in expander_labels),item)
+        self.assertTrue(any("Já documentado" in m.value for m in app.markdown))
+        self.assertTrue(any("Ainda pendente" in m.value for m in app.markdown))
+        self.assertFalse(any("#### Moradia e custo observado" in x for x in labels))
         self.assertNotIn("### Explorar cidades",labels)
 
     def test_data23_and_ux105_remain_distinct_from_historical_times(self):
         for city in ("angers","annecy","aachen","arlon"):
             with self.subTest(city=city):
                 app=view(city)
-                self.assertTrue(any("Explore os detalhes" in m.value for m in app.markdown))
+                self.assertTrue(any("Investigue por assunto" in m.value for m in app.markdown))
                 self.assertTrue(any("referências adicionais de ida" in c.value
                                     for c in app.caption)
                                 if city in ("angers","annecy") else True)
@@ -65,7 +67,7 @@ class ProfileResearchTests(unittest.TestCase):
         city=next(c for c in study["cities"] if not c["housing_offers"])
         app=view(city["id"])
         self.assertEqual(app.metric[0].value,"0")
-        self.assertTrue(any("Ainda precisa confirmar" in m.value for m in app.markdown))
+        self.assertTrue(any("Ainda pendente" in m.value for m in app.markdown))
 
     def test_independent_explorer_keeps_original_headings(self):
         app=view("strasbourg",fixed=False)
