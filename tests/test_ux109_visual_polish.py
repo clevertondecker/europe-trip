@@ -47,6 +47,23 @@ class UX109ProfileTests(unittest.TestCase):
         self.assertTrue(any("Já documentado" in x for x in labels))
         self.assertEqual(len(app.metric),2)
 
+    def test_city_without_optional_pack_still_displays_canonical_summary(self):
+        from city_profiles_model import load_profiles,profile_by_id
+        from base_research_expanded_model import load_research
+        research=load_research(include_candidates=True)
+        expected=profile_by_id(load_profiles(canonical=research),"mulhouse")["summary"]
+        app=AppTest.from_string(
+            'from unittest.mock import patch\\n'
+            'from base_research_expanded_ui import render_expanded_research\\n'
+            'with patch("base_research_expanded_ui.pack_for_city",return_value=None):\\n'
+            '    render_expanded_research(activity_override="Explorar uma cidade",'
+            'compact=True,fixed_city="mulhouse")',
+            default_timeout=120,
+        ).run()
+        self.assertFalse(app.exception,[e.message for e in app.exception])
+        summaries=[str(x.value) for x in app.markdown]+[str(x.value) for x in app.text]
+        self.assertEqual(sum(expected in item for item in summaries),1)
+
     def test_independent_explorer_preserves_existing_headings(self):
         app=AppTest.from_string(
             'from base_research_expanded_ui import render_expanded_research\n'
