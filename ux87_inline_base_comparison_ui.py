@@ -121,6 +121,10 @@ def render_inline_comparison(interests, scope, selected, *, discovery, research)
     with aside:
         st.markdown(summary_panel_html(projection),unsafe_allow_html=True)
 
+    # UX113: the existing selected cities also drive logistics and cost evidence.
+    from ux113_comparison_panorama_ui import render_comparison_panorama
+    render_comparison_panorama(projection,research)
+
     # Keep historical explanatory information, without making the main
     # decision screen a long chain of paragraphs and counters.
     with st.expander("O que sabemos e o que falta · detalhes",expanded=False):
