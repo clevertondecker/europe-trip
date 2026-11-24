@@ -53,6 +53,14 @@ def load_rail_gap_overlay(path:Path=DATA)->dict:
     return payload
 
 
+def unresolved_gap_reason(base_id:str,destination_id:str)->str|None:
+    """Explain genuinely unresolved research without fabricating an itinerary."""
+    for item in load_rail_gap_overlay()["research_gaps"]:
+        if item["base_id"]==base_id and item["destination_id"]==destination_id:
+            return item["reason"]
+    return None
+
+
 def documented_gap_route(base_id:str,destination_id:str)->dict|None:
     """Return only genuine observed minimum, not a fabricated 2027 scenario."""
     for item in load_rail_gap_overlay()["routes"]:
