@@ -9,7 +9,7 @@ import pydeck as pdk
 import streamlit as st
 
 from base_explorer_model import (base_opportunities,compare_bases,
-                                 load_exploration,route_detail,stay_projection)
+                                 load_exploration,route_detail)
 from destination_labels import place_label
 from base_research_expanded_ui import render_expanded_research
 from planning_session import update_fields
@@ -232,99 +232,6 @@ def _choose_base(data:dict,plan:dict,base_id:str)->None:
                 st.rerun()
 
 
-def _split_stay(data:dict,plan:dict,trip_data:dict,finance_live:bool,
-                eurfx:float)->None:
-    names={b["id"]:_base_name(data,b["id"]) for b in base_options(data,include_candidates=True)}
-    days=(st.session_state.get("ux_days",plan["total_days"]-plan["italy_days"])
-          if st.session_state.get("ux_mode")=="Simulação"
-          else plan["total_days"]-plan["italy_days"])
-    st.markdown("### Uma base ou duas?")
-    st.caption("Compare o mesmo período francês e as mesmas verbas restantes, "
-               "mudando apenas o aluguel **hipotético** e a despesa de transferência. "
-               "Não inclui novos bilhetes de passeios nem custos variáveis locais.")
-    a,b=st.columns(2)
-    with a:
-        first=st.selectbox("Primeira base",list(names),
-                           index=list(names).index("lille"),
-                           format_func=lambda x:names[x],key="base_stay_first")
-    with b:
-        second=st.selectbox("Segunda base",list(names),
-                            index=list(names).index("strasbourg"),
-                            format_func=lambda x:names[x],key="base_stay_second")
-    split=st.slider("Dias na primeira cidade",min_value=7,max_value=days-7,
-                    value=min(20,days-7),step=1,key="base_stay_days_first")
-    st.caption(str(split)+" dias em "+names[first]+" + "+str(days-split)+
-               " dias em "+names[second]+". O período da França permanece "+str(days)+" dias.")
-    col1,col2=st.columns(2)
-    with col1:
-        rent1=st.number_input("Aluguel mobiliado hipotético da 1ª base (€ / 30 dias)",
-                              min_value=0.,max_value=10000.,value=0.,step=50.,
-                              key="base_stay_rent_first")
-    with col2:
-        rent2=st.number_input("Aluguel mobiliado hipotético da 2ª base (€ / 30 dias)",
-                              min_value=0.,max_value=10000.,value=0.,step=50.,
-                              key="base_stay_rent_second")
-    moving=st.number_input("Mudança entre as cidades (€ / casal, uma vez)",
-                           min_value=0.,max_value=2500.,value=0.,step=25.,
-                           key="base_stay_move")
-    with st.expander("Caução e caixa temporariamente comprometido"):
-        dep1=st.number_input("Caução da primeira moradia (€)",min_value=0.,
-                             value=0.,step=100.,key="base_stay_deposit_first")
-        dep2=st.number_input("Caução da segunda moradia (€)",min_value=0.,
-                             value=0.,step=100.,key="base_stay_deposit_second")
-        st.caption("Caução potencialmente reembolsável é necessidade de caixa, "
-                   "não despesa definitiva; não entra no total.")
-    if first==second:
-        st.warning("Para comparar uma ou duas bases, escolha duas cidades distintas.")
-        return
-    move_without_cost=st.checkbox("Mudança sem custo financeiro confirmado",
-                                  value=False,key="base_stay_move_free") if moving==0 else False
-    if rent1<=0 or rent2<=0 or (moving==0 and not move_without_cost):
-        st.info("Informe **os dois aluguéis mobiliados** e o custo de mudança. "
-                "Sem esses valores, nenhum total será mostrado como estimativa de hospedagem. "
-                "Não usamos o aluguel residencial médio como cotação de curta estadia.")
-        return
-    preview_plan={**plan,"total_days":plan["italy_days"]+days}
-    projection=stay_projection(preview_plan,trip_data,finance_live,eurfx,
-                               first,second,split,rent1,rent2,moving,dep1,dep2)
-    table=[
-        {"Cenário":"Somente "+names[first],"Dias":days,
-         "Hospedagem (€)":projection["housing_single_a_eur"],
-         "Mudança (€)":0.0,"Projeção parcial (R$)":projection["single_a_total_brl"]},
-        {"Cenário":"Somente "+names[second],"Dias":days,
-         "Hospedagem (€)":projection["housing_single_b_eur"],
-         "Mudança (€)":0.0,"Projeção parcial (R$)":projection["single_b_total_brl"]},
-        {"Cenário":names[first]+" + "+names[second],"Dias":str(split)+"+"+
-         str(days-split),"Hospedagem (€)":projection["housing_split_eur"],
-         "Mudança (€)":projection["move_eur"],
-         "Projeção parcial (R$)":projection["split_total_brl"]},
-    ]
-    st.dataframe(table,hide_index=True,width="stretch")
-    x,y=st.columns(2)
-    x.metric("Diferença duas bases × apenas 1ª",
-             _format_brl(projection["split_delta_vs_a_brl"]))
-    y.metric("Cauções no cenário de 2 bases, fora do custo",
-             _format_eur(projection["cash_deposit_split_eur"]))
-    st.warning("A projeção **não** é custo final da viagem: passagens para os destinos, "
-               "taxas de aluguel, serviços, limpeza, eventuais diárias mínimas, "
-               "segunda caução, hospedagem para passeios e horários de 2027 "
-               "ainda precisam ser cotados. As rubricas antigas de alimentação e "
-               "excursões permanecem iguais nos três cenários.")
-    if st.button("Guardar esta divisão como proposta em estudo",
-                 key="base_stay_save"):
-        st.session_state["base_explorer_split_favorite"]={
-            "first":first,"second":second,"days_first":split,
-            "days_second":days-split,"rent_first":rent1,"rent_second":rent2,
-            "moving_eur":moving,"plan_revision":plan["revision"],
-            "status":"research_only"}
-        st.success("Divisão guardada somente nesta sessão; o roteiro aprovado não mudou.")
-    saved=st.session_state.get("base_explorer_split_favorite")
-    if saved:
-        st.caption("Divisão em estudo nesta sessão: "+
-                   names.get(saved["first"],saved["first"])+" + "+
-                   names.get(saved["second"],saved["second"]))
-
-
 def _scenario_backups(plan:dict,options:list[dict])->None:
     """Save a portable scenario without writing to public GitHub or TripPlan."""
     with st.expander("Meus cenários exploratórios · salvar e recuperar"):
@@ -427,8 +334,6 @@ def render_base_explorer(plan:dict,trip_data:dict,finance_live:bool,
                        "custos completos para 2027 ainda não foram validados.")
             if st.checkbox("Comparar os mesmos passeios entre bases",key="ux42_show_comparison"):
                 _comparison(data)
-            if st.checkbox("Estudar uma ou duas bases",key="ux42_show_split"):
-                _split_stay(data,plan,trip_data,finance_live,eurfx)
         if st.checkbox("Mostrar ferramentas avançadas e cenários",key="ux42_show_advanced"):
             _scenario_backups(plan,study_options)
             st.caption("As ferramentas históricas continuam disponíveis sem "
@@ -447,8 +352,10 @@ def render_base_explorer(plan:dict,trip_data:dict,finance_live:bool,
     st.caption("**Base oficial atual:** "+names[active]+
                " · **Candidatas no catálogo:** "+str(len(names))+". "
                "A exploração não altera suas escolhas.")
+    if st.session_state.get("base_explorer_mode")=="Uma ou duas bases":
+        st.session_state["base_explorer_mode"]="Destinos próximos"
     mode=st.segmented_control("Modo de exploração",
-            ["Destinos próximos","Comparar mesmas viagens","Uma ou duas bases","Pesquisa ampliada"],
+            ["Destinos próximos","Comparar mesmas viagens","Pesquisa ampliada"],
             default="Destinos próximos",key="base_explorer_mode")
     if mode=="Destinos próximos" or mode is None:
         candidate=st.session_state.get("scenario_base_selected",active)
@@ -467,8 +374,6 @@ def render_base_explorer(plan:dict,trip_data:dict,finance_live:bool,
         _choose_base(data,plan,selected)
     elif mode=="Comparar mesmas viagens":
         _comparison(data)
-    elif mode=="Uma ou duas bases":
-        _split_stay(data,plan,trip_data,finance_live,eurfx)
     else:
         render_expanded_research()
     st.caption("Dados de origem: pesquisa documentada em 15/11/2026. "
