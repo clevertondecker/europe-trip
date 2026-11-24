@@ -17,7 +17,9 @@ from base_research_expanded_model import load_rail
 from base_scenario_model import base_options
 from data_model import get_scenario
 from unified_budget import resolve_french_budget, scenario_total
-from ux115_rail_gap_model import documented_gap_route, load_rail_gap_overlay
+from ux115_rail_gap_model import (
+    documented_gap_route, load_rail_gap_overlay, unresolved_gap_reason,
+)
 
 
 # Canonical aliases refer to the SAME city; never merge generic names by proximity.
