@@ -147,6 +147,10 @@ render_base_review_scope(ctx)
         self.assertEqual(set(app.session_state["ux34_destinations"]),
                          {"paris","colmar","strasbourg"})
         self.assertIn("ux115_keep_base",{x.key for x in app.button})
+        self.assertTrue(any("ux117-table" in x.value for x in app.markdown))
+        self.assertTrue(any("ux117-identity" in x.value for x in app.markdown))
+        self.assertTrue(any("ux117-rents" in x.value for x in app.markdown))
+        self.assertIn("ux115_details_open",{x.key for x in app.checkbox})
         self.assertEqual(app.session_state["advisor_plan"],original)
         return app,original
 
