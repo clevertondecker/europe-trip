@@ -14,6 +14,7 @@ from data12_lille_connectivity_model import load_lille_connectivity
 from data13_directed_connectivity_model import load_data13
 from data22_supplemental_rail_model import load_data22
 from data23_france_candidates_model import load_data23
+from ux115_rail_gap_model import load_rail_gap_overlay
 
 
 def format_minutes(value):
@@ -58,10 +59,16 @@ def _cached_data23():
     return {(r['base_id'],r['destination_id']):r for r in load_data23()['routes']}
 
 
+@lru_cache(maxsize=1)
+def _cached_ux115():
+    return {(r["base_id"],r["destination_id"]):r
+            for r in load_rail_gap_overlay()["routes"]}
+
+
 def decorate_comparison(result, *, references=None, gap_overlay=None,
                         connectivity_overlay=None, priority_overlay=None,
                         lille_overlay=None, data13_overlay=None, supplemental_overlay=None,
-                        candidate_overlay=None):
+                        candidate_overlay=None, ux115_overlay=None):
     """All matrix categories are mutually exclusive, including custom baskets."""
     refs = references if references is not None else load_route_references()
     gaps = gap_overlay if gap_overlay is not None else _cached_route_gaps()
@@ -74,6 +81,7 @@ def decorate_comparison(result, *, references=None, gap_overlay=None,
     supplemental = (supplemental_overlay if supplemental_overlay is not None
                     else _cached_data22())
     candidate = candidate_overlay if candidate_overlay is not None else _cached_data23()
+    recent = ux115_overlay if ux115_overlay is not None else _cached_ux115()
     cells = {}
     categories = {
         "historical": 0, "reference_only": 0, "local": 0, "no_time": 0,
@@ -231,6 +239,26 @@ def decorate_comparison(result, *, references=None, gap_overlay=None,
                 "weekend_return_known":False,"valid_for_2027":False,
                 "evidence_notes":city_row["notes"],
             }
+        # Last-resort 2026 minimum, after all existing historical/independent
+        # sources. This reuses the SAME validated overlay as the UX34 decision
+        # comparison, never claiming a return or a reliable 2027 service.
+        recent_row=recent.get(key)
+        if (recent_row is not None and evidence.get("display_min") is None
+                and row["evidence_status"]!="local"):
+            evidence={
+                **evidence,
+                "display_basis":"ux115_operator_minimum",
+                "display_min":recent_row["fastest_train_oneway_min"],
+                "source_url":recent_row["source_url"],
+                "reference_source_url":recent_row["source_url"],
+                "gap_checked_at":recent_row["checked_at"],
+                "source_kind":"official_operator_minimum",
+                "station_comparability":"station_named_in_route_page",
+                "comparability":"indicative_only_not_station_comparable",
+                "arrival_station":recent_row["destination_station"],
+                "evidence_notes":recent_row["notes"],
+                "weekend_return_known":False,"valid_for_2027":False,
+            }
         basis = evidence["display_basis"]
         if basis == "local_not_rail":
             category = "local"
@@ -275,6 +303,9 @@ def decorate_comparison(result, *, references=None, gap_overlay=None,
                          if evidence.get("source_kind") == "official_operator_minimum"
                          else "referência secundária · mínimo divulgado")
             label = f'~{format_minutes(evidence["display_min"])} · {qualifier}'
+        elif basis == "ux115_operator_minimum":
+            category = "reference_only"
+            label = f'~{format_minutes(evidence["display_min"])} · mínimo publicado · operadora'
         elif basis == "data23_candidate_reference":
             category = "reference_only"
             label = f'~{format_minutes(evidence["display_min"])} · mínimo publicado · operadora'
@@ -319,6 +350,7 @@ def decorate_comparison(result, *, references=None, gap_overlay=None,
             "data13_connectivity_applied": basis == "data13_reference",
             "supplemental_connectivity_applied": basis == "data22_supplemental_reference",
             "candidate_connectivity_applied": basis == "data23_candidate_reference",
+            "ux115_connectivity_applied": basis == "ux115_operator_minimum",
             "station_caveat": (
                 "Fonte refere-se à chegada na estação " + evidence["arrival_station"]
                 + "; não confirma acesso a atrações fora da estação."
