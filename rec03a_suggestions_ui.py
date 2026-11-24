@@ -55,6 +55,45 @@ def _go(target):
     request_navigation(st.session_state, target)
 
 
+def _open_base_review(base, scope_destinations):
+    """Explicitly begin the EXISTING official review without changing the plan."""
+    from trip_plan_model import BASES
+    from base_change_model import destination_catalog, _canonical_destination
+    state=st.session_state
+    plan=state.get("advisor_plan",{})
+    if base not in BASES or base==plan.get("base_city"):
+        return
+    catalog=destination_catalog()
+    eligible=[]
+    for destination in scope_destinations:
+        key=_canonical_destination(destination)
+        if key in catalog and key not in eligible:
+            eligible.append(key)
+    state["ux114_review_base"]=base
+    state["ux34_candidates"]=[base]
+    # The historical decision tool supports at most eight destinations.
+    # Never silently trim a larger confirmed research scope.
+    if 1<=len(eligible)<=8:
+        state["ux34_destinations"]=eligible
+        state.pop("ux114_review_overlimit",None)
+    elif len(eligible)>8:
+        state["ux34_destinations"]=[]
+        state["ux114_review_overlimit"]=len(eligible)
+    else:
+        state.pop("ux34_destinations",None)
+        state.pop("ux114_review_overlimit",None)
+    state.pop("ux34_review",None)
+    state.pop("ux34_review_candidate",None)
+
+
+def close_base_review():
+    """Leave review mode without applying or discarding any official plan edit."""
+    state=st.session_state
+    state.pop("ux114_review_base",None)
+    state.pop("ux114_review_overlimit",None)
+    state.pop("ux34_review",None)
+
+
 def _scope_select(ids, interests, discovery):
     if not ids:
         return
@@ -505,7 +544,28 @@ def render_suggestions(*,plan,discovery=None,research=None):
             st.info("Uma cidade selecionada. Explore e adicione outra para comparar.")
         else:
             st.info("Selecione de duas a cinco cidades na aba Explorar alternativas.")
-        st.markdown("#### Continuar para Meu planejamento")
+        st.markdown("#### Próximos passos")
+        from trip_plan_model import BASES
+        eligible=[base for base in selected if base in BASES and base!=plan["base_city"]]
+        unsupported=[base for base in selected if base not in BASES]
+        if eligible and len(selected)<=5:
+            preferred=st.selectbox(
+                "Cidade-base para revisão oficial",eligible,
+                format_func=lambda base:cities[base]["name"],
+                key="ux114_preferred_base")
+            st.button("Revisar esta cidade-base no meu plano",
+                      key="ux114_open_review",type="primary",
+                      on_click=_open_base_review,
+                      args=(preferred,tuple(checked["scope"]["destination_ids"])))
+            st.caption("Abre a revisão existente. Nada muda até você confirmar "
+                       "explicitamente a alteração e salvar o roteiro.")
+        elif 2<=len(selected)<=5:
+            st.info("Nenhuma das alternativas selecionadas pode substituir a base "
+                    "oficial atual. Continue investigando ou adicione uma base elegível.")
+        if unsupported:
+            st.caption("Somente pesquisa, sem aplicação oficial nesta versão: "+
+                       ", ".join(cities[base]["name"] for base in unsupported)+".")
+        st.markdown("#### Continuar montando meu roteiro")
         render_planning_handoff(plan,interests=interests,
                                 discovery=discovery,research=research)
         with st.expander("Metodologia, referências e pesquisas pendentes",expanded=False):
