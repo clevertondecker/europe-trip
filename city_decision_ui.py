@@ -395,7 +395,7 @@ def _render_contextual_review(plan:dict,comparison:dict)->None:
             base=view["official_name"]
             alt=view["candidate_name"]
             if route["before"] is None and route["after"] is None:
-                reason="sem tempo pesquisado nas duas cidades"
+                reason="sem tempo ferroviário comparável nas duas cidades"
             elif route["before"] is None:
                 reason=(base+" sem referência comparável; "+alt+" tem "+
                         str(route["after"])+" min de ida documentados")
