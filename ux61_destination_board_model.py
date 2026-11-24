@@ -7,7 +7,8 @@ from __future__ import annotations
 from ux502_destination_interests_model import (
     PRIORITIES, empty_interests, validate_interests,
 )
-from itinerary_flow_model import selected_rows, UNASSIGNED
+from itinerary_flow_model import selected_rows
+from ux63_timeline_model import project_timeline
 
 
 def build_destination_board(interests, plan, discovery, catalog, weekend_groups=None):
@@ -16,14 +17,7 @@ def build_destination_board(interests, plan, discovery, catalog, weekend_groups=
                                 discovery)
     known = {row["id"]: row for row in discovery["destinations"]}
     visits = {row["id"]: row for row in selected_rows(plan, catalog)}
-    grouped, group_timed = set(), set()
-    if isinstance(weekend_groups, dict):
-        for group in weekend_groups.get("groups", []):
-            ids = group.get("destinations", [])
-            grouped.update(ids)
-            if group.get("start_date") or group.get("period") not in (
-                None, "", "Ainda não definido", "A definir"):
-                group_timed.update(ids)
+    timing = {row["id"]: row for row in project_timeline(plan, catalog, weekend_groups)}
     priorities = {r["destination_id"]: r["priority"] for r in wishes["items"]}
     all_ids = set(priorities) | set(visits)
     rows = []
@@ -33,9 +27,7 @@ def build_destination_board(interests, plan, discovery, catalog, weekend_groups=
         if interest == "discarded" and visit is None:
             continue
         place = known.get(destination_id, {})
-        organized = bool(visit and (
-            visit["period"] != UNASSIGNED or visit["exact_dates"] or
-            destination_id in group_timed))
+        temporal = timing.get(destination_id, {})
         rows.append({
             "id": destination_id,
             "name": place.get("name") or (visit["name"] if visit else destination_id),
@@ -44,9 +36,16 @@ def build_destination_board(interests, plan, discovery, catalog, weekend_groups=
             "wanted": interest is not None and interest != "discarded",
             "planned": visit is not None,
             "attractions_count": len(visit["attractions"]) if visit else 0,
-            "in_group": destination_id in grouped,
-            "organized": organized,
-            "dated": bool(visit and visit["exact_dates"]),
+            "in_group": bool(temporal.get("grouped")),
+            "organized": bool(temporal.get("organized")),
+            "dated": bool(temporal.get("dated")),
+            "group_id": temporal.get("group_id"),
+            "group_name": temporal.get("group_name"),
+            "group_sequence": temporal.get("group_sequence"),
+            "group_period": temporal.get("group_period"),
+            "group_dates": temporal.get("group_dates", []),
+            "individual_period": temporal.get("period"),
+            "individual_dates": temporal.get("dates", []),
             "stage": visit["stage"] if visit else None,
             "planning_support": place.get("planning_support"),
         })

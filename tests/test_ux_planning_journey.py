@@ -28,7 +28,7 @@ class PlanningJourneyTests(unittest.TestCase):
         self.assertEqual((plan,wishes),before)
         added=add_undated_choices(plan,self.catalog,["strasbourg","colmar"],FRANCE_STAGE)
         review=project_planning(added,wishes,self.discovery,self.catalog)
-        self.assertEqual(review["next"],"review")
+        self.assertEqual(review["next"],"organize")
         self.assertEqual(review["counts"]["planned"],2)
         self.assertEqual(review["counts"]["organized"],0)
         self.assertEqual(len(review["pending"]),2)
@@ -36,7 +36,7 @@ class PlanningJourneyTests(unittest.TestCase):
 
     def test_empty_wishlist_existing_draft_is_reviewable(self):
         plan=add_undated_choices(new_plan(),self.catalog,["strasbourg"],FRANCE_STAGE)
-        self.assertEqual(project_planning(plan,empty_interests(),self.discovery,self.catalog)["next"],"review")
+        self.assertEqual(project_planning(plan,empty_interests(),self.discovery,self.catalog)["next"],"organize")
 
     def test_navigation_intent_preserves_plan_and_rejects_account_change(self):
         from ux_planning_journey_ui import request_planning,apply_planning_request
@@ -60,10 +60,10 @@ class PlanningJourneyTests(unittest.TestCase):
             (plan,[],"choose","empty",0),
             (plan,["colmar"],"build","eligible_wishes",1),
             (plan,["angers","paris"],"exploratory","exploratory_only",0),
-            (draft,[],"review","draft_without_wishes",0),
+            (draft,[],"organize","draft_without_wishes",0),
             (draft,["colmar","strasbourg","angers"],"build","draft_with_pending",1),
-            (draft,["colmar","angers"],"review","draft_with_no_eligible_pending",0),
-            (draft,["angers"],"review","draft_with_no_eligible_pending",0),
+            (draft,["colmar","angers"],"organize","draft_with_no_eligible_pending",0),
+            (draft,["angers"],"organize","draft_with_no_eligible_pending",0),
         ]
         for p,ids,action,phase,count in cases:
             with self.subTest(phase=phase,ids=ids):
@@ -245,9 +245,9 @@ render_planning_journey(active_plan(),load_attractions(),
             app.session_state["summary"]=True
             app.run()
             self.assertFalse(app.exception,str(app.exception))
-            self.assertFalse(any("journey-header__eyebrow" in x.value
-                                 for x in app.markdown))
+            self.assertTrue(any("Nossa viagem" in x.value for x in app.markdown))
             self.assertEqual(len(app.metric),3)
+            self.assertEqual({x.label for x in app.metric},{"Incluídos","Organizados","A organizar"})
             app.session_state["summary"]=False
             app.run()
             self.assertFalse(app.exception,str(app.exception))
@@ -300,7 +300,7 @@ render_planning_journey(active_plan(),load_attractions())
             self.assertIn("ux75_private_save_now",{x.key for x in app.button})
             self.assertIn("flow_journey_review_organize",{x.key for x in app.button})
             self.assertEqual(
-                sum(x.label=="Recuperar ou guardar uma cópia privada"
+                sum(x.label=="Cópia e recuperação"
                     for x in app.expander),1)
             self.assertEqual(app.session_state["advisor_plan"]["assignments"],{})
             app.button(key="ux75_private_save_now").click().run()

@@ -28,7 +28,7 @@ MAX_DRAFTS=12
 CONTEXT_KEYS={"area","section","stage","destination_id","search",
               "organize_view","calendar_week","calendar_stage"}
 VALID_ORGANIZE_VIEWS={"Por período ou data","Calendário inteligente",
-                      "Calendário completo"}
+                      "Calendário completo","Viagens agrupadas"}
 
 
 def _json_bytes(value:dict)->bytes:

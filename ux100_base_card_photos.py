@@ -8,7 +8,7 @@ from __future__ import annotations
 from html import escape
 from functools import lru_cache
 import streamlit as st
-from destination_photo_assets import local_destination_photo
+from destination_photo_assets import local_destination_photo, preferred_destination_photo
 from ux501_destination_photo_service import curated_destination_photo
 from attractions_model import load_attractions
 
@@ -20,7 +20,8 @@ def _safe(value) -> str:
 @lru_cache(maxsize=1)
 def _existing_catalog_photos() -> dict:
     """Only catalog-validated, city-ID-matched Commons photo records."""
-    return {item["id"]: item["photo"] for item in load_attractions()["destinations"]
+    return {item["id"]: preferred_destination_photo(item)
+            for item in load_attractions()["destinations"]
             if item.get("photo") and
             item["photo"].get("license_url", "").startswith(
                 "https://creativecommons.org/licenses/")}

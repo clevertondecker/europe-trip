@@ -24,11 +24,12 @@ class PrimaryPrivateSaveTests(unittest.TestCase):
         st.session_state = {
             "ux36_cloud_status": "Salvo em espaço privado",
             "ux36_saved_decisions_fingerprint": "same",
+            "ux36_cloud_generation": 7,
         }
         st.button.return_value = False
         with patch("continuity_ui.save_private_now") as write:
             self.assertTrue(render_primary_private_save({}, {}))
-        self.assertTrue(st.button.call_args.kwargs["disabled"])
+        st.button.assert_not_called()
         st.success.assert_called()
         write.assert_not_called()
 
@@ -56,7 +57,7 @@ class PrimaryPrivateSaveTests(unittest.TestCase):
             self.assertTrue(render_primary_private_save({}, {}))
         self.assertTrue(st.session_state["ux36_cloud_dirty"])
         self.assertTrue(st.session_state["ux36_cloud_status"].startswith("Conflito"))
-        st.error.assert_called_once()
+        st.rerun.assert_called_once()
 
     @patch("continuity_ui._private_store", return_value=object())
     @patch("continuity_ui._current_decisions_fingerprint", return_value="new")
