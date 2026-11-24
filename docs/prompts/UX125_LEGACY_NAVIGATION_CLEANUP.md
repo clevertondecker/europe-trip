@@ -1,0 +1,8 @@
+# UX125 — Retirada definitiva dos painéis legados
+
+Depende de DATA24A (#253) e revisão de DATA24B. Auditar app.py, ux_navigation, base_explorer_ui, base_research_expanded_ui, popovers/expanders, Referências históricas, Cinco bases aprofundadas, Todas as candidatas e explorador de atrações. DATA24A retira Evidências e lacunas; não reintroduzir. Mapear campo a campo evidências, filtros, links, estudos privados, simulações e recuperação de cenários; migrar conteúdo exclusivo às fichas/contextos/relatório, preservar ferramentas sem equivalente. Remover contêiner temporário e navegação legada somente após equivalência comprovada; manter Decisões oficiais/pendências/REC05 em Planejar. Normalizar estados/deep-links, remover renderizadores e CSS órfãos após auditoria de consumidores. Sem novo dashboard, sem alterar TripPlan ou orçamento. Testes de navegação real, estados antigos, preservação de dados, ausência de inventários globais concorrentes e regressão, CI verde. QA desktop/mobile quando disponível.
+
+## Entrega
+Implementar sequencialmente após pré-requisitos. Antes de implementar, atualizar base com alterações integradas ou estabelecer stack revisável; evitar conflitos em app.py e no gerador. Manter draft até código, suíte completa e checks do HEAD confirmados; não mergear sem autorização. Documentar limitações e evidência de testes. DATA25–28 serão definidos a partir dos resultados, não neste PR.
+
+**Status:** especificação publicada; implementação pendente.
