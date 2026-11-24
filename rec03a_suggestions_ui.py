@@ -250,7 +250,10 @@ def _card(candidate, result, names, cities, official, options):
         render_base_context_summary(base)
         missing=candidate["must_visit"]["missing"]
         render_card_choice(base,options,show_selection_hint=False)
-        if st.checkbox("Por que investigar? Ver evidências e limitações",
+        # UX112: primary investigation handoffs must not be hidden behind research details.
+        from rec03b_handoff_ui import render_card_actions
+        render_card_actions(base,"card")
+        if st.checkbox("Detalhes da pesquisa e fontes",
                        key="rec03a_details_"+base):
             from ux105_base_city_context import render_base_context_details
             render_base_context_details(base)
@@ -413,28 +416,14 @@ def render_suggestions(*,plan,discovery=None,research=None):
         selected_card_bases(st.session_state,options),cities,len(result["destinations"])
     ),unsafe_allow_html=True)
     selected=selected_card_bases(st.session_state,options)
+    st.caption("Explore alternativas, compare até cinco cidades e escolha somente uma base por etapa da viagem.")
     st.markdown('<a class="ux111-secondary-action" href="#ux111-picker">'
-                '+ Adicionar cidades para comparar</a>',unsafe_allow_html=True)
-    if len(selected)==1:
-        st.info("Uma cidade selecionada. Conheça-a individualmente ou escolha outra nos cartões abaixo para comparar.")
-        from rec03b_handoff_ui import render_card_actions
-        st.caption("Investigar " + cities[selected[0]]["name"] + " sem alterar seu roteiro")
-        render_card_actions(selected[0],"card",emphasize_profile=True)
-    if 2<=len(selected)<=5:
-        # Stable native fragment target for same-document navigation.
-        st.markdown('<div id="ux111-comparison"></div>',unsafe_allow_html=True)
-        from ux87_inline_base_comparison_ui import render_inline_comparison
-        render_inline_comparison(interests,checked["scope"],selected,
-                                 discovery=discovery,research=research)
-        st.caption("Você pode ajustar as cidades selecionadas nos cartões abaixo.")
-        from rec03b_handoff_ui import render_planning_handoff
-        render_planning_handoff(plan,interests=interests,
-                                discovery=discovery,research=research)
+                'Explorar alternativas ↓</a>',unsafe_allow_html=True)
 
     st.markdown('<div id="ux111-picker"></div>',unsafe_allow_html=True)
     st.markdown(section_heading(
-        "CIDADES-BASE SUGERIDAS", "Sugestões de bases para investigar",
-        "Estas alternativas vêm dos destinos confirmados e das referências de deslocamento disponíveis. Não são um ranking nem mudam seu roteiro.",
+        "EXPLORAR ALTERNATIVAS", "Cidades-base para investigar",
+        "Conheça cada cidade, consulte seu mapa e custo, ou adicione-a à comparação. São alternativas de pesquisa, não um ranking.",
         variant="compact",
     ),unsafe_allow_html=True)
     featured=_featured_ids(result)
@@ -480,9 +469,6 @@ def render_suggestions(*,plan,discovery=None,research=None):
                                  args=("rec03a_page","rec03a_page_shadow"))
             visible = filtered[(page-1)*size:page*size]
             from rec03b_handoff_ui import selected_card_bases
-            _render_quick_comparison(result,names,cities,
-                                     [candidate["base_id"] for candidate in visible],
-                                     selected_card_bases(st.session_state,options))
             with st.container(key="ux99_base_gallery_all"):
                 columns=st.columns(min(2,len(visible)),gap="medium")
                 for index,candidate in enumerate(visible):
@@ -492,8 +478,6 @@ def render_suggestions(*,plan,discovery=None,research=None):
             st.info("Nenhuma cidade corresponde aos filtros.")
     elif featured:
         from rec03b_handoff_ui import selected_card_bases
-        _render_quick_comparison(result,names,cities,featured,
-                                 selected_card_bases(st.session_state,options))
         with st.container(key="ux99_base_gallery_featured"):
             columns=st.columns(min(2,len(featured)),gap="medium")
             for index,base in enumerate(featured):
@@ -503,22 +487,34 @@ def render_suggestions(*,plan,discovery=None,research=None):
         st.info("Não há destaques com referências suficientes para este escopo. "
                 "Use 'Ver todas as cidades' para explorar as alternativas.")
 
-    # The selection remains visible after the cards; callbacks update CHOICE.
-    from rec03b_handoff_ui import render_selection_toolbar
+    # UX112: one explicit journey. Card selection feeds the same CHOICE used by UX87.
+    # The toolbar and comparison follow exploration, so the next action is local.
+    from rec03b_handoff_ui import render_selection_toolbar, render_planning_handoff
     render_selection_toolbar(options,cities)
-    # UX87 uses CHOICE and the confirmed scope; no second manual form.
-    if len(selected)!=1:
-        render_card_selection_summary(result,cities,selection_already_shown=True)
-    if st.checkbox("Metodologia e pesquisas pendentes",
-                   key="rec03a_research_open"):
+    selected=selected_card_bases(st.session_state,options)
+    st.markdown('<div id="ux111-comparison"></div>',unsafe_allow_html=True)
+    st.markdown(section_heading(
+        "MINHA COMPARAÇÃO", "Comparar minhas cidades",
+        "Compare várias alternativas para os mesmos destinos. O roteiro terá somente uma cidade-base por etapa.",
+        variant="compact",
+    ),unsafe_allow_html=True)
+    if 2<=len(selected)<=5:
+        from ux87_inline_base_comparison_ui import render_inline_comparison
+        render_inline_comparison(interests,checked["scope"],selected,
+                                 discovery=discovery,research=research)
+    elif len(selected)==1:
+        st.info("Uma cidade selecionada. Adicione mais uma para comparar ou conheça a ficha individual no cartão.")
+    else:
+        st.info("Selecione de duas a cinco cidades nos cartões para começar sua comparação.")
+
+    st.markdown("#### Continuar para Meu planejamento")
+    render_planning_handoff(plan,interests=interests,
+                            discovery=discovery,research=research)
+    with st.expander("Metodologia, referências e pesquisas pendentes",expanded=False):
         _render_comparison_groups(result,names,cities)
         from rec05_priority_research_ui import render_research_result
         render_research_result(result,key="rec05_suggestions")
-    if len(selected)<2:
-        if st.checkbox("Continuar para o roteiro",key="rec03a_planning_open"):
-            from rec03b_handoff_ui import render_planning_handoff
-            render_planning_handoff(plan,interests=interests,
-                                    discovery=discovery,research=research)
+
 
 
 def render_recommendation_activity(*,plan,discovery=None,research=None):
