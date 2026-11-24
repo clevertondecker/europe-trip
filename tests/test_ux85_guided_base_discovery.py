@@ -106,18 +106,19 @@ class GuidedComparisonTests(unittest.TestCase):
         self.assertFalse(any(b.key=="rec03a_confirm_subset" for b in a.button))
 
 
-    def test_single_cta_follows_all_visible_cards_in_each_view(self):
-        # Structural guard for UX85's temporary native CTA; UX87 will replace
-        # this handoff region with inline comparison after the same cards.
+    def test_exploration_precedes_one_inline_comparison(self):
+        # UX112 removes the redundant preview and secondary focus selection.
         source=inspect.getsource(render_suggestions)
-        self.assertEqual(source.count("render_card_selection_summary(result,cities,selection_already_shown=True)"),1)
+        self.assertNotIn("render_card_selection_summary(",source)
+        self.assertNotIn("_render_quick_comparison(",source)
         self.assertLess(source.index("for index,candidate in enumerate(visible):"),
-                        source.index("render_card_selection_summary(result,cities,selection_already_shown=True)"))
-        self.assertLess(source.index("_render_quick_comparison(result,names,cities,"),
-                        source.index("for index,candidate in enumerate(visible):"))
+                        source.index("render_selection_toolbar(options,cities)"))
         self.assertLess(source.index("for index,base in enumerate(featured):"),
-                        source.index("render_card_selection_summary(result,cities,selection_already_shown=True)"))
+                        source.index("render_selection_toolbar(options,cities)"))
+        self.assertLess(source.index("render_selection_toolbar(options,cities)"),
+                        source.index("render_inline_comparison(interests,checked"))
         self.assertIn("size=4",source)
+        self.assertIn("render_planning_handoff(plan,interests=interests",source)
 
     def test_two_highlight_cards_show_inline_comparison(self):
         a=self.app()
@@ -155,8 +156,7 @@ class GuidedComparisonTests(unittest.TestCase):
                 self.assertTrue(any("ux97-table" in x.value for x in a.markdown))
                 self.assertFalse(any(x.key=="rec03a_handoff_compare" for x in a.button))
                 self.assertFalse(any(x.key==CHOICE+"_widget" for x in a.multiselect))
-                self.assertEqual(len([x for x in a.selectbox
-                                      if x.key=="rec03a_focus_city"]),1)
+                self.assertFalse(any(x.key=="rec03a_focus_city" for x in a.selectbox))
         a.session_state[CHOICE]=[]
         a.run()
         self.assertFalse(a.exception,[x.message for x in a.exception])
