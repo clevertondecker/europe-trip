@@ -160,28 +160,120 @@ def _cancel_batch():
     _show("review")
 
 
+def _workspace_cancel_edit():
+    state=st.session_state
+    old=state.pop("flow_journey_workspace_edit",None)
+    if old:
+        state.pop("flow_edit_attr_"+old,None)
+        state.pop("flow_edit_period_"+old,None)
+    state.pop("flow_removing",None)
+
+
+def _workspace_edit(destination_id):
+    _workspace_cancel_edit()
+    st.session_state["flow_journey_workspace_edit"]=destination_id
+
+
+def _workspace_organize(destination_id, stage):
+    from itinerary_flow_ui import _organize_destination_changed
+    _workspace_cancel_edit()
+    _show("organize")
+    state=st.session_state
+    state["ux_organize_view"]="Por período ou data"
+    state["flow_active_stage"]=stage
+    state["flow_stage"]=stage
+    state["flow_organize_destination"]=destination_id
+    _organize_destination_changed()
+
+
+def _workspace_base(plan):
+    from base_scenario_model import base_options
+    return next((x["name"] for x in base_options(include_candidates=True)
+                 if x["id"]==plan["base_city"]),plan["base_city"])
+
+
+def _workspace_cards(plan,catalog,view):
+    from itinerary_flow_model import get_choice
+    from itinerary_flow_ui import _edit_destination, _navigate
+    from ux47_photo_ui import photo_markup, photo_credit
+    from ux501_destination_photo_service import curated_destination_photo
+    by_id={r["id"]:r for r in view["board"]}
+    places={r["id"]:r for r in _discovery()["destinations"]}
+    primary_places={r["id"]:r for r in catalog["destinations"]}
+    stages=tuple(sorted(STAGES,key=lambda stage:stage!=st.session_state.get("flow_journey_stage_hint")))
+    for stage in stages:
+        rows=[r for r in view["rows"] if r["stage"]==stage]
+        days=plan["italy_days"] if stage==ITALY_STAGE else plan["total_days"]-plan["italy_days"]
+        organized=sum(by_id[r["id"]]["organized"] for r in rows)
+        st.markdown("##### "+LABELS_STAGE[stage])
+        st.caption(f"{days} dias · {len(rows)} incluídos · {organized} organizados"+
+                   (" · Base: "+_workspace_base(plan) if stage==FRANCE_STAGE else ""))
+        if not rows:
+            st.info("Nenhum destino incluído nesta etapa.")
+            if stage==ITALY_STAGE:
+                st.button("Revisar proposta italiana",key="flow_workspace_italy",
+                          on_click=_navigate,args=("Meu roteiro","Itália"))
+            else:
+                st.button("Explorar destinos",key="flow_workspace_empty_france",on_click=_discover)
+        q=st.text_input("Buscar destino nesta etapa",key="flow_journey_workspace_search_"+stage) if len(rows)>8 else ""
+        visible=[r for r in rows if q.casefold() in r["name"].casefold()]
+        limit=st.session_state.get("flow_journey_workspace_limit_"+stage,8)
+        focus=st.session_state.get("flow_journey_workspace_edit")
+        visible.sort(key=lambda r:r["id"]!=focus)
+        for row in visible[:limit]:
+            key=row["id"]
+            timing=by_id[key]
+            place=places.get(key,{})
+            photo=curated_destination_photo(key) or place.get("photo") or primary_places.get(key,{}).get("photo")
+            choice=get_choice(catalog,key)
+            names={a["id"]:a["name"] for a in choice["attractions"]}
+            with st.container(border=True,key="flow_workspace_card_"+key):
+                left,right=st.columns([1,4],gap="small",vertical_alignment="top")
+                with left:
+                    st.html(photo_markup(photo,row["name"]))
+                    credit=photo_credit(photo)
+                    if credit:
+                        st.caption(credit)
+                with right:
+                    st.markdown("**"+row["name"]+"**")
+                    st.caption((timing["country"] or ("Itália" if stage==ITALY_STAGE else "País a verificar"))+
+                               " · "+("Organizado" if timing["organized"] else "A organizar"))
+                    st.write(" · ".join(names.get(a,a) for a in row["attractions"]) or "Atrações a escolher")
+                    if timing["individual_period"]:
+                        st.caption("Período individual: "+timing["individual_period"])
+                    if timing["individual_dates"]:
+                        st.caption("Data individual: "+", ".join(timing["individual_dates"]))
+                    if timing["group_name"]:
+                        st.caption("Viagem: "+timing["group_name"])
+                    if timing["group_period"]:
+                        st.caption("Período da viagem: "+timing["group_period"])
+                    if timing["group_dates"]:
+                        dates=timing["group_dates"]
+                        st.caption("Intervalo da viagem: "+dates[0]+" a "+dates[-1])
+                    if not timing["individual_dates"]:
+                        st.caption("Dia individual a definir")
+                    a,b=st.columns(2)
+                    a.button("Editar passeio",key="flow_workspace_edit_"+key,on_click=_workspace_edit,args=(key,),width="stretch")
+                    b.button("Organizar",key="flow_workspace_organize_"+key,on_click=_workspace_organize,args=(key,stage),width="stretch")
+                if focus==key:
+                    _edit_destination(row,catalog,force_expanded=True)
+                    st.button("Cancelar edição",key="flow_workspace_cancel_"+key,on_click=_workspace_cancel_edit)
+        if len(visible)>limit:
+            st.button(f"Mostrar mais {len(visible)-limit} destinos",key="flow_workspace_more_"+stage,
+                      on_click=lambda s=stage:st.session_state.update(
+                          {"flow_journey_workspace_limit_"+s:st.session_state.get("flow_journey_workspace_limit_"+s,8)+8}))
+        if visible:
+            st.caption(f"Exibindo {min(len(visible),limit)} de {len(visible)} destinos")
+
+
 def render_review(plan,catalog,view):
     from continuity_ui import render_primary_private_save,render_continuity_panel
     from itinerary_flow_model import get_choice
     st.markdown("#### Revisar e salvar meu rascunho")
-    st.caption(f'{plan["italy_days"]} dias de lua de mel · {plan["total_days"]-plan["italy_days"]} dias de temporada europeia · Base oficial de referência: {plan["base_city"]}. Nenhuma reserva confirmada.')
+    st.caption(f'{plan["italy_days"]} dias de lua de mel · {plan["total_days"]-plan["italy_days"]} dias de temporada europeia · Base oficial de referência: {_workspace_base(plan)}. Nenhuma reserva confirmada.')
     if not view["rows"]:
         st.info("Nenhum destino incluído. Você pode manter sua lista de desejos sem inventar passeios.")
-    for stage in STAGES:
-        rows=[r for r in view["rows"] if r["stage"]==stage]
-        st.markdown("**"+LABELS_STAGE[stage]+" · "+str(len(rows))+" destinos**")
-        if rows:
-            def attraction_names(row):
-                choice=get_choice(catalog,row["id"])
-                names={a["id"]:a["name"] for a in choice["attractions"]}
-                return ", ".join(names.get(a,a) for a in row["attractions"]) or "A definir"
-            st.dataframe([{"Destino":r["name"],"Atrações":attraction_names(r),
-                           "Período":r["period"] if r["period"]!=UNASSIGNED else "A definir",
-                           "Datas":", ".join(r["exact_dates"]) or "A definir",
-                           "Estado":"Organizado" if r["period"]!=UNASSIGNED or r["exact_dates"] else "Incluído · a organizar"}
-                          for r in rows],hide_index=True,width="stretch")
-        else:
-            st.caption("Nenhum destino incluído nesta etapa.")
+    _workspace_cards(plan,catalog,view)
     if view["pending"]:
         st.info(f'{len(view["pending"])} destino(s) ainda sem período ou data. Isso não impede salvar o rascunho.')
     if view["eligible_count"]:
@@ -343,6 +435,8 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
         render_build(plan,catalog,view)
     elif state[VIEW]=="review":
         st.markdown('<span id="journey-review-anchor"></span>',unsafe_allow_html=True)
+        render_review(plan,catalog,view)
+    elif state[VIEW] is None and state.get("ux_section")=="Meu planejamento" and view["rows"]:
         render_review(plan,catalog,view)
     elif state[VIEW]=="organize":
         st.markdown('<span id="journey-organize-anchor"></span>',unsafe_allow_html=True)
