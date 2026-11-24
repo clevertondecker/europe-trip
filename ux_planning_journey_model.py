@@ -43,8 +43,11 @@ def project_planning(plan, interests, discovery, catalog, *, private_saved=False
                        "pending":stage_counts["planned"]-stage_counts["organized"],
                        "eligible":len(batches[stage]["eligible"]),
                        "groups":len({r["group_id"] for r in stage_rows if r["group_id"]})}
-    next_stage=next((stage for stage in (ITALY_STAGE,FRANCE_STAGE)
-                     if stages[stage]["eligible" if action=="build" else "pending"]),None) if action in ("build","organize") else None
+    next_stage=None
+    if action in ("build","organize"):
+        field="eligible" if action=="build" else "pending"
+        next_stage=next((stage for stage in (ITALY_STAGE,FRANCE_STAGE)
+                         if stages[stage][field]),None)
     commitments=[]
     seen_groups=set()
     for row in board:
