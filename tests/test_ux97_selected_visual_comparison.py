@@ -46,6 +46,8 @@ class VisualProjectionTests(unittest.TestCase):
                 before=deepcopy(data)
                 html=selected_matrix_html(data)
                 self.assertIn('class="ux97-table"',html)
+                self.assertIn('style="min-width:'+str(max(520,160+170*n))+'px"',html)
+                self.assertIn('role="region"',html)
                 self.assertEqual(html.count("<tr>"),3)
                 self.assertEqual(html.count("<td>"),n*2)
                 self.assertEqual(html.count('<strong class="ux97-cell-time">1h15</strong>'),n*2)
