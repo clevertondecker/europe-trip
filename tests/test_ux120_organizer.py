@@ -31,6 +31,7 @@ class OrganizerTests(unittest.TestCase):
         proposals=suggest_calendar(plan,catalog,load_base_routes(),weekend_groups=state,stage=FRANCE_STAGE)
         from ux48_weekend_groups_model import _trip_days
         forbidden=set(_trip_days(dates[0],0)+_trip_days(dates[1],1))
+        self.assertTrue(proposals)
         for proposal in proposals:
             self.assertFalse(set(proposal["assignments"]) & forbidden)
             self.assertNotIn("basel",proposal["assignments"].values())

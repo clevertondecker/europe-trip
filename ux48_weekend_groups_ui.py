@@ -21,6 +21,7 @@ def _save(value, message="Agrupamentos atualizados"):
     if previous!=value:
         st.session_state.pop("ux35_review_proposal",None)
         st.session_state.pop("ux35_proposals",None)
+        st.session_state.pop("ux35_confirm_ack",None)
     st.session_state["ux48_weekend_groups"] = value
     st.session_state["ux36_cloud_dirty"] = True
     st.session_state["ux48_weekend_message"] = message + (
@@ -176,7 +177,8 @@ def render_weekend_planner(plan, catalog):
             st.markdown("**" + group["name"] + "**")
             st.write(" → ".join(byid[d]["name"] for d in group["destinations"]))
             status = "Em estudo" if group["status"] == "estudo" else "Planejado · não reservado"
-            end = (date.fromisoformat(group["start_date"]) + timedelta(days=max(1, group["nights"]))).isoformat() if group["start_date"] else None
+            from ux48_weekend_groups_model import _trip_days
+            end = _trip_days(group["start_date"],group["nights"])[-1] if group["start_date"] else None
             dates = _date_label(group["start_date"])
             if end:
                 dates += " até " + _date_label(end)

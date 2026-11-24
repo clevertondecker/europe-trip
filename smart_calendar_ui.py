@@ -67,12 +67,25 @@ def _calendar_overview(plan,catalog,preferences,stage=None):
     italy=sum(r["stage"]==ITALY_STAGE for r in days)
     setup=sum(r["setup"] for r in days)
     work=sum(r["workday"] for r in days)
-    weekend=sum("Fim de semana" in r["activity"] for r in days)
+    from ux48_weekend_groups_model import validate_groups, _trip_days, _rest_days
+    sidecar=st.session_state.get("ux48_weekend_groups")
+    occupied={}
+    if sidecar is not None:
+        sidecar=validate_groups(sidecar,plan,catalog)
+        for group in sidecar["groups"]:
+            if group["start_date"]:
+                for day in _trip_days(group["start_date"],group["nights"]):
+                    occupied[day]="Viagem: "+group["name"]
+        for start in sidecar["rest_weekends"]:
+            for day in _rest_days(start):
+                occupied[day]="Descanso escolhido"
+    weekend=sum("Fim de semana" in r["activity"] and r["date"] not in occupied
+                and not r["occupied_by"] for r in days)
     a,b,c,d=st.columns(4)
     a.metric("Itália",italy)
     b.metric("Instalação",setup)
     c.metric("Dias de trabalho",work)
-    d.metric("Fins de semana livres",weekend)
+    d.metric("Dias de fim de semana livres",weekend)
     if "ux35_stage" not in st.session_state:
         st.session_state["ux35_stage"]=st.session_state.get("flow_active_stage",ITALY_STAGE)
     if stage not in (ITALY_STAGE,FRANCE_STAGE):
@@ -83,6 +96,8 @@ def _calendar_overview(plan,catalog,preferences,stage=None):
     filtered=[r for r in days if r["stage"]==stage]
     weeks=sorted({(date.fromisoformat(r["date"])-date.fromisoformat(
         plan["departure_date"])).days//7 for r in filtered})
+    if st.session_state.get("ux35_week") not in weeks:
+        st.session_state["ux35_week"]=weeks[0]
     chosen=st.selectbox("Semana da viagem",weeks,
                         format_func=lambda i:("Semana "+str(i+1)),
                         key="ux35_week")
@@ -94,6 +109,7 @@ def _calendar_overview(plan,catalog,preferences,stage=None):
                    "Contexto":r["activity"],
                    "Passeio":names.get(r["occupied_by"],"Sem data aprovada")
                                if r["occupied_by"] else "Livre/sem passeio",
+                   "Viagem/descanso":occupied.get(r["date"],"—"),
                    "Situação":r["date_status"]} for r in week],
                  hide_index=True,width="stretch")
     st.caption("Datas **aprovadas no roteiro** não são reservas. A grade mostra "
@@ -124,8 +140,9 @@ def _draft_download(proposal):
                 imported=json.loads(data.decode("utf-8"))
                 # Validate against current plan and current selected catalog before
                 # storing; a public JSON cannot bypass revision/plan safeguards.
-                review_calendar_change(active_plan(),imported,
-                                       st.session_state["ux35_catalog"])
+                _review_current_calendar(active_plan(),imported,
+                                         st.session_state["ux35_catalog"])
+                st.session_state.pop("ux35_confirm_ack",None)
                 st.session_state["ux35_review_proposal"]=imported
                 st.session_state["ux35_message"]=(
                     "Rascunho importado e validado, aguardando confirmação.")
@@ -134,13 +151,22 @@ def _draft_download(proposal):
                 st.error("Não foi possível recuperar: "+str(exc))
 
 
+def _review_current_calendar(plan,proposal,catalog):
+    report=review_calendar_change(plan,proposal,catalog)
+    sidecar=st.session_state.get("ux48_weekend_groups")
+    if sidecar is not None:
+        from ux48_weekend_groups_model import validate_groups
+        validate_groups(sidecar,report["candidate"],catalog)
+    return report
+
+
 def _review_panel(plan,catalog):
     proposal=st.session_state.get("ux35_review_proposal")
     if not proposal:return
     with st.container(border=True):
         st.markdown("#### Revisar antes de aplicar")
         try:
-            report=review_calendar_change(plan,proposal,catalog)
+            report=_review_current_calendar(plan,proposal,catalog)
         except (ValueError,TypeError,KeyError) as exc:
             st.warning("Proposta precisa ser recalculada: "+str(exc))
             st.session_state.pop("ux35_review_proposal",None)
@@ -229,6 +255,7 @@ def _suggest(plan,catalog,routes,preferences):
                 " — "+x["reason"] for x in proposal["unresolved"]))
         if st.button("Revisar esta sugestão",key="ux35_review"):
             st.session_state["ux35_review_proposal"]=proposal
+            st.session_state.pop("ux35_confirm_ack",None)
             st.rerun()
         _draft_download(proposal)
 
@@ -269,7 +296,9 @@ def _manual(plan,catalog):
                 proposal=manual_calendar_move(
                     plan,catalog,chosen,row["stage"],target or None,
                     from_day=old or "")
+                _review_current_calendar(plan,proposal,catalog)
                 st.session_state["ux35_review_proposal"]=proposal
+                st.session_state.pop("ux35_confirm_ack",None)
                 st.rerun()
             except (ValueError,KeyError) as exc:
                 st.warning(str(exc))
@@ -299,7 +328,11 @@ def render_smart_calendar(plan:dict,catalog:dict,routes:dict,
         preferences=_preferences()
     except (ValueError,KeyError,TypeError) as exc:
         st.warning(str(exc));return
-    _calendar_overview(plan,catalog,preferences,stage)
+    try:
+        _calendar_overview(plan,catalog,preferences,stage)
+    except (ValueError,KeyError,TypeError) as exc:
+        st.error("Revise os agrupamentos antes de organizar: "+str(exc))
+        return
     if show_groups and st.session_state.get("ux35_stage")==FRANCE_STAGE:
         from ux48_weekend_groups_ui import render_weekend_planner
         render_weekend_planner(active_plan(),catalog)

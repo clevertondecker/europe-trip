@@ -541,7 +541,11 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
             _selected_stage(view["rows"],stage,catalog)
         else:
             from ux63_timeline_ui import render_timeline
-            render_timeline(active_plan(),catalog,stage)
+            def focus_visit(destination_id):
+                from itinerary_flow_ui import _organize_destination_changed
+                state["flow_organize_destination"]=destination_id
+                _organize_destination_changed()
+            render_timeline(active_plan(),catalog,stage,on_organize=focus_visit,pending_first=True)
         st.button("Revisar e salvar sem definir outras datas",key="flow_journey_skip_dates",
                   on_click=_show,args=("review",))
     with st.expander("Ferramentas complementares",expanded=False):
