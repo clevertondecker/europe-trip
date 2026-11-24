@@ -55,6 +55,15 @@ def apply_pending_restore(catalog:dict)->None:
                              catalog,confirmed=True,
                              current_archive=_private_archive(bootstrap(),catalog))
         context=pending["archive"]["continuation"]
+        # A same-plan restore can raise the revision to preserve monotonicity.
+        # Rebind only unapproved drafts from the validated archive, then validate
+        # against the restored plan before publishing any part of the session.
+        from smart_calendar_model import review_calendar_change
+        drafts=deepcopy(pending["archive"]["calendar_drafts"])
+        for draft in drafts:
+            if draft["base_revision"]!=plan["revision"]:
+                draft["base_revision"]=plan["revision"]
+            review_calendar_change(plan,draft,catalog)
         state["advisor_plan"]=plan
         state["advisor_saved_snapshot"]=None
         state["advisor_github_sha"]=None
@@ -78,7 +87,7 @@ def apply_pending_restore(catalog:dict)->None:
         # JSON workspaces are still drafts, never changes to the TripPlan.
         state["ux34_drafts"]={d["name"]:deepcopy(d) for d
                              in pending["archive"]["city_studies"]}
-        state["ux35_proposals"]=deepcopy(pending["archive"]["calendar_drafts"])
+        state["ux35_proposals"]=drafts
         state["ux41_favorites"]=list(pending["archive"].get("city_favorites",[]))
         state["ux502_interests"]=deepcopy(pending["archive"].get("destination_interests",empty_interests()))
         from rec03a_session import clear_recommendation_context
@@ -89,6 +98,7 @@ def apply_pending_restore(catalog:dict)->None:
         state["ux48_weekend_groups"]=deepcopy(pending["archive"]["weekend_groups"])
         state.pop("ux35_review_proposal",None)
         state.pop("ux36_review",None)
+        state.pop("ux36_restore_ack",None)
         sync_legacy_view(plan,state,include_controls=True)
         state["ux36_local_restored"]=True
         state["ux36_cloud_dirty"]=True
@@ -421,12 +431,15 @@ def render_continuity_panel(plan:dict,catalog:dict)->None:
                                                    current_archive=_private_archive(plan,catalog))
                 if (current_review["expected_current_fingerprint"]!=
                     pending["preview"]["expected_current_fingerprint"] or
+                    current_review["expected_current_decisions_fingerprint"]!=
+                    pending["preview"]["expected_current_decisions_fingerprint"] or
                     current_review["expected_archive_fingerprint"]!=
                     pending["preview"]["expected_archive_fingerprint"]):
                     raise ValueError("O roteiro foi alterado. Revise o backup novamente")
             except (ValueError,KeyError,TypeError) as exc:
                 st.warning(str(exc))
                 st.session_state.pop("ux36_review",None)
+                st.session_state.pop("ux36_restore_ack",None)
                 return
             summary=pending["preview"]
             st.markdown("#### Antes de recuperar")
@@ -469,9 +482,4 @@ def render_continuity_panel(plan:dict,catalog:dict)->None:
                 st.session_state.pop("ux36_restore_ack",None)
                 st.rerun()
         if _private_store() is None:
-            st.caption("**Armazenamento:** nesta sessão ou em backup JSON local. "
-                       "Sincronização privada requer configuração no Streamlit Cloud.")
-        else:
-            st.caption("**Armazenamento:** cópia privada disponível para o proprietário autenticado. "
-                       "Salvamento automático só funciona após ativação explícita; "
-                       "rascunhos e contexto podem exigir salvar manualmente.")
+            st.caption("Sem nuvem privada, baixe uma cópia antes de sair.")

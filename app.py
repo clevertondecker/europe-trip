@@ -74,6 +74,9 @@ st.set_page_config(page_title="Nossa Europa 2027", page_icon="🌍", layout="wid
 # Authenticated new sessions recover the latest saved GitHub plan.
 _recover_saved_plan()
 bootstrap_trip()
+_rec_config = _owner_config()
+_rec_user = (_logged_in_user() if _rec_config.get('google_configured') and _rec_config.get('owner_email') else None)
+sync_identity(st.session_state, identity_token(account_view_state(_rec_config, _rec_user), _rec_user))
 # Manual recovery is committed before nav/widgets; no automatic cloud writes.
 apply_pending_restore(load_attractions())
 restore_private_on_start(load_attractions())
@@ -87,9 +90,6 @@ if restored_days is not None:
     st.session_state["ux_days"]=max(40,min(80,int(restored_days)))
     st.session_state["unified_stay"]=st.session_state["ux_days"]
 bootstrap_ux(st.session_state)
-_rec_config = _owner_config()
-_rec_user = (_logged_in_user() if _rec_config.get('google_configured') and _rec_config.get('owner_email') else None)
-sync_identity(st.session_state, identity_token(account_view_state(_rec_config, _rec_user), _rec_user))
 apply_navigation_request(st.session_state)
 apply_recommendation_navigation(st.session_state)
 apply_planning_request(st.session_state)
@@ -1814,6 +1814,9 @@ elif page == "Pesquisas & decisões":
             selection_mode="single",label_visibility="collapsed")
         if view is None: view="Fila por prioridade"
     if view=="Fila por prioridade":
+        # REC05 remains available in the research owner's page, not Meus destinos.
+        from rec05_priority_research_ui import render_research_from_session
+        render_research_from_session(key="rec05_plan")
         filters=st.columns([1,1],gap="medium")
         with filters[0]:
             priority=st.selectbox("Prioridade",["Todas","P0","P1","P2","P3"],
