@@ -1141,3 +1141,26 @@ div[class*="st-key-ux124b-profile-actions"] button{white-space:normal;overflow-w
  div[class*="st-key-ux124b-profile-actions"] [data-testid="stHorizontalBlock"]{flex-wrap:wrap;}
  div[class*="st-key-ux124b-profile-actions"] [data-testid="stColumn"]{flex:1 1 min(100%,130px);min-width:0;}
 }
+
+/* UX124C: compact header and route preview; scoped to the existing profile.
+   The wrapper reserves the exact photo height, including for remote fallback;
+   the attribution is a separate normal-flow element, never an overlay. */
+.st-key-ux124b-profile-header [data-testid="stVerticalBlock"]{gap:.65rem}
+.st-key-ux124b-profile-header [data-testid="stMarkdownContainer"] h2{margin:0;padding-top:0}
+.st-key-ux124b-profile-header .st-key-ux109-city-photo{max-width:260px;min-width:0}
+.st-key-ux124b-profile-header .st-key-ux109-city-photo [data-testid="stImage"] img,
+.st-key-ux124b-profile-header .st-key-ux109-city-photo .ux100-photo-fallback{
+ width:100%;height:120px;max-height:none;object-fit:cover;display:block
+}
+.st-key-ux124b-profile-header .st-key-ux109-city-photo [data-testid="stVerticalBlock"]{gap:.3rem}
+.st-key-ux124b-profile-header .ux100-photo-credit{
+ position:static;margin:0;padding:4px 2px 3px;line-height:1.4;white-space:normal
+}
+.ux124b-routes{max-width:760px;}
+.ux124b-routes li{grid-template-columns:minmax(0,1fr) minmax(0,1fr);}
+.ux124c-flag{display:inline-block;white-space:nowrap;margin-right:.22rem}
+@media(max-width:760px){
+ .st-key-ux124b-profile-header .st-key-ux109-city-photo{max-width:100%}
+ .st-key-ux124b-profile-header .st-key-ux109-city-photo [data-testid="stImage"] img,
+ .st-key-ux124b-profile-header .st-key-ux109-city-photo .ux100-photo-fallback{height:120px}
+}

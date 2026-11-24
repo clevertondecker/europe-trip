@@ -105,6 +105,7 @@ def city_profile(base_id,*,research=None,discovery=None,interests=None):
                 if entry not in fares:
                     fares.append(entry)
         routes.append({"destination_id":dest,"name":names[dest]["name"],
+                       "country":names[dest]["country"],
                        "priority":None,"cell":cell,"fares":fares,
                        "observations":deepcopy(row["observations"]),
                        "historical_typical":row["typical_oneway_min"],
@@ -141,7 +142,7 @@ def city_profile(base_id,*,research=None,discovery=None,interests=None):
     access_observations=[r for r in access["observations"] if r["destination_id"]==base_id]
     # Destination suggestions are based on documented one-way minima, not
     # invented proximity, feasibility or a new ranking of the bases.
-    excursions=[{"destination_id":r["destination_id"],"name":r["name"],
+    excursions=[{"destination_id":r["destination_id"],"name":r["name"],"country":r["country"],
                  "cell":r["cell"],"attraction_count":names[r["destination_id"]]["attraction_count"],
                  "source_url":names[r["destination_id"]].get("source_url")}
                 for r in routes if r["cell"]["category"] in ("historical","reference_only")

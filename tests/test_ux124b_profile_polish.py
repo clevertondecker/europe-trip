@@ -5,7 +5,7 @@ from streamlit.testing.v1 import AppTest
 from base_research_expanded_model import load_research
 from city_profiles_model import load_profiles
 from ux124_city_profile_model import city_profile,personalize_routes
-from ux124b_profile_presentation import city_intro,practical_facts,compact_money,route_preview,route_display,route_list_html,ticket_text,typical_time_label,simulation_note
+from ux124b_profile_presentation import city_intro,practical_facts,compact_money,route_preview,route_display,route_list_html,ticket_text,typical_time_label,simulation_note,destination_name,logistics_table,editorial_risk_text
 
 class ProfilePolishTests(unittest.TestCase):
     def test_intro_and_fact_dedup_without_mutating_any_profile(self):
@@ -67,6 +67,47 @@ class ProfilePolishTests(unittest.TestCase):
             self.assertIn("não cotados",note)
         self.assertIn("provisões gerais",simulation_note(capability_for("annecy")))
         self.assertIn("custos históricos",simulation_note(capability_for("mulhouse")))
+
+    def test_flags_from_destination_country_and_unknown_fallback(self):
+        view=city_profile("mulhouse")
+        rows={r["destination_id"]:r for r in view["routes"]}
+        self.assertEqual(destination_name(rows["basel"]),"🇨🇭 Basel")
+        self.assertEqual(destination_name(rows["colmar"]),"🇫🇷 Colmar")
+        self.assertEqual(destination_name(rows["paris"]),"🇫🇷 Paris")
+        self.assertEqual(destination_name({"name":"Basel"}),"Basel")
+        html=route_list_html([rows["basel"],rows["colmar"]])
+        self.assertIn('aria-label="Suíça"',html)
+        self.assertIn("🇨🇭",html)
+        self.assertIn("🇫🇷",html)
+        self.assertTrue(all(r["country"]==rows[r["destination_id"]]["country"] for r in view["excursions"]))
+
+    def test_logistics_hides_only_wholly_unknown_typical_column(self):
+        unknown={"name":"A","country":"França","priority":"interested",
+                 "cell":{"label":"20 min · histórico","typical_label":"Tempo médio não documentado"},
+                 "historical_typical":None}
+        known={**unknown,"name":"B","cell":{"label":"1h34","typical_label":"1h46 · média reconsultada; 1h56 no snapshot"}}
+        data,visible=logistics_table([unknown])
+        self.assertFalse(visible)
+        self.assertNotIn("Tempo médio/típico",data[0])
+        self.assertEqual(data[0]["Destino"],"🇫🇷 A")
+        data,visible=logistics_table([unknown,known])
+        self.assertTrue(visible)
+        self.assertEqual(data[0]["Tempo médio/típico"],"—")
+        self.assertEqual(data[1]["Tempo médio/típico"],known["cell"]["typical_label"])
+        self.assertIn("avaliação histórica",editorial_risk_text("Menor vida urbana na matriz editorial"))
+        self.assertNotIn("matriz editorial",editorial_risk_text("Menor vida urbana na matriz editorial"))
+
+    def test_daily_life_no_local_grocery_sample_is_not_a_price(self):
+        app=AppTest.from_string(
+            'from ux124_city_profile_ui import render_city_profile\n'
+            'render_city_profile("mulhouse")',default_timeout=120).run()
+        app.segmented_control(key="ux124_topic_mulhouse").set_value("Vida cotidiana").run()
+        self.assertFalse(app.exception,[e.message for e in app.exception])
+        self.assertTrue(any(m.label=="Restaurante para dois" for m in app.metric))
+        self.assertFalse(any(m.label=="Supermercado · cesta local" and m.value=="Não pesquisado" for m in app.metric))
+        self.assertTrue(any("Sem amostra local" in c.value for c in app.caption))
+        self.assertTrue(any("Premissa histórica compartilhada" in e.label for e in app.expander))
+        self.assertTrue(any("15" in str(x) for x in app.dataframe[0].value["Temperatura média (°C)"]))
 
     def test_currency_and_ticket(self):
         self.assertEqual(compact_money(1350),"€ 1.350")
