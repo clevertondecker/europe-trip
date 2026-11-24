@@ -8,6 +8,7 @@ from __future__ import annotations
 from datetime import date
 
 from calendar_model import calendar_plan
+from destination_identity import outing_destination_id
 
 
 def validate_new_assignments(plan:dict, assignments:dict, *,
@@ -23,8 +24,9 @@ def validate_new_assignments(plan:dict, assignments:dict, *,
             continue  # Preserve load/edit compatibility with older saved plans.
         if not isinstance(day,str) or day not in schedule:
             raise ValueError("Passeio fora das datas da viagem")
-        eligible = dest in plan["packages"] or any(
-            v["destination_id"] == dest and v["stage"] == "França"
+        identity = outing_destination_id(dest)
+        eligible = identity in {outing_destination_id(d) for d in plan["packages"]} or any(
+            outing_destination_id(v["destination_id"]) == identity and v["stage"] == "França"
             for v in plan.get("flexible_visits", []))
         if not eligible:
             raise ValueError("Passeio agendado sem cidade incluída no roteiro")
