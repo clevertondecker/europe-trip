@@ -9,7 +9,7 @@ from ux502_destination_interests_model import (
 )
 from itinerary_flow_model import selected_rows
 from destination_identity import canonical_destination_id
-from itinerary_eligibility import itinerary_eligibility
+from itinerary_eligibility import itinerary_eligibility, eligibility_index
 from ux63_timeline_model import project_timeline
 
 
@@ -23,6 +23,7 @@ def build_destination_board(interests, plan, discovery, catalog, weekend_groups=
     priorities = {canonical_destination_id(r["destination_id"]): r["priority"] for r in wishes["items"]}
     all_ids = set(priorities) | set(visits)
     rows = []
+    index = eligibility_index(catalog)
     for destination_id in all_ids:
         interest = priorities.get(destination_id)
         visit = visits.get(destination_id)
@@ -49,7 +50,7 @@ def build_destination_board(interests, plan, discovery, catalog, weekend_groups=
             "individual_period": temporal.get("period"),
             "individual_dates": temporal.get("dates", []),
             "stage": visit["stage"] if visit else None,
-            "eligibility": itinerary_eligibility(destination_id, catalog),
+            "eligibility": itinerary_eligibility(destination_id, catalog, index=index),
         })
     order = {p: i for i, p in enumerate(PRIORITIES)}
     rows.sort(key=lambda r: (0 if r["planned"] else 1,
@@ -69,10 +70,11 @@ def organizer_wishlist_candidates(interests, plan, discovery, catalog, stage):
         raise ValueError("Etapa de organização inválida")
     board = build_destination_board(interests, plan, discovery, catalog)
     result = {"eligible": [], "other_stage": [], "unsupported": []}
+    index = eligibility_index(catalog)
     for row in board:
         if not row["wanted"] or row["planned"]:
             continue
-        eligibility = itinerary_eligibility(row["id"], catalog, stage)
+        eligibility = itinerary_eligibility(row["id"], catalog, stage, index=index)
         bucket = "unsupported" if eligibility["status"] == "research_only" else eligibility["status"]
         result[bucket].append({**row, "eligibility": eligibility})
     return result
