@@ -8,7 +8,7 @@ represent a reservation or incur an additional transport fare.
 from __future__ import annotations
 
 from copy import deepcopy
-from destination_identity import canonical_destination_id
+from destination_identity import outing_destination_id as canonical_destination_id, unique_outing_keys, stored_outing_id
 from datetime import date,timedelta
 from planning_store import change_plan
 from catalog_plan_validation import allowed_attractions
@@ -61,7 +61,9 @@ def get_choice(catalog:dict,dest_id:str)->dict:
 def selected_rows(plan:dict,catalog:dict)->list[dict]:
     lookup={d["id"]:d for d in destinations(catalog)}
     rows={}
-    packages = {canonical_destination_id(key): picked for key, picked in plan.get("packages", {}).items()}
+    raw_packages = plan.get("packages", {})
+    packages = {key: raw_packages[stored] for key, stored in unique_outing_keys(raw_packages).items()}
+    unique_outing_keys(v["destination_id"] for v in plan.get("flexible_visits", []))
     for key,picked in packages.items():
         if key in lookup:
             rows[key]={"id":key,"name":lookup[key]["name"],
@@ -123,16 +125,13 @@ def upsert_choice(plan:dict,catalog:dict,dest_id:str,
                   attractions:list[str],period:str=UNASSIGNED)->dict:
     """One atomic canonical revision, including France `packages` when needed."""
     key = canonical_destination_id(dest_id)
-    # Retain an existing serialized key rather than rewriting old private plans.
-    dest_id = next((d for d in plan.get("packages", {}) if canonical_destination_id(d) == key),
-                   next((v["destination_id"] for v in plan.get("flexible_visits", [])
-                         if canonical_destination_id(v["destination_id"]) == key), key))
+    dest_id = stored_outing_id(plan, dest_id)
     item=_validated_choice(catalog,dest_id,attractions,period)
     visits=deepcopy(plan.get("flexible_visits",[]))
-    old=next((v for v in visits if v["destination_id"]==dest_id),None)
+    old=next((v for v in visits if canonical_destination_id(v["destination_id"])==key),None)
     if old and old.get("exact_date") and item["stage"]==ITALY_STAGE:
         item["exact_date"]=old["exact_date"]
-    visits=[v for v in visits if v["destination_id"]!=dest_id]+[item]
+    visits=[v for v in visits if canonical_destination_id(v["destination_id"])!=key]+[item]
     updates={"flexible_visits":visits}
     if item["stage"]==FRANCE_STAGE:
         allowed=allowed_attractions(catalog,dest_id)
@@ -159,11 +158,11 @@ def add_undated_choices(plan:dict,catalog:dict,destination_ids:list[str],
         raise ValueError("Etapa inválida")
     if (not isinstance(destination_ids,list) or not destination_ids or
             len(destination_ids)>50 or
-            len(set(destination_ids))!=len(destination_ids)):
+            len({canonical_destination_id(d) for d in destination_ids})!=len(destination_ids)):
         raise ValueError("Selecione de 1 a 50 destinos distintos")
     if any(is_selected(plan,dest_id) for dest_id in destination_ids):
         raise ValueError("Algum destino já está no roteiro. Atualize sua seleção.")
-    choices=[_validated_choice(catalog,dest_id,[],UNASSIGNED)
+    choices=[_validated_choice(catalog,canonical_destination_id(dest_id),[],UNASSIGNED)
              for dest_id in destination_ids]
     if any(choice["stage"]!=stage for choice in choices):
         raise ValueError("Os destinos devem pertencer à etapa escolhida")
@@ -178,6 +177,7 @@ def add_undated_choices(plan:dict,catalog:dict,destination_ids:list[str],
 
 def remove_choice(plan:dict,catalog:dict,dest_id:str)->dict:
     stage=get_choice(catalog,dest_id)["stage"]
+    stored_outing_id(plan, dest_id)  # Fail closed on conflicting aliases.
     key = canonical_destination_id(dest_id)
     visits=[v for v in plan.get("flexible_visits",[]) if canonical_destination_id(v["destination_id"])!=key]
     changes={"flexible_visits":visits}
