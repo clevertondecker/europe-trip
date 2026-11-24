@@ -274,15 +274,20 @@ def _review_official_change(plan:dict,comparison:dict,
         chosen=st.selectbox("Base apta para revisão oficial",list(supported),
                             key="ux34_apply_candidate",
                             format_func=lambda k:supported[k])
-    if contextual_base is not None and st.button(
-            "Manter "+comparison["official_name"],key="ux115_keep_base"):
-        from rec03a_suggestions_ui import close_base_review
-        close_base_review()
-        st.rerun()
     action_label=("Revisar e confirmar "+supported[chosen]
                   if contextual_base is not None else "Revisar impacto antes de aplicar")
-    if st.button(action_label,key="ux34_open_review",
-                 type="primary" if contextual_base is not None else "secondary"):
+    if contextual_base is not None:
+        keep,proceed=st.columns(2)
+        if keep.button("Manter "+comparison["official_name"],
+                       key="ux115_keep_base",use_container_width=True):
+            from rec03a_suggestions_ui import close_base_review
+            close_base_review()
+            st.rerun()
+        open_review=proceed.button(action_label,key="ux34_open_review",
+                                   type="primary",use_container_width=True)
+    else:
+        open_review=st.button(action_label,key="ux34_open_review")
+    if open_review:
         try:
             review=review_base_application(plan,comparison,chosen)
             _discard_review()
