@@ -2,12 +2,12 @@
 from __future__ import annotations
 
 from collections import Counter
-from base_recommendation_evidence_model import candidate_ids, _wishlist_matrix_builder
+from base_recommendation_evidence_model import candidate_ids
+from ux503_destination_base_comparison_model import build_destination_matrix
 from base_research_expanded_model import load_research
 from destination_identity import canonical_destination_id
 from rail_reference_projection_model import decorate_comparison
 from trip01_supplemental_discovery import build_exploration_discovery
-from ux502_destination_interests_model import LIMIT, empty_interests
 
 CATEGORIES = ("historical", "reference_only", "local", "no_time")
 
@@ -32,8 +32,7 @@ def rail_coverage(*, research=None, discovery=None, rail=None, exploration=None,
                   projection_options=None):
     """Enumerate directed pairs using the same evidence and overlays as UX124.
 
-    Synthetic interests exist only in this call. Batching follows the current
-    interests contract, not the manual comparison's five-base UI limit.
+    Explicit catalog IDs are independent of the wishlist and its limits.
     No private state, persistence, external network or inferred reverse trips.
     """
     research = load_research(include_candidates=True) if research is None else research
@@ -44,25 +43,20 @@ def rail_coverage(*, research=None, discovery=None, rail=None, exploration=None,
         raise ValueError("Universo de destinos com identidades duplicadas")
     pairs = {}
     if destinations:
-        builder = _wishlist_matrix_builder()
-        for start in range(0, len(destinations), LIMIT):
-            batch = destinations[start:start + LIMIT]
-            interests = empty_interests()
-            interests["items"] = [{"destination_id": key, "priority": "interested"}
-                                  for key in batch]
-            raw = builder(interests, bases, research=research, discovery=discovery,
-                          rail=rail, exploration=exploration)
-            cells = decorate_comparison(raw, **(projection_options or {}))["cells"]
-            expected = {(base, dest) for base in bases for dest in batch}
-            rows = {(row["base_id"], row["destination_id"]): row for row in raw["rows"]}
-            if (len(rows) != len(raw["rows"]) or set(rows) != expected
-                    or set(cells) != expected or expected.intersection(pairs)):
-                raise ValueError("Projeção ferroviária incompleta ou duplicada")
-            for key, row in rows.items():
-                cell = cells[key]
-                if cell["category"] not in CATEGORIES:
-                    raise ValueError("Categoria ferroviária desconhecida")
-                pairs[key] = {"row": row, "cell": cell}
+        raw = build_destination_matrix(bases, destinations, research=research,
+                                       discovery=discovery, rail=rail,
+                                       exploration=exploration)
+        cells = decorate_comparison(raw, **(projection_options or {}))["cells"]
+        expected = {(base, dest) for base in bases for dest in destinations}
+        rows = {(row["base_id"], row["destination_id"]): row for row in raw["rows"]}
+        if (len(rows) != len(raw["rows"]) or set(rows) != expected
+                or set(cells) != expected):
+            raise ValueError("Projeção ferroviária incompleta ou duplicada")
+        for key, row in rows.items():
+            cell = cells[key]
+            if cell["category"] not in CATEGORIES:
+                raise ValueError("Categoria ferroviária desconhecida")
+            pairs[key] = {"row": row, "cell": cell}
     per_base = {base: [] for base in bases}
     for (base, _), pair in pairs.items():
         per_base[base].append(pair["cell"]["category"])
