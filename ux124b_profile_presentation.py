@@ -5,6 +5,7 @@ import re
 from ux124_city_profile_model import TIMED,profile_summary_facts,route_scope,ROUTE_SCOPES
 from ux502_destination_interests_model import LABELS
 from routes7_comparison_projection import format_minutes
+from five_base_comparison_model import COUNTRY_FLAGS
 
 def city_intro(profile):
     """Remove only the known administrative prefix; keep sourced statements."""
@@ -12,7 +13,41 @@ def city_intro(profile):
     text=re.sub(r"^Cidade cadastrada no corredor [^.]+\.\s*","",text,count=1)
     if text.startswith("Pesquisa inicial:"):
         return "Características locais ainda pouco pesquisadas."
-    return text
+    # Exact paraphrases of existing source sentences; do not infer amenities.
+    return {
+        "O turismo municipal documenta uma rede de bondes e conexão entre a estação e museus, incluindo o Cité du Train.":
+            "Rede de bondes e ligações entre a estação e museus, como o Cité du Train, documentadas pelo turismo municipal.",
+        "A ligação ferroviária Metz–Luxembourg inclui exemplos de TER diretos de aproximadamente 53–54 minutos em horários pesquisados de 2026.":
+            "Trens TER diretos para Luxemburgo em cerca de 53–54 minutos nos horários pesquisados de 2026.",
+        "O escritório de turismo descreve os bairros Grande Île, Petite France, Krutenau e Neustadt como áreas distintas.":
+            "Grande Île, Petite France, Krutenau e Neustadt são bairros com características distintas segundo o turismo local.",
+    }.get(text,text)
+
+def editorial_risk_text(risk):
+    # Historical editorial impressions are not current measured conditions.
+    return {
+        "Menor vida urbana na matriz editorial":"A avaliação histórica indicava uma vida urbana menos intensa que outras opções estudadas.",
+        "Maior custo de aluguel estimado":"A avaliação histórica estimava aluguel mais caro que outras opções estudadas.",
+        "Acesso às áreas alpinas menos conveniente":"A avaliação histórica indicava acesso menos conveniente às regiões alpinas.",
+        "Menor pontuação editorial de natureza":"A avaliação histórica favorecia outras cidades quanto às opções de natureza.",
+    }.get(risk,risk)
+
+def destination_name(row):
+    flag=COUNTRY_FLAGS.get(row.get("country"),"")
+    return (flag+" " if flag else "")+row["name"]
+
+def logistics_table(rows):
+    """Hide a wholly unavailable column only; retain canonical divergences."""
+    typical=[typical_time_label(row) for row in rows]
+    has_typical=any(value!="Tempo médio não documentado" for value in typical)
+    result=[]
+    for row,value in zip(rows,typical):
+        entry={"Destino":destination_name(row),"Prioridade":LABELS.get(row["priority"],"—"),
+               "Tempo de ida":row["cell"]["label"]}
+        if has_typical:
+            entry["Tempo médio/típico"]=value if value!="Tempo médio não documentado" else "—"
+        result.append(entry)
+    return result,has_typical
 
 def practical_facts(profile):
     """Conservative editorial selection: no second tourism/transport summary.
@@ -22,7 +57,7 @@ def practical_facts(profile):
     subjects, not a text-similarity heuristic or inferred advantage.
     """
     intro=city_intro(profile)
-    lead=[e for e in profile["evidence"] if e["summary"].rstrip(".")==intro.rstrip(".")
+    lead=[e for e in profile["evidence"] if city_intro({"summary":e["summary"]}).rstrip(".")==intro.rstrip(".")
           or e["summary"]==profile["summary"]]
     occupied={e["section"] for e in lead}
     urls={e.get("source_url") for e in lead}
@@ -83,7 +118,9 @@ def route_list_html(rows):
     for row in rows:
         r=route_display(row)
         priority=f'<small>{safe(r["priority"])}</small>' if r["priority"] else ""
-        parts.append('<li><div><strong>'+safe(r["name"])+'</strong>'+priority+
+        flag=COUNTRY_FLAGS.get(row.get("country"),"")
+        flag_html=('<span class="ux124c-flag" role="img" aria-label="'+safe(row["country"])+'">'+safe(flag)+'</span> ') if flag else ""
+        parts.append('<li><div><strong>'+flag_html+safe(r["name"])+'</strong>'+priority+
                      '</div><div class="ux124b-route-value"><strong>'+safe(r["time"])+
                      '</strong><small>'+safe(r["qualifier"])+'</small></div></li>')
     return '<ul class="ux124b-routes" aria-label="Referências de ida">'+''.join(parts)+'</ul>'

@@ -7,7 +7,7 @@ from ux502_destination_interests_model import empty_interests,ordered_interests,
 from routes7_comparison_projection import format_minutes
 from ux47_photo_ui import photo_markup,photo_credit
 from ux113_comparison_panorama_ui import coworking_night_status
-from ux124b_profile_presentation import city_intro,practical_facts,compact_money,route_preview,route_list_html,ticket_text,typical_time_label
+from ux124b_profile_presentation import city_intro,practical_facts,compact_money,route_preview,route_list_html,ticket_text,typical_time_label,logistics_table,destination_name,editorial_risk_text
 
 def money(value,unit="€"):
     return ("Não pesquisado" if value is None else
@@ -133,7 +133,7 @@ def _overview(v):
             st.caption("Observação da pesquisa histórica.")
         historical=v["editorial"]
         if historical and historical.get("risks"):
-            st.caption("Avaliação editorial histórica: "+historical["risks"][0]+".")
+            st.caption(editorial_risk_text(historical["risks"][0]))
         st.caption("Ainda pendente para 2027: contrato, disponibilidade, taxas e caução da moradia.")
     st.markdown("**Trabalho remoto**")
     if office:
@@ -216,18 +216,24 @@ def _logistics(v):
                    v["widget_prefix"]+"_routes_"+v["city"]["id"])
     selection=route_scope(v["routes"],scope)
     rows=selection["rows"]
-    st.caption(f'{scope}: {selection["timed"]}/{selection["eligible"]} destinos não locais com tempo de ida · '
-               f'{selection["local"]} locais · {selection["missing"]} sem tempo. Não confirma bate-volta.')
+    counts=[f'{scope}: {selection["timed"]}/{selection["eligible"]} destinos não locais com tempo de ida']
+    if selection["local"]:
+        counts.append(f'{selection["local"]} locais')
+    if selection["missing"]:
+        counts.append(f'{selection["missing"]} sem tempo')
+    st.caption(" · ".join(counts)+". Não confirma bate-volta.")
     if not rows:
         st.info("Nenhum destino neste recorte. Altere o filtro ou consulte Minha lista.")
     else:
-        st.dataframe([{"Destino":r["name"],"Prioridade":LABELS.get(r["priority"],"—"),
-                       "Tempo de ida":r["cell"]["label"],
-                       "Tempo médio/típico":typical_time_label(r)}
-                      for r in rows],hide_index=True,width="stretch")
+        table,has_typical=logistics_table(rows)
+        st.dataframe(table,hide_index=True,width="stretch")
+        if not has_typical:
+            st.caption("Tempo médio/típico ainda não documentado neste recorte.")
+        elif any(r.get("Tempo médio/típico")=="—" for r in table):
+            st.caption("— = tempo médio/típico não documentado.")
         with st.expander("Fontes, estações e divergências por destino"):
             chosen=st.selectbox("Detalhar destino", [r["destination_id"] for r in rows],
-                                format_func=lambda k:next(r["name"] for r in rows if r["destination_id"]==k),
+                                format_func=lambda k:next(destination_name(r) for r in rows if r["destination_id"]==k),
                                 key=v["widget_prefix"]+"_route_detail_"+v["city"]["id"]+"_"+str(ROUTE_SCOPES.index(scope)))
             route=next(r for r in rows if r["destination_id"]==chosen)
             cell=route["cell"]
@@ -323,25 +329,39 @@ def _daily(v):
     daily=v["pack"].get("daily_life",{})
     cost=v["cost"]
     value=cost["restaurant_two_midrange_eur"] if cost else daily.get("restaurant_two_midrange_eur_2026")
-    with st.container(key="ux124b-daily-costs"):
-        a,b=st.columns(2,gap="small")
-        with a:
-            with st.container(border=True):
-                st.metric("Restaurante para dois",compact_money(value))
-                if value is not None:
-                    st.caption("Amostra colaborativa de 2026.")
-                    source(cost["restaurant_source_url"] if cost else daily.get("restaurant_source_url"))
-        with b:
-            with st.container(border=True):
-                st.metric("Supermercado · cesta local",compact_money(daily.get("grocery_basket_eur")))
-                st.caption("Não é a premissa comum do orçamento.")
+    grocery=daily.get("grocery_basket_eur")
+    if value is not None or grocery is not None:
+        with st.container(key="ux124b-daily-costs"):
+            a,b=st.columns(2,gap="small")
+            with a:
+                with st.container(border=True):
+                    if value is None:
+                        st.markdown("**Restaurante para dois**")
+                        st.caption("Sem amostra local.")
+                    else:
+                        st.metric("Restaurante para dois",compact_money(value))
+                        st.caption("Amostra colaborativa de 2026.")
+            with b:
+                with st.container(border=True):
+                    if grocery is None:
+                        st.markdown("**Supermercado · cesta local**")
+                        st.caption("Sem amostra local. Veja a premissa comum abaixo.")
+                    else:
+                        st.metric("Supermercado · cesta local",compact_money(grocery))
+                        st.caption("Referência local, não premissa comum do orçamento.")
+    else:
+        st.caption("Restaurante e cesta de supermercado: sem amostra local.")
     if v["market"]:
         urban=v["market"]["urban_pass"]
-        st.caption("Passe urbano mensal: "+money(urban["fare_eur_month_person"])+"/pessoa · "+str(urban["price_period"]))
-        source(urban["source_url"],"Fonte do passe urbano")
+        st.markdown("**Passe urbano mensal:** "+compact_money(urban["fare_eur_month_person"])+" por pessoa")
+        st.caption(str(urban["price_period"])+" · "+urban["eligibility"]+" · "+urban["note"])
     common=v["market_common"]
-    with st.expander("Premissa histórica compartilhada do orçamento"):
-        st.write(money(common["groceries_eur_week_couple"])+"/semana para o casal")
+    with st.expander("Premissa histórica compartilhada do orçamento e fontes de custo"):
+        if value is not None:
+            source(cost["restaurant_source_url"] if cost else daily.get("restaurant_source_url"),"Fonte do restaurante")
+        if v["market"]:
+            source(v["market"]["urban_pass"]["source_url"],"Fonte do passe urbano")
+        st.write(compact_money(common["groceries_eur_week_couple"])+"/semana para o casal")
         st.caption("Não é pesquisa específica desta cidade; não adicionar novamente ao orçamento.")
         source(common["source_url"])
     st.caption("Academia, serviços e cesta comparável ainda exigem pesquisa equivalente.")
@@ -352,9 +372,12 @@ def _daily(v):
         st.dataframe([{"Mês":name,"Temperatura média (°C)":months[key]["tmean_c"],
                        "Chuva média (mm)":months[key]["precip_mm"]}
                       for key,name in (("9","Setembro"),("10","Outubro"),("11","Novembro"))],
-                     hide_index=True,width="stretch")
-        st.caption("Estação "+climate["station_name"]+" · normais 1991–2020, não previsão de 2027.")
-        source(climate["source_url"])
+                     hide_index=True,width="stretch",
+                     column_config={"Temperatura média (°C)":st.column_config.NumberColumn(format="%.1f"),
+                                    "Chuva média (mm)":st.column_config.NumberColumn(format="%.1f")})
+        url=climate["source_url"]
+        st.caption("Estação "+climate["station_name"]+" · normais 1991–2020, não previsão de 2027."+
+                   (" · [Fonte]("+url+")" if isinstance(url,str) and url.startswith("https://") else ""))
     else:
         st.info("Normais climáticas ainda não pesquisadas.")
     _evidence(v,"daily_costs","climate")
@@ -437,7 +460,7 @@ def _attractions(v):
         st.markdown(route_list_html(regional),unsafe_allow_html=True)
         if v.get("on_discover_destination"):
             # One native selection/action rather than six extra buttons.
-            choices={item["destination_id"]:item["name"] for item in regional}
+            choices={item["destination_id"]:destination_name(item) for item in regional}
             dest=st.selectbox("Destino para conhecer",list(choices),format_func=choices.__getitem__,
                               key=v["widget_prefix"]+"_regional_destination_"+v["city"]["id"])
             st.button("Conhecer destino",key=v["widget_prefix"]+"_regional_discover_"+v["city"]["id"],

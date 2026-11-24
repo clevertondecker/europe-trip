@@ -389,7 +389,7 @@ def render_profile_context(plan):
                   on_click=return_to_suggestions)
         photo=base_card_photo_record(base)
         if photo:
-            heading,visual=st.columns([4,1],gap="small",vertical_alignment="center")
+            heading,visual=st.columns([3,1],gap="small",vertical_alignment="top")
         else:
             heading=st.container()
         with heading:
@@ -397,19 +397,13 @@ def render_profile_context(plan):
             st.caption(city["corridor"]+" · "+status)
             if base in favorites:
                 st.caption("Cidade favorita")
-        if photo:
-            with visual:
-                with st.container(key="ux109-city-photo"):
-                    render_base_card_photo(base,city["name"])
-        with st.container(key="ux124b-profile-actions"):
-            a,b,c=st.columns([1,1,1],gap="small")
-            a.button("Simular orçamento",key="rec04_simulate_profile",
-                     type="primary",disabled=not cap["scenario_selectable"],
-                     on_click=request_simulation,args=(st.session_state,base,"profile"))
-            b.button("Comparar cidade",key="rec03a_profile_compare",
-                     disabled=base not in selected and len(selected)>=5,
-                     on_click=_compare_profile,args=(base,choices))
-            with c:
+            with st.container(key="ux124b-profile-actions",horizontal=True,gap="small"):
+                st.button("Simular orçamento",key="rec04_simulate_profile",
+                          type="primary",disabled=not cap["scenario_selectable"],
+                          on_click=request_simulation,args=(st.session_state,base,"profile"))
+                st.button("Comparar cidade",key="rec03a_profile_compare",
+                          disabled=base not in selected and len(selected)>=5,
+                          on_click=_compare_profile,args=(base,choices))
                 with st.popover("Mais ações"):
                     st.button("Remover favorita" if base in favorites else "Adicionar às favoritas",
                               key="rec03a_handoff_favorite",
@@ -421,10 +415,14 @@ def render_profile_context(plan):
                               on_click=_map_from_profile,args=(base,))
                     st.button("Consultar destinos em Descobrir",key="rec03a_profile_discover",
                               on_click=_discover_from_profile)
-        from ux124b_profile_presentation import simulation_note
-        st.caption(simulation_note(cap))
-        if base not in selected and len(selected)>=5:
-            st.caption("Comparação cheia: remova uma das cinco cidades antes de adicionar outra.")
+            from ux124b_profile_presentation import simulation_note
+            st.caption(simulation_note(cap))
+            if base not in selected and len(selected)>=5:
+                st.caption("Comparação cheia: remova uma das cinco cidades antes de adicionar outra.")
+        if photo:
+            with visual:
+                with st.container(key="ux109-city-photo"):
+                    render_base_card_photo(base,city["name"])
     # Reuse the already loaded public city research. The REC05 queue stays
     # in Pesquisas & decisões rather than duplicating the decision surface.
     from ux124_city_profile_ui import render_city_profile

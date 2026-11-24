@@ -29,6 +29,8 @@ class UnifiedProfileTests(unittest.TestCase):
                 row=next(r for r in v["routes"] if r["destination_id"]=="paris")
                 self.assertEqual(row["cell"],matrix["cells"][(c["id"],"paris")])
                 self.assertEqual(row["priority"],"must_visit")
+                countries={d["id"]:d["country"] for d in self.discovery["destinations"]}
+                self.assertTrue(all(r["country"]==countries[r["destination_id"]] for r in v["routes"]))
         self.assertEqual(interests,before)
         self.assertEqual(self.research,research_before)
     def test_housing_and_remote_evidence_keep_separate_contracts(self):
