@@ -74,8 +74,8 @@ def render_destination_board(plan, catalog):
             elif row["planned"]:
                 status += " · A organizar"
             center.caption(status)
-            if not row["planned"] and row.get("planning_support") == "exploration_only":
-                center.caption("Pesquisa e comparação; ainda não pode ser incluído no roteiro.")
+            if not row["planned"] and row["eligibility"]["status"] != "eligible":
+                center.caption(row["eligibility"]["reason"])
             if row["planned"]:
                 right.button("Revisar passeio", key="ux61_review_" + row["id"],
                              on_click=_focus_visit, args=(row["id"], row["stage"]))
