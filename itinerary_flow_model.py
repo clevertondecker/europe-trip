@@ -122,6 +122,11 @@ def _validated_choice(catalog:dict,dest_id:str,attractions:list[str],period:str)
 def upsert_choice(plan:dict,catalog:dict,dest_id:str,
                   attractions:list[str],period:str=UNASSIGNED)->dict:
     """One atomic canonical revision, including France `packages` when needed."""
+    key = canonical_destination_id(dest_id)
+    # Retain an existing serialized key rather than rewriting old private plans.
+    dest_id = next((d for d in plan.get("packages", {}) if canonical_destination_id(d) == key),
+                   next((v["destination_id"] for v in plan.get("flexible_visits", [])
+                         if canonical_destination_id(v["destination_id"]) == key), key))
     item=_validated_choice(catalog,dest_id,attractions,period)
     visits=deepcopy(plan.get("flexible_visits",[]))
     old=next((v for v in visits if v["destination_id"]==dest_id),None)
@@ -173,14 +178,15 @@ def add_undated_choices(plan:dict,catalog:dict,destination_ids:list[str],
 
 def remove_choice(plan:dict,catalog:dict,dest_id:str)->dict:
     stage=get_choice(catalog,dest_id)["stage"]
-    visits=[v for v in plan.get("flexible_visits",[]) if v["destination_id"]!=dest_id]
+    key = canonical_destination_id(dest_id)
+    visits=[v for v in plan.get("flexible_visits",[]) if canonical_destination_id(v["destination_id"])!=key]
     changes={"flexible_visits":visits}
     if stage==FRANCE_STAGE:
         packages=deepcopy(plan["packages"])
-        packages.pop(dest_id,None)
+        packages={d: ids for d, ids in packages.items() if canonical_destination_id(d)!=key}
         changes["packages"]=packages
         changes["assignments"]={day:dest for day,dest in plan.get("assignments",{}).items()
-                                 if dest!=dest_id}
+                                 if canonical_destination_id(dest)!=key}
     return change_plan(plan,changes)
 
 
