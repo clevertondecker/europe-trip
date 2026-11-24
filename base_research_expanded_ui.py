@@ -165,8 +165,6 @@ def _all_candidates(study)->None:
 
 def render_expanded_research(*,activity_override:str|None=None,compact:bool=False,fixed_city:str|None=None)->None:
     study=load_research(include_candidates=True)
-    five=load_five_base_evidence()
-    summary=research_overview(study)
     if compact:
         activity=activity_override or "Explorar uma cidade"
         if activity=="Explorar uma cidade":
@@ -177,6 +175,7 @@ def render_expanded_research(*,activity_override:str|None=None,compact:bool=Fals
         else:
             st.markdown("### Comparar favoritas")
     else:
+        summary=research_overview(study)
         st.markdown("### Onde vale mais a pena morar?")
         st.caption("Compare cidades pelo custo de moradia, conexões ferroviárias "
                    "e acesso aos passeios que vocês desejam realizar.")
@@ -190,6 +189,7 @@ def render_expanded_research(*,activity_override:str|None=None,compact:bool=Fals
                              default=ACTIVITIES[0],key="ux40_research_activity")
         activity=st.session_state["ux40_research_activity"]
     if activity=="Comparar cidades":
+        five=load_five_base_evidence()
         render_favorite_comparison(study,five)
         with st.expander("Referência: as cinco bases aprofundadas"):
             _five_city_comparison(study,five)

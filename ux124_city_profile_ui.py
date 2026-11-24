@@ -2,12 +2,13 @@
 from __future__ import annotations
 import streamlit as st
 from ux124_city_profile_model import TOPICS,city_profile,profile_summary_facts
-from ux502_destination_interests_model import empty_interests,LABELS
+from ux502_destination_interests_model import empty_interests,ordered_interests,LABELS
 from ux47_photo_ui import photo_markup,photo_credit
 from ux113_comparison_panorama_ui import coworking_night_status
 
 def money(value,unit="€"):
-    return "Não pesquisado" if value is None else f"{value:,.2f} {unit}"
+    return ("Não pesquisado" if value is None else
+            f"{value:,.2f}".replace(",","_").replace(".",",").replace("_",".")+" "+unit)
 
 def source(url,label="Fonte"):
     if isinstance(url,str) and url.startswith("https://"):
@@ -127,7 +128,7 @@ def _logistics(v):
     options=["Minha lista","Todos os destinos","Com tempo pesquisado"]
     has_wishes=any(r["priority"] in ("must_visit","interested","maybe") for r in v["routes"])
     scope=st.segmented_control("Destinos",options,default=options[0] if has_wishes else options[1],
-                               key="ux124_routes_"+v["city"]["id"])
+                               key=v["widget_prefix"]+"_routes_"+v["city"]["id"])
     rows=v["routes"]
     if scope=="Minha lista":
         rows=[r for r in rows if r["priority"] in ("must_visit","interested","maybe")]
@@ -293,14 +294,37 @@ def _attractions(v):
         for item in v["complementary_attractions"]:
             st.write(item["name"]+" — "+item["detail"])
             source(item["source_url"])
+    st.markdown("#### Outros destinos com atrações e tempo de ida documentados")
+    if not v["excursions"]:
+        st.caption("Ainda não há tempo documentado para destinos com atrações indexadas.")
+    for item in v["excursions"][:6]:
+        with st.container(border=True):
+            st.markdown("**"+item["name"]+"** · "+item["cell"]["label"])
+            st.caption(str(item["attraction_count"])+" atrações indexadas")
+            source(item["source_url"],"Fonte turística")
+            source(item["cell"].get("source_url"),"Fonte de transporte")
+    if v["excursions"]:
+        st.caption("Até seis menores referências de ida documentadas; retorno e última milha não comprovados. Consulte todos os destinos em Logística.")
     st.caption("Use Descobrir / Minha lista para selecionar destinos. A ficha não inclui passeios automaticamente.")
     st.caption("Bilhetes, acesso e funcionamento para 2027 ainda precisam de confirmação.")
 
 _RENDERERS=dict(zip(TOPICS,(_overview,_housing,_logistics,_daily,_remote,_attractions)))
 
+@st.cache_data(show_spinner=False,ttl=3600,max_entries=64)
+def _public_profile(base_id,research):
+    # Cache public research only. st.cache_data returns an independent copy;
+    # no user's interests, navigation context or plan enters this cache.
+    return city_profile(base_id,research=research)
+
 def render_city_profile(base_id,*,research=None,key_prefix="ux124"):
     interests=st.session_state.get("ux502_interests",empty_interests())
-    v=city_profile(base_id,research=research,interests=interests)
+    v=_public_profile(base_id,research)
+    priorities={item["destination_id"]:item["priority"] for item in ordered_interests(interests)}
+    for row in v["routes"]:
+        row["priority"]=priorities.get(row["destination_id"])
+    v["routes"].sort(key=lambda r:(r["priority"] not in ("must_visit","interested","maybe"),
+                                   r["priority"]!="must_visit",r["name"]))
+    v["widget_prefix"]=key_prefix
     timed=v["counts"].get("historical",0)+v["counts"].get("reference_only",0)
     total=v["catalog_destination_count"]-v["counts"].get("local",0)
     a,b=st.columns(2,gap="medium")
@@ -312,7 +336,8 @@ def render_city_profile(base_id,*,research=None,key_prefix="ux124"):
     with b:
         with st.container(border=True):
             st.metric("Destinos com tempo pesquisado",f"{timed}/{total}")
-            st.caption("Catálogo atual, sem destino local. Históricos e indicativos de ida; não confirma bate-volta.")
+            st.caption("Catálogo atual, sem destino local. Históricos e indicativos de ida; não confirma bate-volta."
+                   if timed else "Nenhuma ida com tempo pesquisado — não significa falta de trens.")
     st.markdown("### Investigue por assunto")
     topic=st.segmented_control("Assunto",list(TOPICS),default=TOPICS[0],
                                key=key_prefix+"_topic_"+base_id)

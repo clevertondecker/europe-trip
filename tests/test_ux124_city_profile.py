@@ -41,6 +41,15 @@ class UnifiedProfileTests(unittest.TestCase):
         self.assertEqual(sparse["housing"]["count"],0)
         self.assertIsNone(sparse["cost"])
         self.assertTrue(sparse["extra_routes"])
+    def test_public_projection_never_contains_private_interests(self):
+        from ux124_city_profile_ui import _public_profile
+        a=_public_profile("mulhouse",self.research)
+        self.assertTrue(all(r["priority"] is None for r in a["routes"]))
+        a["routes"][0]["priority"]="must_visit"
+        b=_public_profile("mulhouse",self.research)
+        self.assertTrue(all(r["priority"] is None for r in b["routes"]))
+        self.assertTrue(all(r["cell"]["category"] in ("historical","reference_only")
+                            and r["attraction_count"]>0 for r in b["excursions"]))
     def test_all_subjects_in_full_and_sparse_profiles(self):
         for city in ("mulhouse","annecy"):
             app=AppTest.from_string(

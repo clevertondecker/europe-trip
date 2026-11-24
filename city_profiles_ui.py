@@ -4,7 +4,7 @@ import streamlit as st
 from ux124_city_profile_ui import render_city_profile
 from base_research_expanded_model import load_research
 
-def render_enriched_city_profiles(rows:list[dict],*,only_finalists:bool)->None:
+def render_enriched_city_profiles(*,only_finalists:bool)->None:
     research=load_research(include_candidates=True)
     choices={c["id"]:c["name"] for c in research["cities"]
              if not only_finalists or c["shortlist"]}

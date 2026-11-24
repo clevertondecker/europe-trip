@@ -108,16 +108,24 @@ def city_profile(base_id,*,research=None,discovery=None,interests=None):
     complementary=[a for a in context["attractions"] if a["name"].casefold() not in local_names]
     pilot=load_mobility_pilot()
     access=load_access_pilot(discovery=discovery)
-    relevant=set(names)
     access_notes=[r for r in pilot.get("access_reference_not_canonical_attraction",[])
-                  if r["destination_id"] in relevant and r["destination_id"]==base_id]
+                  if r["destination_id"]==base_id]
     access_observations=[r for r in access["observations"] if r["destination_id"]==base_id]
+    # Destination suggestions are based on documented one-way minima, not
+    # invented proximity, feasibility or a new ranking of the bases.
+    excursions=[{"destination_id":r["destination_id"],"name":r["name"],
+                 "cell":r["cell"],"attraction_count":names[r["destination_id"]]["attraction_count"],
+                 "source_url":names[r["destination_id"]].get("source_url")}
+                for r in routes if r["cell"]["category"] in ("historical","reference_only")
+                and names[r["destination_id"]]["attraction_count"]>0]
+    excursions.sort(key=lambda r:(r["cell"]["display_min"],r["name"]))
     return deepcopy({"city":city,"profile":profile,"pack":pack,"cost":cost,
             "market":observed_market,"market_common":market["common_costs"],
             "round2_sources":round2["common_sources"],"editorial":editorial,
             "editorial_source":historical["source"]["url"],"audit":audit,
             "housing":observed_housing(city),"routes":routes,"counts":counts,
             "extra_routes":extra,"local_attractions":local,"extra_attractions":extra_attractions,
+            "excursions":excursions,
             "complementary_attractions":complementary,"mobility":context["mobility"],
             "context_gaps":context["gaps"],"access_notes":access_notes,
             "access_observations":access_observations,
