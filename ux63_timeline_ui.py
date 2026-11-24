@@ -27,9 +27,15 @@ def render_timeline(plan, catalog, stage):
                 top.caption("Viagem: "+row["group_name"])
             status.caption(row["status"])
             if row["dates"]:
-                st.caption("Data de referência: "+", ".join(row["dates"]))
-            elif row["period"]:
-                st.caption("Período: "+row["period"])
+                st.caption("Data individual: "+", ".join(row["dates"]))
+            if row["period"]:
+                st.caption("Período individual: "+row["period"])
+            if row["group_dates"]:
+                st.caption("Intervalo da viagem: "+row["group_dates"][0]+" a "+row["group_dates"][-1])
+            if row["group_period"]:
+                st.caption("Período da viagem: "+row["group_period"])
+            if row["grouped"] and not row["dated"]:
+                st.caption("Dia individual a definir")
             st.caption(str(row["attractions_count"])+" atração(ões) escolhida(s)")
     if len(rows)>14:
         st.caption("Mostrando 14 visitas; use o organizador abaixo para outras datas.")

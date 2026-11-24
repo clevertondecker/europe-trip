@@ -7,15 +7,16 @@ from ux61_destination_board_model import (
 )
 
 
-def project_planning(plan, interests, discovery, catalog, *, private_saved=False):
-    board=build_destination_board(interests,plan,discovery,catalog)
+def project_planning(plan, interests, discovery, catalog, *, private_saved=False, weekend_groups=None):
+    board=build_destination_board(interests,plan,discovery,catalog,weekend_groups)
     counts=board_metrics(board)
     rows=selected_rows(plan,catalog)
     batches={stage:organizer_wishlist_candidates(interests,plan,discovery,catalog,stage)
              for stage in (ITALY_STAGE,FRANCE_STAGE)}
     eligible=sum(len(b["eligible"]) for b in batches.values())
     unsupported=batches[ITALY_STAGE]["unsupported"]
-    pending=[r for r in rows if r["period"]==UNASSIGNED and not r["exact_dates"]]
+    by_id={r["id"]:r for r in board}
+    pending=[r for r in rows if not by_id[r["id"]]["organized"]]
     if eligible:
         action="build"
         phase="draft_with_pending" if rows else "eligible_wishes"
@@ -28,7 +29,7 @@ def project_planning(plan, interests, discovery, catalog, *, private_saved=False
     else:
         action="choose"
         phase="empty"
-    return {"counts":counts,"rows":rows,"batches":batches,"eligible_count":eligible,
+    return {"counts":counts,"rows":rows,"board":board,"batches":batches,"eligible_count":eligible,
             "unsupported":unsupported,"pending":pending,"next":action,"phase":phase,
             "private_saved":bool(private_saved),
             "steps":[

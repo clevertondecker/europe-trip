@@ -130,14 +130,9 @@ def _current_decisions_fingerprint(plan, catalog) -> str:
 
 def _private_archive(plan, catalog):
     state = st.session_state
-    from ux48_weekend_groups_model import reconcile_removed_outings
+    # A fingerprint/archive read must never repair or replace the session sidecar.
+    # Canonical plan mutations reconcile before publishing; invalid archives fail.
     weekends=state.get("ux48_weekend_groups")
-    if weekends is not None:
-        reconciled=reconcile_removed_outings(weekends,plan,catalog)
-        if reconciled!=weekends:
-            state["ux48_weekend_groups"]=reconciled
-            state["ux36_cloud_dirty"]=True
-        weekends=reconciled
     return make_archive(plan, catalog, _safe_context(plan, catalog),
                         list(state.get("ux34_drafts", {}).values()),
                         list(state.get("ux35_proposals", [])),

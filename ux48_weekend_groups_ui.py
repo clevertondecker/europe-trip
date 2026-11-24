@@ -2,7 +2,7 @@
 from datetime import date, timedelta
 import streamlit as st
 from ux48_weekend_groups_model import (
-    empty_groups, reconcile_removed_outings, create_group, update_group,
+    empty_groups, validate_groups, create_group, update_group,
     remove_group, ungrouped_outings, available_weekends, eligible_weekends,
     set_rest_weekend, export_groups, import_groups, PERIODS,
 )
@@ -11,18 +11,16 @@ from itinerary_flow_model import selected_rows, FRANCE_STAGE
 
 def _state(plan, catalog):
     value = st.session_state.get("ux48_weekend_groups")
-    if value is None or value.get("plan_id") != plan["plan_id"]:
-        value = empty_groups(plan)
-    else:
-        reconciled = reconcile_removed_outings(value, plan, catalog)
-        if reconciled != value:
-            _save(reconciled, "Agrupamentos ajustados às mudanças do roteiro; revise datas e destinos")
-        value = reconciled
-    st.session_state["ux48_weekend_groups"] = value
-    return value
+    if value is None:
+        return empty_groups(plan)
+    return validate_groups(value, plan, catalog)
 
 
 def _save(value, message="Agrupamentos atualizados"):
+    previous=st.session_state.get("ux48_weekend_groups")
+    if previous!=value:
+        st.session_state.pop("ux35_review_proposal",None)
+        st.session_state.pop("ux35_proposals",None)
     st.session_state["ux48_weekend_groups"] = value
     st.session_state["ux36_cloud_dirty"] = True
     st.session_state["ux48_weekend_message"] = message + (
@@ -153,7 +151,11 @@ def _editor(plan, catalog, groups, byid):
 def render_weekend_planner(plan, catalog):
     st.markdown("### Organizar viagens de fim de semana")
     st.caption("Reúna os passeios escolhidos em viagens. Datas e pernoites são hipóteses de planejamento.")
-    groups = _state(plan, catalog)
+    try:
+        groups = _state(plan, catalog)
+    except (ValueError, KeyError, TypeError) as exc:
+        st.error("Os agrupamentos precisam de revisão. Nenhuma decisão foi alterada: "+str(exc))
+        return
     byid = {row["id"]: row for row in selected_rows(plan, catalog) if row["stage"] == FRANCE_STAGE}
     free = ungrouped_outings(groups, plan, catalog)
     slots = available_weekends(groups, plan, catalog)

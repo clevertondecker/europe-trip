@@ -174,8 +174,8 @@ class SmartCalendarUITests(unittest.TestCase):
         self.assertFalse(app.exception,[x.message for x in app.exception])
         app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Meu roteiro"))).click().run()
         app.segmented_control(key="ux_section").set_value("Organizar viagem").run()
-        app.segmented_control(key="ux_organize_view").set_value(
-            "Calendário inteligente").run()
+        app.segmented_control(key="ux120_mode").set_value(
+            "Calendário").run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
         self.assertIn("ux35_suggest",{x.key for x in app.button})
         original=deepcopy(app.session_state["advisor_plan"])
@@ -189,8 +189,8 @@ class SmartCalendarUITests(unittest.TestCase):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=115).run()
         app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Meu roteiro"))).click().run()
         app.segmented_control(key="ux_section").set_value("Organizar viagem").run()
-        app.segmented_control(key="ux_organize_view").set_value(
-            "Calendário inteligente").run()
+        app.segmented_control(key="ux120_mode").set_value(
+            "Calendário").run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
         app.button(key="ux35_go_budget").click().run()
         self.assertFalse(app.exception,[x.message for x in app.exception])

@@ -59,7 +59,7 @@ def _preferences():
     })
 
 
-def _calendar_overview(plan,catalog,preferences):
+def _calendar_overview(plan,catalog,preferences,stage=None):
     days=availability_matrix(plan,preferences)
     bydate={r["date"]:r for r in days}
     selected=selected_rows(plan,catalog)
@@ -75,11 +75,11 @@ def _calendar_overview(plan,catalog,preferences):
     d.metric("Fins de semana livres",weekend)
     if "ux35_stage" not in st.session_state:
         st.session_state["ux35_stage"]=st.session_state.get("flow_active_stage",ITALY_STAGE)
-    stage=st.segmented_control("Etapa",
-                              [ITALY_STAGE,FRANCE_STAGE],
-                              default=ITALY_STAGE,
-                              format_func=lambda x:"Temporada europeia" if x==FRANCE_STAGE else x,
-                              key="ux35_stage")
+    if stage not in (ITALY_STAGE,FRANCE_STAGE):
+        stage=st.segmented_control("Etapa",[ITALY_STAGE,FRANCE_STAGE],
+                                  default=ITALY_STAGE,
+                                  format_func=lambda x:"Temporada europeia" if x==FRANCE_STAGE else x,
+                                  key="ux35_stage")
     filtered=[r for r in days if r["stage"]==stage]
     weeks=sorted({(date.fromisoformat(r["date"])-date.fromisoformat(
         plan["departure_date"])).days//7 for r in filtered})
@@ -195,7 +195,9 @@ def _suggest(plan,catalog,routes,preferences):
                "As viagens com retorno desconhecido continuam condicionais.")
     if st.button("Sugerir dias",key="ux35_suggest",type="primary"):
         try:
-            plans=suggest_calendar(plan,catalog,routes,preferences)
+            plans=suggest_calendar(plan,catalog,routes,preferences,
+                                   weekend_groups=st.session_state.get("ux48_weekend_groups"),
+                                   stage=st.session_state.get("ux35_stage"))
             st.session_state["ux35_proposals"]=plans
             st.session_state.pop("ux35_review_proposal",None)
             if not plans:
@@ -275,7 +277,7 @@ def _manual(plan,catalog):
 
 def render_smart_calendar(plan:dict,catalog:dict,routes:dict,
                           trip_data:dict|None=None,
-                          sync_sources:dict|None=None)->None:
+                          sync_sources:dict|None=None,*,stage=None,show_groups=True)->None:
     """One contextual route, no extra top-level tab or automatic booking."""
     st.markdown("### Organizar a nossa viagem")
     st.caption("Meu roteiro › Organizar viagem · Planejamento, não reserva")
@@ -297,8 +299,8 @@ def render_smart_calendar(plan:dict,catalog:dict,routes:dict,
         preferences=_preferences()
     except (ValueError,KeyError,TypeError) as exc:
         st.warning(str(exc));return
-    _calendar_overview(plan,catalog,preferences)
-    if st.session_state.get("ux35_stage")==FRANCE_STAGE:
+    _calendar_overview(plan,catalog,preferences,stage)
+    if show_groups and st.session_state.get("ux35_stage")==FRANCE_STAGE:
         from ux48_weekend_groups_ui import render_weekend_planner
         render_weekend_planner(active_plan(),catalog)
     _suggest(plan,catalog,routes,preferences)
