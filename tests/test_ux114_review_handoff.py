@@ -141,6 +141,34 @@ render_base_review_scope(ctx)
         self.assertEqual(app.session_state["advisor_plan"],original)
         self.assertEqual(app.session_state[CHOICE],["metz","nancy"])
 
+    def test_leaving_comparison_invalidates_context_without_plan_change(self):
+        app,original=self._open_in_real_application()
+        app.button(key="ux_sidebar_nav_0").click().run()
+        self.assertFalse(app.exception,[x.message for x in app.exception])
+        self.assertNotIn("ux114_review_context",app.session_state)
+        self.assertEqual(app.session_state["advisor_plan"],original)
+
+    def test_changed_wishlist_priority_invalidates_pending_context(self):
+        app,original=self._open_in_real_application()
+        wishes=app.session_state["ux502_interests"]
+        app.session_state["ux502_interests"]=set_interest(
+            wishes,"paris","maybe",self.discovery)
+        app.run()
+        self.assertFalse(app.exception,[x.message for x in app.exception])
+        self.assertNotIn("ux114_review_context",app.session_state)
+        self.assertEqual(app.session_state["advisor_plan"],original)
+
+    def test_financial_premise_change_requires_a_new_explicit_review(self):
+        app,original=self._open_in_real_application()
+        app.button(key="ux34_open_review").click().run()
+        app.checkbox(key="ux34_apply_ack").check().run()
+        days=app.number_input(key="ux34_days").value
+        app.number_input(key="ux34_days").set_value(days+1).run()
+        self.assertFalse(app.exception,[x.message for x in app.exception])
+        self.assertNotIn("ux34_review",app.session_state)
+        self.assertNotIn("ux34_apply_ack",app.session_state)
+        self.assertEqual(app.session_state["advisor_plan"],original)
+
     def test_real_widget_journey_confirms_only_official_base(self):
         app,original=self._open_in_real_application()
         app.button(key="ux34_open_review").click().run()
