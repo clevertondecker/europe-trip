@@ -97,6 +97,33 @@ def project_inline_comparison(interests, scope, base_ids, *, discovery, research
     }
 
 
+def _render_choice_context(projection:dict)->None:
+    """Show evidence GAPS per base, not a score or a second time matrix."""
+    must=[d for d in projection["destinations"] if d["priority"]=="must_visit"]
+    if not must:
+        st.caption("Nenhum destino foi marcado como imperdível neste escopo.")
+        return
+    st.markdown("#### O que cada cidade cobre nos seus destinos imperdíveis")
+    for base in projection["base_ids"]:
+        categories={kind:[] for kind in CATEGORIES}
+        for dest in must:
+            categories[projection["cells"][(base,dest["id"])]["category"]].append(dest["name"])
+        doc=categories["historical"]+categories["reference_only"]
+        incomplete=categories["no_time"]+categories["local"]
+        st.markdown("**"+projection["names"][base]+"** · "+
+                    str(len(doc))+"/"+str(len(must))+
+                    " com referência ferroviária de ida pesquisada")
+        if incomplete:
+            st.caption("Ainda sem tempo/a confirmar acesso: "+", ".join(incomplete)+".")
+        else:
+            st.caption("Todos os imperdíveis têm referência de ida, "
+                       "mas retorno e última milha permanecem pendentes.")
+    common=projection["common_timed_destination_ids"]
+    st.caption(str(len(common))+" de "+str(len(projection["destinations"]))+
+               " destinos possuem tempos de ida pesquisados em todas as bases. "
+               "Compare apenas trajetos equivalentes e verifique as fontes.")
+
+
 def render_inline_comparison(interests, scope, selected, *, discovery, research):
     """Compact interpretation followed by an optional matrix, never another form."""
     if not 2 <= len(selected) <= 5:
@@ -115,10 +142,11 @@ def render_inline_comparison(interests, scope, selected, *, discovery, research)
         variant="compact",
     ), unsafe_allow_html=True)
     from ux97_comparison_visual_ui import selected_matrix_html, summary_panel_html
-    main,aside=st.columns([3,1],gap="medium")
-    with main:
-        st.markdown(selected_matrix_html(projection),unsafe_allow_html=True)
-    with aside:
+    _render_choice_context(projection)
+    # Preserve full width for 2–5 city columns. UX97 supplies keyboard
+    # accessible horizontal scrolling when the viewport is narrow.
+    st.markdown(selected_matrix_html(projection),unsafe_allow_html=True)
+    with st.expander("Cobertura da pesquisa · métricas documentais",expanded=False):
         st.markdown(summary_panel_html(projection),unsafe_allow_html=True)
 
     # UX113: the existing selected cities also drive logistics and cost evidence.
