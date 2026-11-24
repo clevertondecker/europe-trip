@@ -131,9 +131,13 @@ class JourneyAppTests(unittest.TestCase):
         app.run()
         app.button(key="flow_journey_primary").click().run()
         self.assertEqual(app.session_state["ux_section"],"Meu planejamento")
-        app.button(key="flow_journey_suggestions").click().run()
-        app.session_state["rec03a_navigation_intent"]="manual"
-        app.run()
+        self.assertNotIn("flow_journey_suggestions",{b.key for b in app.button})
+        app.button(key="ux64_sidebar_nav_0").click().run()
+        app.segmented_control(key="ux64_public_task").set_value("Minha lista").run()
+        self.assertFalse(app.exception,[x.message for x in app.exception])
+        self.assertEqual(app.session_state["ux502_interests"],wished())
+        app.button(key="ux503_open_from_wishlist").click().run()
+        self.assertFalse(app.exception,[x.message for x in app.exception])
         self.assertEqual(app.session_state["ux_section"],"Comparar")
         app.button(key="ux503_back_to_wishes").click().run()
         self.assertEqual((app.session_state["ux_area"],app.session_state["ux_section"]),

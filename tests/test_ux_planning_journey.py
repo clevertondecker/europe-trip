@@ -300,7 +300,7 @@ render_planning_journey(active_plan(),load_attractions())
             self.assertIn("ux75_private_save_now",{x.key for x in app.button})
             self.assertIn("flow_journey_review_organize",{x.key for x in app.button})
             self.assertEqual(
-                sum(x.label=="Recuperar ou guardar uma cópia privada"
+                sum(x.label=="Cópia e recuperação"
                     for x in app.expander),1)
             self.assertEqual(app.session_state["advisor_plan"]["assignments"],{})
             app.button(key="ux75_private_save_now").click().run()

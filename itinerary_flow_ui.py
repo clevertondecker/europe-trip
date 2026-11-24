@@ -639,7 +639,7 @@ def _save_panel(plan:dict,catalog:dict)->None:
 def render_itinerary_workbench(plan:dict,catalog:dict,
                                trip_data:dict|None=None,finance_live:bool=False,
                                eurfx:float=6.3,chffx:float=7.1,
-                               show_weekend_planner:bool=False)->None:
+                               show_weekend_planner:bool=False,*,global_continuity=False)->None:
     """Continuously edit a single TripPlan, with no automatic remote write."""
     stats=choice_counts(plan,catalog)
     saved=st.session_state.get("advisor_saved_snapshot")
@@ -682,8 +682,9 @@ def render_itinerary_workbench(plan:dict,catalog:dict,
              on_click=_show_add,type="primary",width="stretch")
     b.button("Montar e organizar roteiro",key="flow_go_calendar",
              on_click=_show_organize,width="stretch")
-    c.button("Salvar planejamento",key="flow_open_save",
-             on_click=_show_save,width="stretch")
+    if not global_continuity:
+        c.button("Salvar planejamento",key="flow_open_save",
+                 on_click=_show_save,width="stretch")
     # Keep the organizer next to its triggering button, instead of placing
     # it below the stage editor where the click can appear to do nothing.
     _render_organize(active_plan(),catalog,stage)
@@ -715,7 +716,8 @@ def render_itinerary_workbench(plan:dict,catalog:dict,
             and st.session_state.get("ux_area") in ("Meu roteiro","Planejar")):
         from ux63_timeline_ui import render_timeline
         render_timeline(active_plan(),catalog,stage)
-    _save_panel(active_plan(),catalog)
+    if not global_continuity:
+        _save_panel(active_plan(),catalog)
     _selected_stage(selected_rows(active_plan(),catalog),stage,catalog)
     # Render the optional European planner AFTER the stage heading and outings.
     if show_weekend_planner and stage==FRANCE_STAGE:

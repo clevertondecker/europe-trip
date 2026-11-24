@@ -74,6 +74,9 @@ st.set_page_config(page_title="Nossa Europa 2027", page_icon="🌍", layout="wid
 # Authenticated new sessions recover the latest saved GitHub plan.
 _recover_saved_plan()
 bootstrap_trip()
+_rec_config = _owner_config()
+_rec_user = (_logged_in_user() if _rec_config.get('google_configured') and _rec_config.get('owner_email') else None)
+sync_identity(st.session_state, identity_token(account_view_state(_rec_config, _rec_user), _rec_user))
 # Manual recovery is committed before nav/widgets; no automatic cloud writes.
 apply_pending_restore(load_attractions())
 restore_private_on_start(load_attractions())
@@ -87,9 +90,6 @@ if restored_days is not None:
     st.session_state["ux_days"]=max(40,min(80,int(restored_days)))
     st.session_state["unified_stay"]=st.session_state["ux_days"]
 bootstrap_ux(st.session_state)
-_rec_config = _owner_config()
-_rec_user = (_logged_in_user() if _rec_config.get('google_configured') and _rec_config.get('owner_email') else None)
-sync_identity(st.session_state, identity_token(account_view_state(_rec_config, _rec_user), _rec_user))
 apply_navigation_request(st.session_state)
 apply_recommendation_navigation(st.session_state)
 apply_planning_request(st.session_state)
@@ -592,12 +592,11 @@ if page == "Visão geral":
     render_planning_journey(active_plan(),load_attractions(),data,
                             sync_sources["finance"]["status"]=="live",
                             st.session_state.get("advisor_eurfx",6.3),
-                            st.session_state.get("advisor_chffx",7.1),summary_only=True)
+                            st.session_state.get("advisor_chffx",7.1),summary_only=True,global_continuity=True)
     # Keep legacy deep-link actions and recovery reachable without another dashboard.
-    with st.expander("Pesquisas, mapa e recuperação · opcional", expanded=False):
+    with st.expander("Pesquisas e mapa · opcional", expanded=False):
         render_home_continue(active_plan())
         render_next_actions(active_plan(),load_attractions())
-        render_continuity_panel(active_plan(),load_attractions())
         st.button("Explorar cidades-base",key="home_continue_bases",
                   on_click=_ux_next_task,args=("Explorar","Cidades-base"))
         st.button("Ver mapa de destinos",key="home_go_map",
@@ -1272,7 +1271,7 @@ elif page == "Roteiro":
             render_planning_journey(active_plan(),load_attractions(),data,
                                     sync_sources["finance"]["status"]=="live",
                                     st.session_state.get("advisor_eurfx",6.3),
-                                    st.session_state.get("advisor_chffx",7.1))
+                                    st.session_state.get("advisor_chffx",7.1),global_continuity=True)
         elif (ux_area,ux_section)==("Meu roteiro","Organizar viagem") and (
             st.session_state.get("ux_organize_view")=="Calendário inteligente"):
             render_smart_calendar(
@@ -1287,14 +1286,15 @@ elif page == "Roteiro":
                                     sync_sources["finance"]["status"]=="live",
                                     st.session_state.get("advisor_eurfx",6.3),
                                     st.session_state.get("advisor_chffx",7.1),
-                                    organizer_stage=st.session_state.get("flow_active_stage"))
+                                    organizer_stage=st.session_state.get("flow_active_stage"),global_continuity=True)
         else:
             render_itinerary_workbench(
                 active_plan(),load_attractions(),data,
                 sync_sources["finance"]["status"]=="live",
                 st.session_state.get("advisor_eurfx",6.3),
                 st.session_state.get("advisor_chffx",7.1),
-                show_weekend_planner=(ux_area,ux_section)==("Meu roteiro","Organizar viagem"))
+                show_weekend_planner=(ux_area,ux_section)==("Meu roteiro","Organizar viagem"),
+                global_continuity=True)
 
     elif itinerary_section == "Itália":
         render_italy_honeymoon()
@@ -1814,6 +1814,9 @@ elif page == "Pesquisas & decisões":
             selection_mode="single",label_visibility="collapsed")
         if view is None: view="Fila por prioridade"
     if view=="Fila por prioridade":
+        # REC05 remains available in the research owner's page, not Meus destinos.
+        from rec05_priority_research_ui import render_research_from_session
+        render_research_from_session(key="rec05_plan")
         filters=st.columns([1,1],gap="medium")
         with filters[0]:
             priority=st.selectbox("Prioridade",["Todas","P0","P1","P2","P3"],

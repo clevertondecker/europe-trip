@@ -329,7 +329,7 @@ def _workspace_cards(plan,catalog,view):
             st.caption(f"Exibindo {min(len(visible),limit)} de {len(visible)} destinos")
 
 
-def render_review(plan,catalog,view):
+def render_review(plan,catalog,view,*,global_continuity=False):
     from continuity_ui import render_primary_private_save,render_continuity_panel
     st.markdown("#### Revisar e salvar meu rascunho")
     st.caption(f'{plan["italy_days"]} dias de lua de mel · {plan["total_days"]-plan["italy_days"]} dias de temporada europeia · Base oficial de referência: {_workspace_base(plan)}. Nenhuma reserva confirmada.')
@@ -351,18 +351,17 @@ def render_review(plan,catalog,view):
                "Salvar registra decisões, não confirma reservas.")
     # Finishing a useful draft does not require selecting days or opening
     # research assistants. Keep the canonical cloud save in the primary path.
-    render_primary_private_save(plan,catalog)
+    if not global_continuity:
+        render_primary_private_save(plan,catalog)
     st.button("Organizar períodos e datas (opcional)",key="flow_journey_review_organize",
               on_click=_show,args=("organize",),disabled=not bool(view["rows"]))
     # The existing recovery panel is itself an expander. Keep it at the same
     # level as the save action so emergency export is never nested twice.
-    render_continuity_panel(plan,catalog)
-    with st.expander("Pesquisa complementar · opcional",expanded=False):
-        from rec05_priority_research_ui import render_research_from_session
-        render_research_from_session(key="rec05_plan")
+    if not global_continuity:
+        render_continuity_panel(plan,catalog)
 
 
-def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx=6.3,chffx=7.1,*,summary_only=False,organizer_stage=None):
+def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx=6.3,chffx=7.1,*,summary_only=False,organizer_stage=None,global_continuity=False):
     from continuity_ui import private_status_label
     from itinerary_flow_ui import (_render_organize,_render_add,_selected_stage,
                                   _active_stage_changed,_stage_label,_show_add,_show_organize,_compact_budget)
@@ -472,9 +471,9 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
         render_build(plan,catalog,view)
     elif state[VIEW]=="review":
         st.markdown('<span id="journey-review-anchor"></span>',unsafe_allow_html=True)
-        render_review(plan,catalog,view)
+        render_review(plan,catalog,view,global_continuity=global_continuity)
     elif state[VIEW] is None and state.get("ux_section")=="Meu planejamento" and view["rows"]:
-        render_review(plan,catalog,view)
+        render_review(plan,catalog,view,global_continuity=global_continuity)
     elif state[VIEW]=="organize":
         st.markdown('<span id="journey-organize-anchor"></span>',unsafe_allow_html=True)
         st.markdown("#### Organizar visitas")
@@ -513,13 +512,7 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
             render_timeline(active_plan(),catalog,stage,on_organize=focus_visit,pending_first=True)
         st.button("Revisar e salvar sem definir outras datas",key="flow_journey_skip_dates",
                   on_click=_show,args=("review",))
-    with st.expander("Ferramentas complementares",expanded=False):
-        st.button("Encontrar cidades-base",key="flow_journey_suggestions",
-                  on_click=request_navigation,args=(state,"suggestions"))
-        st.button("Revisar orçamento",key="flow_journey_budget",
-                  on_click=select_public_task,args=(state,"Orçamento","Visão financeira"))
-        if st.checkbox("Consultar todos os destinos e suas situações",key="flow_journey_board"):
-            render_destination_board(plan,catalog)
-        if st.checkbox("Ver estimativa financeira",key="flow_journey_cost"):
-            _compact_budget(plan,catalog,trip_data,finance_live,eurfx,chffx)
-    st.caption("Desejado ≠ incluído ≠ organizado ≠ reservado.")
+    # Full editors remain in their owning tasks; avoid a second board or budget.
+    st.button("Revisar orçamento",key="flow_journey_budget",
+              on_click=select_public_task,args=(state,"Orçamento","Visão financeira"))
+    st.caption("Organizar não confirma reservas. Salve quando quiser.")

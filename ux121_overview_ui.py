@@ -114,6 +114,6 @@ def render_overview(plan,catalog,view,storage_label,storage_hint,trip_data,finan
         st.button("Abrir orçamento",key="flow_journey_budget",on_click=select_public_task,args=(state,"Orçamento","Visão financeira"))
     # Sidebar owns the existing primary save. The overview links to the full
     # canonical review for local recovery or saving, without a second writer.
-    st.button("Revisar ou salvar minha viagem" if not view["private_saved"] else "Consultar cópia salva",
+    st.button("Consultar meus destinos",
               key="ux121_save_review",
               on_click=request_planning,args=(state,"review"))
