@@ -51,7 +51,7 @@ def render_attraction_dialog(destination_id: str, base: str, catalog: dict, rout
             st.session_state[key] = [x for x in draft if x in available][:5]
         picked = st.multiselect(
             "Atrações desejadas (até cinco)", available, key=key,
-            max_selections=5, format_func=lambda x: by_attr[x]["name"])
+            max_selections=5, format_func=lambda x: by_attr[x]["name"], placeholder="Escolha uma ou mais opções")
         duration = sum(by_attr[x]["visit_minutes"] for x in picked)
         st.caption(f"Duração nas atrações: {duration // 60}h{duration % 60:02d}; "
                    "deslocamentos e filas não incluídos.")
