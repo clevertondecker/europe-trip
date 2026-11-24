@@ -69,7 +69,7 @@ class UnifiedProfileTests(unittest.TestCase):
         self.assertEqual(timed["missing"],0)
         self.assertTrue(all(r["priority"] is None for r in v["routes"]))
     def test_all_subjects_in_full_and_sparse_profiles(self):
-        for city in ("mulhouse","annecy"):
+        for city in ("mulhouse","metz","strasbourg","annecy","colmar"):
             app=AppTest.from_string(
                 "from ux124_city_profile_ui import render_city_profile\n"
                 f"render_city_profile({city!r})",default_timeout=120).run()
