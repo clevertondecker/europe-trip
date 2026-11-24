@@ -96,7 +96,13 @@ def render_selection_toolbar(options,cities,*,navigation=None):
     """Selection feedback adjacent to cards, not another multiselect."""
     selected=selected_card_bases(st.session_state,options)
     with st.container(key="ux111-selection-toolbar",border=True):
-        st.markdown("**Cidades selecionadas · "+str(len(selected))+" de 5**")
+        scope=st.session_state.get(SCOPE)
+        if isinstance(scope,dict) and isinstance(scope.get("destination_ids"),list):
+            from ux96_comparison_visual_ui import selected_context
+            st.markdown(selected_context(selected,cities,len(scope["destination_ids"])),
+                        unsafe_allow_html=True)
+        else:
+            st.markdown("**Cidades selecionadas · "+str(len(selected))+" de 5**")
         feedback=st.session_state.get("ux111_last_selection")
         if (isinstance(feedback,tuple) and len(feedback)==2
                 and feedback[0] in options
