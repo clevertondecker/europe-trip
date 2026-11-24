@@ -223,6 +223,47 @@ class GuidedComparisonTests(unittest.TestCase):
         self.assertTrue(any("ux97-table" in x.value for x in a.markdown))
         self.assertEqual(a.session_state["advisor_plan"],original)
 
+    def test_active_view_survives_widget_rerun(self):
+        a=self.app()
+        a.button(key="rec03a_confirm_subset").click().run()
+        a.segmented_control(key="ux112_active_view").set_value("Minha comparação").run()
+        self.assertEqual(a.session_state["ux112_active_view_shadow"],"Minha comparação")
+        a.run()
+        self.assertEqual(a.segmented_control(key="ux112_active_view").value,
+                         "Minha comparação")
+        a.segmented_control(key="ux112_active_view").set_value("Explorar alternativas").run()
+        self.assertEqual(a.session_state["ux112_active_view_shadow"],"Explorar alternativas")
+
+    def test_identity_change_cleans_ephemeral_review_but_not_trip_plan(self):
+        from rec03a_session import sync_identity
+        original=new_plan()
+        state={"rec03a_identity":"owner:previous",CHOICE:["metz"],
+               "ux112_active_view":"Minha comparação",
+               "ux112_active_view_shadow":"Minha comparação",
+               "ux114_review_context":{"base":"metz"},
+               "ux34_candidates":["metz"],"ux34_destinations":["paris"],
+               "ux34_review":{"pending":True},"ux34_apply_ack":True,
+               "advisor_plan":deepcopy(original),"ux41_favorites":["metz"]}
+        sync_identity(state,"owner:new")
+        for key in (CHOICE,"ux112_active_view","ux112_active_view_shadow",
+                    "ux114_review_context","ux34_candidates","ux34_destinations",
+                    "ux34_review","ux34_apply_ack"):
+            self.assertNotIn(key,state)
+        self.assertEqual(state["advisor_plan"],original)
+        self.assertEqual(state["ux41_favorites"],["metz"])
+
+    def test_overlimit_feedback_never_claims_negative_capacity(self):
+        from base_research_expanded_model import load_research
+        a=self.app()
+        a.button(key="rec03a_confirm_subset").click().run()
+        ids=[c["id"] for c in load_research(include_candidates=True)["cities"]][:6]
+        a.session_state[CHOICE]=ids
+        a.segmented_control(key="ux112_active_view").set_value("Minha comparação").run()
+        self.assertFalse(a.exception,[x.message for x in a.exception])
+        self.assertFalse(any("-1 vaga" in x.value for x in a.caption))
+        self.assertTrue(any("acima do limite" in x.value for x in a.caption)
+                        or any("mais de cinco" in x.value for x in a.warning))
+
     def test_selection_below_filter_remains_authoritative(self):
         a=self.app()
         a.button(key="rec03a_confirm_subset").click().run()
