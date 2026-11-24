@@ -8,7 +8,8 @@ from __future__ import annotations
 
 import streamlit as st
 
-from base_change_model import destination_catalog,_canonical_destination
+from base_change_model import (destination_catalog,_canonical_destination,
+                               SIMILARITY_THRESHOLD_MINUTES)
 from base_scenario_model import base_options
 from city_decision_model import (
     compare_city_decisions,shared_destinations,review_base_application,
@@ -48,49 +49,50 @@ def _load_draft(draft:dict)->None:
     st.session_state.pop("ux34_review",None)
 
 
-def _render_routes(comparison:dict)->None:
+def _render_routes(comparison:dict,*,details_only:bool=False)->None:
     names=_names()
     official=comparison["official_base"]
     alternatives=comparison["alternatives"]
     places=comparison["destination_names"]
-    rows={}
-    for city in [official]+alternatives:
-        rows[city]={r["destination_id"]:r for r in comparison["profiles"][city]["routes"]}
-    table=[]
-    for dest in comparison["destinations"]:
-        entry={"Passeio":places[dest]}
+    if not details_only:
+        rows={}
         for city in [official]+alternatives:
-            route=rows[city][dest]
-            typical=route.get("representative_minutes")
-            fastest=route["minutes"]
-            label=names[city]+(" (meu plano)" if city==official else "")
-            entry[label]=(f"{typical} min típico · {fastest} min mínimo (ida)"
-                          if typical is not None and fastest is not None else
-                          f"{fastest} min mínimo (ida)" if fastest is not None
-                          else "Local · acesso a verificar" if route.get("category")=="local"
-                          else "Não pesquisado")
-        table.append(entry)
-    st.dataframe(table,hide_index=True,width="stretch",height=270)
-    st.caption("Referências históricas de novembro/2026, somente ida, estação a estação. "
-               "O tempo típico é a média publicada pelo operador, não a garantia "
-               "de um trem em qualquer dia. Trocas de estação e última milha "
-               "não integram esses tempos. Nenhuma volta de 2027 foi validada.")
-    if len(alternatives)==1:
-        a,b=official,alternatives[0]
-        paired=comparison["candidates"][0]["routes"]
-        pairs=[(v["destination_id"],v["official_minutes"],v["candidate_minutes"])
-               for v in paired if v["comparison_basis"]=="representative" and v["delta_minutes"] is not None]
-        if pairs:
-            sum_a=sum(v[1] for v in pairs)
-            sum_b=sum(v[2] for v in pairs)
-            st.markdown("**Subtotal ilustrativo das visitas comparáveis**")
-            st.caption(f"{len(pairs)}/{len(paired)} destinos com tempos típicos nas duas bases. "
-                       "Uma visita por destino, apenas ida: "
-                       f"{names[a]} {sum_a} min e {names[b]} {sum_b} min. "
-                       "Uma ida + volta hipotética com duração igual daria "
-                       f"{2*sum_a} min e {2*sum_b} min, respectivamente; "
-                       "**os retornos não foram pesquisados e isso não é um "
-                       "tempo total verificado**. Nenhuma rota incompleta integra a soma.")
+            rows[city]={r["destination_id"]:r for r in comparison["profiles"][city]["routes"]}
+        table=[]
+        for dest in comparison["destinations"]:
+            entry={"Passeio":places[dest]}
+            for city in [official]+alternatives:
+                route=rows[city][dest]
+                typical=route.get("representative_minutes")
+                fastest=route["minutes"]
+                label=names[city]+(" (meu plano)" if city==official else "")
+                entry[label]=(f"{typical} min típico · {fastest} min mínimo (ida)"
+                              if typical is not None and fastest is not None else
+                              f"{fastest} min mínimo (ida)" if fastest is not None
+                              else "Local · acesso a verificar" if route.get("category")=="local"
+                              else "Não pesquisado")
+            table.append(entry)
+        st.dataframe(table,hide_index=True,width="stretch",height=270)
+        st.caption("Referências históricas de novembro/2026, somente ida, estação a estação. "
+                   "O tempo típico é a média publicada pelo operador, não a garantia "
+                   "de um trem em qualquer dia. Trocas de estação e última milha "
+                   "não integram esses tempos. Nenhuma volta de 2027 foi validada.")
+        if len(alternatives)==1:
+            a,b=official,alternatives[0]
+            paired=comparison["candidates"][0]["routes"]
+            pairs=[(v["destination_id"],v["official_minutes"],v["candidate_minutes"])
+                   for v in paired if v["comparison_basis"]=="representative" and v["delta_minutes"] is not None]
+            if pairs:
+                sum_a=sum(v[1] for v in pairs)
+                sum_b=sum(v[2] for v in pairs)
+                st.markdown("**Subtotal ilustrativo das visitas comparáveis**")
+                st.caption(f"{len(pairs)}/{len(paired)} destinos com tempos típicos nas duas bases. "
+                           "Uma visita por destino, apenas ida: "
+                           f"{names[a]} {sum_a} min e {names[b]} {sum_b} min. "
+                           "Uma ida + volta hipotética com duração igual daria "
+                           f"{2*sum_a} min e {2*sum_b} min, respectivamente; "
+                           "**os retornos não foram pesquisados e isso não é um "
+                           "tempo total verificado**. Nenhuma rota incompleta integra a soma.")
     for city in [official]+alternatives:
         with st.expander("Fontes e modalidades · "+names[city],expanded=False):
             for r in comparison["profiles"][city]["routes"]:
@@ -139,7 +141,7 @@ def _render_coverage(comparison:dict)->None:
             st.caption("Comparação com tempo nas duas cidades: "+
                        str(item["paired_route_times"])+"/"+
                        str(len(comparison["destinations"]))+
-                       " destinos. Critério ilustrativo: ≥15 min de diferença só ida, "
+                       f" destinos. Critério ilustrativo: ≥{SIMILARITY_THRESHOLD_MINUTES} min de diferença só ida, "
                        "usando tempos típicos quando disponíveis nas duas bases.")
             if (item["candidate_only_researched"] or
                 item["official_only_researched"]):
@@ -385,7 +387,7 @@ def contextual_impact_projection(comparison:dict, priorities=None)->dict:
 def _render_contextual_review(plan:dict,comparison:dict,overview)->None:
     """Render the decision dashboard ahead of the native finance controls."""
     from ux502_destination_interests_model import ordered_interests,empty_interests
-    from ux100_base_card_photos import base_card_photo_record,render_base_card_photo
+    from ux100_base_card_photos import render_base_card_photo
     from ux117_review_visual import (city_identity_html,impact_html,
                                      housing_html,subtotals_html)
     priorities={_canonical_destination(item["destination_id"]):item["priority"]
@@ -400,8 +402,7 @@ def _render_contextual_review(plan:dict,comparison:dict,overview)->None:
         for column,city,role in ((left,official,"Base atual"),(right,candidate,"Base proposta")):
             with column:
                 with st.container(key="ux117_city_"+city,border=True):
-                    if base_card_photo_record(city):
-                        render_base_card_photo(city,cities[city]["name"])
+                    render_base_card_photo(city,cities[city]["name"])
                     st.markdown(city_identity_html(cities[city],role),unsafe_allow_html=True)
         st.markdown(impact_html(view),unsafe_allow_html=True)
         subtotal=subtotals_html(view)
@@ -409,11 +410,11 @@ def _render_contextual_review(plan:dict,comparison:dict,overview)->None:
             st.markdown(subtotal,unsafe_allow_html=True)
         st.markdown("#### Impacto financeiro")
         st.markdown(housing_html(comparison,view),unsafe_allow_html=True)
-    if st.checkbox("Ver fontes, modalidades e detalhes",key="ux115_details_open"):
-        _render_routes(comparison)
-        _render_finance(comparison)
-        st.caption(comparison["methodology"])
     _review_official_change(active_plan(),comparison,contextual_base=candidate)
+    if st.checkbox("Ver fontes, modalidades e detalhes",key="ux115_details_open"):
+        _render_routes(comparison,details_only=True)
+        st.caption("Moradia: taxas, caução e demais custos não cotados. "
+                   "Tarifas históricas de ida não são somadas ao orçamento.")
 
 
 def render_city_decision(plan:dict,trip_data:dict,finance_live:bool,
