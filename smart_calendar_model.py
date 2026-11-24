@@ -161,7 +161,8 @@ def _draft(plan:dict,assignments:dict,italy_dates:dict,changes:list,
 
 
 def suggest_calendar(plan:dict,catalog:dict,routes:dict,
-                     preferences:dict|None=None,*,max_options:int=3)->list[dict]:
+                     preferences:dict|None=None,*,max_options:int=3,
+                     weekend_groups=None,stage=None)->list[dict]:
     """Suggestions never commit. Existing dated choices are untouched."""
     validate_plan(plan)
     validate_calendar_preferences(preferences)
@@ -170,7 +171,21 @@ def suggest_calendar(plan:dict,catalog:dict,routes:dict,
     rows=selected_rows(plan,catalog)
     if not rows:return []
     days=availability_matrix(plan,preferences)
-    jobs=[row for row in rows if not row["exact_dates"]]
+    if stage not in (None,ITALY_STAGE,FRANCE_STAGE):
+        raise ValueError("Etapa inválida")
+    reserved=set()
+    grouped=set()
+    if weekend_groups is not None:
+        from ux48_weekend_groups_model import validate_groups, _trip_days, _rest_days
+        sidecar=validate_groups(weekend_groups,plan,catalog)
+        for group in sidecar["groups"]:
+            grouped.update(group["destinations"])
+            if group["start_date"]:
+                reserved.update(_trip_days(group["start_date"],group["nights"]))
+        for start in sidecar["rest_weekends"]:
+            reserved.update(_rest_days(start))
+    jobs=[row for row in rows if not row["exact_dates"] and
+          (stage is None or row["stage"]==stage)]
     if not jobs:return []
     jobs.sort(key=lambda r:(r["stage"]!=ITALY_STAGE,r["name"]))
     proposals=[];signatures=set()
@@ -179,8 +194,11 @@ def suggest_calendar(plan:dict,catalog:dict,routes:dict,
         italy_dates={v["destination_id"]:v["exact_date"] for v
                      in plan.get("flexible_visits",[])
                      if v.get("stage")==ITALY_STAGE and v.get("exact_date")}
-        occupied=_occupied_dates(plan);changes=[];unresolved=[]
+        occupied=_occupied_dates(plan)|reserved;changes=[];unresolved=[]
         for visit in jobs:
+            if visit["id"] in grouped:
+                unresolved.append({"destination_id":visit["id"],"reason":"Organize este destino na viagem agrupada."})
+                continue
             insight=_visit_explanation(visit,plan,catalog,routes)
             if not insight["eligible"]:
                 unresolved.append({"destination_id":visit["id"],

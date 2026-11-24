@@ -130,14 +130,9 @@ def _current_decisions_fingerprint(plan, catalog) -> str:
 
 def _private_archive(plan, catalog):
     state = st.session_state
-    from ux48_weekend_groups_model import reconcile_removed_outings
+    # A fingerprint/archive read must never repair or replace the session sidecar.
+    # Canonical plan mutations reconcile before publishing; invalid archives fail.
     weekends=state.get("ux48_weekend_groups")
-    if weekends is not None:
-        reconciled=reconcile_removed_outings(weekends,plan,catalog)
-        if reconciled!=weekends:
-            state["ux48_weekend_groups"]=reconciled
-            state["ux36_cloud_dirty"]=True
-        weekends=reconciled
     return make_archive(plan, catalog, _safe_context(plan, catalog),
                         list(state.get("ux34_drafts", {}).values()),
                         list(state.get("ux35_proposals", [])),
@@ -398,7 +393,7 @@ def render_global_private_save(plan, catalog):
             st.success("Salvamento privado confirmado.")
 
 
-def private_status_label(fallback):
+def private_status_label(fallback, *, detailed=False):
     """Show private success only after a confirmed remote response."""
     state = st.session_state
     if state.get("ux36_cloud_status") == "Salvo em espaço privado":
@@ -414,7 +409,9 @@ def private_status_label(fallback):
             pass
         return ("Alterações apenas nesta sessão", "Salve uma cópia privada ou baixe o backup")
     if state.get("ux36_cloud_status", "").startswith(("Erro","Conflito")):
-        return ("Alterações apenas nesta sessão", "Salve uma cópia privada ou baixe o backup")
+        hint=("Conflito de versão; revise a cópia antes de salvar" if state["ux36_cloud_status"].startswith("Conflito")
+              else "Falha de salvamento; nenhuma gravação confirmada") if detailed else "Salve uma cópia privada ou baixe o backup"
+        return ("Alterações apenas nesta sessão", hint)
     return fallback
 
 

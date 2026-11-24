@@ -191,16 +191,12 @@ class WeekendGroupUITests(unittest.TestCase):
         self.assertFalse(any("Organizar viagens de fim de semana" in m.value
                               for m in app.markdown))
         app.segmented_control(key="flow_active_stage").set_value("França").run()
-        app.checkbox(key="flow_journey_calendar").check().run()
+        app.segmented_control(key="ux120_mode").set_value("Viagens agrupadas").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
         self.assertTrue(any("Organizar viagens de fim de semana" in m.value
                              for m in app.markdown))
-        headings=[m.value for m in app.markdown]
-        stage_pos=next(i for i,v in enumerate(headings)
-                       if "Organizar visitas" in v)
-        weekend_pos=next(i for i,v in enumerate(headings)
-                         if "Organizar viagens de fim de semana" in v)
-        self.assertLess(stage_pos,weekend_pos)
+        self.assertNotIn("flow_organize_destination",{w.key for w in app.selectbox})
+        self.assertNotIn("ux35_suggest",{w.key for w in app.button})
         app.segmented_control(key="flow_active_stage").set_value("Itália").run()
         self.assertFalse(any("Organizar viagens de fim de semana" in m.value
                               for m in app.markdown))

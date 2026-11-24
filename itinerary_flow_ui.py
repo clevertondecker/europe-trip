@@ -222,11 +222,11 @@ def _render_add(plan:dict,catalog:dict)->None:
             st.rerun()
 
 
-def _edit_destination(row:dict,catalog:dict)->None:
+def _edit_destination(row:dict,catalog:dict,*,force_expanded:bool=False)->None:
     item=get_choice(catalog,row["id"])
     labels={x["id"]:x["name"] for x in item["attractions"]}
     with st.expander("Editar "+item["name"],
-                     expanded=st.session_state.get("flow_edit_target")==row["id"]):
+                     expanded=force_expanded or st.session_state.get("flow_edit_target")==row["id"]):
         attractions=st.multiselect(
             "Atrações em "+item["name"],list(labels),
             default=[x for x in row["attractions"] if x in labels],
@@ -244,6 +244,7 @@ def _edit_destination(row:dict,catalog:dict)->None:
                     outcome=commit_outing(row["id"],attractions,chosen,confirmed=True)
                     st.session_state["ux45_flow_result"]=asdict(outcome)
                     st.session_state.pop("flow_edit_target",None)
+                    st.session_state.pop("flow_journey_workspace_edit",None)
                     st.session_state["flow_notice"]=(
                         item["name"]+" atualizado no seu roteiro.")
                     st.rerun()
@@ -257,16 +258,26 @@ def _edit_destination(row:dict,catalog:dict)->None:
             st.warning("Remover "+item["name"]+
                        " do seu planejamento? As datas desse destino, "
                        "se houver, também serão removidas.")
+            groups=st.session_state.get("ux48_weekend_groups") or {}
+            for group in groups.get("groups", []):
+                if row["id"] in group["destinations"]:
+                    st.caption("Também será retirado da viagem "+group["name"]+
+                               (". O grupo ficará vazio e será removido."
+                                if len(group["destinations"])==1 else ". Os demais destinos permanecem."))
             yes,no=st.columns(2)
             with yes:
                 if st.button("Confirmar remoção",
                              key="flow_remove_confirm_"+row["id"],type="primary"):
-                    outcome=delete_outing(row["id"],confirmed=True)
-                    st.session_state["ux45_flow_result"]=asdict(outcome)
-                    st.session_state.pop("flow_edit_target",None)
-                    st.session_state.pop("flow_removing",None)
-                    st.session_state["flow_notice"]=item["name"]+" removido."
-                    st.rerun()
+                    try:
+                        outcome=delete_outing(row["id"],confirmed=True)
+                        st.session_state["ux45_flow_result"]=asdict(outcome)
+                        st.session_state.pop("flow_edit_target",None)
+                        st.session_state.pop("flow_journey_workspace_edit",None)
+                        st.session_state.pop("flow_removing",None)
+                        st.session_state["flow_notice"]=item["name"]+" removido."
+                        st.rerun()
+                    except (ValueError,KeyError) as exc:
+                        st.error(str(exc))
             with no:
                 if st.button("Cancelar",key="flow_remove_cancel_"+row["id"]):
                     st.session_state.pop("flow_removing",None)
@@ -370,7 +381,7 @@ def _selected_stage(rows:list[dict],stage:str,catalog:dict)->None:
 
 
 def _compact_budget(plan:dict,catalog:dict,trip_data:dict,
-                    finance_live:bool,eurfx:float,chffx:float)->None:
+                    finance_live:bool,eurfx:float,chffx:float,*,show_link=True)->None:
     if trip_data is None:
         st.caption("Custos disponíveis em Orçamento; ainda há valores sem cotação.")
         return
@@ -396,8 +407,9 @@ def _compact_budget(plan:dict,catalog:dict,trip_data:dict,
         st.warning("A projeção parcial excede o teto; as escolhas continuam editáveis.")
     st.caption("A Itália permanece na verba agregada, sem somar novamente ingressos. "
                "Valores faltantes não são €0; a margem não é dinheiro livre.")
-    st.button("Ver orçamento detalhado",key="flow_go_budget",
-              on_click=_navigate,args=("Orçamento","Detalhamento"))
+    if show_link:
+        st.button("Ver orçamento detalhado",key="flow_go_budget",
+                  on_click=_navigate,args=("Orçamento","Detalhamento"))
 
 
 def _clear_organize_date_draft(state,stage:str)->None:
@@ -508,14 +520,15 @@ def _render_organizer_wishlist(plan:dict,catalog:dict,stage:str)->None:
                    " destino(s) desejados pertencem à outra etapa.")
 
 
-def _render_organize(plan:dict,catalog:dict,stage:str,*,show_wishlist:bool=True,review_on_close:bool=False)->None:
+def _render_organize(plan:dict,catalog:dict,stage:str,*,show_wishlist:bool=True,review_on_close:bool=False,on_close=None)->None:
     """Organize by flexible period or precise day without leaving this editor."""
     if not st.session_state.get("flow_organize_open",False):
         return
     with st.container(border=True):
-        st.markdown("#### Montar meu roteiro")
+        st.markdown("#### Montar meu roteiro" if show_wishlist else "#### Definir período ou data")
         st.caption("Inclua destinos agora e defina os dias só quando quiser. "
-                   "Você pode salvar o roteiro sem nenhuma data.")
+                   "Você pode salvar o roteiro sem nenhuma data." if show_wishlist else
+                   "Escolha uma visita. Período e data são opcionais.")
         if show_wishlist:
             _render_organizer_wishlist(plan,catalog,stage)
         rows=selected_rows_for_stage(plan,catalog,stage)
@@ -597,9 +610,12 @@ def _render_organize(plan:dict,catalog:dict,stage:str,*,show_wishlist:bool=True,
                             st.rerun()
                         except (ValueError,KeyError) as exc:
                             st.error(str(exc))
-        st.button("Abrir calendário completo",key="flow_organize_full_calendar",
-                  on_click=_navigate,args=("Meu roteiro","Calendário"))
-        if st.button("Concluir organização",key="flow_organize_close"):
+        if on_close is None:
+            st.button("Abrir calendário completo",key="flow_organize_full_calendar",
+                      on_click=_navigate,args=("Meu roteiro","Calendário"))
+        if on_close is not None:
+            st.button("Voltar a Meus destinos",key="flow_organize_close",on_click=on_close)
+        elif st.button("Concluir organização",key="flow_organize_close"):
             st.session_state["flow_organize_open"]=False
             if review_on_close:
                 st.session_state["flow_journey_view"]="review"

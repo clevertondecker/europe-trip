@@ -62,8 +62,16 @@ class IntegratedDestinationCardsTests(unittest.TestCase):
         app.session_state["advisor_plan"]=p
         app.run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
+        self.assertIn("ux120_visit_colmar",{b.key for b in app.button})
+        self.assertNotIn("flow_edit_save_colmar",{b.key for b in app.button})
+        app.button(key="flow_organize_close").click().run()
+        self.assertFalse(app.exception,[e.message for e in app.exception])
+        app.button(key="flow_workspace_edit_colmar").click().run()
+        self.assertFalse(app.exception,[e.message for e in app.exception])
         self.assertEqual(len([b for b in app.button
                               if b.key=="flow_edit_save_colmar"]),1)
+        app.checkbox(key="flow_journey_workspace_logistics_colmar").check().run()
+        self.assertFalse(app.exception,[e.message for e in app.exception])
         self.assertFalse(any("Lugares que escolhemos" in m.value
                              for m in app.markdown))
         self.assertTrue(any("Colmar" in m.value for m in app.markdown))
@@ -122,7 +130,18 @@ class IntegratedDestinationCardsTests(unittest.TestCase):
         app.run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
         keys={b.key for b in app.button}
-        self.assertIn("flow_edit_save_colmar",keys)
-        self.assertIn("flow_edit_save_strasbourg",keys)
+        self.assertIn("ux120_visit_colmar",keys)
+        self.assertIn("ux120_visit_strasbourg",keys)
+        self.assertNotIn("flow_edit_save_colmar",keys)
+        app.button(key="flow_organize_close").click().run()
+        self.assertFalse(app.exception,[e.message for e in app.exception])
+        for destination,other in (("colmar","strasbourg"),("strasbourg","colmar")):
+            app.button(key="flow_workspace_edit_"+destination).click().run()
+            self.assertFalse(app.exception,[e.message for e in app.exception])
+            self.assertEqual(sum(b.key=="flow_edit_save_"+destination for b in app.button),1)
+            self.assertNotIn("flow_edit_save_"+other,{b.key for b in app.button})
+            app.button(key="flow_workspace_cancel_"+destination).click().run()
+            self.assertFalse(app.exception,[e.message for e in app.exception])
+        self.assertEqual(app.session_state["advisor_plan"],p)
 
 if __name__=="__main__":unittest.main()
