@@ -154,7 +154,9 @@ class ComparisonVisualIntegrationTests(unittest.TestCase):
         self.assertIn("Mulhouse",self._selected_strip(app))
         self.assertIn("Metz",self._selected_strip(app))
         self.assertTrue(app.checkbox(key="rec03a_pick_metz").value)
-        self.assertTrue(any(x.label=="Conhecer cidade, mapa e custos" for x in app.expander))
+        # Direct investigation actions replace the old extra expander.
+        self.assertFalse(any(x.label=="Conhecer cidade, mapa e custos" for x in app.expander))
+        self.assertIn("rec03a_handoff_profile_card_metz",{x.key for x in app.button})
         cards=[x.value for x in app.markdown if "ux96-city-header" in x.value]
         self.assertTrue(any("Metz" in x and "Selecionada" in x for x in cards))
         self.assertTrue(any("ux97-table" in x.value for x in app.markdown))
