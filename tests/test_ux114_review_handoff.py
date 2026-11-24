@@ -127,9 +127,14 @@ render_base_review_scope(ctx)
         app.button(key="ux114_open_review").click().run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
         self.assertIn("ux114_review_back",{x.key for x in app.button})
-        self.assertTrue(app.multiselect(key="ux34_candidates").disabled)
-        self.assertTrue(app.multiselect(key="ux34_destinations").disabled)
-        self.assertEqual(app.multiselect(key="ux34_candidates").value,["metz"])
+        # Contextual UX115 presents the confirmed candidate and scope as
+        # readable text, not as disabled multiselect widgets.
+        self.assertNotIn("ux34_candidates",{x.key for x in app.multiselect})
+        self.assertNotIn("ux34_destinations",{x.key for x in app.multiselect})
+        self.assertEqual(app.session_state["ux34_candidates"],["metz"])
+        self.assertEqual(set(app.session_state["ux34_destinations"]),
+                         {"paris","colmar","strasbourg"})
+        self.assertIn("ux115_keep_base",{x.key for x in app.button})
         self.assertEqual(app.session_state["advisor_plan"],original)
         return app,original
 
