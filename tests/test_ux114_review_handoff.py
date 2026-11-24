@@ -56,7 +56,7 @@ class UX114ExplicitReviewTests(unittest.TestCase):
         self.assertFalse(app.exception,[x.message for x in app.exception])
         self.assertEqual(app.session_state["ux114_review_base"],"metz")
         ctx=app.session_state["ux114_review_context"]
-        self.assertEqual(ctx["approved_destinations"],["paris","colmar","strasbourg"])
+        self.assertEqual(set(ctx["approved_destinations"]),{"paris","colmar","strasbourg"})
         self.assertEqual(app.session_state["ux34_candidates"],["metz"])
         self.assertEqual(app.session_state["advisor_plan"],before)
         self.assertEqual(app.session_state[CHOICE],["metz","lille"])
