@@ -138,6 +138,8 @@ class QuickComparisonAppTests(unittest.TestCase):
         self.assertFalse(any("ux97-table" in x.value for x in app.markdown))
         app.checkbox(key=picks[1]).check().run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
+        self.assertFalse(any("ux97-table" in x.value for x in app.markdown))
+        app.segmented_control(key="ux112_active_view").set_value("Minha comparação").run()
         self.assertEqual(sum("ux97-table" in x.value for x in app.markdown),1)
         self.assertFalse(any("Destino desejado" in x.value.columns for x in app.dataframe))
         self.assertEqual(app.session_state["advisor_plan"],plan)
@@ -183,6 +185,8 @@ class QuickComparisonAppTests(unittest.TestCase):
         if first!="rec03a_pick_metz":
             app.checkbox(key="rec03a_pick_metz").check().run()
             self.assertEqual(len(app.session_state[CHOICE]),2)
+            self.assertFalse(any("ux97-table" in x.value for x in app.markdown))
+            app.segmented_control(key="ux112_active_view").set_value("Minha comparação").run()
             self.assertEqual(sum("ux97-table" in x.value for x in app.markdown),1)
         self.assertEqual(app.session_state["advisor_plan"],plan)
         self.assertEqual(app.session_state["ux502_interests"],wishes)
