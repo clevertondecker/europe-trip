@@ -86,11 +86,23 @@ def _remove_comparison_base(base,options):
         state["ux111_last_selection"]=(base,False)
 
 
-def render_selection_toolbar(options,cities):
+def _switch_comparison_view(view):
+    """Change only presentation mode; CHOICE and TripPlan are untouched."""
+    st.session_state["ux112_active_view"]=view
+    st.session_state["ux112_active_view_shadow"]=view
+
+
+def render_selection_toolbar(options,cities,*,navigation=None):
     """Selection feedback adjacent to cards, not another multiselect."""
     selected=selected_card_bases(st.session_state,options)
     with st.container(key="ux111-selection-toolbar",border=True):
-        st.markdown("**Sua comparação · "+str(len(selected))+" de 5 cidades selecionadas**")
+        scope=st.session_state.get(SCOPE)
+        if isinstance(scope,dict) and isinstance(scope.get("destination_ids"),list):
+            from ux96_comparison_visual_ui import selected_context
+            st.markdown(selected_context(selected,cities,len(scope["destination_ids"])),
+                        unsafe_allow_html=True)
+        else:
+            st.markdown("**Cidades selecionadas · "+str(len(selected))+" de 5**")
         feedback=st.session_state.get("ux111_last_selection")
         if (isinstance(feedback,tuple) and len(feedback)==2
                 and feedback[0] in options
@@ -99,7 +111,10 @@ def render_selection_toolbar(options,cities):
                         if feedback[1] else
                         "✓ "+cities[feedback[0]]["name"]+" removida da comparação."))
         if selected:
-            st.caption(str(5-len(selected))+" vaga(s) restantes · alternativas de pesquisa, não roteiro oficial")
+            if len(selected)<=5:
+                st.caption(str(5-len(selected))+" vaga(s) restantes · pesquisa, não roteiro oficial")
+            else:
+                st.caption("Seleção antiga acima do limite; remova as excedentes para continuar.")
             # The native remove action is explicit and keyboard accessible.
             columns=st.columns(min(3,len(selected)))
             for i,base in enumerate(selected):
@@ -111,13 +126,25 @@ def render_selection_toolbar(options,cities):
                               args=(base,tuple(options)),use_container_width=True)
         else:
             st.caption("Selecione uma cidade nos cartões para iniciar.")
-        if len(selected)<2:
+        if len(selected)>5:
+            st.warning("Sua seleção anterior contém mais de cinco cidades. "
+                       "Remova as excedentes para comparar; nenhuma foi excluída automaticamente.")
+        elif len(selected)<2:
             st.info("Escolha pelo menos duas cidades para ver a comparação.")
+        if navigation=="explore":
+            if 2<=len(selected)<=5:
+                st.button("Ver minha comparação ("+str(len(selected))+")",
+                          key="ux112_open_comparison",type="primary",
+                          on_click=_switch_comparison_view,args=("Minha comparação",))
+        elif navigation=="compare":
+            st.button("+ Explorar outras cidades",key="ux112_open_exploration",
+                      on_click=_switch_comparison_view,args=("Explorar alternativas",))
         else:
-            st.markdown('<a class="ux111-primary-action" href="#ux111-comparison">'
-                        'Ver comparação atualizada ↗</a>',unsafe_allow_html=True)
-        st.markdown('<a class="ux111-secondary-action" href="#ux111-picker">'
-                    'Adicionar outras cidades</a>',unsafe_allow_html=True)
+            if 2<=len(selected)<=5:
+                st.markdown('<a class="ux111-primary-action" href="#ux111-comparison">'
+                            'Ver comparação atualizada ↗</a>',unsafe_allow_html=True)
+            st.markdown('<a class="ux111-secondary-action" href="#ux111-picker">'
+                        'Adicionar outras cidades</a>',unsafe_allow_html=True)
 
 
 def render_card_choice(base, options, *, show_selection_hint=True):
@@ -138,9 +165,7 @@ def render_card_choice(base, options, *, show_selection_hint=True):
                    " à comparação · "+str(len(selected))+" de 5 selecionadas")
     elif base in selected:
         st.caption("✓ Nesta comparação · "+str(len(selected))+" de 5 selecionadas")
-    if base in selected and len(selected)>=2:
-        st.markdown('[Ver comparação atualizada](#ux111-comparison)')
-    elif show_selection_hint and base in selected:
+    if show_selection_hint and base in selected and len(selected)==1:
         st.caption("Selecione mais uma cidade para comparar.")
 
 
@@ -206,10 +231,16 @@ def render_planning_return():
         st.caption("O escopo das sugestões foi preservado. A lista completa continua disponível no planejador.")
 
 
-def render_card_actions(base,prefix,*,emphasize_profile=False):
+def render_card_actions(base,prefix,*,emphasize_profile=False,compact=False):
     from rec04_candidate_capabilities import capability_for
     from rec04_simulation_handoff import request_simulation
     cap=capability_for(base)
+    if compact:
+        st.button("Conhecer cidade",key=f"rec03a_handoff_profile_{prefix}_{base}",
+                  type="primary" if emphasize_profile else "secondary",
+                  on_click=queue_handoff,args=(st.session_state,"profile",[base]),
+                  use_container_width=True)
+        return
     a,b,c=st.columns(3)
     a.button("Conhecer cidade",key=f"rec03a_handoff_profile_{prefix}_{base}",
              type="primary" if emphasize_profile else "secondary",

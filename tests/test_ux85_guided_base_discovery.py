@@ -106,18 +106,18 @@ class GuidedComparisonTests(unittest.TestCase):
         self.assertFalse(any(b.key=="rec03a_confirm_subset" for b in a.button))
 
 
-    def test_single_cta_follows_all_visible_cards_in_each_view(self):
-        # Structural guard for UX85's temporary native CTA; UX87 will replace
-        # this handoff region with inline comparison after the same cards.
+    def test_exploration_precedes_one_inline_comparison(self):
+        # UX112 removes the redundant preview and secondary focus selection.
         source=inspect.getsource(render_suggestions)
-        self.assertEqual(source.count("render_card_selection_summary(result,cities,selection_already_shown=True)"),1)
-        self.assertLess(source.index("for index,candidate in enumerate(visible):"),
-                        source.index("render_card_selection_summary(result,cities,selection_already_shown=True)"))
-        self.assertLess(source.index("_render_quick_comparison(result,names,cities,"),
-                        source.index("for index,candidate in enumerate(visible):"))
-        self.assertLess(source.index("for index,base in enumerate(featured):"),
-                        source.index("render_card_selection_summary(result,cities,selection_already_shown=True)"))
+        self.assertNotIn("render_card_selection_summary(",source)
+        self.assertNotIn("_render_quick_comparison(",source)
+        self.assertIn('view=st.segmented_control("Área da pesquisa"',source)
+        self.assertLess(source.index('search=st.text_input("Pesquisar cidade ou país"'),
+                        source.index('show_all=st.checkbox('))
+        self.assertIn('render_selection_toolbar(options,cities,navigation="explore")',source)
+        self.assertIn('render_selection_toolbar(options,cities,navigation="compare")',source)
         self.assertIn("size=4",source)
+        self.assertIn("render_planning_handoff(plan,interests=interests",source)
 
     def test_two_highlight_cards_show_inline_comparison(self):
         a=self.app()
@@ -129,16 +129,19 @@ class GuidedComparisonTests(unittest.TestCase):
             a.checkbox(key=key).check().run()
             self.assertFalse(a.exception,[x.message for x in a.exception])
         self.assertEqual(len(a.session_state[CHOICE]),2)
+        city_headers=" ".join(x.value for x in a.markdown
+                              if "ux96-city-header" in x.value)
+        self.assertIn("Históricos",city_headers)
+        self.assertIn("Indicativos",city_headers)
+        self.assertFalse(any("ux97-table" in x.value for x in a.markdown))
+        a.segmented_control(key="ux112_active_view").set_value("Minha comparação").run()
         self.assertFalse(any(x.key=="rec03a_handoff_compare" for x in a.button))
         self.assertTrue(any("ux97-table" in x.value for x in a.markdown))
         self.assertFalse(any(x.key=="rec03a_inline_matrix" for x in a.checkbox))
         self.assertTrue(any(x.key=="rec03a_inline_sources" for x in a.checkbox))
         self.assertEqual(len([x for x in a.multiselect
                               if x.key==CHOICE+"_widget"]),0)
-        city_headers=" ".join(x.value for x in a.markdown
-                              if "ux96-city-header" in x.value)
-        self.assertIn("Históricos",city_headers)
-        self.assertIn("Indicativos",city_headers)
+        self.assertFalse(any("ux96-city-header" in x.value for x in a.markdown))
 
     def test_comparison_auto_appears_for_three_and_five_bases(self):
         a=self.app()
@@ -146,6 +149,7 @@ class GuidedComparisonTests(unittest.TestCase):
         self.assertFalse(a.exception,[x.message for x in a.exception])
         from base_research_expanded_model import load_research
         candidates=[c["id"] for c in load_research(include_candidates=True)["cities"]]
+        a.segmented_control(key="ux112_active_view").set_value("Minha comparação").run()
         for n in (3,5):
             with self.subTest(n=n):
                 a.session_state[CHOICE]=candidates[:n]
@@ -155,8 +159,7 @@ class GuidedComparisonTests(unittest.TestCase):
                 self.assertTrue(any("ux97-table" in x.value for x in a.markdown))
                 self.assertFalse(any(x.key=="rec03a_handoff_compare" for x in a.button))
                 self.assertFalse(any(x.key==CHOICE+"_widget" for x in a.multiselect))
-                self.assertEqual(len([x for x in a.selectbox
-                                      if x.key=="rec03a_focus_city"]),1)
+                self.assertFalse(any(x.key=="rec03a_focus_city" for x in a.selectbox))
         a.session_state[CHOICE]=[]
         a.run()
         self.assertFalse(a.exception,[x.message for x in a.exception])
@@ -180,11 +183,86 @@ class GuidedComparisonTests(unittest.TestCase):
         self.assertFalse(a.exception,[x.message for x in a.exception])
         selected=list(a.session_state[CHOICE])
         self.assertEqual(set(selected),{first.removeprefix("rec03a_pick_"),other})
+        self.assertFalse(any("ux97-table" in x.value for x in a.markdown))
+        a.button(key="ux112_open_comparison").click().run()
         self.assertTrue(any("ux97-table" in x.value for x in a.markdown))
+        a.button(key="ux112_open_exploration").click().run()
         a.checkbox(key="rec03a_show_all").uncheck().run()
         self.assertFalse(a.exception,[x.message for x in a.exception])
         self.assertEqual(a.session_state[CHOICE],selected)
+        a.segmented_control(key="ux112_active_view").set_value("Minha comparação").run()
         self.assertTrue(any("ux97-table" in x.value for x in a.markdown))
+
+    def test_search_without_opening_catalog_and_preserve_canonical_plan(self):
+        a=self.app()
+        a.button(key="rec03a_confirm_subset").click().run()
+        before=deepcopy(a.session_state["advisor_plan"])
+        self.assertFalse(a.checkbox(key="rec03a_show_all").value)
+        self.assertIn("rec03a_search",{x.key for x in a.text_input})
+        a.text_input(key="rec03a_search").set_value("Metz").run()
+        self.assertFalse(a.exception,[x.message for x in a.exception])
+        self.assertFalse(a.checkbox(key="rec03a_show_all").value)
+        self.assertIn("rec03a_pick_metz",{x.key for x in a.checkbox})
+        self.assertEqual(a.session_state["advisor_plan"],before)
+
+    def test_legacy_overlimit_selection_requires_explicit_removal(self):
+        from base_research_expanded_model import load_research
+        a=self.app()
+        a.button(key="rec03a_confirm_subset").click().run()
+        original=deepcopy(a.session_state["advisor_plan"])
+        ids=[c["id"] for c in load_research(include_candidates=True)["cities"]][:6]
+        a.session_state[CHOICE]=ids
+        a.segmented_control(key="ux112_active_view").set_value("Minha comparação").run()
+        self.assertFalse(a.exception,[x.message for x in a.exception])
+        self.assertEqual(len(a.session_state[CHOICE]),6)
+        self.assertTrue(any("mais de cinco cidades" in x.value for x in a.warning))
+        self.assertFalse(any("ux97-table" in x.value for x in a.markdown))
+        a.button(key="ux111_remove_"+ids[-1]).click().run()
+        self.assertFalse(a.exception,[x.message for x in a.exception])
+        self.assertEqual(a.session_state[CHOICE],ids[:5])
+        self.assertTrue(any("ux97-table" in x.value for x in a.markdown))
+        self.assertEqual(a.session_state["advisor_plan"],original)
+
+    def test_active_view_survives_widget_rerun(self):
+        a=self.app()
+        a.button(key="rec03a_confirm_subset").click().run()
+        a.segmented_control(key="ux112_active_view").set_value("Minha comparação").run()
+        self.assertEqual(a.session_state["ux112_active_view_shadow"],"Minha comparação")
+        a.run()
+        self.assertEqual(a.segmented_control(key="ux112_active_view").value,
+                         "Minha comparação")
+        a.segmented_control(key="ux112_active_view").set_value("Explorar alternativas").run()
+        self.assertEqual(a.session_state["ux112_active_view_shadow"],"Explorar alternativas")
+
+    def test_identity_change_cleans_ephemeral_review_but_not_trip_plan(self):
+        from rec03a_session import sync_identity
+        original=new_plan()
+        state={"rec03a_identity":"owner:previous",CHOICE:["metz"],
+               "ux112_active_view":"Minha comparação",
+               "ux112_active_view_shadow":"Minha comparação",
+               "ux114_review_context":{"base":"metz"},
+               "ux34_candidates":["metz"],"ux34_destinations":["paris"],
+               "ux34_review":{"pending":True},"ux34_apply_ack":True,
+               "advisor_plan":deepcopy(original),"ux41_favorites":["metz"]}
+        sync_identity(state,"owner:new")
+        for key in (CHOICE,"ux112_active_view","ux112_active_view_shadow",
+                    "ux114_review_context","ux34_candidates","ux34_destinations",
+                    "ux34_review","ux34_apply_ack"):
+            self.assertNotIn(key,state)
+        self.assertEqual(state["advisor_plan"],original)
+        self.assertEqual(state["ux41_favorites"],["metz"])
+
+    def test_overlimit_feedback_never_claims_negative_capacity(self):
+        from base_research_expanded_model import load_research
+        a=self.app()
+        a.button(key="rec03a_confirm_subset").click().run()
+        ids=[c["id"] for c in load_research(include_candidates=True)["cities"]][:6]
+        a.session_state[CHOICE]=ids
+        a.segmented_control(key="ux112_active_view").set_value("Minha comparação").run()
+        self.assertFalse(a.exception,[x.message for x in a.exception])
+        self.assertFalse(any("-1 vaga" in x.value for x in a.caption))
+        self.assertTrue(any("acima do limite" in x.value for x in a.caption)
+                        or any("mais de cinco" in x.value for x in a.warning))
 
     def test_selection_below_filter_remains_authoritative(self):
         a=self.app()

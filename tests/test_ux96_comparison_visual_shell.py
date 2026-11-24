@@ -34,6 +34,10 @@ class ComparisonVisualShellTests(unittest.TestCase):
         self.assertIn("ux96-city-flag--official",official)
         self.assertNotIn("Selecionada",official)
         self.assertIn('aria-label="Cobertura documental, não avaliação da cidade"',selected)
+        eligible=city_card_header(self.candidate,self.city,official_supported=True)
+        research=city_card_header(self.candidate,self.city,official_supported=False)
+        self.assertIn("Apta ao roteiro oficial",eligible)
+        self.assertIn("Somente pesquisa",research)
 
     def test_card_styles_do_not_target_unrelated_nested_wrappers(self):
         from pathlib import Path
@@ -154,9 +158,13 @@ class ComparisonVisualIntegrationTests(unittest.TestCase):
         self.assertIn("Mulhouse",self._selected_strip(app))
         self.assertIn("Metz",self._selected_strip(app))
         self.assertTrue(app.checkbox(key="rec03a_pick_metz").value)
-        self.assertTrue(any(x.label=="Conhecer cidade, mapa e custos" for x in app.expander))
+        # Direct investigation actions replace the old extra expander.
+        self.assertFalse(any(x.label=="Conhecer cidade, mapa e custos" for x in app.expander))
+        self.assertIn("rec03a_handoff_profile_card_metz",{x.key for x in app.button})
         cards=[x.value for x in app.markdown if "ux96-city-header" in x.value]
         self.assertTrue(any("Metz" in x and "Selecionada" in x for x in cards))
+        self.assertFalse(any("ux97-table" in x.value for x in app.markdown))
+        app.button(key="ux112_open_comparison").click().run()
         self.assertTrue(any("ux97-table" in x.value for x in app.markdown))
         self.assertEqual(sum("#### Cidades selecionadas" in x.value
                              for x in app.markdown),0)
@@ -164,6 +172,7 @@ class ComparisonVisualIntegrationTests(unittest.TestCase):
                              for x in app.markdown))
         self._assert_unchanged(app,original_plan,original_wishes)
 
+        app.button(key="ux112_open_exploration").click().run()
         app.checkbox(key="rec03a_pick_metz").uncheck().run()
         self.assertEqual(app.session_state[CHOICE],["mulhouse"])
         self.assertIn("Mulhouse",self._selected_strip(app))
@@ -246,8 +255,11 @@ class ComparisonVisualIntegrationTests(unittest.TestCase):
         for base in chosen:
             self.assertIn(base,app.session_state[CHOICE])
         self.assertEqual(strip.count('class="ux96-selected-chip"'),5)
+        self.assertFalse(any("ux97-table" in x.value for x in app.markdown))
+        app.button(key="ux112_open_comparison").click().run()
         self.assertTrue(any("ux97-table" in x.value for x in app.markdown))
         self._assert_unchanged(app,plan,wishes)
+        app.button(key="ux112_open_exploration").click().run()
 
         app.checkbox(key=fifth).uncheck().run()
         chosen.remove(fifth.removeprefix("rec03a_pick_"))
@@ -258,7 +270,10 @@ class ComparisonVisualIntegrationTests(unittest.TestCase):
         self.assertEqual(list(app.session_state[CHOICE]),chosen)
         self.assertEqual(len(app.session_state[CHOICE]),5)
         self.assertEqual(self._selected_strip(app).count('class="ux96-selected-chip"'),5)
+        self.assertFalse(any("ux97-table" in x.value for x in app.markdown))
+        app.segmented_control(key="ux112_active_view").set_value("Minha comparação").run()
         self.assertTrue(any("ux97-table" in x.value for x in app.markdown))
+        app.button(key="ux112_open_exploration").click().run()
         app.run()
         self.assertEqual(list(app.session_state[CHOICE]),chosen)
         self.assertTrue(app.checkbox(key=sixth).value)
@@ -270,6 +285,7 @@ class ComparisonVisualIntegrationTests(unittest.TestCase):
         plan=deepcopy(app.session_state["advisor_plan"])
         wishes=deepcopy(app.session_state["ux502_interests"])
         choices=[c["id"] for c in load_research(include_candidates=True)["cities"]][:5]
+        app.segmented_control(key="ux112_active_view").set_value("Minha comparação").run()
         app.session_state[CHOICE]=choices
         app.run()
         strip=self._selected_strip(app)

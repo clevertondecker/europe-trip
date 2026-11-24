@@ -140,11 +140,15 @@ class SelectedVisualAppTests(unittest.TestCase):
             app.checkbox(key=key).check().run()
             self.assertFalse(app.exception,[x.message for x in app.exception])
         self.assertEqual(len(app.session_state[CHOICE]),2)
+        self.assertFalse(any("ux97-table" in m.value for m in app.markdown))
+        app.segmented_control(key="ux112_active_view").set_value("Minha comparação").run()
         self.assertTrue(any("ux97-table" in m.value for m in app.markdown))
         self.assertTrue(any("ux97-metrics" in m.value for m in app.markdown))
         rendered=[m.value for m in app.markdown]
-        self.assertLess(next(i for i,x in enumerate(rendered) if "ux97-table" in x),
-                        next(i for i,x in enumerate(rendered) if "Sugestões de bases para investigar" in x))
+        # UX112 keeps the comparison within its dedicated native view.
+        self.assertLess(next(i for i,x in enumerate(rendered) if "Comparar minhas cidades" in x),
+                        next(i for i,x in enumerate(rendered) if "ux97-table" in x))
+        self.assertFalse(any("ux96-city-header" in x for x in rendered))
         self.assertTrue(any(x.key=="rec03a_handoff_planning" for x in app.button))
         self.assertFalse(any(x.key=="rec03a_planning_open" for x in app.checkbox))
         # Sources can be explored without first opening the technical matrix.

@@ -13,7 +13,7 @@ def _safe(value) -> str:
 
 
 def city_card_header(candidate: dict, city: dict, *, is_selected: bool = False,
-                     is_official: bool = False) -> str:
+                     is_official: bool = False, official_supported: bool | None = None) -> str:
     """A compact visual header; interactive controls remain native Streamlit."""
     name=_safe(city["name"])
     country=_safe(city["country"])
@@ -33,6 +33,13 @@ def city_card_header(candidate: dict, city: dict, *, is_selected: bool = False,
         + ('<span class="ux96-city-flag ux96-city-flag--official">'
            'Base oficial</span>' if is_official else "")
     )
+    eligibility=(
+        '<span class="ux96-city-flag ux96-city-flag--eligible">Apta ao roteiro oficial</span>'
+        if official_supported is True else
+        '<span class="ux96-city-flag ux96-city-flag--research">Somente pesquisa</span>'
+        if official_supported is False else ""
+    )
+    flags+=eligibility
     return (
         '<div class="ux96-city-header" role="group" aria-label="Resumo da cidade-base">'
         '<div class="ux96-city-heading">'
@@ -50,7 +57,7 @@ def selected_context(base_ids: list[str], cities: dict, destination_count: int) 
     """A read-only view of CHOICE and already-confirmed scope; no selection UI."""
     names=[_safe(cities[base]["name"]) for base in base_ids if base in cities]
     chips=("".join(f'<span class="ux96-selected-chip">{name}</span>' for name in names)
-           if names else '<span class="ux96-selection-empty">Selecione cidades nos cartões abaixo</span>')
+           if names else '<span class="ux96-selection-empty">Selecione cidades nos cartões</span>')
     return (
         '<div class="ux96-selection-strip">'
         '<div class="ux96-selection-description"><span>SELEÇÃO ATUAL</span>'
