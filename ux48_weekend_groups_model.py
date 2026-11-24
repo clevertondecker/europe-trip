@@ -50,6 +50,7 @@ def validate_groups(state,plan,catalog):
     groups=state["groups"]
     if not isinstance(groups,list) or len(groups)>MAX_GROUPS:
         raise ValueError("Quantidade de viagens inválida")
+    from destination_identity import outing_destination_id
     chosen=_selected(plan,catalog)
     season=_season_days(plan)
     occupied={}
@@ -66,8 +67,9 @@ def validate_groups(state,plan,catalog):
         used.add(gid)
         dests=group["destinations"]
         if (not isinstance(dests,list) or not 1<=len(dests)<=6 or
-            len(dests)!=len(set(dests)) or any(d not in chosen for d in dests)):
+            len(dests)!=len({outing_destination_id(d) for d in dests}) or any(outing_destination_id(d) not in chosen for d in dests)):
             raise ValueError("Grupo contém destino não escolhido")
+        dests = [outing_destination_id(d) for d in dests]
         if assigned_to_group.intersection(dests):
             raise ValueError("Passeio já associado a outra viagem")
         assigned_to_group.update(dests)
@@ -91,7 +93,7 @@ def validate_groups(state,plan,catalog):
                 raise ValueError("Dois grupos ocupam o mesmo fim de semana")
             occupied[day]=gid
             assignment=plan["assignments"].get(day)
-            if assignment is not None and assignment not in dests:
+            if assignment is not None and outing_destination_id(assignment) not in dests:
                 raise ValueError("Data já atribuída a outro passeio no TripPlan")
         # A destination already committed elsewhere cannot be silently moved.
         for dest in dests:
@@ -139,11 +141,12 @@ def reconcile_removed_outings(state,plan,catalog):
     """Keep all valid groups; clear outdated dates instead of losing itineraries."""
     if state["plan_id"]!=plan["plan_id"]:return empty_groups(plan)
     result=deepcopy(state)
+    from destination_identity import outing_destination_id
     choices=_selected(plan,catalog)
     season=_season_days(plan)
     kept=[]
     for group in result["groups"]:
-        group["destinations"]=[x for x in group["destinations"] if x in choices]
+        group["destinations"]=[x for x in group["destinations"] if outing_destination_id(x) in choices]
         if group["destinations"]:kept.append(group)
     result["groups"]=kept
     result["rest_weekends"]=[start for start in result["rest_weekends"]
@@ -168,7 +171,8 @@ def reconcile_removed_outings(state,plan,catalog):
     return validate_groups(result,plan,catalog)
 
 def ungrouped_outings(state,plan,catalog):
-    taken={d for g in state["groups"] for d in g["destinations"]}
+    from destination_identity import outing_destination_id
+    taken={outing_destination_id(d) for g in state["groups"] for d in g["destinations"]}
     return [r for r in _selected(plan,catalog).values() if r["id"] not in taken]
 
 def available_weekends(state,plan,catalog):
