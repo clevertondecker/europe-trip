@@ -59,6 +59,8 @@ def _go(target):
 # prior filters on return. No new plan/persistence model is introduced.
 _UX34_CONTEXT_KEYS=(
     "ux34_candidates","ux34_destinations","ux34_apply_candidate",
+)
+_UX34_CONFIRMATION_KEYS=(
     "ux34_apply_ack","ux34_review","ux34_review_candidate",
     "ux34_review_signature",
 )
@@ -135,7 +137,7 @@ def close_base_review():
     state=st.session_state
     if "ux114_review_context" in state or "ux114_saved_workspace" in state:
         previous=state.get("ux114_saved_workspace",{})
-        for key in _UX34_CONTEXT_KEYS:
+        for key in _UX34_CONTEXT_KEYS+_UX34_CONFIRMATION_KEYS:
             state.pop(key,None)
         for key,value in previous.items():
             state[key]=deepcopy(value)
