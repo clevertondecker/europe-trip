@@ -201,15 +201,17 @@ def render_wishlist(discovery) -> bool:
     # Import/restore may replace values even if revision numbers coincide.
     # Never reuse a stale selectbox key from a previous document.
     fingerprint = sha256(export_interests(current, discovery)).hexdigest()[:16]
+    from itinerary_eligibility import itinerary_eligibility, eligibility_index
+    from attractions_model import load_attractions
+    catalog = load_attractions()
+    index = eligibility_index(catalog)
     for row in items:
         destination_id = row["destination_id"]
         destination = by_id[destination_id]
         with st.container(border=True):
             cols = st.columns([3, 2, 1])
             cols[0].markdown("**" + destination["name"] + "** · " + destination["country"])
-            from itinerary_eligibility import itinerary_eligibility
-            from attractions_model import load_attractions
-            status = itinerary_eligibility(destination_id, load_attractions())
+            status = itinerary_eligibility(destination_id, catalog, index=index)
             if status["status"] != "eligible":
                 cols[0].caption(status["reason"])
             widget_key = "ux502_priority_" + destination_id + "_" + fingerprint
