@@ -57,7 +57,7 @@ def selected_context(base_ids: list[str], cities: dict, destination_count: int) 
     """A read-only view of CHOICE and already-confirmed scope; no selection UI."""
     names=[_safe(cities[base]["name"]) for base in base_ids if base in cities]
     chips=("".join(f'<span class="ux96-selected-chip">{name}</span>' for name in names)
-           if names else '<span class="ux96-selection-empty">Selecione cidades nos cartões abaixo</span>')
+           if names else '<span class="ux96-selection-empty">Selecione cidades nos cartões</span>')
     return (
         '<div class="ux96-selection-strip">'
         '<div class="ux96-selection-description"><span>SELEÇÃO ATUAL</span>'

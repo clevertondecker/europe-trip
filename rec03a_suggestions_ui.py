@@ -411,16 +411,15 @@ def render_suggestions(*,plan,discovery=None,research=None):
     options=[c["base_id"] for c in result["candidates"]]
     by_id={c["base_id"]:c for c in result["candidates"]}
     from rec03b_handoff_ui import selected_card_bases, render_selection_toolbar, render_planning_handoff
-    from ux96_comparison_visual_ui import selected_context
     selected=selected_card_bases(st.session_state,options)
-    st.markdown(selected_context(selected,cities,len(result["destinations"])),
-                unsafe_allow_html=True)
     st.caption("Compare até cinco cidades; a base oficial só muda após uma confirmação explícita.")
     modes=("Explorar alternativas","Minha comparação")
-    if st.session_state.get("ux112_active_view") not in modes:
-        st.session_state["ux112_active_view"]=modes[0]
+    _restore_widget("ux112_active_view","ux112_active_view_shadow",
+                    modes[0],lambda x:x in modes)
     view=st.segmented_control("Área da pesquisa",list(modes),
-                              key="ux112_active_view",default=modes[0])
+                              key="ux112_active_view",default=modes[0],
+                              on_change=_remember,
+                              args=("ux112_active_view","ux112_active_view_shadow"))
     if view=="Explorar alternativas":
         st.markdown(section_heading(
             "EXPLORAR ALTERNATIVAS", "Cidades-base para investigar",
