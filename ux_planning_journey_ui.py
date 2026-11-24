@@ -206,7 +206,8 @@ def render_build(plan, catalog, view):
     if view["rows"]:
         st.button("Revisar destinos já incluídos",key="flow_journey_review_after_build",on_click=_show,args=("review",))
     else:
-        st.button("Revisar minha lista",key="flow_journey_edit_wishes",on_click=_choose)
+        from ux502_destination_interests_ui import _discover_eligible
+        st.button("Descobrir destinos compatíveis",key="flow_journey_edit_wishes",on_click=_discover_eligible)
 
 
 def _cancel_batch():
@@ -427,9 +428,11 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
             st.button(LABELS_ACTION[action],key="flow_journey_primary",
                       type="primary",on_click=_discover)
         elif action=="exploratory":
-            st.caption(", ".join(r["name"] for r in view["unsupported"]))
-            st.button("Revisar minha lista",key="flow_journey_primary",
-                      type="primary",on_click=_choose)
+            from ux502_destination_interests_ui import _discover_eligible
+            for row in view["unsupported"]:
+                st.caption(row["name"] + " · " + row["eligibility"]["reason"])
+            st.button("Descobrir destinos compatíveis",key="flow_journey_primary",
+                      type="primary",on_click=_discover_eligible)
         elif action=="review" and state[VIEW]=="review":
             st.markdown('<a class="journey-next__anchor" href="#journey-review-anchor">'
                         'Ir para a revisão ↓</a>',unsafe_allow_html=True)
