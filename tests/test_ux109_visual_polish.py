@@ -38,13 +38,14 @@ class UX109ProfileTests(unittest.TestCase):
         app=load_view("mulhouse")
         self.assertFalse(app.exception,[e.message for e in app.exception])
         labels=[x.value for x in app.markdown]
-        self.assertIn("### Investigue por assunto",labels)
+        self.assertNotIn("### Investigue por assunto",labels)
         self.assertNotIn("#### Moradia e custo observado",labels)
         self.assertFalse(any("#### Trens, logística e passeios" in x for x in labels))
         self.assertIn("Moradia",app.segmented_control(key="ux124_topic_mulhouse").options)
         self.assertIn("Logística",app.segmented_control(key="ux124_topic_mulhouse").options)
         self.assertTrue(any("Fontes e pendências" in e.label for e in app.expander))
-        self.assertTrue(any("Vantagens práticas e limitações" in x for x in labels))
+        self.assertTrue(any("Pontos de atenção" in x for x in labels))
+        self.assertFalse(any("Pontos fortes documentados" in x for x in labels))
         self.assertEqual(len(app.metric),2)
 
     def test_city_without_optional_pack_still_displays_canonical_summary(self):
@@ -61,8 +62,13 @@ class UX109ProfileTests(unittest.TestCase):
             default_timeout=120,
         ).run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
-        summaries=[str(x.value) for x in app.markdown]+[str(x.value) for x in app.text]
-        self.assertEqual(sum(expected in item for item in summaries),1)
+        from collections import Counter
+        from ux124b_profile_presentation import city_intro
+        details=next(e for e in app.expander if "Fontes e pendências" in e.label)
+        summaries=Counter(str(x.value) for x in app.markdown)
+        summaries.subtract(str(x.value) for x in details.markdown)
+        self.assertEqual(sum(n for item,n in summaries.items() if city_intro({"summary":expected}) in item),1)
+        self.assertTrue(any(expected in item.value for item in details.caption))
 
     def test_independent_explorer_preserves_existing_headings(self):
         app=AppTest.from_string(

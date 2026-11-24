@@ -1114,3 +1114,30 @@ div[class*="st-key-ux117_city_"] .ux100-photo-fallback{height:132px;object-fit:c
 .ux117-rent{padding:12px;background:#F5F9FC;border:1px solid #E6EEF4;border-radius:10px;display:flex;flex-direction:column;gap:4px}
 .ux117-rent small{color:#627D8C}
 @media(max-width:760px){.ux117-panel{padding:11px}.ux117-table{min-width:560px}.ux117-bar-row{gap:6px}.ux117-rent{padding:8px}}
+
+/* UX124B: only the shared profile and contextual header. Native controls
+   remain focusable; no fixed heights or overflow on the entire page. */
+div[class*="st-key-ux124b-profile-"]{min-width:0;}
+div[class*="st-key-ux124b-profile-"] [data-testid="stVerticalBlock"]{gap:.55rem;}
+div[class*="st-key-ux124b-profile-"] [data-testid="stMarkdownContainer"] p{margin-bottom:.2rem;overflow-wrap:anywhere;}
+div[class*="st-key-ux124b-profile-"] [data-testid="stMarkdownContainer"] h4{margin:.25rem 0;}
+div[class*="st-key-ux124b-profile-"] [data-testid="stMetricValue"]{font-size:clamp(1.35rem,2.3vw,1.85rem);font-weight:650;}
+div[class*="st-key-ux124b-profile-"] [data-testid="stMetricLabel"]{white-space:normal;overflow-wrap:anywhere;}
+div[class*="st-key-ux124b-profile-"] [data-testid="stSegmentedControl"]{max-width:100%;}
+div[class*="st-key-ux124b-profile-"] [data-testid="stSegmentedControl"] [role="group"]{flex-wrap:wrap;}
+div[class*="st-key-ux124b-profile-actions"] button{white-space:normal;overflow-wrap:anywhere;}
+.ux124b-routes{list-style:none!important;padding:0!important;margin:0!important;}
+.ux124b-routes li{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:center;gap:.7rem;
+ padding:.48rem .1rem;border-bottom:1px solid rgba(108,136,151,.25);overflow-wrap:anywhere;}
+.ux124b-routes li:last-child{border-bottom:0}
+.ux124b-routes strong,.ux124b-routes small{display:block;line-height:1.3}
+.ux124b-routes small{font-size:.78rem;opacity:.8;margin-top:.12rem}
+.ux124b-route-value{text-align:right;font-variant-numeric:tabular-nums}
+@media(max-width:760px){
+ div[class*="st-key-ux124b-overview-"] [data-testid="stHorizontalBlock"],
+ div[class*="st-key-ux124b-daily-costs"] [data-testid="stHorizontalBlock"]{flex-wrap:wrap;}
+ div[class*="st-key-ux124b-overview-"] [data-testid="stColumn"],
+ div[class*="st-key-ux124b-daily-costs"] [data-testid="stColumn"]{flex:1 1 min(100%,240px);min-width:0;}
+ div[class*="st-key-ux124b-profile-actions"] [data-testid="stHorizontalBlock"]{flex-wrap:wrap;}
+ div[class*="st-key-ux124b-profile-actions"] [data-testid="stColumn"]{flex:1 1 min(100%,130px);min-width:0;}
+}

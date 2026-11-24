@@ -32,17 +32,17 @@ class ProfileResearchTests(unittest.TestCase):
         expected=city_profile("strasbourg",research=study)
         timed=expected["counts"].get("historical",0)+expected["counts"].get("reference_only",0)
         total=expected["catalog_destination_count"]-expected["counts"].get("local",0)
-        from ux124_city_profile_ui import money
-        self.assertEqual(app.metric[0].value,money(expected["housing"]["median_eur_month"]))
+        from ux124b_profile_presentation import compact_money
+        self.assertEqual(app.metric[0].value,compact_money(expected["housing"]["median_eur_month"]))
         self.assertEqual(app.metric[1].value,"—")
         self.assertIn("mediana histórica",app.metric[0].label)
         self.assertIn("destinos desejados",app.metric[1].label.lower())
         labels=[m.value for m in app.markdown]
-        self.assertIn("### Investigue por assunto",labels)
+        self.assertNotIn("### Investigue por assunto",labels)
         self.assertEqual(tuple(app.segmented_control(key="ux124_topic_strasbourg").options),TOPICS)
         self.assertTrue(any("Fontes e pendências" in x.label for x in app.expander))
-        self.assertTrue(any("Vantagens práticas e limitações" in m.value for m in app.markdown))
-        self.assertTrue(any("Ainda pendente" in m.value for m in app.markdown))
+        self.assertTrue(any("Pontos de atenção" in m.value for m in app.markdown))
+        self.assertTrue(any("Ainda pendente" in m.value for m in app.caption))
         self.assertFalse(any("#### Moradia e custo observado" in x for x in labels))
         self.assertNotIn("### Explorar cidades",labels)
 
@@ -50,7 +50,7 @@ class ProfileResearchTests(unittest.TestCase):
         for city in ("angers","annecy","aachen","arlon"):
             with self.subTest(city=city):
                 app=view(city)
-                self.assertTrue(any("Investigue por assunto" in m.value for m in app.markdown))
+                self.assertEqual(tuple(app.segmented_control(key="ux124_topic_"+city).options),TOPICS)
                 app.segmented_control(key="ux124_topic_"+city).set_value("Logística").run()
                 self.assertFalse(app.exception,[x.message for x in app.exception])
                 self.assertTrue(any("Transporte urbano e última milha" in m.value for m in app.markdown))
@@ -63,7 +63,7 @@ class ProfileResearchTests(unittest.TestCase):
         city=next(c for c in study["cities"] if not c["housing_offers"])
         app=view(city["id"])
         self.assertEqual(app.metric[0].value,"Não pesquisado")
-        self.assertTrue(any("Ainda pendente" in m.value for m in app.markdown))
+        self.assertTrue(any("Ainda pendente" in m.value for m in app.caption))
 
     def test_independent_explorer_keeps_original_headings(self):
         app=view("strasbourg",fixed=False)
