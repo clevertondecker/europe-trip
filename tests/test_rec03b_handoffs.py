@@ -239,7 +239,9 @@ class HandoffAppTests(unittest.TestCase):
         self.assertTrue(app.dataframe, "Rail evidence table not rendered")
         click("rec03a_handoff_back_map")
         self.assertEqual(app.session_state[SCOPE],scope)
-        # Valid comparison now exposes the existing handoff directly.
+        # Open the comparison view before following the existing planning handoff.
+        app.segmented_control(key="ux112_active_view").set_value("Minha comparação").run()
+        self.assertFalse(app.exception,str(app.exception))
         self.assertNotIn("rec03a_planning_open",{x.key for x in app.checkbox})
         click("rec03a_handoff_planning")
         self.assertEqual(app.session_state["ux_section"],"Meu planejamento")
