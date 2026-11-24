@@ -129,6 +129,10 @@ class GuidedComparisonTests(unittest.TestCase):
             a.checkbox(key=key).check().run()
             self.assertFalse(a.exception,[x.message for x in a.exception])
         self.assertEqual(len(a.session_state[CHOICE]),2)
+        city_headers=" ".join(x.value for x in a.markdown
+                              if "ux96-city-header" in x.value)
+        self.assertIn("Históricos",city_headers)
+        self.assertIn("Indicativos",city_headers)
         self.assertFalse(any("ux97-table" in x.value for x in a.markdown))
         a.segmented_control(key="ux112_active_view").set_value("Minha comparação").run()
         self.assertFalse(any(x.key=="rec03a_handoff_compare" for x in a.button))
@@ -137,10 +141,7 @@ class GuidedComparisonTests(unittest.TestCase):
         self.assertTrue(any(x.key=="rec03a_inline_sources" for x in a.checkbox))
         self.assertEqual(len([x for x in a.multiselect
                               if x.key==CHOICE+"_widget"]),0)
-        city_headers=" ".join(x.value for x in a.markdown
-                              if "ux96-city-header" in x.value)
-        self.assertIn("Históricos",city_headers)
-        self.assertIn("Indicativos",city_headers)
+        self.assertFalse(any("ux96-city-header" in x.value for x in a.markdown))
 
     def test_comparison_auto_appears_for_three_and_five_bases(self):
         a=self.app()

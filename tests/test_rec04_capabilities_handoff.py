@@ -151,14 +151,17 @@ class SimulationAppTests(unittest.TestCase):
         app.segmented_control(key="ux_section").set_value("Comparar").run()
         app.button(key="rec03a_confirm_subset").click().run()
         self.assertFalse(app.exception,str(app.exception))
-        # City actions appear only when a city is selected for investigation.
+        # UX112 keeps cost simulation accessible via the individual city profile.
         candidate=next(x.key for x in app.checkbox if x.key and
                        x.key.startswith("rec03a_pick_"))
         app.checkbox(key=candidate).check().run()
         self.assertFalse(app.exception,str(app.exception))
-        btn=next(x for x in app.button
-                 if x.key and x.key.startswith("rec04_simulate_") and
-                 x.key!="rec04_simulate_profile")
+        profile=next(x for x in app.button if x.key and
+                     x.key.startswith("rec03a_handoff_profile_card_"))
+        profile.click().run()
+        self.assertFalse(app.exception,str(app.exception))
+        btn=app.button(key="rec04_simulate_profile")
+        self.assertFalse(btn.disabled)
         btn.click().run()
         self.assertFalse(app.exception,str(app.exception))
         self.assertEqual(app.session_state["ux_section"],"Simulações")
@@ -168,9 +171,12 @@ class SimulationAppTests(unittest.TestCase):
         self.assertEqual(app.session_state.get("ux41_favorites",[]),favorites)
         app.button(key="rec04_return_to_source").click().run()
         self.assertFalse(app.exception,str(app.exception))
-        self.assertEqual(app.session_state["ux_section"],"Comparar")
+        self.assertEqual(app.session_state["ux_section"],"Cidades-base")
         self.assertEqual(app.session_state["advisor_plan"],plan)
         self.assertEqual(app.session_state["ux502_interests"],wants)
+        app.button(key="rec03a_handoff_back_profile").click().run()
+        self.assertFalse(app.exception,str(app.exception))
+        self.assertEqual(app.session_state["ux_section"],"Comparar")
 
 
 if __name__=="__main__":

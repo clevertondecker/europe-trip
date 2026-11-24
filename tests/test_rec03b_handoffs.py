@@ -186,9 +186,9 @@ class HandoffAppTests(unittest.TestCase):
         choose_city("strasbourg")
         choose_city("angers")
         # UX87 uses the same CHOICE but renders in its dedicated view.
-        self.assertFalse(any("ux97-table" in m.value for m in app.markdown))
+        self.assertFalse(any('class="ux97-table"' in m.value for m in app.markdown))
         app.segmented_control(key="ux112_active_view").set_value("Minha comparação").run()
-        self.assertTrue(any("ux97-table" in m.value for m in app.markdown))
+        self.assertTrue(any('class="ux97-table"' in m.value for m in app.markdown))
         self.assertFalse(any(x.key=="rec03a_inline_matrix" for x in app.checkbox))
         self.assertTrue(any(x.key=="rec03a_inline_sources" for x in app.checkbox))
         self.assertFalse(any(b.key=="rec03a_handoff_compare" for b in app.button))
