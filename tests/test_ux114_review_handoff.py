@@ -147,6 +147,10 @@ render_base_review_scope(ctx)
         self.assertEqual(set(app.session_state["ux34_destinations"]),
                          {"paris","colmar","strasbourg"})
         self.assertIn("ux115_keep_base",{x.key for x in app.button})
+        self.assertTrue(any("ux117-table" in x.value for x in app.markdown))
+        self.assertTrue(any("ux117-identity" in x.value for x in app.markdown))
+        self.assertTrue(any("ux117-rents" in x.value for x in app.markdown))
+        self.assertIn("ux115_details_open",{x.key for x in app.checkbox})
         self.assertEqual(app.session_state["advisor_plan"],original)
         return app,original
 
@@ -185,6 +189,31 @@ render_base_review_scope(ctx)
         self.assertNotIn("ux34_review",app.session_state)
         self.assertNotIn("ux34_apply_ack",app.session_state)
         self.assertEqual(app.session_state["advisor_plan"],original)
+
+    def test_details_remain_optional_and_keep_base_preserves_plan(self):
+        app,original=self._open_in_real_application()
+        app.checkbox(key="ux115_details_open").check().run()
+        self.assertFalse(app.exception,[x.message for x in app.exception])
+        self.assertTrue(any("Fontes e modalidades" in x.label for x in app.expander))
+        self.assertFalse(any("Subtotal ilustrativo das visitas comparáveis" in x.value
+                             for x in app.markdown))
+        self.assertFalse(any("Quanto poderia mudar o orçamento?" in x.value
+                             for x in app.markdown))
+        self.assertEqual(app.session_state["advisor_plan"],original)
+        app.checkbox(key="ux115_details_open").uncheck().run()
+        app.button(key="ux115_keep_base").click().run()
+        self.assertFalse(app.exception,[x.message for x in app.exception])
+        self.assertEqual(app.session_state["advisor_plan"],original)
+        self.assertNotIn("ux114_review_context",app.session_state)
+
+    def test_cancel_pending_confirmation_preserves_plan(self):
+        app,original=self._open_in_real_application()
+        app.button(key="ux34_open_review").click().run()
+        app.button(key="ux34_cancel_review").click().run()
+        self.assertFalse(app.exception,[x.message for x in app.exception])
+        self.assertEqual(app.session_state["advisor_plan"],original)
+        self.assertNotIn("ux114_review_context",app.session_state)
+        self.assertNotIn("ux34_review",app.session_state)
 
     def test_real_widget_journey_confirms_only_official_base(self):
         app,original=self._open_in_real_application()

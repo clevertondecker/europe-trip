@@ -104,6 +104,9 @@ def known_route(base_id:str,dest_id:str)->dict:
             "valid_for_2027":False}
 
 
+SIMILARITY_THRESHOLD_MINUTES=15
+
+
 def destination_impact(plan:dict,candidate:str,dest_ids:list[str])->list[dict]:
     all_bases={row["id"] for row in base_options()}
     official=plan["base_city"]
@@ -130,7 +133,8 @@ def destination_impact(plan:dict,candidate:str,dest_ids:list[str])->list[dict]:
             status,delta,basis="Referência insuficiente",None,"indicative_only"
         else:
             delta=b-a
-            status="Melhorou" if delta<=-15 else "Piorou" if delta>=15 else "Semelhante"
+            status=("Melhorou" if delta<=-SIMILARITY_THRESHOLD_MINUTES else
+                    "Piorou" if delta>=SIMILARITY_THRESHOLD_MINUTES else "Semelhante")
         rows.append({"destination_id":dest,"destination":names[dest],
                      "official_minutes":a,"candidate_minutes":b,
                      "official_fastest_minutes":before["minutes"],
