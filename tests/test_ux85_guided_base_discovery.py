@@ -149,10 +149,10 @@ class GuidedComparisonTests(unittest.TestCase):
         self.assertFalse(a.exception,[x.message for x in a.exception])
         from base_research_expanded_model import load_research
         candidates=[c["id"] for c in load_research(include_candidates=True)["cities"]]
+        a.segmented_control(key="ux112_active_view").set_value("Minha comparação").run()
         for n in (3,5):
             with self.subTest(n=n):
                 a.session_state[CHOICE]=candidates[:n]
-                a.session_state["ux112_active_view"]="Minha comparação"
                 a.run()
                 self.assertFalse(a.exception,[x.message for x in a.exception])
                 self.assertEqual(a.session_state[CHOICE],candidates[:n])

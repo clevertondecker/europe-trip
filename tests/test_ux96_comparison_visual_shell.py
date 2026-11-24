@@ -285,8 +285,8 @@ class ComparisonVisualIntegrationTests(unittest.TestCase):
         plan=deepcopy(app.session_state["advisor_plan"])
         wishes=deepcopy(app.session_state["ux502_interests"])
         choices=[c["id"] for c in load_research(include_candidates=True)["cities"]][:5]
+        app.segmented_control(key="ux112_active_view").set_value("Minha comparação").run()
         app.session_state[CHOICE]=choices
-        app.session_state["ux112_active_view"]="Minha comparação"
         app.run()
         strip=self._selected_strip(app)
         for base in choices:
