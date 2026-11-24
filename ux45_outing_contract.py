@@ -5,7 +5,7 @@ itinerary_flow_model writes canonical TripPlan structures (no second editor).
 """
 from __future__ import annotations
 from dataclasses import dataclass
-from destination_identity import canonical_destination_id
+from destination_identity import outing_destination_id as canonical_destination_id
 from itinerary_flow_model import (get_choice,selected_rows,upsert_choice,
                                   remove_choice,UNASSIGNED,FRANCE_STAGE)
 
