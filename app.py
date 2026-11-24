@@ -500,12 +500,45 @@ if (st.session_state.get(CONTEXT) or {}).get("kind")=="planning" and (
         ux_area=="Meu roteiro" or (ux_area,ux_section)==("Explorar","Passeios")):
     render_planning_return()
 if ux_area=="Meu roteiro" and ux_section=="Organizar viagem":
-    # A single organizer is the default. Advanced calendar views are optional,
-    # preserving their original callbacks and deep-link keys.
-    with st.expander("Outras visualizações de calendário · opcional",expanded=False):
-        st.segmented_control("Como organizar?",
-                             ["Por período ou data","Calendário inteligente","Calendário completo"],
-                             key="ux_organize_view",on_change=_ux_aux_changed)
+    from itinerary_flow_model import ITALY_STAGE, FRANCE_STAGE, selected_rows
+    from itinerary_flow_ui import _active_stage_changed, _stage_label
+    from ux120_organizer_navigation import organizer_mode, legacy_mode, GROUPS, FULL
+    from ux64_navigation_model import select_public_task
+    state=st.session_state
+    if state.get("flow_active_stage") not in (ITALY_STAGE,FRANCE_STAGE):
+        stages={r["stage"] for r in selected_rows(active_plan(),load_attractions())}
+        state["flow_active_stage"]=next(iter(stages)) if len(stages)==1 else ITALY_STAGE
+    def _organizer_stage_change():
+        _active_stage_changed()
+        if state.get("flow_active_stage")==ITALY_STAGE and state.get("ux_organize_view")==GROUPS:
+            state["ux_organize_view"]="Por período ou data"
+        _ux_aux_changed()
+    stage=st.segmented_control("Etapa da viagem",[ITALY_STAGE,FRANCE_STAGE],
+                               key="flow_active_stage",format_func=_stage_label,
+                               on_change=_organizer_stage_change)
+    stage=stage or ITALY_STAGE
+    modes=["Visitas","Calendário"]+([GROUPS] if stage==FRANCE_STAGE else [])
+    state["ux120_mode"]=organizer_mode(state.get("ux_organize_view"),stage)
+    def _organizer_mode_change():
+        state["ux_organize_view"]=legacy_mode(state["ux120_mode"],stage)
+        _ux_aux_changed()
+    st.segmented_control("Organizar por",modes,key="ux120_mode",on_change=_organizer_mode_change)
+    if state["ux120_mode"]=="Calendário":
+        state["ux120_calendar_layout"]="Completo" if state.get("ux_organize_view")==FULL else "Semanal"
+        def _organizer_calendar_change():
+            state["ux_organize_view"]=legacy_mode("Calendário",stage,state["ux120_calendar_layout"])
+            _ux_aux_changed()
+        st.segmented_control("Visualização do calendário",["Semanal","Completo"],
+                             key="ux120_calendar_layout",on_change=_organizer_calendar_change)
+    state["ux35_stage"]=stage
+    current=active_plan()
+    stage_rows=[r for r in selected_rows(current,load_attractions()) if r["stage"]==stage]
+    days=current["italy_days"] if stage==ITALY_STAGE else current["total_days"]-current["italy_days"]
+    st.caption(f"{days} dias · {len(stage_rows)} destinos incluídos"+
+               (" · Base: "+_base_details.get(current["base_city"],{}).get("name",current["base_city"]) if stage==FRANCE_STAGE else ""))
+    if not stage_rows:
+        st.button("Incluir destinos nesta etapa",key="ux120_empty_stage",
+                  on_click=select_public_task,args=(state,"Planejar","Meus destinos"))
 elif ux_area=="Meu roteiro" and ux_section=="Melhorar meu roteiro":
     st.selectbox("Escolha uma ferramenta de apoio",[
         "Descobrir","Simular roteiros","Itália",
@@ -1410,12 +1443,18 @@ elif page == "Roteiro":
         elif (ux_area,ux_section)==("Meu roteiro","Organizar viagem") and (
             st.session_state.get("ux_organize_view")=="Calendário inteligente"):
             render_smart_calendar(
-                active_plan(),load_attractions(),load_base_routes(),data,sync_sources)
+                active_plan(),load_attractions(),load_base_routes(),data,sync_sources,
+                stage=st.session_state.get("flow_active_stage"),show_groups=False)
+        elif (ux_area,ux_section)==("Meu roteiro","Organizar viagem") and (
+            st.session_state.get("ux_organize_view")=="Viagens agrupadas"):
+            from ux48_weekend_groups_ui import render_weekend_planner
+            render_weekend_planner(active_plan(),load_attractions())
         elif (ux_area,ux_section)==("Meu roteiro","Organizar viagem"):
             render_planning_journey(active_plan(),load_attractions(),data,
                                     sync_sources["finance"]["status"]=="live",
                                     st.session_state.get("advisor_eurfx",6.3),
-                                    st.session_state.get("advisor_chffx",7.1))
+                                    st.session_state.get("advisor_chffx",7.1),
+                                    organizer_stage=st.session_state.get("flow_active_stage"))
         else:
             render_itinerary_workbench(
                 active_plan(),load_attractions(),data,

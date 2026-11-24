@@ -362,7 +362,7 @@ def render_review(plan,catalog,view):
         render_research_from_session(key="rec05_plan")
 
 
-def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx=6.3,chffx=7.1,*,summary_only=False):
+def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx=6.3,chffx=7.1,*,summary_only=False,organizer_stage=None):
     from continuity_ui import private_status_label
     from itinerary_flow_ui import (_render_organize,_render_add,_selected_stage,
                                   _active_stage_changed,_stage_label,_show_add,_show_organize,_compact_budget)
@@ -387,6 +387,8 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
         state["flow_journey_identity"]=identity
     if state.get(VIEW) not in ("build","organize","review"):
         state[VIEW]=None
+    if organizer_stage in STAGES:
+        state[VIEW]="organize"
     # Respect existing explicit edit deep links and the canonical organizer.
     if state.get("flow_edit_target") or state.get("flow_add_open"):
         state[VIEW]="organize"
@@ -518,9 +520,9 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
         if state.get("flow_active_stage") not in STAGES:
             stages={r["stage"] for r in view["rows"]}
             state["flow_active_stage"]=next(iter(stages)) if len(stages)==1 else ITALY_STAGE
-        stage=st.segmented_control("Etapa da viagem",list(STAGES),key="flow_active_stage",
-                                   format_func=_stage_label,on_change=_active_stage_changed,
-                                   selection_mode="single")
+        stage=organizer_stage if organizer_stage in STAGES else st.segmented_control(
+            "Etapa da viagem",list(STAGES),key="flow_active_stage",
+            format_func=_stage_label,on_change=_active_stage_changed,selection_mode="single")
         if stage not in STAGES:
             stage=ITALY_STAGE
         st.markdown("##### "+("Etapa 1 · Lua de mel na Itália" if stage==ITALY_STAGE else "Etapa 2 · Temporada europeia"))
@@ -529,15 +531,24 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
             _render_add(active_plan(),catalog)
         else:
             state["flow_organize_open"]=True
-            _render_organize(active_plan(),catalog,stage,show_wishlist=False,review_on_close=True)
+            _render_organize(active_plan(),catalog,stage,show_wishlist=False,review_on_close=True,
+                             on_close=(lambda:_show("review")) if organizer_stage in STAGES else None)
             st.button("Adicionar passeio ou editar atrações",key="flow_add_open_button",on_click=_show_add)
-        if st.checkbox("Ver calendário e agrupamento de visitas",key="flow_journey_calendar"):
+        if organizer_stage is None and st.checkbox("Ver calendário e agrupamento de visitas",key="flow_journey_calendar"):
             from ux63_timeline_ui import render_timeline
             render_timeline(active_plan(),catalog,stage)
             if stage==FRANCE_STAGE:
                 from ux48_weekend_groups_ui import render_weekend_planner
                 render_weekend_planner(active_plan(),catalog)
-        _selected_stage(view["rows"],stage,catalog)
+        if organizer_stage is None or state.get("flow_edit_target"):
+            _selected_stage(view["rows"],stage,catalog)
+        else:
+            from ux63_timeline_ui import render_timeline
+            def focus_visit(destination_id):
+                from itinerary_flow_ui import _organize_destination_changed
+                state["flow_organize_destination"]=destination_id
+                _organize_destination_changed()
+            render_timeline(active_plan(),catalog,stage,on_organize=focus_visit,pending_first=True)
         st.button("Revisar e salvar sem definir outras datas",key="flow_journey_skip_dates",
                   on_click=_show,args=("review",))
     with st.expander("Ferramentas complementares",expanded=False):

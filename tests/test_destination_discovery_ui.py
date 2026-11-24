@@ -35,7 +35,9 @@ class DiscoveryUISmoke(unittest.TestCase):
         self.assertIsNone(app.session_state.get("advisor_github_sha"))
         self.assertFalse(app.session_state.get("advisor_autosave_pending",False))
         app.segmented_control(key="ux_section").set_value("Organizar viagem").run()
-        app.segmented_control(key="ux_organize_view").set_value("Calendário completo").run()
+        app.segmented_control(key="ux120_mode").set_value("Calendário").run()
+        app.segmented_control(key="ux120_calendar_layout").set_value("Completo").run()
+        self.assertFalse(app.exception,[e.message for e in app.exception])
         self.assertIn("advisor_generate",{b.key for b in app.button})
 
 if __name__=="__main__":unittest.main()

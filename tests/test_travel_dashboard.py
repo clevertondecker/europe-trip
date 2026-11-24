@@ -60,9 +60,16 @@ class TravelDashboardTests(unittest.TestCase):
         # carries its photo, logistics and existing edit control.
         self.assertFalse(any("Lugares que escolhemos" in x.value
                              for x in app.markdown))
-        self.assertIn("flow_edit_save_colmar",{b.key for b in app.button})
+        self.assertIn("ux120_visit_colmar",{b.key for b in app.button})
+        self.assertNotIn("flow_edit_save_colmar",{b.key for b in app.button})
         self.assertTrue(any("Colmar" in x.value for x in app.markdown))
-        self.assertIn("flow_add_open_button",{b.key for b in app.button})
+        app.button(key="flow_organize_close").click().run()
+        self.assertFalse(app.exception,[e.message for e in app.exception])
+        self.assertIn("flow_workspace_edit_colmar",{b.key for b in app.button})
+        app.button(key="flow_workspace_edit_colmar").click().run()
+        self.assertFalse(app.exception,[e.message for e in app.exception])
+        self.assertIn("flow_edit_save_colmar",{b.key for b in app.button})
+        self.assertEqual(app.session_state["advisor_plan"],plan)
 
 
 
