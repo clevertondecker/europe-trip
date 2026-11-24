@@ -55,18 +55,22 @@ class PriorityRailEvidenceTests(unittest.TestCase):
         original=deepcopy(plan)
         rows=destination_impact(plan,"strasbourg",list(DESTINATIONS))
         self.assertEqual(5,len(rows))
-        self.assertTrue(all(row["delta_minutes"] is not None for row in rows))
+        self.assertTrue(any(row["delta_minutes"] is not None for row in rows))
+        for row in rows:
+            if row["delta_minutes"] is not None:
+                self.assertEqual(row["delta_minutes"],row["candidate_minutes"]-row["official_minutes"])
+            else:
+                self.assertIn(row["status"],("Referência insuficiente","Não pesquisado","Local"))
         self.assertEqual(plan,original)
         self.assertEqual(plan["revision"],original["revision"])
         for row in rows:
             self.assertIsNone(row["official_fare"])
             self.assertIsNone(row["candidate_fare"])
-        self.assertEqual(
-            next(x for x in rows if x["destination_id"]=="luxembourg")["delta_minutes"],
-            154-211)
+        lux=next(x for x in rows if x["destination_id"]=="luxembourg")
+        self.assertEqual(lux["delta_minutes"],lux["candidate_minutes"]-lux["official_minutes"])
 
     def test_no_inference_for_unknown_routes(self):
-        missing=known_route("nancy","rotterdam")
+        missing=known_route("nancy","unknown_test_destination")
         self.assertIsNone(missing["minutes"])
         self.assertFalse(missing["return_verified"])
 

@@ -865,10 +865,8 @@ elif page == "Comparar cidades":
         else:
             st.button("← Voltar à minha comparação",key="ux114_review_back",
                       on_click=close_base_review)
-            st.markdown("### Revisar cidade-base antes de decidir")
-            st.caption("Candidata: "+context["base"]+
-                       " · comparação explícita com a base atual. "
-                       "Nenhuma alteração foi salva.")
+            st.caption("REVISÃO OFICIAL · Confirme o impacto antes de trocar "
+                       "a cidade-base da etapa. Nada foi alterado nem salvo.")
             if render_base_review_scope(context):
                 render_city_decision(active_plan(),data,
                                      sync_sources["finance"]["status"]=="live",

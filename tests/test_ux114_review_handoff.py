@@ -68,6 +68,18 @@ class UX114ExplicitReviewTests(unittest.TestCase):
         self.assertNotIn("ux34_apply_ack",app.session_state)
         self.assertEqual(app.session_state["advisor_plan"],before)
 
+    def test_obernai_enters_same_review_scope_without_plan_mutation(self):
+        app=self.ready(("metz","nancy"),
+                       destinations=("paris","colmar","obernai"))
+        before=deepcopy(app.session_state["advisor_plan"])
+        app.button(key="ux114_open_review").click().run()
+        self.assertFalse(app.exception,[x.message for x in app.exception])
+        ctx=app.session_state["ux114_review_context"]
+        self.assertEqual(set(ctx["approved_destinations"]),
+                         {"paris","colmar","obernai"})
+        self.assertNotIn("obernai",ctx["unsupported_destinations"])
+        self.assertEqual(app.session_state["advisor_plan"],before)
+
     def test_research_only_candidates_cannot_start_review(self):
         app=self.ready(("lille","freiburg"))
         self.assertNotIn("ux114_open_review",{b.key for b in app.button})
@@ -127,9 +139,14 @@ render_base_review_scope(ctx)
         app.button(key="ux114_open_review").click().run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
         self.assertIn("ux114_review_back",{x.key for x in app.button})
-        self.assertTrue(app.multiselect(key="ux34_candidates").disabled)
-        self.assertTrue(app.multiselect(key="ux34_destinations").disabled)
-        self.assertEqual(app.multiselect(key="ux34_candidates").value,["metz"])
+        # Contextual UX115 presents the confirmed candidate and scope as
+        # readable text, not as disabled multiselect widgets.
+        self.assertNotIn("ux34_candidates",{x.key for x in app.multiselect})
+        self.assertNotIn("ux34_destinations",{x.key for x in app.multiselect})
+        self.assertEqual(app.session_state["ux34_candidates"],["metz"])
+        self.assertEqual(set(app.session_state["ux34_destinations"]),
+                         {"paris","colmar","strasbourg"})
+        self.assertIn("ux115_keep_base",{x.key for x in app.button})
         self.assertEqual(app.session_state["advisor_plan"],original)
         return app,original
 
@@ -161,7 +178,7 @@ render_base_review_scope(ctx)
     def test_financial_premise_change_requires_a_new_explicit_review(self):
         app,original=self._open_in_real_application()
         app.button(key="ux34_open_review").click().run()
-        app.checkbox(key="ux34_apply_ack").check().run()
+        self.assertIn("ux34_confirm_apply",{x.key for x in app.button})
         days=app.number_input(key="ux34_days").value
         app.number_input(key="ux34_days").set_value(days+1).run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
@@ -173,9 +190,9 @@ render_base_review_scope(ctx)
         app,original=self._open_in_real_application()
         app.button(key="ux34_open_review").click().run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
-        self.assertTrue(app.button(key="ux34_confirm_apply").disabled)
-        # Explicit checkbox is required before the apply action can be used.
-        app.checkbox(key="ux34_apply_ack").check().run()
+        self.assertNotIn("ux34_apply_ack",{x.key for x in app.checkbox})
+        self.assertEqual(app.session_state["advisor_plan"],original)
+        self.assertFalse(app.button(key="ux34_confirm_apply").disabled)
         app.button(key="ux34_confirm_apply").click().run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
         current=app.session_state["advisor_plan"]
