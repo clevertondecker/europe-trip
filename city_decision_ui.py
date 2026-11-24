@@ -403,6 +403,12 @@ def _render_contextual_review(plan:dict,comparison:dict)->None:
                 reason=(alt+" sem referência comparável; "+base+" tem "+
                         str(route["before"])+" min de ida documentados")
             st.caption("• "+route["name"]+": "+reason+".")
+            if route.get("official_gap_reason"):
+                st.caption("Pesquisa pendente da base atual: "+
+                           route["official_gap_reason"])
+            if route.get("candidate_gap_reason"):
+                st.caption("Pesquisa pendente da alternativa: "+
+                           route["candidate_gap_reason"])
     else:
         st.caption("Todos os destinos têm referências de ida nas duas cidades. "
                    "Ainda é preciso validar os horários e retornos reais.")
