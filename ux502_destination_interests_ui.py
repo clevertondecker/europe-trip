@@ -126,6 +126,7 @@ def render_wishlist(discovery) -> bool:
     if view != "Minha lista":
         return False
 
+    st.caption("Os destinos já incluídos no roteiro aparecem em Planejar → Organizar.")
     items = ordered_interests(current, discovery)
     active = [r for r in items if r["priority"] != "discarded"]
     st.caption(f'{len(active)} destino(s) desejados · '
