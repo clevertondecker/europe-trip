@@ -17,6 +17,7 @@ from base_research_expanded_model import load_rail
 from base_scenario_model import base_options
 from data_model import get_scenario
 from unified_budget import resolve_french_budget, scenario_total
+from ux115_rail_gap_model import documented_gap_route, load_rail_gap_overlay
 
 
 # Canonical aliases refer to the SAME city; never merge generic names by proximity.
@@ -34,6 +35,14 @@ def destination_catalog() -> dict[str, str]:
         choices.setdefault(row["id"],row["name"])
     for row in load_rail()["segments"]:
         choices.setdefault(_canonical_destination(row["to"]),row["destination"])
+    # Make only sourced supplementary destinations available to UX34.
+    # This does not add them to the official attractions/packages catalog.
+    extra={item["destination_id"] for item in load_rail_gap_overlay()["routes"]}
+    if extra:
+        from trip01_supplemental_discovery import build_exploration_discovery
+        for destination in build_exploration_discovery()["destinations"]:
+            if destination["id"] in extra:
+                choices.setdefault(destination["id"],destination["name"])
     choices.pop("luxembourg_city",None)
     return choices
 
@@ -94,6 +103,11 @@ def known_route(base_id:str,dest_id:str)->dict:
                 "frequency_reference":verified.get("frequency_reference"),
                 "provenance":"five_base_operator_2026",
                 "missing":verified.get("missing",[])}
+    # UX115 overlays ONLY gaps after the existing four/five-base timed records.
+    # Never replace an earlier known route or infer a multi-leg journey.
+    supplemental=documented_gap_route(base_id,dest_id)
+    if supplemental is not None:
+        return supplemental
     rail=load_rail()
     sample=next((r for r in rail["segments"] if
                  r["from"]==base_id and r["to"]==dest_id),None)
