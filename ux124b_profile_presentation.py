@@ -15,16 +15,41 @@ def city_intro(profile):
     return text
 
 def practical_facts(profile):
-    # Put a sourced statement in the strengths block only once. Avoid the
-    # administrative lead (and its exact factual suffix), not fuzzy inference.
+    """Conservative editorial selection: no second tourism/transport summary.
+
+    The existing advantages are elaborations of the same introductory
+    narrative. Keep them in documentation; surface only sourced independent
+    subjects, not a text-similarity heuristic or inferred advantage.
+    """
     intro=city_intro(profile)
-    values=[e["summary"] for e in profile_summary_facts(profile)]+profile["advantages"]
-    distinct=[]
-    for value in values:
-        if value==profile["summary"] or value.rstrip(".")==intro.rstrip(".") or value in distinct:
+    lead=[e for e in profile["evidence"] if e["summary"].rstrip(".")==intro.rstrip(".")
+          or e["summary"]==profile["summary"]]
+    occupied={e["section"] for e in lead}
+    if occupied.intersection(("transport","quality_of_life")):
+        occupied.update(("transport","quality_of_life"))
+    urls={e.get("source_url") for e in lead}
+    # Only complementary practical subjects. Do not relabel an unverified
+    # rent/remote-work observation as a benefit, since those have own blocks.
+    facts=[]
+    for e in profile_summary_facts(profile):
+        if (e["section"] not in ("daily_costs","climate") or e["section"] in occupied
+                or e.get("source_url") in urls or e["summary"] in (intro,profile["summary"])):
             continue
-        distinct.append(value)
-    return distinct[:2]
+        if e["summary"] not in facts:
+            facts.append(e["summary"])
+    return facts[:2]
+
+def typical_time_label(route):
+    """Preserve the shared presentation, including reconsulted divergences."""
+    label=route["cell"]["typical_label"]
+    if label=="Tempo médio não documentado" and route["historical_typical"] is not None:
+        return format_minutes(route["historical_typical"])+" · típico histórico"
+    return label
+
+def simulation_note(capability):
+    if not capability["scenario_selectable"]:
+        return "Simulação indisponível para esta cidade."
+    return capability["budget_note"]+". Aluguel e caução de 2027 não cotados."
 
 def compact_money(value):
     if value is None:

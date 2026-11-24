@@ -160,6 +160,11 @@ class SimulationAppTests(unittest.TestCase):
                      x.key.startswith("rec03a_handoff_profile_card_"))
         profile.click().run()
         self.assertFalse(app.exception,str(app.exception))
+        base=app.session_state["rec03a_handoff_context"]["base_ids"][0]
+        from rec04_candidate_capabilities import capability_for
+        self.assertTrue(any(capability_for(base)["budget_note"] in c.value for c in app.caption))
+        app.segmented_control(key="ux124_topic_"+base).set_value("Logística").run()
+        app.segmented_control(key="ux124_routes_"+base).set_value("Com tempo pesquisado").run()
         btn=app.button(key="rec04_simulate_profile")
         self.assertFalse(btn.disabled)
         btn.click().run()
@@ -172,6 +177,8 @@ class SimulationAppTests(unittest.TestCase):
         app.button(key="rec04_return_to_source").click().run()
         self.assertFalse(app.exception,str(app.exception))
         self.assertEqual(app.session_state["ux_section"],"Cidades-base")
+        self.assertEqual(app.segmented_control(key="ux124_topic_"+base).value,"Logística")
+        self.assertEqual(app.segmented_control(key="ux124_routes_"+base).value,"Com tempo pesquisado")
         self.assertEqual(app.session_state["advisor_plan"],plan)
         self.assertEqual(app.session_state["ux502_interests"],wants)
         app.button(key="rec03a_handoff_back_profile").click().run()

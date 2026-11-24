@@ -119,10 +119,11 @@ def _destination_wishlist_state(interests: dict | None, destination_id: str) -> 
     return "new"
 
 
-def render_independent_destination_discovery(*, discovery=None) -> None:
+def render_independent_destination_discovery(*, discovery=None, focused_destination=None) -> None:
     discovery = discovery if discovery is not None else _cached_discovery()
     destinations = discovery["destinations"]
     by_id = {item["id"]: item for item in destinations}
+    focused = by_id.get(focused_destination) if isinstance(focused_destination,str) else None
     # Keep the page header ahead of filters and wishlist save tools.
     if st.session_state.get("ux502_view","Descobrir lugares")!="Minha lista":
         st.markdown(page_header(
@@ -141,43 +142,47 @@ def render_independent_destination_discovery(*, discovery=None) -> None:
             st.session_state["ux501_interest_session"] != selected):
         st.session_state["ux501_interest_session"] = selected
 
-    st.markdown(section_heading("ENCONTRE SEU DESTINO","Filtre as opções",
-                                "Pesquise por país, experiência ou atração.",
-                                variant="compact"),unsafe_allow_html=True)
-    col1, col2, col3 = st.columns([2, 2, 3])
-    with col1:
-        country = st.selectbox(
-            "País", ["Todos os países", *discovery["countries"]],
-            key="ux501_country")
-    with col2:
-        categories = st.multiselect(
-            "Experiências", discovery["categories"],
-            key="ux501_categories")
-    with col3:
-        query = st.text_input(
-            "Buscar cidade ou atração", placeholder="Ex.: Colmar, museu, catedral",
-            key="ux501_search")
-    matches = filter_destinations(
-        discovery,
-        country=None if country == "Todos os países" else country,
-        categories=categories,
-        query=query,
-        selected=selected,
-    )
-    st.caption(f"{len(matches)} destino(s) encontrados — resultados do catálogo, "
-               "não uma lista de viagens ferroviárias confirmadas.")
-    if not matches:
-        st.info("Nenhum destino corresponde aos filtros. Experimente outra busca.")
-        return
+    if focused is not None:
+        st.caption("Destino escolhido na ficha da cidade-base: "+focused["name"])
+        subset=[focused]
+    else:
+        st.markdown(section_heading("ENCONTRE SEU DESTINO","Filtre as opções",
+                                    "Pesquise por país, experiência ou atração.",
+                                    variant="compact"),unsafe_allow_html=True)
+        col1, col2, col3 = st.columns([2, 2, 3])
+        with col1:
+            country = st.selectbox(
+                "País", ["Todos os países", *discovery["countries"]],
+                key="ux501_country")
+        with col2:
+            categories = st.multiselect(
+                "Experiências", discovery["categories"],
+                key="ux501_categories")
+        with col3:
+            query = st.text_input(
+                "Buscar cidade ou atração", placeholder="Ex.: Colmar, museu, catedral",
+                key="ux501_search")
+        matches = filter_destinations(
+            discovery,
+            country=None if country == "Todos os países" else country,
+            categories=categories,
+            query=query,
+            selected=selected,
+        )
+        st.caption(f"{len(matches)} destino(s) encontrados — resultados do catálogo, "
+                   "não uma lista de viagens ferroviárias confirmadas.")
+        if not matches:
+            st.info("Nenhum destino corresponde aos filtros. Experimente outra busca.")
+            return
 
-    page_size = 12
-    pages = (len(matches)+page_size-1)//page_size
-    if st.session_state.get("ux501_page") not in range(1, pages+1):
-        st.session_state["ux501_page"] = 1
-    page = st.selectbox(
-        "Página de destinos", list(range(1, pages+1)),
-        key="ux501_page", format_func=lambda p: f"{p} de {pages}")
-    subset = matches[(page-1)*page_size:page*page_size]
+        page_size = 12
+        pages = (len(matches)+page_size-1)//page_size
+        if st.session_state.get("ux501_page") not in range(1, pages+1):
+            st.session_state["ux501_page"] = 1
+        page = st.selectbox(
+            "Página de destinos", list(range(1, pages+1)),
+            key="ux501_page", format_func=lambda p: f"{p} de {pages}")
+        subset = matches[(page-1)*page_size:page*page_size]
     # Bundled images require no HTTP request. Query Wikimedia only when
     # neither editorial nor local files cover a destination on this page.
     local_photos = {item["id"]: local_destination_photo(item["id"])
@@ -216,7 +221,7 @@ def render_independent_destination_discovery(*, discovery=None) -> None:
                                   use_container_width=True,
                                   on_click=add_destination, args=(item["id"], discovery))
                     with st.container(key=f"ux53_footer_destination_{item['id']}"):
-                        with st.expander("Ver atrações e fontes · detalhes"):
+                        with st.expander("Ver atrações e fontes · detalhes",expanded=focused is not None):
                             if photo and photo.get("subject"):
                                 st.caption("Na foto: "+photo["subject"])
                             if item.get("planning_support") == "exploration_only":

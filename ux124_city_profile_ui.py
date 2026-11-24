@@ -7,7 +7,7 @@ from ux502_destination_interests_model import empty_interests,ordered_interests,
 from routes7_comparison_projection import format_minutes
 from ux47_photo_ui import photo_markup,photo_credit
 from ux113_comparison_panorama_ui import coworking_night_status
-from ux124b_profile_presentation import city_intro,practical_facts,compact_money,route_preview,route_list_html,ticket_text
+from ux124b_profile_presentation import city_intro,practical_facts,compact_money,route_preview,route_list_html,ticket_text,typical_time_label
 
 def money(value,unit="€"):
     return ("Não pesquisado" if value is None else
@@ -48,9 +48,11 @@ def _control(label,options,default,key,*,hidden=False):
         on_change=_remember_control,args=(key,shadow))
     return value if value in options else saved
 
-def _open_topic(key,topic):
-    st.session_state[key]=topic
-    st.session_state["rec03a_profile_view_"+key]=topic
+def _open_wishlist_logistics(prefix,base):
+    # Explicit intent overrides the previous filter; ordinary returns restore it.
+    for key,value in ((prefix+"_topic_"+base,"Logística"),(prefix+"_routes_"+base,ROUTE_SCOPES[0])):
+        st.session_state[key]=value
+        st.session_state["rec03a_profile_view_"+key]=value
 
 def _overview_details(v):
     p=v["profile"]
@@ -113,30 +115,26 @@ def _overview(v):
         st.markdown("**Conexões com seus destinos**")
         st.markdown(route_list_html(preview),unsafe_allow_html=True)
         st.caption("Referências de ida; retorno, frequência e última milha a confirmar.")
-        st.button("Ver toda a logística",key=v["widget_prefix"]+"_overview_logistics_"+v["city"]["id"],
-                  on_click=_open_topic,args=(v["widget_prefix"]+"_topic_"+v["city"]["id"],"Logística"))
+        st.button("Ver todos os meus destinos",key=v["widget_prefix"]+"_overview_logistics_"+v["city"]["id"],
+                  on_click=_open_wishlist_logistics,args=(v["widget_prefix"],v["city"]["id"]))
         missing=[r["name"] for r in desired["rows"] if r["priority"]=="must_visit" and r["cell"]["category"]=="no_time"]
         if missing:
             st.warning("Imperdíveis sem tempo pesquisado: "+", ".join(missing))
     office=(v["cost"] or {}).get("coworking")
     pack_office=v["pack"].get("remote_work",{}).get("coworking_reference")
+    facts=practical_facts(p)
     with st.container(key="ux124b-overview-considerations"):
-        left,right=st.columns(2,gap="small")
-        with left:
-            st.markdown("**Pontos fortes documentados**")
-            facts=practical_facts(p)
-            if facts:
-                st.markdown("\n".join("- "+x for x in facts))
-            elif not p["advantages"]:
-                st.caption("Ainda faltam referências práticas específicas.")
-            else:
-                st.caption("Característica documentada no resumo acima.")
-        with right:
-            st.markdown("**Pontos de atenção**")
-            st.markdown("- Moradia de temporada: contrato, disponibilidade e custos de 2027 a confirmar.\n"
-                        "- Internet do imóvel não confirmada.")
-            if office and office.get("late_work_compatible") is False:
-                st.caption("Acesso noturno: ver condições de trabalho remoto abaixo.")
+        if facts:
+            st.markdown("**Características complementares**")
+            st.markdown("\n".join("- "+x for x in facts))
+        st.markdown("**Pontos de atenção**")
+        if v["city"].get("screening_notes"):
+            st.write(v["city"]["screening_notes"])
+            st.caption("Observação da pesquisa histórica.")
+        historical=v["editorial"]
+        if historical and historical.get("risks"):
+            st.caption("Avaliação editorial histórica: "+historical["risks"][0]+".")
+        st.caption("Ainda pendente para 2027: contrato, disponibilidade, taxas e caução da moradia.")
     st.markdown("**Trabalho remoto**")
     if office:
         st.write(office["name"]+" — "+coworking_night_status(office))
@@ -147,10 +145,9 @@ def _overview(v):
         st.caption("Horário: "+str(pack_office.get("hours") or "Não pesquisado")+" · modalidade a confirmar.")
     else:
         st.caption("Coworking ainda não pesquisado.")
+    st.caption("Internet do imóvel não confirmada.")
     if not preview:
-        st.caption("Ainda pendente para 2027: confirmar retorno ferroviário e última milha.")
-    else:
-        st.caption("Ainda pendente para 2027: confirmar horários e condições da modalidade de coworking.")
+        st.caption("Retorno ferroviário e última milha a confirmar.")
     _overview_details(v)
 
 def _housing(v):
@@ -226,9 +223,7 @@ def _logistics(v):
     else:
         st.dataframe([{"Destino":r["name"],"Prioridade":LABELS.get(r["priority"],"—"),
                        "Tempo de ida":r["cell"]["label"],
-                       "Tempo médio/típico":r["cell"]["typical_label"]
-                       if r["cell"].get("average_min") is not None or r["historical_typical"] is None
-                       else format_minutes(r["historical_typical"])+" · típico histórico"}
+                       "Tempo médio/típico":typical_time_label(r)}
                       for r in rows],hide_index=True,width="stretch")
         with st.expander("Fontes, estações e divergências por destino"):
             chosen=st.selectbox("Detalhar destino", [r["destination_id"] for r in rows],
@@ -237,9 +232,9 @@ def _logistics(v):
             route=next(r for r in rows if r["destination_id"]==chosen)
             cell=route["cell"]
             st.write(cell["label"])
-            st.caption(cell["typical_label"])
+            st.caption(typical_time_label(route))
             st.caption("Data da fonte histórica: "+str(route["source_date"] or "não documentada"))
-            if route["historical_typical"] is not None:
+            if route["historical_typical"] is not None and typical_time_label(route)==cell["typical_label"]:
                 st.caption("Tempo típico histórico: "+format_minutes(route["historical_typical"]))
             for field in ("station_caveat","evidence_notes","comparability","gap_checked_at"):
                 if cell.get(field):
@@ -440,6 +435,13 @@ def _attractions(v):
     regional=v["excursions"][:6]
     if regional:
         st.markdown(route_list_html(regional),unsafe_allow_html=True)
+        if v.get("on_discover_destination"):
+            # One native selection/action rather than six extra buttons.
+            choices={item["destination_id"]:item["name"] for item in regional}
+            dest=st.selectbox("Destino para conhecer",list(choices),format_func=choices.__getitem__,
+                              key=v["widget_prefix"]+"_regional_destination_"+v["city"]["id"])
+            st.button("Conhecer destino",key=v["widget_prefix"]+"_regional_discover_"+v["city"]["id"],
+                      on_click=v["on_discover_destination"],args=(dest,))
         with st.expander("Atrações e fontes dos destinos regionais"):
             for item in regional:
                 st.markdown("**"+item["name"]+"** · "+str(item["attraction_count"])+" atrações indexadas")
@@ -458,7 +460,7 @@ def _public_profile(base_id,research):
     # no user's interests, navigation context or plan enters this cache.
     return city_profile(base_id,research=research)
 
-def render_city_profile(base_id,*,research=None,key_prefix="ux124"):
+def render_city_profile(base_id,*,research=None,key_prefix="ux124",on_discover_destination=None):
     interests=st.session_state.get("ux502_interests",empty_interests())
     try:
         v=_public_profile(base_id,research)
@@ -468,6 +470,7 @@ def render_city_profile(base_id,*,research=None,key_prefix="ux124"):
     priorities={item["destination_id"]:item["priority"] for item in ordered_interests(interests)}
     v["routes"]=personalize_routes(v["routes"],priorities)
     v["widget_prefix"]=key_prefix
+    v["on_discover_destination"]=on_discover_destination
     with st.container(key="ux124b-profile-"+key_prefix+"-"+base_id):
         topic=_control("Assunto",TOPICS,TOPICS[0],key_prefix+"_topic_"+base_id,hidden=True)
         _RENDERERS[topic](v)

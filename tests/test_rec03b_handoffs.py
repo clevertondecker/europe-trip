@@ -238,6 +238,23 @@ class HandoffAppTests(unittest.TestCase):
         self.assertEqual(app.session_state[CONTEXT]["base_ids"],[base])
         self.assertEqual(app.session_state[SCOPE],scope)
         self.assertEqual(app.session_state["advisor_plan"],original)
+        app.segmented_control(key="ux124_topic_"+base).set_value("Atrações").run()
+        self.assertFalse(app.exception,str(app.exception))
+        # Some sparse candidates have no regional rows: choose a known city
+        # via the existing full-profile integration when one is available.
+        if any(b.key=="ux124_regional_discover_"+base for b in app.button):
+            target=app.selectbox(key="ux124_regional_destination_"+base).value
+            click("ux124_regional_discover_"+base)
+            self.assertEqual(app.session_state["ux_section"],"Passeios")
+            self.assertTrue(any("Destino escolhido na ficha" in x.value for x in app.caption))
+            self.assertTrue(any(x.key=="ux502_add_"+target or x.key=="ux502_restore_"+target for x in app.button)
+                            or any("Na minha lista" in x.value for x in app.caption))
+            click("rec03a_profile_discovery_back")
+            self.assertEqual(app.segmented_control(key="ux124_topic_"+base).value,"Atrações")
+            self.assertEqual(app.session_state["ux502_interests"],wishes)
+            self.assertEqual(app.session_state["advisor_plan"],original)
+        app.segmented_control(key="ux124_topic_"+base).set_value("Logística").run()
+        self.assertEqual(app.segmented_control(key="ux124_routes_"+base).value,"Com tempo pesquisado")
         click("rec03a_handoff_profile_map")
         self.assertEqual(app.session_state[CONTEXT]["kind"],"map")
         # The sidebar reports missing optional Drive credentials in CI.
@@ -251,6 +268,8 @@ class HandoffAppTests(unittest.TestCase):
         self.assertTrue(app.get("deck_gl_json_chart"), "Contextual map not rendered")
         self.assertTrue(app.dataframe, "Rail evidence table not rendered")
         click("rec03a_handoff_back_map")
+        self.assertEqual(app.segmented_control(key="ux124_topic_"+base).value,"Logística")
+        self.assertEqual(app.segmented_control(key="ux124_routes_"+base).value,"Com tempo pesquisado")
         self.assertEqual(app.session_state[SCOPE],scope)
         self.assertEqual(app.session_state[CONTEXT]["kind"],"profile")
         self.assertEqual(app.session_state[CONTEXT]["base_ids"],[base])
