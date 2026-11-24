@@ -32,7 +32,11 @@ class ProfileHierarchyTests(unittest.TestCase):
                              for m in app.markdown))
         self.assertFalse(any(x.key=="expanded_bases_detail_city"
                              for x in app.selectbox))
-        self.assertTrue(any("10/15" in str(m.value) for m in app.metric))
+        from ux124_city_profile_model import city_profile
+        v=city_profile("strasbourg")
+        expected=v["counts"].get("historical",0)+v["counts"].get("reference_only",0)
+        total=v["catalog_destination_count"]-v["counts"].get("local",0)
+        self.assertEqual(app.metric[1].value,f"{expected}/{total}")
 
 
 if __name__=="__main__":

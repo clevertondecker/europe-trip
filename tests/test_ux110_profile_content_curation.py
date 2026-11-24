@@ -44,13 +44,15 @@ class UX110CurationTests(unittest.TestCase):
         ).run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
         self.assertEqual(app.metric[0].value,"0")
-        self.assertEqual(app.metric[1].value,"0/15")
+        from ux124_city_profile_model import city_profile
+        v=city_profile("colmar")
+        expected=v["counts"].get("historical",0)+v["counts"].get("reference_only",0)
+        total=v["catalog_destination_count"]-v["counts"].get("local",0)
+        self.assertEqual(app.metric[1].value,f"{expected}/{total}")
         captions=[str(item.value) for item in app.caption]
         self.assertTrue(any("não significa falta de imóveis" in x for x in captions))
-        self.assertTrue(any("não significa falta de trens" in x for x in captions))
-        self.assertTrue(any("Pesquisa e documentação" in str(x.value)
-                            for x in app.markdown))
-        self.assertTrue(any("Ainda faltam referências práticas" in x for x in captions))
+        self.assertTrue(any("não confirma bate-volta" in x for x in captions))
+        self.assertTrue(any("Fontes e pendências" in x.label for x in app.expander))
 
     def test_independent_mode_keeps_its_existing_metrics(self):
         app=AppTest.from_string(
@@ -61,7 +63,7 @@ class UX110CurationTests(unittest.TestCase):
         ).run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
         self.assertEqual(app.metric[0].label,"Anúncios históricos de 2026")
-        self.assertEqual(app.metric[1].label,"Destinos da pesquisa histórica com referência de tempo")
+        self.assertEqual(app.metric[1].label,"Destinos com tempo pesquisado")
 
 
 if __name__=="__main__":
