@@ -111,12 +111,11 @@ class GuidedComparisonTests(unittest.TestCase):
         source=inspect.getsource(render_suggestions)
         self.assertNotIn("render_card_selection_summary(",source)
         self.assertNotIn("_render_quick_comparison(",source)
-        self.assertLess(source.index("for index,candidate in enumerate(visible):"),
-                        source.index("render_selection_toolbar(options,cities)"))
-        self.assertLess(source.index("for index,base in enumerate(featured):"),
-                        source.index("render_selection_toolbar(options,cities)"))
-        self.assertLess(source.index("render_selection_toolbar(options,cities)"),
-                        source.index("render_inline_comparison(interests,checked"))
+        self.assertIn('view=st.segmented_control("Área da pesquisa"',source)
+        self.assertLess(source.index('search=st.text_input("Pesquisar cidade ou país"'),
+                        source.index('show_all=st.checkbox('))
+        self.assertIn('render_selection_toolbar(options,cities,navigation="explore")',source)
+        self.assertIn('render_selection_toolbar(options,cities,navigation="compare")',source)
         self.assertIn("size=4",source)
         self.assertIn("render_planning_handoff(plan,interests=interests",source)
 
@@ -130,6 +129,8 @@ class GuidedComparisonTests(unittest.TestCase):
             a.checkbox(key=key).check().run()
             self.assertFalse(a.exception,[x.message for x in a.exception])
         self.assertEqual(len(a.session_state[CHOICE]),2)
+        self.assertFalse(any("ux97-table" in x.value for x in a.markdown))
+        a.segmented_control(key="ux112_active_view").set_value("Minha comparação").run()
         self.assertFalse(any(x.key=="rec03a_handoff_compare" for x in a.button))
         self.assertTrue(any("ux97-table" in x.value for x in a.markdown))
         self.assertFalse(any(x.key=="rec03a_inline_matrix" for x in a.checkbox))
@@ -150,6 +151,7 @@ class GuidedComparisonTests(unittest.TestCase):
         for n in (3,5):
             with self.subTest(n=n):
                 a.session_state[CHOICE]=candidates[:n]
+                a.session_state["ux112_active_view"]="Minha comparação"
                 a.run()
                 self.assertFalse(a.exception,[x.message for x in a.exception])
                 self.assertEqual(a.session_state[CHOICE],candidates[:n])
@@ -180,10 +182,14 @@ class GuidedComparisonTests(unittest.TestCase):
         self.assertFalse(a.exception,[x.message for x in a.exception])
         selected=list(a.session_state[CHOICE])
         self.assertEqual(set(selected),{first.removeprefix("rec03a_pick_"),other})
+        self.assertFalse(any("ux97-table" in x.value for x in a.markdown))
+        a.button(key="ux112_open_comparison").click().run()
         self.assertTrue(any("ux97-table" in x.value for x in a.markdown))
+        a.button(key="ux112_open_exploration").click().run()
         a.checkbox(key="rec03a_show_all").uncheck().run()
         self.assertFalse(a.exception,[x.message for x in a.exception])
         self.assertEqual(a.session_state[CHOICE],selected)
+        a.segmented_control(key="ux112_active_view").set_value("Minha comparação").run()
         self.assertTrue(any("ux97-table" in x.value for x in a.markdown))
 
     def test_selection_below_filter_remains_authoritative(self):
