@@ -512,8 +512,13 @@ def render_city_decision(plan:dict,trip_data:dict,finance_live:bool,
     if not dest:
         st.info("Escolha ao menos um destino para comparar.")
         return
-    st.caption("Se você já escolheu passeios no roteiro, eles são usados como "
-               "referência. Destinos sem trajeto pesquisado não são considerados perdidos.")
+    if contextual_base is not None:
+        st.caption("Os destinos do escopo confirmado servem apenas como referência "
+                   "para esta revisão; nenhum passeio é incluído, excluído ou "
+                   "modificado no roteiro. Sem tempo não significa inviável.")
+    else:
+        st.caption("Se você já escolheu passeios no roteiro, eles são usados como "
+                   "referência. Destinos sem trajeto pesquisado não são considerados perdidos.")
     with st.expander("Premissas financeiras opcionais · mesma duração e câmbio"):
         st.caption("Valores mensais são apenas suposições suas, sem anúncio "
                    "validado para 2027. Deixe €0 para indicar que não há cotação.")
