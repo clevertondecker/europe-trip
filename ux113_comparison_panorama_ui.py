@@ -15,6 +15,18 @@ from city_research_round2 import load_round2
 PILOT_BASES = frozenset({"mulhouse", "strasbourg", "freiburg"})
 
 
+def coworking_night_status(coworking: dict | None) -> str:
+    """Three-valued 2026 observation, NEVER a promise of access in 2027."""
+    if not coworking:
+        return "Não pesquisado"
+    observed=coworking.get("late_work_compatible")
+    if observed is True:
+        return "Compatibilidade observada em 2026 · confirmar acesso em 2027"
+    if observed is False:
+        return "Horário publicado não cobre todo o turno · verificar condições"
+    return "Compatibilidade ainda não confirmada"
+
+
 def project_comparison_panorama(projection: dict, research: dict, round2: dict) -> dict:
     """Project the SAME selected cities without inventing cost or viability.
 
@@ -25,7 +37,7 @@ def project_comparison_panorama(projection: dict, research: dict, round2: dict) 
     costs = {city["id"]: city for city in round2["cities"]}
     bases = projection["base_ids"]
     total = len(projection["destinations"])
-    logistics, living, routine, sources = [], [], [], []
+    logistics, living, routine, sources, housing_sources = [], [], [], [], []
     for base in bases:
         city = cities[base]
         evidence = projection["counts"][base]
@@ -40,6 +52,11 @@ def project_comparison_panorama(projection: dict, research: dict, round2: dict) 
             "Retorno e última milha": "Não validados",
         })
         housing = observed_housing(city)
+        for offer in city["housing_offers"]:
+            housing_sources.append((
+                city["name"] + " · anúncio histórico " + str(offer["listing_ref"]),
+                offer["catalogue_url"],
+            ))
         specific = costs.get(base)
         coworking = specific["coworking"] if specific else None
         living.append({
@@ -62,10 +79,8 @@ def project_comparison_panorama(projection: dict, research: dict, round2: dict) 
             "Preço de referência (€)": coworking["price_eur"] if coworking else None,
             "Modalidade": coworking["price_basis"] if coworking else None,
             "Horário publicado": coworking["schedule"] if coworking else None,
-            "Expediente noturno confirmado": (
-                "Não" if coworking and not coworking["late_work_compatible"] else
-                "Não pesquisado"
-            ),
+            "Expediente noturno (ref. 2026)": coworking_night_status(coworking),
+            "Ressalva sobre acesso": coworking["note"] if coworking else None,
         })
         if specific:
             sources.append((city["name"] + " · alimentação",
@@ -78,6 +93,7 @@ def project_comparison_panorama(projection: dict, research: dict, round2: dict) 
         "living": living,
         "routine": routine,
         "living_sources": sources,
+        "housing_sources": housing_sources,
         "residential_source": round2["common_sources"][0]["url"],
         "pilot_bases": [base for base in bases if base in PILOT_BASES],
         "covered_living_count": sum(base in costs for base in bases),
@@ -104,21 +120,44 @@ def _pilot_context(projection: dict, research: dict, pilot: list[str]) -> None:
         matched = [r for r in data["routes"] if r["destination_id"] in selected_destinations]
         if not matched:
             st.info("O piloto não pesquisou os destinos deste escopo. "
-                    "Não o usamos para completar artificialmente a matriz principal.")
-            return
-        rows = []
-        names_dest = {d["id"]: d["name"] for d in projection["destinations"]}
-        for item in matched:
-            minutes = item.get("minimum_rail_minutes_2026")
-            rows.append({
-                "Cidade-base": names[item["base_id"]],
-                "Destino do seu escopo": names_dest[item["destination_id"]],
-                "Mínimo histórico (min)": minutes,
-                "Volta em 2027": "Não validada",
-            })
-        st.dataframe(rows, hide_index=True, width="stretch")
-        st.caption("Os exemplos do piloto não substituem evidências UX87/ROUTES7; "
-                   "as estações, datas, frequência e última milha podem diferir.")
+                    "Não usamos tempos de outras viagens como evidência pessoal.")
+        else:
+            rows = []
+            names_dest = {d["id"]: d["name"] for d in projection["destinations"]}
+            for item in matched:
+                rows.append({
+                    "Cidade-base": names[item["base_id"]],
+                    "Destino do seu escopo": names_dest[item["destination_id"]],
+                    "Mínimo histórico (min)": item.get("minimum_rail_minutes_2026"),
+                    "Volta em 2027": "Não validada",
+                })
+            st.dataframe(rows, hide_index=True, width="stretch")
+            st.caption("Observações históricas, sem confirmação de estações, frequência, "
+                       "retornos, última milha ou disponibilidade em 2027.")
+        with st.expander("Aeroportos e vida urbana · pesquisa geral",expanded=False):
+            st.caption("Estas informações descrevem as cidades pesquisadas em 2026; "
+                       "não pertencem necessariamente aos destinos do seu escopo.")
+            for record in data["airports"]:
+                options=record.get("airport_options",[])
+                names_airport=list(dict.fromkeys(
+                    str(a.get("airport_code")) for a in options if a.get("airport_code")
+                ))
+                st.markdown("**"+names[record["base_id"]]+"** · aeroportos investigados: "+
+                            (", ".join(names_airport) or "sem pesquisa"))
+                st.caption("Acesso completo porta a porta, conexões aéreas e tarifas "
+                           "do casal para 2027 não verificados.")
+            for record in data["urban"]:
+                st.markdown("**"+names[record["city_id"]]+"** · rotina e mobilidade")
+                link=record.get("late_transit_service")
+                if isinstance(link,str) and link.startswith("https://"):
+                    st.link_button("Referência de transporte urbano · "+
+                                   names[record["city_id"]],link)
+                st.caption("Internet do imóvel, segurança na vizinhança, "
+                           "horário do coworking para o seu contrato e última milha "
+                           "exigem confirmação individual.")
+            st.caption("Hipóteses de fins de semana e roteiro combinado belga "
+                       "permanecem no estudo histórico DQ20/DQ21 da área de "
+                       "cidades favoritas; não são passeios confirmados de 2027.")
 
 
 def render_comparison_panorama(projection: dict, research: dict) -> None:
@@ -146,6 +185,13 @@ def render_comparison_panorama(projection: dict, research: dict) -> None:
         st.link_button("Indicador de aluguel residencial (2026)", panorama["residential_source"])
         for label, url in panorama["living_sources"]:
             st.link_button(label, url)
+        with st.expander("Anúncios históricos consultados", expanded=False):
+            if not panorama["housing_sources"]:
+                st.caption("Não há anúncios pesquisados para essas cidades.")
+            for label,url in panorama["housing_sources"]:
+                st.link_button(label,url)
+            st.caption("Anúncios observados em 2026; preço, duração e "
+                       "disponibilidade em 2027 não confirmados.")
         st.caption("Preço residencial por metro quadrado, jantar para dois e anúncio "
                    "histórico usam metodologias distintas; não some como orçamento real.")
     pilot = panorama["pilot_bases"]

@@ -3,7 +3,9 @@ import unittest
 
 from base_research_expanded_model import load_research
 from city_research_round2 import load_round2
-from ux113_comparison_panorama_ui import project_comparison_panorama
+from ux113_comparison_panorama_ui import (
+    coworking_night_status,project_comparison_panorama
+)
 
 
 class UX113PanoramaTests(unittest.TestCase):
@@ -70,6 +72,45 @@ class UX113PanoramaTests(unittest.TestCase):
             else:
                 self.assertIsNone(row["Mediana observada (€ / mês)"])
         self.assertFalse(panel["cost_of_stay_2027_quoted"])
+
+    def test_coworking_observation_is_tristate_and_not_2027_promise(self):
+        self.assertEqual(coworking_night_status(None),"Não pesquisado")
+        for status,expected in (
+            (True,"Compatibilidade observada em 2026"),
+            (False,"Horário publicado não cobre"),
+            (None,"Compatibilidade ainda não confirmada"),
+        ):
+            with self.subTest(status=status):
+                label=coworking_night_status({"late_work_compatible":status})
+                self.assertIn(expected,label)
+                self.assertNotEqual(label,"Não pesquisado")
+        panel=project_comparison_panorama(
+            self.projection(["mulhouse","metz","nancy"]),self.research,self.cost)
+        routine={r["Cidade-base"]:r for r in panel["routine"]}
+        self.assertIn("Horário publicado",routine["Mulhouse"]["Expediente noturno (ref. 2026)"])
+        self.assertIn("não confirmada",routine["Metz"]["Expediente noturno (ref. 2026)"])
+
+    def test_historical_housing_sources_remain_accessible(self):
+        panel=project_comparison_panorama(
+            self.projection(["mulhouse","metz","lille"]),self.research,self.cost)
+        expected=sum(len(c["housing_offers"]) for c in self.research["cities"]
+                     if c["id"] in {"mulhouse","metz","lille"})
+        self.assertEqual(len(panel["housing_sources"]),expected)
+        self.assertTrue(all(url.startswith("https://")
+                            for _,url in panel["housing_sources"]))
+        self.assertFalse(panel["cost_of_stay_2027_quoted"])
+
+    def test_four_and_five_base_cost_panels_keep_same_canonical_order(self):
+        for bases in (["metz","nancy","mulhouse","strasbourg"],
+                      ["metz","nancy","mulhouse","strasbourg","lille"]):
+            with self.subTest(count=len(bases)):
+                panel=project_comparison_panorama(
+                    self.projection(bases),self.research,self.cost)
+                names=[c["name"] for key in bases
+                       for c in self.research["cities"] if c["id"]==key]
+                self.assertEqual([r["Cidade-base"] for r in panel["living"]],names)
+                self.assertEqual([r["Cidade-base"] for r in panel["routine"]],names)
+                self.assertIsNone(panel["selected_base_for_itinerary"])
 
     def test_multiple_bases_are_not_split_into_multiple_stays(self):
         projection = self.projection(["mulhouse", "strasbourg", "metz"])
