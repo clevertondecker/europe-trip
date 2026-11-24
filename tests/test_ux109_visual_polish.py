@@ -61,10 +61,13 @@ class UX109ProfileTests(unittest.TestCase):
             default_timeout=120,
         ).run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
-        summaries=[str(x.value) for x in app.markdown]+[str(x.value) for x in app.text]
+        from collections import Counter
         from ux124b_profile_presentation import city_intro
-        self.assertEqual(sum(city_intro({"summary":expected}) in item for item in summaries),1)
-        self.assertTrue(any(expected in item.value for item in app.caption))
+        details=next(e for e in app.expander if "Fontes e pendências" in e.label)
+        summaries=Counter(str(x.value) for x in app.markdown)
+        summaries.subtract(str(x.value) for x in details.markdown)
+        self.assertEqual(sum(n for item,n in summaries.items() if city_intro({"summary":expected}) in item),1)
+        self.assertTrue(any(expected in item.value for item in details.caption))
 
     def test_independent_explorer_preserves_existing_headings(self):
         app=AppTest.from_string(

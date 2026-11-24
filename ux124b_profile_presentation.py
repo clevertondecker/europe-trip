@@ -42,7 +42,7 @@ def route_display(row):
             amount="~"+amount
         qualifier=label[len(amount):].lstrip(" ·") if label.startswith(amount) else label
     elif cell["category"]=="local":
-        amount,qualifier="Local",label
+        amount,qualifier="Local",label.removeprefix("Local — ")
     else:
         amount,qualifier="Sem tempo",label
     return {"name":row["name"],"priority":LABELS.get(row.get("priority"),""),
@@ -64,9 +64,6 @@ def route_list_html(rows):
                      '</div><div class="ux124b-route-value"><strong>'+safe(r["time"])+
                      '</strong><small>'+safe(r["qualifier"])+'</small></div></li>')
     return '<ul class="ux124b-routes" aria-label="Referências de ida">'+''.join(parts)+'</ul>'
-
-def observed_label(value):
-    return "Não pesquisado" if value is None else str(value)
 
 def ticket_text(ticket):
     if not ticket:

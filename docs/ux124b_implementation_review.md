@@ -17,3 +17,5 @@ Nenhuma mudança em modelos de domínio, datasets, TripPlan, wishlist ou cálcul
 
 ## Validação
 Testes adicionados para todos os perfis (texto/fatos), valores e ingressos, preview de prioridades, navegação de assunto, retorno de descoberta com filtro, quatro cidades nas seis seções. Testes antigos de layout atualizados sem desativar contratos. CI e revisão de falhas do novo HEAD pendentes. QA real em 1440/1280/768/390px, contraste, teclado, fallback e screenshots antes/depois continuam pendentes; AppTest não comprova responsividade. Não mergear antes da revisão visual.
+
+Review estático complementar: detalhes de simulação movidos ao popover existente; callbacks de assunto recebem somente a key, não toda a projeção privada; observações originais mostram minutos sem arredondamento ou conversão de tipo; disponibilidade 2027 explícita nos anúncios; teste de deduplicação diferencia resumo visível e evidência dentro do expansor. A remoção de código de UI antigo é restrita aos componentes substituídos; modelos mantidos.

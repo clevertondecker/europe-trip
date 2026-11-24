@@ -409,10 +409,10 @@ def render_profile_context(plan):
                               on_click=_map_from_profile,args=(base,))
                     st.button("Consultar destinos em Descobrir",key="rec03a_profile_discover",
                               on_click=_discover_from_profile)
+                    if cap["scenario_selectable"]:
+                        st.caption("Limites da simulação: "+cap["budget_note"])
         if cap["scenario_selectable"]:
             st.caption("Simulação hipotética · aluguel e caução de 2027 ainda não cotados.")
-            with st.expander("Limites da simulação"):
-                st.caption(cap["budget_note"])
         else:
             st.caption("Simulação indisponível para esta cidade.")
         if base not in selected and len(selected)>=5:

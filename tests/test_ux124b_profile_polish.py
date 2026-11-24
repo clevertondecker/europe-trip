@@ -4,7 +4,7 @@ from copy import deepcopy
 from streamlit.testing.v1 import AppTest
 from base_research_expanded_model import load_research
 from city_profiles_model import load_profiles
-from ux124_city_profile_model import city_profile,personalize_routes,route_scope
+from ux124_city_profile_model import city_profile,personalize_routes
 from ux124b_profile_presentation import city_intro,practical_facts,compact_money,route_preview,route_display,route_list_html,ticket_text
 
 class ProfilePolishTests(unittest.TestCase):
@@ -38,6 +38,21 @@ class ProfilePolishTests(unittest.TestCase):
         fake={"name":"<script>","cell":{"category":"no_time","label":"Tempo não pesquisado"},"priority":"must_visit"}
         self.assertNotIn("<script>",route_list_html([fake]))
         self.assertIn("Sem tempo",route_list_html([fake]))
+
+    def test_preview_does_not_hide_missing_imperdible_or_change_cell(self):
+        rows=[{"destination_id":"missing","name":"Sem dado","priority":"must_visit",
+               "cell":{"category":"no_time","label":"Tempo não pesquisado"}},
+              {"destination_id":"local","name":"Local","priority":"interested",
+               "cell":{"category":"local","label":"Local — acesso a verificar"}},
+              {"destination_id":"rail","name":"Trem","priority":"maybe",
+               "cell":{"category":"historical","display_min":20,
+                       "label":"20 min · histórico · tempos publicados diferentes"}}]
+        original=deepcopy(rows)
+        preview=route_preview(rows)
+        self.assertEqual(preview,rows)
+        self.assertEqual(route_display(preview[2])["time"],"20 min")
+        self.assertIn("tempos publicados diferentes",route_display(preview[2])["qualifier"])
+        self.assertEqual(rows,original)
 
     def test_overview_navigation_single_details_and_no_eager_other_topics(self):
         app=AppTest.from_string(

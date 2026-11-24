@@ -48,8 +48,7 @@ def _control(label,options,default,key,*,hidden=False):
         on_change=_remember_control,args=(key,shadow))
     return value if value in options else saved
 
-def _open_topic(v,topic):
-    key=v["widget_prefix"]+"_topic_"+v["city"]["id"]
+def _open_topic(key,topic):
     st.session_state[key]=topic
     st.session_state["rec03a_profile_view_"+key]=topic
 
@@ -115,7 +114,7 @@ def _overview(v):
         st.markdown(route_list_html(preview),unsafe_allow_html=True)
         st.caption("Referências de ida; retorno, frequência e última milha a confirmar.")
         st.button("Ver toda a logística",key=v["widget_prefix"]+"_overview_logistics_"+v["city"]["id"],
-                  on_click=_open_topic,args=(v,"Logística"))
+                  on_click=_open_topic,args=(v["widget_prefix"]+"_topic_"+v["city"]["id"],"Logística"))
         missing=[r["name"] for r in desired["rows"] if r["priority"]=="must_visit" and r["cell"]["category"]=="no_time"]
         if missing:
             st.warning("Imperdíveis sem tempo pesquisado: "+", ".join(missing))
@@ -136,11 +135,11 @@ def _overview(v):
             st.markdown("**Pontos de atenção**")
             st.markdown("- Moradia de temporada: contrato, disponibilidade e custos de 2027 a confirmar.\n"
                         "- Internet do imóvel não confirmada.")
-            if office:
-                st.caption(coworking_night_status(office))
+            if office and office.get("late_work_compatible") is False:
+                st.caption("Acesso noturno: ver condições de trabalho remoto abaixo.")
     st.markdown("**Trabalho remoto**")
     if office:
-        st.write(office["name"])
+        st.write(office["name"]+" — "+coworking_night_status(office))
         if office.get("schedule"):
             st.caption("Horário publicado: "+office["schedule"])
     elif pack_office:
@@ -148,7 +147,10 @@ def _overview(v):
         st.caption("Horário: "+str(pack_office.get("hours") or "Não pesquisado")+" · modalidade a confirmar.")
     else:
         st.caption("Coworking ainda não pesquisado.")
-    st.caption("Ainda pendente para 2027: retorno ferroviário, última milha, disponibilidade e condições de trabalho.")
+    if not preview:
+        st.caption("Ainda pendente para 2027: confirmar retorno ferroviário e última milha.")
+    else:
+        st.caption("Ainda pendente para 2027: confirmar horários e condições da modalidade de coworking.")
     _overview_details(v)
 
 def _housing(v):
@@ -173,6 +175,7 @@ def _housing(v):
                            "Taxas":"Documentadas" if o.get("all_mandatory_fees_known") else "A verificar",
                            "Estação próxima":"Verificada" if o.get("near_station_verified") else "A verificar",
                            "56–60 noites":"Confirmadas" if o.get("short_stay_56_to_60_nights_confirmed") else "A verificar",
+                           "Disponibilidade 2027":"Confirmada" if o.get("available_for_autumn_2027") else "A verificar",
                            "Fonte":o.get("listing_url") or o["catalogue_url"]} for o in offers],
                          hide_index=True,width="stretch",
                          column_config={"Fonte":st.column_config.LinkColumn(display_text="Consultar")})
@@ -250,7 +253,7 @@ def _logistics(v):
                 fields=[]
                 for field,label in (("minimum_oneway_min","Mínimo"),("typical_oneway_min","Típico")):
                     if obs.get(field) is not None:
-                        fields.append(label+": "+format_minutes(obs[field]))
+                        fields.append(label+": "+str(obs[field])+" min")
                 for field,label in (("evidence_date","Data"),("origin_station","Origem"),
                                     ("destination_station","Chegada"),("source_dataset","Registro de origem")):
                     if obs.get(field):
