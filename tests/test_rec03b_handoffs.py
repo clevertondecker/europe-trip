@@ -185,7 +185,9 @@ class HandoffAppTests(unittest.TestCase):
             self.assertFalse(app.exception,str(app.exception))
         choose_city("strasbourg")
         choose_city("angers")
-        # UX87 comparison is visible in the suggested view without a handoff.
+        # UX87 uses the same CHOICE but renders in its dedicated view.
+        self.assertFalse(any("ux97-table" in m.value for m in app.markdown))
+        app.segmented_control(key="ux112_active_view").set_value("Minha comparação").run()
         self.assertTrue(any("ux97-table" in m.value for m in app.markdown))
         self.assertFalse(any(x.key=="rec03a_inline_matrix" for x in app.checkbox))
         self.assertTrue(any(x.key=="rec03a_inline_sources" for x in app.checkbox))
@@ -202,6 +204,7 @@ class HandoffAppTests(unittest.TestCase):
         click("rec03a_handoff_back_manual")
         self.assertEqual(app.session_state[SCOPE],scope)
         self.assertEqual(app.session_state["rec03a_handoff_base_selection"],["strasbourg","angers"])
+        app.segmented_control(key="ux112_active_view").set_value("Explorar alternativas").run()
         # Open a real candidate profile and its map, with the same scope.
         buttons=[b for b in app.button if b.key and b.key.startswith("rec03a_handoff_profile_")]
         self.assertTrue(buttons)
