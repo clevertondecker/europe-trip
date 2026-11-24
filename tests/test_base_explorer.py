@@ -142,7 +142,7 @@ class BaseExplorerUITests(unittest.TestCase):
         self.assertEqual(app.session_state["advisor_plan"]["revision"],
                          original["revision"]+1)
 
-    def test_comparison_and_split_modes_leave_plan_untouched(self):
+    def test_comparison_remains_but_split_stay_is_not_available(self):
         app=self.open_explorer()
         old=deepcopy(app.session_state["advisor_plan"])
         app.segmented_control(key="ux_section").set_value("Comparar").run()
@@ -151,20 +151,15 @@ class BaseExplorerUITests(unittest.TestCase):
         self.assertFalse(app.exception,[e.message for e in app.exception])
         self.assertIn("base_compare_destinations",{x.key for x in app.multiselect})
         self.assertEqual(app.session_state["advisor_plan"],old)
-        app.segmented_control(key="ux_compare_mode").set_value(
-            "Uma ou duas bases").run()
+        self.assertNotIn("Uma ou duas bases",
+                         app.segmented_control(key="ux_compare_mode").options)
+        app.segmented_control(key="ux_section").set_value("Cidades-base").run()
+        app.segmented_control(key="ux42_city_activity").set_value("Passeios e conexões").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
-        self.assertIn("base_stay_rent_first",{x.key for x in app.number_input})
-        app.number_input(key="base_stay_rent_first").set_value(1600.0).run()
-        app.number_input(key="base_stay_rent_second").set_value(1400.0).run()
-        app.number_input(key="base_stay_move").set_value(220.0).run()
-        self.assertFalse(app.exception,[e.message for e in app.exception])
-        self.assertIn("base_stay_save",{x.key for x in app.button})
-        app.button(key="base_stay_save").click().run()
-        self.assertFalse(app.exception,[e.message for e in app.exception])
+        self.assertFalse(any(x.key=="ux42_show_split" for x in app.checkbox))
+        self.assertFalse(any(x.key and x.key.startswith("base_stay_")
+                             for x in app.number_input))
         self.assertEqual(app.session_state["advisor_plan"],old)
-        self.assertEqual(app.session_state["base_explorer_split_favorite"]["status"],
-                         "research_only")
 
 
 if __name__=="__main__":
