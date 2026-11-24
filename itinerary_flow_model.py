@@ -268,7 +268,8 @@ def validate_flow_backup(plan:dict,catalog:dict)->None:
                                 row["attractions"],row["period"])
         if {k:row[k] for k in clean}!=clean:
             raise ValueError("Etapa ou atração divergente do catálogo")
+        package_key = unique_outing_keys(plan["packages"]).get(canonical_destination_id(row["destination_id"]))
         if row["stage"]==FRANCE_STAGE and (
-            (bool(row["attractions"]) and plan["packages"].get(row["destination_id"])!=row["attractions"])
-            or (not row["attractions"] and row["destination_id"] in plan["packages"])):
+            (bool(row["attractions"]) and (package_key is None or plan["packages"][package_key]!=row["attractions"]))
+            or (not row["attractions"] and package_key is not None)):
             raise ValueError("Passeio francês divergente entre calendário e roteiro")
