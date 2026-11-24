@@ -35,7 +35,7 @@ class UX111SelectionTests(unittest.TestCase):
         self.assertEqual(app.session_state[CHOICE],["strasbourg","colmar","lille"])
         captions=[str(c.value) for c in app.caption]
         self.assertTrue(any("Adicionada" in x and "3 de 5" in x for x in captions))
-        self.assertTrue(any("3 de 5 cidades selecionadas" in x.value
+        self.assertTrue(any("Cidades selecionadas · 3 de 5" in x.value
                             for x in app.markdown))
         self.assertTrue(any("href=\"#ux111-comparison\"" in x.value
                             for x in app.markdown))
