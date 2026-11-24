@@ -32,7 +32,7 @@ def render_base_change(plan:dict,trip_data:dict,finance_live:bool,
     chosen=st.multiselect("Destinos que vocês desejam manter acessíveis",
                           list(places),default=defaults,
                           format_func=lambda k:places[k],
-                          key="ux_compare_destinations",max_selections=8)
+                          key="ux_compare_destinations",max_selections=8, placeholder="Escolha uma ou mais opções")
     if not chosen:
         st.info("Selecione ao menos um destino para avaliar os deslocamentos.")
         return
