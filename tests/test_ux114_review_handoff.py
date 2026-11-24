@@ -68,6 +68,18 @@ class UX114ExplicitReviewTests(unittest.TestCase):
         self.assertNotIn("ux34_apply_ack",app.session_state)
         self.assertEqual(app.session_state["advisor_plan"],before)
 
+    def test_obernai_enters_same_review_scope_without_plan_mutation(self):
+        app=self.ready(("metz","nancy"),
+                       destinations=("paris","colmar","obernai"))
+        before=deepcopy(app.session_state["advisor_plan"])
+        app.button(key="ux114_open_review").click().run()
+        self.assertFalse(app.exception,[x.message for x in app.exception])
+        ctx=app.session_state["ux114_review_context"]
+        self.assertEqual(set(ctx["approved_destinations"]),
+                         {"paris","colmar","obernai"})
+        self.assertNotIn("obernai",ctx["unsupported_destinations"])
+        self.assertEqual(app.session_state["advisor_plan"],before)
+
     def test_research_only_candidates_cannot_start_review(self):
         app=self.ready(("lille","freiburg"))
         self.assertNotIn("ux114_open_review",{b.key for b in app.button})
