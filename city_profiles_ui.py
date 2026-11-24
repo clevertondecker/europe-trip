@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import streamlit as st
-from city_profiles_model import load_profiles,profile_by_id,compact_comparison
+from city_profiles_model import load_profiles,profile_by_id
 from city_research_packs_model import load_city_packs,pack_for_city
 
 def _eur(value):
@@ -147,16 +147,3 @@ def render_enriched_city_profiles(rows:list[dict],*,only_finalists:bool)->None:
                           format_func=lambda key:profile_by_id(profiles,key)["name"])
     if selected:
         _profile_card(profile_by_id(profiles,selected),current[selected])
-    st.markdown("### Comparação prática de 2–3 cidades")
-    finalists=[p["city_id"] for p in profiles["cities"] if p["shortlist"]]
-    shortlist=st.multiselect("Comparar perfis cadastrados",finalists,
-                             default=[i for i in ("mulhouse","strasbourg","freiburg") if i in finalists],
-                             max_selections=3,key="ux_city_profile_compare",
-                             format_func=lambda key:profile_by_id(profiles,key)["name"])
-    if len(shortlist)>=2:
-        st.dataframe(compact_comparison(profiles,shortlist),
-                     hide_index=True,width="stretch")
-        st.caption("Faixa de moradia é amostra histórica não comparável à reserva de 2027. "
-                   "Sem ranking, economia presumida ou nota final.")
-    else:
-        st.info("Selecione duas ou três finalistas para comparar seus perfis.")

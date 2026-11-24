@@ -203,7 +203,7 @@ class MacroOpportunityUXTests(unittest.TestCase):
         before=deepcopy(at.session_state["advisor_plan"])
         at.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
         at.segmented_control(key="ux_section").set_value("Comparar").run()
-        at.segmented_control(key="ux_compare_mode").set_value("Pesos das 30 cidades").run()
+        at.segmented_control(key="ux_compare_mode").set_value("Evidências e lacunas").run()
         self.assertFalse(at.exception,[x.message for x in at.exception])
         self.assertTrue(any("Cobertura ampliada de oportunidades" in x.value
                             for x in at.markdown))

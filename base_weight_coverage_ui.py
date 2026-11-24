@@ -1,27 +1,12 @@
-"""Evidence-first 30-city research comparison (not an invented score table)."""
+"""Temporary read-only research inventory pending the global DATA24 audit."""
 from __future__ import annotations
 
 import streamlit as st
 
-from base_research_expanded_model import PRESETS,load_research
-from base_coverage_model import (
-    LABELS,REQUIREMENTS,coverage_matrix,coverage_summary,UNRESEARCHED,PARTIAL,
-)
-from five_base_comparison_model import load_five_base_evidence
+from base_coverage_model import LABELS,coverage_matrix,coverage_summary,PARTIAL
 from city_profiles_ui import render_enriched_city_profiles
-
-from dq31_logistics_evaluation_model import (
-    DEFAULT_WEIGHTS, FALLBACK_BASKET, logistics_comparison,
-)
+from dq31_logistics_evaluation_model import DEFAULT_WEIGHTS,FALLBACK_BASKET,logistics_comparison
 from planning_session import active_plan
-
-PROFILE_IDS={"Geral":"general","Economia":"economy","Explorador":"explorer"}
-
-LOGISTICS_WEIGHT_CHOICES = {
-    "Logística prioritária · 65/30/5": {"logistics":65,"living_cost":30,"daily_practicality":5},
-    "Mais passeios · 75/20/5": {"logistics":75,"living_cost":20,"daily_practicality":5},
-    "Mais economia · 50/45/5": {"logistics":50,"living_cost":45,"daily_practicality":5},
-}
 
 
 def _render_dq32_macro_coverage(rows):
@@ -39,23 +24,15 @@ def _render_dq32_macro_coverage(rows):
         "Atrações canônicas e novas são contadas separadamente; equivalências "
         "semânticas são reconciliadas sem perder IDs e fontes. "
         "O mesmo universo de destinos é considerado para todas as bases. "
-        "Ausência de tempo não é ausência de conexão. "
-        "Preservados os pesos exploratórios de logística/custo/praticidade "
-        "e as exigências estritas da decisão definitiva.")
+        "Ausência de tempo não é ausência de conexão.")
 
 
 def _render_dq31_logistics(rows):
     """Same-basket exploratory facts, without inventing a maturity score."""
     from five_base_comparison_model import load_five_base_evidence
 
-    st.markdown("### Comparação exploratória · logística e custo de vida")
-    st.caption(
-        "A documentação completa continua necessária para a decisão final, "
-        "não para explorar alternativas. Prioridade sugerida: 65% logística, "
-        "30% custo de vida e deslocamentos, 5% praticidade cotidiana. "
-        "Os pesos orientam a pesquisa; NÃO viram uma nota sem dados comparáveis.")
-    preset=st.selectbox("Prioridades da comparação",list(LOGISTICS_WEIGHT_CHOICES),
-                        key="ux_dq31_logistics_weights")
+    st.markdown("### Evidências de última milha e retorno")
+    st.caption("Detalhes da cesta histórica de pesquisa, não uma segunda comparação de bases.")
     all_destinations=load_five_base_evidence()["common_destinations"]
     names={d["id"]:d["name"] for d in all_destinations}
     selected_from_plan=[key for key in active_plan().get("packages",{})
@@ -73,36 +50,12 @@ def _render_dq31_logistics(rows):
     comparison=logistics_comparison(
         [x["id"] for x in rows],
         selected_destinations=chosen,
-        weights=LOGISTICS_WEIGHT_CHOICES[preset],
+        weights=DEFAULT_WEIGHTS,
         coverage=rows)
     st.caption("Mesma cesta para todas as cidades: "+
                ", ".join(names[x] for x in comparison["basket"]["ids"])+
                ". Sem retorno de 2027 comprovado, não declaramos bate-volta garantido.")
 
-    summaries=[]
-    for row in comparison["rows"]:
-        maturity=row["maturity"]["current"]
-        stage={"pesquisa_inicial":"Pesquisa inicial",
-               "triagem_exploratoria":"Triagem com evidências",
-               "comparacao_fundamentada":"Cobertura de triagem ampliada",
-               "decisao_definitiva":"Pronta para decisão"}[maturity]
-        rent=row["housing_historical_median_eur_month"]
-        summaries.append({
-            "Cidade-base":row["name"],
-            "Maturidade":stage,
-            "Trens conhecidos":str(row["train_time_coverage"])+"/"+str(row["basket_size"]),
-            "Rotas completas":str(row["complete_itineraries"])+"/"+str(row["basket_size"]),
-            "Aluguel histórico (€ / mês)":round(rent) if rent is not None else None,
-            "Amostras moradia":row["housing_sample_count"],
-            "Vida cotidiana":"Parcial" if row["daily_researched"] else "Pendente",
-            "Documentação":f'{row["documentary_weighted_percent"]:.1f}%',
-            "Próxima pesquisa":row["missing"][0] if row["missing"] else "Revisão final",
-        })
-    st.dataframe(summaries,hide_index=True,width="stretch",height=360)
-    st.caption("Aluguel: mediana de anúncios históricos não comparáveis, "
-               "não cotação de 2027. Uma cidade com 0 rotas conhecidas não "
-               "significa que não há trem. 'Rotas completas' exige retorno e "
-               "última milha; nenhum tempo de ida foi duplicado.")
     keyed={x["id"]:x for x in comparison["rows"]}
     inspect=st.selectbox("Examinar logística e lacunas da cidade",
                          list(keyed),format_func=lambda i:keyed[i]["name"],
@@ -132,10 +85,7 @@ def _render_dq31_logistics(rows):
                                 str(item["oneway_train_min"])+" min (ida) · "+
                                 "[Fonte]("+item["train_source_url"]+")")
             st.write("**Próximas verificações:** "+"; ".join(city["missing"]))
-    st.caption("Não há ranking final neste estágio. O nível C continua exigindo "
-               "dados específicos da viagem e hospedagem confirmada.")
-
-CRITERIA_KEYS=list(LABELS)
+    st.caption("Retornos, acesso inicial e horários de 2027 continuam pendentes.")
 
 
 def _status(row,key):
@@ -148,7 +98,7 @@ def _currency(value):
     return "Não documentado" if value is None else "€ "+f"{value:,.0f}".replace(",",".")
 
 
-def _evidence_table(rows,*,long=False):
+def _evidence_table(rows):
     items=[]
     for r in rows:
         housing=r["housing"]
@@ -163,8 +113,6 @@ def _evidence_table(rows,*,long=False):
             "Passeios":_status(r,"viable_destinations"),
             "Custos":_status(r,"outing_cost"),
             "Vida cotidiana":_status(r,"daily_life_remote_work"),
-            "Documentação ponderada":f'{r["documentary_weighted_percent"]:.1f}%',
-            "Nota final":"Indisponível",
             "Situação":"Pesquisa parcial" if r["status"]==PARTIAL
                        else "Sem pesquisa",
         })
@@ -222,107 +170,36 @@ def _city_detail(row):
                "pesquisa útil, não ofertas ou itinerários verificados para 2027.")
 
 
-def _side_by_side(rows):
-    choices={r["id"]:r for r in rows}
-    shortlist=[r["id"] for r in rows if r["shortlist"]]
-    st.markdown("### Comparar duas ou três finalistas")
-    picked=st.multiselect("Cidades para comparar",shortlist,
-                          default=[x for x in ("mulhouse","strasbourg","offenburg")
-                                   if x in choices],
-                          max_selections=3,key="ux_30_shortlist_compare",
-                          format_func=lambda key:choices[key]["name"])
-    if len(picked)<2:
-        st.info("Selecione ao menos duas finalistas para comparação.")
-        return
-    cols=st.columns(len(picked))
-    for col,key in zip(cols,picked):
-        r=choices[key]
-        with col:
-            with st.container(border=True):
-                st.markdown("**"+r["name"]+"**")
-                st.caption("Pesquisa documental ponderada: "+
-                           f'{r["documentary_weighted_percent"]:.1f}%'+
-                           " · não é nota de qualidade")
-                st.caption("Aluguel observado: "+
-                           _currency(r["housing"]["median_eur_month"])+
-                           "/mês (mediana de amostra histórica)")
-                st.caption("Tempos de trem documentados: "+
-                           str(r["route_basket_with_time"])+"/15")
-                st.caption("Tarifas de ida: "+
-                           str(r["route_basket_with_fare"])+"/15")
-                st.caption("Países com tempo observado: "+
-                           (", ".join(r["international_countries_with_time"])
-                            or "Não pesquisado"))
-                st.caption("Vida cotidiana: "+
-                           _status(r,"daily_life_remote_work"))
-                st.caption("Cotações elegíveis para 2027: **nenhuma confirmada**")
-    st.caption("As contagens mostram onde há pesquisa, não quantos passeios são "
-               "viáveis. Moradia com maior número de anúncios não recebe "
-               "automaticamente nota melhor. Preços não comparáveis não são "
-               "somados, nem usados para declarar economia.")
-
-
 def render_weight_coverage()->None:
-    st.markdown("### Comparar 30 cidades-base · o que já sabemos")
-    st.caption("Casal sem carro, cerca de dois meses de temporada europeia. "
-               "Pesquisa e pontuação são indicadores **diferentes**; selecionar "
-               "uma cidade aqui não altera o plano oficial.")
-    profile=st.segmented_control("O que priorizar?",
-                                 list(PROFILE_IDS),key="ux_30_weight_profile",
-                                 selection_mode="single")
-    profile_id=PROFILE_IDS.get(profile,"general")
-    rows=coverage_matrix(profile_id)
+    st.markdown("### Evidências históricas · o que já sabemos")
+    st.caption("Inventário histórico da pesquisa original de 30 bases. Não é a cobertura global atual; "
+               "consultar não altera o plano oficial.")
+    rows=coverage_matrix("general")
     summary=coverage_summary(rows)
-    a,b,c,d,e=st.columns(5)
+    a,b,c=st.columns(3)
     a.metric("Cidades",summary["cities"])
     b.metric("Com moradia pesquisada",summary["housing_documented"])
-    c.metric("Com tempos ferroviários",summary["rail_documented"])
-    d.metric("Com critério pontuável",summary["has_comparable_criterion"])
-    e.metric("Prontas para decisão",summary["decision_ready"])
-
-    st.info("**Atenção:** o percentual agora mede **progresso documental por "
-            "requisito**, não a qualidade da cidade. O antigo 0% vinha da "
-            "avaliação de um dicionário vazio para todas as cidades. "
-            "A cobertura para pontuação e a nota final continuam indisponíveis "
-            "até existirem métricas completas e comparáveis.")
+    c.metric("Com tempos ferroviários na cesta histórica",summary["rail_documented"])
+    st.caption("Contagens documentais do estudo original, não notas de qualidade.")
     only=st.checkbox("Priorizar as 12 finalistas",value=True,
                      key="ux_30_only_finalists")
     filtered=[r for r in rows if r["shortlist"]] if only else rows
     _render_dq32_macro_coverage(filtered)
     _render_dq31_logistics(filtered)
 
-    with st.expander("Entenda os seis critérios e seus pesos",expanded=False):
-        st.dataframe([{"Critério":LABELS[key],
-                       "Peso no perfil (%)":weight,
-                       "O que precisamos documentar":len(REQUIREMENTS[key])}
-                      for key,weight in zip(CRITERIA_KEYS,PRESETS[profile_id])],
-                     hide_index=True,width="stretch")
-        st.caption("A ponderação da **documentação** usa os seis pesos originais "
-                   "sobre a fração de itens verificados de cada categoria. "
-                   "Não redistribui peso de pesquisa faltante. "
-                   "Esse indicador não é uma nota de adequação.")
-        st.caption("Trens = informações do conjunto fixo de 15 destinos e "
-                   "atributos das ligações. Passeios = acesso às atrações e "
-                   "necessidade real de retorno ou pernoite. Países = diversidade "
-                   "internacional demonstrada, sem repetir a mesma vantagem "
-                   "como nota ferroviária.")
-
     render_enriched_city_profiles(rows,only_finalists=only)
     st.markdown("### Matriz documental detalhada")
     st.markdown("**Matriz de evidências**")
     st.dataframe(_evidence_table(filtered),hide_index=True,width="stretch",
                  height=405)
-    st.caption("Cada linha reflete as mesmas regras documentais. Uma cidade sem "
-               "ligação pesquisada está como 'Não pesquisado', não como "
-               "'Sem ligação'. O índice de documentação não compara a qualidade "
-               "dos anúncios ou destinos.")
+    st.caption("Uma ligação não pesquisada não significa ausência de conexão. "
+               "O inventário não classifica a qualidade das cidades.")
     lookup={r["id"]:r for r in filtered}
     selected=st.selectbox("Analisar uma cidade",list(lookup),
                           key="ux_30_city_detail",
                           format_func=lambda key:lookup[key]["name"])
     if selected:
         _city_detail(lookup[selected])
-    _side_by_side(rows)
     st.markdown("#### Próximos dados que farão diferença")
     st.caption("Prioridade: confirmar, na mesma cesta de 15 destinos, horários "
                "de ida e volta, conexões/última milha, tarifas normais para "
