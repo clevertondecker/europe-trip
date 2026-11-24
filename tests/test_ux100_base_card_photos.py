@@ -25,6 +25,41 @@ class VerifiedBasePhotosTests(unittest.TestCase):
                     "https://creativecommons.org/licenses/"))
                 self.assertTrue(record["author"])
 
+    def test_metz_uses_same_verified_photo_as_discovery_without_network(self):
+        from attractions_model import load_attractions
+        from destination_photo_assets import preferred_destination_photo
+        from ux100_base_card_photos import _existing_catalog_photos
+        destination=next(d for d in load_attractions()["destinations"] if d["id"]=="metz")
+        original=dict(destination["photo"])
+        _existing_catalog_photos.cache_clear()
+        with patch("urllib.request.urlopen",side_effect=AssertionError("Unexpected network call")):
+            expected=preferred_destination_photo(destination)
+            actual=base_card_photo_record("metz")
+        self.assertEqual(actual,expected)
+        self.assertEqual(actual["url"],
+                         "https://upload.wikimedia.org/wikipedia/commons/3/36/Metz_centre_ville_crop.jpg")
+        self.assertEqual(actual["author"],"Philippe Gisselbrecht / Ville de Metz")
+        self.assertEqual(actual["license"],"CC BY-SA 4.0")
+        self.assertEqual(destination["photo"],original)
+
+    def test_metz_card_renders_correct_url_and_credit_with_fallback(self):
+        app=AppTest.from_string("""
+from ux100_base_card_photos import render_base_card_photo
+render_base_card_photo("metz", "Metz")
+""",default_timeout=30).run()
+        self.assertFalse(app.exception,[x.message for x in app.exception])
+        html=" ".join(x.value for x in app.markdown)
+        self.assertIn("https://upload.wikimedia.org/wikipedia/commons/3/36/Metz_centre_ville_crop.jpg",html)
+        self.assertIn("Foto indisponível no momento",html)
+        self.assertIn("Philippe Gisselbrecht / Ville de Metz",html)
+        self.assertIn("https://creativecommons.org/licenses/by-sa/4.0/",html)
+        self.assertNotIn("LuxFoto09",html)
+
+    def test_other_catalog_base_keeps_existing_photo(self):
+        from attractions_model import load_attractions
+        destination=next(d for d in load_attractions()["destinations"] if d["id"]=="mulhouse")
+        self.assertEqual(base_card_photo_record("mulhouse"),destination["photo"])
+
     def test_local_image_passes_verified_alt_to_native_image(self):
         from ux100_base_card_photos import render_base_card_photo
         photo={"local_path":"test.webp", "alt":"Centro histórico de Lille",
