@@ -120,21 +120,44 @@ def _pilot_context(projection: dict, research: dict, pilot: list[str]) -> None:
         matched = [r for r in data["routes"] if r["destination_id"] in selected_destinations]
         if not matched:
             st.info("O piloto não pesquisou os destinos deste escopo. "
-                    "Não o usamos para completar artificialmente a matriz principal.")
-            return
-        rows = []
-        names_dest = {d["id"]: d["name"] for d in projection["destinations"]}
-        for item in matched:
-            minutes = item.get("minimum_rail_minutes_2026")
-            rows.append({
-                "Cidade-base": names[item["base_id"]],
-                "Destino do seu escopo": names_dest[item["destination_id"]],
-                "Mínimo histórico (min)": minutes,
-                "Volta em 2027": "Não validada",
-            })
-        st.dataframe(rows, hide_index=True, width="stretch")
-        st.caption("Os exemplos do piloto não substituem evidências UX87/ROUTES7; "
-                   "as estações, datas, frequência e última milha podem diferir.")
+                    "Não usamos tempos de outras viagens como evidência pessoal.")
+        else:
+            rows = []
+            names_dest = {d["id"]: d["name"] for d in projection["destinations"]}
+            for item in matched:
+                rows.append({
+                    "Cidade-base": names[item["base_id"]],
+                    "Destino do seu escopo": names_dest[item["destination_id"]],
+                    "Mínimo histórico (min)": item.get("minimum_rail_minutes_2026"),
+                    "Volta em 2027": "Não validada",
+                })
+            st.dataframe(rows, hide_index=True, width="stretch")
+            st.caption("Observações históricas, sem confirmação de estações, frequência, "
+                       "retornos, última milha ou disponibilidade em 2027.")
+        with st.expander("Aeroportos e vida urbana · pesquisa geral",expanded=False):
+            st.caption("Estas informações descrevem as cidades pesquisadas em 2026; "
+                       "não pertencem necessariamente aos destinos do seu escopo.")
+            for record in data["airports"]:
+                options=record.get("airport_options",[])
+                names_airport=list(dict.fromkeys(
+                    str(a.get("airport_code")) for a in options if a.get("airport_code")
+                ))
+                st.markdown("**"+names[record["base_id"]]+"** · aeroportos investigados: "+
+                            (", ".join(names_airport) or "sem pesquisa"))
+                st.caption("Acesso completo porta a porta, conexões aéreas e tarifas "
+                           "do casal para 2027 não verificados.")
+            for record in data["urban"]:
+                st.markdown("**"+names[record["city_id"]]+"** · rotina e mobilidade")
+                link=record.get("late_transit_service")
+                if isinstance(link,str) and link.startswith("https://"):
+                    st.link_button("Referência de transporte urbano · "+
+                                   names[record["city_id"]],link)
+                st.caption("Internet do imóvel, segurança na vizinhança, "
+                           "horário do coworking para o seu contrato e última milha "
+                           "exigem confirmação individual.")
+            st.caption("Hipóteses de fins de semana e roteiro combinado belga "
+                       "permanecem no estudo histórico DQ20/DQ21 da área de "
+                       "cidades favoritas; não são passeios confirmados de 2027.")
 
 
 def render_comparison_panorama(projection: dict, research: dict) -> None:
