@@ -94,6 +94,50 @@ def _selection(key,allowed):
         st.session_state[key]=clean
 
 
+def _toggle_batch_choice(key, destination_id):
+    selected=list(st.session_state.get(key,[]))
+    if destination_id in selected:
+        selected.remove(destination_id)
+    elif len(selected)<50:
+        selected.append(destination_id)
+    st.session_state[key]=selected
+
+
+def _render_batch_cards(key, by_id):
+    from ux47_photo_ui import photo_markup, photo_credit
+    from ux501_destination_photo_service import curated_destination_photo
+    places={r["id"]:r for r in _discovery()["destinations"]}
+    search=st.text_input("Buscar na lista",key=key+"_search") if len(by_id)>8 else ""
+    visible=[r for r in by_id.values()
+             if search.casefold() in (r["name"]+" "+r["country"]).casefold()]
+    limit=st.session_state.get(key+"_limit",8)
+    selected=st.session_state.get(key,[])
+    st.caption(f"{len(selected)} selecionados · até 50 por confirmação")
+    for row in visible[:limit]:
+        destination_id=row["id"]
+        photo=curated_destination_photo(destination_id) or places.get(destination_id,{}).get("photo")
+        with st.container(border=True):
+            image,details,action=st.columns([1,3,2],vertical_alignment="center")
+            with image:
+                st.html(photo_markup(photo,row["name"]))
+                credit=photo_credit(photo)
+                if credit:
+                    st.caption(credit)
+            with details:
+                st.markdown("**"+row["name"]+"**")
+                st.caption(row["country"]+" · "+LABELS.get(row["priority"],"Quero conhecer"))
+            chosen=destination_id in selected
+            action.button("Selecionado · retirar" if chosen else "Selecionar",
+                          key=key+"_card_"+destination_id,
+                          disabled=not chosen and len(selected)>=50,
+                          on_click=_toggle_batch_choice,args=(key,destination_id),width="stretch")
+    if len(visible)>limit:
+        st.button(f"Mostrar mais {len(visible)-limit} destinos",key=key+"_more",
+                  on_click=lambda:st.session_state.update({key+"_limit":limit+8}))
+    if not visible:
+        st.caption("Nenhum destino encontrado com esse filtro.")
+
+
 def render_build(plan, catalog, view):
     st.markdown("#### Montar roteiro a partir da minha lista")
     st.caption("Escolha em lote os lugares de cada etapa. Nenhuma data, atração ou reserva será inventada.")
@@ -118,6 +162,7 @@ def render_build(plan, catalog, view):
             b.button("Limpar seleção",key=key+"_clear",on_click=_select_all,args=(key,[]))
             if len(by_id)>50:
                 st.caption("Inclua até 50 destinos por confirmação; os demais continuam disponíveis.")
+            _render_batch_cards(key,by_id)
             picked=st.multiselect("Destinos para incluir",list(by_id),key=key,
                                   max_selections=50,
                                   format_func=lambda x:by_id[x]["name"]+" · "+LABELS.get(by_id[x]["priority"],""))
