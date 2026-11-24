@@ -44,7 +44,7 @@ from continuity_ui import (apply_pending_restore,render_continuity_panel,
                            restore_private_on_start,autosave_private_if_requested,private_status_label)
 from planning_context_ui import (render_context,render_home_continue,
                                  render_breadcrumb,return_to_edit,show_settings)
-from base_explorer_ui import render_base_explorer, _comparison as render_route_comparison, _split_stay as render_split_stay
+from base_explorer_ui import render_base_explorer, _comparison as render_route_comparison
 from base_explorer_model import load_exploration
 from base_change_ui import render_base_change
 from city_decision_ui import render_city_decision
@@ -846,9 +846,12 @@ elif page == "Comparar cidades":
     render_contextual_shortcuts("comparison")
     with st.expander("Análises antigas de cidades-base · avançado", expanded=False):
         st.caption("Ferramentas anteriores preservadas para consultas adicionais.")
+        # Retired split-stay mode is never presented or restored as an active widget.
+        if st.session_state.get("ux_compare_mode")=="Uma ou duas bases":
+            st.session_state["ux_compare_mode"]="Impacto da troca"
         compare_mode=st.segmented_control(
         "Tipo de análise",["Impacto da troca","Pesos das 30 cidades",
-        "Comparar mesmas viagens","Uma ou duas bases","Estudo histórico"],
+        "Comparar mesmas viagens","Estudo histórico"],
         key="ux_compare_mode",selection_mode="single")
         if compare_mode in ("Impacto da troca",None):
             render_city_decision(active_plan(),data,
@@ -858,10 +861,6 @@ elif page == "Comparar cidades":
             render_weight_coverage()
         elif compare_mode=="Comparar mesmas viagens":
             render_route_comparison(load_exploration())
-        elif compare_mode=="Uma ou duas bases":
-            render_split_stay(load_exploration(),active_plan(),data,
-                              sync_sources["finance"]["status"]=="live",
-                              st.session_state.get("advisor_eurfx",6.3))
         else:
 
             import pandas as pd
