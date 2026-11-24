@@ -541,6 +541,11 @@ page,itinerary_target,guide_target,base_target=ux_route(
     city_view=st.session_state.get("ux_city_view","Visão da cidade"),
     budget_view=st.session_state.get("ux_budget_view","Simulação geral"),
     guide_view=st.session_state.get("ux_guide_view","Itália e Costa Amalfitana"))
+# Contextual UX114 review ends on navigation away. Its candidate and scope
+# must not reappear as an apparently active approval on a later visit.
+if page!="Comparar cidades" and st.session_state.get("ux114_review_context"):
+    from rec03a_suggestions_ui import close_base_review
+    close_base_review()
 if ux_area!="Minha viagem" and (ux_area,ux_section)!=("Explorar","Cidades-base"):
     st.caption(UX_DESCRIPTIONS.get((ux_area,ux_section),"Continue o planejamento."))
 if (ux_area=="Meu roteiro" and ux_section=="Melhorar meu roteiro" and
