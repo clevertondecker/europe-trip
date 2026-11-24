@@ -51,6 +51,8 @@ def build_recommendation_matrix(interests: dict, destination_ids: list[str], *,
     discovery = discovery if discovery is not None else build_exploration_discovery()
     research = research if research is not None else load_research(include_candidates=True)
     active = set(selected_destinations_for_comparison(interests, discovery))
+    # The wishlist resolves historical aliases; an explicit scope must use
+    # the exact active IDs of the current projection, not silently coerce input.
     if (not isinstance(destination_ids, list) or not destination_ids
             or any(not isinstance(x, str) or x not in active for x in destination_ids)
             or len(set(destination_ids)) != len(destination_ids)):

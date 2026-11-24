@@ -12,10 +12,11 @@ def project_timeline(plan, catalog, weekend_groups=None, stage=None):
     # Keep lightweight read-only projections usable for legacy callers/fixtures.
     if groups and "schema_version" in weekend_groups:
         validate_groups(weekend_groups, plan, catalog)
+    from destination_identity import outing_destination_id
     associated = {}
     for group in groups:
         for index, dest in enumerate(group.get("destinations", []), 1):
-            associated[dest] = (group, index)
+            associated[outing_destination_id(dest)] = (group, index)
     result = []
     for row in rows:
         if stage is not None and row["stage"] != stage:

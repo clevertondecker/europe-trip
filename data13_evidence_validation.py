@@ -12,6 +12,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 import re
 from urllib.parse import urlparse
+from destination_identity import canonical_destination_id
 
 SNCF = {
     "aachen":"aix-la-chapelle", "amsterdam":"amsterdam",
@@ -20,7 +21,7 @@ SNCF = {
     "brussels":"bruxelles", "colmar":"colmar", "cologne":"cologne",
     "dijon":"dijon", "epernay":"epernay", "freiburg":"fribourg-en-brisgau",
     "haguenau":"haguenau", "karlsruhe":"karlsruhe", "kehl":"kehl",
-    "liege":"liege", "lille":"lille", "luxembourg_city":"luxembourg",
+    "liege":"liege", "lille":"lille", "luxembourg":"luxembourg",
     "lausanne":"lausanne", "lyon":"lyon", "metz":"metz", "mulhouse":"mulhouse", "nancy":"nancy",
     "offenburg":"offenbourg", "paris":"paris", "reims":"reims",
     "rotterdam":"rotterdam", "saarbrucken":"sarrebruck",
@@ -38,7 +39,7 @@ TRAINLINE = {
     "esch":"esch-sur-alzette", "freiburg":"freiburg-breisgau-hbf",
     "ghent":"ghent", "interlaken":"interlaken-ost", "kehl":"kehl", "lausanne":"lausanne",
     "liege":"liege", "lille":"lille",
-    "lorrach":"lorrach", "luxembourg_city":"luxembourg", "mulhouse":"mulhouse", "offenburg":"offenburg",
+    "lorrach":"lorrach", "luxembourg":"luxembourg", "mulhouse":"mulhouse", "offenburg":"offenburg",
     "lyon":"lyon", "metz":"metz", "namur":"namur",
     "nancy":"nancy", "paris":"paris", "reims":"reims",
     "rotterdam":"rotterdam", "saint_louis":"st-louis", "saverne":"saverne", "selestat":"selestat", "strasbourg":"strasbourg",
@@ -71,8 +72,8 @@ def validate_record_url(row):
     if not match:
         raise EvidenceError("Not a directional rail page")
     origin, destination = match.groups()
-    if (origin != names.get(row.get("origin_id")) or
-            destination != names.get(row.get("destination_id"))):
+    if (origin != names.get(canonical_destination_id(row.get("origin_id"))) or
+            destination != names.get(canonical_destination_id(row.get("destination_id")))):
         raise EvidenceError("URL refers to another route or opposite direction")
 
 

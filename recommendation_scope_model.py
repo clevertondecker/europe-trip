@@ -22,6 +22,8 @@ def _active(snapshot):
 def confirm_scope(interests, destination_ids, discovery, *, stage=STAGE):
     """Explicit user action only. Return a disposable, session-local value."""
     snapshot = _snapshot(interests, discovery)
+    # The wishlist resolves historical aliases; an explicit scope must use
+    # the exact active IDs of the current projection, not silently coerce input.
     if (stage != STAGE or not isinstance(destination_ids, list)
             or not destination_ids
             or any(not isinstance(x, str) or x not in _active(snapshot)

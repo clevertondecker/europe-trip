@@ -114,16 +114,27 @@ def _destination_teaser(item: dict) -> str:
 def _destination_wishlist_state(interests: dict | None, destination_id: str) -> str:
     """Read the existing UX502 priority without treating discarded as active."""
     for row in (interests or {}).get("items", []):
-        if row["destination_id"] == destination_id:
+        from destination_identity import canonical_destination_id
+        if canonical_destination_id(row["destination_id"]) == canonical_destination_id(destination_id):
             return "discarded" if row["priority"] == "discarded" else "saved"
     return "new"
 
 
 def render_independent_destination_discovery(*, discovery=None, focused_destination=None) -> None:
     discovery = discovery if discovery is not None else _cached_discovery()
+    from attractions_model import load_attractions
+    from itinerary_eligibility import itinerary_eligibility, eligibility_index
+    from destination_identity import canonical_destination_id
+    from itinerary_flow_model import is_selected, UNASSIGNED
+    from planning_session import active_plan, commit_outing
+    from ux_planning_journey_ui import _workspace_organize
+    from dataclasses import asdict
+    catalog = load_attractions()
     destinations = discovery["destinations"]
+    index = eligibility_index(catalog)
+    eligibility = {item["id"]: itinerary_eligibility(item["id"], catalog, index=index) for item in destinations}
     by_id = {item["id"]: item for item in destinations}
-    focused = by_id.get(focused_destination) if isinstance(focused_destination,str) else None
+    focused = by_id.get(canonical_destination_id(focused_destination)) if isinstance(focused_destination, str) and focused_destination.strip() else None
     # Keep the page header ahead of filters and wishlist save tools.
     if st.session_state.get("ux502_view","Descobrir lugares")!="Minha lista":
         st.markdown(page_header(
@@ -144,7 +155,7 @@ def render_independent_destination_discovery(*, discovery=None, focused_destinat
 
     if focused is not None:
         st.caption("Destino escolhido na ficha da cidade-base: "+focused["name"])
-        subset=[focused]
+        subset = [focused]
     else:
         st.markdown(section_heading("ENCONTRE SEU DESTINO","Filtre as opções",
                                     "Pesquise por país, experiência ou atração.",
@@ -162,6 +173,7 @@ def render_independent_destination_discovery(*, discovery=None, focused_destinat
             query = st.text_input(
                 "Buscar cidade ou atração", placeholder="Ex.: Colmar, museu, catedral",
                 key="ux501_search")
+        mode = st.radio("Mostrar", ("Todos", "Posso planejar agora"), horizontal=True, key="ux126_eligibility_filter")
         matches = filter_destinations(
             discovery,
             country=None if country == "Todos os países" else country,
@@ -169,6 +181,12 @@ def render_independent_destination_discovery(*, discovery=None, focused_destinat
             query=query,
             selected=selected,
         )
+        count = sum(eligibility[item["id"]]["status"] == "eligible" for item in matches)
+        research = sum(eligibility[item["id"]]["status"] == "research_only" for item in matches)
+        other = len(matches) - count - research
+        st.caption(f"{count} podem entrar no roteiro · {research} em pesquisa" + (f" · {other} em outra etapa" if other else ""))
+        if mode == "Posso planejar agora":
+            matches = [item for item in matches if eligibility[item["id"]]["status"] == "eligible"]
         st.caption(f"{len(matches)} destino(s) encontrados — resultados do catálogo, "
                    "não uma lista de viagens ferroviárias confirmadas.")
         if not matches:
@@ -205,6 +223,26 @@ def render_independent_destination_discovery(*, discovery=None, focused_destinat
                     # A short, sourced reason to explore: only catalogued
                     # attractions and categories, not invented editorial text.
                     st.caption(_destination_teaser(item))
+                    status = eligibility[item["id"]]
+                    canonical_id = status["outing_id"]
+                    if status["status"] == "eligible":
+                        if is_selected(active_plan(), canonical_id):
+                            from itinerary_flow_model import selected_rows
+                            visit = next((v for v in selected_rows(active_plan(), catalog) if v["id"] == canonical_id), None)
+                            st.caption("✓ No roteiro")
+                            if visit and not visit["attractions"] and not visit["exact_dates"]:
+                                st.caption("Atrações e datas a definir" if visit["period"] == UNASSIGNED else "Atrações a definir")
+                            st.button("Organizar " + item["name"], key="ux126_organize_"+item["id"], on_click=_workspace_organize, args=(canonical_id, status["stage"]))
+                        elif st.button("Adicionar ao roteiro", key="ux126_add_"+item["id"], type="primary", use_container_width=True):
+                            try:
+                                outcome = commit_outing(canonical_id, [], UNASSIGNED, confirmed=True)
+                                st.session_state["ux45_flow_result"] = asdict(outcome)
+                                st.rerun()
+                            except (ValueError, KeyError) as exc:
+                                st.error(str(exc))
+                    else:
+                        st.caption("Em pesquisa" if status["status"] == "research_only" else "Outra etapa")
+                        st.caption(status["reason"])
                     state = _destination_wishlist_state(
                         st.session_state.get("ux502_interests"), item["id"])
                     if state == "saved":
@@ -216,16 +254,14 @@ def render_independent_destination_discovery(*, discovery=None, focused_destinat
                                   use_container_width=True,
                                   on_click=add_destination, args=(item["id"], discovery))
                     else:
-                        st.button("Adicionar à minha lista",
+                        st.button("Salvar na lista",
                                   key="ux502_add_"+item["id"],
                                   use_container_width=True,
                                   on_click=add_destination, args=(item["id"], discovery))
                     with st.container(key=f"ux53_footer_destination_{item['id']}"):
-                        with st.expander("Ver atrações e fontes · detalhes",expanded=focused is not None):
+                        with st.expander("Ver atrações e fontes · detalhes", expanded=focused is not None):
                             if photo and photo.get("subject"):
                                 st.caption("Na foto: "+photo["subject"])
-                            if item.get("planning_support") == "exploration_only":
-                                st.info("Disponível para pesquisar e comparar; ainda não pode ser incluído no roteiro.")
                             if item["attractions"]:
                                 for attraction in item["attractions"]:
                                     st.markdown("- ["+attraction["name"]+"]("+

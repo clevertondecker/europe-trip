@@ -10,15 +10,13 @@ from copy import deepcopy
 import json
 
 ROOT=Path(__file__).resolve().parent/"data"
-ALIASES={"luxembourg":"luxembourg_city","luxembourg_city":"luxembourg_city",
-         "bruxelles":"brussels","bruxelas":"brussels","brussels":"brussels",
-         "bruges":"bruges_be","brugge":"bruges_be","bruges_be":"bruges_be",
-         "köln":"cologne","koln":"cologne","cologne":"cologne"}
+from destination_identity import canonical_destination_id
 
-def canonical_place(value:str)->str:
-    if not isinstance(value,str) or not value.strip():
-        raise ValueError("Identificador inválido")
-    return ALIASES.get(value.strip().casefold(),value.strip().casefold())
+# Historical rail datasets and overlays retain their original pair keys.
+# This is a source-key adapter, not a second identity registry.
+def canonical_place(value: str) -> str:
+    key = canonical_destination_id(value)
+    return "luxembourg_city" if key == "luxembourg" else key
 
 def _read(filename:str)->dict:
     return json.loads((ROOT/filename).read_text(encoding="utf-8"))

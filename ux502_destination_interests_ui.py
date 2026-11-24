@@ -68,6 +68,15 @@ def _recover_previous_session_interests(state) -> None:
         state["ux501_interest_session"]=list(shadow)
 
 
+def _discover_eligible():
+    from ux64_navigation_model import select_public_task
+    state = st.session_state
+    select_public_task(state, "Explorar", "Descobrir")
+    state["ux502_discovery_filters"] = {"ux501_country": "Todos os países", "ux501_categories": [], "ux501_search": "", "ux501_page": 1, "ux126_eligibility_filter": "Posso planejar agora"}
+    for key, value in state["ux502_discovery_filters"].items():
+        state[key] = value
+
+
 def render_wishlist(discovery) -> bool:
     """Render controls and return True when 'Minha lista' is the selected view."""
     current = _current(discovery)
@@ -76,7 +85,7 @@ def render_wishlist(discovery) -> bool:
     _recover_previous_session_interests(st.session_state)
     by_id = {row["id"]: row for row in discovery["destinations"]}
     def remember_discovery_filters():
-        keys = ("ux501_country", "ux501_categories", "ux501_search", "ux501_page")
+        keys = ("ux501_country", "ux501_categories", "ux501_search", "ux501_page", "ux126_eligibility_filter")
         # Streamlit removes keys for controls not mounted in the alternate view.
         snapshot = st.session_state.get("ux502_discovery_filters", {}).copy()
         snapshot.update({key: st.session_state[key] for key in keys if key in st.session_state})
@@ -171,10 +180,9 @@ def render_wishlist(discovery) -> bool:
             st.button("Revisar meu roteiro",key="flow_journey_from_wishlist",type="primary",
                       on_click=request_planning,args=(st.session_state,"review"))
         else:
-            st.info("Os destinos desejados ainda não têm passeios compatíveis para inclusão. Eles continuam na sua lista.")
-            from ux504_guided_journey_ui import request_step
+            st.info("Seus desejos continuam na lista. Veja o motivo em cada destino abaixo.")
             st.button("Descobrir destinos compatíveis",key="flow_journey_find_compatible",type="primary",
-                      on_click=request_step,args=("discover",))
+                      on_click=_discover_eligible)
             # Discovery remains accessible in the existing task tabs.
         # UX89: one optional guided entry; the previous manual comparator
         # stays available on demand for historical planning workflows.
@@ -193,14 +201,19 @@ def render_wishlist(discovery) -> bool:
     # Import/restore may replace values even if revision numbers coincide.
     # Never reuse a stale selectbox key from a previous document.
     fingerprint = sha256(export_interests(current, discovery)).hexdigest()[:16]
+    from itinerary_eligibility import itinerary_eligibility, eligibility_index
+    from attractions_model import load_attractions
+    catalog = load_attractions()
+    index = eligibility_index(catalog)
     for row in items:
         destination_id = row["destination_id"]
         destination = by_id[destination_id]
         with st.container(border=True):
             cols = st.columns([3, 2, 1])
             cols[0].markdown("**" + destination["name"] + "** · " + destination["country"])
-            if destination.get("planning_support") == "exploration_only":
-                cols[0].caption("Pesquisa e comparação; inclusão no roteiro ainda indisponível.")
+            status = itinerary_eligibility(destination_id, catalog, index=index)
+            if status["status"] != "eligible":
+                cols[0].caption(status["reason"])
             widget_key = "ux502_priority_" + destination_id + "_" + fingerprint
             cols[1].selectbox("Prioridade", PRIORITIES,
                                index=PRIORITIES.index(row["priority"]),

@@ -15,15 +15,20 @@ class Data23DiscoveryOverlayTests(unittest.TestCase):
     def test_curated_catalog_is_additive_and_reversible(self):
         legacy = append_trip01_candidates(build_destination_discovery())
         original = deepcopy(legacy)
+        from destination_identity import canonical_destination_id
+        from itinerary_eligibility import itinerary_eligibility
+        from attractions_model import load_attractions
+        catalog = load_attractions()
         public = build_exploration_discovery()
         by_id = {d["id"]: d for d in public["destinations"]}
-        added = set(by_id) - {d["id"] for d in legacy["destinations"]}
+        added = set(by_id) - {canonical_destination_id(d["id"]) for d in legacy["destinations"]}
         self.assertEqual(added, {"angers", "le_mans", "annecy", "rennes",
                                  "saumur", "saint_malo", "dinan"})
         self.assertEqual(legacy, original)
         self.assertEqual(append_data23_destinations(public), public)
         for destination in original["destinations"]:
-            self.assertEqual(by_id[destination["id"]], destination)
+            canonical_id = canonical_destination_id(destination["id"])
+            self.assertEqual(by_id[canonical_id], {**destination, "id": canonical_id})
         self.assertEqual(public["destination_count"], len(by_id))
         self.assertEqual(public["unique_attractions_count"],
                          sum(d["attraction_count"] for d in by_id.values()))
@@ -34,7 +39,7 @@ class Data23DiscoveryOverlayTests(unittest.TestCase):
             self.assertFalse(item["verified_weekend_return"])
             self.assertIsNone(item["feasible_from_base"])
             self.assertTrue(item["attractions"])
-            self.assertEqual(item["planning_support"], "exploration_only")
+            self.assertEqual(itinerary_eligibility(key, catalog)["status"], "research_only")
             self.assertIn(item["photo"]["subject"], [a["name"] for a in item["attractions"]])
             self.assertTrue(item["photo"]["author"])
             self.assertTrue(item["photo"]["license"])
@@ -58,7 +63,8 @@ class Data23DiscoveryOverlayTests(unittest.TestCase):
         row = next(r for r in board if r["id"] == "saumur")
         self.assertTrue(row["wanted"])
         self.assertFalse(row["planned"])
-        self.assertEqual(row["planning_support"], "exploration_only")
+        self.assertEqual(row["eligibility"]["status"], "research_only")
+        self.assertTrue(row["eligibility"]["reason"])
         options = organizer_wishlist_candidates(wishes, plan, discovery, catalog, FRANCE_STAGE)
         self.assertIn("saumur", {r["id"] for r in options["unsupported"]})
         self.assertNotIn("saumur", {r["id"] for r in options["eligible"]})

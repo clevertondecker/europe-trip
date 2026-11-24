@@ -21,12 +21,12 @@ I, Q, T = "must_visit", "interested", "maybe"
 SCENARIOS = {
     "france": [("paris", I), ("strasbourg", I), ("colmar", Q), ("nancy", Q), ("metz", T)],
     "multi_country": [("paris", I), ("cologne", Q), ("brussels", Q), ("basel", I), ("lucerne", T)],
-    "border": [("luxembourg_city", I), ("trier", Q), ("saarbrucken", T), ("metz", I)],
+    "border": [("luxembourg", I), ("trier", Q), ("saarbrucken", T), ("metz", I)],
     "must_visit": [(d, I) for d in ("paris", "strasbourg", "brussels", "basel", "interlaken", "amsterdam")],
     "small": [("paris", I), ("colmar", Q), ("basel", T)],
     "large": [("paris", I), ("strasbourg", I), ("colmar", Q), ("brussels", Q),
               ("bruges_be", T), ("amsterdam", I), ("cologne", Q), ("aachen", T),
-              ("luxembourg_city", Q), ("basel", I), ("lucerne", T), ("interlaken", Q)],
+              ("luxembourg", Q), ("basel", I), ("lucerne", T), ("interlaken", Q)],
     "supplemental": [("obernai", I), ("lucerne", Q)],
 }
 DATA23_SCENARIOS = {

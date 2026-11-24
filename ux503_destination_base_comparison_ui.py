@@ -95,8 +95,14 @@ def render_wishlist_base_comparison(*, plan, discovery=None, research=None):
     except ValueError as exc:
         st.error("Lista de destinos incompatível: " + str(exc))
         return
+    from attractions_model import load_attractions
+    from itinerary_eligibility import itinerary_eligibility, eligibility_index
+    catalog = load_attractions()
+    index = eligibility_index(catalog)
+    statuses = {d["id"]: itinerary_eligibility(d["id"], catalog, index=index)["status"] for d in discovery["destinations"] if d["id"] in active}
     exploratory = [d["name"] for d in discovery["destinations"]
-                   if d["id"] in active and d.get("planning_support") == "exploration_only"]
+                   if statuses.get(d["id"]) == "research_only"]
+    st.caption(f'{sum(x == "eligible" for x in statuses.values())} podem entrar no roteiro · {len(exploratory)} em pesquisa')
     if exploratory:
         st.caption("Somente pesquisa e comparação por enquanto: " + ", ".join(exploratory) +
                    ". Ainda não podem ser incluídos no roteiro.")

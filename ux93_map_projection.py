@@ -7,8 +7,7 @@ of the travel itinerary or source catalog.
 from __future__ import annotations
 
 from copy import deepcopy
-from rail_evidence_unified_model import canonical_place
-from catalog import ALIASES as MAP_CATALOG_ALIASES
+from destination_identity import canonical_destination_id
 
 # Explicitly reconciled against itinerary_options_2027.json (map geometry)
 # and italy_honeymoon_research_2027.json (canonical TripPlan choice IDs).
@@ -27,9 +26,8 @@ ITALY_TO_MAP = {
 
 def map_identity(source_id: str) -> str:
     """Only explicit catalog/Italy aliases; never infer from display names."""
-    key = canonical_place(source_id)
-    key = ITALY_TO_MAP.get(key, key)
-    return canonical_place(MAP_CATALOG_ALIASES.get(key, key))
+    key = canonical_destination_id(source_id)
+    return canonical_destination_id(ITALY_TO_MAP.get(key, key))
 
 
 def unmapped_wishes(places: list[dict], interests: dict | None) -> set[str]:

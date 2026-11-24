@@ -87,10 +87,12 @@ def decorate_comparison(result, *, references=None, gap_overlay=None,
             "minimum_oneway_min": row["minimum_oneway_min"],
             "source_url": row["source_url"],
         }
-        evidence = planning_reference(*key, references=refs, legacy=legacy)
+        from rail_evidence_unified_model import canonical_place
+        source_key = tuple(canonical_place(part) for part in key)
+        evidence = planning_reference(*source_key, references=refs, legacy=legacy)
         # Existing documented observations always win. A missing or unreproduced
         # time may use an independent, explicitly less certain DATA 9 reference.
-        gap_row = gaps["by_pair"].get(key)
+        gap_row = gaps["by_pair"].get(key) or gaps["by_pair"].get(source_key)
         if (gap_row is not None and evidence.get("display_min") is None
                 and row["evidence_status"] != "local"):
             evidence = {
@@ -110,7 +112,7 @@ def decorate_comparison(result, *, references=None, gap_overlay=None,
             }
         # DATA 10 is the last sourced fallback. Never overwrite older evidence
         # or claim the reverse journey, a future timetable or local transport.
-        connectivity_row = connectivity["by_pair"].get(key)
+        connectivity_row = connectivity["by_pair"].get(key) or connectivity["by_pair"].get(source_key)
         if (connectivity_row is not None
                 and evidence.get("display_min") is None
                 and row["evidence_status"] != "local"):
@@ -130,7 +132,7 @@ def decorate_comparison(result, *, references=None, gap_overlay=None,
             }
         # DATA 11 extends researched coverage without overwriting historical,
         # ROUTES7, DATA 9 or DATA 10. Only source-level outbound minima are known.
-        priority_row = priority["by_pair"].get(key)
+        priority_row = priority["by_pair"].get(key) or priority["by_pair"].get(source_key)
         if (priority_row is not None
                 and evidence.get("display_min") is None
                 and row["evidence_status"] != "local"):
@@ -149,7 +151,7 @@ def decorate_comparison(result, *, references=None, gap_overlay=None,
                 "valid_for_2027": False,
             }
         # DATA12 is the last-resort sourced Lille overlay, never a return route.
-        lille_row = lille["by_pair"].get(key)
+        lille_row = lille["by_pair"].get(key) or lille["by_pair"].get(source_key)
         if (lille_row is not None and evidence.get("display_min") is None
                 and row["evidence_status"] != "local"):
             evidence = {
@@ -166,7 +168,7 @@ def decorate_comparison(result, *, references=None, gap_overlay=None,
                 "weekend_return_known": False,
                 "valid_for_2027": False,
             }
-        data13_row = data13["by_pair"].get(key)
+        data13_row = data13["by_pair"].get(key) or data13["by_pair"].get(source_key)
         if (data13_row is not None and evidence.get("display_min") is None
                 and row["evidence_status"] != "local"):
             evidence = {
@@ -194,7 +196,7 @@ def decorate_comparison(result, *, references=None, gap_overlay=None,
             }
         # DATA22 fills only still-missing routes to *supplemental* tourist
         # destinations. It does not alter canonical coverage or reverse trips.
-        sup_row = supplemental["by_pair"].get(key)
+        sup_row = supplemental["by_pair"].get(key) or supplemental["by_pair"].get(source_key)
         if (sup_row is not None and evidence.get("display_min") is None
                 and row["evidence_status"] != "local"):
             evidence = {

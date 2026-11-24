@@ -74,4 +74,8 @@ def build_exploration_discovery() -> dict:
     """
     from ux501_destination_discovery_model import build_destination_discovery
     from data23_discovery_overlay_model import append_data23_destinations
-    return append_data23_destinations(append_trip01_candidates(build_destination_discovery()))
+    from destination_identity import canonical_destination_id
+    output = append_data23_destinations(append_trip01_candidates(build_destination_discovery()))
+    for row in output["destinations"]:
+        row["id"] = canonical_destination_id(row["id"])
+    return output
