@@ -145,14 +145,26 @@ class BaseExplorerUITests(unittest.TestCase):
     def test_comparison_remains_but_split_stay_is_not_available(self):
         app=self.open_explorer()
         old=deepcopy(app.session_state["advisor_plan"])
+        from ux502_destination_interests_model import empty_interests,set_interest
+        wishes=set_interest(empty_interests(),"colmar","must_visit")
+        wishes=set_interest(wishes,"basel","interested")
+        app.session_state["ux502_interests"]=wishes
+        app.session_state["rec03a_activity"]="Comparação personalizada"
         app.segmented_control(key="ux_section").set_value("Comparar").run()
-        app.segmented_control(key="ux_compare_mode").set_value(
-            "Comparar mesmas viagens").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
-        self.assertIn("base_compare_destinations",{x.key for x in app.multiselect})
+        app.multiselect(key="ux503_bases").set_value(["lille","metz"]).run()
+        app.multiselect(key="ux503_visible_destinations").set_value(["colmar","basel"]).run()
+        self.assertFalse(app.exception,[e.message for e in app.exception])
+        matrix=next(f.value for f in app.dataframe if "Destino · prioridade" in f.value.columns)
+        self.assertEqual(len(matrix),2)
+        self.assertIn("Lille",matrix.columns)
+        self.assertIn("Metz",matrix.columns)
+        self.assertEqual(app.session_state["ux502_interests"],wishes)
         self.assertEqual(app.session_state["advisor_plan"],old)
-        self.assertNotIn("Uma ou duas bases",
-                         app.segmented_control(key="ux_compare_mode").options)
+        self.assertNotIn("base_compare_destinations",{x.key for x in app.multiselect})
+        modes=app.segmented_control(key="ux_compare_mode").options
+        self.assertNotIn("Uma ou duas bases",modes)
+        self.assertNotIn("Comparar mesmas viagens",modes)
         app.segmented_control(key="ux_section").set_value("Cidades-base").run()
         app.segmented_control(key="ux42_city_activity").set_value("Passeios e conexões").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
