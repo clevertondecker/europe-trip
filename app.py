@@ -1197,6 +1197,8 @@ elif page == "Roteiro":
 
     elif itinerary_section == "Explorar atrações":
         # UX 5.0.1: destination-first discovery, no base choice required.
+        from rec03b_handoff_ui import render_profile_discovery_return
+        render_profile_discovery_return()
         render_independent_destination_discovery()
         if st.session_state.get("ux502_view","Descobrir lugares")=="Descobrir lugares":
             render_contextual_shortcuts("discovery")

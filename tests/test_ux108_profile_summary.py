@@ -32,18 +32,16 @@ class ProfileResearchTests(unittest.TestCase):
         expected=city_profile("strasbourg",research=study)
         timed=expected["counts"].get("historical",0)+expected["counts"].get("reference_only",0)
         total=expected["catalog_destination_count"]-expected["counts"].get("local",0)
-        self.assertEqual(app.metric[0].value,str(len(city["housing_offers"])))
-        self.assertEqual(
-            app.metric[1].value,
-            f"{timed}/{total}"
-        )
-        self.assertIn("históricos de 2026",app.metric[0].label)
-        self.assertIn("tempo pesquisado",app.metric[1].label)
+        from ux124_city_profile_ui import money
+        self.assertEqual(app.metric[0].value,money(expected["housing"]["median_eur_month"]))
+        self.assertEqual(app.metric[1].value,"—")
+        self.assertIn("mediana histórica",app.metric[0].label)
+        self.assertIn("destinos desejados",app.metric[1].label.lower())
         labels=[m.value for m in app.markdown]
         self.assertIn("### Investigue por assunto",labels)
         self.assertEqual(tuple(app.segmented_control(key="ux124_topic_strasbourg").options),TOPICS)
         self.assertTrue(any("Fontes e pendências" in x.label for x in app.expander))
-        self.assertTrue(any("Já documentado" in m.value for m in app.markdown))
+        self.assertTrue(any("Vantagens práticas e limitações" in m.value for m in app.markdown))
         self.assertTrue(any("Ainda pendente" in m.value for m in app.markdown))
         self.assertFalse(any("#### Moradia e custo observado" in x for x in labels))
         self.assertNotIn("### Explorar cidades",labels)
@@ -64,7 +62,7 @@ class ProfileResearchTests(unittest.TestCase):
         study=load_research(include_candidates=True)
         city=next(c for c in study["cities"] if not c["housing_offers"])
         app=view(city["id"])
-        self.assertEqual(app.metric[0].value,"0")
+        self.assertEqual(app.metric[0].value,"Não pesquisado")
         self.assertTrue(any("Ainda pendente" in m.value for m in app.markdown))
 
     def test_independent_explorer_keeps_original_headings(self):

@@ -10,7 +10,7 @@ from city_market import load_market
 from city_compare import load_cities
 from city_research import load_audit
 from trip01_supplemental_discovery import build_exploration_discovery
-from ux502_destination_interests_model import empty_interests,ordered_interests
+from ux502_destination_interests_model import empty_interests,ordered_interests,PRIORITIES
 from ux503_destination_base_comparison_model import build_wishlist_matrix
 from routes7_comparison_projection import decorate_comparison
 from base_scenario_model import expanded_rail_routes
@@ -22,6 +22,31 @@ from dq30_mobility_evidence_model import load_mobility_pilot
 from attraction_last_mile_model import load_access_pilot
 
 TOPICS=("Visão geral","Moradia","Logística","Vida cotidiana","Trabalho remoto","Atrações")
+
+ACTIVE_PRIORITIES=PRIORITIES[:3]
+ROUTE_SCOPES=("Minha lista","Todos os destinos","Com tempo pesquisado")
+TIMED=("historical","reference_only")
+
+def personalize_routes(routes,priorities):
+    """One canonical order for both full and filtered views; no input mutation."""
+    rows=[{**r,"priority":priorities.get(r["destination_id"])} for r in routes]
+    return sorted(rows,key=lambda r:(PRIORITIES.index(r["priority"])
+                    if r["priority"] in PRIORITIES else len(PRIORITIES),r["name"]))
+
+def route_scope(routes,scope):
+    if scope not in ROUTE_SCOPES:
+        raise ValueError("Escopo ferroviário inválido")
+    if scope==ROUTE_SCOPES[0]:
+        rows=[r for r in routes if r["priority"] in ACTIVE_PRIORITIES]
+    elif scope==ROUTE_SCOPES[2]:
+        rows=[r for r in routes if r["cell"]["category"] in TIMED]
+    else:
+        rows=list(routes)
+    counts=Counter(r["cell"]["category"] for r in rows)
+    return {"rows":rows,"total":len(rows),"eligible":len(rows)-counts["local"],
+            "timed":sum(counts[c] for c in TIMED),"local":counts["local"],
+            "historical":counts["historical"],"indicative":counts["reference_only"],
+            "missing":counts["no_time"]}
 
 def profile_summary_facts(profile):
     facts=[]
@@ -80,9 +105,12 @@ def city_profile(base_id,*,research=None,discovery=None,interests=None):
                 if entry not in fares:
                     fares.append(entry)
         routes.append({"destination_id":dest,"name":names[dest]["name"],
-                       "priority":priorities.get(dest),"cell":cell,"fares":fares})
-    routes.sort(key=lambda r:(r["priority"] not in ("must_visit","interested","maybe"),
-                              r["priority"]!="must_visit",r["name"]))
+                       "priority":None,"cell":cell,"fares":fares,
+                       "observations":deepcopy(row["observations"]),
+                       "historical_typical":row["typical_oneway_min"],
+                       "source_date":row["source_date"],"source_dataset":row["source_dataset"],
+                       "research_gaps":row["research_gaps"]})
+    routes=personalize_routes(routes,priorities)
     counts=dict(Counter(r["cell"]["category"] for r in routes))
     extra=[r for r in expanded_rail_routes(base_id)
            if canonical_place(r["destination_id"]) not in names]

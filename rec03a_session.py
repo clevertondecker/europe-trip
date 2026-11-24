@@ -56,7 +56,7 @@ def sync_identity(state, token):
 
 
 def request_navigation(state, target):
-    if target not in ("suggestions", "manual", "wishlist"):
+    if target not in ("suggestions", "manual", "wishlist", "discovery"):
         raise ValueError("Destino de navegação inválido")
     state[INTENT] = target
 
@@ -66,7 +66,9 @@ def apply_navigation(state):
     if "rec03a_handoff_pending" in state:
         from rec03b_handoffs import apply_handoff
         apply_handoff(state)
-    if target == "wishlist":
+    if target == "discovery":
+        select_public_task(state, "Explorar", "Descobrir")
+    elif target == "wishlist":
         select_public_task(state, "Explorar", "Minha lista")
     elif target in ("suggestions", "manual"):
         select_public_task(state, "Explorar", "Comparar bases")

@@ -7,7 +7,7 @@ from trip01_supplemental_discovery import build_exploration_discovery
 from ux502_destination_interests_model import empty_interests,set_interest
 from ux503_destination_base_comparison_model import build_wishlist_matrix
 from routes7_comparison_projection import decorate_comparison
-from ux124_city_profile_model import city_profile,TOPICS
+from ux124_city_profile_model import city_profile,TOPICS,route_scope,personalize_routes
 
 class UnifiedProfileTests(unittest.TestCase):
     @classmethod
@@ -50,6 +50,24 @@ class UnifiedProfileTests(unittest.TestCase):
         self.assertTrue(all(r["priority"] is None for r in b["routes"]))
         self.assertTrue(all(r["cell"]["category"] in ("historical","reference_only")
                             and r["attraction_count"]>0 for r in b["excursions"]))
+    def test_scope_priority_and_counts(self):
+        v=city_profile("mulhouse")
+        priorities={"paris":"maybe","strasbourg":"interested","basel":"must_visit",
+                    "mulhouse":"interested","colmar":"discarded"}
+        routes=personalize_routes(v["routes"],priorities)
+        desired=route_scope(routes,"Minha lista")
+        self.assertEqual([r["priority"] for r in desired["rows"]],
+                         ["must_visit","interested","interested","maybe"])
+        self.assertEqual(desired["total"],4)
+        self.assertEqual(desired["local"],1)
+        self.assertEqual(desired["eligible"],3)
+        self.assertEqual(desired["timed"]+desired["missing"],3)
+        catalog=route_scope(routes,"Todos os destinos")
+        self.assertEqual(catalog["total"],len(self.discovery["destinations"]))
+        timed=route_scope(routes,"Com tempo pesquisado")
+        self.assertEqual(timed["total"],catalog["timed"])
+        self.assertEqual(timed["missing"],0)
+        self.assertTrue(all(r["priority"] is None for r in v["routes"]))
     def test_all_subjects_in_full_and_sparse_profiles(self):
         for city in ("mulhouse","annecy"):
             app=AppTest.from_string(
@@ -59,6 +77,11 @@ class UnifiedProfileTests(unittest.TestCase):
             for topic in TOPICS:
                 app.segmented_control(key="ux124_topic_"+city).set_value(topic).run()
                 self.assertFalse(app.exception,[x.message for x in app.exception])
+            app.segmented_control(key="ux124_topic_"+city).set_value("Logística").run()
+            for scope in ("Minha lista","Todos os destinos","Com tempo pesquisado"):
+                app.segmented_control(key="ux124_routes_"+city).set_value(scope).run()
+                self.assertFalse(app.exception,[x.message for x in app.exception])
+                self.assertTrue(any(x.value.startswith(scope+":") for x in app.caption))
             self.assertNotIn("expanded_bases_rank_preset",{w.key for w in app.segmented_control})
 
 if __name__=="__main__":

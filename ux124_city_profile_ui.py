@@ -1,8 +1,10 @@
 """UX124 shared, topic-based research profile. No planning writes."""
 from __future__ import annotations
 import streamlit as st
-from ux124_city_profile_model import TOPICS,city_profile,profile_summary_facts
+from ux124_city_profile_model import (TOPICS,city_profile,profile_summary_facts,
+    personalize_routes,route_scope,ROUTE_SCOPES,TIMED)
 from ux502_destination_interests_model import empty_interests,ordered_interests,LABELS
+from routes7_comparison_projection import format_minutes
 from ux47_photo_ui import photo_markup,photo_credit
 from ux113_comparison_panorama_ui import coworking_night_status
 
@@ -28,33 +30,58 @@ def _evidence(view,section):
 
 def _overview(v):
     p=v["profile"]
-    st.markdown("#### Pesquisa em resumo")
+    st.markdown("#### Como seria morar aqui por dois meses?")
     st.write(p["summary"])
-    demo=p.get("demographics") or {}
-    if demo.get("population_municipal") is not None:
-        st.caption(f'{demo["population_municipal"]:,}'.replace(",",".")+
-                   f' habitantes no município · {demo["reference_year"]} · não área metropolitana')
-        source(demo.get("source_url"),"Fonte estatística")
-    else:
-        st.caption("População municipal ainda não pesquisada.")
-    left,right=st.columns(2,gap="medium")
-    with left:
+    desired=route_scope(v["routes"],ROUTE_SCOPES[0])
+    h=v["housing"]
+    a,b=st.columns(2,gap="medium")
+    with a:
         with st.container(border=True):
-            st.markdown("**Já documentado**")
-            facts=profile_summary_facts(p)
-            if facts:
-                _facts(facts)
+            st.metric("Aluguel mensal · mediana histórica",money(h["median_eur_month"]))
+            st.caption(f'{h["count"]} anúncios de 2026 · não cotação de 2027'
+                       if h["count"] else "Sem amostra — não significa falta de imóveis.")
+    with b:
+        with st.container(border=True):
+            st.metric("Destinos desejados com referência de ida",
+                      f'{desired["timed"]}/{desired["eligible"]}' if desired["eligible"] else "—")
+            if desired["total"]:
+                st.caption(f'{desired["missing"]} sem tempo · {desired["local"]} locais (fora do denominador). Não confirma bate-volta.')
             else:
-                st.caption("Ainda faltam referências práticas específicas.")
-    with right:
-        with st.container(border=True):
-            st.markdown("**Ainda pendente para 2027**")
-            st.write("Moradia: contrato, disponibilidade, taxas, caução e internet.")
-            st.write("Transporte: retorno, frequência e última milha.")
-    with st.expander("Características e contexto histórico"):
-        for item in dict.fromkeys(p["advantages"]):
-            st.write(item)
-        for item in dict.fromkeys(p["limitations"]):
+                st.caption("Escolha destinos em Minha lista para personalizar esta leitura.")
+    office=(v["cost"] or {}).get("coworking")
+    pack_office=v["pack"].get("remote_work",{}).get("coworking_reference")
+    st.markdown("**Trabalho remoto**")
+    if office:
+        st.write(office["name"]+" — "+coworking_night_status(office))
+    elif pack_office:
+        st.write(pack_office["name"]+" — horário e modalidade a confirmar.")
+    else:
+        st.caption("Coworking ainda não pesquisado.")
+    st.caption("Internet do imóvel não confirmada.")
+    st.markdown("**Vantagens práticas e limitações**")
+    facts=profile_summary_facts(p)
+    advantages=list(dict.fromkeys([e["summary"] for e in facts]+p["advantages"]))
+    for item in [x for x in advantages if x!=p["summary"]][:2]:
+        st.write("• "+item)
+    if p["limitations"]:
+        st.caption(p["limitations"][0])
+    if not facts and not p["advantages"]:
+        st.caption("Ainda faltam referências práticas específicas.")
+    known=[r for r in desired["rows"] if r["cell"]["category"] in TIMED][:3]
+    if known:
+        st.write("Destinos da sua lista: "+" · ".join(r["name"]+" "+r["cell"]["label"] for r in known))
+    missing=[r["name"] for r in desired["rows"] if r["priority"]=="must_visit" and r["cell"]["category"]=="no_time"]
+    if missing:
+        st.warning("Imperdíveis sem tempo pesquisado: "+", ".join(missing))
+    st.markdown("**Ainda pendente para 2027**")
+    st.caption("Moradia: contrato, disponibilidade, taxas, caução e internet. Transporte: retorno, frequência e última milha.")
+    with st.expander("Características, fontes e contexto histórico"):
+        demo=p.get("demographics") or {}
+        if demo.get("population_municipal") is not None:
+            st.write(f'{demo["population_municipal"]:,}'.replace(",",".")+
+                       f' habitantes no município · {demo["reference_year"]} · não área metropolitana')
+            source(demo.get("source_url"),"Fonte estatística")
+        for item in dict.fromkeys(p["advantages"]+p["limitations"]):
             st.caption(item)
         historical=v["editorial"]
         if historical:
@@ -63,29 +90,28 @@ def _overview(v):
             for item in historical["advantages"]+historical["risks"]:
                 st.caption(item)
             source(v["editorial_source"],"Matriz histórica")
-        _facts([e for e in p["evidence"] if e["section"]=="quality_of_life"])
+        _facts(p["evidence"])
         source(p["official_statistics_source"]["url"],"Base estatística oficial")
 
 def _housing(v):
-    st.markdown("#### Moradia e bairros")
+    st.markdown("#### Quanto custa morar aqui e quais bairros investigar?")
     h=v["housing"]
-    a,b,c=st.columns(3)
-    a.metric("Mínimo observado",money(h["minimum_eur_month"]))
-    b.metric("Mediana da amostra",money(h["median_eur_month"]))
-    c.metric("Máximo observado",money(h["maximum_eur_month"]))
+    st.metric("Mediana mensal da amostra",money(h["median_eur_month"]))
+    st.caption("Faixa observada: "+money(h["minimum_eur_month"])+" a "+money(h["maximum_eur_month"])+
+               f' · {h["count"]} anúncios históricos')
     st.caption("Valores mensais da mesma amostra histórica usada no comparador, não cotações de 2027.")
     offers=v["city"]["housing_offers"]
     if offers:
-        for offer in offers:
-            with st.container(border=True):
-                st.markdown("**"+offer["observed_title_or_address"]+"**")
-                st.write(money(offer["monthly_eur"])+"/mês · "+str(offer["size_m2"])+" m²")
-                st.caption("Dois adultos: "+("documentados" if offer.get("two_adults_confirmed") is True else "não confirmados")+
-                           " · "+str(offer.get("utilities") or "Contas a verificar"))
-                source(offer.get("listing_url") or offer["catalogue_url"],
-                       "Anúncio individual" if offer.get("listing_url") else "Catálogo de 2026")
+        with st.expander("Consultar anúncios históricos"):
+            st.dataframe([{"Imóvel":o["observed_title_or_address"],
+                           "€/mês":o["monthly_eur"],"m²":o["size_m2"],
+                           "Dois adultos":"Documentados" if o.get("two_adults_confirmed") is True else "Não confirmados",
+                           "Contas":o.get("utilities"),"Data":o.get("checked_at"),
+                           "Fonte":o.get("listing_url") or o["catalogue_url"]} for o in offers],
+                         hide_index=True,width="stretch",
+                         column_config={"Fonte":st.column_config.LinkColumn(display_text="Consultar")})
     else:
-        st.info("Nenhum anúncio na amostra — não significa falta de imóveis.")
+        st.caption("Nenhum anúncio na amostra — não significa falta de imóveis.")
     st.markdown("**Bairros identificados em fontes locais**")
     neighborhoods=v["pack"].get("neighborhoods",[])
     if not neighborhoods:
@@ -120,28 +146,54 @@ def _housing(v):
     _evidence(v,"housing")
 
 def _logistics(v):
-    st.markdown("#### Conexões ferroviárias")
-    counts=v["counts"]
-    st.caption(f'{counts.get("historical",0)} históricos · {counts.get("reference_only",0)} indicativos · '
-               f'{counts.get("local",0)} locais · {counts.get("no_time",0)} sem tempo. '
-               "Ida somente; não é confirmação de viagem de 2027.")
-    options=["Minha lista","Todos os destinos","Com tempo pesquisado"]
-    has_wishes=any(r["priority"] in ("must_visit","interested","maybe") for r in v["routes"])
-    scope=st.segmented_control("Destinos",options,default=options[0] if has_wishes else options[1],
+    st.markdown("#### Quais destinos posso conhecer e em quanto tempo?")
+    desired=route_scope(v["routes"],ROUTE_SCOPES[0])
+    scope=st.segmented_control("Destinos",list(ROUTE_SCOPES),
+                               default=ROUTE_SCOPES[0] if desired["total"] else ROUTE_SCOPES[1],
                                key=v["widget_prefix"]+"_routes_"+v["city"]["id"])
-    rows=v["routes"]
-    if scope=="Minha lista":
-        rows=[r for r in rows if r["priority"] in ("must_visit","interested","maybe")]
-    elif scope=="Com tempo pesquisado":
-        rows=[r for r in rows if r["cell"]["category"] in ("historical","reference_only")]
+    scope=scope or (ROUTE_SCOPES[0] if desired["total"] else ROUTE_SCOPES[1])
+    selection=route_scope(v["routes"],scope)
+    rows=selection["rows"]
+    st.caption(f'{scope}: {selection["timed"]}/{selection["eligible"]} destinos não locais com tempo de ida · '
+               f'{selection["local"]} locais · {selection["missing"]} sem tempo. Não confirma bate-volta.')
     if not rows:
-        st.info("Nenhum destino desejado nesse recorte.")
+        st.info("Nenhum destino neste recorte. Altere o filtro ou consulte Minha lista.")
     else:
         st.dataframe([{"Destino":r["name"],"Prioridade":LABELS.get(r["priority"],"—"),
-                       "Tempo de ida":r["cell"]["label"],"Tempo médio":r["cell"]["typical_label"],
-                       "Fonte":r["cell"].get("source_url")}
-                      for r in rows],hide_index=True,width="stretch",
-                     column_config={"Fonte":st.column_config.LinkColumn(display_text="Consultar")})
+                       "Tempo de ida":r["cell"]["label"],
+                       "Tempo médio/típico":r["cell"]["typical_label"]
+                       if r["cell"].get("average_min") is not None or r["historical_typical"] is None
+                       else format_minutes(r["historical_typical"])+" · típico histórico"}
+                      for r in rows],hide_index=True,width="stretch")
+        with st.expander("Fontes, estações e divergências por destino"):
+            chosen=st.selectbox("Detalhar destino", [r["destination_id"] for r in rows],
+                                format_func=lambda k:next(r["name"] for r in rows if r["destination_id"]==k),
+                                key=v["widget_prefix"]+"_route_detail_"+v["city"]["id"]+"_"+str(ROUTE_SCOPES.index(scope)))
+            route=next(r for r in rows if r["destination_id"]==chosen)
+            cell=route["cell"]
+            st.write(cell["label"])
+            st.caption(cell["typical_label"])
+            if route["historical_typical"] is not None:
+                st.caption("Tempo típico histórico: "+format_minutes(route["historical_typical"]))
+            for field in ("station_caveat","evidence_notes","comparability","gap_checked_at"):
+                if cell.get(field):
+                    st.caption(str(cell[field]))
+            if cell.get("legacy_divergent_sources") or cell.get("reference_differs_from_legacy"):
+                st.warning("Tempos publicados diferentes: condições ainda não reconciliadas.")
+            for label,field in (("Fonte apresentada","source_url"),("Fonte histórica","historical_source_url"),
+                                ("Referência indicativa","reference_source_url")):
+                source(cell.get(field),label)
+            for obs in route["observations"]:
+                st.caption(" · ".join(str(x) for x in (obs.get("minimum_oneway_min"),obs.get("typical_oneway_min"),
+                    obs.get("evidence_date"),obs.get("source_dataset"),obs.get("origin_station"),obs.get("destination_station")) if x is not None))
+                source(obs.get("source_url"),"Observação original")
+            for gap in route["research_gaps"]:
+                st.caption(gap)
+    with st.expander("Cobertura de pesquisa · catálogo e minha lista"):
+        for name in ROUTE_SCOPES[:2]:
+            data=route_scope(v["routes"],name)
+            st.caption(f'{name}: {data["historical"]} históricos · {data["indicative"]} indicativos · '
+                       f'{data["local"]} locais · {data["missing"]} sem tempo (total: {data["total"]}).')
     with st.expander("Tarifas condicionadas e outras referências de trem"):
         found=False
         for r in rows:
@@ -150,6 +202,7 @@ def _logistics(v):
                 st.write(r["name"]+" · "+money(fare["amount"])+"/pessoa/ida")
                 st.caption(str(fare["conditions"] or "Condições a verificar")+" · "+str(fare["observed_at"] or "Data a verificar"))
                 source(fare["source_url"])
+        st.caption("Referências históricas adicionais da base inteira, independentes do filtro acima.")
         if v["market"]:
             for r in v["market"]["rail"]:
                 if r["discounted_eur_leg_person"] is not None:
@@ -195,7 +248,7 @@ def _logistics(v):
     _evidence(v,"transport")
 
 def _daily(v):
-    st.markdown("#### Alimentação e rotina")
+    st.markdown("#### Como seria minha rotina e meu custo de vida?")
     daily=v["pack"].get("daily_life",{})
     cost=v["cost"]
     value=cost["restaurant_two_midrange_eur"] if cost else daily.get("restaurant_two_midrange_eur_2026")
@@ -225,7 +278,7 @@ def _daily(v):
     _evidence(v,"climate")
 
 def _remote(v):
-    st.markdown("#### Trabalho remoto")
+    st.markdown("#### Existem condições para trabalhar no meu horário?")
     st.caption("Internet do imóvel: não confirmada para a estadia de 2027.")
     office=(v["cost"] or {}).get("coworking")
     pack=v["pack"].get("remote_work",{}).get("coworking_reference")
@@ -282,7 +335,7 @@ def _attraction(item):
                     source(url,"Fonte complementar")
 
 def _attractions(v):
-    st.markdown("#### Atrações na cidade")
+    st.markdown("#### O que conhecer na cidade e nas redondezas?")
     if not v["local_attractions"]:
         st.info("Ainda não há atrações locais indexadas no catálogo.")
     for item in v["local_attractions"]:
@@ -320,29 +373,15 @@ def render_city_profile(base_id,*,research=None,key_prefix="ux124"):
     interests=st.session_state.get("ux502_interests",empty_interests())
     v=_public_profile(base_id,research)
     priorities={item["destination_id"]:item["priority"] for item in ordered_interests(interests)}
-    for row in v["routes"]:
-        row["priority"]=priorities.get(row["destination_id"])
-    v["routes"].sort(key=lambda r:(r["priority"] not in ("must_visit","interested","maybe"),
-                                   r["priority"]!="must_visit",r["name"]))
+    v["routes"]=personalize_routes(v["routes"],priorities)
     v["widget_prefix"]=key_prefix
-    timed=v["counts"].get("historical",0)+v["counts"].get("reference_only",0)
-    total=v["catalog_destination_count"]-v["counts"].get("local",0)
-    a,b=st.columns(2,gap="medium")
-    with a:
-        with st.container(border=True):
-            st.metric("Anúncios históricos de 2026",v["housing"]["count"])
-            st.caption("Amostra documental, não imóveis disponíveis." if v["housing"]["count"] else
-                       "Nenhuma amostra — não significa falta de imóveis.")
-    with b:
-        with st.container(border=True):
-            st.metric("Destinos com tempo pesquisado",f"{timed}/{total}")
-            st.caption("Catálogo atual, sem destino local. Históricos e indicativos de ida; não confirma bate-volta."
-                   if timed else "Nenhuma ida com tempo pesquisado — não significa falta de trens.")
     st.markdown("### Investigue por assunto")
     topic=st.segmented_control("Assunto",list(TOPICS),default=TOPICS[0],
                                key=key_prefix+"_topic_"+base_id)
     _RENDERERS.get(topic,_overview)(v)
     with st.expander("Fontes e pendências da pesquisa",expanded=False):
+        st.caption(f'{v["housing"]["count"]} anúncios históricos · {v["catalog_destination_count"]} destinos no catálogo atual.')
+
         for item in dict.fromkeys(v["profile"]["research_gaps"]+v["pack"].get("missing",[])+v["context_gaps"]):
             st.caption(item)
         if v["city"].get("screening_notes"):

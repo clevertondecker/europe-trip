@@ -44,7 +44,7 @@ class UX109ProfileTests(unittest.TestCase):
         self.assertIn("Moradia",app.segmented_control(key="ux124_topic_mulhouse").options)
         self.assertIn("Logística",app.segmented_control(key="ux124_topic_mulhouse").options)
         self.assertTrue(any("Fontes e pendências" in e.label for e in app.expander))
-        self.assertTrue(any("Já documentado" in x for x in labels))
+        self.assertTrue(any("Vantagens práticas e limitações" in x for x in labels))
         self.assertEqual(len(app.metric),2)
 
     def test_city_without_optional_pack_still_displays_canonical_summary(self):

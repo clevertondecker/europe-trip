@@ -14,8 +14,39 @@ from base_research_expanded_model import load_research
 
 def return_to_suggestions():
     st.session_state.pop(CONTEXT,None)
+    st.session_state.pop("rec03a_profile_discovery",None)
     request_navigation(st.session_state,"suggestions")
 
+
+def _discover_from_profile():
+    st.session_state["rec03a_profile_discovery"]=True
+    request_navigation(st.session_state,"discovery")
+
+def render_profile_discovery_return():
+    if not st.session_state.get("rec03a_profile_discovery"):
+        return
+    context,_,_=context_for("profile")
+    if context is None:
+        st.session_state.pop("rec03a_profile_discovery",None)
+        return
+    def back():
+        from ux_navigation import set_task
+        st.session_state.pop("rec03a_profile_discovery",None)
+        set_task(st.session_state,"Explorar","Cidades-base")
+    st.button("Voltar à ficha da cidade",key="rec03a_profile_discovery_back",on_click=back)
+
+def _compare_profile(base, options):
+    state=st.session_state
+    selected=selected_card_bases(state,options)
+    if base not in selected:
+        if len(selected)>=5:
+            state[ERROR]="Remova uma cidade da comparação antes de adicionar outra."
+            return
+        state[CHOICE]=selected+[base]
+        state["ux111_last_selection"]=(base,True)
+    state["ux112_active_view"]="Minha comparação"
+    state["ux112_active_view_shadow"]="Minha comparação"
+    return_to_suggestions()
 
 def render_notice():
     message=st.session_state.pop(ERROR,None)
@@ -336,8 +367,7 @@ def render_profile_context(plan):
     with heading:
         st.markdown("## "+city["name"]+" · "+city["country"])
         st.caption(city["corridor"]+" · "+research_status+" · "+status)
-        st.write("Investigue moradia, conexões e vida cotidiana antes de "
-                 "escolher uma cidade-base.")
+        st.caption("Avalie a cidade para morar, trabalhar e viajar durante a temporada.")
     if photo:
         with visual:
             with st.container(key="ux109-city-photo"):
@@ -367,12 +397,18 @@ def render_profile_context(plan):
     if base not in favorites and len(favorites)>=MAX_FAVORITES:
         st.caption("Limite de favoritas atingido. Remova uma favorita antes de adicionar outra.")
 
-    # Keep the existing shared renderer and suppress only duplicate fixed-city headings.
-    from base_research_expanded_ui import render_expanded_research
-    render_expanded_research(activity_override="Explorar uma cidade",
-                             compact=True,fixed_city=base)
-    from rec05_priority_research_ui import render_research_from_session
-    render_research_from_session(key="rec05_profile",base_ids=[base])
+    choices=[c["id"] for c in research["cities"]]
+    selected=selected_card_bases(st.session_state,choices)
+    a,b=st.columns(2,gap="small")
+    a.button("Comparar com outras cidades",key="rec03a_profile_compare",
+             disabled=base not in selected and len(selected)>=5,
+             on_click=_compare_profile,args=(base,choices),use_container_width=True)
+    b.button("Consultar destinos em Descobrir",key="rec03a_profile_discover",
+             on_click=_discover_from_profile,use_container_width=True)
+    # Reuse the already loaded public city research. The REC05 queue stays
+    # in Pesquisas & decisões rather than duplicating the decision surface.
+    from ux124_city_profile_ui import render_city_profile
+    render_city_profile(base,research=research)
     return True
 
 
