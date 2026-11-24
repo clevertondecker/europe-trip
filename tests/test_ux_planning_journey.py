@@ -214,12 +214,12 @@ render_planning_journey(active_plan(),load_attractions(),summary_only=st.session
         with patch("continuity_ui._private_store",return_value=None):
             app.run()
             self.assertFalse(app.exception,str(app.exception))
-            self.assertEqual(app.button(key="flow_journey_primary").label,"Revisar minha lista")
+            self.assertEqual(app.button(key="flow_journey_primary").label,"Descobrir destinos compatíveis")
             app.session_state["summary"]=False
             app.session_state["flow_journey_view"]="build"
             app.run()
             self.assertFalse(app.exception,str(app.exception))
-            self.assertEqual(app.button(key="flow_journey_primary").label,"Revisar minha lista")
+            self.assertEqual(app.button(key="flow_journey_primary").label,"Descobrir destinos compatíveis")
             self.assertTrue(app.button(key="flow_journey_step_build").disabled)
             self.assertFalse(any(w.key.startswith("flow_journey_batch_") for w in app.multiselect if w.key))
             self.assertEqual(app.session_state["advisor_plan"],plan)
