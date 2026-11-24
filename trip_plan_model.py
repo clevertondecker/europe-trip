@@ -24,6 +24,7 @@ def new_plan(base="mulhouse",departure="2027-09-09",profile="balanced")->dict:
     return plan
 
 def validate_plan(plan:dict,known_attractions:set[str]|None=None)->None:
+    from destination_identity import unique_outing_keys, outing_destination_id
     if plan.get("schema_version")!=SCHEMA_VERSION:raise ValueError("Versão de plano incompatível")
     if not isinstance(plan.get("plan_id"),str) or not plan["plan_id"].startswith("trip-"):
         raise ValueError("ID inválido")
@@ -48,6 +49,7 @@ def validate_plan(plan:dict,known_attractions:set[str]|None=None)->None:
     packages=plan.get("packages")
     if not isinstance(packages,dict) or not all(isinstance(v,list) for v in packages.values()):
         raise ValueError("Passeios inválidos")
+    unique_outing_keys(packages)
     chosen=[x for group in packages.values() for x in group]
     if len(chosen)!=len(set(chosen)):raise ValueError("Atrações duplicadas")
     if known_attractions is not None and not set(chosen)<=known_attractions:
@@ -56,9 +58,9 @@ def validate_plan(plan:dict,known_attractions:set[str]|None=None)->None:
         names=plan.get(key,[])
         if (not isinstance(names,list) or len(names)>50 or
             any(not isinstance(d,str) or not d or len(d)>100 for d in names) or
-            len(set(names))!=len(names)):
+            len({outing_destination_id(d) for d in names})!=len(names)):
             raise ValueError("Preferências de destinos inválidas")
-    if set(plan.get("mandatory_destinations",[])) & set(plan.get("excluded_destinations",[])):
+    if {outing_destination_id(d) for d in plan.get("mandatory_destinations",[])} & {outing_destination_id(d) for d in plan.get("excluded_destinations",[])}:
         raise ValueError("Destino obrigatório e excluído")
     if not isinstance(plan.get("assignments"),dict):raise ValueError("Datas inválidas")
     for k,v in plan["assignments"].items():
@@ -82,7 +84,7 @@ def validate_plan(plan:dict,known_attractions:set[str]|None=None)->None:
         period=visit["period"]
         if (not isinstance(destination,str) or len(destination)>80 or
             not destination.replace("_","").replace("-","").isalnum() or
-            destination in seen or stage not in ("Itália","França") or
+            outing_destination_id(destination) in seen or stage not in ("Itália","França") or
             not isinstance(choices,list) or not 0<=len(choices)<=5 or
             not all(isinstance(a,str) and 0<len(a)<=100 for a in choices) or
             len(set(choices))!=len(choices) or
@@ -103,7 +105,7 @@ def validate_plan(plan:dict,known_attractions:set[str]|None=None)->None:
             departure=date.fromisoformat(plan["departure_date"])
             if not departure<=chosen_date<departure+timedelta(days=plan["italy_days"]):
                 raise ValueError("Data fora da etapa italiana")
-        seen.add(destination)
+        seen.add(outing_destination_id(destination))
     proposal=plan.get("italy_proposal")
     if proposal is not None:
         keys={"variant","label","status","source_retrieved_at","days","nights",
