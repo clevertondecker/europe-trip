@@ -6,20 +6,19 @@ where available, without claiming the new catalog is synchronized from Drive.
 from __future__ import annotations
 from typing import Any
 
-ALIASES = {"roma":"rome","napoles":"naples","luxemburgo":"luxembourg"}
-REVERSE_ALIASES = {v:k for k,v in ALIASES.items()}
+from destination_identity import canonical_destination_id
 COUNTRY = {"Itália":"Itália","França":"França","Suíça":"Suíça",
            "Alemanha":"Alemanha","Luxemburgo":"Luxemburgo"}
 def build_catalog(legacy: list[dict], itinerary: dict,
                   researched_destinations: list[dict] | None = None) -> list[dict]:
     by_id: dict[str,dict[str,Any]] = {}
     for row in legacy:
-        mapped = ALIASES.get(row["id"],row["id"])
+        mapped = canonical_destination_id(row["id"])
         if mapped in by_id:
             raise ValueError("Identificador legado duplicado")
         by_id[mapped] = {**row,"id":mapped}
     for p in itinerary["places"]:
-        key = p["id"]
+        key = canonical_destination_id(p["id"])
         if key in by_id:
             base = by_id[key]
             by_id[key] = {**base, "lat":p["lat"],"lon":p["lon"],
@@ -33,9 +32,10 @@ def build_catalog(legacy: list[dict], itinerary: dict,
                 "duration":"A verificar","status":"opcional","source":"itinerary_research_2026",
             }
     for point in researched_destinations or []:
-        if point["id"] not in by_id:
-            by_id[point["id"]] = {
-                "id": point["id"], "name": point["name"],
+        key = canonical_destination_id(point["id"])
+        if key not in by_id:
+            by_id[key] = {
+                "id": key, "name": point["name"],
                 "country": point["country"], "lat": point["lat"],
                 "lon": point["lon"], "status": "opcional",
                 "role": "Atrações pesquisadas",
