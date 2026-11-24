@@ -313,7 +313,6 @@ def _workspace_cards(plan,catalog,view):
 
 def render_review(plan,catalog,view):
     from continuity_ui import render_primary_private_save,render_continuity_panel
-    from itinerary_flow_model import get_choice
     st.markdown("#### Revisar e salvar meu rascunho")
     st.caption(f'{plan["italy_days"]} dias de lua de mel · {plan["total_days"]-plan["italy_days"]} dias de temporada europeia · Base oficial de referência: {_workspace_base(plan)}. Nenhuma reserva confirmada.')
     if not view["rows"]:
@@ -329,6 +328,7 @@ def render_review(plan,catalog,view):
         st.button("Voltar a incluir destinos",key="flow_journey_review_build",on_click=_show,args=("build",))
     if view["unsupported"]:
         st.caption("Somente pesquisa: "+", ".join(r["name"] for r in view["unsupported"]))
+        st.button("Consultar minha lista",key="flow_workspace_research_only",on_click=_choose)
     st.caption("Retornos, reservas, moradia e custos de 2027 ainda precisam de confirmação. "
                "Salvar registra decisões, não confirma reservas.")
     # Finishing a useful draft does not require selecting days or opening
@@ -388,13 +388,23 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
             "Meu roteiro","Organizar viagem")
         st.markdown(header_html(
             label,hint,saved=visual["saved"],
-            title="Organizar nossa viagem" if organizing else "Meu roteiro",
+            title="Organizar nossa viagem" if organizing else "Meus destinos" if state.get("ux_section")=="Meu planejamento" else "Meu roteiro",
             tag="Visitas por período ou data" if organizing
-                else "Da lista ao roteiro revisado",
+                else "Gerencie os lugares da sua viagem",
         ),unsafe_allow_html=True)
         with st.container(key="flow_journey_metrics"):
             metric_columns=st.columns(3,gap="small")
-            for column,metric in zip(metric_columns,visual["metrics"]):
+            metrics=visual["metrics"]
+            if state.get("ux_section")=="Meu planejamento":
+                metrics=[
+                    {"id":"planned","icon":"▣","name":"Incluídos","value":counts["planned"],
+                     "hint":"No roteiro","highlight":False},
+                    {"id":"organized","icon":"▤","name":"Organizados","value":counts["organized"],
+                     "hint":"Com período ou data","highlight":False},
+                    {"id":"pending","icon":"◎","name":"A organizar","value":counts["planned"]-counts["organized"],
+                     "hint":"Período ou data opcionais","highlight":bool(view["pending"])},
+                ]
+            for column,metric in zip(metric_columns,metrics):
                 column.markdown(metric_html(metric),unsafe_allow_html=True)
     if summary_only:
         action=view["next"]
