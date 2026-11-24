@@ -232,64 +232,99 @@ def _draft_panel(comparison:dict)->None:
                 st.error("Arquivo recusado: "+str(exc))
 
 
-def _review_official_change(plan:dict,comparison:dict)->None:
+def _review_signature(comparison:dict,chosen:str)->tuple:
+    """Bind consent to this plan revision, candidate and exact assumptions."""
+    return (comparison["plan_id"],comparison["plan_revision"],
+            comparison["official_base"],chosen,
+            tuple(comparison["destinations"]),comparison["french_days"],
+            comparison["eur_fx"],
+            tuple(sorted(comparison["rents_eur_month"].items())))
+
+
+def _discard_review():
+    for key in ("ux34_review","ux34_review_candidate",
+                "ux34_review_signature","ux34_apply_ack"):
+        st.session_state.pop(key,None)
+
+
+def _review_official_change(plan:dict,comparison:dict,
+                            *,contextual_base:str|None=None)->None:
     st.markdown("#### Meu plano continua protegido")
     st.caption("Inalterados: "+"; ".join(comparison["unmodified"])+".")
     eligible=[c for c in comparison["candidates"] if c["official_supported"]]
     if not eligible:
         st.warning("As cidades comparadas ainda não possuem integração completa "
-                   "com o modelo oficial. Guarde o estudo e continue pesquisando; "
-                   "nenhuma mudança pode ser aplicada agora.")
+                   "com o modelo oficial. Continue pesquisando; nenhuma mudança "
+                   "pode ser aplicada agora.")
         return
     supported={c["id"]:c["name"] for c in eligible}
-    chosen=st.selectbox("Base apta para revisão oficial",list(supported),
-                        key="ux34_apply_candidate",
-                        format_func=lambda k:supported[k])
+    if contextual_base is not None:
+        if contextual_base not in supported or comparison["alternatives"]!=[contextual_base]:
+            st.error("A candidata mudou. Retorne à comparação para escolher outra cidade.")
+            return
+        chosen=contextual_base
+        st.caption("Candidata fixa: "+supported[chosen]+
+                   ". Para escolher outra cidade, volte à comparação.")
+    else:
+        chosen=st.selectbox("Base apta para revisão oficial",list(supported),
+                            key="ux34_apply_candidate",
+                            format_func=lambda k:supported[k])
     if st.button("Revisar impacto antes de aplicar",key="ux34_open_review"):
         try:
             review=review_base_application(plan,comparison,chosen)
+            _discard_review()
             st.session_state["ux34_review"]=review
             st.session_state["ux34_review_candidate"]=chosen
+            st.session_state["ux34_review_signature"]=_review_signature(comparison,chosen)
         except (ValueError,KeyError) as exc:
             st.error(str(exc))
     pending=st.session_state.get("ux34_review")
-    if pending is not None:
-        if (pending["plan_id"]!=plan["plan_id"] or
-            pending["original_revision"]!=plan["revision"] or
-            st.session_state.get("ux34_review_candidate")!=chosen):
-            st.warning("O plano ou a seleção mudou. Revise novamente.")
-            st.session_state.pop("ux34_review",None)
-            return
-        st.warning("Você vai trocar **somente a cidade-base oficial**: "+
-                   comparison["official_name"]+" → "+supported[chosen]+
-                   ". Dias, datas, passeios e decisões anteriores permanecem. "
-                   "Ainda será preciso revisar hospedagem, traslados e retornos.")
-        confirmation=st.checkbox(
-            "Confirmo que desejo alterar minha cidade-base oficial",
-            key="ux34_apply_ack",value=False)
-        a,b=st.columns(2)
-        if a.button("Aplicar mudança ao meu plano",key="ux34_confirm_apply",
-                    type="primary",disabled=not confirmation):
-            try:
-                if active_plan()["revision"]!=pending["original_revision"]:
-                    raise ValueError("Plano desatualizado. Revise novamente.")
-                if pending["changes"]["base_city"]["proposed"]!=chosen:
-                    raise ValueError("Cidade em revisão diferente da selecionada")
-                update_fields(base_city=chosen)
-                st.session_state.pop("ux34_review",None)
-                st.session_state["ux34_notice"]=(
-                    "Cidade-base oficial atualizada nesta sessão. "
-                    "Revise os passeios e salve explicitamente para manter.")
-                st.rerun()
-            except (ValueError,KeyError) as exc:
-                st.error(str(exc))
-        if b.button("Cancelar revisão",key="ux34_cancel_review"):
-            st.session_state.pop("ux34_review",None)
+    if pending is None:
+        return
+    if (pending["plan_id"]!=plan["plan_id"] or
+        pending["original_revision"]!=plan["revision"] or
+        st.session_state.get("ux34_review_candidate")!=chosen or
+        st.session_state.get("ux34_review_signature")!=
+            _review_signature(comparison,chosen)):
+        st.warning("O plano, os destinos ou as premissas mudaram. Revise novamente.")
+        _discard_review()
+        return
+    st.warning("Você vai trocar **somente a cidade-base oficial**: "+
+               comparison["official_name"]+" → "+supported[chosen]+
+               ". Dias, datas, passeios e decisões anteriores permanecem. "
+               "Revise hospedagem, traslados e retornos antes de reservar.")
+    confirmation=st.checkbox("Confirmo que desejo alterar minha cidade-base oficial",
+                             key="ux34_apply_ack",value=False)
+    left,right=st.columns(2)
+    if left.button("Aplicar mudança ao meu plano",key="ux34_confirm_apply",
+                   type="primary",disabled=not confirmation):
+        try:
+            fresh=active_plan()
+            if (fresh["plan_id"]!=pending["plan_id"] or
+                    fresh["revision"]!=pending["original_revision"]):
+                raise ValueError("Plano desatualizado. Revise novamente.")
+            if pending["changes"]["base_city"]["proposed"]!=chosen:
+                raise ValueError("Cidade em revisão diferente da selecionada")
+            if contextual_base is not None:
+                from rec03a_suggestions_ui import validate_base_review
+                ctx=validate_base_review(fresh)
+                if ctx is None or ctx["base"]!=chosen:
+                    raise ValueError("O contexto da escolha mudou. Revise novamente.")
+            update_fields(base_city=chosen)
+            _discard_review()
+            st.session_state["ux34_notice"]=(
+                "Cidade-base oficial atualizada apenas nesta sessão. "
+                "Revise passeios e custos e salve explicitamente para persistir.")
             st.rerun()
+        except (ValueError,KeyError) as exc:
+            st.error(str(exc))
+    if right.button("Cancelar revisão",key="ux34_cancel_review"):
+        _discard_review()
+        st.rerun()
 
 
 def render_city_decision(plan:dict,trip_data:dict,finance_live:bool,
-                         french_days:int)->None:
+                         french_days:int,*,contextual_base:str|None=None)->None:
     """Main task in Explorar → Comparar: 2–3 bases, equal assumptions."""
     names=_names()
     official=plan["base_city"]
@@ -305,22 +340,38 @@ def render_city_decision(plan:dict,trip_data:dict,finance_live:bool,
     defaults=[x for x in defaults if x in names and x!=official]
     if not defaults:
         defaults=["strasbourg" if official!="strasbourg" else "mulhouse"]
-    if "ux34_candidates" not in st.session_state:
+    if contextual_base is not None:
+        if contextual_base not in names or contextual_base==official:
+            st.error("Candidata inválida para esta revisão.")
+            return
+        st.session_state["ux34_candidates"]=[contextual_base]
+    elif "ux34_candidates" not in st.session_state:
         st.session_state["ux34_candidates"]=defaults
-    candidate_ids=st.multiselect("Comparar meu plano com até duas alternativas",
-                                 [key for key in names if key!=official],
-                                 format_func=lambda key:names[key],
-                                 max_selections=2,key="ux34_candidates")
+    candidate_ids=st.multiselect(
+        "Cidade-base escolhida" if contextual_base else
+        "Comparar meu plano com até duas alternativas",
+        [key for key in names if key!=official],format_func=lambda key:names[key],
+        max_selections=2,key="ux34_candidates",disabled=contextual_base is not None)
+    if contextual_base is not None:
+        candidate_ids=[contextual_base]
     if not candidate_ids:
         st.info("Escolha ao menos uma cidade-base alternativa.")
         return
     places=destination_catalog()
     defaults=[k for k in shared_destinations(plan) if k in places]
-    if "ux34_destinations" not in st.session_state:
+    if contextual_base is None and "ux34_destinations" not in st.session_state:
         st.session_state["ux34_destinations"]=defaults[:8]
+    if contextual_base is not None:
+        from rec03a_suggestions_ui import validate_base_review
+        ctx=validate_base_review(plan)
+        if ctx is None or not ctx.get("approved_destinations"):
+            st.error("Escopo da revisão inválido ou não confirmado.")
+            return
+        st.session_state["ux34_destinations"]=list(ctx["approved_destinations"])
     dest=st.multiselect("Passeios que quero manter acessíveis (mesmos para todas)",
                         list(places),format_func=lambda k:places[k],
-                        max_selections=8,key="ux34_destinations")
+                        max_selections=8,key="ux34_destinations",
+                        disabled=contextual_base is not None)
     if not dest:
         st.info("Escolha ao menos um destino para comparar.")
         return
@@ -372,8 +423,13 @@ def render_city_decision(plan:dict,trip_data:dict,finance_live:bool,
                             "Não pesquisado"))
     _render_coverage(comparison)
     _render_finance(comparison)
-    _draft_panel(comparison)
-    _review_official_change(active_plan(),comparison)
+    if contextual_base is None:
+        _draft_panel(comparison)
+    else:
+        st.caption("Estudos guardados e comparação avançada permanecem disponíveis "
+                   "fora desta revisão contextual.")
+    _review_official_change(active_plan(),comparison,
+                            contextual_base=contextual_base)
     st.caption("**Conclusão responsável:** nenhum vencedor automático. "
                "Faltam retornos verificáveis, moradias equivalentes e custos "
                "completos para avaliar a economia real da mudança.")
