@@ -86,7 +86,12 @@ def _remove_comparison_base(base,options):
         state["ux111_last_selection"]=(base,False)
 
 
-def render_selection_toolbar(options,cities):
+def _switch_comparison_view(view):
+    """Change only presentation mode; CHOICE and TripPlan are untouched."""
+    st.session_state["ux112_active_view"]=view
+
+
+def render_selection_toolbar(options,cities,*,navigation=None):
     """Selection feedback adjacent to cards, not another multiselect."""
     selected=selected_card_bases(st.session_state,options)
     with st.container(key="ux111-selection-toolbar",border=True):
@@ -111,13 +116,25 @@ def render_selection_toolbar(options,cities):
                               args=(base,tuple(options)),use_container_width=True)
         else:
             st.caption("Selecione uma cidade nos cartões para iniciar.")
-        if len(selected)<2:
+        if len(selected)>5:
+            st.warning("Sua seleção anterior contém mais de cinco cidades. "
+                       "Remova as excedentes para comparar; nenhuma foi excluída automaticamente.")
+        elif len(selected)<2:
             st.info("Escolha pelo menos duas cidades para ver a comparação.")
+        if navigation=="explore":
+            if 2<=len(selected)<=5:
+                st.button("Ver minha comparação ("+str(len(selected))+")",
+                          key="ux112_open_comparison",type="primary",
+                          on_click=_switch_comparison_view,args=("Minha comparação",))
+        elif navigation=="compare":
+            st.button("+ Explorar outras cidades",key="ux112_open_exploration",
+                      on_click=_switch_comparison_view,args=("Explorar alternativas",))
         else:
-            st.markdown('<a class="ux111-primary-action" href="#ux111-comparison">'
-                        'Ver comparação atualizada ↗</a>',unsafe_allow_html=True)
-        st.markdown('<a class="ux111-secondary-action" href="#ux111-picker">'
-                    'Adicionar outras cidades</a>',unsafe_allow_html=True)
+            if 2<=len(selected)<=5:
+                st.markdown('<a class="ux111-primary-action" href="#ux111-comparison">'
+                            'Ver comparação atualizada ↗</a>',unsafe_allow_html=True)
+            st.markdown('<a class="ux111-secondary-action" href="#ux111-picker">'
+                        'Adicionar outras cidades</a>',unsafe_allow_html=True)
 
 
 def render_card_choice(base, options, *, show_selection_hint=True):
@@ -206,10 +223,16 @@ def render_planning_return():
         st.caption("O escopo das sugestões foi preservado. A lista completa continua disponível no planejador.")
 
 
-def render_card_actions(base,prefix,*,emphasize_profile=False):
+def render_card_actions(base,prefix,*,emphasize_profile=False,compact=False):
     from rec04_candidate_capabilities import capability_for
     from rec04_simulation_handoff import request_simulation
     cap=capability_for(base)
+    if compact:
+        st.button("Conhecer cidade",key=f"rec03a_handoff_profile_{prefix}_{base}",
+                  type="primary" if emphasize_profile else "secondary",
+                  on_click=queue_handoff,args=(st.session_state,"profile",[base]),
+                  use_container_width=True)
+        return
     a,b,c=st.columns(3)
     a.button("Conhecer cidade",key=f"rec03a_handoff_profile_{prefix}_{base}",
              type="primary" if emphasize_profile else "secondary",

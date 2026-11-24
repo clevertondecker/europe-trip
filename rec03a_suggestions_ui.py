@@ -237,10 +237,12 @@ def _card(candidate, result, names, cities, official, options):
     with st.container(border=True,key="ux96_city_"+base):
         from ux100_base_card_photos import render_base_card_photo
         render_base_card_photo(base,meta["name"])
+        from trip_plan_model import BASES
         st.markdown(city_card_header(
             candidate,meta,
             is_selected=base in selected_card_bases(st.session_state,options),
             is_official=base==official,
+            official_supported=base in BASES,
         ),unsafe_allow_html=True)
         from ux98_base_insights_presentation import project_base_insights
         from ux99_base_cards_presentation import insight_panels
@@ -252,7 +254,7 @@ def _card(candidate, result, names, cities, official, options):
         render_card_choice(base,options,show_selection_hint=False)
         # UX112: primary investigation handoffs must not be hidden behind research details.
         from rec03b_handoff_ui import render_card_actions
-        render_card_actions(base,"card")
+        render_card_actions(base,"card",compact=True)
         if st.checkbox("Detalhes da pesquisa e fontes",
                        key="rec03a_details_"+base):
             from ux105_base_city_context import render_base_context_details
@@ -350,8 +352,6 @@ def _featured_ids(result):
 
 
 def render_suggestions(*,plan,discovery=None,research=None):
-    from rec03b_handoff_ui import render_card_selection_summary
-
     st.markdown(page_header(
         "Comparar cidades-base", "NOSSA EUROPA 2027 · EXPLORAR",
         "Encontre cidades para investigar a partir dos destinos que vocês escolheram.",
@@ -410,110 +410,108 @@ def render_suggestions(*,plan,discovery=None,research=None):
 
     options=[c["base_id"] for c in result["candidates"]]
     by_id={c["base_id"]:c for c in result["candidates"]}
-    from rec03b_handoff_ui import selected_card_bases
+    from rec03b_handoff_ui import selected_card_bases, render_selection_toolbar, render_planning_handoff
     from ux96_comparison_visual_ui import selected_context
-    st.markdown(selected_context(
-        selected_card_bases(st.session_state,options),cities,len(result["destinations"])
-    ),unsafe_allow_html=True)
     selected=selected_card_bases(st.session_state,options)
-    st.caption("Explore alternativas, compare até cinco cidades e escolha somente uma base por etapa da viagem.")
-    st.markdown('<a class="ux111-secondary-action" href="#ux111-picker">'
-                'Explorar alternativas ↓</a>',unsafe_allow_html=True)
-
-    st.markdown('<div id="ux111-picker"></div>',unsafe_allow_html=True)
-    st.markdown(section_heading(
-        "EXPLORAR ALTERNATIVAS", "Cidades-base para investigar",
-        "Conheça cada cidade, consulte seu mapa e custo, ou adicione-a à comparação. São alternativas de pesquisa, não um ranking.",
-        variant="compact",
-    ),unsafe_allow_html=True)
-    featured=_featured_ids(result)
-    _restore_widget("rec03a_show_all","rec03a_show_all_shadow",False,
-                    lambda x:type(x) is bool)
-    browsing=st.checkbox(f"Ver todas as cidades ({len(result['candidates'])})",
-                         key="rec03a_show_all",on_change=_remember,
-                         args=("rec03a_show_all","rec03a_show_all_shadow"))
-    if browsing:
-        # Browse INSTEAD OF highlighting the same IDs a second time.
-        # Four visible cards keep the sole comparison CTA close to the last choice.
+    st.markdown(selected_context(selected,cities,len(result["destinations"])),
+                unsafe_allow_html=True)
+    st.caption("Compare até cinco cidades; a base oficial só muda após uma confirmação explícita.")
+    modes=("Explorar alternativas","Minha comparação")
+    if st.session_state.get("ux112_active_view") not in modes:
+        st.session_state["ux112_active_view"]=modes[0]
+    view=st.segmented_control("Área da pesquisa",list(modes),
+                              key="ux112_active_view",default=modes[0])
+    if view=="Explorar alternativas":
         st.markdown(section_heading(
-            "TODAS AS ALTERNATIVAS", "Explore outras cidades-base",
-            "Busque por nome ou país. As cidades em destaque também estão aqui.",
+            "EXPLORAR ALTERNATIVAS", "Cidades-base para investigar",
+            "Pesquise por cidade ou país. Selecione candidatas para comparar, ou conheça sua ficha individual.",
             variant="compact",
         ),unsafe_allow_html=True)
+        # Search is always accessible, without an extra checkbox first.
         _restore_widget("rec03a_search","rec03a_search_shadow","",
                         lambda x:isinstance(x,str))
         search=st.text_input("Pesquisar cidade ou país",key="rec03a_search",
+                             placeholder="Ex.: Metz, Nancy, França",
                              on_change=_remember,
                              args=("rec03a_search","rec03a_search_shadow")).strip().casefold()
-        categories=("Todas","Comparáveis","Condicionais","Para investigar")
-        _restore_widget("rec03a_category","rec03a_category_shadow","Todas",
-                        lambda x:x in categories)
-        category=st.selectbox("Disponibilidade de evidências",categories,
-                              key="rec03a_category",on_change=_remember,
-                              args=("rec03a_category","rec03a_category_shadow"))
-        groups={"Comparáveis":"comparable","Condicionais":"conditional",
-                "Para investigar":"investigate"}
-        filtered=[c for c in result["candidates"] if
-                  (category=="Todas" or c["group"]==groups.get(category)) and
-                  (not search or search in
-                   (cities[c["base_id"]]["name"]+" "+
-                    cities[c["base_id"]]["country"]).casefold())]
-        st.caption(f"{len(filtered)} de {len(result['candidates'])} cidades-base encontradas.")
-        if filtered:
-            size=4
-            pages=(len(filtered)+size-1)//size
-            _restore_widget("rec03a_page","rec03a_page_shadow",1,
-                            lambda x:type(x) is int and 1<=x<=pages)
-            page=st.number_input("Página",min_value=1,max_value=pages,step=1,
-                                 key="rec03a_page",on_change=_remember,
-                                 args=("rec03a_page","rec03a_page_shadow"))
-            visible = filtered[(page-1)*size:page*size]
-            from rec03b_handoff_ui import selected_card_bases
-            with st.container(key="ux99_base_gallery_all"):
-                columns=st.columns(min(2,len(visible)),gap="medium")
-                for index,candidate in enumerate(visible):
-                    with columns[index%len(columns)]:
-                        _card(candidate,result,names,cities,plan["base_city"],options)
+        _restore_widget("rec03a_show_all","rec03a_show_all_shadow",False,
+                        lambda x:type(x) is bool)
+        show_all=st.checkbox(f"Ver todas as cidades ({len(result['candidates'])})",
+                             key="rec03a_show_all",on_change=_remember,
+                             args=("rec03a_show_all","rec03a_show_all_shadow"))
+        browsing=bool(search) or show_all
+        if browsing:
+            if show_all:
+                categories=("Todas","Comparáveis","Condicionais","Para investigar")
+                _restore_widget("rec03a_category","rec03a_category_shadow","Todas",
+                                lambda x:x in categories)
+                category=st.selectbox("Disponibilidade de evidências",categories,
+                                      key="rec03a_category",on_change=_remember,
+                                      args=("rec03a_category","rec03a_category_shadow"))
+            else:
+                category="Todas"
+            groups={"Comparáveis":"comparable","Condicionais":"conditional",
+                    "Para investigar":"investigate"}
+            filtered=[c for c in result["candidates"] if
+                      (category=="Todas" or c["group"]==groups.get(category)) and
+                      (not search or search in
+                       (cities[c["base_id"]]["name"]+" "+
+                        cities[c["base_id"]]["country"]).casefold())]
+            st.caption(f"{len(filtered)} de {len(result['candidates'])} cidades-base encontradas.")
+            if filtered:
+                size=4
+                pages=(len(filtered)+size-1)//size
+                _restore_widget("rec03a_page","rec03a_page_shadow",1,
+                                lambda x:type(x) is int and 1<=x<=pages)
+                page=st.number_input("Página",min_value=1,max_value=pages,step=1,
+                                     key="rec03a_page",on_change=_remember,
+                                     args=("rec03a_page","rec03a_page_shadow"))
+                visible=filtered[(page-1)*size:page*size]
+                with st.container(key="ux99_base_gallery_all"):
+                    columns=st.columns(min(2,len(visible)),gap="medium")
+                    for index,candidate in enumerate(visible):
+                        with columns[index%len(columns)]:
+                            _card(candidate,result,names,cities,plan["base_city"],options)
+            else:
+                st.info("Nenhuma cidade corresponde aos filtros.")
         else:
-            st.info("Nenhuma cidade corresponde aos filtros.")
-    elif featured:
-        from rec03b_handoff_ui import selected_card_bases
-        with st.container(key="ux99_base_gallery_featured"):
-            columns=st.columns(min(2,len(featured)),gap="medium")
-            for index,base in enumerate(featured):
-                with columns[index%len(columns)]:
-                    _card(by_id[base],result,names,cities,plan["base_city"],options)
+            featured=_featured_ids(result)
+            if featured:
+                with st.container(key="ux99_base_gallery_featured"):
+                    columns=st.columns(min(2,len(featured)),gap="medium")
+                    for index,base in enumerate(featured):
+                        with columns[index%len(columns)]:
+                            _card(by_id[base],result,names,cities,plan["base_city"],options)
+            else:
+                st.info("Não há destaques para este escopo. Pesquise uma cidade acima "
+                        "ou abra todas as alternativas.")
+        render_selection_toolbar(options,cities,navigation="explore")
     else:
-        st.info("Não há destaques com referências suficientes para este escopo. "
-                "Use 'Ver todas as cidades' para explorar as alternativas.")
-
-    # UX112: one explicit journey. Card selection feeds the same CHOICE used by UX87.
-    # The toolbar and comparison follow exploration, so the next action is local.
-    from rec03b_handoff_ui import render_selection_toolbar, render_planning_handoff
-    render_selection_toolbar(options,cities)
-    selected=selected_card_bases(st.session_state,options)
-    st.markdown('<div id="ux111-comparison"></div>',unsafe_allow_html=True)
-    st.markdown(section_heading(
-        "MINHA COMPARAÇÃO", "Comparar minhas cidades",
-        "Compare várias alternativas para os mesmos destinos. O roteiro terá somente uma cidade-base por etapa.",
-        variant="compact",
-    ),unsafe_allow_html=True)
-    if 2<=len(selected)<=5:
-        from ux87_inline_base_comparison_ui import render_inline_comparison
-        render_inline_comparison(interests,checked["scope"],selected,
-                                 discovery=discovery,research=research)
-    elif len(selected)==1:
-        st.info("Uma cidade selecionada. Adicione mais uma para comparar ou conheça a ficha individual no cartão.")
-    else:
-        st.info("Selecione de duas a cinco cidades nos cartões para começar sua comparação.")
-
-    st.markdown("#### Continuar para Meu planejamento")
-    render_planning_handoff(plan,interests=interests,
-                            discovery=discovery,research=research)
-    with st.expander("Metodologia, referências e pesquisas pendentes",expanded=False):
-        _render_comparison_groups(result,names,cities)
-        from rec05_priority_research_ui import render_research_result
-        render_research_result(result,key="rec05_suggestions")
+        st.markdown(section_heading(
+            "MINHA COMPARAÇÃO", "Comparar minhas cidades",
+            "Os mesmos destinos em cada alternativa. A seleção não altera seu roteiro oficial.",
+            variant="compact",
+        ),unsafe_allow_html=True)
+        render_selection_toolbar(options,cities,navigation="compare")
+        selected=selected_card_bases(st.session_state,options)
+        if 2<=len(selected)<=5:
+            from ux87_inline_base_comparison_ui import render_inline_comparison
+            render_inline_comparison(interests,checked["scope"],selected,
+                                     discovery=discovery,research=research)
+        elif len(selected)>5:
+            st.warning("Seleção anterior acima do limite de cinco cidades. "
+                       "Remova as excedentes sem perder suas escolhas restantes.")
+        elif len(selected)==1:
+            st.info("Uma cidade selecionada. Explore e adicione outra para comparar.")
+        else:
+            st.info("Selecione de duas a cinco cidades na aba Explorar alternativas.")
+        st.markdown("#### Continuar para Meu planejamento")
+        render_planning_handoff(plan,interests=interests,
+                                discovery=discovery,research=research)
+        with st.expander("Metodologia, referências e pesquisas pendentes",expanded=False):
+            _render_comparison_groups(result,names,cities)
+            from rec05_priority_research_ui import render_research_result
+            render_research_result(result,key="rec05_suggestions")
 
 
 
