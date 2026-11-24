@@ -151,6 +151,7 @@ def validate_base_review(plan):
     """
     from rec03b_handoffs import CHOICE,validate_handoff
     from ux502_destination_interests_model import empty_interests
+    from base_research_expanded_model import load_research
     state=st.session_state
     ctx=state.get("ux114_review_context")
     if not isinstance(ctx,dict):
