@@ -126,7 +126,7 @@ def _render_destination(profile:str,board:dict,row:dict,catalog:dict,plan:dict,
                                   default=[a["id"] for a in row["attractions"]],
                                   format_func=lambda x:labels[x],
                                   key="scenario_attractions_"+profile+"_"+key,
-                                  disabled=row["locked"])
+                                  disabled=row["locked"], placeholder="Escolha uma ou mais opções")
             if st.button("Atualizar atrações",key="scenario_update_"+profile+"_"+key,
                          disabled=row["locked"] or len(picked)>5,):
                 try:_update(profile,change_board(board,catalog,key,picked))
@@ -250,7 +250,7 @@ def render_scenario_boards(plan:dict,scenarios:list[dict],catalog:dict,routes:di
             defaults=list(labels)[:2]
             selected=st.multiselect("Atrações deste destino",list(labels),
                                     default=defaults,key="scenario_add_attractions_"+profile+"_"+chosen,
-                                    format_func=lambda key:labels[key])
+                                    format_func=lambda key:labels[key], placeholder="Escolha uma ou mais opções")
             st.caption("Até cinco atrações por visita; passagens contabilizadas apenas uma vez.")
             if st.button("Adicionar ao cenário",key="scenario_add_confirm_"+profile,
                          disabled=not selected or len(selected)>5):
