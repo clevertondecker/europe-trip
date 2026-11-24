@@ -52,7 +52,7 @@ def select_public_task(state, area, task):
     if area=="Explorar" and task in ("Descobrir","Minha lista"):
         filters=dict(state.get("ux502_discovery_filters",{}))
         filters.update({key:state[key] for key in
-                        ("ux501_country","ux501_categories","ux501_search","ux501_page")
+                        ("ux501_country","ux501_categories","ux501_search","ux501_page","ux126_eligibility_filter")
                         if key in state})
         state["ux502_discovery_filters"]=filters
     target_area,target_section=TARGETS[(area,task)]
