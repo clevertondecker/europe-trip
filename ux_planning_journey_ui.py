@@ -103,9 +103,24 @@ def _toggle_batch_choice(key, destination_id):
     st.session_state[key]=selected
 
 
-def _render_batch_cards(key, by_id):
-    from ux47_photo_ui import photo_markup, photo_credit
+def _workspace_photo(destination_id, name, place):
+    """Reuse the licensed local/catalog photo priority, including UX118 Metz."""
+    from destination_photo_assets import preferred_destination_photo
     from ux501_destination_photo_service import curated_destination_photo
+    from ux47_photo_ui import photo_markup, photo_credit
+    photo=preferred_destination_photo({**place,"id":destination_id},
+                                      curated_destination_photo(destination_id))
+    if photo and photo.get("local_path"):
+        st.image(photo["local_path"],width="stretch")
+        credit=photo_credit({**photo,"url":photo["source_page"]})
+    else:
+        st.html(photo_markup(photo,name))
+        credit=photo_credit(photo)
+    if credit:
+        st.caption(credit)
+
+
+def _render_batch_cards(key, by_id):
     places={r["id"]:r for r in _discovery()["destinations"]}
     search=st.text_input("Buscar na lista",key=key+"_search") if len(by_id)>8 else ""
     visible=[r for r in by_id.values()
@@ -115,14 +130,10 @@ def _render_batch_cards(key, by_id):
     st.caption(f"{len(selected)} selecionados · até 50 por confirmação")
     for row in visible[:limit]:
         destination_id=row["id"]
-        photo=curated_destination_photo(destination_id) or places.get(destination_id,{}).get("photo")
         with st.container(border=True):
             image,details,action=st.columns([1,3,2],vertical_alignment="center")
             with image:
-                st.html(photo_markup(photo,row["name"]))
-                credit=photo_credit(photo)
-                if credit:
-                    st.caption(credit)
+                _workspace_photo(destination_id,row["name"],places.get(destination_id,{}))
             with details:
                 st.markdown("**"+row["name"]+"**")
                 st.caption(row["country"]+" · "+LABELS.get(row["priority"],"Quero conhecer"))
@@ -240,8 +251,6 @@ def _workspace_base(plan):
 def _workspace_cards(plan,catalog,view):
     from itinerary_flow_model import get_choice
     from itinerary_flow_ui import _edit_destination, _navigate
-    from ux47_photo_ui import photo_markup, photo_credit
-    from ux501_destination_photo_service import curated_destination_photo
     by_id={r["id"]:r for r in view["board"]}
     places={r["id"]:r for r in _discovery()["destinations"]}
     primary_places={r["id"]:r for r in catalog["destinations"]}
@@ -269,16 +278,15 @@ def _workspace_cards(plan,catalog,view):
             key=row["id"]
             timing=by_id[key]
             place=places.get(key,{})
-            photo=curated_destination_photo(key) or place.get("photo") or primary_places.get(key,{}).get("photo")
+            photo_place={**primary_places.get(key,{}),**place}
+            if not photo_place.get("photo"):
+                photo_place["photo"]=primary_places.get(key,{}).get("photo")
             choice=get_choice(catalog,key)
             names={a["id"]:a["name"] for a in choice["attractions"]}
             with st.container(border=True,key="flow_workspace_card_"+key):
                 left,right=st.columns([1,4],gap="small",vertical_alignment="top")
                 with left:
-                    st.html(photo_markup(photo,row["name"]))
-                    credit=photo_credit(photo)
-                    if credit:
-                        st.caption(credit)
+                    _workspace_photo(key,row["name"],photo_place)
                 with right:
                     st.markdown("**"+row["name"]+"**")
                     st.caption((timing["country"] or ("Itália" if stage==ITALY_STAGE else "País a verificar"))+
@@ -300,6 +308,16 @@ def _workspace_cards(plan,catalog,view):
                     a,b=st.columns(2)
                     a.button("Editar passeio",key="flow_workspace_edit_"+key,on_click=_workspace_edit,args=(key,),width="stretch")
                     b.button("Organizar",key="flow_workspace_organize_"+key,on_click=_workspace_organize,args=(key,stage),width="stretch")
+                if stage==FRANCE_STAGE and st.checkbox("Consultar logística e custos",key="flow_journey_workspace_logistics_"+key):
+                    from attractions_model import load_base_routes
+                    from ux47_destination_card_model import destination_card_view
+                    try:
+                        details=destination_card_view(plan,catalog,load_base_routes(),row)
+                        st.caption(details["transport"])
+                        st.caption(details["cost"])
+                        st.caption(details["data_basis"])
+                    except (ValueError,KeyError):
+                        st.caption("Referências de logística ou custos ainda indisponíveis.")
                 if focus==key:
                     _edit_destination(row,catalog,force_expanded=True)
                     st.button("Cancelar edição",key="flow_workspace_cancel_"+key,on_click=_workspace_cancel_edit)
