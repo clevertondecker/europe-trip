@@ -145,7 +145,7 @@ render_base_review_scope(ctx)
         app,original=self._open_in_real_application()
         app.button(key="ux34_open_review").click().run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
-        self.assertFalse(app.button(key="ux34_confirm_apply").disabled)
+        self.assertTrue(app.button(key="ux34_confirm_apply").disabled)
         # Explicit checkbox is required before the apply action can be used.
         app.checkbox(key="ux34_apply_ack").check().run()
         app.button(key="ux34_confirm_apply").click().run()
