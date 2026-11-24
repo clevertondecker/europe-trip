@@ -23,13 +23,7 @@ from data_model import get_scenario
 from unified_budget import resolve_french_budget, scenario_total
 
 
-# Canonical aliases refer to the SAME city; never merge generic names by proximity.
-DESTINATION_ALIASES={"luxembourg_city":"luxembourg"}
-EVIDENCE_ALIASES={"luxembourg":"luxembourg_city"}
-
-
-def _canonical_destination(destination:str)->str:
-    return DESTINATION_ALIASES.get(destination,destination)
+from destination_identity import canonical_destination_id as _canonical_destination
 
 
 def destination_catalog() -> dict[str, str]:
