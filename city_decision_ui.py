@@ -349,6 +349,8 @@ def contextual_impact_projection(comparison:dict)->dict:
         groups[row["status"]].append({
             "name":row["destination"],"delta_minutes":row["delta_minutes"],
             "before":row["official_minutes"],"after":row["candidate_minutes"],
+            "official_gap_reason":row.get("official_gap_reason"),
+            "candidate_gap_reason":row.get("candidate_gap_reason"),
         })
     return {
         "candidate":entry["id"],"candidate_name":entry["name"],
