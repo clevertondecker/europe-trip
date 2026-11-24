@@ -15,6 +15,18 @@ from city_research_round2 import load_round2
 PILOT_BASES = frozenset({"mulhouse", "strasbourg", "freiburg"})
 
 
+def coworking_night_status(coworking: dict | None) -> str:
+    """Three-valued 2026 observation, NEVER a promise of access in 2027."""
+    if not coworking:
+        return "Não pesquisado"
+    observed=coworking.get("late_work_compatible")
+    if observed is True:
+        return "Compatibilidade observada em 2026 · confirmar acesso em 2027"
+    if observed is False:
+        return "Horário publicado não cobre todo o turno · verificar condições"
+    return "Compatibilidade ainda não confirmada"
+
+
 def project_comparison_panorama(projection: dict, research: dict, round2: dict) -> dict:
     """Project the SAME selected cities without inventing cost or viability.
 
@@ -25,7 +37,7 @@ def project_comparison_panorama(projection: dict, research: dict, round2: dict) 
     costs = {city["id"]: city for city in round2["cities"]}
     bases = projection["base_ids"]
     total = len(projection["destinations"])
-    logistics, living, routine, sources = [], [], [], []
+    logistics, living, routine, sources, housing_sources = [], [], [], [], []
     for base in bases:
         city = cities[base]
         evidence = projection["counts"][base]
@@ -40,6 +52,11 @@ def project_comparison_panorama(projection: dict, research: dict, round2: dict) 
             "Retorno e última milha": "Não validados",
         })
         housing = observed_housing(city)
+        for offer in city["housing_offers"]:
+            housing_sources.append((
+                city["name"] + " · anúncio histórico " + str(offer["listing_ref"]),
+                offer["catalogue_url"],
+            ))
         specific = costs.get(base)
         coworking = specific["coworking"] if specific else None
         living.append({
@@ -62,10 +79,8 @@ def project_comparison_panorama(projection: dict, research: dict, round2: dict) 
             "Preço de referência (€)": coworking["price_eur"] if coworking else None,
             "Modalidade": coworking["price_basis"] if coworking else None,
             "Horário publicado": coworking["schedule"] if coworking else None,
-            "Expediente noturno confirmado": (
-                "Não" if coworking and not coworking["late_work_compatible"] else
-                "Não pesquisado"
-            ),
+            "Expediente noturno (ref. 2026)": coworking_night_status(coworking),
+            "Ressalva sobre acesso": coworking["note"] if coworking else None,
         })
         if specific:
             sources.append((city["name"] + " · alimentação",
@@ -78,6 +93,7 @@ def project_comparison_panorama(projection: dict, research: dict, round2: dict) 
         "living": living,
         "routine": routine,
         "living_sources": sources,
+        "housing_sources": housing_sources,
         "residential_source": round2["common_sources"][0]["url"],
         "pilot_bases": [base for base in bases if base in PILOT_BASES],
         "covered_living_count": sum(base in costs for base in bases),
@@ -146,6 +162,13 @@ def render_comparison_panorama(projection: dict, research: dict) -> None:
         st.link_button("Indicador de aluguel residencial (2026)", panorama["residential_source"])
         for label, url in panorama["living_sources"]:
             st.link_button(label, url)
+        with st.expander("Anúncios históricos consultados", expanded=False):
+            if not panorama["housing_sources"]:
+                st.caption("Não há anúncios pesquisados para essas cidades.")
+            for label,url in panorama["housing_sources"]:
+                st.link_button(label,url)
+            st.caption("Anúncios observados em 2026; preço, duração e "
+                       "disponibilidade em 2027 não confirmados.")
         st.caption("Preço residencial por metro quadrado, jantar para dois e anúncio "
                    "histórico usam metodologias distintas; não some como orçamento real.")
     pilot = panorama["pilot_bases"]
