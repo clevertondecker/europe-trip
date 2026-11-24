@@ -76,9 +76,11 @@ def selected_rows(plan:dict,catalog:dict)->list[dict]:
                      else item["attractions"])
         rows[key]={"id":key,"name":lookup[key]["name"],"stage":item["stage"],
                    "attractions":attractions,"period":item["period"],
-                   "exact_dates":([item["exact_date"]]
-                                  if item.get("exact_date") else
-                                  rows.get(key,{}).get("exact_dates",[]))}
+                   # France dates live in assignments even for metadata-only
+                   # visits without a package/attractions. Italy owns exact_date.
+                   "exact_dates":(sorted(day for day,d in plan.get("assignments",{}).items()
+                                         if d==key) if item["stage"]==FRANCE_STAGE else
+                                  [item["exact_date"]] if item.get("exact_date") else [])}
     return sorted(rows.values(),key=lambda x:(x["stage"]!=ITALY_STAGE,x["name"]))
 
 

@@ -222,11 +222,11 @@ def _render_add(plan:dict,catalog:dict)->None:
             st.rerun()
 
 
-def _edit_destination(row:dict,catalog:dict)->None:
+def _edit_destination(row:dict,catalog:dict,*,force_expanded:bool=False)->None:
     item=get_choice(catalog,row["id"])
     labels={x["id"]:x["name"] for x in item["attractions"]}
     with st.expander("Editar "+item["name"],
-                     expanded=st.session_state.get("flow_edit_target")==row["id"]):
+                     expanded=force_expanded or st.session_state.get("flow_edit_target")==row["id"]):
         attractions=st.multiselect(
             "Atrações em "+item["name"],list(labels),
             default=[x for x in row["attractions"] if x in labels],
@@ -244,6 +244,7 @@ def _edit_destination(row:dict,catalog:dict)->None:
                     outcome=commit_outing(row["id"],attractions,chosen,confirmed=True)
                     st.session_state["ux45_flow_result"]=asdict(outcome)
                     st.session_state.pop("flow_edit_target",None)
+                    st.session_state.pop("flow_journey_workspace_edit",None)
                     st.session_state["flow_notice"]=(
                         item["name"]+" atualizado no seu roteiro.")
                     st.rerun()
@@ -257,16 +258,26 @@ def _edit_destination(row:dict,catalog:dict)->None:
             st.warning("Remover "+item["name"]+
                        " do seu planejamento? As datas desse destino, "
                        "se houver, também serão removidas.")
+            groups=st.session_state.get("ux48_weekend_groups") or {}
+            for group in groups.get("groups", []):
+                if row["id"] in group["destinations"]:
+                    st.caption("Também será retirado da viagem "+group["name"]+
+                               (". O grupo ficará vazio e será removido."
+                                if len(group["destinations"])==1 else ". Os demais destinos permanecem."))
             yes,no=st.columns(2)
             with yes:
                 if st.button("Confirmar remoção",
                              key="flow_remove_confirm_"+row["id"],type="primary"):
-                    outcome=delete_outing(row["id"],confirmed=True)
-                    st.session_state["ux45_flow_result"]=asdict(outcome)
-                    st.session_state.pop("flow_edit_target",None)
-                    st.session_state.pop("flow_removing",None)
-                    st.session_state["flow_notice"]=item["name"]+" removido."
-                    st.rerun()
+                    try:
+                        outcome=delete_outing(row["id"],confirmed=True)
+                        st.session_state["ux45_flow_result"]=asdict(outcome)
+                        st.session_state.pop("flow_edit_target",None)
+                        st.session_state.pop("flow_journey_workspace_edit",None)
+                        st.session_state.pop("flow_removing",None)
+                        st.session_state["flow_notice"]=item["name"]+" removido."
+                        st.rerun()
+                    except (ValueError,KeyError) as exc:
+                        st.error(str(exc))
             with no:
                 if st.button("Cancelar",key="flow_remove_cancel_"+row["id"]):
                     st.session_state.pop("flow_removing",None)
