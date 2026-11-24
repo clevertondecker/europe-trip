@@ -31,6 +31,8 @@ class UX113PanoramaTests(unittest.TestCase):
         self.assertEqual(panel["base_ids"], before)
         self.assertEqual([x["Cidade-base"] for x in panel["logistics"]],
                          [x["Cidade-base"] for x in panel["living"]])
+        self.assertEqual([x["Cidade-base"] for x in panel["living"]],
+                         [x["Cidade-base"] for x in panel["routine"]])
         self.assertEqual(panel["pilot_bases"], ["mulhouse", "strasbourg"])
         self.assertIsNone(panel["selected_base_for_itinerary"])
         self.assertFalse(panel["comparison_has_full_trip_logistics"])
@@ -45,9 +47,29 @@ class UX113PanoramaTests(unittest.TestCase):
         self.assertIsNotNone(indexed["Mulhouse"]["Jantar para dois (€)"])
         self.assertIsNone(indexed["Lille"]["Jantar para dois (€)"])
         self.assertIsNone(indexed["Lille"]["Aluguel residencial (€/m²/mês)"])
-        self.assertEqual(indexed["Lille"]["Coworking pesquisado"], "Não pesquisado")
+        routine = {x["Cidade-base"]: x for x in panel["routine"]}
+        self.assertIsNone(routine["Lille"]["Coworking pesquisado"])
+        self.assertIsNone(routine["Lille"]["Preço de referência (€)"])
+        self.assertEqual(indexed["Lille"]["Amostra de anúncios (2026)"],
+                         len(next(c["housing_offers"] for c in self.research["cities"]
+                                  if c["id"] == "lille")))
         self.assertEqual(panel["logistics"][0]["Idas com tempo documentado"], "2/3")
         self.assertEqual(panel["logistics"][0]["Retorno e última milha"], "Não validados")
+
+    def test_housing_range_is_documented_not_2027_quote(self):
+        panel = project_comparison_panorama(
+            self.projection(["metz","nancy"]), self.research, self.cost)
+        for row in panel["living"]:
+            count = row["Amostra de anúncios (2026)"]
+            self.assertGreaterEqual(count, 0)
+            if count:
+                self.assertLessEqual(row["Mínimo observado (€ / mês)"],
+                                     row["Mediana observada (€ / mês)"])
+                self.assertLessEqual(row["Mediana observada (€ / mês)"],
+                                     row["Máximo observado (€ / mês)"])
+            else:
+                self.assertIsNone(row["Mediana observada (€ / mês)"])
+        self.assertFalse(panel["cost_of_stay_2027_quoted"])
 
     def test_multiple_bases_are_not_split_into_multiple_stays(self):
         projection = self.projection(["mulhouse", "strasbourg", "metz"])
