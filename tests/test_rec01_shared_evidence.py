@@ -93,6 +93,25 @@ class SharedEvidenceTests(unittest.TestCase):
             with self.subTest(invalid=invalid), self.assertRaises(ValueError):
                 build_recommendation_matrix(wishes, invalid, discovery=self.discovery, research=self.research)
 
+    def test_legacy_wishlist_aliases_resolve_before_explicit_scope(self):
+        from recommendation_scope_model import confirm_scope
+        wishes = set_interest(empty_interests(), "luxembourg_city", "interested", self.discovery)
+        canonical = "luxembourg"
+        self.assertEqual(wishes["items"][0]["destination_id"], canonical)
+        confirmed = confirm_scope(wishes, [canonical], self.discovery)
+        self.assertEqual(confirmed["destination_ids"], [canonical])
+        matrix = build_recommendation_matrix(wishes, [canonical],
+                                             discovery=self.discovery, research=self.research)
+        self.assertEqual([d["id"] for d in matrix["comparison"]["destinations"]], [canonical])
+        for invalid in (["luxembourg_city"], ["luxemburgo"], ["LUXEMBOURG"],
+                        [" luxembourg "], [canonical, "luxembourg_city"]):
+            with self.subTest(invalid=invalid):
+                with self.assertRaises(ValueError):
+                    confirm_scope(wishes, invalid, self.discovery)
+                with self.assertRaises(ValueError):
+                    build_recommendation_matrix(wishes, invalid, discovery=self.discovery,
+                                                research=self.research)
+
     def test_invalid_duplicate_base_ids_rejected(self):
         data = deepcopy(self.research)
         data["cities"].append(deepcopy(data["cities"][0]))
