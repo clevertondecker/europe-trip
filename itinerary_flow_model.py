@@ -8,6 +8,7 @@ represent a reservation or incur an additional transport fare.
 from __future__ import annotations
 
 from copy import deepcopy
+from destination_identity import canonical_destination_id
 from datetime import date,timedelta
 from planning_store import change_plan
 from catalog_plan_validation import allowed_attractions
@@ -52,7 +53,7 @@ def destinations(catalog:dict)->list[dict]:
 
 
 def get_choice(catalog:dict,dest_id:str)->dict:
-    item=next((d for d in destinations(catalog) if d["id"]==dest_id),None)
+    item=next((d for d in destinations(catalog) if canonical_destination_id(d["id"])==canonical_destination_id(dest_id)),None)
     if item is None:raise ValueError("Destino desconhecido")
     return item
 
@@ -60,26 +61,27 @@ def get_choice(catalog:dict,dest_id:str)->dict:
 def selected_rows(plan:dict,catalog:dict)->list[dict]:
     lookup={d["id"]:d for d in destinations(catalog)}
     rows={}
-    for key,picked in plan.get("packages",{}).items():
+    packages = {canonical_destination_id(key): picked for key, picked in plan.get("packages", {}).items()}
+    for key,picked in packages.items():
         if key in lookup:
             rows[key]={"id":key,"name":lookup[key]["name"],
                        "stage":FRANCE_STAGE,"attractions":picked,
                        "period":UNASSIGNED,"exact_dates":[
-                           day for day,d in plan.get("assignments",{}).items() if d==key]}
+                           day for day,d in plan.get("assignments",{}).items() if canonical_destination_id(d)==key]}
     for item in plan.get("flexible_visits",[]):
-        key=item["destination_id"]
+        key=canonical_destination_id(item["destination_id"])
         if key not in lookup:continue
-        if (item["stage"]==FRANCE_STAGE and key not in plan.get("packages",{})
+        if (item["stage"]==FRANCE_STAGE and key not in packages
                 and item["attractions"]):
             continue  # Preserve reading older inconsistent drafts conservatively.
-        attractions=(plan["packages"].get(key,[]) if item["stage"]==FRANCE_STAGE
+        attractions=(packages.get(key,[]) if item["stage"]==FRANCE_STAGE
                      else item["attractions"])
         rows[key]={"id":key,"name":lookup[key]["name"],"stage":item["stage"],
                    "attractions":attractions,"period":item["period"],
                    # France dates live in assignments even for metadata-only
                    # visits without a package/attractions. Italy owns exact_date.
                    "exact_dates":(sorted(day for day,d in plan.get("assignments",{}).items()
-                                         if d==key) if item["stage"]==FRANCE_STAGE else
+                                         if canonical_destination_id(d)==key) if item["stage"]==FRANCE_STAGE else
                                   [item["exact_date"]] if item.get("exact_date") else [])}
     return sorted(rows.values(),key=lambda x:(x["stage"]!=ITALY_STAGE,x["name"]))
 
@@ -100,8 +102,9 @@ def choice_counts(plan:dict,catalog:dict)->dict:
 
 
 def is_selected(plan:dict,dest_id:str)->bool:
-    return dest_id in plan.get("packages",{}) or any(
-        v["destination_id"]==dest_id for v in plan.get("flexible_visits",[]))
+    key = canonical_destination_id(dest_id)
+    return any(canonical_destination_id(d) == key for d in plan.get("packages", {})) or any(
+        canonical_destination_id(v["destination_id"]) == key for v in plan.get("flexible_visits", []))
 
 
 def _validated_choice(catalog:dict,dest_id:str,attractions:list[str],period:str)->dict:
