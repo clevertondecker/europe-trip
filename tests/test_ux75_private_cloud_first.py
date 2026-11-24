@@ -10,10 +10,13 @@ class PrimaryPrivateSaveTests(unittest.TestCase):
     @patch("continuity_ui.st")
     def test_unconfigured_cloud_never_claims_saved_or_attempts_write(self, st, store):
         from continuity_ui import render_primary_private_save
+        st.session_state = {}
         with patch("continuity_ui.save_private_now") as write:
             self.assertFalse(render_primary_private_save({}, {}))
         st.warning.assert_called_once()
+        self.assertIn("Cópia e recuperação",st.warning.call_args.args[0])
         st.success.assert_not_called()
+        st.button.assert_not_called()
         write.assert_not_called()
 
     @patch("continuity_ui._private_store", return_value=object())
