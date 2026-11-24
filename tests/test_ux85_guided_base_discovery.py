@@ -192,6 +192,36 @@ class GuidedComparisonTests(unittest.TestCase):
         a.segmented_control(key="ux112_active_view").set_value("Minha comparação").run()
         self.assertTrue(any("ux97-table" in x.value for x in a.markdown))
 
+    def test_search_without_opening_catalog_and_preserve_canonical_plan(self):
+        a=self.app()
+        a.button(key="rec03a_confirm_subset").click().run()
+        before=deepcopy(a.session_state["advisor_plan"])
+        self.assertFalse(a.checkbox(key="rec03a_show_all").value)
+        self.assertIn("rec03a_search",{x.key for x in a.text_input})
+        a.text_input(key="rec03a_search").set_value("Metz").run()
+        self.assertFalse(a.exception,[x.message for x in a.exception])
+        self.assertFalse(a.checkbox(key="rec03a_show_all").value)
+        self.assertIn("rec03a_pick_metz",{x.key for x in a.checkbox})
+        self.assertEqual(a.session_state["advisor_plan"],before)
+
+    def test_legacy_overlimit_selection_requires_explicit_removal(self):
+        from base_research_expanded_model import load_research
+        a=self.app()
+        a.button(key="rec03a_confirm_subset").click().run()
+        original=deepcopy(a.session_state["advisor_plan"])
+        ids=[c["id"] for c in load_research(include_candidates=True)["cities"]][:6]
+        a.session_state[CHOICE]=ids
+        a.segmented_control(key="ux112_active_view").set_value("Minha comparação").run()
+        self.assertFalse(a.exception,[x.message for x in a.exception])
+        self.assertEqual(len(a.session_state[CHOICE]),6)
+        self.assertTrue(any("mais de cinco cidades" in x.value for x in a.warning))
+        self.assertFalse(any("ux97-table" in x.value for x in a.markdown))
+        a.button(key="ux111_remove_"+ids[-1]).click().run()
+        self.assertFalse(a.exception,[x.message for x in a.exception])
+        self.assertEqual(a.session_state[CHOICE],ids[:5])
+        self.assertTrue(any("ux97-table" in x.value for x in a.markdown))
+        self.assertEqual(a.session_state["advisor_plan"],original)
+
     def test_selection_below_filter_remains_authoritative(self):
         a=self.app()
         a.button(key="rec03a_confirm_subset").click().run()
