@@ -13,7 +13,6 @@ from city_compare import load_cities
 from city_research import load_audit
 from city_market import load_market, observed_rent_summary
 from city_research_round2 import load_round2
-from finance_lifestyle import FRENCH_BUDGET
 from itinerary_planner import load_itinerary, select_outings, basket_totals, visible_map_places
 from italy_honeymoon_ui import render_italy_honeymoon
 from catalog import build_catalog, filter_catalog
@@ -22,7 +21,6 @@ from calendar_model import calendar_plan
 from route_preview import route_endpoints
 from attractions_ui import render_explorer
 from ux501_destination_discovery_ui import render_independent_destination_discovery
-from ux_shared_ui_presentation import page_header, section_heading
 from rec03a_suggestions_ui import render_recommendation_activity
 from rec03a_session import apply_navigation as apply_recommendation_navigation, sync_identity, identity_token, SUGGESTED
 from rec03b_handoff_ui import render_notice, render_profile_context, render_contextual_map, render_planning_return
@@ -742,7 +740,7 @@ elif page == "Comparar cidades":
                         "Uma ou duas bases":"Estudos de troca"}
         current_mode=st.session_state.get("ux_compare_mode")
         if current_mode not in preserved_modes:
-            st.session_state["ux_compare_mode"]=legacy_modes.get(current_mode,"Evidências e lacunas")
+            st.session_state["ux_compare_mode"]=legacy_modes.get(current_mode,"Estudos de troca")
         compare_mode=st.segmented_control(
             "Consultar",preserved_modes,key="ux_compare_mode",selection_mode="single")
         if compare_mode=="Estudos de troca":
@@ -772,7 +770,7 @@ elif page == "Comparar cidades":
             st.button("Abrir passeios e rotas desta base",
                       key="compare_open_base",on_click=navigate_to_base_explorer)
             if selected_candidate not in {"mulhouse","strasbourg","metz","nancy"}:
-                research=find_city(load_research(),selected_candidate)
+                research=find_city(load_research(include_candidates=True),selected_candidate)
                 observed=observed_housing(research)
                 rails=expanded_rail_routes(selected_candidate)
                 with st.expander("Pesquisa da candidata · "+
@@ -1108,7 +1106,7 @@ elif page == "Comparar cidades":
                     for item in city["advantages"]+city["risks"]:
                         st.caption(item)
                     for ad in city["sample_ads"]:
-                        st.link_button(ad["label"],ad["url"])
+                        st.markdown("["+ad["label"]+"]("+ad["url"]+")")
 
 elif page == "Roteiro":
     itinerary = load_itinerary()

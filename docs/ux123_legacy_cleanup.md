@@ -19,3 +19,5 @@ Retirar comparações e rankings redundantes antes de desenhar a localização d
 Não excluir JSONs, fontes, validadores, cálculos financeiros ou modelos históricos utilizados em outros fluxos/testes. UX114/117 revisão oficial e confirmação de troca, UX87/97 comparação moderna, simulações REC04, favoritos, wishlist e TripPlan permanecem. O expander residual é explicitamente temporário. Não apagar os estudos privados.
 
 Teste: atualizar contratos antigos de navegação para verificar as rotas preservadas, ausência dos controles aposentados e nenhuma alteração do planejamento. A suíte de modelos de ranking histórico continua válida porque os arquivos permanecem como evidência histórica. QA visual e CI ainda a confirmar.
+
+A entrada residual preserva o modo de estudos de troca como padrão de compatibilidade, evitando quebrar a recuperação de estudos existentes. O estudo histórico agora também aceita as quatro candidatas DATA23 ao abrir detalhes. Remoção física de módulos e CSS compartilhados permanece condicionada à auditoria de consumidores; a limpeza desta etapa limita-se a código comprovadamente redundante no painel.

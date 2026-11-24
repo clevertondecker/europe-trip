@@ -39,13 +39,13 @@ def _render_dq31_logistics(rows):
                         if key in names]
     default=selected_from_plan or [x for x in FALLBACK_BASKET if x in names]
     chosen=st.multiselect(
-        "Mesmos destinos para comparar as cidades-base",
+        "Destinos da pesquisa histórica",
         options=list(names),default=default,
         format_func=lambda key:names[key],key="ux_dq31_basket",
         help="Se não houver passeios oficiais nesta cesta, usamos uma seleção "
              "exploratória, sem alterar o planejamento.")
     if not chosen:
-        st.info("Selecione ao menos um destino para a comparação.")
+        st.info("Selecione ao menos um destino para consultar as evidências.")
         return
     comparison=logistics_comparison(
         [x["id"] for x in rows],
@@ -101,7 +101,6 @@ def _currency(value):
 def _evidence_table(rows):
     items=[]
     for r in rows:
-        housing=r["housing"]
         items.append({
             "Cidade":r["name"],
             "Moradia":_status(r,"temporary_housing"),
