@@ -5,6 +5,7 @@ once a TripPlan is loaded. No network or persistence side effects.
 """
 from __future__ import annotations
 from copy import deepcopy
+from destination_identity import stored_outing_id, outing_destination_id
 from datetime import date
 from trip_plan_model import new_plan,validate_plan,with_revision,BASES
 from plan_read_models import legacy_plan_projection
@@ -48,7 +49,9 @@ def change_plan(plan:dict,changes:dict)->dict:
 def set_package(plan:dict,destination:str,attractions:list[str],
                 valid_destinations:set[str]|None=None,
                 valid_attractions:set[str]|None=None)->dict:
-    if valid_destinations is not None and destination not in valid_destinations:
+    destination = stored_outing_id(plan, destination)
+    identity = outing_destination_id(destination)
+    if valid_destinations is not None and identity not in {outing_destination_id(d) for d in valid_destinations}:
         raise ValueError("Destino desconhecido")
     if not attractions or len(attractions)>5 or len(attractions)!=len(set(attractions)):
         raise ValueError("Escolha uma a cinco atrações distintas")
@@ -57,33 +60,39 @@ def set_package(plan:dict,destination:str,attractions:list[str],
     packages=deepcopy(plan["packages"])
     packages[destination]=list(attractions)
     updates={"packages":packages}
-    if any(v["destination_id"]==destination for v in plan.get("flexible_visits",[])):
+    if any(outing_destination_id(v["destination_id"])==identity for v in plan.get("flexible_visits",[])):
         visits=deepcopy(plan["flexible_visits"])
         for item in visits:
-            if item["destination_id"]==destination:
+            if outing_destination_id(item["destination_id"])==identity:
                 item["attractions"]=list(attractions)
         updates["flexible_visits"]=visits
     return change_plan(plan,updates)
 
 def remove_package(plan:dict,destination:str)->dict:
+    destination = stored_outing_id(plan, destination)
+    identity = outing_destination_id(destination)
     packages=deepcopy(plan["packages"])
     if destination not in packages:return deepcopy(plan)
     del packages[destination]
-    dates={day:dest for day,dest in plan["assignments"].items() if dest!=destination}
+    dates={day:dest for day,dest in plan["assignments"].items() if outing_destination_id(dest)!=identity}
     visits=[v for v in plan.get("flexible_visits",[])
-            if v["destination_id"]!=destination]
+            if outing_destination_id(v["destination_id"])!=identity]
     return change_plan(plan,{"packages":packages,"assignments":dates,
                               "flexible_visits":visits})
 
 def add_assignment(plan:dict,day:str,destination:str)->dict:
+    destination = stored_outing_id(plan, destination)
+    identity = outing_destination_id(destination)
     chosen = destination in plan["packages"] or any(
-        v["destination_id"] == destination and v["stage"] == "França"
+        outing_destination_id(v["destination_id"]) == identity and v["stage"] == "França"
         for v in plan.get("flexible_visits", []))
     if not chosen:
         raise ValueError("Inclua a cidade no roteiro antes de agendar")
     date.fromisoformat(day)
-    if day in plan["assignments"] and plan["assignments"][day]!=destination:
+    if day in plan["assignments"] and outing_destination_id(plan["assignments"][day])!=identity:
         raise ValueError("Já existe outro passeio neste dia")
+    if day in plan["assignments"]:
+        return deepcopy(plan)
     dates={**plan["assignments"],day:destination}
     return change_plan(plan,{"assignments":dates})
 
