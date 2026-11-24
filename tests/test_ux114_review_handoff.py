@@ -60,6 +60,26 @@ class UX114ExplicitReviewTests(unittest.TestCase):
         self.assertTrue(any("Somente pesquisa" in x.value for x in app.caption))
         self.assertEqual(app.session_state["advisor_plan"]["base_city"],"mulhouse")
 
+    def test_real_app_review_workspace_and_safe_return(self):
+        from pathlib import Path
+        app=AppTest.from_file(str(Path(__file__).resolve().parents[1]/"app.py"),
+                              default_timeout=120).run()
+        self.assertFalse(app.exception,[x.message for x in app.exception])
+        plan=deepcopy(app.session_state["advisor_plan"])
+        app.button(key="ux_sidebar_nav_1").click().run()
+        app.segmented_control(key="ux_section").set_value("Comparar").run()
+        app.session_state["ux114_review_base"]="metz"
+        app.session_state["ux34_candidates"]=["metz"]
+        app.run()
+        self.assertFalse(app.exception,[x.message for x in app.exception])
+        self.assertIn("ux114_review_back",{x.key for x in app.button})
+        self.assertIn("ux34_candidates",{x.key for x in app.multiselect})
+        self.assertEqual(app.session_state["advisor_plan"],plan)
+        app.button(key="ux114_review_back").click().run()
+        self.assertFalse(app.exception,[x.message for x in app.exception])
+        self.assertNotIn("ux114_review_base",app.session_state)
+        self.assertEqual(app.session_state["advisor_plan"],plan)
+
     def test_more_than_eight_destinations_never_truncated_silently(self):
         app=AppTest.from_string("""
 import streamlit as st
