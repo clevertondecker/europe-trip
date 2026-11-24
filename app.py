@@ -840,6 +840,31 @@ elif page == "Mapa & destinos":
                    "= opção em estudo. Reservas, horários e rotas não são inferidos.")
 
 elif page == "Comparar cidades":
+    # UX114: an explicit candidate can enter the EXISTING official review
+    # without exposing the entire legacy comparison below the main journey.
+    preferred_base=st.session_state.get("ux114_review_base")
+    if preferred_base:
+        from trip_plan_model import BASES
+        from rec03a_suggestions_ui import close_base_review
+        if preferred_base not in BASES or preferred_base==active_plan()["base_city"]:
+            close_base_review()
+        else:
+            st.button("← Voltar à minha comparação",key="ux114_review_back",
+                      on_click=close_base_review)
+            st.markdown("### Revisar cidade-base antes de decidir")
+            st.caption("A cidade selecionada foi encaminhada à ferramenta oficial "
+                       "existente. Nenhuma alteração será aplicada sem revisão, "
+                       "confirmação explícita e salvamento.")
+            if st.session_state.get("ux114_review_overlimit"):
+                st.warning("Seu escopo possui "+
+                           str(st.session_state["ux114_review_overlimit"])+
+                           " destinos aceitos pelo comparador exploratório. "
+                           "A revisão oficial aceita até oito. Escolha explicitamente "
+                           "os destinos prioritários abaixo; não removemos nenhum do seu roteiro.")
+            render_city_decision(active_plan(),data,
+                                 sync_sources["finance"]["status"]=="live",
+                                 int(st.session_state.get("ux_days_value",60)))
+            st.stop()
     # UX85: the recommended task and its results come before technical tools.
     # Both legacy widgets retain their keys, callbacks and optional access.
     _rec_activity = render_recommendation_activity(plan=active_plan())
