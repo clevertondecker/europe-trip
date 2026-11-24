@@ -5,6 +5,7 @@ itinerary_flow_model writes canonical TripPlan structures (no second editor).
 """
 from __future__ import annotations
 from dataclasses import dataclass
+from destination_identity import canonical_destination_id
 from itinerary_flow_model import (get_choice,selected_rows,upsert_choice,
                                   remove_choice,UNASSIGNED,FRANCE_STAGE)
 
@@ -21,7 +22,7 @@ class OutingResult:
 
 def existing_choice(plan:dict,catalog:dict,destination_id:str)->dict|None:
     return next((r for r in selected_rows(plan,catalog)
-                 if r["id"]==destination_id),None)
+                 if canonical_destination_id(r["id"])==canonical_destination_id(destination_id)),None)
 
 def preview_outing(plan:dict,catalog:dict,destination_id:str,
                    attractions:list[str]|None=None,period:str|None=None)->dict:
