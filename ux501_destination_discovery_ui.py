@@ -170,12 +170,25 @@ def _turn_page(delta):
     state["ux501_page"] = snapshot["ux501_page"]
 
 
+def _render_pagination(page, pages, *, bottom=False):
+    if pages <= 1:
+        return
+    suffix = "_bottom" if bottom else ""
+    prev, label, nxt = st.columns([1, 2, 1])
+    prev.button("Anterior", key="ux126b_previous"+suffix, disabled=page == 1,
+                on_click=_turn_page, args=(-1,))
+    label.caption(f"Página {page} de {pages}")
+    nxt.button("Próxima", key="ux126b_next"+suffix, disabled=page == pages,
+               on_click=_turn_page, args=(1,))
+
+
 def _restore_filters(discovery):
     state = st.session_state
     snapshot = {**_FILTER_DEFAULTS, **state.get("ux502_discovery_filters", {})}
-    for key in _FILTER_DEFAULTS:
-        if key in state:
-            snapshot[key] = state[key]
+    # Explicit navigation and filter callbacks update the stable snapshot.
+    # Widget keys may be stale after a handoff; bootstrap them only once.
+    if "ux502_discovery_filters" not in state:
+        snapshot.update({key: state[key] for key in _FILTER_DEFAULTS if key in state})
     if snapshot["ux501_country"] not in ["Todos os países", *discovery["countries"]]:
         snapshot["ux501_country"] = "Todos os países"
         snapshot["ux501_page"] = 1
@@ -263,14 +276,10 @@ def render_independent_destination_discovery(*, discovery=None, focused_destinat
         if not matches:
             st.info("Nenhum destino corresponde aos filtros. Experimente outra busca.")
             return
-        if pages > 1:
-            prev, label, nxt = st.columns([1, 2, 1])
-            prev.button("Anterior", key="ux126b_previous", disabled=page == 1,
-                        on_click=_turn_page, args=(-1,))
-            label.caption(f"Página {page} de {pages}")
-            nxt.button("Próxima", key="ux126b_next", disabled=page == pages,
-                       on_click=_turn_page, args=(1,))
+        _render_pagination(page, pages)
         subset = matches[(page-1)*page_size:page*page_size]
+    if any(eligibility[item["id"]]["status"] == "eligible" for item in subset):
+        st.caption("Roteiro: entra no planejamento e no orçamento · Lista: só para pesquisar e comparar bases")
     # Bundled images require no HTTP request. Query Wikimedia only when
     # neither editorial nor local files cover a destination on this page.
     local_photos = {item["id"]: local_destination_photo(item["id"])
@@ -328,8 +337,6 @@ def render_independent_destination_discovery(*, discovery=None, focused_destinat
                                   key="ux502_add_"+item["id"],
                                   use_container_width=True,
                                   on_click=add_destination, args=(item["id"], discovery))
-                    if status["status"] == "eligible":
-                        st.caption("Roteiro: entra no planejamento e no orçamento · Lista: só para pesquisar e comparar bases")
                     with st.container(key=f"ux53_footer_destination_{item['id']}"):
                         with st.expander("Ver atrações e fontes · detalhes", expanded=focused is not None):
                             if photo and photo.get("subject"):
@@ -346,3 +353,5 @@ def render_independent_destination_discovery(*, discovery=None, focused_destinat
                             render_data8_destination_preview(
                                 item["id"], attraction_names={
                                     a["id"]:a["name"] for a in item["attractions"]})
+    if focused is None:
+        _render_pagination(page, pages, bottom=True)
