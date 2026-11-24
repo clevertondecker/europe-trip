@@ -77,6 +77,9 @@ def selected_matrix_html(projection: dict) -> str:
     expected={(base,d["id"]) for base in bases for d in rows}
     if set(cells)!=expected:
         raise ValueError("Matriz não corresponde ao escopo confirmado")
+    # Keep roughly 170 px per city; smaller viewports scroll the existing
+    # accessible region instead of squeezing five cities into unreadable cells.
+    min_table_width=max(520,160+170*len(bases))
     headers=''.join(
         f'<th scope="col">{_safe(projection["names"][base])}</th>'
         for base in bases)
@@ -97,7 +100,8 @@ def selected_matrix_html(projection: dict) -> str:
         'Sem estimativa de retorno ou duração porta a porta.</p>'
         '<div class="ux97-scroll" role="region" tabindex="0" '
         'aria-label="Matriz da comparação de cidades selecionadas">'
-        '<table class="ux97-table"><thead><tr><th scope="col">Destino</th>'
+        '<table class="ux97-table" style="min-width:'+str(min_table_width)+
+        'px"><thead><tr><th scope="col">Destino</th>'
         +headers+'</tr></thead><tbody>'
         +''.join(body)+'</tbody></table></div>'
         '<p class="ux97-footnote">Histórico = registro anterior; Indicativo = '
