@@ -3,7 +3,7 @@ from __future__ import annotations
 from copy import deepcopy
 import json
 from trip01_supplemental_discovery import build_exploration_discovery
-from rail_evidence_unified_model import canonical_place
+from destination_identity import canonical_destination_id as canonical_place
 
 KIND = "nossa-europa-destination-interests"
 VERSION = 1
@@ -34,22 +34,26 @@ def validate_interests(document: dict, discovery=None) -> dict:
         len(document["items"]) > LIMIT):
         raise ValueError("Versão ou formato dos destinos desejados inválido")
     seen = set()
-    for row in document["items"]:
+    clean = deepcopy(document)
+    # Respect the inventory namespace when reading historical projections.
+    by_identity = {canonical_place(key): key for key in valid}
+    for row in clean["items"]:
         if (not isinstance(row, dict) or
             set(row) != {"destination_id", "priority"} or
             not isinstance(row["destination_id"], str) or
-            row["destination_id"] not in valid or
-            row["destination_id"] in seen or
+            canonical_place(row["destination_id"]) not in by_identity or
+            canonical_place(row["destination_id"]) in seen or
             row["priority"] not in PRIORITIES):
             raise ValueError("Destino ou prioridade inválida, ou repetida")
-        seen.add(row["destination_id"])
-    return deepcopy(document)
+        seen.add(canonical_place(row["destination_id"]))
+        row["destination_id"] = by_identity[canonical_place(row["destination_id"])]
+    return clean
 
 
 def set_interest(document: dict, destination_id: str, priority: str, discovery=None) -> dict:
     result = validate_interests(document, discovery)
     valid = _ids(discovery)
-    destination_id = canonical_place(destination_id)
+    destination_id = {canonical_place(key): key for key in valid}.get(canonical_place(destination_id))
     if destination_id not in valid or priority not in PRIORITIES:
         raise ValueError("Destino ou prioridade desconhecidos")
     found = next((row for row in result["items"] if row["destination_id"] == destination_id), None)
@@ -68,7 +72,7 @@ def set_interest(document: dict, destination_id: str, priority: str, discovery=N
 def remove_interest(document: dict, destination_id: str, discovery=None) -> dict:
     result = validate_interests(document, discovery)
     result["items"] = [row for row in result["items"]
-                       if row["destination_id"] != canonical_place(destination_id)]
+                       if canonical_place(row["destination_id"]) != canonical_place(destination_id)]
     if len(result["items"]) != len(document["items"]):
         result["revision"] += 1
     return result
@@ -89,8 +93,9 @@ def reconcile_transient(interests: dict, transient: list[str], discovery=None) -
     result = validate_interests(interests, discovery)
     if not isinstance(transient, list) or len(set(transient)) != len(transient):
         raise ValueError("Seleção temporária inválida")
-    missing = [canonical_place(x) for x in transient
-               if canonical_place(x) not in {r["destination_id"] for r in result["items"]}]
+    by_identity = {canonical_place(key): key for key in _ids(discovery)}
+    missing = [by_identity.get(canonical_place(x), canonical_place(x)) for x in transient
+               if canonical_place(x) not in {canonical_place(r["destination_id"]) for r in result["items"]}]
     if any(x not in _ids(discovery) for x in missing) or len(set(missing)) != len(missing):
         raise ValueError("Destino temporário inválido")
     return result, missing
