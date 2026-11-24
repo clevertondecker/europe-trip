@@ -143,8 +143,9 @@ class SelectedVisualAppTests(unittest.TestCase):
         self.assertTrue(any("ux97-table" in m.value for m in app.markdown))
         self.assertTrue(any("ux97-metrics" in m.value for m in app.markdown))
         rendered=[m.value for m in app.markdown]
-        self.assertLess(next(i for i,x in enumerate(rendered) if "ux97-table" in x),
-                        next(i for i,x in enumerate(rendered) if "Sugestões de bases para investigar" in x))
+        # UX112 moves the canonical UX87 matrix after exploration.
+        self.assertLess(next(i for i,x in enumerate(rendered) if "Cidades-base para investigar" in x),
+                        next(i for i,x in enumerate(rendered) if "ux97-table" in x))
         self.assertTrue(any(x.key=="rec03a_handoff_planning" for x in app.button))
         self.assertFalse(any(x.key=="rec03a_planning_open" for x in app.checkbox))
         # Sources can be explored without first opening the technical matrix.
