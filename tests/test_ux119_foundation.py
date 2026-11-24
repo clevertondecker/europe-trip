@@ -46,6 +46,19 @@ class PlanningFoundationTests(unittest.TestCase):
         self.assertEqual((self.plan,groups),before)
         return {r["id"]:r for r in timeline}
 
+    def test_metadata_only_visit_keeps_canonical_assignment(self):
+        from itinerary_flow_model import selected_rows
+        from planning_store import remove_assignment
+        self.assertNotIn("strasbourg",self.plan["packages"])
+        row=next(r for r in selected_rows(self.plan,self.catalog)
+                 if r["id"]=="strasbourg")
+        self.assertEqual(row["exact_dates"],[self.saturdays[-1]])
+        self.assertEqual(row["attractions"],[])
+        unscheduled=remove_assignment(self.plan,self.saturdays[-1])
+        row=next(r for r in selected_rows(unscheduled,self.catalog)
+                 if r["id"]=="strasbourg")
+        self.assertEqual(row["exact_dates"],[])
+
     def test_group_interval_is_not_individual_date(self):
         self._check(self.groups,2)
         undated=create_group(self.groups,self.plan,self.catalog,name="Suíça",
