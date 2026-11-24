@@ -45,7 +45,7 @@ class UnifiedCardLayoutTests(unittest.TestCase):
         code = (ROOT / "ux501_destination_discovery_ui.py").read_text(encoding="utf-8")
         for term in ("Fonte original", "Fonte e licença", "Foto a pesquisar",
                      "Consultar fonte turística", "Ver atrações e fontes",
-                     "Adicionar à minha lista", "on_click=add_destination",
+                     "Salvar na lista", "on_click=add_destination", "Adicionar ao roteiro", "commit_outing(",
                      'key="ux501_page"'):
             self.assertIn(term, code)
 
