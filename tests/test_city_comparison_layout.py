@@ -11,8 +11,8 @@ class CityComparisonLayoutTests(unittest.TestCase):
         cls.page = contents.split('elif page == "Comparar cidades":', 1)[1].split('elif page == "Roteiro":', 1)[0]
         cls.app = contents
 
-    def test_four_navigation_tabs(self):
-        for title in ("Visão rápida", "Moradia", "Transporte e custos", "Comparar e ajustar"):
+    def test_preserved_reference_sections(self):
+        for title in ("Visão rápida", "Moradia", "Transporte e custos"):
             self.assertIn(title, self.page)
         self.assertIn("st.segmented_control(", self.page)
         self.assertIn("active_section", self.page)
@@ -23,10 +23,14 @@ class CityComparisonLayoutTests(unittest.TestCase):
                       "Fonte TER", "Catálogo", "Tarifa reduzida Carte Fluo"):
             self.assertIn(field, self.page)
 
-    def test_preserves_weighted_ranking_and_real_links(self):
-        for code in ("rank_cities(", "initialize_weight_state(",
-                     "st.column_config.LinkColumn", "load_market()", "load_audit()"):
-            self.assertIn(code, self.page)
+    def test_removes_editorial_ranking_and_preserves_real_links(self):
+        for code in ("rank_cities(", "initialize_weight_state(", "city_compare_pair", "city_weight_"):
+            self.assertNotIn(code,self.page)
+        for code in ("st.column_config.LinkColumn", "load_market()", "load_audit()",
+                     "Requisitos e documentos históricos", "render_city_decision(",
+                     "render_recommendation_activity("):
+            self.assertIn(code,self.page)
+        self.assertNotIn("render_route_comparison(",self.page)
 
     def test_no_old_repeated_rail_links(self):
         self.assertNotIn('st.link_button(f"Fonte TER: {item', self.page)

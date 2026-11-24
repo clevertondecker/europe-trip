@@ -9,11 +9,10 @@ import streamlit as st
 from data_model import STATUS_LABEL, calculate_scenario, get_scenario, load_data, money_brl, select_places
 from map_presentation_ui import render_map_view
 from drive_sync import load_live_updates, update_map_places
-from city_compare import get_preset, initialize_weight_state, load_cities, normalized_weights, rank_cities
-from city_research import city_readiness, load_audit
-from city_market import load_market, observed_rent_summary, example_train_couple_return
+from city_compare import load_cities
+from city_research import load_audit
+from city_market import load_market, observed_rent_summary
 from city_research_round2 import load_round2
-from finance_lifestyle import FRENCH_BUDGET, audit_subtotals, lifestyle_outcome
 from itinerary_planner import load_itinerary, select_outings, basket_totals, visible_map_places
 from italy_honeymoon_ui import render_italy_honeymoon
 from catalog import build_catalog, filter_catalog
@@ -22,7 +21,6 @@ from calendar_model import calendar_plan
 from route_preview import route_endpoints
 from attractions_ui import render_explorer
 from ux501_destination_discovery_ui import render_independent_destination_discovery
-from ux_shared_ui_presentation import page_header, section_heading
 from rec03a_suggestions_ui import render_recommendation_activity
 from rec03a_session import apply_navigation as apply_recommendation_navigation, sync_identity, identity_token, SUGGESTED
 from rec03b_handoff_ui import render_notice, render_profile_context, render_contextual_map, render_planning_return
@@ -44,8 +42,7 @@ from continuity_ui import (apply_pending_restore,render_continuity_panel,
                            restore_private_on_start,autosave_private_if_requested,private_status_label)
 from planning_context_ui import (render_context,render_home_continue,
                                  render_breadcrumb,return_to_edit,show_settings)
-from base_explorer_ui import render_base_explorer, _comparison as render_route_comparison
-from base_explorer_model import load_exploration
+from base_explorer_ui import render_base_explorer
 from base_change_ui import render_base_change
 from city_decision_ui import render_city_decision
 from base_weight_coverage_ui import render_weight_coverage
@@ -241,16 +238,6 @@ def navigate_to_attractions() -> None:
 def navigate_to_consultor() -> None:
     st.session_state["main_navigation"] = "Roteiro"
     st.session_state["itinerary_section"] = "Meus passeios"
-
-
-def simulate_city_in_budget(city_name: str) -> None:
-    """Carry a hypothetical base to the finance page, without approving D-004."""
-    st.session_state["unified_city"] = city_name
-    candidates={x["name"]:x["id"] for x in base_options(include_candidates=True)}
-    if city_name in candidates:
-        st.session_state["scenario_base_selected"]=candidates[city_name]
-    st.session_state["unified_override_rent"] = True
-    st.session_state["main_navigation"] = "Orçamento"
 
 
 def _select_scenario_sidebar() -> None:
@@ -742,23 +729,26 @@ elif page == "Comparar cidades":
     # Both legacy widgets retain their keys, callbacks and optional access.
     _rec_activity = render_recommendation_activity(plan=active_plan())
     render_contextual_shortcuts("comparison")
-    with st.expander("Análises antigas de cidades-base · avançado", expanded=False):
-        st.caption("Ferramentas anteriores preservadas para consultas adicionais.")
-        # Retired split-stay mode is never presented or restored as an active widget.
-        if st.session_state.get("ux_compare_mode")=="Uma ou duas bases":
-            st.session_state["ux_compare_mode"]="Impacto da troca"
+    with st.expander("Pesquisas e estudos preservados · temporário", expanded=False):
+        st.caption("Consultas e estudos ainda não migrados. Para comparar cidades, use a comparação principal acima.")
+        # Migrate stale widget preferences without touching the official plan.
+        preserved_modes = ["Estudos de troca","Evidências e lacunas","Referências históricas"]
+        legacy_modes = {"Impacto da troca":"Estudos de troca",
+                        "Pesos das 30 cidades":"Evidências e lacunas",
+                        "Estudo histórico":"Referências históricas",
+                        "Comparar mesmas viagens":"Evidências e lacunas",
+                        "Uma ou duas bases":"Estudos de troca"}
+        current_mode=st.session_state.get("ux_compare_mode")
+        if current_mode not in preserved_modes:
+            st.session_state["ux_compare_mode"]=legacy_modes.get(current_mode,"Estudos de troca")
         compare_mode=st.segmented_control(
-        "Tipo de análise",["Impacto da troca","Pesos das 30 cidades",
-        "Comparar mesmas viagens","Estudo histórico"],
-        key="ux_compare_mode",selection_mode="single")
-        if compare_mode in ("Impacto da troca",None):
+            "Consultar",preserved_modes,key="ux_compare_mode",selection_mode="single")
+        if compare_mode=="Estudos de troca":
             render_city_decision(active_plan(),data,
                                  sync_sources["finance"]["status"]=="live",
                                  int(st.session_state.get("ux_days_value",60)))
-        elif compare_mode=="Pesos das 30 cidades":
+        elif compare_mode in ("Evidências e lacunas",None):
             render_weight_coverage()
-        elif compare_mode=="Comparar mesmas viagens":
-            render_route_comparison(load_exploration())
         else:
 
             import pandas as pd
@@ -780,7 +770,7 @@ elif page == "Comparar cidades":
             st.button("Abrir passeios e rotas desta base",
                       key="compare_open_base",on_click=navigate_to_base_explorer)
             if selected_candidate not in {"mulhouse","strasbourg","metz","nancy"}:
-                research=find_city(load_research(),selected_candidate)
+                research=find_city(load_research(include_candidates=True),selected_candidate)
                 observed=observed_housing(research)
                 rails=expanded_rail_routes(selected_candidate)
                 with st.expander("Pesquisa da candidata · "+
@@ -811,9 +801,7 @@ elif page == "Comparar cidades":
             city_audit = load_audit()
             market = load_market()
             round2 = load_round2()
-            market_by_name = {city["name"]: city for city in market["cities"]}
             audit_by_name = {city["name"]: city for city in city_audit["cities"]}
-            criteria_ids = [criterion["id"] for criterion in city_data["criteria"]]
 
             st.markdown(
                 "<div class='page-eyebrow'>PLANEJAMENTO 2027 · FRANÇA</div>"
@@ -842,7 +830,9 @@ elif page == "Comparar cidades":
                     )
             # Native segmented control has its own selected-state visual; it does not rely
             # on fragile CSS selectors for Streamlit tab internals.
-            sections = ["Visão rápida", "Moradia", "Transporte e custos", "Comparar e ajustar"]
+            sections = ["Visão rápida", "Moradia", "Transporte e custos"]
+            if st.session_state.get("city_compare_section") not in (None,*sections):
+                st.session_state["city_compare_section"]="Visão rápida"
             active_section = st.segmented_control(
                 "Seção do comparador", sections, default="Visão rápida",
                 selection_mode="single", key="city_compare_section",
@@ -851,7 +841,6 @@ elif page == "Comparar cidades":
                     "Visão rápida": "◉  Visão rápida",
                     "Moradia": "⌂  Moradia",
                     "Transporte e custos": "⇄  Transporte e custos",
-                    "Comparar e ajustar": "⚖  Comparar e ajustar",
                 }[section],
             )
             if active_section is None:
@@ -1102,115 +1091,22 @@ elif page == "Comparar cidades":
                                round2["common_sources"][1]["url"])
 
 
-            elif active_section == "Comparar e ajustar":
-                st.markdown("<div class='page-section'>Ranking de preferências históricas</div>",
-                            unsafe_allow_html=True)
-                st.caption("A pontuação de 0 a 5 vem de avaliações editoriais de 2026. "
-                           "Não mede disponibilidade de imóveis ou custos de 2027.")
-                profile = st.selectbox(
-                    "Perfil de comparação", city_data["presets"],
-                    format_func=lambda item: item["label"], key="city_compare_profile",
-                    help="Pesos extraídos da matriz histórica do projeto.")
-                initialize_weight_state(st.session_state, profile["id"],
-                                        get_preset(city_data, profile["id"]))
-                weights = {}
-                for idx, criterion in enumerate(city_data["criteria"]):
-                    # Three well-balanced columns instead of a long vertical list.
-                    if idx % 3 == 0:
-                        slider_cols = st.columns(3, gap="medium")
-                    with slider_cols[idx % 3]:
-                        weights[criterion["id"]] = st.slider(
-                            criterion["label"], min_value=0, max_value=100, step=5,
-                            key=f"city_weight_{criterion['id']}", help=criterion["explanation"])
-                total_weights = sum(weights.values())
-                if total_weights == 0:
-                    st.warning("Ajuste pelo menos um critério acima de zero.")
-                else:
-                    actual_weights = normalized_weights(weights, criteria_ids)
-                    st.caption("Pesos normalizados: " + " · ".join(
-                        f"{crit['label']}: {actual_weights[crit['id']]*100:.0f}%"
-                        for crit in city_data["criteria"]))
-                    ranking = rank_cities(city_data["cities"], weights, criteria_ids)
-                    for group_start in range(0, len(ranking), 2):
-                        for col, (position, result) in zip(
-                            st.columns(2, gap="medium"),
-                            list(enumerate(ranking, start=1))[group_start:group_start + 2]
-                        ):
-                            city = result["city"]
-                            pct = max(0.0, min(100.0, result["score"] * 20))
-                            with col:
-                                st.markdown(
-                                    "<div class='city-ranking-card'>"
-                                    f"<span>#{position} · Preferência simulada</span>"
-                                    f"<strong>{escape(city['name'])}</strong>"
-                                    f"<div class='city-ranking-number'>{result['score']:.3f}"
-                                    "<small> / 5</small></div>"
-                                    f"<div class='city-score__bar'><span style='width:{pct:.2f}%'></span></div>"
-                                    "</div>", unsafe_allow_html=True)
-                    score_rows = [
-                        {"Cidade": result["city"]["name"],
-                         "Score ponderado": round(result["score"], 3),
-                         **{criterion["label"]: result["city"]["scores"][criterion["id"]]
-                            for criterion in city_data["criteria"]}}
-                        for result in ranking
-                    ]
-                    with st.expander("Ver notas de cada critério", expanded=False):
-                        st.dataframe(pd.DataFrame(score_rows), hide_index=True,
-                                     use_container_width=True,
-                                     column_config={
-                                         "Score ponderado": st.column_config.NumberColumn(format="%.3f")
-                                     })
-                    st.markdown("<div class='page-section'>Duas cidades, lado a lado</div>",
-                                unsafe_allow_html=True)
-                    selections = st.multiselect("Escolha até duas cidades",
-                                                [c["name"] for c in city_data["cities"]],
-                                                default=["Mulhouse", "Strasbourg"],
-                                                max_selections=2, key="city_compare_pair")
-                    results_by_name = {item["city"]["name"]: item for item in ranking}
-                    if not selections:
-                        st.info("Escolha uma ou duas cidades para comparar os detalhes.")
-                    for col, city_name in zip(st.columns(2, gap="medium"), selections):
-                        city = results_by_name[city_name]["city"]
-                        market_city = market_by_name[city_name]
-                        sample = observed_rent_summary(market_city)
-                        with col:
-                            st.markdown(
-                                "<div class='city-side'>"
-                                f"<div class='city-side__name'>{escape(city_name)}</div>"
-                                f"<div class='city-side__score'>{results_by_name[city_name]['score']:.3f}/5"
-                                " <small>nota editorial</small></div>"
-                                f"<div class='city-side__sample'>€ {sample['sample_median_eur_month']:,.0f}"
-                                " <small>/mês · mediana de 3 anúncios</small></div>"
-                                f"<p>{escape(city['summary'])}</p>"
-                                "</div>", unsafe_allow_html=True)
-                            st.markdown(
-                                "<div class='city-fact city-fact--good'><strong>✓ Pontos favoráveis "
-                                "(avaliação histórica)</strong><ul>" +
-                                "".join(f"<li>{escape(value)}</li>" for value in city["advantages"]) +
-                                "</ul></div>", unsafe_allow_html=True)
-                            st.markdown(
-                                "<div class='city-fact city-fact--warn'><strong>! Riscos e verificações</strong>"
-                                "<ul>" + "".join(f"<li>{escape(value)}</li>" for value in
-                                                (city["risks"] + audit_by_name[city_name]["risks"][:1])) +
-                                "</ul></div>", unsafe_allow_html=True)
-                            st.button(f"Simular {city_name} no orçamento →",key=f"city_budget_{city_name}",
-                                      use_container_width=True,on_click=simulate_city_in_budget,
-                                      args=(city_name,))
-                            with st.expander(f"Exemplos históricos em {city_name}"):
-                                for ad in city["sample_ads"]:
-                                    st.link_button(ad["label"], ad["url"], use_container_width=True)
-                with st.expander("Metodologia, requisitos e documentos", expanded=False):
-                    st.markdown("**Amostra observada ≠ preço de mercado ≠ nota editorial ≠ cotação para 2027.**")
-                    st.caption("Todos os valores de mercado são registros de novembro de 2026. "
-                               "Uma cidade só estará pronta quando houver imóveis elegíveis para as datas "
-                               "reais, custo completo e os oito requisitos de auditoria comprovados.")
-                    for gate in city_audit["standards"]:
-                        st.markdown(f"**{escape(gate['label'])}**")
-                        st.caption(gate["gate"])
-                    st.link_button("Ver relatório e lacunas", 
-                        "https://github.com/clevertondecker/europe-trip/blob/main/RELATORIO_PRIMEIRA_COMPARACAO_REAL.md")
-                    st.link_button("Abrir matriz original no Drive", city_data["source"]["url"])
-                    st.link_button("Decisão D-004 no Drive", data["sources"]["decisions"])
+
+            with st.expander("Requisitos e documentos históricos", expanded=False):
+                st.caption("Amostras de mercado e avaliações históricas não são cotações para 2027.")
+                for gate in city_audit["standards"]:
+                    st.markdown(f"**{escape(gate['label'])}**")
+                    st.caption(gate["gate"])
+                st.link_button("Ver relatório e lacunas",
+                    "https://github.com/clevertondecker/europe-trip/blob/main/RELATORIO_PRIMEIRA_COMPARACAO_REAL.md")
+                st.link_button("Abrir matriz original no Drive", city_data["source"]["url"])
+                st.link_button("Decisão D-004 no Drive", data["sources"]["decisions"])
+                for city in city_data["cities"]:
+                    st.markdown("**"+escape(city["name"])+" · contexto editorial de 2026**")
+                    for item in city["advantages"]+city["risks"]:
+                        st.caption(item)
+                    for ad in city["sample_ads"]:
+                        st.markdown("["+ad["label"]+"]("+ad["url"]+")")
 
 elif page == "Roteiro":
     itinerary = load_itinerary()
