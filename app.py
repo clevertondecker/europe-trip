@@ -844,26 +844,31 @@ elif page == "Comparar cidades":
     # without exposing the entire legacy comparison below the main journey.
     preferred_base=st.session_state.get("ux114_review_base")
     if preferred_base:
-        from trip_plan_model import BASES
-        from rec03a_suggestions_ui import close_base_review
-        if preferred_base not in BASES or preferred_base==active_plan()["base_city"]:
+        from rec03a_suggestions_ui import (
+            close_base_review,validate_base_review,render_base_review_scope
+        )
+        context=validate_base_review(active_plan())
+        if context is None:
+            # Changes of plan, identity, wishes or scope invalidate the review.
+            # The existing UX34 workspace is restored rather than reused stale.
             close_base_review()
+            if st.session_state.get("ux34_notice"):
+                st.success(st.session_state.pop("ux34_notice"))
+            else:
+                st.warning("A revisão anterior não corresponde mais ao planejamento "
+                           "ou à pesquisa atual. Escolha a cidade novamente.")
         else:
             st.button("← Voltar à minha comparação",key="ux114_review_back",
                       on_click=close_base_review)
             st.markdown("### Revisar cidade-base antes de decidir")
-            st.caption("A cidade selecionada foi encaminhada à ferramenta oficial "
-                       "existente. Nenhuma alteração será aplicada sem revisão, "
-                       "confirmação explícita e salvamento.")
-            if st.session_state.get("ux114_review_overlimit"):
-                st.warning("Seu escopo possui "+
-                           str(st.session_state["ux114_review_overlimit"])+
-                           " destinos aceitos pelo comparador exploratório. "
-                           "A revisão oficial aceita até oito. Escolha explicitamente "
-                           "os destinos prioritários abaixo; não removemos nenhum do seu roteiro.")
-            render_city_decision(active_plan(),data,
-                                 sync_sources["finance"]["status"]=="live",
-                                 int(st.session_state.get("ux_days_value",60)))
+            st.caption("Candidata: "+context["base"]+
+                       " · comparação explícita com a base atual. "
+                       "Nenhuma alteração foi salva.")
+            if render_base_review_scope(context):
+                render_city_decision(active_plan(),data,
+                                     sync_sources["finance"]["status"]=="live",
+                                     int(st.session_state.get("ux_days_value",60)),
+                                     contextual_base=context["base"])
             st.stop()
     # UX85: the recommended task and its results come before technical tools.
     # Both legacy widgets retain their keys, callbacks and optional access.
