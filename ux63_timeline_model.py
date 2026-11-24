@@ -1,13 +1,17 @@
 """Shared read-only temporal projection: individual dates never derive from groups."""
 from __future__ import annotations
 from itinerary_flow_model import selected_rows, UNASSIGNED, FRANCE_STAGE
-from ux48_weekend_groups_model import PERIODS, _trip_days
+from ux48_weekend_groups_model import PERIODS, _trip_days, validate_groups
 
 
 def project_timeline(plan, catalog, weekend_groups=None, stage=None):
     rows = selected_rows(plan, catalog)
     groups = (weekend_groups.get("groups", []) if isinstance(weekend_groups, dict)
               and weekend_groups.get("plan_id", plan["plan_id"]) == plan["plan_id"] else [])
+    # Real persisted sidecars have a plan identity and schema; validate them.
+    # Keep lightweight read-only projections usable for legacy callers/fixtures.
+    if groups and "schema_version" in weekend_groups:
+        validate_groups(weekend_groups, plan, catalog)
     associated = {}
     for group in groups:
         for index, dest in enumerate(group.get("destinations", []), 1):
