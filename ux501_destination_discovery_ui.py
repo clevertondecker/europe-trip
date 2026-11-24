@@ -123,15 +123,16 @@ def _destination_wishlist_state(interests: dict | None, destination_id: str) -> 
 def render_independent_destination_discovery(*, discovery=None) -> None:
     discovery = discovery if discovery is not None else _cached_discovery()
     from attractions_model import load_attractions
-    from itinerary_eligibility import itinerary_eligibility
+    from itinerary_eligibility import itinerary_eligibility, eligibility_index
     from destination_identity import canonical_destination_id
     from itinerary_flow_model import is_selected, UNASSIGNED
     from planning_session import active_plan, commit_outing
-    from ux_planning_journey_ui import request_planning
+    from ux_planning_journey_ui import _workspace_organize
     from dataclasses import asdict
     catalog = load_attractions()
     destinations = discovery["destinations"]
-    eligibility = {item["id"]: itinerary_eligibility(item["id"], catalog) for item in destinations}
+    index = eligibility_index(catalog)
+    eligibility = {item["id"]: itinerary_eligibility(item["id"], catalog, index=index) for item in destinations}
     by_id = {item["id"]: item for item in destinations}
     # Keep the page header ahead of filters and wishlist save tools.
     if st.session_state.get("ux502_view","Descobrir lugares")!="Minha lista":
@@ -177,7 +178,8 @@ def render_independent_destination_discovery(*, discovery=None) -> None:
     )
     count = sum(eligibility[item["id"]]["status"] == "eligible" for item in matches)
     research = sum(eligibility[item["id"]]["status"] == "research_only" for item in matches)
-    st.caption(f"{count} podem entrar no roteiro · {research} em pesquisa")
+    other = len(matches) - count - research
+    st.caption(f"{count} podem entrar no roteiro · {research} em pesquisa" + (f" · {other} em outra etapa" if other else ""))
     if mode == "Posso planejar agora":
         matches = [item for item in matches if eligibility[item["id"]]["status"] == "eligible"]
     st.caption(f"{len(matches)} destino(s) encontrados — resultados do catálogo, "
@@ -217,11 +219,15 @@ def render_independent_destination_discovery(*, discovery=None) -> None:
                     # attractions and categories, not invented editorial text.
                     st.caption(_destination_teaser(item))
                     status = eligibility[item["id"]]
-                    canonical_id = canonical_destination_id(item["id"])
+                    canonical_id = status["outing_id"]
                     if status["status"] == "eligible":
                         if is_selected(active_plan(), canonical_id):
+                            from itinerary_flow_model import selected_rows
+                            visit = next((v for v in selected_rows(active_plan(), catalog) if v["id"] == canonical_id), None)
                             st.caption("✓ No roteiro")
-                            st.button("Organizar", key="ux126_organize_"+item["id"], on_click=request_planning, args=(st.session_state, "organize"))
+                            if visit and not visit["attractions"] and not visit["exact_dates"]:
+                                st.caption("Atrações e datas a definir" if visit["period"] == UNASSIGNED else "Atrações a definir")
+                            st.button("Organizar " + item["name"], key="ux126_organize_"+item["id"], on_click=_workspace_organize, args=(canonical_id, status["stage"]))
                         elif st.button("Adicionar ao roteiro", key="ux126_add_"+item["id"], type="primary", use_container_width=True):
                             try:
                                 outcome = commit_outing(canonical_id, [], UNASSIGNED, confirmed=True)
