@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
+from destination_identity import canonical_destination_id
 from ux502_destination_interests_model import validate_interests
 
 STAGE = "europe_season"
@@ -22,6 +23,9 @@ def _active(snapshot):
 def confirm_scope(interests, destination_ids, discovery, *, stage=STAGE):
     """Explicit user action only. Return a disposable, session-local value."""
     snapshot = _snapshot(interests, discovery)
+    active_by_identity = {canonical_destination_id(x): x for x in _active(snapshot)}
+    if isinstance(destination_ids, list) and all(isinstance(x, str) and x.strip() for x in destination_ids):
+        destination_ids = [active_by_identity.get(canonical_destination_id(x), x) for x in destination_ids]
     if (stage != STAGE or not isinstance(destination_ids, list)
             or not destination_ids
             or any(not isinstance(x, str) or x not in _active(snapshot)
