@@ -62,3 +62,30 @@ class EligibilityTests(unittest.TestCase):
         self.assertIsNotNone(expected["minimum_oneway_min"])
         self.assertEqual(expected, get_rail_evidence("metz", "luxembourg"))
         self.assertEqual(expected, get_rail_evidence("metz", "luxemburgo"))
+
+
+class DiscoveryAppTests(unittest.TestCase):
+    def test_card_action_and_filter(self):
+        from pathlib import Path
+        from streamlit.testing.v1 import AppTest
+        root = Path(__file__).resolve().parents[1]
+        app = AppTest.from_file(str(root / "app.py"), default_timeout=120).run()
+        app.button(key="ux_sidebar_nav_1").click().run()
+        app.segmented_control(key="ux_section").set_value("Passeios").run()
+        app.segmented_control(key="ux64_public_task").set_value("Descobrir").run()
+        app.text_input(key="ux501_search").set_value("Aachen").run()
+        self.assertFalse(app.exception, [x.message for x in app.exception])
+        self.assertNotIn("ux126_add_aachen", {x.key for x in app.button})
+        self.assertTrue(any("Em pesquisa" in x.value for x in app.caption))
+        self.assertTrue(any("ainda não foram catalogadas" in x.value for x in app.caption))
+        app.radio(key="ux126_eligibility_filter").set_value("Posso planejar agora").run()
+        self.assertNotIn("ux502_add_aachen", {x.key for x in app.button})
+        app.text_input(key="ux501_search").set_value("Colmar").run()
+        app.button(key="ux126_add_colmar").click().run()
+        self.assertFalse(app.exception, [x.message for x in app.exception])
+        self.assertTrue(is_selected(app.session_state["advisor_plan"], "colmar"))
+        self.assertIn("ux126_organize_colmar", {x.key for x in app.button})
+        app.button(key="ux126_organize_colmar").click().run()
+        self.assertFalse(app.exception, [x.message for x in app.exception])
+        self.assertEqual(app.session_state["ux64_public_task"], "Organizar")
+        self.assertTrue(is_selected(app.session_state["advisor_plan"], "colmar"))
