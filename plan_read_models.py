@@ -6,14 +6,15 @@ This module does not write session state or perform persistence.
 from __future__ import annotations
 from copy import deepcopy
 from trip_plan_model import validate_plan
+from destination_identity import outing_destination_id, unique_outing_keys
 
 
 def legacy_plan_projection(plan: dict) -> dict:
     """Fresh defensive snapshot for older page consumers and widgets."""
     validate_plan(plan)
     return {
-        "explore_packages": deepcopy(plan["packages"]),
-        "explore_calendar": deepcopy(plan["assignments"]),
+        "explore_packages": {key: deepcopy(plan["packages"][original]) for key, original in unique_outing_keys(plan["packages"]).items()},
+        "explore_calendar": {day: outing_destination_id(dest) for day, dest in plan["assignments"].items()},
         "explore_base": plan["base_city"],
         "unified_city": plan["base_city"].capitalize(),
         "unified_scenario": plan["budget_scenario"],
@@ -30,8 +31,8 @@ def read_plan_view(plan: dict) -> dict:
         "packages": deepcopy(plan["packages"]),
         "assignments": deepcopy(plan["assignments"]),
         "preferences": deepcopy(plan.get("preferences") or {}),
-        "mandatory_destinations": deepcopy(plan.get("mandatory_destinations") or []),
-        "excluded_destinations": deepcopy(plan.get("excluded_destinations") or []),
+        "mandatory_destinations": [outing_destination_id(d) for d in plan.get("mandatory_destinations", [])],
+        "excluded_destinations": [outing_destination_id(d) for d in plan.get("excluded_destinations", [])],
     }
 
 
