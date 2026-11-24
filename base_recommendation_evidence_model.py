@@ -5,7 +5,6 @@ No ranking, scope inference, persistence, or changes to historical datasets.
 from __future__ import annotations
 
 from importlib import import_module
-from destination_identity import canonical_destination_id
 
 from base_research_expanded_model import load_research
 from rail_evidence_unified_model import canonical_place
@@ -52,9 +51,8 @@ def build_recommendation_matrix(interests: dict, destination_ids: list[str], *,
     discovery = discovery if discovery is not None else build_exploration_discovery()
     research = research if research is not None else load_research(include_candidates=True)
     active = set(selected_destinations_for_comparison(interests, discovery))
-    active_by_identity = {canonical_destination_id(x): x for x in active}
-    if isinstance(destination_ids, list) and all(isinstance(x, str) and x.strip() for x in destination_ids):
-        destination_ids = [active_by_identity.get(canonical_destination_id(x), x) for x in destination_ids]
+    # The wishlist resolves historical aliases; an explicit scope must use
+    # the exact active IDs of the current projection, not silently coerce input.
     if (not isinstance(destination_ids, list) or not destination_ids
             or any(not isinstance(x, str) or x not in active for x in destination_ids)
             or len(set(destination_ids)) != len(destination_ids)):
