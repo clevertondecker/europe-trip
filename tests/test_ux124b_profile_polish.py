@@ -37,6 +37,27 @@ class ProfilePolishTests(unittest.TestCase):
         route["historical_typical"]=None
         self.assertEqual(typical_time_label(route),"Tempo médio não documentado")
 
+    def test_real_route_reconsulted_average_preserves_shared_cell(self):
+        view=city_profile("strasbourg")
+        row=next(r for r in view["routes"] if r["destination_id"]=="belfort")
+        cell=row["cell"]
+        self.assertEqual(typical_time_label(row),cell["typical_label"])
+        self.assertIn("média reconsultada",cell["typical_label"])
+        self.assertIn("no snapshot",cell["typical_label"])
+
+    def test_focused_discovery_uses_canonical_id_and_existing_card(self):
+        app=AppTest.from_string(
+            'import streamlit as st\n'
+            'from ux501_destination_discovery_ui import render_independent_destination_discovery\n'
+            'from ux502_destination_interests_model import empty_interests\n'
+            'if "ux502_interests" not in st.session_state: st.session_state["ux502_interests"]=empty_interests()\n'
+            'render_independent_destination_discovery(focused_destination="basel")',
+            default_timeout=120).run()
+        self.assertFalse(app.exception,[e.message for e in app.exception])
+        self.assertEqual([b.key for b in app.button if b.key and b.key.startswith("ux502_add_")],["ux502_add_basel"])
+        self.assertFalse(any(x.key=="ux501_country" for x in app.selectbox))
+        self.assertEqual(app.session_state["ux502_interests"]["items"],[])
+
     def test_financial_limitation_uses_rec04_capabilities(self):
         from rec04_candidate_capabilities import capability_for
         for base in ("mulhouse","annecy"):
@@ -87,7 +108,7 @@ class ProfilePolishTests(unittest.TestCase):
             'from ux124_city_profile_ui import render_city_profile\n'
             'from ux502_destination_interests_model import empty_interests,set_interest\n'
             'import streamlit as st\n'
-            'if "ux502_interests" not in st.session_state: st.session_state["ux502_interests"]=set_interest(set_interest(empty_interests(),"basel","must_visit"),"oeschinensee","must_visit")\n'
+            'if "ux502_interests" not in st.session_state: st.session_state["ux502_interests"]=set_interest(set_interest(empty_interests(),"basel","must_visit"),"oeschinen","must_visit")\n'
             'render_city_profile("mulhouse")',default_timeout=120).run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
         self.assertEqual(app.metric[0].value,"€ 1.350")

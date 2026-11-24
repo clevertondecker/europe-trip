@@ -25,8 +25,6 @@ def practical_facts(profile):
     lead=[e for e in profile["evidence"] if e["summary"].rstrip(".")==intro.rstrip(".")
           or e["summary"]==profile["summary"]]
     occupied={e["section"] for e in lead}
-    if occupied.intersection(("transport","quality_of_life")):
-        occupied.update(("transport","quality_of_life"))
     urls={e.get("source_url") for e in lead}
     # Only complementary practical subjects. Do not relabel an unverified
     # rent/remote-work observation as a benefit, since those have own blocks.
