@@ -274,7 +274,7 @@ def _review_official_change(plan:dict,comparison:dict,
         chosen=st.selectbox("Base apta para revisão oficial",list(supported),
                             key="ux34_apply_candidate",
                             format_func=lambda k:supported[k])
-    action_label=("Revisar e confirmar "+supported[chosen]
+    action_label=("Trocar para "+supported[chosen]
                   if contextual_base is not None else "Revisar impacto antes de aplicar")
     if contextual_base is not None:
         keep,proceed=st.columns(2)
@@ -311,10 +311,12 @@ def _review_official_change(plan:dict,comparison:dict,
                comparison["official_name"]+" → "+supported[chosen]+
                ". Dias, datas, passeios e decisões anteriores permanecem. "
                "Revise hospedagem, traslados e retornos antes de reservar.")
-    confirmation=st.checkbox("Confirmo que desejo alterar minha cidade-base oficial",
-                             key="ux34_apply_ack",value=False)
+    confirmation=(True if contextual_base is not None else st.checkbox(
+        "Confirmo que desejo alterar minha cidade-base oficial",
+        key="ux34_apply_ack",value=False))
     left,right=st.columns(2)
-    if left.button("Aplicar mudança ao meu plano",key="ux34_confirm_apply",
+    if left.button("Confirmar troca na sessão" if contextual_base is not None else
+                   "Aplicar mudança ao meu plano",key="ux34_confirm_apply",
                    type="primary",disabled=not confirmation):
         try:
             fresh=active_plan()
@@ -349,13 +351,12 @@ def contextual_impact_projection(comparison:dict)->dict:
     if len(comparison["candidates"])!=1:
         raise ValueError("A revisão contextual requer uma candidata")
     entry=comparison["candidates"][0]
-    groups={"Melhorou":[],"Piorou":[],"Semelhante":[],"Não pesquisado":[]}
+    groups={key:[] for key in ("Melhorou","Piorou","Semelhante","Não pesquisado","Local","Referência insuficiente")}
     for row in entry["routes"]:
         groups[row["status"]].append({
             "name":row["destination"],"delta_minutes":row["delta_minutes"],
             "before":row["official_minutes"],"after":row["candidate_minutes"],
-            "official_gap_reason":row.get("official_gap_reason"),
-            "candidate_gap_reason":row.get("candidate_gap_reason"),
+            "comparison_basis":row["comparison_basis"],
         })
     return {
         "candidate":entry["id"],"candidate_name":entry["name"],
@@ -376,10 +377,12 @@ def _render_contextual_review(plan:dict,comparison:dict)->None:
     st.caption("Comparação de tempos ferroviários históricos de ida, "
                "somente quando ambas as cidades têm evidências. "
                "Cobertura de pesquisa não significa cidade melhor.")
-    a,b,c=st.columns(3)
+    st.caption(f'{view["comparable"]}/{view["total"]} destinos com tempos comparáveis · referências históricas, não previsão de 2027.')
+    a,b,c,d=st.columns(4)
     a.metric("Idas menores",len(groups["Melhorou"]))
     b.metric("Idas maiores",len(groups["Piorou"]))
-    c.metric("Sem comparação",len(groups["Não pesquisado"]))
+    c.metric("Semelhantes",len(groups["Semelhante"]))
+    d.metric("A verificar",len(groups["Não pesquisado"])+len(groups["Referência insuficiente"])+len(groups["Local"]))
     for title,status in (("Deslocamentos menores","Melhorou"),
                          ("Deslocamentos maiores","Piorou"),
                          ("Deslocamentos semelhantes","Semelhante")):
@@ -395,11 +398,16 @@ def _render_contextual_review(plan:dict,comparison:dict)->None:
                       "a mais" if status=="Piorou" else "de diferença")+
                      ").")
     st.markdown("#### O que ainda preciso verificar?")
-    if groups["Não pesquisado"]:
-        for route in groups["Não pesquisado"]:
+    pending=groups["Não pesquisado"]+groups["Referência insuficiente"]+groups["Local"]
+    if pending:
+        for route in pending:
             base=view["official_name"]
             alt=view["candidate_name"]
-            if route["before"] is None and route["after"] is None:
+            if route in groups["Local"]:
+                reason="destino local em uma das bases; acesso urbano a verificar, sem estimativa de zero minutos"
+            elif route in groups["Referência insuficiente"]:
+                reason="referências indicativas de "+str(route["before"])+" e "+str(route["after"])+" min; confiança insuficiente para classificar a mudança"
+            elif route["before"] is None and route["after"] is None:
                 reason="sem tempo ferroviário comparável nas duas cidades"
             elif route["before"] is None:
                 reason=(base+" sem referência comparável; "+alt+" tem "+
@@ -408,12 +416,6 @@ def _render_contextual_review(plan:dict,comparison:dict)->None:
                 reason=(alt+" sem referência comparável; "+base+" tem "+
                         str(route["before"])+" min de ida documentados")
             st.caption("• "+route["name"]+": "+reason+".")
-            if route.get("official_gap_reason"):
-                st.caption("Pesquisa pendente da base atual: "+
-                           route["official_gap_reason"])
-            if route.get("candidate_gap_reason"):
-                st.caption("Pesquisa pendente da alternativa: "+
-                           route["candidate_gap_reason"])
     else:
         st.caption("Todos os destinos têm referências de ida nas duas cidades. "
                    "Ainda é preciso validar os horários e retornos reais.")
