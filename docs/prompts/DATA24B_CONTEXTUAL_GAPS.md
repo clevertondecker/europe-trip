@@ -1,0 +1,8 @@
+# DATA24B — Lacunas contextuais, sem dashboard
+
+Depende de DATA24A (#253). Auditar antes de modificar: UX126 já exibe status e reason do contrato itinerary_eligibility; não criar outra elegibilidade. Em Descobrir, melhorar apenas lacuna acionável comprovadamente insuficiente, sem repetir CTA, sem bloquear wishlist, sem inventar requisitos. Na ficha UX124, usar os mesmos pares e prioridades de Logística para mostrar trajetos desejados sem tempo pesquisado e filtro explícito quando necessário, não outra matriz global nem ranking. Preservar fontes, local, indicativo, divergências, sem wishlist, etapas, retorno e persistência. Não calcular auditoria global durante rerun. Testar AppTest, paridade com elegibilidade/UX124, vazios e nenhuma mutação. Se já satisfaz o objetivo, registrar evidência e evitar mudança cosmética. Não tocar navegação legada de UX125.
+
+## Entrega
+Implementar sequencialmente após pré-requisitos. Antes de implementar, atualizar base com alterações integradas ou estabelecer stack revisável; evitar conflitos em app.py e no gerador. Manter draft até código, suíte completa e checks do HEAD confirmados; não mergear sem autorização. Documentar limitações e evidência de testes. DATA25–28 serão definidos a partir dos resultados, não neste PR.
+
+**Status:** especificação publicada; implementação pendente.
