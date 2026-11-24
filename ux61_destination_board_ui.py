@@ -11,14 +11,14 @@ def _discovery():
 
 
 def _open_research(destination_id, name):
-    from ux_navigation import set_task
+    from ux64_navigation_model import select_public_task
     state = st.session_state
-    filters = dict(state.get("ux502_discovery_filters", {}))
-    filters["ux501_search"] = name
-    filters["ux501_page"] = 1
-    state["ux502_discovery_filters"] = filters
-    state["ux502_view"] = "Descobrir lugares"
-    set_task(state, "Explorar", "Passeios")
+    select_public_task(state, "Explorar", "Descobrir")
+    # An explicit target must remain visible even after incompatible filters.
+    state["ux502_discovery_filters"] = {
+        "ux501_country": "Todos os países", "ux501_categories": [],
+        "ux501_search": name, "ux501_page": 1, "ux126_eligibility_filter": "Todos",
+    }
 
 
 def _focus_visit(destination_id, stage):
