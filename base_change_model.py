@@ -173,6 +173,10 @@ def destination_impact(plan:dict,candidate:str,dest_ids:list[str])->list[dict]:
                      "delta_minutes":delta,"status":status,
                      "official_fare":before["fare"],
                      "candidate_fare":after["fare"],
+                     "official_gap_reason":(
+                         unresolved_gap_reason(official,dest) if a is None else None),
+                     "candidate_gap_reason":(
+                         unresolved_gap_reason(candidate,dest) if b is None else None),
                      "official_source":before["source"],
                      "candidate_source":after["source"],
                      "official_fare_condition":before["fare_condition"],
