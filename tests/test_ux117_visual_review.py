@@ -1,6 +1,8 @@
 """UX117: accessible, read-only visual projection and safe aggregate semantics."""
 import unittest
 from copy import deepcopy
+from unittest.mock import patch
+from base_change_model import SIMILARITY_THRESHOLD_MINUTES,destination_impact
 from ux117_review_visual import comparable_subtotals,impact_html,subtotals_html,housing_html,city_identity_html
 from city_decision_ui import contextual_impact_projection
 from city_decision_model import compare_city_decisions
@@ -71,3 +73,56 @@ class VisualReviewTests(unittest.TestCase):
         self.assertIn("Local · acesso a verificar",impact_html(view))
         self.assertIn("0 de 1 destinos comparáveis",impact_html(view))
         self.assertEqual(subtotals_html(view),"")
+
+    def test_domain_threshold_and_explanation(self):
+        plan=new_plan()
+        plan["base_city"]="metz"
+        route=dict(minutes=100,fare=None,source=None,fare_condition=None,basis=None,
+                   note="",category="historical",confidence="medium",provenance="sample",
+                   representative_minutes=None)
+        limit=SIMILARITY_THRESHOLD_MINUTES
+        for delta,status in ((-limit,"Melhorou"),(-limit+1,"Semelhante"),
+                             (limit-1,"Semelhante"),(limit,"Piorou"),(0,"Semelhante")):
+            with self.subTest(delta=delta):
+                with patch("base_change_model.known_route",side_effect=[route,dict(route,minutes=100+delta)]):
+                    impact=destination_impact(plan,"nancy",["paris"])[0]
+                self.assertEqual(impact["status"],status)
+
+    def test_priority_notices_are_conditional(self):
+        groups={k:[] for k in ("Melhorou","Piorou","Semelhante","Local","Não pesquisado","Referência insuficiente")}
+        rows=[row(100,120,"fastest_reference","Piorou",20),
+              row(None,69,"unavailable","Não pesquisado",None)]
+        for item in rows:groups[item["status"]].append(item)
+        view=dict(rows=rows,groups=groups,comparable=1,total=2,
+                  official_name="Metz",candidate_name="Nancy")
+        html=impact_html(view)
+        self.assertIn(f"inferiores a {SIMILARITY_THRESHOLD_MINUTES} minutos",html)
+        self.assertIn("1 destino imperdível terá uma ida mais longa.",html)
+        self.assertIn("1 destino imperdível ainda precisa de validação.",html)
+        for item in rows:item["priority"]="maybe"
+        self.assertNotIn("ux117-priority-note",impact_html(view))
+
+    def test_subtotal_prose_for_positive_negative_and_zero(self):
+        for delta,expected in ((20,"20 min a mais"),(-20,"20 min a menos"),
+                               (0,"Mesmo tempo acumulado")):
+            status="Piorou" if delta>0 else "Melhorou" if delta<0 else "Semelhante"
+            view=dict(rows=[row(100,100+delta,"fastest_reference",status,delta)],
+                      total=2,official_name="Metz",candidate_name="Nancy")
+            html=subtotals_html(view)
+            self.assertIn(expected,html)
+            self.assertIn("1/2 destinos",html)
+
+    def test_financial_fraction_and_zero_preserved(self):
+        comparison=dict(official_base="metz",rents_eur_month={"metz":1000.25,"nancy":999.75},
+                        french_days=60,eur_fx=6.3)
+        view=dict(candidate="nancy",official_name="Metz",candidate_name="Nancy",
+                  housing_known=True,housing_delta_brl=-6.3)
+        html=housing_html(comparison,view)
+        self.assertIn("€ 1.000,25/mês",html)
+        self.assertIn("€ 999,75/mês",html)
+        self.assertIn("−R$ 6,30",html)
+        self.assertIn("R$ 6,30/€",html)
+        view["housing_delta_brl"]=0
+        self.assertIn("moradia: R$ 0",housing_html(comparison,view))
+        view["housing_delta_brl"]=6.3
+        self.assertIn("+R$ 6,30",housing_html(comparison,view))
