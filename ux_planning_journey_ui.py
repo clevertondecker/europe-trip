@@ -387,6 +387,8 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
         state["flow_journey_identity"]=identity
     if state.get(VIEW) not in ("build","organize","review"):
         state[VIEW]=None
+    if organizer_stage in STAGES:
+        state[VIEW]="organize"
     # Respect existing explicit edit deep links and the canonical organizer.
     if state.get("flow_edit_target") or state.get("flow_add_open"):
         state[VIEW]="organize"
@@ -529,7 +531,8 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
             _render_add(active_plan(),catalog)
         else:
             state["flow_organize_open"]=True
-            _render_organize(active_plan(),catalog,stage,show_wishlist=False,review_on_close=True)
+            _render_organize(active_plan(),catalog,stage,show_wishlist=False,review_on_close=True,
+                             on_close=(lambda:_show("review")) if organizer_stage in STAGES else None)
             st.button("Adicionar passeio ou editar atrações",key="flow_add_open_button",on_click=_show_add)
         if organizer_stage is None and st.checkbox("Ver calendário e agrupamento de visitas",key="flow_journey_calendar"):
             from ux63_timeline_ui import render_timeline

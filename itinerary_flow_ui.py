@@ -519,14 +519,15 @@ def _render_organizer_wishlist(plan:dict,catalog:dict,stage:str)->None:
                    " destino(s) desejados pertencem à outra etapa.")
 
 
-def _render_organize(plan:dict,catalog:dict,stage:str,*,show_wishlist:bool=True,review_on_close:bool=False)->None:
+def _render_organize(plan:dict,catalog:dict,stage:str,*,show_wishlist:bool=True,review_on_close:bool=False,on_close=None)->None:
     """Organize by flexible period or precise day without leaving this editor."""
     if not st.session_state.get("flow_organize_open",False):
         return
     with st.container(border=True):
-        st.markdown("#### Montar meu roteiro")
+        st.markdown("#### Montar meu roteiro" if show_wishlist else "#### Definir período ou data")
         st.caption("Inclua destinos agora e defina os dias só quando quiser. "
-                   "Você pode salvar o roteiro sem nenhuma data.")
+                   "Você pode salvar o roteiro sem nenhuma data." if show_wishlist else
+                   "Escolha uma visita. Período e data são opcionais.")
         if show_wishlist:
             _render_organizer_wishlist(plan,catalog,stage)
         rows=selected_rows_for_stage(plan,catalog,stage)
@@ -608,9 +609,12 @@ def _render_organize(plan:dict,catalog:dict,stage:str,*,show_wishlist:bool=True,
                             st.rerun()
                         except (ValueError,KeyError) as exc:
                             st.error(str(exc))
-        st.button("Abrir calendário completo",key="flow_organize_full_calendar",
-                  on_click=_navigate,args=("Meu roteiro","Calendário"))
-        if st.button("Concluir organização",key="flow_organize_close"):
+        if on_close is None:
+            st.button("Abrir calendário completo",key="flow_organize_full_calendar",
+                      on_click=_navigate,args=("Meu roteiro","Calendário"))
+        if on_close is not None:
+            st.button("Voltar a Meus destinos",key="flow_organize_close",on_click=on_close)
+        elif st.button("Concluir organização",key="flow_organize_close"):
             st.session_state["flow_organize_open"]=False
             if review_on_close:
                 st.session_state["flow_journey_view"]="review"

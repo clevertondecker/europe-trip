@@ -69,6 +69,9 @@ def _commit(next_plan:dict)->dict:
         if st.session_state.get("unified_scenario")!=next_plan["budget_scenario"]:
             st.session_state["unified_scenario"]=next_plan["budget_scenario"]
     st.session_state.pop("advisor_proposals",None)
+    st.session_state.pop("ux35_proposals",None)
+    st.session_state.pop("ux35_review_proposal",None)
+    st.session_state.pop("ux35_confirm_ack",None)
     st.session_state["advisor_local_changed"]=True
     st.session_state["ux36_cloud_dirty"]=True
     # UX75: changes never queue automatic publication to a public repository.
