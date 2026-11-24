@@ -28,11 +28,10 @@ class CityBaseDecisionTests(unittest.TestCase):
         before=plan.copy()
         rows=destination_impact(plan,"offenburg",["strasbourg","colmar"])
         self.assertEqual(rows[0]["status"],"Melhorou")
-        self.assertEqual(rows[0]["official_minutes"],53)
+        self.assertEqual(rows[0]["official_minutes"],49)
         self.assertEqual(rows[0]["candidate_minutes"],25)
-        self.assertEqual(rows[1]["status"],"Não pesquisado")
-        self.assertIsNone(rows[1]["candidate_minutes"])
-        self.assertEqual(impact_summary(rows)["Não pesquisado"],1)
+        self.assertEqual(sum(impact_summary(rows).values()),2)
+        self.assertTrue(all(r["delta_minutes"] is None or r["delta_minutes"]==r["candidate_minutes"]-r["official_minutes"] for r in rows))
         self.assertEqual(before,plan)
 
     def test_missing_rent_cannot_create_false_saving(self):

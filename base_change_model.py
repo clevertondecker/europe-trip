@@ -15,6 +15,8 @@ from evidence_query_model import get_rail_evidence
 from rail_evidence_unified_model import load_rail_evidence, canonical_place
 from rail_reference_projection_model import decorate_comparison
 from base_explorer_model import load_exploration
+from attractions_model import load_base_routes
+from five_base_comparison_model import load_five_base_evidence
 from trip01_supplemental_discovery import build_exploration_discovery
 from base_scenario_model import base_options
 from data_model import get_scenario
@@ -49,12 +51,12 @@ def planned_destinations(plan:dict)->list[str]:
 
 @lru_cache(maxsize=1)
 def _rail_inputs():
-    return load_rail_evidence(),load_exploration()
+    return load_rail_evidence(),load_exploration(),load_base_routes(),load_five_base_evidence()
 
 
 def known_route(base_id:str,dest_id:str)->dict:
     """Adapt the shared REC01/UX503 resolution, preserving provenance."""
-    rail,exploration=_rail_inputs()
+    rail,exploration,legacy,study=_rail_inputs()
     origin,destination=canonical_place(base_id),canonical_place(dest_id)
     raw=get_rail_evidence(origin,destination,rail=rail,exploration=exploration)
     row={"base_id":origin,"destination_id":destination,
@@ -66,6 +68,23 @@ def known_route(base_id:str,dest_id:str)->dict:
     obs=next((x for x in raw["observations"]
               if x.get("source_url")==raw["source_url"] and
               x.get("minimum_oneway_min")==raw["minimum_oneway_min"]),{}) if historical else {}
+    source=raw["source_url"] if historical else cell.get("source_url")
+    # Preserve metadata only from the exact selected observation, never mix sources.
+    matching=[]
+    for dataset,rows,origin_key,dest_key,time_key in (
+        ("four_base_routes_2026",legacy["routes"],"base_id","destination_id","train_minutes_one_way"),
+        ("five_base_operator_2026",study["verified_time_routes"],"base_id","destination_id","fastest_train_oneway_min"),
+        ("exploration_bases_2027",exploration["routes"],"base_id","destination_id","train_minutes_oneway_min")):
+        for item in rows:
+            if (canonical_place(item[origin_key])==origin and canonical_place(item[dest_key])==destination
+                and item.get(time_key)==cell["display_min"] and item.get("source_url")==source):
+                matching.append((dataset,item))
+    metadata=next((item for dataset,item in matching if dataset==raw["source_dataset"]),{})
+    if not metadata and matching:
+        metadata=matching[0][1]
+    typical=raw["typical_oneway_min"] if historical else None
+    if typical is None:
+        typical=metadata.get("representative_minutes")
     return {"minutes":cell["display_min"],"fare":obs.get("fare_from_eur_person_oneway"),
             "source":raw["source_url"] if historical else cell.get("source_url"),
             "fare_condition":obs.get("fare_conditions"),
@@ -73,11 +92,11 @@ def known_route(base_id:str,dest_id:str)->dict:
                 (cell.get("gap_checked_at") or cell.get("checked_at")),
             "note":obs.get("notes") or cell.get("evidence_notes") or cell["label"],
             "return_verified":False,"representative_minutes":
-                raw["typical_oneway_min"] if historical else None,
-            "transfers":obs.get("transfers"),"operator":None,
-            "origin_station":obs.get("origin_station"),
-            "destination_station":obs.get("destination_station") or cell.get("arrival_station"),
-            "frequency_reference":None,
+                typical,
+            "transfers":obs.get("transfers") if obs.get("transfers") is not None else metadata.get("transfers"),"operator":metadata.get("operator"),
+            "origin_station":obs.get("origin_station") or metadata.get("origin_station") or metadata.get("departure_point"),
+            "destination_station":obs.get("destination_station") or cell.get("arrival_station") or metadata.get("destination_station") or metadata.get("arrival_point"),
+            "frequency_reference":metadata.get("frequency_reference"),
             "provenance":raw["source_dataset"] if historical else cell["display_basis"],
             "missing":obs.get("missing",[]),"category":cell["category"],
             "confidence":cell.get("confidence","unknown"),

@@ -132,7 +132,7 @@ def _render_coverage(comparison:dict)->None:
                 f"**{counts['Melhorou']} mais rápidos** · "
                 f"**{counts['Piorou']} mais lentos** · "
                 f"{counts['Semelhante']} semelhantes · "
-                f"{counts['Não pesquisado']} sem tempo comparável · "
+                f"{counts['Não pesquisado']} sem comparação pesquisada · "
                 f"{counts.get('Local',0)} locais · "
                 f"{counts.get('Referência insuficiente',0)} referências insuficientes"
             )

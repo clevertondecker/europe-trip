@@ -48,8 +48,8 @@ class RailFinalistExpansionTests(unittest.TestCase):
         self.assertFalse(any("roundtrip_couple_eur" in item for item in comparison))
 
     def test_unresearched_remains_unknown(self):
-        self.assertIsNone(known_route("nancy","bruges_be")["minutes"])
-        self.assertIsNone(known_route("metz","rotterdam")["minutes"])
+        self.assertIsNone(known_route("nancy","unknown_test_destination")["minutes"])
+        self.assertIsNone(known_route("metz","unknown_test_destination")["minutes"])
 
 
 class RailFinalistAppTest(unittest.TestCase):

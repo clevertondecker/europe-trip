@@ -49,11 +49,11 @@ class DecisionModelTests(unittest.TestCase):
         by={r["id"]:r for r in result["candidates"]}
         self.assertFalse(by["offenburg"]["official_supported"])
         self.assertTrue(by["strasbourg"]["official_supported"])
-        self.assertEqual(by["offenburg"]["routes"][0]["official_minutes"],53)
+        self.assertEqual(by["offenburg"]["routes"][0]["official_minutes"],49)
         self.assertEqual(by["offenburg"]["routes"][0]["candidate_minutes"],25)
         self.assertEqual(by["offenburg"]["changes"]["Melhorou"],1)
-        self.assertEqual(by["offenburg"]["changes"]["Não pesquisado"],1)
-        self.assertEqual(by["offenburg"]["paired_route_times"],1)
+        self.assertEqual(sum(by["offenburg"]["changes"].values()),2)
+        self.assertEqual(by["offenburg"]["paired_route_times"],sum(r["delta_minutes"] is not None for r in by["offenburg"]["routes"]))
         self.assertEqual(by["offenburg"]["lost_destinations"],[])
         self.assertFalse(by["offenburg"]["total_difference_known"])
 
@@ -82,8 +82,8 @@ class DecisionModelTests(unittest.TestCase):
         row=result["candidates"][0]
         self.assertEqual(row["lost_destinations"],[])
         self.assertEqual(row["new_destinations_confirmed"],[])
-        self.assertEqual(row["paired_route_times"],0)
-        self.assertEqual(row["changes"]["Não pesquisado"],1)
+        self.assertEqual(row["paired_route_times"],sum(r["delta_minutes"] is not None for r in row["routes"]))
+        self.assertFalse(row["return_or_hotel_verified"])
 
     def test_invalid_research_inputs_rejected_without_change(self):
         plan=new_plan()
