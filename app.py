@@ -541,6 +541,11 @@ page,itinerary_target,guide_target,base_target=ux_route(
     city_view=st.session_state.get("ux_city_view","Visão da cidade"),
     budget_view=st.session_state.get("ux_budget_view","Simulação geral"),
     guide_view=st.session_state.get("ux_guide_view","Itália e Costa Amalfitana"))
+# Contextual UX114 review ends on navigation away. Its candidate and scope
+# must not reappear as an apparently active approval on a later visit.
+if page!="Comparar cidades" and st.session_state.get("ux114_review_context"):
+    from rec03a_suggestions_ui import close_base_review
+    close_base_review()
 if ux_area!="Minha viagem" and (ux_area,ux_section)!=("Explorar","Cidades-base"):
     st.caption(UX_DESCRIPTIONS.get((ux_area,ux_section),"Continue o planejamento."))
 if (ux_area=="Meu roteiro" and ux_section=="Melhorar meu roteiro" and
@@ -840,6 +845,36 @@ elif page == "Mapa & destinos":
                    "= opção em estudo. Reservas, horários e rotas não são inferidos.")
 
 elif page == "Comparar cidades":
+    # UX114: an explicit candidate can enter the EXISTING official review
+    # without exposing the entire legacy comparison below the main journey.
+    preferred_base=st.session_state.get("ux114_review_base")
+    if preferred_base:
+        from rec03a_suggestions_ui import (
+            close_base_review,validate_base_review,render_base_review_scope
+        )
+        context=validate_base_review(active_plan())
+        if context is None:
+            # Changes of plan, identity, wishes or scope invalidate the review.
+            # The existing UX34 workspace is restored rather than reused stale.
+            close_base_review()
+            if st.session_state.get("ux34_notice"):
+                st.success(st.session_state.pop("ux34_notice"))
+            else:
+                st.warning("A revisão anterior não corresponde mais ao planejamento "
+                           "ou à pesquisa atual. Escolha a cidade novamente.")
+        else:
+            st.button("← Voltar à minha comparação",key="ux114_review_back",
+                      on_click=close_base_review)
+            st.markdown("### Revisar cidade-base antes de decidir")
+            st.caption("Candidata: "+context["base"]+
+                       " · comparação explícita com a base atual. "
+                       "Nenhuma alteração foi salva.")
+            if render_base_review_scope(context):
+                render_city_decision(active_plan(),data,
+                                     sync_sources["finance"]["status"]=="live",
+                                     int(st.session_state.get("ux_days_value",60)),
+                                     contextual_base=context["base"])
+            st.stop()
     # UX85: the recommended task and its results come before technical tools.
     # Both legacy widgets retain their keys, callbacks and optional access.
     _rec_activity = render_recommendation_activity(plan=active_plan())
