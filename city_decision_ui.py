@@ -257,7 +257,7 @@ def _review_official_change(plan:dict,comparison:dict,
     else:
         st.markdown("#### Confirmar a troca")
         st.caption("Somente a cidade-base será alterada no plano da sessão. "
-                   "Datas, passeios, orçamento e demais decisões permanecem.")
+                   "Datas, passeios e demais decisões permanecem. Salve depois para persistir.")
     eligible=[c for c in comparison["candidates"] if c["official_supported"]]
     if not eligible:
         st.warning("As cidades comparadas ainda não possuem integração completa "
@@ -270,8 +270,7 @@ def _review_official_change(plan:dict,comparison:dict,
             st.error("A candidata mudou. Retorne à comparação para escolher outra cidade.")
             return
         chosen=contextual_base
-        st.caption("Candidata fixa: "+supported[chosen]+
-                   ". Para escolher outra cidade, volte à comparação.")
+
     else:
         chosen=st.selectbox("Base apta para revisão oficial",list(supported),
                             key="ux34_apply_candidate",
@@ -356,18 +355,26 @@ def contextual_impact_projection(comparison:dict, priorities=None)->dict:
     priorities=priorities or {}
     entry=comparison["candidates"][0]
     groups={key:[] for key in ("Melhorou","Piorou","Semelhante","Não pesquisado","Local","Referência insuficiente")}
+    rows=[]
     for row in entry["routes"]:
-        groups[row["status"]].append({
+        item={
             "name":row["destination"],"delta_minutes":row["delta_minutes"],
             "priority":priorities.get(row["destination_id"]),
             "priority_label":LABELS.get(priorities.get(row["destination_id"]),""),
             "before":row["official_minutes"],"after":row["candidate_minutes"],
             "comparison_basis":row["comparison_basis"],
-        })
+            "status":row["status"],"destination_id":row["destination_id"],
+            "official_category":row["official_category"],
+            "candidate_category":row["candidate_category"],
+            "official_confidence":row["official_confidence"],
+            "candidate_confidence":row["candidate_confidence"],
+        }
+        groups[row["status"]].append(item)
+        rows.append(item)
     return {
         "candidate":entry["id"],"candidate_name":entry["name"],
         "official_name":comparison["official_name"],
-        "groups":groups,"comparable":entry["paired_route_times"],
+        "groups":groups,"rows":rows,"comparable":entry["paired_route_times"],
         "total":len(comparison["destinations"]),
         "housing_known":entry["housing_whatif"]["known"],
         "housing_delta_brl":entry["financial_delta_brl"],
@@ -375,97 +382,38 @@ def contextual_impact_projection(comparison:dict, priorities=None)->dict:
     }
 
 
-def _render_contextual_review(plan:dict,comparison:dict)->None:
-    """Decision first; retain all existing technical comparisons on demand."""
+def _render_contextual_review(plan:dict,comparison:dict,overview)->None:
+    """Render the decision dashboard ahead of the native finance controls."""
     from ux502_destination_interests_model import ordered_interests,empty_interests
+    from ux100_base_card_photos import base_card_photo_record,render_base_card_photo
+    from ux117_review_visual import (city_identity_html,impact_html,
+                                     housing_html,subtotals_html)
     priorities={_canonical_destination(item["destination_id"]):item["priority"]
                 for item in ordered_interests(st.session_state.get("ux502_interests",empty_interests()))}
     view=contextual_impact_projection(comparison,priorities)
-    groups=view["groups"]
-    st.markdown("#### Impacto nos meus passeios")
-    st.caption("Comparação de tempos ferroviários históricos de ida, "
-               "somente quando ambas as cidades têm evidências. "
-               "Cobertura de pesquisa não significa cidade melhor.")
-    st.caption(f'{view["comparable"]}/{view["total"]} destinos com tempos comparáveis · referências históricas, não previsão de 2027.')
-    a,b,c,d=st.columns(4)
-    a.metric("Idas menores",len(groups["Melhorou"]))
-    b.metric("Idas maiores",len(groups["Piorou"]))
-    c.metric("Semelhantes",len(groups["Semelhante"]))
-    d.metric("A verificar",len(groups["Não pesquisado"])+len(groups["Referência insuficiente"])+len(groups["Local"]))
-    for title,status in (("Deslocamentos menores","Melhorou"),
-                         ("Deslocamentos maiores","Piorou"),
-                         ("Deslocamentos semelhantes","Semelhante")):
-        if not groups[status]:
-            continue
-        st.markdown("**"+title+"**")
-        for route in groups[status]:
-            minutes=abs(route["delta_minutes"])
-            label=route["name"]+(" · "+route["priority_label"] if route["priority_label"] else "")
-            st.write("• **"+label+"**: "+
-                     str(route["before"])+" → "+str(route["after"])+
-                     " min de ida ("+str(minutes)+" min "+
-                     ("a menos" if status=="Melhorou" else
-                      "a mais" if status=="Piorou" else "de diferença")+
-                     ").")
-    st.markdown("#### O que ainda preciso verificar?")
-    pending=groups["Não pesquisado"]+groups["Referência insuficiente"]+groups["Local"]
-    if pending:
-        for route in pending:
-            base=view["official_name"]
-            alt=view["candidate_name"]
-            if route in groups["Local"]:
-                reason="destino local em uma das bases; acesso urbano a verificar, sem estimativa de zero minutos"
-            elif route in groups["Referência insuficiente"]:
-                reason="referências indicativas de "+str(route["before"])+" e "+str(route["after"])+" min; confiança insuficiente para classificar a mudança"
-            elif route["before"] is None and route["after"] is None:
-                reason="sem tempo ferroviário comparável nas duas cidades"
-            elif route["before"] is None:
-                reason=(base+" sem referência comparável; "+alt+" tem "+
-                        str(route["after"])+" min de ida documentados")
-            else:
-                reason=(alt+" sem referência comparável; "+base+" tem "+
-                        str(route["before"])+" min de ida documentados")
-            label=route["name"]+(" · "+route["priority_label"] if route["priority_label"] else "")
-            if route["priority"]=="must_visit":
-                st.warning(label+": "+reason+".")
-            else:
-                st.caption("• "+label+": "+reason+".")
-    else:
-        st.caption("Todos os destinos têm referências de ida nas duas cidades. "
-                   "Ainda é preciso validar os horários e retornos reais.")
-    st.caption("Retorno, última milha, conexões compatíveis, hospedagem e "
-               "datas de 2027 não estão confirmados. "
-               "Ausência de pesquisa não significa passeio impossível.")
-    st.markdown("#### Impacto no orçamento")
-    if view["housing_known"]:
-        st.metric("Variação hipotética de moradia (R$)",
-                  _currency(view["housing_delta_brl"]))
-        st.caption("Somente aluguel inserido manualmente, para a mesma duração "
-                   "e câmbio. Não é a diferença total da viagem.")
-    else:
-        st.info("Ainda não há dois valores de aluguel comparáveis. "
-                "Você pode informar hipóteses em 'Premissas financeiras' acima; "
-                "a ausência de dados não equivale a custo zero.")
-    _review_official_change(active_plan(),comparison,
-                            contextual_base=view["candidate"])
-    if st.checkbox("Ver comparação detalhada, fontes e modalidades",
-                   key="ux115_details_open"):
-        st.markdown("#### Cobertura documental")
-        cols=st.columns(2)
-        for col,city in zip(cols,[comparison["official_base"],view["candidate"]]):
-            profile=comparison["profiles"][city]
-            with col:
-                st.metric(
-                    view["official_name"] if city==comparison["official_base"]
-                    else view["candidate_name"],
-                    str(profile["route_time_count"])+"/"+str(view["total"])+
-                    " idas documentadas",
-                )
-        _render_coverage(comparison)
+    official=comparison["official_base"]
+    candidate=view["candidate"]
+    cities={item["id"]:item for item in base_options()}
+    with overview:
+        st.markdown("### Trocar "+view["official_name"]+" por "+view["candidate_name"]+"?")
+        left,right=st.columns(2)
+        for column,city,role in ((left,official,"Base atual"),(right,candidate,"Base proposta")):
+            with column:
+                with st.container(key="ux117_city_"+city,border=True):
+                    if base_card_photo_record(city):
+                        render_base_card_photo(city,cities[city]["name"])
+                    st.markdown(city_identity_html(cities[city],role),unsafe_allow_html=True)
+        st.markdown(impact_html(view),unsafe_allow_html=True)
+        subtotal=subtotals_html(view)
+        if subtotal:
+            st.markdown(subtotal,unsafe_allow_html=True)
+        st.markdown("#### Impacto financeiro")
+        st.markdown(housing_html(comparison,view),unsafe_allow_html=True)
+    if st.checkbox("Ver fontes, modalidades e detalhes",key="ux115_details_open"):
+        _render_routes(comparison)
         _render_finance(comparison)
         st.caption(comparison["methodology"])
-    st.caption("Nenhuma cidade vencedora foi escolhida automaticamente; "
-               "seu planejamento oficial só muda após confirmação explícita.")
+    _review_official_change(active_plan(),comparison,contextual_base=candidate)
 
 
 def render_city_decision(plan:dict,trip_data:dict,finance_live:bool,
@@ -473,11 +421,7 @@ def render_city_decision(plan:dict,trip_data:dict,finance_live:bool,
     """Main task in Explorar → Comparar: 2–3 bases, equal assumptions."""
     names=_names()
     official=plan["base_city"]
-    if contextual_base is not None and contextual_base in names:
-        st.markdown("### Trocar "+names[official]+" por "+names[contextual_base]+"?")
-        st.caption("Você escolheu uma candidata em Minha comparação. "
-                   "Revise o que sabemos antes de alterar o plano da sessão.")
-    else:
+    if contextual_base is None:
         st.markdown("### Comparar cidades-base e decidir com segurança")
         st.caption("**Meu plano:** "+names[official]+" · "+
                    str(plan["total_days"]-plan["italy_days"])+" dias na temporada europeia · "+
@@ -519,8 +463,7 @@ def render_city_decision(plan:dict,trip_data:dict,finance_live:bool,
             return
         dest=list(ctx["approved_destinations"])
         st.session_state["ux34_destinations"]=list(dest)
-        st.caption("Destinos desta revisão: "+
-                   ", ".join(places.get(key,key) for key in dest)+".")
+
     else:
         dest=st.multiselect("Passeios que quero manter acessíveis (mesmos para todas)",
                             list(places),format_func=lambda k:places[k],
@@ -528,14 +471,12 @@ def render_city_decision(plan:dict,trip_data:dict,finance_live:bool,
     if not dest:
         st.info("Escolha ao menos um destino para comparar.")
         return
-    if contextual_base is not None:
-        st.caption("Os destinos do escopo confirmado servem apenas como referência "
-                   "para esta revisão; nenhum passeio é incluído, excluído ou "
-                   "modificado no roteiro. Sem tempo não significa inviável.")
-    else:
+    if contextual_base is None:
         st.caption("Se você já escolheu passeios no roteiro, eles são usados como "
                    "referência. Destinos sem trajeto pesquisado não são considerados perdidos.")
-    with st.expander("Premissas financeiras opcionais · mesma duração e câmbio"):
+    overview=st.container() if contextual_base is not None else None
+    with st.expander("Simular aluguel · duração e câmbio" if contextual_base is not None else
+                     "Premissas financeiras opcionais · mesma duração e câmbio"):
         st.caption("Valores mensais são apenas suposições suas, sem anúncio "
                    "validado para 2027. Deixe €0 para indicar que não há cotação.")
         if "ux34_days" not in st.session_state:
@@ -565,7 +506,7 @@ def render_city_decision(plan:dict,trip_data:dict,finance_live:bool,
         st.warning("Comparação indisponível com as premissas atuais: "+str(exc))
         return
     if contextual_base is not None:
-        _render_contextual_review(plan,comparison)
+        _render_contextual_review(plan,comparison,overview)
         return
     st.markdown("#### Comparação em condições iguais")
     cols=st.columns(1+len(candidate_ids))
