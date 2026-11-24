@@ -56,7 +56,8 @@ def selected_context(base_ids: list[str], cities: dict, destination_count: int) 
         '<div class="ux96-selection-description"><span>SELEÇÃO ATUAL</span>'
         '<strong>Cidades para comparar</strong></div>'
         f'<div class="ux96-selection-chips">{chips}</div>'
-        f'<div class="ux96-selection-total"><strong>{int(destination_count)}</strong>'
+        f'<div class="ux96-selection-total"><strong>{len(names)} de 5</strong>'
+        ' cidades escolhidas · <strong>'+str(int(destination_count))+'</strong>'
         ' destinos do escopo</div>'
         '</div>'
     )

@@ -413,12 +413,16 @@ def render_suggestions(*,plan,discovery=None,research=None):
         selected_card_bases(st.session_state,options),cities,len(result["destinations"])
     ),unsafe_allow_html=True)
     selected=selected_card_bases(st.session_state,options)
+    st.markdown('<a class="ux111-secondary-action" href="#ux111-picker">'
+                '+ Adicionar cidades para comparar</a>',unsafe_allow_html=True)
     if len(selected)==1:
         st.info("Uma cidade selecionada. Conheça-a individualmente ou escolha outra nos cartões abaixo para comparar.")
         from rec03b_handoff_ui import render_card_actions
         st.caption("Investigar " + cities[selected[0]]["name"] + " sem alterar seu roteiro")
         render_card_actions(selected[0],"card",emphasize_profile=True)
     if 2<=len(selected)<=5:
+        # Stable native fragment target for same-document navigation.
+        st.markdown('<div id="ux111-comparison"></div>',unsafe_allow_html=True)
         from ux87_inline_base_comparison_ui import render_inline_comparison
         render_inline_comparison(interests,checked["scope"],selected,
                                  discovery=discovery,research=research)
@@ -427,6 +431,7 @@ def render_suggestions(*,plan,discovery=None,research=None):
         render_planning_handoff(plan,interests=interests,
                                 discovery=discovery,research=research)
 
+    st.markdown('<div id="ux111-picker"></div>',unsafe_allow_html=True)
     st.markdown(section_heading(
         "CIDADES-BASE SUGERIDAS", "Sugestões de bases para investigar",
         "Estas alternativas vêm dos destinos confirmados e das referências de deslocamento disponíveis. Não são um ranking nem mudam seu roteiro.",
@@ -498,6 +503,9 @@ def render_suggestions(*,plan,discovery=None,research=None):
         st.info("Não há destaques com referências suficientes para este escopo. "
                 "Use 'Ver todas as cidades' para explorar as alternativas.")
 
+    # The selection remains visible after the cards; callbacks update CHOICE.
+    from rec03b_handoff_ui import render_selection_toolbar
+    render_selection_toolbar(options,cities)
     # UX87 uses CHOICE and the confirmed scope; no second manual form.
     if len(selected)!=1:
         render_card_selection_summary(result,cities,selection_already_shown=True)
