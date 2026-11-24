@@ -75,7 +75,6 @@ def append_data23_destinations(discovery: dict, *, data=None) -> dict:
             "categories": sorted({a["category"] for a in attrs}),
             # Contextual photograph of a named attraction in this destination.
             "photo": group["photo"], "source_url": group["source_url"],
-            "planning_support": "exploration_only",
             "research_status": "supplemental_attractions_documented",
             "feasible_from_base": None, "verified_weekend_return": False,
             "officially_selected": False,
