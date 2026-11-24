@@ -111,121 +111,81 @@ class QuickComparisonAppTests(unittest.TestCase):
     def setUpClass(cls):
         cls.discovery=build_exploration_discovery()
 
-    def test_matrix_is_visible_before_selection_and_plan_is_unchanged(self):
-        app=AppTest.from_string(APP,default_timeout=120)
+    def app(self, destinations=("colmar","strasbourg","paris","basel")):
+        a=AppTest.from_string(APP,default_timeout=120)
         wishes=empty_interests()
-        for destination in ("colmar","strasbourg","paris","basel"):
-            wishes=set_interest(wishes,destination,"interested",self.discovery)
-        app.session_state["ux502_interests"]=wishes
-        app.session_state["advisor_plan"]=new_plan()
-        app.session_state["rec03a_identity"]="unconfigured"
-        app.run()
-        app.button(key="rec03a_confirm_subset").click().run()
-        self.assertFalse(app.exception,[x.message for x in app.exception])
-        tables=[x for x in app.dataframe if "Destino desejado" in x.value.columns]
-        self.assertEqual(len(tables),1)
-        self.assertEqual(len(tables[0].value),4)
-        self.assertGreaterEqual(len(tables[0].value.columns),3)
-        before=deepcopy(app.session_state["advisor_plan"])
+        for place in destinations:
+            wishes=set_interest(wishes,place,"interested",self.discovery)
+        plan=new_plan()
+        a.session_state["ux502_interests"]=wishes
+        a.session_state["advisor_plan"]=deepcopy(plan)
+        a.session_state["rec03a_identity"]="unconfigured"
+        a.run()
+        a.button(key="rec03a_confirm_subset").click().run()
+        self.assertFalse(a.exception,[x.message for x in a.exception])
+        return a,plan,wishes
+
+    def test_no_preview_before_selection_and_one_canonical_comparison_afterward(self):
+        app,plan,wishes=self.app()
+        self.assertFalse(any("ux97-table" in x.value for x in app.markdown))
+        self.assertFalse(any("Destino desejado" in x.value.columns for x in app.dataframe))
+        self.assertFalse(any(x.label=="Prévia das sugestões · não é sua seleção"
+                             for x in app.expander))
         picks=[x.key for x in app.checkbox
                if x.key and x.key.startswith("rec03a_pick_")]
         self.assertGreaterEqual(len(picks),2)
         app.checkbox(key=picks[0]).check().run()
+        self.assertFalse(any("ux97-table" in x.value for x in app.markdown))
         app.checkbox(key=picks[1]).check().run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
-        self.assertEqual(app.session_state["advisor_plan"],before)
-        self.assertEqual(app.session_state["ux502_interests"],wishes)
-        self.assertEqual(len([x for x in app.dataframe
-                              if "Destino desejado" in x.value.columns]),1)
-
-    def test_documentary_preview_starts_collapsed_for_discovery(self):
-        # Streamlit executes content inside collapsed expanders, so test the
-        # configured initial state rather than dataframe presence in AppTest.
-        from pathlib import Path
-        source=(Path(__file__).resolve().parents[1] /
-                "rec03a_suggestions_ui.py").read_text()
-        preview=source.split("def _render_quick_comparison(",1)[1].split(
-            "\ndef _card(",1)[0]
-        self.assertIn('expanded=False):',preview)
-        self.assertNotIn("expanded=not 2<=len(selected)<=5",preview)
-
-    def test_selected_comparison_is_canonically_distinct_from_preview(self):
-        app=AppTest.from_string(APP,default_timeout=120)
-        wishes=empty_interests()
-        for destination in ("colmar","strasbourg","paris"):
-            wishes=set_interest(wishes,destination,"interested",self.discovery)
-        app.session_state["ux502_interests"]=wishes
-        plan=new_plan()
-        app.session_state["advisor_plan"]=deepcopy(plan)
-        app.session_state["rec03a_identity"]="unconfigured"
-        app.run()
-        app.button(key="rec03a_confirm_subset").click().run()
-        self.assertFalse(app.exception,[x.message for x in app.exception])
-        self.assertTrue(any(x.label=="Prévia das sugestões · não é sua seleção"
-                            for x in app.expander))
-        picks=[x.key for x in app.checkbox if x.key and x.key.startswith("rec03a_pick_")]
-        self.assertGreaterEqual(len(picks),2)
-        app.checkbox(key=picks[0]).check().run()
-        app.checkbox(key=picks[1]).check().run()
-        self.assertFalse(app.exception,[x.message for x in app.exception])
-        self.assertEqual(len(app.session_state[CHOICE]),2)
-        self.assertTrue(any("ux97-table" in x.value for x in app.markdown))
-        self.assertTrue(any("SUA COMPARAÇÃO" in x.value for x in app.markdown))
-        self.assertEqual(len([x for x in app.multiselect if x.key==CHOICE+"_widget"]),0)
+        self.assertEqual(sum("ux97-table" in x.value for x in app.markdown),1)
+        self.assertFalse(any("Destino desejado" in x.value.columns for x in app.dataframe))
         self.assertEqual(app.session_state["advisor_plan"],plan)
         self.assertEqual(app.session_state["ux502_interests"],wishes)
 
-    def test_one_visible_city_has_individual_documentary_title(self):
-        app=AppTest.from_string(APP,default_timeout=120)
-        wishes=set_interest(empty_interests(),"colmar","interested",self.discovery)
-        app.session_state["ux502_interests"]=wishes
-        app.session_state["advisor_plan"]=new_plan()
-        app.session_state["rec03a_identity"]="unconfigured"
-        app.run()
-        app.button(key="rec03a_confirm_subset").click().run()
+    def test_legacy_preview_helpers_kept_but_not_rendered(self):
+        import inspect
+        from rec03a_suggestions_ui import render_suggestions
+        source=inspect.getsource(render_suggestions)
+        self.assertNotIn("_render_quick_comparison(",source)
+        self.assertEqual(source.count("render_inline_comparison("),1)
+
+    def test_single_filtered_city_offers_direct_investigation(self):
+        app,plan,wishes=self.app(("colmar",))
         app.checkbox(key="rec03a_show_all").check().run()
         app.text_input(key="rec03a_search").set_value("Metz").run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
-        self.assertTrue(any("Dados disponíveis para Metz" in x.value
+        self.assertTrue(any("Metz" in x.value and "ux96-city-header" in x.value
                             for x in app.markdown))
-        tables=[x for x in app.dataframe if "Destino desejado" in x.value.columns]
-        self.assertEqual(len(tables),1)
-        self.assertEqual(len(tables[0].value.columns),2)
+        self.assertIn("rec03a_handoff_profile_card_metz",{x.key for x in app.button})
+        self.assertFalse(any("ux97-table" in x.value for x in app.markdown))
         app.text_input(key="rec03a_search").set_value("cidade-que-nao-existe-ux95").run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
-        self.assertEqual(len([x for x in app.dataframe
-                              if "Destino desejado" in x.value.columns]),0)
+        self.assertFalse(any("ux96-city-header" in x.value for x in app.markdown))
         app.text_input(key="rec03a_search").set_value("").run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
-        self.assertEqual(len([x for x in app.dataframe
-                              if "Destino desejado" in x.value.columns]),1)
+        self.assertEqual(app.session_state["advisor_plan"],plan)
+        self.assertEqual(app.session_state["ux502_interests"],wishes)
 
-    def test_browse_is_paged_and_scope_and_selection_remain_canonical(self):
-        app=AppTest.from_string(APP,default_timeout=120)
-        wishes=set_interest(empty_interests(),"colmar","must_visit",self.discovery)
-        wishes=set_interest(wishes,"paris","interested",self.discovery)
-        app.session_state["ux502_interests"]=wishes
-        app.session_state["advisor_plan"]=new_plan()
-        plan_before=deepcopy(app.session_state["advisor_plan"])
-        app.session_state["rec03a_identity"]="unconfigured"
-        app.run()
-        app.button(key="rec03a_confirm_subset").click().run()
+    def test_browsing_filters_and_pagination_preserve_selection(self):
+        app,plan,wishes=self.app(("colmar","paris"))
         app.checkbox(key="rec03a_show_all").check().run()
-        self.assertFalse(app.exception,[x.message for x in app.exception])
-        matrix=[x for x in app.dataframe if "Destino desejado" in x.value.columns]
-        self.assertEqual(len(matrix),1)
-        self.assertLessEqual(len(matrix[0].value.columns),5)
-        self.assertEqual(len(matrix[0].value),2)
+        self.assertLessEqual(sum(x.key.startswith("rec03a_pick_")
+                                 for x in app.checkbox if x.key),4)
         first=next(x.key for x in app.checkbox
                    if x.key and x.key.startswith("rec03a_pick_"))
         app.checkbox(key=first).check().run()
         selected=deepcopy(app.session_state[CHOICE])
         app.text_input(key="rec03a_search").set_value("Metz").run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
-        self.assertEqual(app.session_state["advisor_plan"],plan_before)
         self.assertEqual(app.session_state[CHOICE],selected)
-        self.assertEqual(len([x for x in app.dataframe
-                              if "Destino desejado" in x.value.columns]),1)
+        self.assertFalse(any("ux97-table" in x.value for x in app.markdown))
+        if first!="rec03a_pick_metz":
+            app.checkbox(key="rec03a_pick_metz").check().run()
+            self.assertEqual(len(app.session_state[CHOICE]),2)
+            self.assertEqual(sum("ux97-table" in x.value for x in app.markdown),1)
+        self.assertEqual(app.session_state["advisor_plan"],plan)
+        self.assertEqual(app.session_state["ux502_interests"],wishes)
 
 
 if __name__=="__main__":
