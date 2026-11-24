@@ -136,10 +136,10 @@ def _form_settings(plan:dict)->None:
             with st.expander("Preferências principais"):
                 must=st.multiselect("Destinos que quero priorizar",list(named),
                     default=plan.get("mandatory_destinations",[]),
-                    format_func=lambda key:named[key],key="workflow_priority_destinations")
+                    format_func=lambda key:named[key],key="workflow_priority_destinations", placeholder="Escolha uma ou mais opções")
                 avoid=st.multiselect("Destinos que quero evitar",list(named),
                     default=plan.get("excluded_destinations",[]),
-                    format_func=lambda key:named[key],key="workflow_avoid_destinations")
+                    format_func=lambda key:named[key],key="workflow_avoid_destinations", placeholder="Escolha uma ou mais opções")
                 st.caption(str(len(plan.get("preferences",{})))+
                     " preferências de atrações já marcadas. "
                     "Preferências específicas continuam editáveis ao escolher passeios.")
