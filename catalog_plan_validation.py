@@ -2,7 +2,11 @@
 from __future__ import annotations
 
 
+from destination_identity import canonical_destination_id
+
+
 def allowed_attractions(catalog:dict,destination:str)->set[str]:
+    destination = canonical_destination_id(destination)
     if destination not in {d["id"] for d in catalog["destinations"]}:
         from ux62_supplemental_outings import supplemental_allowed
         allowed = supplemental_allowed(destination)
