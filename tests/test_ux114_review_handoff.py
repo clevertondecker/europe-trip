@@ -178,7 +178,7 @@ render_base_review_scope(ctx)
     def test_financial_premise_change_requires_a_new_explicit_review(self):
         app,original=self._open_in_real_application()
         app.button(key="ux34_open_review").click().run()
-        app.checkbox(key="ux34_apply_ack").check().run()
+        self.assertIn("ux34_confirm_apply",{x.key for x in app.button})
         days=app.number_input(key="ux34_days").value
         app.number_input(key="ux34_days").set_value(days+1).run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
@@ -190,9 +190,9 @@ render_base_review_scope(ctx)
         app,original=self._open_in_real_application()
         app.button(key="ux34_open_review").click().run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
-        self.assertTrue(app.button(key="ux34_confirm_apply").disabled)
-        # Explicit checkbox is required before the apply action can be used.
-        app.checkbox(key="ux34_apply_ack").check().run()
+        self.assertNotIn("ux34_apply_ack",{x.key for x in app.checkbox})
+        self.assertEqual(app.session_state["advisor_plan"],original)
+        self.assertFalse(app.button(key="ux34_confirm_apply").disabled)
         app.button(key="ux34_confirm_apply").click().run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
         current=app.session_state["advisor_plan"]

@@ -67,6 +67,7 @@ def _render_routes(comparison:dict)->None:
             entry[label]=(f"{typical} min típico · {fastest} min mínimo (ida)"
                           if typical is not None and fastest is not None else
                           f"{fastest} min mínimo (ida)" if fastest is not None
+                          else "Local · acesso a verificar" if route.get("category")=="local"
                           else "Não pesquisado")
         table.append(entry)
     st.dataframe(table,hide_index=True,width="stretch",height=270)
@@ -76,10 +77,9 @@ def _render_routes(comparison:dict)->None:
                "não integram esses tempos. Nenhuma volta de 2027 foi validada.")
     if len(alternatives)==1:
         a,b=official,alternatives[0]
-        paired=[(d,rows[a][d].get("representative_minutes"),
-                   rows[b][d].get("representative_minutes"))
-                for d in comparison["destinations"]]
-        pairs=[v for v in paired if v[1] is not None and v[2] is not None]
+        paired=comparison["candidates"][0]["routes"]
+        pairs=[(v["destination_id"],v["official_minutes"],v["candidate_minutes"])
+               for v in paired if v["comparison_basis"]=="representative" and v["delta_minutes"] is not None]
         if pairs:
             sum_a=sum(v[1] for v in pairs)
             sum_b=sum(v[2] for v in pairs)
@@ -132,7 +132,9 @@ def _render_coverage(comparison:dict)->None:
                 f"**{counts['Melhorou']} mais rápidos** · "
                 f"**{counts['Piorou']} mais lentos** · "
                 f"{counts['Semelhante']} semelhantes · "
-                f"{counts['Não pesquisado']} sem comparação pesquisada"
+                f"{counts['Não pesquisado']} sem tempo comparável · "
+                f"{counts.get('Local',0)} locais · "
+                f"{counts.get('Referência insuficiente',0)} referências insuficientes"
             )
             st.caption("Comparação com tempo nas duas cidades: "+
                        str(item["paired_route_times"])+"/"+
@@ -346,15 +348,19 @@ def _review_official_change(plan:dict,comparison:dict,
         st.rerun()
 
 
-def contextual_impact_projection(comparison:dict)->dict:
+def contextual_impact_projection(comparison:dict, priorities=None)->dict:
     """Read-only view of the same UX34 model; never rank or infer viability."""
     if len(comparison["candidates"])!=1:
         raise ValueError("A revisão contextual requer uma candidata")
+    from ux502_destination_interests_model import LABELS
+    priorities=priorities or {}
     entry=comparison["candidates"][0]
     groups={key:[] for key in ("Melhorou","Piorou","Semelhante","Não pesquisado","Local","Referência insuficiente")}
     for row in entry["routes"]:
         groups[row["status"]].append({
             "name":row["destination"],"delta_minutes":row["delta_minutes"],
+            "priority":priorities.get(row["destination_id"]),
+            "priority_label":LABELS.get(priorities.get(row["destination_id"]),""),
             "before":row["official_minutes"],"after":row["candidate_minutes"],
             "comparison_basis":row["comparison_basis"],
         })
@@ -371,7 +377,10 @@ def contextual_impact_projection(comparison:dict)->dict:
 
 def _render_contextual_review(plan:dict,comparison:dict)->None:
     """Decision first; retain all existing technical comparisons on demand."""
-    view=contextual_impact_projection(comparison)
+    from ux502_destination_interests_model import ordered_interests,empty_interests
+    priorities={_canonical_destination(item["destination_id"]):item["priority"]
+                for item in ordered_interests(st.session_state.get("ux502_interests",empty_interests()))}
+    view=contextual_impact_projection(comparison,priorities)
     groups=view["groups"]
     st.markdown("#### Impacto nos meus passeios")
     st.caption("Comparação de tempos ferroviários históricos de ida, "
@@ -391,7 +400,8 @@ def _render_contextual_review(plan:dict,comparison:dict)->None:
         st.markdown("**"+title+"**")
         for route in groups[status]:
             minutes=abs(route["delta_minutes"])
-            st.write("• **"+route["name"]+"**: "+
+            label=route["name"]+(" · "+route["priority_label"] if route["priority_label"] else "")
+            st.write("• **"+label+"**: "+
                      str(route["before"])+" → "+str(route["after"])+
                      " min de ida ("+str(minutes)+" min "+
                      ("a menos" if status=="Melhorou" else
@@ -415,7 +425,11 @@ def _render_contextual_review(plan:dict,comparison:dict)->None:
             else:
                 reason=(alt+" sem referência comparável; "+base+" tem "+
                         str(route["before"])+" min de ida documentados")
-            st.caption("• "+route["name"]+": "+reason+".")
+            label=route["name"]+(" · "+route["priority_label"] if route["priority_label"] else "")
+            if route["priority"]=="must_visit":
+                st.warning(label+": "+reason+".")
+            else:
+                st.caption("• "+label+": "+reason+".")
     else:
         st.caption("Todos os destinos têm referências de ida nas duas cidades. "
                    "Ainda é preciso validar os horários e retornos reais.")

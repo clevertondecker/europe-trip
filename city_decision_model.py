@@ -149,7 +149,7 @@ def compare_city_decisions(plan:dict,alternatives:list[str],destinations:list[st
                       "Passeios escolhidos","Estilo e cenário do orçamento",
                       "Decisões do Drive","Reservas (não confirmadas)"],
         "methodology":"Mesma lista de passeios, duração, casal e cenário financeiro; "
-            "tempos históricos de ida: típicos quando disponíveis em ambas as bases, "
+            "tempos históricos de ida: típicos somente quando compatíveis nas duas bases, "
             "mínimos somente como referência subsidiária; sem conclusão sobre volta; "
             "provisões de moradia são hipóteses inseridas pelo usuário.",
     }
