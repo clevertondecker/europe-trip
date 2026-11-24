@@ -11,7 +11,7 @@ from city_compare import load_cities
 from city_research import load_audit
 from trip01_supplemental_discovery import build_exploration_discovery
 from ux502_destination_interests_model import empty_interests,ordered_interests,PRIORITIES
-from ux503_destination_base_comparison_model import build_wishlist_matrix
+from base_recommendation_evidence_model import _wishlist_matrix_builder
 from routes7_comparison_projection import decorate_comparison
 from base_scenario_model import expanded_rail_routes
 from rail_evidence_unified_model import canonical_place
@@ -89,7 +89,7 @@ def city_profile(base_id,*,research=None,discovery=None,interests=None):
     # a request to the existing read-only matrix to enumerate the full catalog.
     basket=empty_interests()
     basket["items"]=[{"destination_id":k,"priority":"interested"} for k in names]
-    raw=build_wishlist_matrix(basket,[base_id],discovery=discovery,research=research)
+    raw=_wishlist_matrix_builder()(basket,[base_id],discovery=discovery,research=research)
     projected=decorate_comparison(raw)
     routes=[]
     for row in raw["rows"]:

@@ -114,9 +114,12 @@ class ExpandedBaseResearchAppTests(unittest.TestCase):
         app.segmented_control(key="ux42_city_activity").set_value(
             "Explorar cidades").run()
         self.assertIn("expanded_bases_detail_city",{x.key for x in app.selectbox})
-        self.assertIn("expanded_bases_rank_preset",{x.key for x in app.segmented_control})
+        self.assertNotIn("expanded_bases_rank_preset",{x.key for x in app.segmented_control})
         app.selectbox(key="expanded_bases_detail_city").set_value("trier").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
+        app.segmented_control(key="ux124_topic_trier").set_value("Moradia").run()
+        self.assertFalse(app.exception,[e.message for e in app.exception])
+        self.assertTrue(any("Mediana mensal" in x.label for x in app.metric))
         self.assertEqual(app.session_state["advisor_plan"],original)
 
 

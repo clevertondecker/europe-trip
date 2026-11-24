@@ -173,6 +173,7 @@ def _logistics(v):
             cell=route["cell"]
             st.write(cell["label"])
             st.caption(cell["typical_label"])
+            st.caption("Data da fonte histórica: "+str(route["source_date"] or "não documentada"))
             if route["historical_typical"] is not None:
                 st.caption("Tempo típico histórico: "+format_minutes(route["historical_typical"]))
             for field in ("station_caveat","evidence_notes","comparability","gap_checked_at"):
@@ -186,6 +187,10 @@ def _logistics(v):
             for obs in route["observations"]:
                 st.caption(" · ".join(str(x) for x in (obs.get("minimum_oneway_min"),obs.get("typical_oneway_min"),
                     obs.get("evidence_date"),obs.get("source_dataset"),obs.get("origin_station"),obs.get("destination_station")) if x is not None))
+                if obs.get("notes"):
+                    st.caption(str(obs["notes"]))
+                for gap in obs.get("missing",[]):
+                    st.caption(str(gap))
                 source(obs.get("source_url"),"Observação original")
             for gap in route["research_gaps"]:
                 st.caption(gap)
@@ -371,7 +376,11 @@ def _public_profile(base_id,research):
 
 def render_city_profile(base_id,*,research=None,key_prefix="ux124"):
     interests=st.session_state.get("ux502_interests",empty_interests())
-    v=_public_profile(base_id,research)
+    try:
+        v=_public_profile(base_id,research)
+    except ImportError:
+        st.error("Não foi possível carregar as evidências ferroviárias. Atualize a aplicação; nenhum dado do planejamento foi alterado.")
+        return
     priorities={item["destination_id"]:item["priority"] for item in ordered_interests(interests)}
     v["routes"]=personalize_routes(v["routes"],priorities)
     v["widget_prefix"]=key_prefix

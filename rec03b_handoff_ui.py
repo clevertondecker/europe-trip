@@ -15,12 +15,26 @@ from base_research_expanded_model import load_research
 def return_to_suggestions():
     st.session_state.pop(CONTEXT,None)
     st.session_state.pop("rec03a_profile_discovery",None)
+    st.session_state.pop("rec03a_profile_map_origin",None)
     request_navigation(st.session_state,"suggestions")
 
 
 def _discover_from_profile():
     st.session_state["rec03a_profile_discovery"]=True
     request_navigation(st.session_state,"discovery")
+
+def _map_from_profile(base):
+    st.session_state["rec03a_profile_map_origin"]=base
+    queue_handoff(st.session_state,"map",[base])
+
+def _return_from_map():
+    state=st.session_state
+    base=state.pop("rec03a_profile_map_origin",None)
+    ctx,_,_=context_for("map")
+    if base and ctx and ctx["base_ids"]==[base]:
+        queue_handoff(state,"profile",[base])
+    else:
+        return_to_suggestions()
 
 def render_profile_discovery_return():
     if not st.session_state.get("rec03a_profile_discovery"):
@@ -44,8 +58,9 @@ def _compare_profile(base, options):
             return
         state[CHOICE]=selected+[base]
         state["ux111_last_selection"]=(base,True)
-    state["ux112_active_view"]="Minha comparação"
-    state["ux112_active_view_shadow"]="Minha comparação"
+    target="Minha comparação" if len(state.get(CHOICE,[]))>=2 else "Explorar alternativas"
+    state["ux112_active_view"]=target
+    state["ux112_active_view_shadow"]=target
     return_to_suggestions()
 
 def render_notice():
@@ -381,7 +396,7 @@ def render_profile_context(plan):
                     args=(st.session_state,base,"profile"),
                     use_container_width=True)
     map_col.button("Ver no mapa",key="rec03a_handoff_profile_map",
-                   on_click=queue_handoff,args=(st.session_state,"map",[base]),
+                   on_click=_map_from_profile,args=(base,),
                    use_container_width=True)
     favorite.button("Remover favorita" if base in favorites else "Adicionar às favoritas",
                     key="rec03a_handoff_favorite",
@@ -414,8 +429,9 @@ def render_profile_context(plan):
 
 def render_contextual_map(plan):
     context,discovery,research=context_for("map")
-    st.button("Voltar às cidades sugeridas",key="rec03a_handoff_back_map",
-              on_click=return_to_suggestions)
+    from_profile=bool(context and st.session_state.get("rec03a_profile_map_origin") in context["base_ids"])
+    st.button("Voltar à ficha da cidade" if from_profile else "Voltar às cidades sugeridas",
+              key="rec03a_handoff_back_map",on_click=_return_from_map)
     if context is None:
         st.warning("O contexto mudou; abra o mapa novamente pelas sugestões.")
         return
