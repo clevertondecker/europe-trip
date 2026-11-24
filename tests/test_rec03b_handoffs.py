@@ -217,13 +217,19 @@ class HandoffAppTests(unittest.TestCase):
         profile_titles=[m.value for m in app.markdown]
         self.assertFalse(any("Explorar cidades-base" in x for x in profile_titles))
         self.assertTrue(any(base.title() in x and "## " in x for x in profile_titles))
-        self.assertTrue(any("Pesquisa em resumo" in x for x in profile_titles))
+        self.assertTrue(any("Como seria morar aqui por dois meses?" in x for x in profile_titles))
         self.assertTrue(any("Investigue por assunto" in x for x in profile_titles))
         self.assertFalse(any("#### Explore uma cidade" in x for x in profile_titles))
         self.assertFalse(any("### Explorar cidades" in x for x in profile_titles))
         self.assertTrue(any(b.key=="rec04_simulate_profile" and not b.disabled
                             for b in app.button))
         self.assertTrue(any(b.key=="rec03a_handoff_favorite" for b in app.button))
+        self.assertEqual(app.session_state["advisor_plan"],original)
+        click("rec03a_profile_discover")
+        self.assertEqual(app.session_state["ux_section"],"Passeios")
+        click("rec03a_profile_discovery_back")
+        self.assertEqual(app.session_state[CONTEXT]["base_ids"],[base])
+        self.assertEqual(app.session_state[SCOPE],scope)
         self.assertEqual(app.session_state["advisor_plan"],original)
         click("rec03a_handoff_profile_map")
         self.assertEqual(app.session_state[CONTEXT]["kind"],"map")
@@ -239,7 +245,15 @@ class HandoffAppTests(unittest.TestCase):
         self.assertTrue(app.dataframe, "Rail evidence table not rendered")
         click("rec03a_handoff_back_map")
         self.assertEqual(app.session_state[SCOPE],scope)
-        # Open the comparison view before following the existing planning handoff.
+        self.assertEqual(app.session_state[CONTEXT]["kind"],"profile")
+        self.assertEqual(app.session_state[CONTEXT]["base_ids"],[base])
+        selected=list(app.session_state["rec03a_handoff_base_selection"])
+        click("rec03a_profile_compare")
+        self.assertEqual(app.session_state["rec03a_handoff_base_selection"],
+                         selected if base in selected else selected+[base])
+        self.assertEqual(app.session_state["ux112_active_view"],"Minha comparação")
+        self.assertEqual(app.session_state["advisor_plan"],original)
+        # Continue from the existing comparison view into planning.
         app.segmented_control(key="ux112_active_view").set_value("Minha comparação").run()
         self.assertFalse(app.exception,str(app.exception))
         self.assertNotIn("rec03a_planning_open",{x.key for x in app.checkbox})

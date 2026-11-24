@@ -6,7 +6,7 @@ from unittest.mock import patch
 from streamlit.testing.v1 import AppTest
 
 from base_research_expanded_model import load_research, find_city
-from base_coverage_model import coverage_matrix
+from ux124_city_profile_model import city_profile,TOPICS
 
 
 def view(city_id: str, *, fixed=True):
@@ -29,23 +29,19 @@ class ProfileResearchTests(unittest.TestCase):
         study=load_research(include_candidates=True)
         app=view("strasbourg")
         city=find_city(study,"strasbourg")
-        expected=next(r for r in coverage_matrix("general",study=study)
-                      if r["id"]=="strasbourg")
-        self.assertEqual(app.metric[0].value,str(len(city["housing_offers"])))
-        self.assertEqual(
-            app.metric[1].value,
-            f'{expected["route_basket_with_time"]}/{expected["route_basket_total"]}'
-        )
-        self.assertIn("históricos de 2026",app.metric[0].label)
-        self.assertIn("tempo pesquisado",app.metric[1].label)
+        expected=city_profile("strasbourg",research=study)
+        timed=expected["counts"].get("historical",0)+expected["counts"].get("reference_only",0)
+        total=expected["catalog_destination_count"]-expected["counts"].get("local",0)
+        from ux124_city_profile_ui import money
+        self.assertEqual(app.metric[0].value,money(expected["housing"]["median_eur_month"]))
+        self.assertEqual(app.metric[1].value,"—")
+        self.assertIn("mediana histórica",app.metric[0].label)
+        self.assertIn("destinos desejados",app.metric[1].label.lower())
         labels=[m.value for m in app.markdown]
         self.assertIn("### Investigue por assunto",labels)
-        sections=["Moradia e bairros","Trens, logística e passeios",
-                  "Vida cotidiana, bairros e clima","Fontes e metodologia"]
-        expander_labels=[x.label for x in app.expander]
-        for item in sections:
-            self.assertTrue(any(item in x for x in expander_labels),item)
-        self.assertTrue(any("Já documentado" in m.value for m in app.markdown))
+        self.assertEqual(tuple(app.segmented_control(key="ux124_topic_strasbourg").options),TOPICS)
+        self.assertTrue(any("Fontes e pendências" in x.label for x in app.expander))
+        self.assertTrue(any("Vantagens práticas e limitações" in m.value for m in app.markdown))
         self.assertTrue(any("Ainda pendente" in m.value for m in app.markdown))
         self.assertFalse(any("#### Moradia e custo observado" in x for x in labels))
         self.assertNotIn("### Explorar cidades",labels)
@@ -55,18 +51,18 @@ class ProfileResearchTests(unittest.TestCase):
             with self.subTest(city=city):
                 app=view(city)
                 self.assertTrue(any("Investigue por assunto" in m.value for m in app.markdown))
-                self.assertTrue(any("referências adicionais de ida" in c.value
-                                    for c in app.caption)
+                app.segmented_control(key="ux124_topic_"+city).set_value("Logística").run()
+                self.assertFalse(app.exception,[x.message for x in app.exception])
+                self.assertTrue(any("Transporte urbano e última milha" in m.value for m in app.markdown))
+                self.assertTrue(any("Conexões fora do catálogo" in x.label for x in app.expander)
                                 if city in ("angers","annecy") else True)
-                self.assertTrue(any("Mobilidade local e atrações complementares" in x.label
-                                    for x in app.expander))
                 self.assertFalse(any("Nota final" in str(x.value) for x in app.metric))
 
     def test_city_without_2026_housing_is_not_presented_as_quoted_for_2027(self):
         study=load_research(include_candidates=True)
         city=next(c for c in study["cities"] if not c["housing_offers"])
         app=view(city["id"])
-        self.assertEqual(app.metric[0].value,"0")
+        self.assertEqual(app.metric[0].value,"Não pesquisado")
         self.assertTrue(any("Ainda pendente" in m.value for m in app.markdown))
 
     def test_independent_explorer_keeps_original_headings(self):

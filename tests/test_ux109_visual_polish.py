@@ -41,10 +41,10 @@ class UX109ProfileTests(unittest.TestCase):
         self.assertIn("### Investigue por assunto",labels)
         self.assertNotIn("#### Moradia e custo observado",labels)
         self.assertFalse(any("#### Trens, logística e passeios" in x for x in labels))
-        self.assertTrue(any("Moradia e bairros" in e.label for e in app.expander))
-        self.assertTrue(any("Trens, logística e passeios" in e.label for e in app.expander))
-        self.assertTrue(any("Fontes e metodologia" in e.label for e in app.expander))
-        self.assertTrue(any("Já documentado" in x for x in labels))
+        self.assertIn("Moradia",app.segmented_control(key="ux124_topic_mulhouse").options)
+        self.assertIn("Logística",app.segmented_control(key="ux124_topic_mulhouse").options)
+        self.assertTrue(any("Fontes e pendências" in e.label for e in app.expander))
+        self.assertTrue(any("Vantagens práticas e limitações" in x for x in labels))
         self.assertEqual(len(app.metric),2)
 
     def test_city_without_optional_pack_still_displays_canonical_summary(self):
@@ -55,7 +55,7 @@ class UX109ProfileTests(unittest.TestCase):
         app=AppTest.from_string(
             'from unittest.mock import patch\n'
             'from base_research_expanded_ui import render_expanded_research\n'
-            'with patch("base_research_expanded_ui.pack_for_city",return_value=None):\n'
+            'with patch("ux124_city_profile_model.pack_for_city",return_value=None):\n'
             '    render_expanded_research(activity_override="Explorar uma cidade",'
             'compact=True,fixed_city="mulhouse")',
             default_timeout=120,

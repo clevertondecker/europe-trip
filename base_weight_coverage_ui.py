@@ -186,7 +186,7 @@ def render_weight_coverage()->None:
     _render_dq32_macro_coverage(filtered)
     _render_dq31_logistics(filtered)
 
-    render_enriched_city_profiles(rows,only_finalists=only)
+    render_enriched_city_profiles(only_finalists=only)
     st.markdown("### Matriz documental detalhada")
     st.markdown("**Matriz de evidências**")
     st.dataframe(_evidence_table(filtered),hide_index=True,width="stretch",

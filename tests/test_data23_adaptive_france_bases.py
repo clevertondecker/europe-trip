@@ -171,7 +171,7 @@ class DynamicBaseCatalogTests(unittest.TestCase):
 
 
 class DynamicCandidateUIRegressionTests(unittest.TestCase):
-    @patch("base_research_expanded_ui._candidate_photo_markup",
+    @patch("ux124_city_profile_ui._attraction_photo",
            return_value="<div>Fotografia licenciada</div>")
     def test_new_base_detail_renders_and_cannot_change_saved_plan(self, photo):
         from pathlib import Path
@@ -187,6 +187,8 @@ class DynamicCandidateUIRegressionTests(unittest.TestCase):
         self.assertFalse(app.exception,[e.message for e in app.exception])
         self.assertEqual(app.session_state["advisor_plan"],original)
         self.assertEqual(app.session_state["expanded_bases_detail_city"],"angers")
+        app.segmented_control(key="ux124_topic_angers").set_value("Atrações").run()
+        self.assertFalse(app.exception,[e.message for e in app.exception])
         self.assertTrue(photo.called)
 
 
