@@ -87,10 +87,13 @@ def render_wishlist(discovery) -> bool:
     def remember_discovery_filters():
         keys = ("ux501_country", "ux501_categories", "ux501_search", "ux501_page", "ux126_eligibility_filter")
         # Streamlit removes keys for controls not mounted in the alternate view.
-        snapshot = st.session_state.get("ux502_discovery_filters", {}).copy()
-        snapshot.update({key: st.session_state[key] for key in keys if key in st.session_state})
+        # Only recover pre-UX126B widget state. New filter callbacks already
+        # own the snapshot, including explicit navigation handoffs.
+        if "ux502_discovery_filters" not in st.session_state:
+            snapshot = {key: st.session_state[key] for key in keys if key in st.session_state}
+            if snapshot:
+                st.session_state["ux502_discovery_filters"] = snapshot
         _recover_previous_session_interests(st.session_state)
-        st.session_state["ux502_discovery_filters"] = snapshot
 
     def legacy_view_changed():
         remember_discovery_filters()
@@ -112,9 +115,6 @@ def render_wishlist(discovery) -> bool:
     if view == "Descobrir lugares":
         if "ux501_interest_session" not in st.session_state and "ux502_transient_shadow" in st.session_state:
             st.session_state["ux501_interest_session"] = list(st.session_state["ux502_transient_shadow"])
-        for key, value in st.session_state.get("ux502_discovery_filters", {}).items():
-            if key not in st.session_state:
-                st.session_state[key] = value
     if view == "Minha lista":
         st.markdown(page_header(
             "Minha lista", "NOSSA EUROPA 2027 · EXPLORAR",
@@ -126,6 +126,7 @@ def render_wishlist(discovery) -> bool:
     if view != "Minha lista":
         return False
 
+    st.caption("Os destinos já incluídos no roteiro aparecem em Planejar → Organizar.")
     items = ordered_interests(current, discovery)
     active = [r for r in items if r["priority"] != "discarded"]
     st.caption(f'{len(active)} destino(s) desejados · '
@@ -268,8 +269,9 @@ def render_wishlist(discovery) -> bool:
             "Recuperar arquivo antigo da lista (avançado)",
             key="ux502_legacy_import_open"))
         if advanced:
+            st.caption("Arquivo .json exportado por este app")
             uploaded = st.file_uploader("Importar lista JSON", type=["json"],
-                                        key="ux502_upload")
+                                        key="ux502_upload", max_upload_size=5)
             if uploaded is not None and st.button("Analisar arquivo", key="ux502_import_preview"):
                 try:
                     incoming = import_interests(uploaded.getvalue(), discovery)

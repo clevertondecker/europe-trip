@@ -144,6 +144,11 @@ class DestinationPhotoAppTests(TestCase):
             app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
             app.segmented_control(key="ux_section").set_value("Passeios").run()
             self.assertFalse(app.exception,[x.message for x in app.exception])
+            # Aachen is no longer on page 1 after the stable eligibility partition.
+            # Locate the actual destination rather than relying on catalog position.
+            app.text_input(key="ux501_search").set_value("Aachen").run()
+            self.assertFalse(app.exception,[x.message for x in app.exception])
+            self.assertIn("ux502_add_aachen",{b.key for b in app.button})
             markup=" ".join(x.value for x in app.markdown)
             # Local WebP is now served through st.image rather than an
             # externally hosted HTML <img>. The remote mock cannot override it.
