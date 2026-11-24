@@ -134,7 +134,8 @@ def _pilot_context(projection: dict, research: dict, pilot: list[str]) -> None:
             st.dataframe(rows, hide_index=True, width="stretch")
             st.caption("Observações históricas, sem confirmação de estações, frequência, "
                        "retornos, última milha ou disponibilidade em 2027.")
-        with st.expander("Aeroportos e vida urbana · pesquisa geral",expanded=False):
+        if st.checkbox("Consultar aeroportos e vida urbana · pesquisa geral",
+                       key="ux113_pilot_general"):
             st.caption("Estas informações descrevem as cidades pesquisadas em 2026; "
                        "não pertencem necessariamente aos destinos do seu escopo.")
             for record in data["airports"]:
@@ -185,7 +186,8 @@ def render_comparison_panorama(projection: dict, research: dict) -> None:
         st.link_button("Indicador de aluguel residencial (2026)", panorama["residential_source"])
         for label, url in panorama["living_sources"]:
             st.link_button(label, url)
-        with st.expander("Anúncios históricos consultados", expanded=False):
+        if st.checkbox("Ver anúncios históricos consultados",
+                       key="ux113_housing_sources"):
             if not panorama["housing_sources"]:
                 st.caption("Não há anúncios pesquisados para essas cidades.")
             for label,url in panorama["housing_sources"]:
