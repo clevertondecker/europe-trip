@@ -46,3 +46,28 @@ class VisualReviewTests(unittest.TestCase):
         self.assertNotIn("<button",impact_html(view))
         self.assertNotIn("<img",city_identity_html({"name":"<img>","country":"França"},"Base atual"))
         self.assertEqual(plan,original)
+
+    def test_housing_hypotheses_use_existing_finance_result(self):
+        plan=new_plan()
+        plan["base_city"]="metz"
+        c=compare_city_decisions(plan,["mulhouse"],["paris"],
+                                 {"metz":1000,"mulhouse":900},load_data(),False,60,6.3)
+        view=contextual_impact_projection(c)
+        self.assertTrue(view["housing_known"])
+        self.assertLess(view["housing_delta_brl"],0)
+        html=housing_html(c,view)
+        self.assertIn("€ 1.000/mês",html)
+        self.assertIn("€ 900/mês",html)
+        self.assertIn("Somente moradia",html)
+        self.assertNotIn("Não cotado",html)
+
+    def test_zero_comparable_and_local_remain_distinct(self):
+        rows=[row(None,45,"local","Local",None)]
+        rows[0]["official_category"]="local"
+        groups={k:[] for k in ("Melhorou","Piorou","Semelhante","Local","Não pesquisado","Referência insuficiente")}
+        groups["Local"]=rows
+        view=dict(rows=rows,groups=groups,comparable=0,total=1,
+                  official_name="Metz",candidate_name="Nancy")
+        self.assertIn("Local · acesso a verificar",impact_html(view))
+        self.assertIn("0 de 1 destinos comparáveis",impact_html(view))
+        self.assertEqual(subtotals_html(view),"")
