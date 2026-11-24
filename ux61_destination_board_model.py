@@ -8,6 +8,8 @@ from ux502_destination_interests_model import (
     PRIORITIES, empty_interests, validate_interests,
 )
 from itinerary_flow_model import selected_rows
+from destination_identity import canonical_destination_id
+from itinerary_eligibility import itinerary_eligibility
 from ux63_timeline_model import project_timeline
 
 
@@ -15,10 +17,10 @@ def build_destination_board(interests, plan, discovery, catalog, weekend_groups=
     """One row per place; interest, outing, group and time are independent facets."""
     wishes = validate_interests(interests if interests is not None else empty_interests(),
                                 discovery)
-    known = {row["id"]: row for row in discovery["destinations"]}
-    visits = {row["id"]: row for row in selected_rows(plan, catalog)}
-    timing = {row["id"]: row for row in project_timeline(plan, catalog, weekend_groups)}
-    priorities = {r["destination_id"]: r["priority"] for r in wishes["items"]}
+    known = {canonical_destination_id(row["id"]): row for row in discovery["destinations"]}
+    visits = {canonical_destination_id(row["id"]): row for row in selected_rows(plan, catalog)}
+    timing = {canonical_destination_id(row["id"]): row for row in project_timeline(plan, catalog, weekend_groups)}
+    priorities = {canonical_destination_id(r["destination_id"]): r["priority"] for r in wishes["items"]}
     all_ids = set(priorities) | set(visits)
     rows = []
     for destination_id in all_ids:
@@ -47,7 +49,7 @@ def build_destination_board(interests, plan, discovery, catalog, weekend_groups=
             "individual_period": temporal.get("period"),
             "individual_dates": temporal.get("dates", []),
             "stage": visit["stage"] if visit else None,
-            "planning_support": place.get("planning_support"),
+            "eligibility": itinerary_eligibility(destination_id, catalog),
         })
     order = {p: i for i, p in enumerate(PRIORITIES)}
     rows.sort(key=lambda r: (0 if r["planned"] else 1,
@@ -62,22 +64,17 @@ def organizer_wishlist_candidates(interests, plan, discovery, catalog, stage):
     A wishlist ID is promotable only if it matches a validated outing choice
     in the current stage. Never guess an ID from similar names.
     """
-    from itinerary_flow_model import destinations, ITALY_STAGE, FRANCE_STAGE
+    from itinerary_flow_model import ITALY_STAGE, FRANCE_STAGE
     if stage not in (ITALY_STAGE, FRANCE_STAGE):
         raise ValueError("Etapa de organização inválida")
-    choices = {row["id"]: row for row in destinations(catalog)}
     board = build_destination_board(interests, plan, discovery, catalog)
     result = {"eligible": [], "other_stage": [], "unsupported": []}
     for row in board:
         if not row["wanted"] or row["planned"]:
             continue
-        choice = choices.get(row["id"])
-        if choice is None:
-            result["unsupported"].append(row)
-        elif choice["stage"] != stage:
-            result["other_stage"].append(row)
-        else:
-            result["eligible"].append(row)
+        eligibility = itinerary_eligibility(row["id"], catalog, stage)
+        bucket = "unsupported" if eligibility["status"] == "research_only" else eligibility["status"]
+        result[bucket].append({**row, "eligibility": eligibility})
     return result
 
 
