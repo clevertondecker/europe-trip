@@ -269,8 +269,9 @@ def render_wishlist(discovery) -> bool:
             "Recuperar arquivo antigo da lista (avançado)",
             key="ux502_legacy_import_open"))
         if advanced:
+            st.caption("Arquivo .json exportado por este app")
             uploaded = st.file_uploader("Importar lista JSON", type=["json"],
-                                        key="ux502_upload")
+                                        key="ux502_upload", max_upload_size=5)
             if uploaded is not None and st.button("Analisar arquivo", key="ux502_import_preview"):
                 try:
                     incoming = import_interests(uploaded.getvalue(), discovery)
