@@ -195,9 +195,12 @@ def render_base_review_scope(ctx):
     supported=ctx["supported_destinations"]
     unsupported=ctx["unsupported_destinations"]
     if unsupported:
+        visible_names={d["id"]:d["name"]
+                       for d in build_exploration_discovery()["destinations"]}
         st.warning(str(len(unsupported))+" destino(s) do seu escopo não são "
                    "suportados pela pesquisa legada: "+
-                   ", ".join(unsupported)+". Eles continuam na lista e no roteiro.")
+                   ", ".join(visible_names.get(item,item) for item in unsupported)+
+                   ". Eles continuam na lista e no roteiro.")
     if not supported:
         st.error("Nenhum destino do escopo é compatível com esta ferramenta. "
                  "Não abriremos uma comparação usando passeios de exemplo.")
