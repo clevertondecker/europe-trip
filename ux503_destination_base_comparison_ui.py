@@ -174,10 +174,6 @@ def render_wishlist_base_comparison(*, plan, discovery=None, research=None):
 
     # New read-only decision layer: never modifies choices or official TripPlan.
     decision = build_decision_readiness(result, discovery=discovery, research=research)
-    from base_recommendation_model import evaluate_matrix
-    from rec05_priority_research_ui import render_research_result
-    render_research_result(evaluate_matrix({"comparison":result,"evidence":enriched}),
-                           key="rec05_manual",base_ids=list(selected),readiness=decision)
     # Decision readiness evaluates historical evidence and verified logistics.
     # An additional directional minimum must be visible, but must not be
     # promoted into a confirmed return, timetable, or historical observation.

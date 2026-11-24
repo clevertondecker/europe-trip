@@ -477,38 +477,6 @@ def _card(candidate, result, names, cities, official, options):
             st.caption(candidate["limitation"])
 
 
-def _render_comparison_groups(result,names,cities):
-    # Display only groups involving contextual highlights by default; full
-    # matrix remains in the existing manual activity, no duplicated ranking.
-    highlights=set(result["highlight_ids"])
-    groups=result["complete_groups"]
-    conditional=result["conditional_comparisons"]
-    if st.checkbox("Como as referências foram comparadas", key="rec03a_groups_open"):
-        for group in groups:
-            st.write("Escopo completo: "+_label_ids(group["destination_ids"],names))
-            st.caption("Bases: "+", ".join(cities[b]["name"] for b in group["base_ids"]))
-        relevant=[g for g in conditional if highlights.intersection(g["base_ids"])]
-        if relevant:
-            by_pair={tuple(g["base_ids"]):g for g in relevant}
-            options=list(by_pair)
-            def label(pair):
-                return " × ".join(cities[b]["name"] for b in pair)
-            _restore_widget("rec03a_group","rec03a_group_shadow",options[0],
-                            lambda x:isinstance(x,tuple) and x in by_pair)
-            selected=st.selectbox("Comparação condicional para consultar",options,
-                                  format_func=label,key="rec03a_group",
-                                  on_change=_remember,args=("rec03a_group","rec03a_group_shadow"))
-            group=by_pair[selected]
-            st.write("Trajetos comparados: "+_label_ids(group["destination_ids"],names))
-            st.caption("Fora do conjunto comum: "+_label_ids(group["omitted_destination_ids"],names))
-            for b in group["base_ids"]:
-                st.markdown("**"+cities[b]["name"]+"**")
-                st.caption("Tempo conhecido, fora da comparação: "+_label_ids(group["known_not_compared_by_base"][b],names))
-                st.caption("Sem tempo pesquisado: "+_label_ids(group["missing_time_by_base"][b],names))
-                st.caption("Local: "+_label_ids(group["local_destination_ids_by_base"][b],names))
-        st.caption(result["limitation"])
-
-
 def _featured_ids(result):
     """Up to four documented highlights, preserving REC02 section ordering."""
     sections=result["highlight_sections"]
@@ -701,10 +669,6 @@ def render_suggestions(*,plan,discovery=None,research=None):
         st.markdown("#### Continuar montando meu roteiro")
         render_planning_handoff(plan,interests=interests,
                                 discovery=discovery,research=research)
-        with st.expander("Metodologia, referências e pesquisas pendentes",expanded=False):
-            _render_comparison_groups(result,names,cities)
-            from rec05_priority_research_ui import render_research_result
-            render_research_result(result,key="rec05_suggestions")
 
 
 
