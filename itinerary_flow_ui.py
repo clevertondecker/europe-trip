@@ -257,16 +257,25 @@ def _edit_destination(row:dict,catalog:dict)->None:
             st.warning("Remover "+item["name"]+
                        " do seu planejamento? As datas desse destino, "
                        "se houver, também serão removidas.")
+            groups=st.session_state.get("ux48_weekend_groups") or {}
+            for group in groups.get("groups", []):
+                if row["id"] in group["destinations"]:
+                    st.caption("Também será retirado da viagem "+group["name"]+
+                               (". O grupo ficará vazio e será removido."
+                                if len(group["destinations"])==1 else ". Os demais destinos permanecem."))
             yes,no=st.columns(2)
             with yes:
                 if st.button("Confirmar remoção",
                              key="flow_remove_confirm_"+row["id"],type="primary"):
-                    outcome=delete_outing(row["id"],confirmed=True)
-                    st.session_state["ux45_flow_result"]=asdict(outcome)
-                    st.session_state.pop("flow_edit_target",None)
-                    st.session_state.pop("flow_removing",None)
-                    st.session_state["flow_notice"]=item["name"]+" removido."
-                    st.rerun()
+                    try:
+                        outcome=delete_outing(row["id"],confirmed=True)
+                        st.session_state["ux45_flow_result"]=asdict(outcome)
+                        st.session_state.pop("flow_edit_target",None)
+                        st.session_state.pop("flow_removing",None)
+                        st.session_state["flow_notice"]=item["name"]+" removido."
+                        st.rerun()
+                    except (ValueError,KeyError) as exc:
+                        st.error(str(exc))
             with no:
                 if st.button("Cancelar",key="flow_remove_cancel_"+row["id"]):
                     st.session_state.pop("flow_removing",None)

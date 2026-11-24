@@ -217,7 +217,8 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
     label,hint=private_status_label(("Rascunho nesta sessão","Salve quando quiser; datas são opcionais."))
     try:
         view=project_planning(plan,st.session_state.get("ux502_interests",empty_interests()),
-                              _discovery(),catalog,private_saved=label=="Salvo em espaço privado")
+                              _discovery(),catalog,private_saved=label=="Salvo em espaço privado",
+                              weekend_groups=st.session_state.get("ux48_weekend_groups"))
     except (ValueError,KeyError,TypeError):
         st.error("A lista precisa de revisão. Seu roteiro foi preservado.")
         st.button("Abrir minha lista",key="flow_journey_invalid",on_click=_choose)

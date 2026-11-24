@@ -1,45 +1,51 @@
-"""Pure, read-only timeline projection for planned visits and weekend groups."""
+"""Shared read-only temporal projection: individual dates never derive from groups."""
 from __future__ import annotations
 from itinerary_flow_model import selected_rows, UNASSIGNED, FRANCE_STAGE
+from ux48_weekend_groups_model import PERIODS, _trip_days
 
 
 def project_timeline(plan, catalog, weekend_groups=None, stage=None):
     rows = selected_rows(plan, catalog)
-    groups = weekend_groups.get("groups", []) if isinstance(weekend_groups,dict) else []
+    groups = (weekend_groups.get("groups", []) if isinstance(weekend_groups, dict)
+              and weekend_groups.get("plan_id", plan["plan_id"]) == plan["plan_id"] else [])
     associated = {}
     for group in groups:
-        for dest in group.get("destinations", []):
-            associated[dest] = group
+        for index, dest in enumerate(group.get("destinations", []), 1):
+            associated[dest] = (group, index)
     result = []
     for row in rows:
         if stage is not None and row["stage"] != stage:
             continue
-        group = associated.get(row["id"])
+        group, sequence = (associated.get(row["id"], (None, None))
+                           if row["stage"] == FRANCE_STAGE else (None, None))
         exact = list(row["exact_dates"])
         period = row["period"] if row["period"] != UNASSIGNED else None
-        if group and group.get("start_date") and not exact:
-            exact = [group["start_date"]]
-        if group and not period and group.get("period") not in (
-                None, "", "Ainda não definido", "A definir"):
-            period = group["period"]
+        group_period = None
+        group_dates = []
+        if group:
+            if group.get("period") in PERIODS and group["period"] not in (UNASSIGNED, "A definir"):
+                group_period = group["period"]
+            if group.get("start_date"):
+                group_dates = _trip_days(group["start_date"], group.get("nights", 0))
+        organized = bool(period or exact or group_period or group_dates)
+        status = ("Data individual definida" if exact else
+                  "Viagem com intervalo definido · dia individual pendente" if group_dates else
+                  "Período definido · data pendente" if period or group_period else
+                  "Em grupo · período/data pendentes" if group else "Sem período ou data")
         result.append({
             "id": row["id"], "name": row["name"], "stage": row["stage"],
             "attractions_count": len(row["attractions"]),
-            "group_name": group["name"] if group else None,
-            "grouped": group is not None,
-            "period": period,
-            "dates": exact,
-            "organized": bool(period or exact),
-            "dated": bool(exact),
-            "status": ("Data definida" if exact else
-                       "Período definido; data pendente" if period else
-                       "Em grupo; período/data pendentes" if group else
-                       "Sem período ou data"),
+            "group_id": group.get("id") if group else None,
+            "group_name": group.get("name") if group else None,
+            "grouped": group is not None, "group_sequence": sequence,
+            "period": period, "dates": exact,
+            "group_period": group_period, "group_dates": group_dates,
+            "organized": organized, "dated": bool(exact), "status": status,
         })
     result.sort(key=lambda r: (
-        0 if r["dated"] else 1 if r["period"] else 2,
-        r["dates"][0] if r["dates"] else "",
-        r["name"].casefold()))
+        0 if r["dated"] or r["group_dates"] else 1 if r["organized"] else 2,
+        (r["dates"] or r["group_dates"] or [""])[0],
+        r["group_sequence"] or 0, r["name"].casefold()))
     return result
 
 

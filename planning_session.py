@@ -36,7 +36,16 @@ def active_plan()->dict:
 def _commit(next_plan:dict)->dict:
     before=bootstrap()
     if next_plan==before:return before
+    # Reconcile the existing sidecar at the explicit mutation boundary, not on read.
+    groups=st.session_state.get("ux48_weekend_groups")
+    reconciled=groups
+    if groups is not None:
+        from ux48_weekend_groups_model import reconcile_removed_outings
+        reconciled=reconcile_removed_outings(groups,next_plan,load_attractions())
     st.session_state["advisor_plan"]=next_plan
+    if reconciled!=groups:
+        st.session_state["ux48_weekend_groups"]=reconciled
+        st.session_state["ux48_weekend_message"]="Agrupamentos ajustados às mudanças do roteiro; revise datas e destinos."
     sync_legacy_view(next_plan,st.session_state)
     if before["base_city"]!=next_plan["base_city"]:
         new_base=next_plan["base_city"]
