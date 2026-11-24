@@ -381,7 +381,7 @@ def _selected_stage(rows:list[dict],stage:str,catalog:dict)->None:
 
 
 def _compact_budget(plan:dict,catalog:dict,trip_data:dict,
-                    finance_live:bool,eurfx:float,chffx:float)->None:
+                    finance_live:bool,eurfx:float,chffx:float,*,show_link=True)->None:
     if trip_data is None:
         st.caption("Custos disponíveis em Orçamento; ainda há valores sem cotação.")
         return
@@ -407,8 +407,9 @@ def _compact_budget(plan:dict,catalog:dict,trip_data:dict,
         st.warning("A projeção parcial excede o teto; as escolhas continuam editáveis.")
     st.caption("A Itália permanece na verba agregada, sem somar novamente ingressos. "
                "Valores faltantes não são €0; a margem não é dinheiro livre.")
-    st.button("Ver orçamento detalhado",key="flow_go_budget",
-              on_click=_navigate,args=("Orçamento","Detalhamento"))
+    if show_link:
+        st.button("Ver orçamento detalhado",key="flow_go_budget",
+                  on_click=_navigate,args=("Orçamento","Detalhamento"))
 
 
 def _clear_organize_date_draft(state,stage:str)->None:

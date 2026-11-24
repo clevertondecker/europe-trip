@@ -369,7 +369,7 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
     from ux61_destination_board_ui import render_destination_board
     from ux64_navigation_model import select_public_task
     from rec03a_session import request_navigation
-    label,hint=private_status_label(("Rascunho nesta sessão","Salve quando quiser; datas são opcionais."))
+    label,hint=private_status_label(("Rascunho nesta sessão","Salve quando quiser; datas são opcionais."), detailed=summary_only)
     try:
         view=project_planning(plan,st.session_state.get("ux502_interests",empty_interests()),
                               _discovery(),catalog,private_saved=label=="Salvo em espaço privado",
@@ -377,6 +377,10 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
     except (ValueError,KeyError,TypeError):
         st.error("A lista precisa de revisão. Seu roteiro foi preservado.")
         st.button("Abrir minha lista",key="flow_journey_invalid",on_click=_choose)
+        return
+    if summary_only:
+        from ux121_overview_ui import render_overview
+        render_overview(plan,catalog,view,label,hint,trip_data,finance_live,eurfx,chffx)
         return
     counts=view["counts"]
     state=st.session_state
@@ -394,71 +398,29 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
         state[VIEW]="organize"
     if state.get(VIEW)=="build" and not view["eligible_count"]:
         state[VIEW]="review" if view["rows"] else None
-    visual=project_visual_state(view,label,focused=state[VIEW])
-    if summary_only:
-        # Keep the compact home summary unchanged; only redesign the full page.
-        st.markdown("## Meu roteiro")
-        st.caption(label+" · "+hint)
-        a,b,c=st.columns(3)
-        a.metric("Desejados",counts["wished"])
-        b.metric("Incluídos",counts["planned"])
-        c.metric("Organizados",counts["organized"])
-    else:
-        organizing=(state.get("ux_area"),state.get("ux_section"))==(
-            "Meu roteiro","Organizar viagem")
-        st.markdown(header_html(
-            label,hint,saved=visual["saved"],
-            title="Organizar nossa viagem" if organizing else "Meus destinos" if state.get("ux_section")=="Meu planejamento" else "Meu roteiro",
-            tag="Visitas por período ou data" if organizing
-                else "Gerencie os lugares da sua viagem",
-        ),unsafe_allow_html=True)
-        with st.container(key="flow_journey_metrics"):
-            metric_columns=st.columns(3,gap="small")
-            metrics=visual["metrics"]
-            if state.get("ux_section")=="Meu planejamento":
-                metrics=[
-                    {"id":"planned","icon":"▣","name":"Incluídos","value":counts["planned"],
-                     "hint":"No roteiro","highlight":False},
-                    {"id":"organized","icon":"▤","name":"Organizados","value":counts["organized"],
-                     "hint":"Com período ou data","highlight":False},
-                    {"id":"pending","icon":"◎","name":"A organizar","value":counts["planned"]-counts["organized"],
-                     "hint":"Período ou data opcionais","highlight":bool(view["pending"])},
-                ]
-            for column,metric in zip(metric_columns,metrics):
-                column.markdown(metric_html(metric),unsafe_allow_html=True)
-    if summary_only:
-        action=view["next"]
-        with st.container(border=True):
-            st.markdown("#### Continue de onde parou")
-            if action=="build":
-                st.write(f'{view["eligible_count"]} destinos elegíveis ainda não incluídos.')
-                label="Adicionar destinos pendentes ao roteiro" if counts["planned"] else "Montar roteiro com meus destinos"
-            elif action=="exploratory":
-                st.write("Seus desejos são apenas exploratórios: ainda não possuem passeios compatíveis com o roteiro. Permanecem na lista.")
-                st.caption(", ".join(r["name"] for r in view["unsupported"]))
-                label="Revisar minha lista"
-            elif action=="review":
-                st.write("Confira os destinos incluídos e salve seu rascunho.")
-                label="Revisar meu roteiro"
-            else:
-                st.write("Escolha os destinos que deseja conhecer.")
-                label="Escolher destinos"
-            st.button(label,key="flow_journey_primary",type="primary",
-                      on_click=_discover if action=="choose" else _choose if action=="exploratory" else request_planning,
-                      args=() if action in ("choose","exploratory") else (state,action))
-        with st.expander("Ver etapas da jornada · opcional",expanded=False):
-            st.markdown("#### Etapas da jornada")
-            for step,title,status in view["steps"]:
-                st.markdown("**"+title+"**")
-                st.caption(status)
-        with st.expander("Ferramentas complementares"):
-            st.button("Encontrar cidades-base",key="flow_journey_suggestions",
-                      on_click=request_navigation,args=(state,"suggestions"))
-            st.button("Revisar orçamento",key="flow_journey_budget",
-                      on_click=select_public_task,args=(state,"Orçamento","Visão financeira"))
-            if st.checkbox("Consultar todos os destinos",key="flow_journey_board"):
-                render_destination_board(plan,catalog)
-        return
+    visual=project_visual_state({**view,"next":view["editor_next"]},label,focused=state[VIEW])
+    organizing=(state.get("ux_area"),state.get("ux_section"))==(
+        "Meu roteiro","Organizar viagem")
+    st.markdown(header_html(
+        label,hint,saved=visual["saved"],
+        title="Organizar nossa viagem" if organizing else "Meus destinos" if state.get("ux_section")=="Meu planejamento" else "Meu roteiro",
+        tag="Visitas por período ou data" if organizing
+            else "Gerencie os lugares da sua viagem",
+    ),unsafe_allow_html=True)
+    with st.container(key="flow_journey_metrics"):
+        metric_columns=st.columns(3,gap="small")
+        metrics=visual["metrics"]
+        if state.get("ux_section")=="Meu planejamento":
+            metrics=[
+                {"id":"planned","icon":"▣","name":"Incluídos","value":counts["planned"],
+                 "hint":"No roteiro","highlight":False},
+                {"id":"organized","icon":"▤","name":"Organizados","value":counts["organized"],
+                 "hint":"Com período ou data","highlight":False},
+                {"id":"pending","icon":"◎","name":"A organizar","value":counts["planned"]-counts["organized"],
+                 "hint":"Período ou data opcionais","highlight":bool(view["pending"])},
+            ]
+        for column,metric in zip(metric_columns,metrics):
+            column.markdown(metric_html(metric),unsafe_allow_html=True)
     action=visual["action"]
     with st.container(key="flow_journey_next"):
         st.markdown(next_html(visual),unsafe_allow_html=True)

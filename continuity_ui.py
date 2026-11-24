@@ -393,7 +393,7 @@ def render_global_private_save(plan, catalog):
             st.success("Salvamento privado confirmado.")
 
 
-def private_status_label(fallback):
+def private_status_label(fallback, *, detailed=False):
     """Show private success only after a confirmed remote response."""
     state = st.session_state
     if state.get("ux36_cloud_status") == "Salvo em espaço privado":
@@ -409,7 +409,9 @@ def private_status_label(fallback):
             pass
         return ("Alterações apenas nesta sessão", "Salve uma cópia privada ou baixe o backup")
     if state.get("ux36_cloud_status", "").startswith(("Erro","Conflito")):
-        return ("Alterações apenas nesta sessão", "Salve uma cópia privada ou baixe o backup")
+        hint=("Conflito de versão; revise a cópia antes de salvar" if state["ux36_cloud_status"].startswith("Conflito")
+              else "Falha de salvamento; nenhuma gravação confirmada") if detailed else "Salve uma cópia privada ou baixe o backup"
+        return ("Alterações apenas nesta sessão", hint)
     return fallback
 
 
