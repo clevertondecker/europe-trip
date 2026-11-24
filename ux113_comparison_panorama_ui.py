@@ -1,7 +1,8 @@
-"""UX113: read-only logistics/living panorama for the canonical UX87 selection.
+"""UX113: non-redundant housing, daily-life and pilot context for UX87 selection.
 
-Research snapshots are not fares, schedules, booking quotes or an official
-choice. This module introduces no Streamlit selection or persisted plan state.
+The canonical UX87 matrix already owns travel-time evidence. This panel adds
+only researched dimensions that are not in the matrix; missing values remain
+unknown and no research-only city is silently promoted into the official plan.
 """
 from __future__ import annotations
 
@@ -15,21 +16,22 @@ PILOT_BASES = frozenset({"mulhouse", "strasbourg", "freiburg"})
 
 
 def project_comparison_panorama(projection: dict, research: dict, round2: dict) -> dict:
-    """Cross-project the same chosen bases without making a synthetic score.
+    """Project the SAME selected cities without inventing cost or viability.
 
-    The 2026 cost snapshot covers four bases only. Missing prices stay missing,
-    and unequal rental samples must never be treated as comparable quotes.
+    Historical offers are heterogeneous rental advertisements, not verified
+    comparable furnished 2027 stays. Residential €/m² is a separate indicator.
     """
     cities = {city["id"]: city for city in research["cities"]}
     costs = {city["id"]: city for city in round2["cities"]}
     bases = projection["base_ids"]
     total = len(projection["destinations"])
-    logistics, living = [], []
-    sources = []
+    logistics, living, routine, sources = [], [], [], []
     for base in bases:
         city = cities[base]
         evidence = projection["counts"][base]
         timed = evidence.get("historical", 0) + evidence.get("reference_only", 0)
+        # Retained for backward-compatible research projections; intentionally
+        # NOT rendered as a second logistics table beside the UX97 matrix.
         logistics.append({
             "Cidade-base": city["name"],
             "Idas com tempo documentado": f"{timed}/{total}",
@@ -39,31 +41,42 @@ def project_comparison_panorama(projection: dict, research: dict, round2: dict) 
         })
         housing = observed_housing(city)
         specific = costs.get(base)
+        coworking = specific["coworking"] if specific else None
         living.append({
             "Cidade-base": city["name"],
-            "Anúncios históricos (2026)": (
-                f'{housing["count"]} · mediana € {housing["median_eur_month"]:,.0f}/mês'
-                if housing["count"] else "Sem anúncios pesquisados"
-            ),
+            "Amostra de anúncios (2026)": housing["count"],
+            "Mínimo observado (€ / mês)": housing["minimum_eur_month"],
+            "Mediana observada (€ / mês)": housing["median_eur_month"],
+            "Máximo observado (€ / mês)": housing["maximum_eur_month"],
+            "Anúncios para dois adultos": housing["two_adult_listings_documented"],
             "Aluguel residencial (€/m²/mês)": (
                 specific["residential_rent_eur_sqm_month"] if specific else None
             ),
             "Jantar para dois (€)": (
                 specific["restaurant_two_midrange_eur"] if specific else None
             ),
-            "Coworking pesquisado": (
-                specific["coworking"]["name"] if specific else "Não pesquisado"
+        })
+        routine.append({
+            "Cidade-base": city["name"],
+            "Coworking pesquisado": coworking["name"] if coworking else None,
+            "Preço de referência (€)": coworking["price_eur"] if coworking else None,
+            "Modalidade": coworking["price_basis"] if coworking else None,
+            "Horário publicado": coworking["schedule"] if coworking else None,
+            "Expediente noturno confirmado": (
+                "Não" if coworking and not coworking["late_work_compatible"] else
+                "Não pesquisado"
             ),
         })
         if specific:
-            sources.append((city["name"] + " · jantar para dois",
+            sources.append((city["name"] + " · alimentação",
                             specific["restaurant_source_url"]))
             sources.append((city["name"] + " · coworking",
-                            specific["coworking"]["source_url"]))
+                            coworking["source_url"]))
     return {
         "base_ids": list(bases),
         "logistics": logistics,
         "living": living,
+        "routine": routine,
         "living_sources": sources,
         "residential_source": round2["common_sources"][0]["url"],
         "pilot_bases": [base for base in bases if base in PILOT_BASES],
@@ -74,48 +87,67 @@ def project_comparison_panorama(projection: dict, research: dict, round2: dict) 
     }
 
 
+def _pilot_context(projection: dict, research: dict, pilot: list[str]) -> None:
+    """Only expose pilot observations overlapping the user's actual destinations."""
+    from dq21_decision_model import decision_research
+
+    names = {city["id"]: city["name"] for city in research["cities"]}
+    with st.expander("Pesquisa histórica do piloto · detalhes opcionais", expanded=False):
+        st.caption("Estudo independente de Mulhouse, Strasbourg e Freiburg. "
+                   "Apenas destinos em comum com a sua seleção aparecem aqui; "
+                   "nenhum horário, retorno ou aeroporto é uma reserva para 2027.")
+        data = decision_research(pilot)
+        if data["status"] != "available":
+            st.info("Pacote piloto adicional indisponível; a comparação principal permanece válida.")
+            return
+        selected_destinations = {d["id"] for d in projection["destinations"]}
+        matched = [r for r in data["routes"] if r["destination_id"] in selected_destinations]
+        if not matched:
+            st.info("O piloto não pesquisou os destinos deste escopo. "
+                    "Não o usamos para completar artificialmente a matriz principal.")
+            return
+        rows = []
+        names_dest = {d["id"]: d["name"] for d in projection["destinations"]}
+        for item in matched:
+            minutes = item.get("minimum_rail_minutes_2026")
+            rows.append({
+                "Cidade-base": names[item["base_id"]],
+                "Destino do seu escopo": names_dest[item["destination_id"]],
+                "Mínimo histórico (min)": minutes,
+                "Volta em 2027": "Não validada",
+            })
+        st.dataframe(rows, hide_index=True, width="stretch")
+        st.caption("Os exemplos do piloto não substituem evidências UX87/ROUTES7; "
+                   "as estações, datas, frequência e última milha podem diferir.")
+
+
 def render_comparison_panorama(projection: dict, research: dict) -> None:
-    """Show contextual evidence immediately under UX87's comparison matrix."""
+    """Add decision-relevant dimensions below, never duplicate UX97's counts."""
     try:
         panorama = project_comparison_panorama(projection, research, load_round2())
-    except (KeyError, ValueError, TypeError, OSError) as exc:
-        st.info("O panorama adicional de logística e custo de vida está indisponível. "
-                "A matriz principal permanece válida.")
+    except (KeyError, ValueError, TypeError, OSError):
+        st.info("Moradia e rotina indisponíveis nesta pesquisa. A matriz ferroviária permanece válida.")
         return
-    st.markdown("#### Panorama para decidir o que investigar")
-    st.caption("As mesmas cidades da comparação acima, sem segundo seletor. "
-               "Referências de 2026 não garantem trajetos, aluguel ou preços em 2027.")
-    tab_logistics, tab_living = st.tabs(["Logística e passeios", "Custo de vida e rotina"])
-    with tab_logistics:
-        st.dataframe(panorama["logistics"], hide_index=True, width="stretch")
-        st.caption("O número de idas pesquisadas mede cobertura documental, não menor tempo, "
-                   "facilidade de deslocamento nem viabilidade de bate-volta. "
-                   "Retorno de fim de semana e última milha continuam pendentes.")
-    with tab_living:
-        st.dataframe(panorama["living"], hide_index=True, width="stretch",
-                     column_config={
-                         "Aluguel residencial (€/m²/mês)":
-                             st.column_config.NumberColumn(format="€ %.2f"),
-                         "Jantar para dois (€)":
-                             st.column_config.NumberColumn(format="€ %.2f"),
-                     })
+    st.markdown("#### Moradia, alimentação e trabalho remoto")
+    st.caption("Referências pesquisadas em 2026, não cotações de hospedagem ou custos confirmados de 2027.")
+    housing_tab, routine_tab = st.tabs(["Moradia e alimentação", "Trabalho e rotina"])
+    with housing_tab:
+        st.dataframe(panorama["living"], hide_index=True, width="stretch")
         st.caption(f'{panorama["covered_living_count"]} de {len(panorama["base_ids"])} '
-                   "cidades têm indicadores locais pontuais da rodada 2026. "
-                   "Campos vazios significam pesquisa ausente, não custo zero. "
-                   "Anúncios têm amostras desiguais; aluguel residencial não é estadia mobiliada.")
-        st.caption("Jantar para dois: referência colaborativa, não orçamento diário. "
-                   "Coworking: funcionamento noturno, internet e datas de 2027 não confirmados.")
-        with st.expander("Fontes e contexto dos indicadores", expanded=False):
-            st.link_button("Fonte do aluguel residencial (2026)",
-                           panorama["residential_source"])
-            for label, url in panorama["living_sources"]:
-                st.link_button(label, url)
+                   "cidades têm indicadores locais de alimentação e aluguel residencial. "
+                   "Campos vazios significam pesquisa ausente. "
+                   "As amostras de anúncios são heterogêneas; não equivalem a "
+                   "hospedagem mobiliada para duas pessoas por 56–60 noites.")
+    with routine_tab:
+        st.dataframe(panorama["routine"], hide_index=True, width="stretch")
+        st.caption("Coworking e horários são referências dos provedores. "
+                   "Internet no imóvel, acesso ao turno noturno e condições para 2027 não confirmados.")
+    with st.expander("Fontes e limitações de custos", expanded=False):
+        st.link_button("Indicador de aluguel residencial (2026)", panorama["residential_source"])
+        for label, url in panorama["living_sources"]:
+            st.link_button(label, url)
+        st.caption("Preço residencial por metro quadrado, jantar para dois e anúncio "
+                   "histórico usam metodologias distintas; não some como orçamento real.")
     pilot = panorama["pilot_bases"]
     if len(pilot) >= 2:
-        names = {city["id"]: city["name"] for city in research["cities"]}
-        st.caption("Pesquisas aprofundadas para " + ", ".join(names[base] for base in pilot) +
-                   " (subconjunto do piloto de 2026; as demais cidades não foram avaliadas nele):")
-        from dq21_comparison_ui import render_dq21_panel
-        from dq20_comparison_ui import render_dq20_panel
-        render_dq21_panel(pilot)
-        render_dq20_panel(pilot)
+        _pilot_context(projection, research, pilot)
