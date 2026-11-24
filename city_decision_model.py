@@ -68,6 +68,10 @@ def _country_catalog()->dict:
     places={d["id"]:d.get("country") for d in load_attractions()["destinations"]}
     for d in load_exploration()["destinations"]:
         places.setdefault(d["id"],d.get("country"))
+    # Only read-only geographical metadata; not official attraction/persistence.
+    from trip01_supplemental_discovery import build_exploration_discovery
+    for d in build_exploration_discovery()["destinations"]:
+        places.setdefault(d["id"],d.get("country"))
     return places
 
 
