@@ -55,43 +55,171 @@ def _go(target):
     request_navigation(st.session_state, target)
 
 
-def _open_base_review(base, scope_destinations):
-    """Explicitly begin the EXISTING official review without changing the plan."""
-    from trip_plan_model import BASES
+# A contextual review borrows the EXISTING UX34 workspace and restores its
+# prior filters on return. No new plan/persistence model is introduced.
+_UX34_CONTEXT_KEYS=(
+    "ux34_candidates","ux34_destinations","ux34_apply_candidate",
+    "ux34_apply_ack","ux34_review","ux34_review_candidate",
+    "ux34_review_signature",
+)
+
+
+def _review_destinations(scope_destinations):
+    """Never hide destinations that the legacy UX34 catalog cannot compare."""
     from base_change_model import destination_catalog, _canonical_destination
+    catalog=destination_catalog()
+    supported,unsupported=[],[]
+    for item in dict.fromkeys(scope_destinations):
+        normalized=_canonical_destination(item)
+        if normalized in catalog:
+            if normalized not in supported:
+                supported.append(normalized)
+        else:
+            unsupported.append(item)
+    return supported,unsupported
+
+
+def _open_base_review(base,scope_destinations):
+    """Start a validated one-base handoff; never write the official TripPlan."""
+    from copy import deepcopy
+    from trip_plan_model import BASES
+    from rec03b_handoffs import CHOICE
     state=st.session_state
     plan=state.get("advisor_plan",{})
-    if base not in BASES or base==plan.get("base_city"):
+    scope=state.get(SCOPE)
+    if (base not in BASES or base==plan.get("base_city")
+            or not isinstance(scope,dict) or not scope.get("confirmed")
+            or tuple(scope.get("destination_ids",()))!=tuple(scope_destinations)
+            or base not in state.get(CHOICE,[])):
         return
-    catalog=destination_catalog()
-    eligible=[]
-    for destination in scope_destinations:
-        key=_canonical_destination(destination)
-        if key in catalog and key not in eligible:
-            eligible.append(key)
+    from rec03b_handoffs import validate_handoff
+    from ux502_destination_interests_model import empty_interests
+    from base_research_expanded_model import load_research
+    try:
+        validate_handoff(scope,state.get("ux502_interests",empty_interests()),
+                         build_exploration_discovery(),
+                         load_research(include_candidates=True),[],"planning")
+    except (ValueError,KeyError,TypeError):
+        return
+    supported,unsupported=_review_destinations(scope_destinations)
+    state["ux114_saved_workspace"]={
+        key:deepcopy(state[key]) for key in _UX34_CONTEXT_KEYS if key in state
+    }
+    state["ux114_review_context"]={
+        "base":base,
+        "identity":state.get("rec03a_identity"),
+        "plan_id":plan["plan_id"],"revision":plan["revision"],
+        "official":plan["base_city"],"scope":deepcopy(scope),
+        "scope_destinations":list(scope_destinations),
+        "supported_destinations":supported,"unsupported_destinations":unsupported,
+        "approved_destinations":(
+            list(supported) if supported and len(supported)<=8 and not unsupported
+            else None),
+    }
     state["ux114_review_base"]=base
-    state["ux34_candidates"]=[base]
-    # The historical decision tool supports at most eight destinations.
-    # Never silently trim a larger confirmed research scope.
-    if 1<=len(eligible)<=8:
-        state["ux34_destinations"]=eligible
-        state.pop("ux114_review_overlimit",None)
-    elif len(eligible)>8:
-        state["ux34_destinations"]=[]
-        state["ux114_review_overlimit"]=len(eligible)
+    if len(supported)>8:
+        state["ux114_review_overlimit"]=len(supported)
     else:
-        state.pop("ux34_destinations",None)
         state.pop("ux114_review_overlimit",None)
-    state.pop("ux34_review",None)
-    state.pop("ux34_review_candidate",None)
+    state["ux34_candidates"]=[base]
+    state["ux34_destinations"]=list(
+        state["ux114_review_context"]["approved_destinations"] or [])
+    for key in ("ux34_review","ux34_review_candidate","ux34_review_signature",
+                "ux34_apply_ack","ux34_apply_candidate","ux114_scope_choice"):
+        state.pop(key,None)
 
 
 def close_base_review():
-    """Leave review mode without applying or discarding any official plan edit."""
+    """Restore the advanced decision filters; never alter the TripPlan."""
+    from copy import deepcopy
     state=st.session_state
-    state.pop("ux114_review_base",None)
-    state.pop("ux114_review_overlimit",None)
-    state.pop("ux34_review",None)
+    if "ux114_review_context" in state or "ux114_saved_workspace" in state:
+        previous=state.get("ux114_saved_workspace",{})
+        for key in _UX34_CONTEXT_KEYS:
+            state.pop(key,None)
+        for key,value in previous.items():
+            state[key]=deepcopy(value)
+    for key in ("ux114_review_base","ux114_review_overlimit",
+                "ux114_review_context","ux114_saved_workspace",
+                "ux114_scope_choice"):
+        state.pop(key,None)
+
+
+def validate_base_review(plan):
+    """Reuse the REC03B scope contract; fail closed when any identity/plan
+    revision, selected base, wishlist priority or confirmed scope changes.
+    """
+    from rec03b_handoffs import CHOICE,validate_handoff
+    from ux502_destination_interests_model import empty_interests
+    state=st.session_state
+    ctx=state.get("ux114_review_context")
+    if not isinstance(ctx,dict):
+        return None
+    if (ctx.get("base")!=state.get("ux114_review_base")
+            or ctx.get("identity")!=state.get("rec03a_identity")
+            or ctx.get("plan_id")!=plan.get("plan_id")
+            or ctx.get("revision")!=plan.get("revision")
+            or ctx.get("official")!=plan.get("base_city")
+            or ctx.get("scope")!=state.get(SCOPE)
+            or ctx.get("base") not in state.get(CHOICE,[])):
+        return None
+    try:
+        validate_handoff(ctx["scope"],
+                         state.get("ux502_interests",empty_interests()),
+                         build_exploration_discovery(),
+                         load_research(include_candidates=True),[],"planning")
+    except (ValueError,KeyError,TypeError):
+        return None
+    return ctx
+
+
+def _confirm_base_review_scope(supported):
+    state=st.session_state
+    context=state.get("ux114_review_context")
+    selected=state.get("ux114_scope_choice",[])
+    if (not isinstance(context,dict) or not isinstance(selected,list)
+            or not 1<=len(selected)<=8 or len(selected)!=len(set(selected))
+            or not set(selected)<=set(supported)):
+        return
+    context["approved_destinations"]=list(selected)
+    state["ux34_destinations"]=list(selected)
+
+
+def render_base_review_scope(ctx):
+    """Make subset/unsupported data explicit; never use UX34's defaults."""
+    from base_change_model import destination_catalog
+    from city_decision_model import MAX_DESTINATIONS
+    supported=ctx["supported_destinations"]
+    unsupported=ctx["unsupported_destinations"]
+    if unsupported:
+        st.warning(str(len(unsupported))+" destino(s) do seu escopo não são "
+                   "suportados pela pesquisa legada: "+
+                   ", ".join(unsupported)+". Eles continuam na lista e no roteiro.")
+    if not supported:
+        st.error("Nenhum destino do escopo é compatível com esta ferramenta. "
+                 "Não abriremos uma comparação usando passeios de exemplo.")
+        return False
+    if ctx.get("approved_destinations") is not None:
+        st.caption("Escopo da revisão: "+str(len(ctx["approved_destinations"]))+
+                   " destino(s) explicitamente escolhidos. "
+                   "A lista original e o roteiro permanecem intactos.")
+        return True
+    if len(supported)>MAX_DESTINATIONS:
+        st.info("O comparador oficial aceita até "+str(MAX_DESTINATIONS)+
+                " destinos por revisão. Selecione explicitamente quais usar; "
+                "nenhum foi escolhido automaticamente.")
+    else:
+        st.info("A ferramenta não pesquisa todos os destinos da sua lista. "
+                "Confirme o subconjunto antes de avaliar a mudança.")
+    catalog=destination_catalog()
+    st.multiselect("Destinos compatíveis para esta revisão",supported,
+                   format_func=lambda x:catalog[x],max_selections=MAX_DESTINATIONS,
+                   key="ux114_scope_choice")
+    chosen=st.session_state.get("ux114_scope_choice",[])
+    st.button("Confirmar destinos da revisão",key="ux114_confirm_scope",
+              disabled=not chosen,on_click=_confirm_base_review_scope,
+              args=(tuple(supported),))
+    return False
 
 
 def _scope_select(ids, interests, discovery):
