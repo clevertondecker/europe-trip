@@ -87,10 +87,13 @@ def render_wishlist(discovery) -> bool:
     def remember_discovery_filters():
         keys = ("ux501_country", "ux501_categories", "ux501_search", "ux501_page", "ux126_eligibility_filter")
         # Streamlit removes keys for controls not mounted in the alternate view.
-        snapshot = st.session_state.get("ux502_discovery_filters", {}).copy()
-        snapshot.update({key: st.session_state[key] for key in keys if key in st.session_state})
+        # Only recover pre-UX126B widget state. New filter callbacks already
+        # own the snapshot, including explicit navigation handoffs.
+        if "ux502_discovery_filters" not in st.session_state:
+            snapshot = {key: st.session_state[key] for key in keys if key in st.session_state}
+            if snapshot:
+                st.session_state["ux502_discovery_filters"] = snapshot
         _recover_previous_session_interests(st.session_state)
-        st.session_state["ux502_discovery_filters"] = snapshot
 
     def legacy_view_changed():
         remember_discovery_filters()
@@ -112,9 +115,6 @@ def render_wishlist(discovery) -> bool:
     if view == "Descobrir lugares":
         if "ux501_interest_session" not in st.session_state and "ux502_transient_shadow" in st.session_state:
             st.session_state["ux501_interest_session"] = list(st.session_state["ux502_transient_shadow"])
-        for key, value in st.session_state.get("ux502_discovery_filters", {}).items():
-            if key not in st.session_state:
-                st.session_state[key] = value
     if view == "Minha lista":
         st.markdown(page_header(
             "Minha lista", "NOSSA EUROPA 2027 · EXPLORAR",
