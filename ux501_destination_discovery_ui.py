@@ -114,7 +114,8 @@ def _destination_teaser(item: dict) -> str:
 def _destination_wishlist_state(interests: dict | None, destination_id: str) -> str:
     """Read the existing UX502 priority without treating discarded as active."""
     for row in (interests or {}).get("items", []):
-        if row["destination_id"] == destination_id:
+        from destination_identity import canonical_destination_id
+        if canonical_destination_id(row["destination_id"]) == canonical_destination_id(destination_id):
             return "discarded" if row["priority"] == "discarded" else "saved"
     return "new"
 
