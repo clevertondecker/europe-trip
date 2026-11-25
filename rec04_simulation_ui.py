@@ -34,7 +34,7 @@ def render_simulation_context(plan):
         render_research_from_session(key="rec05_budget",base_ids=[ctx["city_id"]])
 
 
-def render_optional_housing_commitments(fx,city_id):
+def render_optional_housing_commitments(fx,city_id,*,disabled=False):
     """Opt-in, city-scoped and hypothetical; None means not provided."""
     from rec04_housing_costs import housing_cashflow
     with st.expander("Caução reembolsável e taxas separadas (opcional)"):
@@ -42,9 +42,9 @@ def render_optional_housing_commitments(fx,city_id):
                    "o casal. O desconhecido permanece não informado; nenhuma "
                    "caução é considerada despesa.")
         checked=st.checkbox("Simular caução e taxas desta cidade",
-                            key="rec04_housing_terms_"+city_id)
+                            key="rec04_housing_terms_"+city_id,disabled=disabled)
         fee=deposit=None
-        if checked:
+        if checked and not disabled:
             fee=st.number_input("Taxas únicas não reembolsáveis (€)",
                                 min_value=0.,max_value=10000.,value=0.,step=50.,
                                 key="rec04_fees_"+city_id)
