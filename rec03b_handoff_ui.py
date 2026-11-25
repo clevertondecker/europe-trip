@@ -3,8 +3,8 @@ from __future__ import annotations
 
 import streamlit as st
 from rec03b_handoffs import (
-    CHOICE, CONTEXT, ERROR, PREVIOUS, queue_handoff, queue_restore_manual,
-    manual_selection, current_context, contextual_points, planning_handoff_projection,
+    CHOICE, CONTEXT, ERROR, queue_handoff,
+    current_context, contextual_points, planning_handoff_projection,
 )
 from rec03a_session import request_navigation, SCOPE
 from ux502_destination_interests_model import empty_interests
@@ -79,33 +79,6 @@ def render_notice():
     message=st.session_state.pop(ERROR,None)
     if message:
         st.warning(message)
-
-
-def render_compare_selection(result,cities):
-    state=st.session_state
-    options=[c["base_id"] for c in result["candidates"]]
-    st.markdown("#### Escolher alternativas para comparar")
-    st.caption("Selecione de 2 a 5 cidades. Nenhuma seleção é oficializada.")
-    saved=state.get(CHOICE,[])
-    chosen=list(dict.fromkeys(x for x in saved if isinstance(x,str) and x in options)) if isinstance(saved,list) else []
-    widget=CHOICE+"_widget"
-    if state.get(widget)!=chosen:
-        state[widget]=chosen
-    def remember():
-        state[CHOICE]=list(state[widget])
-    selected=st.multiselect("Cidades para a comparação personalizada",options,
-                            key=widget,max_selections=5,
-                            format_func=lambda b:cities[b]["name"]+" · "+cities[b]["country"],
-                            on_change=remember, placeholder="Escolha uma ou mais opções")
-    previous=manual_selection(state)
-    scope_ids=[x["id"] for x in result["destinations"]]
-    if previous:
-        st.caption("A ação substituirá os filtros manuais atuais. Você poderá recuperá-los na comparação.")
-    st.button(("Substituir filtros e comparar" if previous else "Comparar cidades selecionadas")+
-              f" · {len(scope_ids)} destinos",
-              key="rec03a_handoff_compare",disabled=not 2<=len(selected)<=5,
-              on_click=queue_handoff,args=(state,"manual",list(selected)),type="primary")
-
 
 
 def selected_card_bases(state, options):
@@ -314,30 +287,6 @@ def render_card_actions(base,prefix,*,emphasize_profile=False,compact=False):
             st.caption("Aluguel e caução de 2027 ainda não foram cotados.")
     else:
         st.caption("Ainda não há cenário de custos disponível para esta cidade.")
-
-
-def render_manual_context(selected=None,visible=None):
-    state=st.session_state
-    context=state.get(CONTEXT)
-    if not isinstance(context,dict) or context.get("kind")!="manual":
-        return
-    if selected is None:
-        valid,_,_=context_for("manual")
-        if valid is None:
-            state.pop(CONTEXT,None)
-            st.caption("O escopo da análise mudou. Os filtros manuais atuais são independentes.")
-            return
-    if selected is None:
-        st.caption("Comparação aberta a partir das sugestões. Os filtros são de pesquisa, não do roteiro.")
-        # The single return button belongs ABOVE the manual renderer in REC03A.
-        if PREVIOUS in state:
-            st.button("Recuperar comparação anterior",key="rec03a_handoff_restore_manual",
-                      on_click=queue_restore_manual,args=(state,))
-    elif (set(selected)!=set(context["base_ids"]) or
-          set(visible)!=set(context["scope"]["destination_ids"])):
-        st.info("Você editou os filtros: esta comparação não representa mais exatamente o escopo das sugestões.")
-    else:
-        st.caption("Mesmos destinos e células ferroviárias REC01. As contagens desta tela não são os pesos do REC02.")
 
 
 def context_for(kind):

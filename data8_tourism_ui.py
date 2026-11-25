@@ -260,6 +260,24 @@ def render_data8_destination_preview(destination_id, *, tourism=None, attraction
     research=tourism if tourism is not None else _tourism()
     attraction_names = attraction_names or {}
     summary=destination_research_overview(destination_id,tourism=research)
+    if attraction_names:
+        from attractions_model import load_attractions
+        from tourism_visit_evidence_model import load_visit_evidence
+        catalog={a["id"]:a for a in load_attractions()["attractions"]}
+        pilot={a["attraction_id"]:a for a in load_visit_evidence()["entries"]
+               if a["destination_id"]==destination_id}
+        ids=set(attraction_names)
+        observed=[catalog[a] for a in ids if a in catalog]
+        tickets=sum(a.get("ticket",{}).get("status")=="operator_published"
+                    and a.get("ticket",{}).get("amount") is not None for a in observed)
+        hours={a["id"] for a in observed if a.get("opening_hours")} | (ids & set(pilot))
+        st.caption(f"Catálogo: {len(ids)} atrações · {tickets} com ingresso histórico publicado · "
+                   f"{len(hours)} com horários/regras documentados · {len(ids & set(pilot))} com ficha do piloto. "
+                   "Visita em 2027 ainda não validada.")
+        for aid in sorted(ids & set(pilot)):
+            entry=pilot[aid]
+            st.caption(attraction_names[aid]+" · "+entry["opening_rule"])
+            st.markdown("[Fonte da regra de visita]("+entry["source_url"]+")")
     if summary["researched_attractions"]:
         st.caption(str(summary["researched_attractions"]) +
                    " atração(ões) com ficha enriquecida neste lote, "
@@ -267,11 +285,12 @@ def render_data8_destination_preview(destination_id, *, tourism=None, attraction
         for row in research["entries"]:
             if row["destination_id"]==destination_id:
                 st.markdown("**"+attraction_names.get(row["attraction_id"], row["attraction_id"])+"**")
-                st.caption(row["experience"]["why_visit"])
+                render_data8_attraction_details(row["attraction_id"], tourism=research)
     for row in summary["unreconciled_candidates"]:
         st.caption("Atração ainda não cadastrada: "+row["name"]+
                    " · documentação turística disponível, identidade pendente.")
         st.markdown("[Fonte oficial]("+row["source_url"]+")")
+    render_data8_cost_simulator(destination_id,tourism=research)
 
 
 def render_data8_cost_simulator(destination_id, *, tourism=None):
