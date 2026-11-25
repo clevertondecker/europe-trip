@@ -115,41 +115,26 @@ def apply_handoff(state, *, interests=None, discovery=None, research=None):
             research=load_research(include_candidates=True)
         kind=request.get("kind")
         if kind=="restore_manual":
-            previous=state.get(PREVIOUS)
-            if not isinstance(previous,dict):
-                raise ValueError("Não há seleção anterior para recuperar.")
-            valid_bases={c["id"] for c in research["cities"]}
-            active=set(selected_destinations_for_comparison(interests,discovery))
-            restored={}
-            for _,shadow in MANUAL_KEYS:
-                if shadow in previous:
-                    allowed=valid_bases if shadow==MANUAL_KEYS[0][1] else active
-                    value=previous[shadow]
-                    if not isinstance(value,list):
-                        raise ValueError("Seleção anterior inválida.")
-                    restored[shadow]=list(dict.fromkeys(x for x in value if isinstance(x,str) and x in allowed))
-            _write_manual(state,restored)
-            state.pop(PREVIOUS,None)
-            state.pop(CONTEXT,None)
+            # Old queued restore cannot replace a newer canonical selection.
+            from ux128_comparison_migration import migrate_legacy_comparison
+            migrate_legacy_comparison(state,interests,discovery,research)
             select_public_task(state,"Explorar","Comparar bases")
-            state["rec03a_activity"]="Comparação personalizada"
+            state["ux112_active_view"]="Minha comparação"
+            state["ux112_active_view_shadow"]="Minha comparação"
+            state.pop(ERROR,None)
             return kind
         if request.get("scope")!=state.get(SCOPE):
             raise ValueError("O escopo mudou. Revise as sugestões.")
         context=validate_handoff(request.get("scope"),interests,discovery,research,
                                  request.get("base_ids"),kind)
         if kind=="manual":
-            # This transition was explicitly requested by the user. Keep a
-            # recoverable copy of any pre-existing manual filters.
-            previous=manual_selection(state)
-            if previous and PREVIOUS not in state:
-                state[PREVIOUS]=previous
-            _write_manual(state,{
-                "ux504_bases_shadow":context["base_ids"],
-                "ux504_visible_destinations_shadow":context["scope"]["destination_ids"],
-            })
+            # Validated old handoff opens the existing modern comparison.
+            # Do not overwrite a newer explicit canonical selection.
+            if CHOICE not in state:
+                state[CHOICE]=list(context["base_ids"])
             select_public_task(state,"Explorar","Comparar bases")
-            state["rec03a_activity"]="Comparação personalizada"
+            state["ux112_active_view"]="Minha comparação"
+            state["ux112_active_view_shadow"]="Minha comparação"
         elif kind=="profile":
             set_task(state,"Explorar","Cidades-base")
             state["ux40_selected_city"]=context["base_ids"][0]
@@ -166,7 +151,10 @@ def apply_handoff(state, *, interests=None, discovery=None, research=None):
                 request_planning(state,projected["action"],FRANCE_STAGE)
         else:
             select_public_task(state,"Explorar","Mapa")
-        state[CONTEXT]=context
+        if kind=="manual":
+            state.pop(CONTEXT,None)
+        else:
+            state[CONTEXT]=context
         state.pop(ERROR,None)
         return kind
     except (ValueError,KeyError,TypeError,ImportError,OSError):

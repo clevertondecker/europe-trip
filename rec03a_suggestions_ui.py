@@ -15,7 +15,6 @@ from ux502_destination_interests_model import (
 )
 from rec03a_session import (SCOPE, DRAFT, ACTIVITY, ACTIVITIES, MANUAL, SUGGESTED,
                             request_navigation, reconcile_session_scope)
-from ux503_destination_base_comparison_ui import render_wishlist_base_comparison
 from ux_shared_ui_presentation import page_header, section_heading
 
 _REASON = {
@@ -504,6 +503,9 @@ def render_suggestions(*,plan,discovery=None,research=None):
         active=[x for x in ordered_interests(interests,discovery)
                 if x["priority"]!="discarded"]
         names={x["id"]:x["name"] for x in discovery["destinations"]}
+        research=research if research is not None else load_research(include_candidates=True)
+        from ux128_comparison_migration import migrate_legacy_comparison
+        migrate_legacy_comparison(st.session_state, interests, discovery, research)
         checked=reconcile_session_scope(st.session_state,interests,discovery)
         if checked["state"]=="no_destinations":
             st.info("Nenhum destino ativo. Adicione lugares ou revise as prioridades em Minha lista.")
@@ -513,7 +515,6 @@ def render_suggestions(*,plan,discovery=None,research=None):
         if checked["state"]!="ready" or st.session_state.get("rec03a_edit_scope"):
             _render_scope(interests,discovery,active,names,checked)
             return
-        research=research if research is not None else load_research(include_candidates=True)
         result=recommend_bases(interests,checked["scope"],
                                discovery=discovery,research=research)
         cities={x["id"]:x for x in research["cities"]}
@@ -673,21 +674,7 @@ def render_suggestions(*,plan,discovery=None,research=None):
 
 
 def render_recommendation_activity(*,plan,discovery=None,research=None):
-    """Suggested research is default; manual view survives validated handoffs."""
-    state=st.session_state
-    if state.get(ACTIVITY) not in ACTIVITIES:
-        state[ACTIVITY]=SUGGESTED
-    if state[ACTIVITY]==MANUAL:
-        from rec03b_handoff_ui import return_to_suggestions
-        # Native return action appears BEFORE the lengthy legacy comparison.
-        st.button("Voltar às cidades sugeridas",key="rec03a_handoff_back_manual",
-                  on_click=return_to_suggestions)
-        render_wishlist_base_comparison(plan=plan,discovery=discovery,
-                                        research=research)
-    else:
-        render_suggestions(plan=plan,discovery=discovery,research=research)
-        # Detailed basket filtering and recovery remain in the comparison task.
-        from rec03a_session import request_navigation
-        st.button("Ajustar comparação detalhada", key="ux125_open_manual_comparison",
-                  on_click=request_navigation, args=(state,"manual"))
-    return state[ACTIVITY]
+    """One public comparison; historical intents are migrated before rendering."""
+    render_suggestions(plan=plan,discovery=discovery,research=research)
+    st.session_state[ACTIVITY]=SUGGESTED
+    return SUGGESTED

@@ -81,33 +81,6 @@ def render_notice():
         st.warning(message)
 
 
-def render_compare_selection(result,cities):
-    state=st.session_state
-    options=[c["base_id"] for c in result["candidates"]]
-    st.markdown("#### Escolher alternativas para comparar")
-    st.caption("Selecione de 2 a 5 cidades. Nenhuma seleção é oficializada.")
-    saved=state.get(CHOICE,[])
-    chosen=list(dict.fromkeys(x for x in saved if isinstance(x,str) and x in options)) if isinstance(saved,list) else []
-    widget=CHOICE+"_widget"
-    if state.get(widget)!=chosen:
-        state[widget]=chosen
-    def remember():
-        state[CHOICE]=list(state[widget])
-    selected=st.multiselect("Cidades para a comparação personalizada",options,
-                            key=widget,max_selections=5,
-                            format_func=lambda b:cities[b]["name"]+" · "+cities[b]["country"],
-                            on_change=remember, placeholder="Escolha uma ou mais opções")
-    previous=manual_selection(state)
-    scope_ids=[x["id"] for x in result["destinations"]]
-    if previous:
-        st.caption("A ação substituirá os filtros manuais atuais. Você poderá recuperá-los na comparação.")
-    st.button(("Substituir filtros e comparar" if previous else "Comparar cidades selecionadas")+
-              f" · {len(scope_ids)} destinos",
-              key="rec03a_handoff_compare",disabled=not 2<=len(selected)<=5,
-              on_click=queue_handoff,args=(state,"manual",list(selected)),type="primary")
-
-
-
 def selected_card_bases(state, options):
     """Read-only validated CHOICE projection; do not mutate session on render."""
     allowed=set(options)

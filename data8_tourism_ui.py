@@ -267,7 +267,7 @@ def render_data8_destination_preview(destination_id, *, tourism=None, attraction
         for row in research["entries"]:
             if row["destination_id"]==destination_id:
                 st.markdown("**"+attraction_names.get(row["attraction_id"], row["attraction_id"])+"**")
-                st.caption(row["experience"]["why_visit"])
+                render_data8_attraction_details(row["attraction_id"], tourism=research)
     for row in summary["unreconciled_candidates"]:
         st.caption("Atração ainda não cadastrada: "+row["name"]+
                    " · documentação turística disponível, identidade pendente.")
@@ -354,3 +354,17 @@ def render_data8_cost_simulator(destination_id, *, tourism=None):
         brl=result["partial_planning_range_brl"]
         st.caption(f"R$ {brl[0]:.2f}–R$ {brl[1]:.2f} ao câmbio manual informado; "
                    "não é cotação cambial atual.")
+
+def render_excursion_cost_in_budget():
+    """Same optional DATA8 calculator, now in the financial workflow."""
+    research=_tourism()
+    ids=sorted({row["destination_id"] for row in research["entries"]})
+    if not ids:
+        return
+    from trip01_supplemental_discovery import build_exploration_discovery
+    names={row["id"]:row["name"] for row in build_exploration_discovery()["destinations"]}
+    with st.expander("Estimar custos de um passeio (opcional)",expanded=False):
+        st.caption("Estimativa isolada para o casal; não entra automaticamente na projeção oficial ou simulada.")
+        dest=st.selectbox("Destino do passeio",ids,format_func=lambda x:names.get(x,x),
+                          key="ux128_excursion_destination")
+        render_data8_cost_simulator(dest,tourism=research)

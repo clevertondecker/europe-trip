@@ -1712,6 +1712,9 @@ elif page == "Orçamento":
             st.link_button("Planilha financeira oficial",data["sources"]["spreadsheet"],
                            use_container_width=True)
 
+        from data8_tourism_ui import render_excursion_cost_in_budget
+        render_excursion_cost_in_budget()
+
 elif page == "Pesquisas & decisões":
     st.markdown("<div class='page-eyebrow'>CENTRAL DE PLANEJAMENTO · FONTES DO DRIVE</div>"
                 "<div class='page-title'>Pesquisas, decisões & próximos passos</div>"
