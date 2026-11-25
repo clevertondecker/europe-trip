@@ -9,12 +9,14 @@ def request_step(step_id: str) -> None:
     """Queue only; widget keys are updated by app.py before sidebar renders."""
     # Preserve ephemeral discovery inputs before their widgets unmount.
     # Streamlit removes widget-owned session keys when switching pages.
-    if st.session_state.get("ux502_view") == "Descobrir lugares":
-        keys = ("ux501_country","ux501_categories","ux501_search","ux501_page")
+    if (st.session_state.get("ux502_view") == "Descobrir lugares"
+            and "ux502_discovery_filters" not in st.session_state):
+        keys = ("ux501_country","ux501_categories","ux501_search","ux501_page","ux126_eligibility_filter")
         snapshot = dict(st.session_state.get("ux502_discovery_filters", {}))
         snapshot.update({key:st.session_state[key] for key in keys
                          if key in st.session_state})
-        st.session_state["ux502_discovery_filters"] = snapshot
+        if snapshot:
+            st.session_state["ux502_discovery_filters"] = snapshot
     st.session_state["_ux504_navigation_request"] = navigation_request(step_id)
 
 

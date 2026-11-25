@@ -78,7 +78,7 @@ def _editor(plan, catalog, groups, byid):
                       on_change=_remember, args=("name",), max_chars=100)
         selected = st.multiselect("Passeios na ordem desejada", options,
             format_func=lambda value: byid[value]["name"], max_selections=6,
-            key="ux49_field_destinations", on_change=_remember, args=("destinations",))
+            key="ux49_field_destinations", on_change=_remember, args=("destinations",), placeholder="Escolha uma ou mais opções")
         if len(selected) > 1:
             st.caption("Ordem atual: " + " → ".join(byid[d]["name"] for d in selected))
             moving = st.selectbox("Destino para reordenar", selected,
@@ -201,7 +201,7 @@ def render_weekend_planner(plan, catalog):
     st.markdown("#### Passeios ainda não organizados")
     if free:
         selected = st.multiselect("Passeios para uma nova viagem", [r["id"] for r in free],
-                                  format_func=lambda value: byid[value]["name"], max_selections=6)
+                                  format_func=lambda value: byid[value]["name"], max_selections=6, placeholder="Escolha uma ou mais opções")
         if st.button("Organizar passeios selecionados", disabled=not selected):
             _open_editor(plan["plan_id"], destinations=selected)
             st.rerun()
@@ -240,8 +240,9 @@ def render_weekend_planner(plan, catalog):
         data=export_groups(groups,plan,catalog),
         file_name="nossa-europa-fins-de-semana.json",
         mime="application/json",key="ux48_export_weekends")
+    st.caption("Arquivo .json exportado por este app")
     uploaded=st.file_uploader("Importar rascunho anterior (mesmo planejamento)",
-        type=["json"],key="ux48_import_weekends")
+        type=["json"],key="ux48_import_weekends", max_upload_size=5)
     if uploaded and st.button("Validar e importar rascunho",key="ux48_confirm_import"):
         try:
             _save(import_groups(uploaded.getvalue().decode("utf-8"),plan,catalog))

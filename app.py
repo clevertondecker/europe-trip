@@ -638,7 +638,7 @@ elif page == "Mapa & destinos":
     a,b=st.columns([1,1],gap="medium")
     with a:
         countries=st.multiselect("Países",countries_all,default=countries_all,
-                                 key="map_countries")
+                                 key="map_countries", placeholder="Escolha uma ou mais opções")
         group=st.selectbox("Mostrar",["Todos","Na minha lista","No roteiro",
                                      "Base candidata","Outros destinos"],
                            key="ux93_map_focus")
@@ -646,7 +646,7 @@ elif page == "Mapa & destinos":
         statuses=st.multiselect("Etapa de decisão",list(STATUS_LABEL),
                                 default=list(STATUS_LABEL),
                                 format_func=lambda key:STATUS_LABEL[key],
-                                key="map_statuses")
+                                key="map_statuses", placeholder="Escolha uma ou mais opções")
         stage=st.selectbox("Etapa da viagem",["Todas","Itália","Temporada europeia"],
                            key="ux93_map_stage")
     current=filter_map_places(
@@ -1307,7 +1307,7 @@ elif page == "Roteiro":
         selected=st.multiselect("Escolha os passeios a incluir",
                                 [x["id"] for x in available],
                                 format_func=lambda x:next(o["title"] for o in available if o["id"]==x),
-                                default=[],key=f"route_cost_options_{phase}_{base}")
+                                default=[],key=f"route_cost_options_{phase}_{base}", placeholder="Escolha uma ou mais opções")
         subtotal=basket_totals(available,selected)
         eur=subtotal["known_ticket_subtotals"]["EUR"]
         chf=subtotal["known_ticket_subtotals"]["CHF"]

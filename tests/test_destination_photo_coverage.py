@@ -65,8 +65,10 @@ class FullDestinationImageCoverageTests(unittest.TestCase):
 
 
 class FullPhotoDiscoveryAppTests(unittest.TestCase):
-    def test_all_four_catalog_pages_have_no_online_photo_requests(self):
-        # The entire 46-destination catalog must render without Wikimedias API.
+    def test_all_catalog_pages_have_no_online_photo_requests(self):
+        # Visit the entire current public catalog, not a fixed historical page count.
+        from trip01_supplemental_discovery import build_exploration_discovery
+        expected = {row['id'] for row in build_exploration_discovery()['destinations']}
         with patch("ux501_destination_discovery_ui._cached_visible_photos",
                    side_effect=AssertionError("Runtime photo network request")):
             app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
@@ -74,9 +76,20 @@ class FullPhotoDiscoveryAppTests(unittest.TestCase):
             app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
             app.segmented_control(key="ux_section").set_value("Passeios").run()
             self.assertFalse(app.exception,[e.message for e in app.exception])
-            for page in (2,3,4):
-                app.selectbox(key="ux501_page").set_value(page).run()
+            seen = set()
+            pages = (len(expected) + 11) // 12
+            for page in range(1, pages + 1):
                 self.assertFalse(app.exception,[e.message for e in app.exception])
+                self.assertEqual(app.session_state["ux502_discovery_filters"]["ux501_page"], page)
+                page_ids = {b.key.removeprefix("ux502_add_") for b in app.button
+                            if b.key and b.key.startswith("ux502_add_")}
+                self.assertEqual(len(page_ids), min(12, len(expected) - (page - 1) * 12))
+                self.assertFalse(seen & page_ids)
+                seen.update(page_ids)
+                self.assertEqual(app.button(key="ux126b_next").disabled, page == pages)
+                if page < pages:
+                    app.button(key="ux126b_next").click().run()
+            self.assertEqual(seen, expected)
             self.assertEqual(app.session_state["advisor_plan"],initial)
             self.assertFalse(app.session_state.get("advisor_autosave_pending",False))
 

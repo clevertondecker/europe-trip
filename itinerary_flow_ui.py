@@ -182,7 +182,7 @@ def _render_add(plan:dict,catalog:dict)->None:
             picked=st.multiselect("Atrações desejadas (opcionais, até 5)",list(labels),
                                   format_func=lambda key:labels[key],
                                   key=pick_key,max_selections=5,
-                                  on_change=_picks_changed,args=(dest_id,))
+                                  on_change=_picks_changed,args=(dest_id,), placeholder="Escolha uma ou mais opções")
             periods=period_options(stage)
             period_key="flow_period_"+dest_id
             selected_period=st.session_state.get(
@@ -231,7 +231,7 @@ def _edit_destination(row:dict,catalog:dict,*,force_expanded:bool=False)->None:
             "Atrações em "+item["name"],list(labels),
             default=[x for x in row["attractions"] if x in labels],
             format_func=lambda key:labels[key],
-            key="flow_edit_attr_"+row["id"],max_selections=5)
+            key="flow_edit_attr_"+row["id"],max_selections=5, placeholder="Escolha uma ou mais opções")
         periods=period_options(row["stage"])
         chosen=st.selectbox("Período flexível",list(periods),
             index=periods.index(row["period"]) if row["period"] in periods else 0,
@@ -482,7 +482,7 @@ def _render_organizer_wishlist(plan:dict,catalog:dict,stage:str)->None:
         picked=st.multiselect("Destinos para incluir no roteiro",
             list(by_id),key=select_key,max_selections=50,
             format_func=lambda dest:by_id[dest]["name"]+" · "+
-                LABELS.get(by_id[dest]["priority"],"Quero conhecer"))
+                LABELS.get(by_id[dest]["priority"],"Quero conhecer"), placeholder="Escolha uma ou mais opções")
         if st.button("Incluir selecionados no roteiro",type="primary",
                      disabled=not bool(picked),key="flow_wishlist_confirm_"+stage):
             try:

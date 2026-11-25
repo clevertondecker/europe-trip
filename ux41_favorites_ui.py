@@ -152,8 +152,9 @@ def _persistence(study):
             data=export_favorites(selected,study),
             file_name="nossa-europa-favoritas.json",
             mime="application/json",key="ux41_favorites_export")
+        st.caption("Arquivo .json exportado por este app")
         uploaded=st.file_uploader("Recuperar favoritas de um arquivo",
-                                   type=["json"],key="ux41_favorites_import_file")
+                                   type=["json"],key="ux41_favorites_import_file", max_upload_size=5)
         if uploaded and st.button("Importar favoritas",key="ux41_favorites_import"):
             try:
                 imported=import_favorites(uploaded.getvalue(),study)
@@ -199,7 +200,7 @@ def render_favorite_comparison(study,five):
         list(choices),max_selections=3,key="ux41_favorites_widget",
         on_change=_remember_favorites,args=(study,),
         format_func=lambda key:COUNTRY_FLAGS.get(choices[key]["country"],"")+
-                                " "+choices[key]["name"])
+                                " "+choices[key]["name"], placeholder="Escolha uma ou mais opções")
     if list(selected)!=saved:
         st.session_state["ux41_favorites"]=list(selected)
     st.caption(str(len(selected))+"/3 favoritas · seleção exploratória, "
@@ -219,7 +220,7 @@ def render_favorite_comparison(study,five):
         list(common),key="ux41_destinations",
         format_func=lambda key:common[key]["name"],
         on_change=lambda:st.session_state.update({
-            "ux41_saved_destinations":list(st.session_state["ux41_destinations"])}))
+            "ux41_saved_destinations":list(st.session_state["ux41_destinations"])}), placeholder="Escolha uma ou mais opções")
     if selected:
         matrix=comparative_matrix(study,five,load_profiles(),load_city_packs(),
                                   list(selected),list(dest))

@@ -43,7 +43,7 @@ def _render_dq31_logistics(rows):
         options=list(names),default=default,
         format_func=lambda key:names[key],key="ux_dq31_basket",
         help="Se não houver passeios oficiais nesta cesta, usamos uma seleção "
-             "exploratória, sem alterar o planejamento.")
+             "exploratória, sem alterar o planejamento.", placeholder="Escolha uma ou mais opções")
     if not chosen:
         st.info("Selecione ao menos um destino para consultar as evidências.")
         return

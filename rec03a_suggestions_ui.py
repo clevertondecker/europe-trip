@@ -220,7 +220,7 @@ def render_base_review_scope(ctx):
     catalog=destination_catalog()
     st.multiselect("Destinos compatíveis para esta revisão",supported,
                    format_func=lambda x:catalog[x],max_selections=MAX_DESTINATIONS,
-                   key="ux114_scope_choice")
+                   key="ux114_scope_choice", placeholder="Escolha uma ou mais opções")
     chosen=st.session_state.get("ux114_scope_choice",[])
     st.button("Confirmar destinos da revisão",key="ux114_confirm_scope",
               disabled=not chosen,on_click=_confirm_base_review_scope,
@@ -277,7 +277,7 @@ def _render_scope(interests, discovery, active, names, checked):
         state["rec03a_scope_widget"] = draft
     st.multiselect("Destinos considerados", active_ids,
                    format_func=lambda x: names[x]+" · "+priorities[x],
-                   key="rec03a_scope_widget", on_change=_draft_changed)
+                   key="rec03a_scope_widget", on_change=_draft_changed, placeholder="Escolha uma ou mais opções")
     st.caption(f"{len(draft)} de {len(active_ids)} destinos selecionados.")
     st.button("Analisar estes destinos", key="rec03a_confirm_subset", type="primary",
               disabled=not draft, on_click=_scope_select, args=(draft,interests,discovery))
