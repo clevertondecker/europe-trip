@@ -71,7 +71,7 @@ def _edit_card(dest_id: str, plan: dict, attractions: dict) -> None:
         options=list(labels),
         default=[a for a in plan["packages"][dest_id] if a in labels],
         format_func=lambda key: labels[key],
-        key="outing_edit_attractions_" + dest_id,
+        key="outing_edit_attractions_" + dest_id, placeholder="Escolha uma ou mais opções"
     )
     if st.button("Salvar alterações", key="outing_edit_save_" + dest_id,
                  width="stretch"):
@@ -158,7 +158,7 @@ def render_my_outings(plan: dict, catalog: dict, *, routes: dict | None = None,
                 picked = st.multiselect(
                     "Atrações (selecione de 1 a 5)",
                     options=list(labels), key="outing_new_attractions",
-                    format_func=lambda key: labels[key])
+                    format_func=lambda key: labels[key], placeholder="Escolha uma ou mais opções")
                 if st.button("Adicionar ao meu roteiro", type="primary",
                              key="outing_add_save", width="stretch"):
                     try:

@@ -18,7 +18,8 @@ from planning_session import (active_plan,commit_outing,commit_undated_destinati
                               schedule_package,unschedule_package)
 from travel_advisor_ui import _owner_signed_in
 from attractions_model import load_base_routes,package_cost
-from advisor_finance import advisor_projection
+from official_budget_model import official_budget_for_plan
+from data_model import money_brl
 from continuity_ui import render_primary_private_save, private_status_label
 
 
@@ -182,7 +183,7 @@ def _render_add(plan:dict,catalog:dict)->None:
             picked=st.multiselect("Atrações desejadas (opcionais, até 5)",list(labels),
                                   format_func=lambda key:labels[key],
                                   key=pick_key,max_selections=5,
-                                  on_change=_picks_changed,args=(dest_id,))
+                                  on_change=_picks_changed,args=(dest_id,), placeholder="Escolha uma ou mais opções")
             periods=period_options(stage)
             period_key="flow_period_"+dest_id
             selected_period=st.session_state.get(
@@ -231,7 +232,7 @@ def _edit_destination(row:dict,catalog:dict,*,force_expanded:bool=False)->None:
             "Atrações em "+item["name"],list(labels),
             default=[x for x in row["attractions"] if x in labels],
             format_func=lambda key:labels[key],
-            key="flow_edit_attr_"+row["id"],max_selections=5)
+            key="flow_edit_attr_"+row["id"],max_selections=5, placeholder="Escolha uma ou mais opções")
         periods=period_options(row["stage"])
         chosen=st.selectbox("Período flexível",list(periods),
             index=periods.index(row["period"]) if row["period"] in periods else 0,
@@ -381,30 +382,23 @@ def _selected_stage(rows:list[dict],stage:str,catalog:dict)->None:
 
 
 def _compact_budget(plan:dict,catalog:dict,trip_data:dict,
-                    finance_live:bool,eurfx:float,chffx:float,*,show_link=True)->None:
+                    finance_live:bool,*,show_link=True)->None:
     if trip_data is None:
         st.caption("Custos disponíveis em Orçamento; ainda há valores sem cotação.")
         return
-    try:
-        selected=[a for group in plan["packages"].values() for a in group]
-        scheduled_cities=[row["id"] for row in selected_rows(plan,catalog)
-                          if row["stage"]==FRANCE_STAGE]
-        historical=package_cost(catalog,load_base_routes(),
-                                plan["base_city"],selected,
-                                planned_destination_ids=scheduled_cities)
-        snapshot=advisor_projection(trip_data,finance_live,plan,historical,
-                                    eurfx,chffx,False)
-    except (ValueError,KeyError,TypeError):
-        st.caption("Projeção parcial indisponível; consulte as premissas em Orçamento.")
-        return
-    projection=snapshot["result"]
-    st.caption("**Orçamento resumido:** projeção do casal "+
-               _money(projection["total"])+
-               " · margem nominal "+_money(projection["margin"])+
-               " · "+str(len(historical["missing"]))+
+    snapshot=official_budget_for_plan(trip_data,finance_live,plan,catalog=catalog)
+    if not snapshot["outings_available"]:
+        st.warning("Referência da planilha, sem recálculo dos passeios do roteiro; revise a seleção antiga.")
+    st.caption("**Orçamento oficial:** projeção do casal "+
+               money_brl(snapshot["total"])+
+               " · margem nominal "+money_brl(snapshot["margin"])+
+               " · "+str(len(snapshot["missing"]))+
                " componente(s) de passeio com preço pendente.")
-    if projection["margin"]<0:
+    if snapshot["margin"]<0:
         st.warning("A projeção parcial excede o teto; as escolhas continuam editáveis.")
+    if snapshot["planned_days"]!=snapshot["reference_days"]:
+        st.caption(f'Verba de referência para {snapshot["reference_days"]} dias; '
+                   f'roteiro atual de {snapshot["planned_days"]} dias, sem reprecificação automática.')
     st.caption("A Itália permanece na verba agregada, sem somar novamente ingressos. "
                "Valores faltantes não são €0; a margem não é dinheiro livre.")
     if show_link:
@@ -482,7 +476,7 @@ def _render_organizer_wishlist(plan:dict,catalog:dict,stage:str)->None:
         picked=st.multiselect("Destinos para incluir no roteiro",
             list(by_id),key=select_key,max_selections=50,
             format_func=lambda dest:by_id[dest]["name"]+" · "+
-                LABELS.get(by_id[dest]["priority"],"Quero conhecer"))
+                LABELS.get(by_id[dest]["priority"],"Quero conhecer"), placeholder="Escolha uma ou mais opções")
         if st.button("Incluir selecionados no roteiro",type="primary",
                      disabled=not bool(picked),key="flow_wishlist_confirm_"+stage):
             try:
@@ -737,6 +731,6 @@ def render_itinerary_workbench(plan:dict,catalog:dict,
         st.button("Abrir sugestões detalhadas",key="flow_go_suggestions",
                   on_click=_navigate,args=("Meu roteiro","Sugestões"))
     with st.expander("Ver impacto financeiro estimado",expanded=False):
-        _compact_budget(active_plan(),catalog,trip_data,finance_live,eurfx,chffx)
+        _compact_budget(active_plan(),catalog,trip_data,finance_live)
     st.caption("Escolhido = incluído no plano · Organizado = com período ou data "
                "· Reservado = somente com confirmação externa (não inferida).")

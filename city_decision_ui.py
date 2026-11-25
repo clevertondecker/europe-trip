@@ -223,8 +223,9 @@ def _draft_panel(comparison:dict)->None:
                               mime="application/json",key="ux34_export_json")
         from private_city_studies_ui import render_private_studies
         render_private_studies(comparison,_load_draft)
+        st.caption("Arquivo .json exportado por este app")
         file=st.file_uploader("Importar estudo JSON",type=["json"],
-                              key="ux34_import_file")
+                              key="ux34_import_file", max_upload_size=5)
         if file is not None and st.button("Validar e recuperar",
                                           key="ux34_import_draft"):
             try:
@@ -448,7 +449,7 @@ def render_city_decision(plan:dict,trip_data:dict,finance_live:bool,
             "Comparar meu plano com até duas alternativas",
             [key for key in names if key!=official],
             format_func=lambda key:names[key],
-            max_selections=2,key="ux34_candidates")
+            max_selections=2,key="ux34_candidates", placeholder="Escolha uma ou mais opções")
     if not candidate_ids:
         st.info("Escolha ao menos uma cidade-base alternativa.")
         return
@@ -468,7 +469,7 @@ def render_city_decision(plan:dict,trip_data:dict,finance_live:bool,
     else:
         dest=st.multiselect("Passeios que quero manter acessíveis (mesmos para todas)",
                             list(places),format_func=lambda k:places[k],
-                            max_selections=8,key="ux34_destinations")
+                            max_selections=8,key="ux34_destinations", placeholder="Escolha uma ou mais opções")
     if not dest:
         st.info("Escolha ao menos um destino para comparar.")
         return

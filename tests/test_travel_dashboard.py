@@ -42,7 +42,7 @@ class TravelDashboardTests(unittest.TestCase):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
         app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Meu roteiro"))).click().run()
         app.segmented_control(key="ux_section").set_value("Organizar viagem").run()
-        app.button(key="flow_journey_step_organize").click().run()
+        app.segmented_control(key="ux64_public_task").set_value("Organizar").run()
         app.segmented_control(key="flow_active_stage").set_value("França").run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
         self.assertNotIn("flow_show_legacy_dashboard",

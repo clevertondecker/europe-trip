@@ -120,6 +120,86 @@ def _destination_wishlist_state(interests: dict | None, destination_id: str) -> 
     return "new"
 
 
+def _ordered_matches(matches, eligibility, mode):
+    """Stable partition; this is not a recommendation ranking."""
+    eligible = [row for row in matches if eligibility[row["id"]]["status"] == "eligible"]
+    if mode == "Posso planejar agora":
+        return eligible
+    return eligible + [row for row in matches if eligibility[row["id"]]["status"] != "eligible"]
+
+
+def _result_caption(matches, eligibility):
+    total = len(matches)
+    counts = {status: sum(eligibility[row["id"]]["status"] == status for row in matches)
+              for status in ("eligible", "research_only", "other_stage")}
+    if total == 0:
+        return "Nenhum destino"
+    if total == 1:
+        return ("1 destino pode entrar no roteiro" if counts["eligible"] else
+                "1 destino em pesquisa" if counts["research_only"] else "1 destino em outra etapa")
+    parts = [f"{total} destinos"]
+    n = counts["eligible"]
+    if n:
+        parts.append(f"{n} pode entrar no roteiro" if n == 1 else f"{n} podem entrar no roteiro")
+    for status, label in (("research_only", "em pesquisa"), ("other_stage", "em outra etapa")):
+        if counts[status]:
+            parts.append(f"{counts[status]} {label}")
+    return " · ".join(parts)
+
+
+_FILTER_DEFAULTS = {"ux501_country": "Todos os países", "ux501_categories": [],
+                    "ux501_search": "", "ux126_eligibility_filter": "Todos", "ux501_page": 1}
+
+
+def _remember_filters():
+    state = st.session_state
+    snapshot = {**_FILTER_DEFAULTS, **state.get("ux502_discovery_filters", {})}
+    for key in _FILTER_DEFAULTS:
+        if key != "ux501_page" and key in state:
+            snapshot[key] = state[key]
+    snapshot["ux501_page"] = 1
+    state["ux502_discovery_filters"] = snapshot
+    state["ux501_page"] = 1
+
+
+def _turn_page(delta):
+    state = st.session_state
+    snapshot = dict(state["ux502_discovery_filters"])
+    snapshot["ux501_page"] += delta
+    state["ux502_discovery_filters"] = snapshot
+    state["ux501_page"] = snapshot["ux501_page"]
+
+
+def _render_pagination(page, pages, *, bottom=False):
+    if pages <= 1:
+        return
+    suffix = "_bottom" if bottom else ""
+    prev, label, nxt = st.columns([1, 2, 1])
+    prev.button("Anterior", key="ux126b_previous"+suffix, disabled=page == 1,
+                on_click=_turn_page, args=(-1,))
+    label.caption(f"Página {page} de {pages}")
+    nxt.button("Próxima", key="ux126b_next"+suffix, disabled=page == pages,
+               on_click=_turn_page, args=(1,))
+
+
+def _restore_filters(discovery):
+    state = st.session_state
+    snapshot = {**_FILTER_DEFAULTS, **state.get("ux502_discovery_filters", {})}
+    # Explicit navigation and filter callbacks update the stable snapshot.
+    # Widget keys may be stale after a handoff; bootstrap them only once.
+    if "ux502_discovery_filters" not in state:
+        snapshot.update({key: state[key] for key in _FILTER_DEFAULTS if key in state})
+    if snapshot["ux501_country"] not in ["Todos os países", *discovery["countries"]]:
+        snapshot["ux501_country"] = "Todos os países"
+        snapshot["ux501_page"] = 1
+    snapshot["ux501_categories"] = [x for x in snapshot["ux501_categories"] if x in discovery["categories"]]
+    for key in _FILTER_DEFAULTS:
+        if key != "ux501_page":
+            state[key] = snapshot[key]
+    state["ux502_discovery_filters"] = snapshot
+    return snapshot
+
+
 def render_independent_destination_discovery(*, discovery=None, focused_destination=None) -> None:
     discovery = discovery if discovery is not None else _cached_discovery()
     from attractions_model import load_attractions
@@ -157,6 +237,7 @@ def render_independent_destination_discovery(*, discovery=None, focused_destinat
         st.caption("Destino escolhido na ficha da cidade-base: "+focused["name"])
         subset = [focused]
     else:
+        snapshot = _restore_filters(discovery)
         st.markdown(section_heading("ENCONTRE SEU DESTINO","Filtre as opções",
                                     "Pesquise por país, experiência ou atração.",
                                     variant="compact"),unsafe_allow_html=True)
@@ -164,16 +245,16 @@ def render_independent_destination_discovery(*, discovery=None, focused_destinat
         with col1:
             country = st.selectbox(
                 "País", ["Todos os países", *discovery["countries"]],
-                key="ux501_country")
+                key="ux501_country", on_change=_remember_filters)
         with col2:
             categories = st.multiselect(
                 "Experiências", discovery["categories"],
-                key="ux501_categories")
+                key="ux501_categories", placeholder="Escolha uma ou mais experiências", on_change=_remember_filters)
         with col3:
             query = st.text_input(
                 "Buscar cidade ou atração", placeholder="Ex.: Colmar, museu, catedral",
-                key="ux501_search")
-        mode = st.radio("Mostrar", ("Todos", "Posso planejar agora"), horizontal=True, key="ux126_eligibility_filter")
+                key="ux501_search", on_change=_remember_filters)
+        mode = st.radio("Mostrar", ("Todos", "Posso planejar agora"), horizontal=True, key="ux126_eligibility_filter", on_change=_remember_filters)
         matches = filter_destinations(
             discovery,
             country=None if country == "Todos os países" else country,
@@ -181,26 +262,24 @@ def render_independent_destination_discovery(*, discovery=None, focused_destinat
             query=query,
             selected=selected,
         )
-        count = sum(eligibility[item["id"]]["status"] == "eligible" for item in matches)
-        research = sum(eligibility[item["id"]]["status"] == "research_only" for item in matches)
-        other = len(matches) - count - research
-        st.caption(f"{count} podem entrar no roteiro · {research} em pesquisa" + (f" · {other} em outra etapa" if other else ""))
-        if mode == "Posso planejar agora":
-            matches = [item for item in matches if eligibility[item["id"]]["status"] == "eligible"]
-        st.caption(f"{len(matches)} destino(s) encontrados — resultados do catálogo, "
-                   "não uma lista de viagens ferroviárias confirmadas.")
+        matches = _ordered_matches(matches, eligibility, mode)
+        st.caption(_result_caption(matches, eligibility))
+        st.caption("Resultados do catálogo; não é uma lista de viagens ferroviárias confirmadas.")
+        page_size = 12
+        pages = max(1, (len(matches)+page_size-1)//page_size)
+        page = snapshot["ux501_page"]
+        if not isinstance(page, int) or not 1 <= page <= pages:
+            page = 1
+        snapshot["ux501_page"] = page
+        st.session_state["ux502_discovery_filters"] = snapshot
+        st.session_state["ux501_page"] = page
         if not matches:
             st.info("Nenhum destino corresponde aos filtros. Experimente outra busca.")
             return
-
-        page_size = 12
-        pages = (len(matches)+page_size-1)//page_size
-        if st.session_state.get("ux501_page") not in range(1, pages+1):
-            st.session_state["ux501_page"] = 1
-        page = st.selectbox(
-            "Página de destinos", list(range(1, pages+1)),
-            key="ux501_page", format_func=lambda p: f"{p} de {pages}")
+        _render_pagination(page, pages)
         subset = matches[(page-1)*page_size:page*page_size]
+    if any(eligibility[item["id"]]["status"] == "eligible" for item in subset):
+        st.caption("Roteiro: entra no planejamento e no orçamento · Lista: só para pesquisar e comparar bases")
     # Bundled images require no HTTP request. Query Wikimedia only when
     # neither editorial nor local files cover a destination on this page.
     local_photos = {item["id"]: local_destination_photo(item["id"])
@@ -274,3 +353,5 @@ def render_independent_destination_discovery(*, discovery=None, focused_destinat
                             render_data8_destination_preview(
                                 item["id"], attraction_names={
                                     a["id"]:a["name"] for a in item["attractions"]})
+    if focused is None:
+        _render_pagination(page, pages, bottom=True)

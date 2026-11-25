@@ -13,6 +13,7 @@ from evidence_query_model import get_rail_evidence
 from rail_evidence_unified_model import load_rail_evidence
 from base_explorer_model import load_exploration
 from rail_pair_projection_model import pair_projection_row
+from destination_identity import canonical_destination_id
 
 MISSING = ("Retorno de fim de semana não confirmado",
            "Acesso urbano e última milha a verificar")
@@ -40,14 +41,9 @@ def build_wishlist_matrix(interests: dict, base_ids: list[str], *,
     """
     discovery = discovery if discovery is not None else build_destination_discovery()
     research = research if research is not None else load_research(include_candidates=True)
-    cities = {row["id"]: row for row in research["cities"]}
-    if (not isinstance(base_ids, list) or not base_ids
-            or any(not isinstance(x, str) or x not in cities for x in base_ids)
-            or len(base_ids) != len(set(base_ids))):
-        raise ValueError("Selecione cidades-base pesquisadas, sem duplicações")
+    _validated_bases(base_ids, research)
     ordered = ordered_interests(interests, discovery)
     active = selected_destinations_for_comparison(interests, discovery)
-    names = {x["id"]: x for x in discovery["destinations"]}
     if visible_destination_ids is not None:
         if (not isinstance(visible_destination_ids, (list, tuple)) or
                 len(set(visible_destination_ids)) != len(visible_destination_ids) or
@@ -56,11 +52,51 @@ def build_wishlist_matrix(interests: dict, base_ids: list[str], *,
         visible = set(visible_destination_ids)
     else:
         visible = set(active)
+    priorities = {x["destination_id"]: x["priority"]
+                  for x in ordered if x["destination_id"] in visible}
+    result = build_destination_matrix(
+        base_ids, list(priorities), discovery=discovery, research=research,
+        rail=rail, exploration=exploration)
+    for destination in result["destinations"]:
+        priority = priorities[destination["id"]]
+        destination.update(priority=priority, priority_label=LABELS[priority])
+    for row in result["rows"]:
+        priority = priorities[row["destination_id"]]
+        row.update(priority=priority, priority_label=LABELS[priority])
+    result.update(discarded_count=len(ordered)-len(active),
+                  active_destination_count=len(active))
+    return result
+
+
+def _validated_bases(base_ids, research):
+    cities = {row["id"]: row for row in research["cities"]}
+    if (not isinstance(base_ids, list) or not base_ids
+            or any(not isinstance(x, str) or x not in cities for x in base_ids)
+            or len(base_ids) != len(set(base_ids))):
+        raise ValueError("Selecione cidades-base pesquisadas, sem duplicações")
+    return cities
+
+
+def build_destination_matrix(base_ids: list[str], destination_ids: list[str], *,
+                             discovery=None, research=None, rail=None,
+                             exploration=None) -> dict:
+    """Read-only projection of explicit directed pairs, independent of wishes.
+
+    Exact catalog IDs and input order are preserved. Empty destinations are
+    valid. The caller owns any wishlist-specific priorities or UI limits.
+    """
+    discovery = discovery if discovery is not None else build_destination_discovery()
+    research = research if research is not None else load_research(include_candidates=True)
+    cities = _validated_bases(base_ids, research)
+    names = {x["id"]: x for x in discovery["destinations"]}
+    if (not isinstance(destination_ids, list)
+            or any(not isinstance(x, str) or x not in names for x in destination_ids)
+            or len({canonical_destination_id(x) for x in destination_ids}) != len(destination_ids)):
+        raise ValueError("Selecione destinos do catálogo, sem duplicações")
     wanted = [
-        {"id":x["destination_id"], "name":names[x["destination_id"]]["name"],
-         "country":names[x["destination_id"]]["country"],
-         "priority":x["priority"], "priority_label":LABELS[x["priority"]]}
-        for x in ordered if x["destination_id"] in visible
+        {"id": key, "name": names[key]["name"], "country": names[key]["country"],
+         "priority": None, "priority_label": None}
+        for key in destination_ids
     ]
     rail = rail if rail is not None else load_rail_evidence()
     exploration = exploration if exploration is not None else load_exploration()
@@ -134,8 +170,8 @@ def build_wishlist_matrix(interests: dict, base_ids: list[str], *,
         })
     return {"destinations":deepcopy(wanted),"base_ids":list(base_ids),
             "rows":rows,"summaries":summaries,
-            "discarded_count":len(ordered)-len(active),
-            "active_destination_count":len(active),
+            "discarded_count":0,
+            "active_destination_count":len(wanted),
             "comparison_ready":bool(wanted),
             "quality_ranking_available":False,
             "official_plan_modified":False}

@@ -115,7 +115,7 @@ def _render_suggestion(rec,plan,catalog,routes,trip_data,live,eurfx,chffx,use_ci
                         st.session_state[key]=default
                     picked=st.multiselect("Atrações a incluir ou atualizar",
                                            list(options),key=key,max_selections=5,
-                                           format_func=lambda k:options[k])
+                                           format_func=lambda k:options[k], placeholder="Escolha uma ou mais opções")
                     periods=period_options(FRANCE_STAGE)
                     period=st.selectbox("Período flexível (opcional)",periods,
                                         index=periods.index(info["period"])

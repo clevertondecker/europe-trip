@@ -16,8 +16,9 @@ def render_draft_controls(board:dict,plan:dict,catalog:dict,*,profile:str)->dict
             file_name=f"nossa-europa-{profile}-rascunho.json",
             mime="application/json",
             key="draft_export_"+profile,use_container_width=True)
+        st.caption("Arquivo .json exportado por este app")
         upload=st.file_uploader("Escolher backup do rascunho",type=["json"],
-                                key="draft_import_"+profile)
+                                key="draft_import_"+profile, max_upload_size=5)
         if upload is not None and st.button("Restaurar backup após validação",
                                              key="draft_confirm_"+profile):
             try:

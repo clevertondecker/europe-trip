@@ -19,8 +19,8 @@ class ExplorerDesignConsistencyTests(unittest.TestCase):
                 self.assertIn("page_header(",code)
         # Discovery intentionally uses a gallery, not the obsolete catalog KPI panel.
         self.assertNotIn("kpi_cards(",discovery)
-        for code in (wishlist,comparison):
-            self.assertIn("kpi_cards(",code)
+        self.assertNotIn("kpi_cards(",wishlist)
+        self.assertIn("kpi_cards(",comparison)
         self.assertIn("next_action(",wishlist)
         self.assertIn('variant="compact"',app)
 
@@ -40,8 +40,8 @@ render_independent_destination_discovery()
         self.assertFalse(app.exception,str(app.exception))
         self.assertEqual(sum("ui-page-header" in m.value for m in app.markdown),1)
         self.assertEqual(app.session_state["ux502_interests"],initial)
-        self.assertIn("ux82_wishlist_metrics",str(app.get('main')) if False else
-                      (ROOT/"ux502_destination_interests_ui.py").read_text())
+        self.assertFalse(any("Indicadores do catálogo de desejos" in e.label for e in app.expander))
+        self.assertTrue(any("destino(s) desejados" in x.value for x in app.caption))
 
     def test_visual_changes_do_not_introduce_a_second_router_or_persistence(self):
         from ux64_navigation_model import TARGETS,PUBLIC_TASKS

@@ -73,7 +73,7 @@ class DestinationInterestsAppTests(unittest.TestCase):
         original=deepcopy(app.session_state["advisor_plan"])
         app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
         app.segmented_control(key="ux_section").set_value("Passeios").run()
-        app.radio(key="ux502_view").set_value("Minha lista").run()
+        app.segmented_control(key="ux64_public_task").set_value("Minha lista").run()
         app.session_state["ux502_interests"]=set_interest(
             set_interest(empty_interests(),"colmar","must_visit"),
             "bruges_be","interested")
@@ -82,7 +82,7 @@ class DestinationInterestsAppTests(unittest.TestCase):
         self.assertEqual(app.session_state["advisor_plan"],original)
         self.assertEqual(selected_destinations_for_comparison(
             app.session_state["ux502_interests"]),["colmar","bruges_be"])
-        app.radio(key="ux502_view").set_value("Descobrir lugares").run()
+        app.segmented_control(key="ux64_public_task").set_value("Descobrir").run()
         app.selectbox(key="ux501_country").set_value("Bélgica").run()
         self.assertEqual(app.session_state["advisor_plan"],original)
         self.assertEqual(len(app.session_state["ux502_interests"]["items"]),2)
@@ -92,7 +92,7 @@ class DestinationInterestsAppTests(unittest.TestCase):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
         app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
         app.segmented_control(key="ux_section").set_value("Passeios").run()
-        app.radio(key="ux502_view").set_value("Minha lista").run()
+        app.segmented_control(key="ux64_public_task").set_value("Minha lista").run()
         first=set_interest(empty_interests(),"colmar","must_visit")
         app.session_state["ux502_interests"]=first
         app.run()

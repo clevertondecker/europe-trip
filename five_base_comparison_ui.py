@@ -50,7 +50,7 @@ def render_five_base_study()->None:
                           list(destinations),default=saved,
                           format_func=lambda id:COUNTRY_FLAGS.get(destinations[id]["country"],"")+
                           " "+destinations[id]["name"],key="five_base_destinations",
-                          on_change=_save_destinations)
+                          on_change=_save_destinations, placeholder="Escolha uma ou mais opções")
     if not chosen:
         st.info("Selecione ao menos um destino para comparar.")
         return

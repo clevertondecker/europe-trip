@@ -7,9 +7,8 @@ from planning_session import active_plan, commit_undated_destinations
 from ux502_destination_interests_model import empty_interests, LABELS
 from ux61_destination_board_ui import _discovery
 from ux_planning_journey_model import project_planning, clear_planning_context
-from ux_shared_ui_presentation import section_heading
 from ux_planning_journey_presentation import (
-    project_visual_state, header_html, metric_html, next_html, step_html,
+    project_visual_state, header_html, metric_html, next_html,
 )
 
 VIEW="flow_journey_view"
@@ -176,7 +175,7 @@ def render_build(plan, catalog, view):
             _render_batch_cards(key,by_id)
             picked=st.multiselect("Destinos para incluir",list(by_id),key=key,
                                   max_selections=50,
-                                  format_func=lambda x:by_id[x]["name"]+" · "+LABELS.get(by_id[x]["priority"],""))
+                                  format_func=lambda x:by_id[x]["name"]+" · "+LABELS.get(by_id[x]["priority"],""), placeholder="Escolha uma ou mais opções")
             if st.button("Confirmar inclusão · "+LABELS_STAGE[stage],
                          key=key+"_confirm",disabled=not picked):
                 try:
@@ -446,22 +445,6 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
             st.button(visual["primary_label"] or LABELS_ACTION[action],
                       key="flow_journey_primary",type="primary",
                       on_click=_show,args=(action,))
-    # One main next-action button remains above the active editor. Keep
-    # legacy step links as a secondary, non-competing escape hatch.
-    with st.expander("Acessar outras etapas · opcional",expanded=False):
-        st.markdown(section_heading(
-            "SEU CAMINHO", "Etapas da jornada",
-            "Continue quando quiser. Organizar datas é opcional para salvar um rascunho."
-        ), unsafe_allow_html=True)
-        for step in visual["steps"]:
-            card_key="flow_journey_step_card_"+("active_" if step["active"] else "quiet_")+step["id"]
-            with st.container(key=card_key):
-                left,right=st.columns([4.5,1.5],vertical_alignment="center")
-                left.markdown(step_html(step),unsafe_allow_html=True)
-                right.button(step["button"],key="flow_journey_step_"+step["id"],
-                             disabled=step["disabled"],use_container_width=True,
-                             on_click=_choose if step["id"]=="choose" else _show,
-                             args=() if step["id"]=="choose" else (step["id"],))
     note=state.pop("flow_journey_notice",None) or state.pop("flow_notice",None)
     if note:
         st.success(note)

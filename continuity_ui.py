@@ -407,8 +407,9 @@ def render_continuity_panel(plan:dict,catalog:dict)->None:
                                mime="application/json",key="ux36_download")
             st.caption("Este download não confirma salvamento na nuvem. "
                        "Para recuperar o arquivo manualmente em outro dispositivo, abra-o lá.")
+        st.caption("Arquivo .json exportado por este app")
         uploaded=st.file_uploader("Abrir cópia de segurança (JSON)",
-                                  type=["json"],key="ux36_upload")
+                                  type=["json"],key="ux36_upload", max_upload_size=5)
         if uploaded is not None:
             if st.button("Pré-visualizar recuperação",key="ux36_preview_button"):
                 try:

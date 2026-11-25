@@ -107,7 +107,7 @@ def _render_research_only_outings(base_id: str, catalog: dict) -> None:
     countries = sorted({x["country"] for x in coverage["destinations"]})
     chosen_countries = st.multiselect(
         "Filtrar países do catálogo", countries,
-        default=countries, key="explore_readonly_countries")
+        default=countries, key="explore_readonly_countries", placeholder="Escolha uma ou mais opções")
     available = [x for x in available if x["country"] in chosen_countries]
     rows = []
     for item in available:
@@ -564,10 +564,10 @@ def render_explorer(trip_data: dict, sync_sources: dict, map_view) -> None:
         a,b,c=st.columns(3,gap="medium")
         with a:
             selected_countries=st.multiselect("Países",country_options,
-                                              default=country_options,key="explore_countries")
+                                              default=country_options,key="explore_countries", placeholder="Escolha uma ou mais opções")
         with b:
             selected_categories=st.multiselect("Tipo de atração",category_options,
-                                               default=category_options,key="explore_categories")
+                                               default=category_options,key="explore_categories", placeholder="Escolha uma ou mais opções")
         with c:
             transport_filter=st.selectbox(
                 "Acesso",["Todos","Apenas trem documentado / local","Pernoite em estudo"],
