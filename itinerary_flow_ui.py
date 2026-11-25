@@ -382,15 +382,13 @@ def _selected_stage(rows:list[dict],stage:str,catalog:dict)->None:
 
 
 def _compact_budget(plan:dict,catalog:dict,trip_data:dict,
-                    finance_live:bool,eurfx:float,chffx:float,*,show_link=True)->None:
+                    finance_live:bool,*,show_link=True)->None:
     if trip_data is None:
         st.caption("Custos disponíveis em Orçamento; ainda há valores sem cotação.")
         return
-    try:
-        snapshot=official_budget_for_plan(trip_data,finance_live,plan,catalog=catalog)
-    except (ValueError,KeyError,TypeError,StopIteration):
-        st.caption("Projeção oficial indisponível; consulte as premissas em Orçamento.")
-        return
+    snapshot=official_budget_for_plan(trip_data,finance_live,plan,catalog=catalog)
+    if not snapshot["outings_available"]:
+        st.warning("Referência da planilha, sem recálculo dos passeios do roteiro; revise a seleção antiga.")
     st.caption("**Orçamento oficial:** projeção do casal "+
                money_brl(snapshot["total"])+
                " · margem nominal "+money_brl(snapshot["margin"])+
@@ -733,6 +731,6 @@ def render_itinerary_workbench(plan:dict,catalog:dict,
         st.button("Abrir sugestões detalhadas",key="flow_go_suggestions",
                   on_click=_navigate,args=("Meu roteiro","Sugestões"))
     with st.expander("Ver impacto financeiro estimado",expanded=False):
-        _compact_budget(active_plan(),catalog,trip_data,finance_live,eurfx,chffx)
+        _compact_budget(active_plan(),catalog,trip_data,finance_live)
     st.caption("Escolhido = incluído no plano · Organizado = com período ou data "
                "· Reservado = somente com confirmação externa (não inferida).")
