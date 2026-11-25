@@ -35,14 +35,18 @@ class BudgetUx84Tests(unittest.TestCase):
         self.assertIn('key="ux84_simulation_metrics"',app)
         self.assertIn('next_action(',budget)
 
-    def test_legacy_simulation_keys_and_explicit_confirmation_are_retained(self):
+    def test_simulation_keys_remain_and_official_confirmation_is_isolated(self):
         app=(ROOT/"app.py").read_text()
-        for key in ('unified_scenario','unified_style','budget_cap_confirm',
+        for key in ('unified_scenario','unified_style',
                     'scenario_id!=active_plan()["budget_scenario"]',
-                    'update_fields(budget_scenario=scenario_id)'):
+                    'ux127_custom_simulation'):
             self.assertIn(key,app)
         self.assertIn('["60k","70k"]',app)
-        self.assertIn('if st.session_state.get("ux_mode")=="Oficial":',app)
+        self.assertNotIn('budget_cap_confirm',app)
+        self.assertNotIn('update_fields(budget_scenario=scenario_id)',app)
+        settings=(ROOT/"planning_context_ui.py").read_text()
+        self.assertIn('budget_scenario=budget',settings)
+        self.assertIn('update_fields(**changes)',settings)
         self.assertIn('sync_sources["finance"]["status"] == "live"',app)
         self.assertIn('render_quotes_summary(data,plan,finance_live)',(ROOT/"budget_sections_ui.py").read_text())
 
