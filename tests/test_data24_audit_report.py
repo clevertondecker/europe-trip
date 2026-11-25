@@ -8,7 +8,7 @@ from unittest.mock import patch
 
 from data24_audit_model import build_audit, attributed_photo
 from data24_coverage_model import rail_coverage
-from tools.data24_research_coverage import input_manifest, render_report, render_annex, main
+from tools.data24_research_coverage import input_manifest, render_report, render_annex, render_legacy_annex, main
 
 
 class AuditReportTests(unittest.TestCase):
@@ -73,7 +73,7 @@ class AuditReportTests(unittest.TestCase):
                                  "kind", "source_url", "limitation"}.issubset(evidence))
 
     def test_deterministic_rendering_and_stale_check(self):
-        manifest = input_manifest()
+        manifest = input_manifest(self.audit)
         before = deepcopy(self.audit)
         report = render_report(self.audit, manifest)
         annex = render_annex(self.audit, manifest)
@@ -85,7 +85,10 @@ class AuditReportTests(unittest.TestCase):
             path = Path(tmp) / "report.md"
             with patch("tools.data24_research_coverage.build_audit", return_value=self.audit):
                 self.assertEqual(main(["--output", str(path)]), 0)
+                self.assertEqual(main(["--output", str(path), "--check-annex"]), 0)
+                path.with_suffix(".json").unlink()
                 self.assertEqual(main(["--output", str(path), "--check"]), 0)
+                self.assertEqual(main(["--output", str(path), "--check-annex"]), 1)
                 path.write_text("stale", encoding="utf-8")
                 self.assertEqual(main(["--output", str(path), "--check"]), 1)
 
@@ -93,7 +96,7 @@ class AuditReportTests(unittest.TestCase):
         root = Path(__file__).resolve().parents[1]
         report = root / "docs/audits/data24_research_coverage.md"
         self.assertEqual(report.read_text(encoding="utf-8"),
-                         render_report(self.audit, input_manifest()))
+                         render_report(self.audit))
     
     def test_removed_inventory_is_not_imported_by_app(self):
         root = Path(__file__).resolve().parents[1]
@@ -104,3 +107,21 @@ class AuditReportTests(unittest.TestCase):
         self.assertIn('"Pesos das 30 cidades":"Referências históricas"', app)
         self.assertIn('"Comparar mesmas viagens":"Referências históricas"', app)
         self.assertIn("render_city_decision(", app)
+
+    def test_content_fingerprint_and_legacy_artifact(self):
+        changed = deepcopy(self.audit)
+        changed["rail_pairs"][0]["source_url"] = "https://example.org/reviewed"
+        self.assertNotEqual(input_manifest(self.audit), input_manifest(changed))
+        self.assertEqual(render_report(self.audit, {"unrelated": "a"}),
+                         render_report(self.audit, {"unrelated": "b"}))
+        legacy = render_legacy_annex(self.audit)
+        decoded = json.loads(legacy)
+        for key in ("legacy_evidence", "legacy_dq31", "legacy_summary"):
+            self.assertEqual(decoded[key], json.loads(json.dumps(self.audit[key])))
+        # Temporary diagnostic: publish the exact compact artifact via CI,
+        # then remove this diagnostic once the versioned file is committed.
+        print("DATA24_LEGACY_LENGTH", len(legacy), len(legacy.encode("utf-8")))
+        for index in range(0, len(legacy), 12000):
+            print("DATA24_LEGACY_PART " + json.dumps([index, legacy[index:index+12000]], ensure_ascii=True))
+        path = Path(__file__).resolve().parents[1] / "docs/audits/data24_legacy_evidence.json"
+        self.assertEqual(path.read_text(encoding="utf-8"), legacy)
