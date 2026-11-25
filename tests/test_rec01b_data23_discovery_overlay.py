@@ -103,9 +103,10 @@ class Data23WishlistAppTests(unittest.TestCase):
             app.button(key="ux_sidebar_nav_1").click().run()
             app.segmented_control(key="ux_section").set_value("Passeios").run()
             app.session_state["ux502_interests"] = wishes
-            app.radio(key="ux502_view").set_value("Minha lista").run()
+            app.segmented_control(key="ux64_public_task").set_value("Minha lista").run()
             self.assertFalse(app.exception, [e.message for e in app.exception])
-            app.button(key="ux503_open_from_wishlist").click().run()
+            app.button(key="rec03a_open_from_wishlist").click().run()
+            app.button(key="ux125_open_manual_comparison").click().run()
             app.multiselect(key="ux503_bases").set_value(["angers", "rennes"]).run()
             self.assertFalse(app.exception, [e.message for e in app.exception])
             self.assertTrue(any("Ainda não podem ser incluídos" in c.value for c in app.caption))

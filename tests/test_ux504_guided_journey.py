@@ -136,7 +136,8 @@ class JourneyAppTests(unittest.TestCase):
         app.segmented_control(key="ux64_public_task").set_value("Minha lista").run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
         self.assertEqual(app.session_state["ux502_interests"],wished())
-        app.button(key="ux503_open_from_wishlist").click().run()
+        app.button(key="rec03a_open_from_wishlist").click().run()
+        app.button(key="ux125_open_manual_comparison").click().run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
         self.assertEqual(app.session_state["ux_section"],"Comparar")
         app.button(key="ux503_back_to_wishes").click().run()
@@ -176,7 +177,8 @@ class JourneyAppTests(unittest.TestCase):
         app.session_state["ux502_interests"]=wishes
         app.run()
         # Minha lista -> Comparar, then customize bases and the visible basket.
-        app.button(key="ux503_open_from_wishlist").click().run()
+        app.button(key="rec03a_open_from_wishlist").click().run()
+        app.button(key="ux125_open_manual_comparison").click().run()
         app.multiselect(key="ux503_bases").set_value(["lille","metz"]).run()
         app.multiselect(key="ux503_visible_destinations").set_value(["colmar"]).run()
         self.assertEqual(app.session_state["ux504_bases_shadow"],["lille","metz"])
@@ -189,14 +191,18 @@ class JourneyAppTests(unittest.TestCase):
         self.assertEqual(app.session_state["ux_area"],"Orçamento")
         # Back to comparison. Streamlit removes unmounted widget keys; the
         # view-only shadow must rehydrate the previously selected bases.
-        app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
-        app.segmented_control(key="ux_section").set_value("Comparar").run()
+        app.button(key="ux64_sidebar_nav_0").click().run()
+        app.segmented_control(key="ux64_public_task").set_value("Comparar bases").run()
+        # A public entry may restore the detailed view directly; if it opens
+        # suggestions, enter the detailed editor through its canonical CTA.
+        if "ux125_open_manual_comparison" in {b.key for b in app.button}:
+            app.button(key="ux125_open_manual_comparison").click().run()
         self.assertEqual(app.multiselect(key="ux503_bases").value,["lille","metz"])
         self.assertEqual(
             app.multiselect(key="ux503_visible_destinations").value,["colmar"])
         app.button(key="ux503_back_to_wishes").click().run()
         self.assertEqual(app.session_state["ux502_view"],"Minha lista")
-        app.radio(key="ux502_view").set_value("Descobrir lugares").run()
+        app.segmented_control(key="ux64_public_task").set_value("Descobrir").run()
         self.assertEqual(app.text_input(key="ux501_search").value,"Colmar")
         self.assertEqual(app.session_state["ux502_interests"],wishes)
         self.assertEqual(app.session_state["advisor_plan"],plan)
