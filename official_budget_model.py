@@ -47,3 +47,22 @@ def official_budget_for_plan(data, source_live, plan, catalog=None, routes=None)
     costs = package_cost(catalog, routes, plan["base_city"], chosen,
                          planned_destination_ids=selected)
     return official_budget_projection(data, source_live, plan, costs)
+
+
+def official_simulation_result(snapshot):
+    """Read-only initial simulation state, exactly equal to official reference."""
+    original = snapshot["french"]["amounts"]
+    components = {key: round(amount, 2) for key, amount in original.items()}
+    overage = snapshot["known_excursions_overage_brl"]
+    components["excursions"] = round(original["excursions"] + overage, 2)
+    margin = snapshot["margin"]
+    cap = snapshot["cap"]
+    status = ("acima_do_teto" if margin < 0 else
+              "apertado" if margin < cap * .05 else "margem_condicional")
+    return {"total": snapshot["total"], "margin": margin, "status": status,
+            "reserve_already_in_total": snapshot["scenario"]["emergency_reserve_brl"],
+            "new_components": components,
+            "deltas": {key: overage if key == "excursions" else 0. for key in original},
+            "flight_delta": 0., "source": snapshot["source"],
+            "budget_fraction": round(snapshot["total"] / cap, 4),
+            "days": snapshot["french"]["french_days"]}
