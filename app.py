@@ -17,7 +17,8 @@ from itinerary_planner import load_itinerary, select_outings, basket_totals, vis
 from italy_honeymoon_ui import render_italy_honeymoon
 from catalog import build_catalog, filter_catalog
 from unified_budget import resolve_french_budget, scenario_total
-from official_budget_model import (official_budget_for_plan, official_simulation_result)
+from official_budget_model import (official_budget_for_plan, official_simulation_result,
+                                   REFERENCE_EUR_BRL, REFERENCE_CHF_BRL)
 from calendar_model import calendar_plan
 from route_preview import route_endpoints
 from attractions_ui import render_explorer
@@ -1434,6 +1435,8 @@ elif page == "Orçamento":
             st.caption("Valores das subcategorias são recalculados a partir da planilha sincronizada.")
         official=official_budget_for_plan(data,live_finance,active_plan())
         st.markdown("#### Oficial")
+        if not official["outings_available"]:
+            st.warning("Referência da planilha, sem recálculo dos passeios do roteiro; revise a seleção antiga. A margem é incompleta.")
         st.caption("Projeção parcial da viagem · mesma referência de Planejar e Visão financeira")
         official_cards=kpi_cards([
             {"name":"Total oficial","value":money_brl(official["total"]),
@@ -1458,9 +1461,8 @@ elif page == "Orçamento":
             st.session_state["ux127_custom_simulation"] = (
                 st.session_state.get("ux_mode_value")=="Simulação")
         def _ux127_custom_changed():
-            if not st.session_state["ux127_custom_simulation"]:
-                st.session_state["ux_mode"]="Oficial"
-                _ux_mode_changed()
+            st.session_state["ux_mode"] = ("Simulação" if st.session_state["ux127_custom_simulation"] else "Oficial")
+            _ux_mode_changed()
         custom=st.checkbox("Personalizar premissas da simulação",key="ux127_custom_simulation",
                            on_change=_ux127_custom_changed,
                            help="Desmarque para restaurar a projeção oficial, sem alterar o roteiro.")
@@ -1474,7 +1476,7 @@ elif page == "Orçamento":
                 "ux_days_value":official["french"]["french_days"],
                 "ux127_use_budget_dining":True,
                 "unified_style":"Equilibrado",
-                "unified_outings":2,"unified_outing_cost":60,"unified_fx":6.3,
+                "unified_outings":2,"unified_outing_cost":60,"unified_fx":REFERENCE_EUR_BRL,
                 "unified_override_rent":False,"unified_flight_extra":0,
                 "unified_tour_extra":0,"unified_transit_extra":0,
                 "unified_rent_extra":0,"budget_use_attraction_cost":True,
@@ -1489,10 +1491,7 @@ elif page == "Orçamento":
             st.info("Teto selecionado apenas para esta simulação. "
                     "O teto do planejamento oficial permanece em R$ "+
                     active_plan()["budget_scenario"][:-1]+" mil.")
-            if st.session_state.get("ux_mode")=="Oficial":
-                if st.button("Confirmar alteração do teto oficial",key="budget_cap_confirm"):
-                    update_fields(budget_scenario=scenario_id)
-                    st.rerun()
+            st.caption("Para alterar o teto oficial, use Configurar minha viagem em Planejar.")
         scenario = get_scenario(data,scenario_id)
         baseline = calculate_scenario(scenario)
         french = resolve_french_budget(scenario,live_finance)
@@ -1535,7 +1534,7 @@ elif page == "Orçamento":
             outings = st.slider("Saídas por semana",0,7,value=2,key="unified_outings",disabled=not custom or use_budget_dining)
             spend = st.slider("Gasto por saída (€ para o casal)",15,150,value=60,step=5,
                               key="unified_outing_cost",disabled=not custom or use_budget_dining)
-            fx = st.number_input("Câmbio simulado (R$/€)",4.0,10.0,6.3,0.05,
+            fx = st.number_input("Câmbio simulado (R$/€)",4.0,10.0,REFERENCE_EUR_BRL,0.05,
                                  key="unified_fx",disabled=not custom)
             st.caption("Esta cidade é uma simulação independente. "
                        "O roteiro oficial permanece em "+active_plan()["base_city"].capitalize()+
@@ -1597,22 +1596,15 @@ elif page == "Orçamento":
         catalog_extra=0.0
         attraction_ref=None
         current_plan=active_plan()
-        from itinerary_flow_model import selected_rows, FRANCE_STAGE
-        official_rows=[row for row in selected_rows(current_plan,load_attractions())
-                       if row["stage"]==FRANCE_STAGE]
-        official_cities=[row["id"] for row in official_rows]
-        if official_cities:
-            known_cost=package_cost(
-                load_attractions(),load_base_routes(),current_plan["base_city"],
-                [item for row in official_rows for item in row["attractions"]],
-                planned_destination_ids=official_cities)
+        official_cities=list(official["destination_ids"])
+        if official["outings_available"] and official_cities:
             attraction_ref={
-                "eur":known_cost["known_by_currency"]["EUR"],
-                "chf":known_cost["known_by_currency"]["CHF"],
-                "fx_eur":fx if custom else 6.3,
-                "fx_chf":st.session_state.get("explore_chf_fx",7.1) if custom else 7.1,
+                "eur":official["known_by_currency"]["EUR"],
+                "chf":official["known_by_currency"]["CHF"],
+                "fx_eur":fx if custom else REFERENCE_EUR_BRL,
+                "fx_chf":st.session_state.get("explore_chf_fx",REFERENCE_CHF_BRL) if custom else REFERENCE_CHF_BRL,
                 "base":current_plan["base_city"],
-                "incomplete":not known_cost["complete"],
+                "incomplete":official["has_unknown_costs"],
                 "destinations":official_cities}
             st.caption("Passeios importados do roteiro oficial. Os custos destas "
                        "atrações ainda não foram recalculados para a base hipotética "
