@@ -34,8 +34,6 @@ def _show(action, *, navigate=True):
     state["flow_save_open"]=False
     if action!="organize":
         state.pop("flow_edit_target",None)
-        state.pop("flow_journey_visit_focus",None)
-        state.pop("flow_journey_visit_pending",None)
 
 
 def request_planning(state, action="build", stage=None):
@@ -64,6 +62,8 @@ def apply_planning_request(state):
     if state.get("flow_journey_identity")!=identity:
         clear_planning_context(state)
     state[VIEW]=action
+    state.pop("flow_journey_visit_focus",None)
+    state.pop("flow_journey_visit_pending",None)
     state["flow_journey_identity"]=(state.get("rec03a_identity"),state["advisor_plan"]["plan_id"])
     state["flow_organize_open"]=action=="organize"
     state["flow_add_open"]=False
@@ -206,8 +206,8 @@ def render_build(plan, catalog, view):
     if view["rows"]:
         st.button("Revisar destinos já incluídos",key="flow_journey_review_after_build",on_click=_show,args=("review",))
     else:
-        from ux502_destination_interests_ui import _discover_eligible
-        st.button("Descobrir destinos compatíveis",key="flow_journey_edit_wishes",on_click=_discover_eligible)
+        from ux502_destination_interests_ui import _discover_destinations
+        st.button("Descobrir destinos",key="flow_journey_edit_wishes",on_click=_discover_destinations)
 
 
 def _render_unavailable(view):
@@ -256,6 +256,8 @@ def _workspace_organize(destination_id, stage):
     state["flow_stage"]=stage
     state["flow_organize_destination"]=destination_id
     state["flow_journey_visit_focus"]=(stage,destination_id)
+    from ux129_visit_focus import _clear_widgets
+    _clear_widgets(state)
     _organize_destination_changed()
 
 
@@ -404,6 +406,8 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
     identity=(state.get("rec03a_identity"),plan["plan_id"])
     if state.get("flow_journey_identity")!=identity:
         clear_planning_context(state)
+        from ux129_visit_focus import _clear_widgets
+        _clear_widgets(state)
         state["flow_journey_identity"]=identity
     if state.get(VIEW) not in ("build","organize","review"):
         state[VIEW]=None
@@ -444,9 +448,13 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
             st.button(LABELS_ACTION[action],key="flow_journey_primary",
                       type="primary",on_click=_discover)
         elif action=="exploratory":
-            from ux502_destination_interests_ui import _discover_eligible
-            st.button("Descobrir destinos compatíveis",key="flow_journey_primary",
-                      type="primary",on_click=_discover_eligible)
+            if not state.get("flow_add_open"):
+                st.button("Adicionar pelo catálogo de passeios",key="flow_journey_primary",
+                          type="primary",on_click=_open_catalog)
+                st.button("Comparar cidades-base",key="ux130_planning_compare",
+                          on_click=request_navigation,args=(state,"suggestions"))
+            else:
+                st.caption("Escolha um passeio no catálogo abaixo.")
         elif action=="review" and state[VIEW]=="review":
             st.markdown('<a class="journey-next__anchor" href="#journey-review-anchor">'
                         'Ir para a revisão ↓</a>',unsafe_allow_html=True)
@@ -461,8 +469,9 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
                       key="flow_journey_primary",type="primary",
                       on_click=_show,args=(action,))
     if not organizing and state.get("ux_section")=="Meu planejamento":
-        st.caption("Prefira incluir destinos da sua lista. Para outros lugares, use o catálogo de passeios.")
-        st.button("Adicionar pelo catálogo de passeios",key="ux131_open_catalog",on_click=_open_catalog)
+        if action!="exploratory":
+            st.caption("Prefira incluir destinos da sua lista. Para outros lugares, use o catálogo de passeios.")
+            st.button("Adicionar pelo catálogo de passeios",key="ux131_open_catalog",on_click=_open_catalog)
         if state[VIEW] is None and not view["rows"]:
             _render_unavailable(view)
     note=state.pop("flow_journey_notice",None) or state.pop("flow_notice",None)
@@ -494,17 +503,25 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
             stage=ITALY_STAGE
         st.markdown("##### "+("Etapa 1 · Lua de mel na Itália" if stage==ITALY_STAGE else "Etapa 2 · Temporada europeia"))
         if organizer_stage in STAGES and not state.get("flow_edit_target"):
-            from ux129_visit_focus import FOCUS,PENDING,request_focus,render_pending,render_editor
+            from ux129_visit_focus import FOCUS,PENDING,DRAFTS,_clear_widgets,request_focus,render_pending,render_editor
             from ux63_timeline_ui import render_timeline
             rows=[r for r in view["rows"] if r["stage"]==stage]
             by_id={r["id"]:r for r in rows}
+            # Keep drafts by destination across stage/mode changes, but never for removed visits.
+            valid={(r["stage"],r["id"]) for r in view["rows"]}
+            drafts=state.get(DRAFTS,{})
+            if not isinstance(drafts,dict):
+                drafts={}
+            state[DRAFTS]={k:v for k,v in drafts.items() if k in valid and isinstance(v,dict)}
             focus=state.get(FOCUS)
             if not isinstance(focus,tuple) or len(focus)!=2 or focus[0]!=stage or focus[1] not in by_id:
+                if focus is not None:
+                    _clear_widgets(state)
                 state.pop(FOCUS,None)
                 state.pop(PENDING,None)
                 focus=None
             if state.get("flow_add_open"):
-                selected=state.get("flow_active_destination")
+                selected=state.get("flow_active_destination") or state.get("flow_add_destination")
                 st.button("Organizar períodos e datas",key="flow_go_calendar",
                           on_click=request_focus,args=(selected if selected in by_id else None,stage,rows))
                 _render_add(active_plan(),catalog)
@@ -517,7 +534,8 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
             primary={r["id"]:r for r in catalog["destinations"]}
             def card_photo(row):
                 key=row["id"]
-                place={**primary.get(key,{}),**places.get(key,{})}
+                from destination_identity import canonical_destination_id
+                place={**primary.get(key,{}),**places.get(canonical_destination_id(key),{})}
                 if not place.get("photo"):
                     place["photo"]=primary.get(key,{}).get("photo")
                 _workspace_photo(key,row["name"],place)

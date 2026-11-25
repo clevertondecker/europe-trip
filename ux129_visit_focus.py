@@ -53,7 +53,7 @@ def _apply(target,stage,*,discard=False):
     from itinerary_flow_ui import _show_organize,_show_add
     state=st.session_state
     old=state.get(FOCUS)
-    if discard and old:
+    if old and (discard or old!=(stage,target)):
         state.get(DRAFTS,{}).pop(old,None)
     _clear_widgets(state)
     state.pop(PENDING,None)
@@ -75,7 +75,7 @@ def _apply(target,stage,*,discard=False):
 def request_focus(target,stage,rows):
     state=st.session_state
     old=state.get(FOCUS)
-    if old==(stage,target):
+    if old==(stage,target) and not state.get("flow_add_open"):
         return
     current=next((r for r in rows if old==(stage,r["id"])),None)
     if current is not None and _dirty(state,current,stage):
@@ -105,6 +105,11 @@ def render_editor(plan,catalog,stage,row):
     from itinerary_flow_ui import _render_organize_fields
     state=st.session_state
     focus=(stage,row["id"])
+    if state.pop("flow_journey_visit_refresh",None)==focus:
+        mode=state.get("flow_organize_mode")
+        _clear_widgets(state)
+        if mode:
+            state["flow_organize_mode"]=mode
     draft=state.get(DRAFTS,{}).get(focus,{})
     for key in WIDGETS:
         if key in draft and key not in state:
@@ -112,6 +117,7 @@ def render_editor(plan,catalog,stage,row):
     def saved():
         state.get(DRAFTS,{}).pop(focus,None)
         state.pop(PENDING,None)
+        state["flow_journey_visit_refresh"]=focus
     st.markdown("##### Organizar visita a "+row["name"])
     st.caption("Período e data são opcionais. As alterações só valem após confirmação.")
     _render_organize_fields(plan,catalog,stage,row,on_draft_change=_remember,

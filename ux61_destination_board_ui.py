@@ -17,7 +17,7 @@ def _open_research(destination_id, name):
     # An explicit target must remain visible even after incompatible filters.
     state["ux502_discovery_filters"] = {
         "ux501_country": "Todos os países", "ux501_categories": [],
-        "ux501_search": name, "ux501_page": 1, "ux126_eligibility_filter": "Todos",
+        "ux501_search": name, "ux501_page": 1,
     }
 
 

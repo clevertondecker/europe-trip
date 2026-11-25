@@ -104,3 +104,34 @@ render_planning_journey(active_plan(),load_attractions(),summary_only=True)
             self.assertEqual(app.session_state["advisor_plan"],self.plan)
             self.assertEqual(app.session_state["ux502_interests"],self.wishes)
             self.assertEqual(app.session_state["ux48_weekend_groups"],self.groups)
+
+
+    def test_research_only_overview_opens_catalog_without_mutation(self):
+        source="""
+import streamlit as st
+from planning_session import active_plan
+from attractions_model import load_attractions
+from ux_planning_journey_ui import render_planning_journey
+render_planning_journey(active_plan(),load_attractions(),
+    summary_only=st.session_state.get("ux_section")!="Organizar viagem")
+"""
+        app=AppTest.from_string(source,default_timeout=90)
+        plan=new_plan()
+        wishes=set_interest(empty_interests(),"angers","must_visit",self.discovery)
+        app.session_state["advisor_plan"]=deepcopy(plan)
+        app.session_state["ux502_interests"]=deepcopy(wishes)
+        app.session_state["ux_area"]="Meu roteiro"
+        app.session_state["ux_section"]="Visão geral"
+        app.session_state["flow_journey_identity"]=(None,plan["plan_id"])
+        with patch("continuity_ui._private_store",return_value=None):
+            app.run()
+            self.assertFalse(app.exception,[e.message for e in app.exception])
+            self.assertEqual(app.button(key="flow_journey_primary").label,"Adicionar pelo catálogo de passeios")
+            self.assertIn("ux130_overview_compare",{b.key for b in app.button})
+            app.button(key="flow_journey_primary").click().run()
+            self.assertFalse(app.exception,[e.message for e in app.exception])
+            self.assertEqual(app.session_state["ux_section"],"Organizar viagem")
+            self.assertTrue(app.session_state["flow_add_open"])
+            self.assertIn("flow_add_confirm",{b.key for b in app.button})
+            self.assertEqual(app.session_state["advisor_plan"],plan)
+            self.assertEqual(app.session_state["ux502_interests"],wishes)

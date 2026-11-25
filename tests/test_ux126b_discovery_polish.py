@@ -3,33 +3,18 @@ import ast
 from pathlib import Path
 import unittest
 
-from ux501_destination_discovery_ui import _ordered_matches, _result_caption
+from ux501_destination_discovery_ui import _result_caption
 
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
 class DiscoveryPresentationTests(unittest.TestCase):
-    def test_stable_partition_and_counter(self):
-        rows = [{"id": key} for key in ("r1", "e1", "r2", "e2", "o")]
-        statuses = dict(zip(("r1", "e1", "r2", "e2", "o"),
-                            ("research_only", "eligible", "research_only", "eligible", "other_stage")))
-        eligibility = {k: {"status": v} for k, v in statuses.items()}
-        self.assertEqual([x["id"] for x in _ordered_matches(rows, eligibility, "Todos")],
-                         ["e1", "e2", "r1", "r2", "o"])
-        eligible = _ordered_matches(rows, eligibility, "Posso planejar agora")
-        self.assertEqual(eligible, [rows[1], rows[3]])
-        for items, expected in (
-            ([], "Nenhum destino"),
-            ([rows[1]], "1 destino pode entrar no roteiro"),
-            ([rows[0]], "1 destino em pesquisa"),
-            ([rows[4]], "1 destino em outra etapa"),
-            (rows[:2], "2 destinos · 1 pode entrar no roteiro · 1 em pesquisa"),
-            (eligible, "2 destinos · 2 podem entrar no roteiro"),
-            ([rows[0], rows[2]], "2 destinos · 2 em pesquisa"),
-            (rows, "5 destinos · 2 podem entrar no roteiro · 2 em pesquisa · 1 em outra etapa"),
-        ):
-            self.assertEqual(_result_caption(items, eligibility), expected)
+    def test_counter_includes_all_research_destinations(self):
+        rows=[{"id":key} for key in ("r1","e1","r2","e2","o")]
+        self.assertEqual(_result_caption(rows),"5 destinos")
+        self.assertEqual(_result_caption(rows[:1]),"1 destino")
+        self.assertEqual(_result_caption([]),"Nenhum destino")
 
     def test_portuguese_selection_and_json_upload_contract(self):
         violations = []
@@ -88,14 +73,11 @@ class DiscoveryNavigationTests(unittest.TestCase):
         self.assertIn(f"Página 1 de {pages}", captions())
         self.assertTrue(app.button(key="ux126b_previous_bottom").disabled)
         self.assertEqual(captions().count(f"Página 1 de {pages}"), 2)
-        self.assertEqual(sum(x.startswith("Roteiro: entra no planejamento") for x in captions()), 1)
+        self.assertNotIn("ux126_eligibility_filter",{x.key for x in app.radio})
         app.button(key="ux126b_next_bottom").click().run()
         self.assertEqual(captions().count(f"Página 2 de {pages}"), 2)
         app.button(key="ux126b_next").click().run()
         self.assertIn(f"Página 3 de {pages}", captions())
-        app.radio(key="ux126_eligibility_filter").set_value("Posso planejar agora").run()
-        self.assertIn(f"Página 1 de {(n+11)//12}", captions())
-        self.assertEqual(app.session_state["ux502_discovery_filters"]["ux501_page"], 1)
         app.text_input(key="ux501_search").set_value("Lux").run()
         self.assertNotIn("ux126b_next", {b.key for b in app.button})
         self.assertNotIn("ux126b_previous", {b.key for b in app.button})
@@ -114,7 +96,8 @@ class DiscoveryNavigationTests(unittest.TestCase):
         app.button(key="ux_sidebar_nav_1").click().run()
         app.segmented_control(key="ux64_public_task").set_value("Descobrir").run()
         self.assertFalse(app.exception, [e.message for e in app.exception])
-        self.assertEqual(app.radio(key="ux126_eligibility_filter").value, "Posso planejar agora")
+        self.assertNotIn("ux126_eligibility_filter",{x.key for x in app.radio})
+        self.assertNotIn("ux126_eligibility_filter",app.session_state["ux502_discovery_filters"])
         self.assertEqual(app.text_input(key="ux501_search").value, "Lux")
         self.assertEqual(app.selectbox(key="ux501_country").value, "Luxemburgo")
         self.assertEqual(app.multiselect(key="ux501_categories").value, expected["ux501_categories"])
@@ -174,8 +157,9 @@ else:
         self.assertFalse(app.exception, [e.message for e in app.exception])
         self.assertEqual(app.text_input(key="ux501_search").value, "Colmar")
         self.assertEqual(app.selectbox(key="ux501_country").value, "Todos os países")
-        self.assertEqual(app.radio(key="ux126_eligibility_filter").value, "Todos")
-        self.assertIn("ux126_add_colmar", {b.key for b in app.button})
+        self.assertNotIn("ux126_eligibility_filter",{x.key for x in app.radio})
+        self.assertNotIn("ux126_add_colmar",{b.key for b in app.button})
+        self.assertTrue(any("Na minha lista" in x.value for x in app.caption))
         self.assertEqual(app.session_state["ux502_discovery_filters"]["ux501_page"], 1)
 
     def _assert_preserved(self, key):
@@ -184,7 +168,8 @@ else:
         self.assertFalse(app.exception, [e.message for e in app.exception])
         self.assertEqual(app.text_input(key="ux501_search").value, "Lux")
         self.assertEqual(app.selectbox(key="ux501_country").value, "Luxemburgo")
-        self.assertEqual(app.radio(key="ux126_eligibility_filter").value, "Posso planejar agora")
+        self.assertNotIn("ux126_eligibility_filter",{x.key for x in app.radio})
+        self.assertNotIn("ux126_eligibility_filter",app.session_state["ux502_discovery_filters"])
         self.assertEqual(app.session_state["ux502_discovery_filters"]["ux501_page"], 1)
 
     def test_ux504_guided_handoff_preserves_snapshot(self):

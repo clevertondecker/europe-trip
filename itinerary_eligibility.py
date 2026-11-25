@@ -22,3 +22,15 @@ def itinerary_eligibility(destination_id, catalog, stage="França", *, index=Non
                 "reason": "Este destino pertence à etapa " + choice["stage"] + " da viagem."}
     return {**result, "status": "eligible",
             "reason": "Você pode incluir este destino no roteiro sem definir datas ou atrações."}
+
+
+def availability_label(status, plan):
+    """Shared, passive presentation; does not change the inclusion contract."""
+    from itinerary_flow_model import is_selected
+    if status["outing_id"] is not None and is_selected(plan,status["outing_id"]):
+        return "✓ No roteiro"
+    if status["status"] == "eligible":
+        return "Disponível para o roteiro"
+    if status["status"] == "other_stage":
+        return "Outra etapa da viagem · " + status["stage"]
+    return "Atrações ainda não catalogadas para o roteiro"
