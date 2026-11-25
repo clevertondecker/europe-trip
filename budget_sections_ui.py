@@ -15,17 +15,15 @@ def render_budget_summary(data:dict,plan:dict,finance_live:bool)->None:
         "Consulte as estimativas e a margem do cenário oficial, sempre com contexto de fonte.",
         tag="Valores de referência", variant="compact",
     ),unsafe_allow_html=True)
-    try:
-        official=official_budget_for_plan(data,finance_live,plan)
-    except (ValueError,KeyError,TypeError,StopIteration):
-        st.warning("Projeção oficial indisponível; confira as fontes financeiras.")
-        return
+    official=official_budget_for_plan(data,finance_live,plan)
+    if not official["outings_available"]:
+        st.warning("Referência da planilha, sem recálculo dos passeios do roteiro. A verba original de passeios permanece incluída; revise a seleção antiga.")
     scenario=official["scenario"]
     cards=kpi_cards([
         {"name":"Teto planejado","value":money_brl(scenario["cap_brl"]),
          "hint":"Cenário oficial · não é gasto","icon":"◎","highlight":True},
         {"name":"Total oficial estimado","value":money_brl(official["total"]),
-         "hint":"Referência + excedente conhecido de passeios","icon":"▤"},
+         "hint":"Referência + excedente conhecido de passeios" if official["outings_available"] else "Planilha · sem recálculo de passeios","icon":"▤"},
         {"name":"Margem oficial","value":money_brl(official["margin"]),
          "hint":"Teto menos projeção parcial","icon":"◈"},
     ])
