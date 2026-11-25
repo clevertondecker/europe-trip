@@ -118,10 +118,5 @@ class AuditReportTests(unittest.TestCase):
         decoded = json.loads(legacy)
         for key in ("legacy_evidence", "legacy_dq31", "legacy_summary"):
             self.assertEqual(decoded[key], json.loads(json.dumps(self.audit[key])))
-        # Temporary diagnostic: publish the exact compact artifact via CI,
-        # then remove this diagnostic once the versioned file is committed.
-        print("DATA24_LEGACY_LENGTH", len(legacy), len(legacy.encode("utf-8")))
-        for index in range(0, len(legacy), 12000):
-            print("DATA24_LEGACY_PART " + json.dumps([index, legacy[index:index+12000]], ensure_ascii=True))
         path = Path(__file__).resolve().parents[1] / "docs/audits/data24_legacy_evidence.json"
         self.assertEqual(path.read_text(encoding="utf-8"), legacy)
