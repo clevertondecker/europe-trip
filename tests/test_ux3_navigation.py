@@ -52,6 +52,22 @@ class UX3NavigationModelTests(unittest.TestCase):
         self.assertEqual((state["ux_area"],state["ux_section"]),
                          ("Meu roteiro","Organizar viagem"))
 
+    def test_old_consultant_routes_migrate_to_planning(self):
+        for state in (
+            {"main_navigation":"Roteiro","itinerary_section":"Orçamento"},
+            {"ux_area":"Orçamento","ux_section":"Simulações",
+             "ux_budget_view":"Consultor de passeios"},
+        ):
+            with self.subTest(state=state):
+                self.assertEqual(bootstrap(state)[:2],("Roteiro","Orçamento"))
+                self.assertEqual((state["ux_area"],state["ux_section"]),
+                                 ("Meu roteiro","Melhorar meu roteiro"))
+                self.assertEqual(state["ux_improve_view"],"Consultor de passeios")
+                set_task(state,"Orçamento","Simulações")
+                self.assertEqual(state["main_navigation"],"Orçamento")
+        self.assertEqual(route("Orçamento","Simulações",
+                         budget_view="Consultor de passeios")[0],"Orçamento")
+
     def test_comparisons_research_and_suggestions_are_reachable(self):
         self.assertEqual(route("Explorar","Comparar cidades")[0],"Comparar cidades")
         self.assertEqual(route("Explorar","Cidades-base")[3],"Destinos próximos")
@@ -84,9 +100,11 @@ class UX3StreamlitNavigationSmokeTests(unittest.TestCase):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=90).run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
         official=deepcopy(app.session_state["advisor_plan"])
+        app.button(key="ux64_sidebar_nav_2").click().run()
+        app.segmented_control(key="ux64_public_task").set_value("Simulações").run()
+        app.checkbox(key="ux127_custom_simulation").check().run()
+        app.selectbox(key="ux94_simulation_city").set_value("offenburg").run()
         app.button(key="ux_sidebar_nav_1").click().run()
-        app.segmented_control(key="ux_mode").set_value("Simulação").run()
-        app.selectbox(key="scenario_sidebar").set_value("offenburg").run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
         self.assertEqual(app.session_state["advisor_plan"],official)
         for area, sections in SECTIONS.items():
@@ -114,21 +132,27 @@ class UX3StreamlitNavigationSmokeTests(unittest.TestCase):
     def test_shared_city_and_duration_between_explore_and_budget(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=90).run()
         official=deepcopy(app.session_state["advisor_plan"])
+        app.button(key="ux64_sidebar_nav_2").click().run()
+        app.segmented_control(key="ux64_public_task").set_value("Simulações").run()
+        app.checkbox(key="ux127_custom_simulation").check().run()
+        app.selectbox(key="ux94_simulation_city").set_value("offenburg").run()
+        app.slider(key="unified_stay").set_value(65).run()
         app.button(key="ux_sidebar_nav_1").click().run()
         app.segmented_control(key="ux_section").set_value("Cidades-base").run()
-        app.segmented_control(key="ux_mode").set_value("Simulação").run()
-        app.selectbox(key="scenario_sidebar").set_value("offenburg").run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
         self.assertEqual(app.session_state["scenario_base_selected"],"offenburg")
-        self.assertEqual(app.session_state["scenario_sidebar"],"offenburg")
+        self.assertNotIn("scenario_sidebar",{w.key for w in app.selectbox})
         self.assertEqual(app.session_state["advisor_plan"],official)
-        app.number_input(key="ux_days").set_value(65).run()
-        self.assertEqual(app.session_state["unified_stay"],65)
+        self.assertEqual(app.session_state["ux_days_value"],65)
         app.button(key="ux_sidebar_nav_3").click().run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
         self.assertEqual(app.session_state["scenario_base_selected"],"offenburg")
-        self.assertEqual(app.session_state["unified_stay"],65)
+        self.assertEqual(app.session_state["ux_days_value"],65)
         app.segmented_control(key="ux_section").set_value("Simulações").run()
+        self.assertTrue(app.checkbox(key="ux127_custom_simulation").value)
+        self.assertFalse(app.slider(key="unified_stay").disabled)
+        self.assertEqual(app.slider(key="unified_stay").value,65)
+        self.assertEqual(app.selectbox(key="ux94_simulation_city").value,"offenburg")
         app.slider(key="unified_stay").set_value(60).run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
         self.assertEqual(app.session_state["ux_days"],60)

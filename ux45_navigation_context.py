@@ -43,5 +43,13 @@ def return_to_origin(state)->bool:
         state[key]=deepcopy(value)
     state.pop("flow_edit_target",None)
     state.pop("explore_selected_destination",None)
-    set_task(state,origin["area"],origin["section"])
+    if (origin["area"],origin["section"])==("Explorar","Passeios"):
+        # The base-specific explorer moved to a specialist guide. Old handoffs
+        # retain their filter snapshots and return to that actual renderer.
+        state["ux_improve_view"]="Guias especializados"
+        state["ux_guide_view"]="Explorar atrações"
+        state["ux125b_focused_guide"]="Explorar atrações"
+        set_task(state,"Meu roteiro","Melhorar meu roteiro")
+    else:
+        set_task(state,origin["area"],origin["section"])
     return True

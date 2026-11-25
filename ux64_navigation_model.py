@@ -38,6 +38,8 @@ def public_task(legacy_area, legacy_section, wishlist_view=None):
     if legacy_area=="Minha viagem":
         return "Visão geral"
     if legacy_area=="Meu roteiro":
+        if legacy_section=="Melhorar meu roteiro":
+            return None  # Secondary content is not the public destination editor.
         return "Organizar" if legacy_section=="Organizar viagem" else "Meus destinos"
     if legacy_area=="Orçamento":
         return "Simulações" if legacy_section=="Simulações" else "Visão financeira"

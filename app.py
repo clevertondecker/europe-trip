@@ -49,7 +49,7 @@ from base_change_ui import render_base_change
 from city_decision_ui import render_city_decision
 from budget_sections_ui import render_budget_summary, render_budget_details
 from ux_shared_ui_presentation import page_header, kpi_cards, section_heading
-from base_scenario_model import base_options, choose_exploratory_base, hypothetical_city_name, expanded_rail_routes
+from base_scenario_model import base_options, hypothetical_city_name, expanded_rail_routes
 from base_research_expanded_model import load_research, find_city, observed_housing
 from base_scenario_ui import render_scenario_impact
 from exploratory_selection import sync_city_widget, set_city_from_widget
@@ -86,6 +86,7 @@ if restored_mode in ("Oficial","Simulação"):
 restored_days=st.session_state.pop("ux_pending_days",None)
 if restored_days is not None:
     st.session_state["ux_days"]=max(40,min(80,int(restored_days)))
+    st.session_state["ux_days_value"]=st.session_state["ux_days"]
     st.session_state["unified_stay"]=st.session_state["ux_days"]
 bootstrap_ux(st.session_state)
 apply_navigation_request(st.session_state)
@@ -239,14 +240,6 @@ def navigate_to_consultor() -> None:
     st.session_state["itinerary_section"] = "Meus passeios"
 
 
-def _select_scenario_sidebar() -> None:
-    chosen=choose_exploratory_base(st.session_state["scenario_sidebar"],_all_bases)
-    st.session_state["scenario_base_selected"]=chosen
-    st.session_state["ux_last_candidate"]=chosen
-    st.session_state["ux_mode"]="Simulação"
-    st.session_state["ux_mode_value"]="Simulação"
-
-
 def _ux_area_changed() -> None:
     st.session_state.pop("ux45_origin",None)
     st.session_state.pop("flow_edit_target",None)
@@ -254,6 +247,7 @@ def _ux_area_changed() -> None:
 
 def _ux64_legacy_sidebar_clicked(area: str) -> None:
     # Original indexed controls remain reachable in advanced navigation.
+    st.session_state.pop("ux125b_focused_guide", None)
     st.session_state.pop("ux45_origin", None)
     st.session_state.pop("flow_edit_target", None)
     set_ux_area(st.session_state, area)
@@ -270,6 +264,8 @@ def _ux_section_changed() -> None:
     # A repeated click may yield None in Streamlit. Preserve the return
     # handoff unless the user actually selects a different task.
     requested=st.session_state["ux_section"]
+    if requested is not None and requested!=st.session_state.get("_ux_last_section"):
+        st.session_state.pop("ux125b_focused_guide",None)
     if requested is not None and requested!=st.session_state.get("_ux_last_section"):
         st.session_state.pop("ux45_origin",None)
         st.session_state.pop("flow_edit_target",None)
@@ -299,14 +295,6 @@ def _ux_legacy_guide_changed() -> None:
                   st.session_state["guide_section"])
 
 
-def _ux_days_changed() -> None:
-    # Shared duration is a what-if input, never a mutation of TripPlan.
-    st.session_state["ux_days_value"]=st.session_state["ux_days"]
-    st.session_state["unified_stay"]=st.session_state["ux_days"]
-    if (st.session_state.get("ux_area"),st.session_state.get("ux_section"))==("Orçamento","Simulações"):
-        st.session_state["ux127_custom_simulation"]=True
-
-
 def _ux_budget_days_changed() -> None:
     st.session_state["ux_days"]=st.session_state["unified_stay"]
     st.session_state["ux_days_value"]=st.session_state["unified_stay"]
@@ -314,6 +302,22 @@ def _ux_budget_days_changed() -> None:
 
 def _ux_next_task(area:str,task:str) -> None:
     set_ux_task(st.session_state,area,task)
+
+
+def _ux125b_open_base_studies() -> None:
+    """Open specialist research without competing with the public comparison."""
+    st.session_state["ux_improve_view"]="Guias especializados"
+    st.session_state["ux_guide_view"]="Estudos de cidades-base"
+    st.session_state["ux125b_focused_guide"]="Estudos de cidades-base"
+    set_ux_task(st.session_state,"Meu roteiro","Melhorar meu roteiro")
+
+
+def _ux125b_open_base_outings() -> None:
+    """Keep the legacy itinerary actions available without mounting a second catalog."""
+    st.session_state["ux_improve_view"]="Guias especializados"
+    st.session_state["ux_guide_view"]="Explorar atrações"
+    st.session_state["ux125b_focused_guide"]="Explorar atrações"
+    set_ux_task(st.session_state,"Meu roteiro","Melhorar meu roteiro")
 
 
 def _ux_mode_changed() -> None:
@@ -436,19 +440,8 @@ with st.sidebar:
             st.segmented_control("Atividade legada",list(UX_SECTIONS[legacy_area]),
                                  key="ux_section",on_change=_ux_section_changed,
                                  selection_mode="single")
-        if legacy_area=="Explorar":
-            # Compatibility for old research/simulation deep links.
-            st.segmented_control("Visualizar",["Oficial","Simulação"],
-                                 key="ux_mode",on_change=_ux_mode_changed)
-            st.selectbox("Cidade-base da simulação",list(_base_details),
-                         key="scenario_sidebar",on_change=_select_scenario_sidebar,
-                         disabled=st.session_state["ux_mode_value"]=="Oficial",
-                         format_func=lambda key:_base_details[key]["name"]+
-                                            " · "+_base_details[key]["country"])
-            st.number_input("Dias na França (simulação)",
-                            min_value=40,max_value=80,
-                            key="ux_days",on_change=_ux_days_changed,
-                            disabled=st.session_state["ux_mode_value"]=="Oficial")
+        # Simulation inputs live only in Orçamento → Simulações;
+        # legacy route IDs and restored context remain available.
         # Compatibility: old indexed controls still work, but are not top-level tabs.
         for old_index,old_area in enumerate(("Minha viagem","Explorar",
                                              "Meu roteiro","Orçamento")):
@@ -461,7 +454,9 @@ with st.sidebar:
 official_id=active_plan()["base_city"]
 ux_area=st.session_state["ux_area"]
 ux_section=st.session_state["ux_section"]
-if ux_area!="Orçamento":
+focused_guide=((ux_area,ux_section)==("Meu roteiro","Melhorar meu roteiro") and
+               st.session_state.get("ux125b_focused_guide") in ("Estudos de cidades-base","Explorar atrações"))
+if ux_area!="Orçamento" and not focused_guide:
     render_context(active_plan(),area=ux_area)
 if (ux_area in ("Explorar","Orçamento") and
     st.session_state.get("flow_return_stage")):
@@ -515,13 +510,14 @@ if ux_area=="Meu roteiro" and ux_section=="Organizar viagem":
     if not stage_rows:
         st.button("Incluir destinos nesta etapa",key="ux120_empty_stage",
                   on_click=select_public_task,args=(state,"Planejar","Meus destinos"))
-elif ux_area=="Meu roteiro" and ux_section=="Melhorar meu roteiro":
+elif ux_area=="Meu roteiro" and ux_section=="Melhorar meu roteiro" and not focused_guide:
     st.selectbox("Escolha uma ferramenta de apoio",[
         "Descobrir","Simular roteiros","Itália",
-        "Temporada europeia","Calendário completo","Guias especializados"],
+        "Temporada europeia","Calendário completo","Consultor de passeios","Guias especializados"],
         key="ux_improve_view",on_change=_ux_aux_changed)
     if st.session_state.get("ux_improve_view")=="Guias especializados":
         st.selectbox("Qual guia?",list(UX_GUIDES),
+                     format_func=lambda name: "Passeios por cidade-base" if name=="Explorar atrações" else name,
                      key="ux_guide_view",on_change=_ux_aux_changed)
 # Initialize the organizer on navigation entry, never on each Streamlit rerun.
 _organize_activity=(ux_area,ux_section)==("Meu roteiro","Organizar viagem")
@@ -541,21 +537,20 @@ page,itinerary_target,guide_target,base_target=ux_route(
                 else st.session_state.get("ux_suggestion","Descobrir")),
     france=st.session_state.get("ux_france_view","Meus passeios"),
     city_view=st.session_state.get("ux_city_view","Visão da cidade"),
-    budget_view=st.session_state.get("ux_budget_view","Simulação geral"),
     guide_view=st.session_state.get("ux_guide_view","Itália e Costa Amalfitana"))
 # Contextual UX114 review ends on navigation away. Its candidate and scope
 # must not reappear as an apparently active approval on a later visit.
 if page!="Comparar cidades" and st.session_state.get("ux114_review_context"):
     from rec03a_suggestions_ui import close_base_review
     close_base_review()
-if ux_area!="Minha viagem" and (ux_area,ux_section)!=("Explorar","Cidades-base"):
+if not focused_guide and ux_area!="Minha viagem" and (ux_area,ux_section)!=("Explorar","Cidades-base"):
     st.caption(UX_DESCRIPTIONS.get((ux_area,ux_section),"Continue o planejamento."))
-if (ux_area=="Meu roteiro" and ux_section=="Melhorar meu roteiro" and
+if (not focused_guide and ux_area=="Meu roteiro" and ux_section=="Melhorar meu roteiro" and
     st.session_state.get("flow_return_stage")):
     render_breadcrumb(stage=st.session_state.get("flow_return_stage"),
                       city=st.session_state.get("flow_return_city"),
                       show_return=True)
-if page != "Visão geral":
+if page != "Visão geral" and not focused_guide:
     render_return_to_summary()
 if page == "Visão geral":
     render_planning_journey(active_plan(),load_attractions(),data,
@@ -574,6 +569,8 @@ if page == "Visão geral":
                      on_click=_ux_next_task,args=("Minha viagem","Decisões"))
         st.button("Consultar propostas italianas e guias",key="home_open_consultor",
                   on_click=navigate_to_consultor)
+        st.button("Pesquisa de passeios por cidade-base",key="ux125b_home_base_outings",
+                  on_click=_ux125b_open_base_outings)
 
 elif page == "Mapa & destinos" and (st.session_state.get(CONTEXT) or {}).get("kind")=="map":
     render_contextual_map(active_plan())
@@ -712,8 +709,104 @@ elif page == "Comparar cidades":
     # Both legacy widgets retain their keys, callbacks and optional access.
     _rec_activity = render_recommendation_activity(plan=active_plan())
     render_contextual_shortcuts("comparison")
-    with st.expander("Pesquisas e estudos preservados · temporário", expanded=False):
-        st.caption("Consultas e estudos ainda não migrados. Para comparar cidades, use a comparação principal acima.")
+    st.button("Consultar estudos e referências de cidades-base",
+              key="ux125b_open_base_studies",on_click=_ux125b_open_base_studies)
+
+elif page == "Roteiro":
+    itinerary = load_itinerary()
+    # The page title follows the current task, rather than showing a giant
+    # generic trip dashboard above every single tool.
+    task_title={
+        "Passeios":"Minha lista" if st.session_state.get("ux502_view")=="Minha lista"
+                  else "Descobrir lugares",
+        "Cidades-base":"Explorar cidades-base",
+        "Passeios e destinos":"O que podemos conhecer?",
+        "Mais pesquisas":"Detalhes das pesquisas",
+        "Meu planejamento":"Meu roteiro",
+        "Organizar viagem":"Organizar nossa viagem",
+        "Melhorar meu roteiro":"Melhorar nosso roteiro",
+    }.get(ux_section,"Meu roteiro")
+    # A contextual city profile has its own title; suppress only this global heading.
+    profile_context=st.session_state.get(CONTEXT)
+    individual_base_profile=False
+    if (ux_area=="Explorar" and ux_section=="Cidades-base"
+            and isinstance(profile_context,dict)
+            and profile_context.get("kind")=="profile"):
+        # Reuse REC03B's validated handoff instead of trusting stale session data.
+        # A stale/invalid profile must retain the normal page heading.
+        from rec03b_handoff_ui import context_for
+        individual_base_profile=context_for("profile")[0] is not None
+    if not focused_guide and not individual_base_profile and ux_section not in ("Meu planejamento","Organizar viagem") and not (
+            ux_area=="Explorar" and ux_section=="Passeios"):
+        st.markdown("<div class='page-eyebrow'>NOSSA EUROPA · "+escape(ux_area.upper())+"</div>"
+                "<div class='page-title'>"+escape(task_title)+"</div>"
+                "<div class='page-subtitle'>"+escape(
+                    UX_DESCRIPTIONS.get((ux_area,ux_section),"Planeje sua viagem."))+
+                "</div>",unsafe_allow_html=True)
+    if not focused_guide and ux_area=="Meu roteiro" and ux_section not in ("Meu planejamento","Organizar viagem"):
+        render_scenario_impact(active_plan(),data,
+                               sync_sources["finance"]["status"]=="live")
+    # UX 4.8: only task-based navigation is user-visible. Keep legacy routing
+    # adapter internally for old deep links and session-state compatibility.
+    # The modern task selector resolves guide/research access without a second
+    # competing nine-item navigation menu.
+    itinerary_section=itinerary_target or st.session_state.get("itinerary_section","Meus passeios")
+    if itinerary_section=="Guias e pesquisas":
+        itinerary_section=guide_target or st.session_state.get("guide_section","Explorar atrações")
+    if itinerary_section=="Calendário de pesquisa":
+        itinerary_section="Calendário legado"
+
+    def itinerary_map(phase: str, zoom: float, center: tuple[float,float], height: int=400) -> None:
+        # Convert research-place roles into existing project status colors; no fake route lines.
+        markers=[]
+        for point in visible_map_places(itinerary,phase):
+            status=("roteiro_proposto" if point["role"] in
+                    ("Cidade principal","Logística","Passeio desejado") else
+                    "candidata" if "Base candidata" in point["role"] else "opcional")
+            markers.append({**point,"status":status})
+        map_view(markers,height=height,show_labels=False,zoom=zoom,center=center)
+
+    if itinerary_section == "Visão geral":
+        if (ux_area,ux_section)==("Meu roteiro","Meu planejamento"):
+            render_planning_journey(active_plan(),load_attractions(),data,
+                                    sync_sources["finance"]["status"]=="live",
+                                    st.session_state.get("advisor_eurfx",6.3),
+                                    st.session_state.get("advisor_chffx",7.1),global_continuity=True)
+        elif (ux_area,ux_section)==("Meu roteiro","Organizar viagem") and (
+            st.session_state.get("ux_organize_view")=="Calendário inteligente"):
+            render_smart_calendar(
+                active_plan(),load_attractions(),load_base_routes(),data,sync_sources,
+                stage=st.session_state.get("flow_active_stage"),show_groups=False)
+        elif (ux_area,ux_section)==("Meu roteiro","Organizar viagem") and (
+            st.session_state.get("ux_organize_view")=="Viagens agrupadas"):
+            from ux48_weekend_groups_ui import render_weekend_planner
+            render_weekend_planner(active_plan(),load_attractions())
+        elif (ux_area,ux_section)==("Meu roteiro","Organizar viagem"):
+            render_planning_journey(active_plan(),load_attractions(),data,
+                                    sync_sources["finance"]["status"]=="live",
+                                    st.session_state.get("advisor_eurfx",6.3),
+                                    st.session_state.get("advisor_chffx",7.1),
+                                    organizer_stage=st.session_state.get("flow_active_stage"),global_continuity=True)
+        else:
+            render_itinerary_workbench(
+                active_plan(),load_attractions(),data,
+                sync_sources["finance"]["status"]=="live",
+                st.session_state.get("advisor_eurfx",6.3),
+                st.session_state.get("advisor_chffx",7.1),
+                show_weekend_planner=(ux_area,ux_section)==("Meu roteiro","Organizar viagem"),
+                global_continuity=True)
+
+    elif itinerary_section == "Itália":
+        render_italy_honeymoon()
+
+    elif itinerary_section == "Estudos de cidades-base":
+        from ux64_navigation_model import select_public_task
+        st.button("← Voltar à comparação de bases",key="ux125b_return_comparison",
+                  on_click=select_public_task,
+                  args=(st.session_state,"Explorar","Comparar bases"))
+        st.caption("Estudos salvos, revisão de alternativas e fontes históricas. "
+                   "Para comparar os destinos desejados, use Comparar bases. "
+                   "As referências de 2026 não são cotações para 2027.")
         # Migrate stale widget preferences without touching the official plan.
         preserved_modes = ["Estudos de troca","Referências históricas"]
         legacy_modes = {"Impacto da troca":"Estudos de troca",
@@ -1090,104 +1183,23 @@ elif page == "Comparar cidades":
                     for ad in city["sample_ads"]:
                         st.markdown("["+ad["label"]+"]("+ad["url"]+")")
 
-elif page == "Roteiro":
-    itinerary = load_itinerary()
-    # The page title follows the current task, rather than showing a giant
-    # generic trip dashboard above every single tool.
-    task_title={
-        "Passeios":"Minha lista" if st.session_state.get("ux502_view")=="Minha lista"
-                  else "Descobrir lugares",
-        "Cidades-base":"Explorar cidades-base",
-        "Passeios e destinos":"O que podemos conhecer?",
-        "Mais pesquisas":"Detalhes das pesquisas",
-        "Meu planejamento":"Meu roteiro",
-        "Organizar viagem":"Organizar nossa viagem",
-        "Melhorar meu roteiro":"Melhorar nosso roteiro",
-    }.get(ux_section,"Meu roteiro")
-    # A contextual city profile has its own title; suppress only this global heading.
-    profile_context=st.session_state.get(CONTEXT)
-    individual_base_profile=False
-    if (ux_area=="Explorar" and ux_section=="Cidades-base"
-            and isinstance(profile_context,dict)
-            and profile_context.get("kind")=="profile"):
-        # Reuse REC03B's validated handoff instead of trusting stale session data.
-        # A stale/invalid profile must retain the normal page heading.
-        from rec03b_handoff_ui import context_for
-        individual_base_profile=context_for("profile")[0] is not None
-    if not individual_base_profile and ux_section not in ("Meu planejamento","Organizar viagem") and not (
-            ux_area=="Explorar" and ux_section=="Passeios"):
-        st.markdown("<div class='page-eyebrow'>NOSSA EUROPA · "+escape(ux_area.upper())+"</div>"
-                "<div class='page-title'>"+escape(task_title)+"</div>"
-                "<div class='page-subtitle'>"+escape(
-                    UX_DESCRIPTIONS.get((ux_area,ux_section),"Planeje sua viagem."))+
-                "</div>",unsafe_allow_html=True)
-    if ux_area=="Meu roteiro" and ux_section not in ("Meu planejamento","Organizar viagem"):
-        render_scenario_impact(active_plan(),data,
-                               sync_sources["finance"]["status"]=="live")
-    # UX 4.8: only task-based navigation is user-visible. Keep legacy routing
-    # adapter internally for old deep links and session-state compatibility.
-    # The modern task selector resolves guide/research access without a second
-    # competing nine-item navigation menu.
-    itinerary_section=itinerary_target or st.session_state.get("itinerary_section","Meus passeios")
-    if itinerary_section=="Guias e pesquisas":
-        itinerary_section=guide_target or st.session_state.get("guide_section","Explorar atrações")
-    if itinerary_section=="Calendário de pesquisa":
-        itinerary_section="Calendário legado"
-
-    def itinerary_map(phase: str, zoom: float, center: tuple[float,float], height: int=400) -> None:
-        # Convert research-place roles into existing project status colors; no fake route lines.
-        markers=[]
-        for point in visible_map_places(itinerary,phase):
-            status=("roteiro_proposto" if point["role"] in
-                    ("Cidade principal","Logística","Passeio desejado") else
-                    "candidata" if "Base candidata" in point["role"] else "opcional")
-            markers.append({**point,"status":status})
-        map_view(markers,height=height,show_labels=False,zoom=zoom,center=center)
-
-    if itinerary_section == "Visão geral":
-        if (ux_area,ux_section)==("Meu roteiro","Meu planejamento"):
-            render_planning_journey(active_plan(),load_attractions(),data,
-                                    sync_sources["finance"]["status"]=="live",
-                                    st.session_state.get("advisor_eurfx",6.3),
-                                    st.session_state.get("advisor_chffx",7.1),global_continuity=True)
-        elif (ux_area,ux_section)==("Meu roteiro","Organizar viagem") and (
-            st.session_state.get("ux_organize_view")=="Calendário inteligente"):
-            render_smart_calendar(
-                active_plan(),load_attractions(),load_base_routes(),data,sync_sources,
-                stage=st.session_state.get("flow_active_stage"),show_groups=False)
-        elif (ux_area,ux_section)==("Meu roteiro","Organizar viagem") and (
-            st.session_state.get("ux_organize_view")=="Viagens agrupadas"):
-            from ux48_weekend_groups_ui import render_weekend_planner
-            render_weekend_planner(active_plan(),load_attractions())
-        elif (ux_area,ux_section)==("Meu roteiro","Organizar viagem"):
-            render_planning_journey(active_plan(),load_attractions(),data,
-                                    sync_sources["finance"]["status"]=="live",
-                                    st.session_state.get("advisor_eurfx",6.3),
-                                    st.session_state.get("advisor_chffx",7.1),
-                                    organizer_stage=st.session_state.get("flow_active_stage"),global_continuity=True)
-        else:
-            render_itinerary_workbench(
-                active_plan(),load_attractions(),data,
-                sync_sources["finance"]["status"]=="live",
-                st.session_state.get("advisor_eurfx",6.3),
-                st.session_state.get("advisor_chffx",7.1),
-                show_weekend_planner=(ux_area,ux_section)==("Meu roteiro","Organizar viagem"),
-                global_continuity=True)
-
-    elif itinerary_section == "Itália":
-        render_italy_honeymoon()
 
     elif itinerary_section == "Explorar atrações":
-        # UX 5.0.1: destination-first discovery, no base choice required.
-        from rec03b_handoff_ui import render_profile_discovery_return
-        focused_destination=render_profile_discovery_return()
-        render_independent_destination_discovery(focused_destination=focused_destination)
-        if st.session_state.get("ux502_view","Descobrir lugares")=="Descobrir lugares":
-            render_contextual_shortcuts("discovery")
-        st.divider()
-        with st.popover("Pesquisar por cidade-base · opcional", use_container_width=True):
-            st.caption("Ferramenta anterior preservada para investigar alternativas de cidade-base.")
+        if (ux_area,ux_section)==("Meu roteiro","Melhorar meu roteiro"):
+            from ux64_navigation_model import select_public_task
+            st.button("← Voltar a Descobrir",key="ux125b_return_discovery",
+                      on_click=select_public_task,
+                      args=(st.session_state,"Explorar","Descobrir"))
+            st.caption("Pesquisa de passeios, conexões e custos a partir de uma base. "
+                       "O catálogo independente continua em Explorar → Descobrir.")
             render_explorer(data,sync_sources,map_view)
+        else:
+            # UX501/126B: destination-first catalog; no second base-specific renderer.
+            from rec03b_handoff_ui import render_profile_discovery_return
+            focused_destination=render_profile_discovery_return()
+            render_independent_destination_discovery(focused_destination=focused_destination)
+            if st.session_state.get("ux502_view","Descobrir lugares")=="Descobrir lugares":
+                render_contextual_shortcuts("discovery")
 
     elif itinerary_section == "Explorar bases":
         if ((st.session_state.get(CONTEXT) or {}).get("kind")!="profile"
@@ -1455,9 +1467,10 @@ elif page == "Orçamento":
             st.caption(f'Verba de referência para {official["reference_days"]} dias; roteiro atual de {official["planned_days"]} dias.')
         # An explicit simulation handoff from Explore is not a fresh visit.
         # Preserve the existing shared candidate and duration in that case.
-        if "ux127_custom_simulation" not in st.session_state:
-            st.session_state["ux127_custom_simulation"] = (
-                st.session_state.get("ux_mode_value")=="Simulação")
+        # Widget keys are discarded by Streamlit when navigating away. Rehydrate
+        # from durable shared context before mounting, including explicit handoffs.
+        st.session_state["ux127_custom_simulation"] = (
+            st.session_state.get("ux_mode_value")=="Simulação")
         def _ux127_custom_changed():
             st.session_state["ux_mode"] = ("Simulação" if st.session_state["ux127_custom_simulation"] else "Oficial")
             _ux_mode_changed()
@@ -1500,8 +1513,11 @@ elif page == "Orçamento":
         ),unsafe_allow_html=True)
         basic, advanced = st.tabs(["Principal","Personalizar gastos"])
         with basic:
+            # Restore the durable duration rather than the scenario default on re-entry.
+            st.session_state["unified_stay"] = max(40,min(80,int(
+                st.session_state.get("ux_days_value",french["french_days"]))))
             stay = st.slider("Dias na França",min_value=40,max_value=80,
-                             value=french["french_days"],step=1,key="unified_stay",
+                             step=1,key="unified_stay",
                              on_change=_ux_budget_days_changed,disabled=not custom)
             exploratory_options=base_options(include_candidates=True)
             city_ids=[item["id"] for item in exploratory_options]
@@ -1800,30 +1816,4 @@ elif page == "Pesquisas & decisões":
             with col: st.link_button(label,data["sources"][key],use_container_width=True)
         for col,(label,key) in zip(st.columns(2,gap="medium"),docs[4:]):
             with col: st.link_button(label,data["sources"][key],use_container_width=True)
-
-# UX127: existing alternative and advanced tools below the simulator, not above tabs.
-if ux_area=="Orçamento" and ux_section=="Simulações":
-    with st.expander("Ajustes avançados da simulação",expanded=False):
-        st.segmented_control("Visualizar",["Oficial","Simulação"],
-                             key="ux_mode",on_change=_ux_mode_changed)
-        # The canonical hypothetical base is selected by the budget activity.
-        # Keep the previous sidebar selector accessible only via Explorar ->
-        # Fontes e ferramentas; do not mount two city widgets in Simulações.
-        st.caption("Cidade-base hipotética: ajuste no simulador acima. "
-                   "O seletor anterior continua em Explorar → Fontes e ferramentas.")
-        st.number_input("Dias na França (simulação)",
-                        min_value=40,max_value=80,
-                        key="ux_days",on_change=_ux_days_changed,
-                        disabled=st.session_state["ux_mode_value"]=="Oficial")
-        st.caption("Entradas hipotéticas, não alteram o roteiro aprovado. "
-                   "Para alterar o plano oficial, use Configurar minha viagem.")
-if ux_area=="Orçamento" and ux_section=="Simulações":
-    # Retain the legacy tool selector and callback, but it should not compete
-    # with the single budget scenario and hypothetical-base controls.
-    with st.expander("Outras ferramentas financeiras · avançado",expanded=False):
-        st.segmented_control("Ferramenta de simulação",
-                             ["Simulação geral","Consultor de passeios"],
-                             key="ux_budget_view",on_change=_ux_aux_changed)
-if ux_area=="Orçamento" and ux_section=="Simulações":
-    render_context(active_plan(),area=ux_area)
 

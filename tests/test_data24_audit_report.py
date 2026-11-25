@@ -108,6 +108,36 @@ class AuditReportTests(unittest.TestCase):
         self.assertIn('"Comparar mesmas viagens":"Referências históricas"', app)
         self.assertIn("render_city_decision(", app)
 
+    def test_retired_inventory_renderers_have_no_python_consumers(self):
+        import ast
+        root = Path(__file__).resolve().parents[1]
+        retired = {"base_weight_coverage_ui", "city_profiles_ui"}
+        for module in retired:
+            self.assertFalse((root / (module + ".py")).exists())
+        consumers = []
+        for path in root.rglob("*.py"):
+            relative = path.relative_to(root)
+            if any(part.startswith(".") or part in ("venv", "__pycache__", "site-packages")
+                   for part in relative.parts):
+                continue
+            tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(relative))
+            for node in ast.walk(tree):
+                names = []
+                if isinstance(node, ast.Import):
+                    names = [alias.name for alias in node.names]
+                elif isinstance(node, ast.ImportFrom) and node.module:
+                    names = [node.module]
+                elif isinstance(node, ast.Call) and node.args:
+                    function = node.func
+                    if ((isinstance(function, ast.Name) and function.id in ("__import__", "import_module"))
+                            or (isinstance(function, ast.Attribute) and function.attr == "import_module")):
+                        argument = node.args[0]
+                        if isinstance(argument, ast.Constant) and isinstance(argument.value, str):
+                            names = [argument.value]
+                if any(name.split(".")[-1] in retired for name in names):
+                    consumers.append(f"{relative}:{node.lineno}")
+        self.assertEqual(consumers, [], "Retired UI renderers must have no consumers")
+
     def test_content_fingerprint_and_legacy_artifact(self):
         changed = deepcopy(self.audit)
         changed["rail_pairs"][0]["source_url"] = "https://example.org/reviewed"

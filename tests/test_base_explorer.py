@@ -105,7 +105,6 @@ class BaseExplorerUITests(unittest.TestCase):
     def open_explorer(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=100).run()
         app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
-        app.segmented_control(key="ux_mode").set_value("Simulação").run()
         app.segmented_control(key="ux_section").set_value("Cidades-base").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
         return app
@@ -113,11 +112,11 @@ class BaseExplorerUITests(unittest.TestCase):
     def test_exploring_new_city_does_not_modify_official_plan(self):
         app=self.open_explorer()
         original=deepcopy(app.session_state["advisor_plan"])
-        self.assertIn("scenario_sidebar",{x.key for x in app.selectbox})
-        app.selectbox(key="scenario_sidebar").set_value("lille").run()
+        self.assertNotIn("scenario_sidebar",{x.key for x in app.selectbox})
+        app.segmented_control(key="ux42_city_activity").set_value("Passeios e conexões").run()
+        app.selectbox(key="base_explorer_city").set_value("lille").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
         self.assertEqual(app.session_state["advisor_plan"],original)
-        app.segmented_control(key="ux42_city_activity").set_value("Passeios e conexões").run()
         app.checkbox(key="ux42_show_advanced").check().run()
         self.assertNotIn("base_explore_apply",{x.key for x in app.button})
         app.button(key="base_explore_favorite").click().run()
@@ -128,9 +127,9 @@ class BaseExplorerUITests(unittest.TestCase):
     def test_existing_base_must_be_explicitly_approved(self):
         app=self.open_explorer()
         original=deepcopy(app.session_state["advisor_plan"])
-        app.selectbox(key="scenario_sidebar").set_value("strasbourg").run()
-        self.assertFalse(app.exception,[e.message for e in app.exception])
         app.segmented_control(key="ux42_city_activity").set_value("Passeios e conexões").run()
+        app.selectbox(key="base_explorer_city").set_value("strasbourg").run()
+        self.assertFalse(app.exception,[e.message for e in app.exception])
         app.checkbox(key="ux42_show_advanced").check().run()
         self.assertTrue(app.button(key="base_explore_apply").disabled)
         self.assertEqual(app.session_state["advisor_plan"],original)
@@ -162,9 +161,13 @@ class BaseExplorerUITests(unittest.TestCase):
         self.assertEqual(app.session_state["ux502_interests"],wishes)
         self.assertEqual(app.session_state["advisor_plan"],old)
         self.assertNotIn("base_compare_destinations",{x.key for x in app.multiselect})
+        self.assertNotIn("ux_compare_mode",{w.key for w in app.segmented_control})
+        app.button(key="ux125b_open_base_studies").click().run()
+        self.assertFalse(app.exception,[e.message for e in app.exception])
         modes=app.segmented_control(key="ux_compare_mode").options
         self.assertNotIn("Uma ou duas bases",modes)
         self.assertNotIn("Comparar mesmas viagens",modes)
+        app.button(key="ux125b_return_comparison").click().run()
         app.segmented_control(key="ux_section").set_value("Cidades-base").run()
         app.segmented_control(key="ux42_city_activity").set_value("Passeios e conexões").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])

@@ -7,7 +7,9 @@ from ux64_navigation_model import PUBLIC_TASKS,public_area,public_task,select_pu
 def _changed():
     area=public_area(st.session_state.get("ux_area"))
     selected=st.session_state["ux64_public_task"]
-    select_public_task(st.session_state,area,selected)
+    if selected is not None:
+        select_public_task(st.session_state,area,selected)
+    # Deselecting an active tab is a no-op; render restores the canonical task.
 
 
 def render_public_task_tabs():
