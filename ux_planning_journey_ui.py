@@ -493,6 +493,7 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
             from ux63_timeline_ui import render_timeline
             def focus_visit(destination_id):
                 from itinerary_flow_ui import _organize_destination_changed
+                _show_organize()
                 state["flow_organize_destination"]=destination_id
                 _organize_destination_changed()
             render_timeline(active_plan(),catalog,stage,on_organize=focus_visit,pending_first=True)
