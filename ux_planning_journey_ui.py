@@ -27,6 +27,8 @@ def _show(action, *, navigate=True):
         destination="Organizar" if action=="organize" else "Meus destinos"
         select_public_task(state,"Planejar",destination)
     state[VIEW]=action
+    state.pop("flow_journey_visit_focus",None)
+    state.pop("flow_journey_visit_pending",None)
     state["flow_organize_open"]=action=="organize"
     state["flow_add_open"]=False
     state["flow_save_open"]=False
@@ -60,6 +62,8 @@ def apply_planning_request(state):
     if state.get("flow_journey_identity")!=identity:
         clear_planning_context(state)
     state[VIEW]=action
+    state.pop("flow_journey_visit_focus",None)
+    state.pop("flow_journey_visit_pending",None)
     state["flow_journey_identity"]=(state.get("rec03a_identity"),state["advisor_plan"]["plan_id"])
     state["flow_organize_open"]=action=="organize"
     state["flow_add_open"]=False
@@ -251,6 +255,9 @@ def _workspace_organize(destination_id, stage):
     state["flow_active_stage"]=stage
     state["flow_stage"]=stage
     state["flow_organize_destination"]=destination_id
+    state["flow_journey_visit_focus"]=(stage,destination_id)
+    from ux129_visit_focus import _clear_widgets
+    _clear_widgets(state)
     _organize_destination_changed()
 
 
@@ -399,6 +406,8 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
     identity=(state.get("rec03a_identity"),plan["plan_id"])
     if state.get("flow_journey_identity")!=identity:
         clear_planning_context(state)
+        from ux129_visit_focus import _clear_widgets
+        _clear_widgets(state)
         state["flow_journey_identity"]=identity
     if state.get(VIEW) not in ("build","organize","review"):
         state[VIEW]=None
@@ -493,30 +502,65 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
         if stage not in STAGES:
             stage=ITALY_STAGE
         st.markdown("##### "+("Etapa 1 · Lua de mel na Itália" if stage==ITALY_STAGE else "Etapa 2 · Temporada europeia"))
-        if state.get("flow_add_open"):
-            st.button("Organizar períodos e datas",key="flow_go_calendar",on_click=_show_organize)
-            _render_add(active_plan(),catalog)
-        else:
-            state["flow_organize_open"]=True
-            _render_organize(active_plan(),catalog,stage,show_wishlist=False,review_on_close=True,
-                             on_close=(lambda:_show("review")) if organizer_stage in STAGES else None)
-            st.button("Adicionar passeio ou editar atrações",key="flow_add_open_button",on_click=_show_add)
-        if organizer_stage is None and st.checkbox("Ver calendário e agrupamento de visitas",key="flow_journey_calendar"):
+        if organizer_stage in STAGES and not state.get("flow_edit_target"):
+            from ux129_visit_focus import FOCUS,PENDING,DRAFTS,_clear_widgets,request_focus,render_editor
             from ux63_timeline_ui import render_timeline
-            render_timeline(active_plan(),catalog,stage)
-            if stage==FRANCE_STAGE:
-                from ux48_weekend_groups_ui import render_weekend_planner
-                render_weekend_planner(active_plan(),catalog)
-        if organizer_stage is None or state.get("flow_edit_target"):
+            rows=[r for r in view["rows"] if r["stage"]==stage]
+            by_id={r["id"]:r for r in rows}
+            # Keep drafts by destination across stage/mode changes, but never for removed visits.
+            valid={(r["stage"],r["id"]) for r in view["rows"]}
+            drafts=state.get(DRAFTS,{})
+            if not isinstance(drafts,dict):
+                drafts={}
+            state[DRAFTS]={k:v for k,v in drafts.items() if k in valid and isinstance(v,dict)}
+            focus=state.get(FOCUS)
+            if not isinstance(focus,tuple) or len(focus)!=2 or focus[0]!=stage or focus[1] not in by_id:
+                if focus is not None:
+                    _clear_widgets(state)
+                state.pop(FOCUS,None)
+                state.pop(PENDING,None)
+                focus=None
+            if state.get("flow_add_open"):
+                selected=state.get("flow_active_destination") or state.get("flow_add_destination")
+                st.button("Organizar períodos e datas",key="flow_go_calendar",
+                          on_click=request_focus,args=(selected if selected in by_id else None,stage,rows))
+                _render_add(active_plan(),catalog)
+                focus=None
+            else:
+                st.button("Adicionar passeio ou editar atrações",key="flow_add_open_button",
+                          on_click=request_focus,args=("catalog",stage,rows))
+            places={r["id"]:r for r in _discovery()["destinations"]}
+            primary={r["id"]:r for r in catalog["destinations"]}
+            def card_photo(row):
+                key=row["id"]
+                from destination_identity import canonical_destination_id
+                place={**primary.get(key,{}),**places.get(canonical_destination_id(key),{})}
+                if not place.get("photo"):
+                    place["photo"]=primary.get(key,{}).get("photo")
+                _workspace_photo(key,row["name"],place)
+            def card_editor(row):
+                render_editor(active_plan(),catalog,stage,by_id[row["id"]],rows=rows)
+            render_timeline(active_plan(),catalog,stage,
+                            on_organize=lambda key:request_focus(key,stage,rows),
+                            pending_first=True,focused_id=focus[1] if focus else None,
+                            render_editor=card_editor,render_photo=card_photo,
+                            places=places)
+        else:
+            if state.get("flow_add_open"):
+                st.button("Organizar períodos e datas",key="flow_go_calendar",on_click=_show_organize)
+                _render_add(active_plan(),catalog)
+            else:
+                state["flow_organize_open"]=True
+                _render_organize(active_plan(),catalog,stage,show_wishlist=False,review_on_close=True,
+                                 on_close=(lambda:_show("review")) if organizer_stage in STAGES else None)
+                st.button("Adicionar passeio ou editar atrações",key="flow_add_open_button",on_click=_show_add)
+            if organizer_stage is None and st.checkbox("Ver calendário e agrupamento de visitas",key="flow_journey_calendar"):
+                from ux63_timeline_ui import render_timeline
+                render_timeline(active_plan(),catalog,stage)
+                if stage==FRANCE_STAGE:
+                    from ux48_weekend_groups_ui import render_weekend_planner
+                    render_weekend_planner(active_plan(),catalog)
             _selected_stage(view["rows"],stage,catalog)
-        else:
-            from ux63_timeline_ui import render_timeline
-            def focus_visit(destination_id):
-                from itinerary_flow_ui import _organize_destination_changed
-                _show_organize()
-                state["flow_organize_destination"]=destination_id
-                _organize_destination_changed()
-            render_timeline(active_plan(),catalog,stage,on_organize=focus_visit,pending_first=True)
         st.button("Revisar e salvar sem definir outras datas",key="flow_journey_skip_dates",
                   on_click=_show,args=("review",))
     # Full editors remain in their owning tasks; avoid a second board or budget.
