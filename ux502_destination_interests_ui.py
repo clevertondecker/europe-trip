@@ -176,7 +176,7 @@ def render_wishlist(discovery) -> bool:
                       on_click=request_planning,args=(st.session_state,"review"))
         else:
             st.info("Seus desejos continuam na lista. Veja o motivo em cada destino abaixo.")
-            st.button("Abrir planejamento",key="flow_journey_find_compatible",
+            st.button("Abrir planejamento",key="ux130_open_planning",
                       on_click=request_planning,args=(st.session_state,"build"))
             # Discovery remains accessible in the existing task tabs.
         # The canonical comparator is reachable through the public task.

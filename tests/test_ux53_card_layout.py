@@ -45,9 +45,11 @@ class UnifiedCardLayoutTests(unittest.TestCase):
         code = (ROOT / "ux501_destination_discovery_ui.py").read_text(encoding="utf-8")
         for term in ("Fonte original", "Fonte e licença", "Foto a pesquisar",
                      "Consultar fonte turística", "Ver atrações e fontes",
-                     "Salvar na lista", "on_click=add_destination", "Adicionar ao roteiro", "commit_outing(",
+                     "Quero conhecer", "on_click=add_destination", "availability_label(",
                      'key="ux126b_previous"+suffix', 'key="ux126b_next"+suffix'):
             self.assertIn(term, code)
+        for retired in ("Adicionar ao roteiro", "commit_outing(", "ux126_organize_"):
+            self.assertNotIn(retired,code)
 
     def test_existing_callback_contracts(self):
         rail = (ROOT / "attractions_ui.py").read_text(encoding="utf-8")
