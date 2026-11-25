@@ -86,6 +86,7 @@ if restored_mode in ("Oficial","Simulação"):
 restored_days=st.session_state.pop("ux_pending_days",None)
 if restored_days is not None:
     st.session_state["ux_days"]=max(40,min(80,int(restored_days)))
+    st.session_state["ux_days_value"]=st.session_state["ux_days"]
     st.session_state["unified_stay"]=st.session_state["ux_days"]
 bootstrap_ux(st.session_state)
 apply_navigation_request(st.session_state)
@@ -1428,9 +1429,10 @@ elif page == "Orçamento":
             st.caption(f'Verba de referência para {official["reference_days"]} dias; roteiro atual de {official["planned_days"]} dias.')
         # An explicit simulation handoff from Explore is not a fresh visit.
         # Preserve the existing shared candidate and duration in that case.
-        if "ux127_custom_simulation" not in st.session_state:
-            st.session_state["ux127_custom_simulation"] = (
-                st.session_state.get("ux_mode_value")=="Simulação")
+        # Widget keys are discarded by Streamlit when navigating away. Rehydrate
+        # from durable shared context before mounting, including explicit handoffs.
+        st.session_state["ux127_custom_simulation"] = (
+            st.session_state.get("ux_mode_value")=="Simulação")
         def _ux127_custom_changed():
             st.session_state["ux_mode"] = ("Simulação" if st.session_state["ux127_custom_simulation"] else "Oficial")
             _ux_mode_changed()
@@ -1473,8 +1475,11 @@ elif page == "Orçamento":
         ),unsafe_allow_html=True)
         basic, advanced = st.tabs(["Principal","Personalizar gastos"])
         with basic:
+            # Restore the durable duration rather than the scenario default on re-entry.
+            st.session_state["unified_stay"] = max(40,min(80,int(
+                st.session_state.get("ux_days_value",french["french_days"]))))
             stay = st.slider("Dias na França",min_value=40,max_value=80,
-                             value=french["french_days"],step=1,key="unified_stay",
+                             step=1,key="unified_stay",
                              on_change=_ux_budget_days_changed,disabled=not custom)
             exploratory_options=base_options(include_candidates=True)
             city_ids=[item["id"] for item in exploratory_options]

@@ -133,6 +133,8 @@ class UX3StreamlitNavigationSmokeTests(unittest.TestCase):
         self.assertEqual(app.session_state["scenario_base_selected"],"offenburg")
         self.assertEqual(app.session_state["ux_days_value"],65)
         app.segmented_control(key="ux_section").set_value("Simulações").run()
+        self.assertTrue(app.checkbox(key="ux127_custom_simulation").value)
+        self.assertFalse(app.slider(key="unified_stay").disabled)
         self.assertEqual(app.slider(key="unified_stay").value,65)
         self.assertEqual(app.selectbox(key="ux94_simulation_city").value,"offenburg")
         app.slider(key="unified_stay").set_value(60).run()
