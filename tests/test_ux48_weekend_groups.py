@@ -186,7 +186,7 @@ class WeekendGroupUITests(unittest.TestCase):
         self.assertFalse(app.exception,[e.message for e in app.exception])
         self.assertFalse(any("Acesso a ferramentas antigas" in e.label
                              for e in app.expander))
-        app.button(key="flow_journey_step_organize").click().run()
+        app.segmented_control(key="ux64_public_task").set_value("Organizar").run()
         # Italy is the initial stage: the European weekend tool must be hidden.
         self.assertFalse(any("Organizar viagens de fim de semana" in m.value
                               for m in app.markdown))
