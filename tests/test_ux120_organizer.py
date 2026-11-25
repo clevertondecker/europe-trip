@@ -36,3 +36,48 @@ class OrganizerTests(unittest.TestCase):
             self.assertFalse(set(proposal["assignments"]) & forbidden)
             self.assertNotIn("basel",proposal["assignments"].values())
         self.assertEqual((plan,state),before)
+
+
+    def test_timeline_visit_click_replaces_add_form_with_correct_organizer(self):
+        from pathlib import Path
+        from streamlit.testing.v1 import AppTest
+        from ux502_destination_interests_model import empty_interests, set_interest
+
+        app=AppTest.from_file(str(Path(__file__).resolve().parents[1]/"app.py"),
+                              default_timeout=120).run()
+        self.assertFalse(app.exception,[e.message for e in app.exception])
+        plan=add_undated_choices(app.session_state["advisor_plan"],load_attractions(),
+                                 ["colmar","basel"],FRANCE_STAGE)
+        wishes=set_interest(empty_interests(),"colmar","must_visit")
+        app.session_state["advisor_plan"]=deepcopy(plan)
+        app.session_state["ux502_interests"]=deepcopy(wishes)
+        app.button(key="ux64_sidebar_nav_1").click().run()
+        app.segmented_control(key="ux64_public_task").set_value("Organizar").run()
+        self.assertFalse(app.exception,[e.message for e in app.exception])
+        app.segmented_control(key="flow_active_stage").set_value(FRANCE_STAGE).run()
+        app.segmented_control(key="ux120_mode").set_value("Visitas").run()
+        self.assertFalse(app.exception,[e.message for e in app.exception])
+        app.selectbox(key="flow_organize_destination").set_value("colmar").run()
+        app.button(key="flow_add_open_button").click().run()
+        self.assertFalse(app.exception,[e.message for e in app.exception])
+        self.assertTrue(app.session_state["flow_add_open"])
+        self.assertIn("flow_add_close",{b.key for b in app.button})
+
+        app.button(key="ux120_visit_basel").click().run()
+        self.assertFalse(app.exception,[e.message for e in app.exception])
+        self.assertFalse(app.session_state["flow_add_open"])
+        self.assertTrue(app.session_state["flow_organize_open"])
+        self.assertFalse(app.session_state["flow_save_open"])
+        self.assertNotIn("flow_add_close",{b.key for b in app.button})
+        self.assertEqual(app.selectbox(key="flow_organize_destination").value,"basel")
+        self.assertIn("flow_organize_mode",{w.key for w in app.segmented_control})
+        self.assertEqual(app.session_state["advisor_plan"],plan)
+        self.assertEqual(app.session_state["ux502_interests"],wishes)
+
+        # The same CTA must still work when the organizer is already open.
+        app.button(key="ux120_visit_colmar").click().run()
+        self.assertFalse(app.exception,[e.message for e in app.exception])
+        self.assertFalse(app.session_state["flow_add_open"])
+        self.assertEqual(app.selectbox(key="flow_organize_destination").value,"colmar")
+        self.assertEqual(app.session_state["advisor_plan"],plan)
+        self.assertEqual(app.session_state["ux502_interests"],wishes)
