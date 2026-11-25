@@ -1,5 +1,6 @@
 """Official projection regressions independent of simulated settings."""
 import unittest
+from unittest.mock import patch
 from copy import deepcopy
 from data_model import load_data, calculate_scenario, get_scenario
 from trip_plan_model import new_plan
@@ -78,3 +79,24 @@ class OfficialBudgetTests(unittest.TestCase):
         self.assertEqual(same["deltas"]["dining"], 0.)
         self.assertEqual(changed["new_components"]["dining"], 0.)
         self.assertLess(changed["total"], same["total"])
+
+    def test_obsolete_outings_keep_reference_and_explicit_unknowns(self):
+        for packages in ({"colmar": ["removed-attraction"]},
+                         {"removed-city": []},
+                         {"colmar": ["duplicate", "duplicate"]}):
+            plan = {**self.plan, "packages": packages}
+            before = deepcopy(plan)
+            result = official_budget_for_plan(self.data, False, plan)
+            baseline = calculate_scenario(get_scenario(self.data, plan["budget_scenario"]))
+            self.assertFalse(result["outings_available"])
+            self.assertTrue(result["has_unknown_costs"])
+            self.assertEqual(result["total"], baseline["total"])
+            self.assertEqual(result["margin"], baseline["balance"])
+            self.assertEqual(official_simulation_result(result)["total"], result["total"])
+            self.assertEqual(plan, before)
+
+    def test_programming_errors_are_not_hidden_by_catalog_fallback(self):
+        for failure in (TypeError("bug"), KeyError("bug")):
+            with patch("attractions_model.package_cost", side_effect=failure):
+                with self.assertRaises(type(failure)):
+                    official_budget_for_plan(self.data, False, self.plan)
