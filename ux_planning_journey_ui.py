@@ -503,7 +503,7 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
             stage=ITALY_STAGE
         st.markdown("##### "+("Etapa 1 · Lua de mel na Itália" if stage==ITALY_STAGE else "Etapa 2 · Temporada europeia"))
         if organizer_stage in STAGES and not state.get("flow_edit_target"):
-            from ux129_visit_focus import FOCUS,PENDING,DRAFTS,_clear_widgets,request_focus,render_pending,render_editor
+            from ux129_visit_focus import FOCUS,PENDING,DRAFTS,_clear_widgets,request_focus,render_editor
             from ux63_timeline_ui import render_timeline
             rows=[r for r in view["rows"] if r["stage"]==stage]
             by_id={r["id"]:r for r in rows}
@@ -529,7 +529,6 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
             else:
                 st.button("Adicionar passeio ou editar atrações",key="flow_add_open_button",
                           on_click=request_focus,args=("catalog",stage,rows))
-            render_pending(rows,stage)
             places={r["id"]:r for r in _discovery()["destinations"]}
             primary={r["id"]:r for r in catalog["destinations"]}
             def card_photo(row):
@@ -540,7 +539,7 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
                     place["photo"]=primary.get(key,{}).get("photo")
                 _workspace_photo(key,row["name"],place)
             def card_editor(row):
-                render_editor(active_plan(),catalog,stage,by_id[row["id"]])
+                render_editor(active_plan(),catalog,stage,by_id[row["id"]],rows=rows)
             render_timeline(active_plan(),catalog,stage,
                             on_organize=lambda key:request_focus(key,stage,rows),
                             pending_first=True,focused_id=focus[1] if focus else None,

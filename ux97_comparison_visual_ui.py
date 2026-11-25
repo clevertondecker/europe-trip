@@ -9,7 +9,8 @@ from html import escape
 from rail_reference_projection_model import format_minutes
 
 COUNTRY_FLAGS = {"França":"🇫🇷", "Alemanha":"🇩🇪", "Bélgica":"🇧🇪",
-                 "Luxemburgo":"🇱🇺", "Países Baixos":"🇳🇱", "Suíça":"🇨🇭"}
+                 "Luxemburgo":"🇱🇺", "Países Baixos":"🇳🇱", "Suíça":"🇨🇭",
+                 "Itália":"🇮🇹", "Holanda":"🇳🇱", "Áustria":"🇦🇹", "Espanha":"🇪🇸"}
 
 def destination_country_label(name, country):
     flag=COUNTRY_FLAGS.get(country)

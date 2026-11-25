@@ -5,6 +5,8 @@ import streamlit as st
 FOCUS="flow_journey_visit_focus"
 DRAFTS="flow_journey_visit_drafts"
 PENDING="flow_journey_visit_pending"
+ORDER="flow_journey_visit_order"
+NOTICE="flow_journey_visit_notice"
 WIDGETS=("flow_organize_mode","flow_organize_period",
          "flow_organize_date_Itália","flow_organize_date_França")
 
@@ -15,6 +17,18 @@ def visible_visits(rows,limit,focus=None):
     if focus and not any(r["id"]==focus for r in visible):
         visible.extend(r for r in rows[limit:] if r["id"]==focus)
     return visible
+
+
+def stable_visit_order(rows,state,stage,focus):
+    """Freeze current order while a card is open, even after its status changes."""
+    prior=state.get(ORDER)
+    ids=[row["id"] for row in rows]
+    if focus and isinstance(prior,tuple) and prior[0]==stage:
+        rank={key:i for i,key in enumerate(prior[1])}
+        rows=sorted(rows,key=lambda row:rank.get(row["id"],len(rank)))
+        ids=[row["id"] for row in rows]
+    state[ORDER]=(stage,ids)
+    return rows
 
 
 def _clear_widgets(state):
@@ -57,6 +71,7 @@ def _apply(target,stage,*,discard=False):
         state.get(DRAFTS,{}).pop(old,None)
     _clear_widgets(state)
     state.pop(PENDING,None)
+    state.pop(NOTICE,None)
     if target=="catalog":
         state.pop(FOCUS,None)
         _show_add()
@@ -101,7 +116,7 @@ def render_pending(rows,stage):
              on_click=lambda:state.pop(PENDING,None))
 
 
-def render_editor(plan,catalog,stage,row):
+def render_editor(plan,catalog,stage,row,*,rows=None):
     from itinerary_flow_ui import _render_organize_fields
     state=st.session_state
     focus=(stage,row["id"])
@@ -118,12 +133,21 @@ def render_editor(plan,catalog,stage,row):
         state.get(DRAFTS,{}).pop(focus,None)
         state.pop(PENDING,None)
         state["flow_journey_visit_refresh"]=focus
+        message=state.pop("flow_notice",None)
+        if message:
+            state[NOTICE]=(focus,message)
     st.markdown("##### Organizar visita a "+row["name"])
-    st.caption("Período e data são opcionais. As alterações só valem após confirmação.")
+    st.caption("Período e data são opcionais. Use o botão de gravação para aplicar as alterações.")
+    notice=state.pop(NOTICE,None)
+    if notice and notice[0]==focus:
+        st.success(notice[1])
     _render_organize_fields(plan,catalog,stage,row,on_draft_change=_remember,
                             on_date_change=_record_date,on_saved=saved)
+    render_pending(rows if rows is not None else [row],stage)
     a,b=st.columns(2)
-    a.button("Concluir edição",key="flow_organize_close",
+    # This key now closes only the focused card; legacy navigation uses
+    # flow_journey_skip_dates to return to Meus destinos.
+    a.button("Fechar",key="flow_organize_close",
              on_click=request_focus,args=(None,stage,[row]))
     b.button("Cancelar",key="ux129_cancel_visit",on_click=_apply,
              args=(None,stage),kwargs={"discard":True})

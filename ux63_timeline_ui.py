@@ -23,13 +23,13 @@ def render_timeline(plan, catalog, stage, *, on_organize=None, pending_first=Fal
     if pending_first:
         rows.sort(key=lambda row:row["organized"])
     limit=st.session_state.get("ux120_timeline_limit_"+stage,14) if pending_first else 14
-    from ux129_visit_focus import visible_visits
+    from ux129_visit_focus import visible_visits,stable_visit_order
+    from ux97_comparison_visual_ui import destination_country_label
+    if render_editor is not None:
+        rows=stable_visit_order(rows,st.session_state,stage,focused_id)
     from itinerary_flow_model import get_choice,selected_rows_for_stage,ITALY_STAGE
     from destination_identity import canonical_destination_id
     visits={r["id"]:r for r in selected_rows_for_stage(plan,catalog,stage)}
-    flags={"França":"🇫🇷","Suíça":"🇨🇭","Alemanha":"🇩🇪","Itália":"🇮🇹",
-           "Bélgica":"🇧🇪","Luxemburgo":"🇱🇺","Países Baixos":"🇳🇱",
-           "Holanda":"🇳🇱","Áustria":"🇦🇹","Espanha":"🇪🇸"}
     visible=visible_visits(rows,limit,focused_id)
     for row in visible:
         key=row["id"]
@@ -43,7 +43,7 @@ def render_timeline(plan, catalog, stage, *, on_organize=None, pending_first=Fal
                 top,status=st.columns([3,2],vertical_alignment="center")
             place=(places or {}).get(canonical_destination_id(key),{})
             country=place.get("country") or ("Itália" if stage==ITALY_STAGE else "")
-            top.markdown("**"+(flags.get(country,"")+" " if country else "")+row["name"]+"**")
+            top.markdown("**"+destination_country_label(row["name"],country)+"**")
             if country:
                 top.caption(country)
             if selected:
