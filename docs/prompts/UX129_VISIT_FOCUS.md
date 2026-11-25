@@ -1,5 +1,3 @@
-# UX129B — Redesign contextual de visitas
-
 **Draft — redesign separado do hotfix UX129A.**
 
 ## Objetivo e justificativa
@@ -29,3 +27,9 @@ Redesign de Visitas, após UX129A. Não bloquear o hotfix com alterações visua
 
 ## Revisão de escopo
 Depende do hotfix UX129A (#267). Partir da main já corrigida; revalidar a regressão do clique com modo adição ativo. O redesign é independente da entrega da correção e não deve atrasar UX131. Manter a lógica de persistência existente.
+
+## UX aprovado — contrato de implementação
+- Visitas abre com os cards, sem seletor genérico de destino nem editor pré-aberto. Card selecionado recebe destaque, título com nome e editor imediatamente dentro dele. Usar o mesmo componente de período/data da tela antiga, preservando os handlers e keys de gravação; nenhuma duplicação de regras.
+- Reusar o catálogo e a política de fotos/licença de Meus destinos. Mostrar bandeira derivada do país, atrações escolhidas por nome e estados de período/data individual e de grupo sem inferir datas. Cards compactos, responsivos, com texto acessível.
+- Salvar por ação explícita; Cancelar limpa somente rascunho. Troca de card ou abertura do catálogo com rascunho alterado exige confirmação explícita. Preservar rascunhos de inclusão existentes em vez de descartá-los. Entrada via Meus destinos deve abrir o card certo; a paginação expõe o card focalizado. Invalidar seleção na troca de etapa, identidade ou plano. Manter fluxo proprietário de edição de atrações e calendário/grupos.
+- AppTest com navegação real: card em repouso, foco, troca de card, confirmação de descarte, cancelamento, período/data, catálogo aberto e retorno, proteção de dados e ausência de seletor redundante. Testes puros de paginação e rascunho. QA visual desktop/mobile obrigatório antes de considerar a experiência validada. Não mergear sem autorização.

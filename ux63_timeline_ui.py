@@ -4,7 +4,8 @@ import streamlit as st
 from ux63_timeline_model import project_timeline, timeline_metrics
 
 
-def render_timeline(plan, catalog, stage, *, on_organize=None, pending_first=False):
+def render_timeline(plan, catalog, stage, *, on_organize=None, pending_first=False,
+                    focused_id=None,render_editor=None,render_photo=None,places=None):
     rows = project_timeline(plan, catalog,
                             st.session_state.get("ux48_weekend_groups"),
                             stage=stage)
@@ -22,10 +23,31 @@ def render_timeline(plan, catalog, stage, *, on_organize=None, pending_first=Fal
     if pending_first:
         rows.sort(key=lambda row:row["organized"])
     limit=st.session_state.get("ux120_timeline_limit_"+stage,14) if pending_first else 14
-    for row in rows[:limit]:
-        with st.container(border=True):
-            top, status = st.columns([3,2], vertical_alignment="center")
-            top.markdown("**"+row["name"]+"**")
+    from ux129_visit_focus import visible_visits
+    from itinerary_flow_model import get_choice,selected_rows_for_stage,ITALY_STAGE
+    from destination_identity import canonical_destination_id
+    visits={r["id"]:r for r in selected_rows_for_stage(plan,catalog,stage)}
+    flags={"França":"🇫🇷","Suíça":"🇨🇭","Alemanha":"🇩🇪","Itália":"🇮🇹",
+           "Bélgica":"🇧🇪","Luxemburgo":"🇱🇺","Países Baixos":"🇳🇱",
+           "Holanda":"🇳🇱","Áustria":"🇦🇹","Espanha":"🇪🇸"}
+    visible=visible_visits(rows,limit,focused_id)
+    for row in visible:
+        key=row["id"]
+        selected=focused_id==key and render_editor is not None
+        with st.container(border=True,key=("ux129_focused_" if selected else "ux129_visit_")+key):
+            if render_photo is not None:
+                photo_col,top,status=st.columns([1,3,2],vertical_alignment="top")
+                with photo_col:
+                    render_photo(row)
+            else:
+                top,status=st.columns([3,2],vertical_alignment="center")
+            place=(places or {}).get(canonical_destination_id(key),{})
+            country=place.get("country") or ("Itália" if stage==ITALY_STAGE else "")
+            top.markdown("**"+(flags.get(country,"")+" " if country else "")+row["name"]+"**")
+            if country:
+                top.caption(country)
+            if selected:
+                top.caption("● Em edição")
             if row["group_name"]:
                 top.caption("Viagem: "+row["group_name"])
             status.caption(row["status"])
@@ -39,8 +61,16 @@ def render_timeline(plan, catalog, stage, *, on_organize=None, pending_first=Fal
                 st.caption("Período da viagem: "+row["group_period"])
             if row["grouped"] and not row["dated"]:
                 st.caption("Dia individual a definir")
-            st.caption(str(row["attractions_count"])+" atração(ões) escolhida(s)")
-            if on_organize is not None:
+            if render_editor is not None:
+                names={a["id"]:a["name"] for a in get_choice(catalog,key)["attractions"]}
+                picked=visits[key]["attractions"]
+                st.write(" · ".join(names.get(a,a) for a in picked) or "Atrações a escolher")
+            else:
+                st.caption(str(row["attractions_count"])+" atração(ões) escolhida(s)")
+            if selected:
+                st.divider()
+                render_editor(row)
+            elif on_organize is not None:
                 st.button("Organizar visita",key="ux120_visit_"+row["id"],
                           on_click=on_organize,args=(row["id"],))
     if len(rows)>limit:
@@ -48,7 +78,7 @@ def render_timeline(plan, catalog, stage, *, on_organize=None, pending_first=Fal
             key="ux120_timeline_limit_"+stage
             st.button("Mostrar mais visitas",key="ux120_timeline_more_"+stage,
                       on_click=lambda:st.session_state.update({key:limit+14}))
-        st.caption(f"Mostrando {limit} de {len(rows)} visitas.")
+        st.caption(f"Mostrando {len(visible)} de {len(rows)} visitas.")
     st.info("O calendário atual aceita um passeio francês principal por dia. "
             "Várias cidades podem compor uma viagem de fim de semana, "
             "mas não criam várias reservas ou agendamentos no mesmo dia.")

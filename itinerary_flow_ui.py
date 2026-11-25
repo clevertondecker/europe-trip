@@ -79,6 +79,9 @@ def _active_stage_changed()->None:
     state["flow_stage"]=state["flow_active_stage"]
     state["flow_active_destination"]=None
     state.pop("flow_edit_target",None)
+    state.pop("flow_journey_visit_focus",None)
+    state.pop("flow_journey_visit_pending",None)
+    state.pop("flow_organize_mode",None)
     # Reconcile stage-dependent organizer widgets before they are rendered.
     state.pop("flow_organize_destination",None)
     state.pop("flow_organize_period",None)
@@ -514,6 +517,83 @@ def _render_organizer_wishlist(plan:dict,catalog:dict,stage:str)->None:
                    " destino(s) desejados pertencem à outra etapa.")
 
 
+def _render_organize_fields(plan,catalog,stage,row,*,on_draft_change=None,on_date_change=None,on_saved=None):
+    """Single canonical period/date editor, also mounted inside a focused card."""
+    dest_id=row["id"]
+    mode=st.segmented_control(
+        "Como organizar?",["Por período","Definir data"],
+        default="Por período",key="flow_organize_mode",
+        selection_mode="single",on_change=on_draft_change)
+    if mode!="Definir data":
+        options=period_options(row["stage"])
+        if st.session_state.get("flow_organize_period") not in options:
+            st.session_state["flow_organize_period"]=row["period"] if row["period"] in options else UNASSIGNED
+        value=st.selectbox("Período sugerido",options,
+            index=options.index(row["period"]) if row["period"] in options else 0,
+            key="flow_organize_period",format_func=_period_label,on_change=on_draft_change)
+        if st.button("Guardar período",key="flow_organize_save_period",
+                     type="primary"):
+            try:
+                _assert_organize_stage(catalog,dest_id,stage)
+                outcome=commit_outing(dest_id,row["attractions"],value,confirmed=True)
+                st.session_state["ux45_flow_result"]=asdict(outcome)
+                st.session_state["flow_notice"]="Período de "+row["name"]+" atualizado."
+                if on_saved is not None:
+                    on_saved()
+                st.rerun()
+            except (ValueError,KeyError) as exc:
+                st.error(str(exc))
+    else:
+        start=date.fromisoformat(plan["departure_date"])
+        if row["stage"]==FRANCE_STAGE:
+            start+=timedelta(days=plan["italy_days"])
+            end=date.fromisoformat(plan["departure_date"])+timedelta(
+                days=plan["total_days"]-1)
+        else:
+            end=start+timedelta(days=plan["italy_days"]-1)
+        previous=next((date.fromisoformat(d) for d in row["exact_dates"]
+                       if start<=date.fromisoformat(d)<=end),start)
+        date_key="flow_organize_date_"+row["stage"]
+        existing_date=st.session_state.get(date_key)
+        if isinstance(existing_date,date) and not start<=existing_date<=end:
+            st.session_state[date_key]=previous
+        chosen=st.date_input("Data proposta",value=previous,
+            min_value=start,max_value=end,
+            key=date_key,on_change=on_date_change)
+        st.caption("Datas baseadas na partida planejada; sujeitas a alterações. "
+                   "A data deve permanecer dentro da etapa selecionada.")
+        if st.button("Definir data",key="flow_organize_save_date",
+                     type="primary"):
+            try:
+                _assert_organize_stage(catalog,dest_id,stage)
+                if not start<=chosen<=end:
+                    raise ValueError("Data fora da etapa selecionada")
+                if row["stage"]==ITALY_STAGE:
+                    schedule_italy_visit(dest_id,chosen.isoformat())
+                else:
+                    schedule_package(chosen.isoformat(),dest_id)
+                st.session_state["flow_notice"]="Data proposta registrada para "+row["name"]+"."
+                if on_saved is not None:
+                    on_saved()
+                st.rerun()
+            except (ValueError,KeyError) as exc:
+                st.error(str(exc))
+        if row["exact_dates"]:
+            if st.button("Retirar data definida",key="flow_organize_remove_date"):
+                try:
+                    _assert_organize_stage(catalog,dest_id,stage)
+                    if row["stage"]==ITALY_STAGE:
+                        schedule_italy_visit(dest_id,None)
+                    else:
+                        unschedule_package(row["exact_dates"][0])
+                    st.session_state["flow_notice"]="Data removida; o lugar permanece escolhido."
+                    if on_saved is not None:
+                        on_saved()
+                    st.rerun()
+                except (ValueError,KeyError) as exc:
+                    st.error(str(exc))
+
+
 def _render_organize(plan:dict,catalog:dict,stage:str,*,show_wishlist:bool=True,review_on_close:bool=False,on_close=None)->None:
     """Organize by flexible period or precise day without leaving this editor."""
     if not st.session_state.get("flow_organize_open",False):
@@ -538,72 +618,7 @@ def _render_organize(plan:dict,catalog:dict,stage:str,*,show_wishlist:bool=True,
                                  key="flow_organize_destination",
                                  on_change=_organize_destination_changed)
             row=by_id[dest_id]
-            mode=st.segmented_control(
-                "Como organizar?",["Por período","Definir data"],
-                default="Por período",key="flow_organize_mode",
-                selection_mode="single")
-            if mode!="Definir data":
-                options=period_options(row["stage"])
-                if st.session_state.get("flow_organize_period") not in options:
-                    st.session_state["flow_organize_period"]=row["period"] if row["period"] in options else UNASSIGNED
-                value=st.selectbox("Período sugerido",options,
-                    index=options.index(row["period"]) if row["period"] in options else 0,
-                    key="flow_organize_period",format_func=_period_label)
-                if st.button("Guardar período",key="flow_organize_save_period",
-                             type="primary"):
-                    try:
-                        _assert_organize_stage(catalog,dest_id,stage)
-                        outcome=commit_outing(dest_id,row["attractions"],value,confirmed=True)
-                        st.session_state["ux45_flow_result"]=asdict(outcome)
-                        st.session_state["flow_notice"]="Período de "+row["name"]+" atualizado."
-                        st.rerun()
-                    except (ValueError,KeyError) as exc:
-                        st.error(str(exc))
-            else:
-                start=date.fromisoformat(plan["departure_date"])
-                if row["stage"]==FRANCE_STAGE:
-                    start+=timedelta(days=plan["italy_days"])
-                    end=date.fromisoformat(plan["departure_date"])+timedelta(
-                        days=plan["total_days"]-1)
-                else:
-                    end=start+timedelta(days=plan["italy_days"]-1)
-                previous=next((date.fromisoformat(d) for d in row["exact_dates"]
-                               if start<=date.fromisoformat(d)<=end),start)
-                date_key="flow_organize_date_"+row["stage"]
-                existing_date=st.session_state.get(date_key)
-                if isinstance(existing_date,date) and not start<=existing_date<=end:
-                    st.session_state[date_key]=previous
-                chosen=st.date_input("Data proposta",value=previous,
-                    min_value=start,max_value=end,
-                    key=date_key)
-                st.caption("Datas baseadas na partida planejada; sujeitas a alterações. "
-                           "A data deve permanecer dentro da etapa selecionada.")
-                if st.button("Definir data",key="flow_organize_save_date",
-                             type="primary"):
-                    try:
-                        _assert_organize_stage(catalog,dest_id,stage)
-                        if not start<=chosen<=end:
-                            raise ValueError("Data fora da etapa selecionada")
-                        if row["stage"]==ITALY_STAGE:
-                            schedule_italy_visit(dest_id,chosen.isoformat())
-                        else:
-                            schedule_package(chosen.isoformat(),dest_id)
-                        st.session_state["flow_notice"]="Data proposta registrada para "+row["name"]+"."
-                        st.rerun()
-                    except (ValueError,KeyError) as exc:
-                        st.error(str(exc))
-                if row["exact_dates"]:
-                    if st.button("Retirar data definida",key="flow_organize_remove_date"):
-                        try:
-                            _assert_organize_stage(catalog,dest_id,stage)
-                            if row["stage"]==ITALY_STAGE:
-                                schedule_italy_visit(dest_id,None)
-                            else:
-                                unschedule_package(row["exact_dates"][0])
-                            st.session_state["flow_notice"]="Data removida; o lugar permanece escolhido."
-                            st.rerun()
-                        except (ValueError,KeyError) as exc:
-                            st.error(str(exc))
+            _render_organize_fields(plan,catalog,stage,row)
         if on_close is None:
             st.button("Abrir calendário completo",key="flow_organize_full_calendar",
                       on_click=_navigate,args=("Meu roteiro","Calendário"))

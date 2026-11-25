@@ -9,6 +9,7 @@ _LOG = logging.getLogger(__name__)
 from base_recommendation_model import recommend_bases
 from base_research_expanded_model import load_research
 from recommendation_scope_model import confirm_scope
+from comparison_destinations_model import from_state, comparison_items, PRIORITY_LABELS, ORDER
 from trip01_supplemental_discovery import build_exploration_discovery
 from ux502_destination_interests_model import (
     empty_interests, ordered_interests, LABELS,
@@ -97,7 +98,7 @@ def _open_base_review(base,scope_destinations):
     from ux502_destination_interests_model import empty_interests
     from base_research_expanded_model import load_research
     try:
-        validate_handoff(scope,state.get("ux502_interests",empty_interests()),
+        validate_handoff(scope,from_state(state,build_exploration_discovery()),
                          build_exploration_discovery(),
                          load_research(include_candidates=True),[],"planning")
     except (ValueError,KeyError,TypeError):
@@ -167,7 +168,7 @@ def validate_base_review(plan):
         return None
     try:
         validate_handoff(ctx["scope"],
-                         state.get("ux502_interests",empty_interests()),
+                         from_state(state,build_exploration_discovery()),
                          build_exploration_discovery(),
                          load_research(include_candidates=True),[],"planning")
     except (ValueError,KeyError,TypeError):
@@ -256,7 +257,7 @@ def _render_scope(interests, discovery, active, names, checked):
     state = st.session_state
     scope = checked["scope"]
     active_ids = [x["destination_id"] for x in active]
-    priorities = {x["destination_id"]: LABELS[x["priority"]] for x in active}
+    priorities = {x["destination_id"]: PRIORITY_LABELS[x["priority"]]+" · "+x.get("origin","Minha lista") for x in active}
     st.markdown(section_heading(
         "CONFIRME O ESCOPO", "Quais destinos vamos considerar?",
         "Escolha os lugares desta pesquisa, sem alterar a wishlist ou o roteiro.",
@@ -265,7 +266,7 @@ def _render_scope(interests, discovery, active, names, checked):
     st.caption("A temporada não é inferida pelo país: revise o conjunto antes de analisar.")
     st.caption("Esta seleção não altera sua lista nem o roteiro. A análise vale somente nesta sessão.")
     if scope and scope.get("pending_ids"):
-        st.info("Novos interesses precisam de revisão: " + ", ".join(names[x] for x in scope["pending_ids"]))
+        st.info("Novos destinos precisam de revisão: " + ", ".join(names[x] for x in scope["pending_ids"]))
     default = scope["destination_ids"] if scope else active_ids
     draft = state.get(DRAFT, default)
     if not isinstance(draft, list):
@@ -295,7 +296,7 @@ def _label_ids(ids,names):
 
 def evidence_examples(candidate, destinations, limit=3):
     """Presentation only: priority, then canonical ID; never sort by speed."""
-    priority = {"must_visit": 0, "interested": 1, "maybe": 2}
+    priority = ORDER
     ordered = sorted(destinations, key=lambda d: (priority[d["priority"]], d["id"]))
     return [(d["id"], candidate["evidence"][d["id"]]) for d in ordered
             if candidate["evidence"][d["id"]]["category"] in ("historical","reference_only","local")][:limit]
@@ -499,8 +500,11 @@ def render_suggestions(*,plan,discovery=None,research=None):
     ),unsafe_allow_html=True)
     try:
         discovery=discovery if discovery is not None else build_exploration_discovery()
-        interests=st.session_state.get("ux502_interests",empty_interests())
-        active=[x for x in ordered_interests(interests,discovery)
+        wishes=st.session_state.get("ux502_interests",empty_interests())
+        interests=from_state(st.session_state,discovery)
+        if interests.unmatched:
+            st.warning("Destinos do roteiro sem correspondência na pesquisa: "+", ".join(interests.unmatched))
+        active=[x for x in comparison_items(interests,discovery)
                 if x["priority"]!="discarded"]
         names={x["id"]:x["name"] for x in discovery["destinations"]}
         checked=reconcile_session_scope(st.session_state,interests,discovery)
@@ -666,7 +670,7 @@ def render_suggestions(*,plan,discovery=None,research=None):
             st.caption("Somente pesquisa, sem aplicação oficial nesta versão: "+
                        ", ".join(cities[base]["name"] for base in unsupported)+".")
         st.markdown("#### Continuar montando meu roteiro")
-        render_planning_handoff(plan,interests=interests,
+        render_planning_handoff(plan,interests=wishes,
                                 discovery=discovery,research=research)
 
 
