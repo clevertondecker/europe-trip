@@ -46,7 +46,7 @@ class UnifiedCardLayoutTests(unittest.TestCase):
         for term in ("Fonte original", "Fonte e licença", "Foto a pesquisar",
                      "Consultar fonte turística", "Ver atrações e fontes",
                      "Salvar na lista", "on_click=add_destination", "Adicionar ao roteiro", "commit_outing(",
-                     'key="ux501_page"'):
+                     'key="ux126b_previous"+suffix', 'key="ux126b_next"+suffix'):
             self.assertIn(term, code)
 
     def test_existing_callback_contracts(self):

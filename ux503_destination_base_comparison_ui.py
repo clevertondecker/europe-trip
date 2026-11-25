@@ -79,7 +79,7 @@ def render_wishlist_base_comparison(*, plan, discovery=None, research=None):
     selected = st.multiselect(
         "Cidades-base para comparar (2 a 5)",choices,
         format_func=label,key="ux503_bases",
-        help="Seleção apenas para pesquisa; não altera a base oficial.")
+        help="Seleção apenas para pesquisa; não altera a base oficial.", placeholder="Escolha uma ou mais opções")
     st.session_state["ux504_bases_shadow"] = list(selected)
     st.caption("Base do roteiro oficial: **" + label(official) + "**. "
                "Removê-la desta comparação não altera a viagem.")
@@ -129,7 +129,7 @@ def render_wishlist_base_comparison(*, plan, discovery=None, research=None):
         format_func=lambda x: destination_country_label(
                 names[x]["name"], names[x]["country"]) + " · " + priorities[x],
         key="ux503_visible_destinations",
-        help="Filtra apenas esta tela. Não altera ou remove destinos da lista salva.")
+        help="Filtra apenas esta tela. Não altera ou remove destinos da lista salva.", placeholder="Escolha uma ou mais opções")
     st.session_state["ux504_visible_destinations_shadow"] = list(selected_view)
     visible = [x for x in active if x in selected_view]
     render_manual_context(selected,visible)

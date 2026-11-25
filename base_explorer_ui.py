@@ -144,10 +144,10 @@ def _comparison(data:dict)->None:
     places={d["id"]:place_label(d["name"],d["country"]) for d in data["destinations"]}
     bases=st.multiselect("Quais bases comparar?",
                          list(names),default=["lille","strasbourg","metz","dijon"],
-                         format_func=lambda x:names[x],key="base_compare_bases")
+                         format_func=lambda x:names[x],key="base_compare_bases", placeholder="Escolha uma ou mais opções")
     dest=st.multiselect("Manter os mesmos destinos nas comparações",
                         list(places),default=["amsterdam","brussels","colmar","basel"],
-                        format_func=lambda x:places[x],key="base_compare_destinations")
+                        format_func=lambda x:places[x],key="base_compare_destinations", placeholder="Escolha uma ou mais opções")
     if not bases or not dest:
         st.info("Selecione ao menos uma cidade-base e um destino.")
         return
@@ -277,8 +277,9 @@ def _scenario_backups(plan:dict,options:list[dict])->None:
                 st.download_button("Baixar JSON",scenario_export(drafts[selected]),
                                    file_name="nossa_europa_cenario.json",
                                    mime="application/json",key="scenario_export_json")
+        st.caption("Arquivo .json exportado por este app")
         upload=st.file_uploader("Importar cenário JSON",type=["json"],
-                                key="scenario_import_file")
+                                key="scenario_import_file", max_upload_size=5)
         if upload is not None and st.button("Validar e importar",key="scenario_import_apply"):
             try:
                 restored=scenario_import(upload.getvalue())

@@ -109,7 +109,7 @@ def render_overview(plan,catalog,view,storage_label,storage_hint,trip_data,finan
         except (ValueError,KeyError,TypeError,StopIteration):
             st.caption("Teto oficial: A verificar")
         if trip_data is not None:
-            _compact_budget(plan,catalog,trip_data,finance_live,eurfx,chffx,show_link=False)
+            _compact_budget(plan,catalog,trip_data,finance_live,show_link=False)
         else:
             st.caption("Estimativa total: A verificar")
         st.button("Abrir orçamento",key="flow_journey_budget",on_click=select_public_task,args=(state,"Orçamento","Visão financeira"))
