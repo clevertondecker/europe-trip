@@ -199,6 +199,27 @@ class RecommendationAppTests(unittest.TestCase):
         self.assertEqual(angers["evidence"]["angers"]["category"],"local")
         self.assertIsNone(angers["evidence"]["angers"]["display_min"])
 
+    def test_planned_only_destination_appears_and_new_visit_requires_review(self):
+        from attractions_model import load_attractions
+        from itinerary_flow_model import add_undated_choices,FRANCE_STAGE
+        a=self.make_app([], "compare")
+        wishes=deepcopy(a.session_state["ux502_interests"])
+        plan=add_undated_choices(a.session_state["advisor_plan"],load_attractions(),["basel"],FRANCE_STAGE)
+        a.session_state["advisor_plan"]=plan
+        self.run_ok(a)
+        self.assertEqual(a.multiselect(key="rec03a_scope_widget").value,["basel"])
+        self.click(a,"rec03a_confirm_subset")
+        self.assertTrue(a.session_state[SCOPE]["confirmed"])
+        self.assertEqual(a.session_state[SCOPE]["destination_ids"],["basel"])
+        plan=add_undated_choices(plan,load_attractions(),["colmar"],FRANCE_STAGE)
+        a.session_state["advisor_plan"]=plan
+        self.run_ok(a)
+        self.assertFalse(a.session_state[SCOPE]["confirmed"])
+        self.assertEqual(a.session_state[SCOPE]["pending_ids"],["colmar"])
+        self.assertEqual(a.multiselect(key="rec03a_scope_widget").value,["basel"])
+        self.assertEqual(a.session_state["advisor_plan"],plan)
+        self.assertEqual(a.session_state["ux502_interests"],wishes)
+
     def test_loader_failure_and_identity_reset(self):
         a=self.make_app([("paris","must_visit")],"compare")
         self.click(a,"rec03a_confirm_subset")
