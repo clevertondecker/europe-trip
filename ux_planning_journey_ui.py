@@ -176,7 +176,7 @@ def render_build(plan, catalog, view):
             picked=st.multiselect("Destinos para incluir",list(by_id),key=key,
                                   max_selections=50,
                                   format_func=lambda x:by_id[x]["name"]+" · "+LABELS.get(by_id[x]["priority"],""), placeholder="Escolha uma ou mais opções")
-            if st.button("Confirmar inclusão · "+LABELS_STAGE[stage],
+            if st.button(f"Incluir {len(picked)} destino(s) no roteiro · "+LABELS_STAGE[stage],
                          key=key+"_confirm",disabled=not picked):
                 try:
                     latest=project_planning(active_plan(),st.session_state.get("ux502_interests",empty_interests()),

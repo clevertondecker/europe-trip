@@ -8,6 +8,10 @@ STAGE = "europe_season"
 
 
 def _snapshot(interests, discovery):
+    from comparison_destinations_model import ComparisonDestinations
+    if isinstance(interests,ComparisonDestinations):
+        return {"revision":interests.revision,"plan_id":interests.plan_id,
+                "items":sorted((key,priority) for key,priority,_,_ in interests.entries)}
     doc = validate_interests(interests, discovery)
     return {
         "revision": doc["revision"],
@@ -57,11 +61,14 @@ def reconcile_scope(interests, scope, discovery, *, reset=False):
                 or not isinstance(old_items, list)
                 or any(not isinstance(x, (list, tuple)) or len(x) != 2
                        or not isinstance(x[0], str)
-                       or x[1] not in ("must_visit", "interested", "maybe", "discarded")
+                       or x[1] not in ("must_visit", "interested", "maybe", "discarded", "planned_only")
                        for x in old_items)
                 or len({x[0] for x in old_items}) != len(old_items)):
             raise ValueError("Snapshot inválido")
-        old = {"revision": old["revision"], "items": sorted(tuple(x) for x in old_items)}
+        old = {"revision": old["revision"], "items": sorted(tuple(x) for x in old_items),
+               **({"plan_id":old["plan_id"]} if "plan_id" in old else {})}
+        if "plan_id" in old and old.get("plan_id")!=now.get("plan_id"):
+            raise ValueError("Roteiro substituído")
         chosen, pending = scope["destination_ids"], scope["pending_ids"]
         for ids in (chosen, pending):
             if (not isinstance(ids, list) or any(not isinstance(x, str) for x in ids)
@@ -70,12 +77,15 @@ def reconcile_scope(interests, scope, discovery, *, reset=False):
         if not set(chosen) <= _active(old) or not set(pending) <= _active(old):
             raise ValueError("Escopo inconsistente")
         if now["revision"] < old["revision"] or (
-                now["revision"] == old["revision"] and now != old):
+                now["revision"] == old["revision"] and now != old
+                and "plan_id" not in now):
             raise ValueError("Documento substituído")
     except (KeyError, TypeError, ValueError):
         return {"state": "scope_required", "scope": None, "pending_ids": sorted(active)}
     picked = sorted(set(chosen) & active)
     review = sorted((set(pending) | (active - _active(old))) & active)
+    # A legacy wishlist scope may retain deliberate exclusions; new candidates
+    # require explicit confirmation. A plan revision alone is immaterial.
     confirmed = bool(picked) and scope["confirmed"] and not review
     updated = {"stage": STAGE, "destination_ids": picked, "snapshot": now,
                "confirmed": confirmed, "pending_ids": review}

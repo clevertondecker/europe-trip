@@ -105,7 +105,9 @@ def apply_handoff(state, *, interests=None, discovery=None, research=None):
             return kind
         if request.get("scope")!=state.get(SCOPE):
             raise ValueError("O escopo mudou. Revise as sugestões.")
-        context=validate_handoff(request.get("scope"),interests,discovery,research,
+        from comparison_destinations_model import from_state
+        projected=from_state(state,discovery) if "advisor_plan" in state and "plan_id" in (request.get("scope") or {}).get("snapshot",{}) else interests
+        context=validate_handoff(request.get("scope"),projected,discovery,research,
                                  request.get("base_ids"),kind)
         if kind=="manual":
             # Validated old handoff opens the existing modern comparison.
@@ -149,7 +151,9 @@ def current_context(state, kind, *, interests, discovery, research):
     if context.get("scope")!=state.get(SCOPE):
         return None
     try:
-        return validate_handoff(context["scope"],interests,discovery,research,
+        from comparison_destinations_model import from_state
+        projected=from_state(state,discovery) if "plan_id" in context["scope"].get("snapshot",{}) else interests
+        return validate_handoff(context["scope"],projected,discovery,research,
                                 context["base_ids"],kind)
     except (ValueError,KeyError,TypeError):
         return None

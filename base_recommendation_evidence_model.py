@@ -10,7 +10,7 @@ from base_research_expanded_model import load_research
 from rail_evidence_unified_model import canonical_place
 from rail_reference_projection_model import decorate_comparison
 from trip01_supplemental_discovery import build_exploration_discovery
-from ux502_destination_interests_model import selected_destinations_for_comparison
+from comparison_destinations_model import active_ids
 
 
 def candidate_ids(research: dict) -> list[str]:
@@ -50,7 +50,7 @@ def build_recommendation_matrix(interests: dict, destination_ids: list[str], *,
     """
     discovery = discovery if discovery is not None else build_exploration_discovery()
     research = research if research is not None else load_research(include_candidates=True)
-    active = set(selected_destinations_for_comparison(interests, discovery))
+    active = set(active_ids(interests, discovery))
     # The wishlist resolves historical aliases; an explicit scope must use
     # the exact active IDs of the current projection, not silently coerce input.
     if (not isinstance(destination_ids, list) or not destination_ids

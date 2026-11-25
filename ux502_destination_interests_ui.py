@@ -170,7 +170,7 @@ def render_wishlist(discovery) -> bool:
             headline="Continue descobrindo destinos"
             detail="Os desejos atuais ainda estão disponíveis somente para pesquisa."
         st.markdown(next_action(headline,detail,variant="compact"),unsafe_allow_html=True)
-        if planning["eligible_count"] and not planning["rows"]:
+        if planning["eligible_count"]:
             st.button("Montar roteiro com meus destinos",key="flow_journey_from_wishlist",type="primary",
                       on_click=request_planning,args=(st.session_state,"build"))
         elif planning["rows"]:

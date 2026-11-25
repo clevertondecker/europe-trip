@@ -82,6 +82,9 @@ def evaluate_matrix(matrix, *, weights=None):
     raw, evidence = matrix["comparison"], matrix["evidence"]
     bases = sorted(raw["base_ids"])
     destinations = sorted(raw["destinations"], key=lambda x: x["id"])
+    from comparison_destinations_model import PLANNED, PLANNED_WEIGHT
+    if any(d["priority"]==PLANNED for d in destinations):
+        weights[PLANNED]=PLANNED_WEIGHT
     by_id = {d["id"]: d for d in destinations}
     scope_ids = set(by_id)
     cells = evidence["cells"]
