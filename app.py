@@ -1435,17 +1435,34 @@ elif page == "Orçamento":
         official=official_budget_for_plan(data,live_finance,active_plan())
         st.markdown("#### Oficial")
         st.caption("Projeção parcial da viagem · mesma referência de Planejar e Visão financeira")
-        oc1,oc2,oc3=st.columns(3)
-        oc1.metric("Total oficial",money_brl(official["total"]))
-        oc2.metric("Margem oficial",money_brl(official["margin"]))
-        oc3.metric("Teto oficial",money_brl(official["cap"]))
+        official_cards=kpi_cards([
+            {"name":"Total oficial","value":money_brl(official["total"]),
+             "hint":"Projeção parcial","icon":"▤"},
+            {"name":"Margem oficial","value":money_brl(official["margin"]),
+             "hint":"Teto menos projeção","icon":"◈"},
+            {"name":"Teto oficial","value":money_brl(official["cap"]),
+             "hint":"Cenário oficial","icon":"◎","highlight":True},
+        ])
+        with st.container(key="ux84_simulation_metrics"):
+            for column,markup in zip(st.columns(3,gap="small"),official_cards):
+                column.markdown(markup,unsafe_allow_html=True)
         if official["margin"]<0:
             st.warning("A projeção parcial oficial excede o teto.")
         if official["has_unknown_costs"]:
             st.caption("Há preços de passeios pendentes; a margem não é dinheiro livre.")
         if official["planned_days"]!=official["reference_days"]:
             st.caption(f'Verba de referência para {official["reference_days"]} dias; roteiro atual de {official["planned_days"]} dias.')
+        # An explicit simulation handoff from Explore is not a fresh visit.
+        # Preserve the existing shared candidate and duration in that case.
+        if "ux127_custom_simulation" not in st.session_state:
+            st.session_state["ux127_custom_simulation"] = (
+                st.session_state.get("ux_mode_value")=="Simulação")
+        def _ux127_custom_changed():
+            if not st.session_state["ux127_custom_simulation"]:
+                st.session_state["ux_mode"]="Oficial"
+                _ux_mode_changed()
         custom=st.checkbox("Personalizar premissas da simulação",key="ux127_custom_simulation",
+                           on_change=_ux127_custom_changed,
                            help="Desmarque para restaurar a projeção oficial, sem alterar o roteiro.")
         if not custom:
             # Restore before mounting controls. No stale hypothetical inputs
