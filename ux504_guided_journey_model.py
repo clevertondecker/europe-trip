@@ -76,7 +76,7 @@ def project_journey(plan: dict, interests: dict | None = None) -> dict:
         alternative_actions = []
     elif not outing_count and not eligible_remaining:
         next_step = {"label":"Revisar minha lista","id":"wishlist"}
-        alternative_actions = [{"label":"Descobrir destinos compatíveis","id":"discover"}]
+        alternative_actions = [{"label":"Descobrir destinos","id":"discover"}]
     elif not outing_count:
         next_step = {"label":"Montar roteiro com meus destinos","id":"itinerary"}
         alternative_actions = [{"label":"Comparar cidades-base","id":"compare"}]

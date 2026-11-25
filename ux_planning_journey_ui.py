@@ -202,8 +202,8 @@ def render_build(plan, catalog, view):
     if view["rows"]:
         st.button("Revisar destinos já incluídos",key="flow_journey_review_after_build",on_click=_show,args=("review",))
     else:
-        from ux502_destination_interests_ui import _discover_eligible
-        st.button("Descobrir destinos compatíveis",key="flow_journey_edit_wishes",on_click=_discover_eligible)
+        from ux502_destination_interests_ui import _discover_destinations
+        st.button("Descobrir destinos",key="flow_journey_edit_wishes",on_click=_discover_destinations)
 
 
 def _render_unavailable(view):
@@ -439,9 +439,13 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
             st.button(LABELS_ACTION[action],key="flow_journey_primary",
                       type="primary",on_click=_discover)
         elif action=="exploratory":
-            from ux502_destination_interests_ui import _discover_eligible
-            st.button("Descobrir destinos compatíveis",key="flow_journey_primary",
-                      type="primary",on_click=_discover_eligible)
+            if not state.get("flow_add_open"):
+                st.button("Adicionar pelo catálogo de passeios",key="flow_journey_primary",
+                          type="primary",on_click=_open_catalog)
+                st.button("Comparar cidades-base",key="ux130_planning_compare",
+                          on_click=request_navigation,args=(state,"suggestions"))
+            else:
+                st.caption("Escolha um passeio no catálogo abaixo.")
         elif action=="review" and state[VIEW]=="review":
             st.markdown('<a class="journey-next__anchor" href="#journey-review-anchor">'
                         'Ir para a revisão ↓</a>',unsafe_allow_html=True)
@@ -456,8 +460,9 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
                       key="flow_journey_primary",type="primary",
                       on_click=_show,args=(action,))
     if not organizing and state.get("ux_section")=="Meu planejamento":
-        st.caption("Prefira incluir destinos da sua lista. Para outros lugares, use o catálogo de passeios.")
-        st.button("Adicionar pelo catálogo de passeios",key="ux131_open_catalog",on_click=_open_catalog)
+        if action!="exploratory":
+            st.caption("Prefira incluir destinos da sua lista. Para outros lugares, use o catálogo de passeios.")
+            st.button("Adicionar pelo catálogo de passeios",key="ux131_open_catalog",on_click=_open_catalog)
         if state[VIEW] is None and not view["rows"]:
             _render_unavailable(view)
     note=state.pop("flow_journey_notice",None) or state.pop("flow_notice",None)
