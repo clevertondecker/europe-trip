@@ -43,7 +43,8 @@ def scenario_total(scenario: dict, budget: dict, *,
                    french_days: int, outings_weekly: float, outing_couple_eur: float,
                    fx_brl_per_eur: float, rent_override_eur_month: float | None = None,
                    flight_delta_brl: float = 0, excursions_delta_brl: float = 0,
-                   local_transport_delta_brl: float = 0, rent_delta_brl: float = 0) -> dict:
+                   local_transport_delta_brl: float = 0, rent_delta_brl: float = 0,
+                   use_budget_dining: bool = False) -> dict:
     """Replace already budgeted subcategories, then add only other true deltas."""
     if not 30 <= french_days <= 100:
         raise ValueError("Estadia na França fora do intervalo de simulação")
@@ -68,7 +69,8 @@ def scenario_total(scenario: dict, budget: dict, *,
         "groceries": original["groceries"] * ratio,
         "transport": original["transport"] * ratio + local_transport_delta_brl,
         "excursions": original["excursions"] * ratio + excursions_delta_brl,
-        "dining": (french_days / 7) * outings_weekly * outing_couple_eur * fx_brl_per_eur,
+        "dining": (original["dining"] * ratio if use_budget_dining else
+                   (french_days / 7) * outings_weekly * outing_couple_eur * fx_brl_per_eur),
         "rent": (original["rent"] * ratio if rent_override_eur_month is None else
                  rent_override_eur_month * (french_days/30) * fx_brl_per_eur),
     }
