@@ -11,9 +11,11 @@ class FullItineraryNavigationTests(unittest.TestCase):
     def test_all_itinerary_areas_preserve_official_base(self):
         at=AppTest.from_file(str(ROOT/"app.py"),default_timeout=100).run()
         official=at.session_state["advisor_plan"]["base_city"]
-        at.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
-        at.segmented_control(key="ux_mode").set_value("Simulação").run()
-        at.selectbox(key="scenario_sidebar").set_value("offenburg").run()
+        at.button(key="ux64_sidebar_nav_2").click().run()
+        at.segmented_control(key="ux64_public_task").set_value("Simulações").run()
+        at.checkbox(key="ux127_custom_simulation").check().run()
+        at.selectbox(key="ux94_simulation_city").set_value("offenburg").run()
+        at.button(key="ux_sidebar_nav_1").click().run()
         at.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Meu roteiro"))).click().run()
         for area in ("Meu planejamento","Organizar viagem","Melhorar meu roteiro"):
             with self.subTest(area=area):

@@ -126,6 +126,9 @@ class CoverageStreamlitTests(unittest.TestCase):
         at.session_state["ux_compare_mode"]="Evidências e lacunas"
         at.segmented_control(key="ux64_public_task").set_value("Comparar bases").run()
         self.assertFalse(at.exception,[x.message for x in at.exception])
+        self.assertNotIn("ux_compare_mode",{w.key for w in at.segmented_control})
+        at.button(key="ux125b_open_base_studies").click().run()
+        self.assertFalse(at.exception,[x.message for x in at.exception])
         self.assertEqual(at.session_state["ux_compare_mode"],"Referências históricas")
         self.assertNotIn("Evidências e lacunas", at.segmented_control(key="ux_compare_mode").options)
         self.assertFalse(any("Evidências históricas · o que já sabemos" in x.value

@@ -127,7 +127,8 @@ class OutingExplorerNavigationTests(unittest.TestCase):
         self.assertFalse(app.exception,[x.message for x in app.exception])
         original=deepcopy(app.session_state["advisor_plan"])
         app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
-        app.segmented_control(key="ux_section").set_value("Passeios").run()
+        app.button(key="ux64_sidebar_nav_1").click().run()
+        app.button(key="ux125b_home_base_outings").click().run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
 
         app.selectbox(key="attractions_scenario_base").set_value("lille").run()

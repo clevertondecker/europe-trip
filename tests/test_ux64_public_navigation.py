@@ -15,6 +15,7 @@ class PublicNavigationTests(unittest.TestCase):
         self.assertEqual(public_area("Minha viagem"),"Planejar")
         self.assertEqual(public_area("Meu roteiro"),"Planejar")
         self.assertEqual(public_task("Meu roteiro","Organizar viagem"),"Organizar")
+        self.assertIsNone(public_task("Meu roteiro","Melhorar meu roteiro"))
 
     def test_wishlist_and_discovery_share_one_legacy_tool(self):
         state={}

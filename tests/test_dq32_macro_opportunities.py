@@ -185,10 +185,11 @@ class MacroOpportunityUXTests(unittest.TestCase):
         self.assertFalse(at.exception,[x.message for x in at.exception])
         original=deepcopy(at.session_state["advisor_plan"])
         at.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
-        at.segmented_control(key="ux_section").set_value("Passeios").run()
+        at.button(key="ux64_sidebar_nav_1").click().run()
+        at.button(key="ux125b_home_base_outings").click().run()
         at.selectbox(key="attractions_scenario_base").set_value("lille").run()
         self.assertFalse(at.exception,[x.message for x in at.exception])
-        self.assertTrue(any("Descubra lugares para conhecer" in x.value for x in at.markdown))
+        self.assertTrue(any("O que poderemos conhecer a partir da nossa base?" in x.value for x in at.markdown))
         self.assertTrue(any("Atrações na base" == x.label for x in at.metric))
         at.selectbox(key="ux_dq32_opportunity_group").set_value(
             "Trem histórico documentado").run()

@@ -61,7 +61,13 @@ class BudgetParityAppTests(unittest.TestCase):
         self.assert_cards(app, "Margem simulada", margin)
         self.assertTrue(any("R$ 0,00 vs. oficial" in x.value for x in app.caption))
         self.assert_money_tables(app)
+        # UX125B: only the canonical simulator owns mode and duration.
+        self.assertNotIn("ux_mode", {x.key for x in app.segmented_control})
+        self.assertNotIn("ux_days", {x.key for x in app.number_input})
+        self.assertTrue(app.slider(key="unified_stay").disabled)
         app.checkbox(key="ux127_custom_simulation").check().run()
+        self.assertEqual(app.session_state["ux_mode_value"], "Simulação")
+        self.assertFalse(app.slider(key="unified_stay").disabled)
         app.number_input(key="unified_flight_extra").set_value(500).run()
         self.assert_clean(app)
         self.assert_cards(app, "Total oficial", total)

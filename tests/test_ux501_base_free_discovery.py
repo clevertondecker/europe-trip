@@ -121,8 +121,8 @@ class BaseFreeDiscoveryAppTests(unittest.TestCase):
         self.assertFalse(any(x.key=="ux501_interest_session" for x in app.multiselect))
         self.assertFalse(any("Pesquisa do catálogo e seleção anterior" in x.label
                              for x in app.expander))
-        # Other legacy itinerary widgets belong to a separate compatibility path.
-        self.assertTrue(any(x.key=="attractions_scenario_base" for x in app.selectbox))
+        # The specialist guide is not mounted on the destination-first catalog.
+        self.assertNotIn("attractions_scenario_base",{x.key for x in app.selectbox})
         app.selectbox(key="ux501_country").set_value("Bélgica").run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
         self.assertEqual(app.session_state["advisor_plan"],initial)
