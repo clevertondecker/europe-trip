@@ -24,7 +24,7 @@ from attraction_last_mile_model import load_access_pilot
 TOPICS=("Visão geral","Moradia","Logística","Vida cotidiana","Trabalho remoto","Atrações")
 
 ACTIVE_PRIORITIES=PRIORITIES[:3]
-MISSING_WISHLIST_SCOPE="Minha lista sem tempo pesquisado"
+MISSING_WISHLIST_SCOPE="Sem tempo (lista)"
 ROUTE_SCOPES=("Minha lista","Todos os destinos","Com tempo pesquisado",MISSING_WISHLIST_SCOPE)
 TIMED=("historical","reference_only")
 

@@ -113,6 +113,8 @@ class UnifiedProfileTests(unittest.TestCase):
         self.assertFalse(app.exception,[x.message for x in app.exception])
         self.assertEqual(app.selectbox(key="ux124_route_detail_mulhouse_3").value,missing["destination_id"])
         self.assertEqual(len(app.selectbox(key="ux124_route_detail_mulhouse_3").options),1)
+        self.assertTrue(any(x.value.startswith("1 sem tempo.") for x in app.caption))
+        self.assertFalse(any(x.value.startswith("0/1 destinos") for x in app.caption))
         self.assertEqual(app.session_state["ux502_interests"],wishes)
         app.session_state["ux502_interests"]=empty_interests()
         app.run()
@@ -133,7 +135,9 @@ class UnifiedProfileTests(unittest.TestCase):
             for scope in ("Minha lista","Todos os destinos","Com tempo pesquisado",MISSING_WISHLIST_SCOPE):
                 app.segmented_control(key="ux124_routes_"+city).set_value(scope).run()
                 self.assertFalse(app.exception,[x.message for x in app.exception])
-                self.assertTrue(any(x.value.startswith(scope+":") for x in app.caption))
+                self.assertTrue(any(x.value.startswith(scope+":") if scope!=MISSING_WISHLIST_SCOPE
+                                    else "sem tempo. Não confirma bate-volta." in x.value
+                                    for x in app.caption))
             self.assertNotIn("expanded_bases_rank_preset",{w.key for w in app.segmented_control})
 
 if __name__=="__main__":

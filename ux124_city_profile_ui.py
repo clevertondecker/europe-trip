@@ -221,7 +221,10 @@ def _logistics(v):
         counts.append(f'{selection["local"]} locais')
     if selection["missing"]:
         counts.append(f'{selection["missing"]} sem tempo')
-    st.caption(" · ".join(counts)+". Não confirma bate-volta.")
+    if scope==MISSING_WISHLIST_SCOPE:
+        st.caption(f'{selection["missing"]} sem tempo. Não confirma bate-volta.')
+    else:
+        st.caption(" · ".join(counts)+". Não confirma bate-volta.")
     if scope==MISSING_WISHLIST_SCOPE:
         st.caption("Destinos ativos da sua lista sem referência de tempo de ida. "
                    "Não significa que o trajeto seja impossível; o acesso local e as "
