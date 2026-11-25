@@ -35,10 +35,12 @@ def attraction_inventory(discovery, catalog, data23, macro, geography):
                 raise ValueError("Duplicate source attraction")
             source_rows[row["id"]] = row
     access = defaultdict(list)
+    station_ids = {row["id"] for row in geography["stations"]}
     for row in geography["walking_routes"]:
         if (row["status"] in ("official_published", "operator_published_walk_duration",
                               "pedestrian_routed")
-                and row.get("duration_min") is not None and row.get("source_url")):
+                and row.get("duration_min") is not None and row.get("source_url")
+                and row["origin_id"] in station_ids):
             access[row["destination_id"]].append(deepcopy(row))
     rows, destinations, seen = [], [], set()
     for dest in discovery["destinations"]:
