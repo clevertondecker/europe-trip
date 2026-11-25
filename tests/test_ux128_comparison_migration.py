@@ -53,3 +53,33 @@ class UX128MigrationTests(unittest.TestCase):
         state={"ux504_bases_shadow":ids}
         self.migrate(state)
         self.assertEqual(state[CHOICE],ids)
+
+    def test_no_retired_renderer_or_public_entry(self):
+        from pathlib import Path
+        import ast
+        root=Path(__file__).resolve().parents[1]
+        self.assertFalse((root/"ux503_destination_base_comparison_ui.py").exists())
+        renderer=(root/"rec03a_suggestions_ui.py").read_text(encoding="utf-8")
+        self.assertNotIn("Ajustar comparação detalhada",renderer)
+        self.assertNotIn("render_wishlist_base_comparison",renderer)
+        consumers=[]
+        for file in root.rglob("*.py"):
+            if any(part.startswith(".") or part in ("venv","__pycache__","site-packages")
+                   for part in file.relative_to(root).parts):
+                continue
+            for node in ast.walk(ast.parse(file.read_text(encoding="utf-8"))):
+                modules=[]
+                if isinstance(node,ast.Import):
+                    modules=[alias.name for alias in node.names]
+                elif isinstance(node,ast.ImportFrom):
+                    modules=[node.module or ""]
+                elif isinstance(node,ast.Call) and node.args:
+                    func=node.func
+                    if ((isinstance(func,ast.Name) and func.id in ("__import__","import_module")) or
+                        (isinstance(func,ast.Attribute) and func.attr=="import_module")):
+                        arg=node.args[0]
+                        if isinstance(arg,ast.Constant) and isinstance(arg.value,str):
+                            modules=[arg.value]
+                if any(x.split(".")[-1]=="ux503_destination_base_comparison_ui" for x in modules):
+                    consumers.append(str(file.relative_to(root)))
+        self.assertEqual(consumers,[])

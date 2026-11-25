@@ -253,7 +253,7 @@ def render_inline_comparison(interests, scope, selected, *, discovery, research)
                 for label,url in sources:
                     if url and url not in seen:
                         seen.add(url)
-                        st.link_button(label,url)
+                        st.link_button(label+" · "+projection["names"][base],url)
                 if not seen:
                     st.caption("Fonte ainda não disponível.")
                 st.caption("Retorno e última milha não confirmados para 2027.")

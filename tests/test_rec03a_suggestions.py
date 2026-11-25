@@ -138,6 +138,8 @@ class RecommendationAppTests(unittest.TestCase):
         a.session_state[INTENT]="suggestions"
         self.run_ok(a)
         self.assertEqual(a.session_state[CHOICE],["strasbourg","metz"])
+        a.segmented_control(key="ux112_active_view").set_value("Explorar alternativas")
+        self.run_ok(a)
         self.assertEqual(a.session_state["ux112_active_view"],"Explorar alternativas")
         self.click(a,"rec03a_back_wishlist")
         self.assertEqual(a.session_state["ux502_view"],"Minha lista")
@@ -182,6 +184,8 @@ class RecommendationAppTests(unittest.TestCase):
         a.session_state[INTENT]="manual"
         self.run_ok(a)
         a.session_state[INTENT]="suggestions"
+        self.run_ok(a)
+        a.segmented_control(key="ux112_active_view").set_value("Explorar alternativas")
         self.run_ok(a)
         self.assertEqual(a.text_input(key="rec03a_search").value,"Angers")
         self.assertEqual(a.session_state["advisor_plan"],original_plan)

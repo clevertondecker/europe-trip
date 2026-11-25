@@ -82,9 +82,6 @@ def apply_navigation(state):
         if target == "manual":
             state["ux112_active_view"] = "Minha comparação"
             state["ux112_active_view_shadow"] = "Minha comparação"
-        else:
-            state["ux112_active_view"] = "Explorar alternativas"
-            state["ux112_active_view_shadow"] = "Explorar alternativas"
     return target
 
 
