@@ -198,15 +198,27 @@ def render_build(plan, catalog, view):
                 except (ValueError,KeyError) as exc:
                     st.error(str(exc))
     st.button("Cancelar seleção não confirmada",key="flow_journey_cancel_batch",on_click=_cancel_batch)
-    if view["unsupported"]:
-        with st.expander("Destinos ainda disponíveis somente para pesquisa"):
-            st.write(", ".join(r["name"] for r in view["unsupported"]))
-            st.caption("Continuam na wishlist. Você pode revisar e salvar os destinos compatíveis sem esperar novas pesquisas.")
+    _render_unavailable(view)
     if view["rows"]:
         st.button("Revisar destinos já incluídos",key="flow_journey_review_after_build",on_click=_show,args=("review",))
     else:
         from ux502_destination_interests_ui import _discover_eligible
         st.button("Descobrir destinos compatíveis",key="flow_journey_edit_wishes",on_click=_discover_eligible)
+
+
+def _render_unavailable(view):
+    if view["unsupported"]:
+        with st.expander(f'Ainda não disponíveis para o roteiro ({len(view["unsupported"])})'):
+            for row in view["unsupported"]:
+                st.caption(row["name"]+" · "+row["eligibility"]["reason"])
+            st.caption("Continuam na sua lista e podem ser considerados ao comparar bases.")
+
+
+def _open_catalog():
+    _show("organize")
+    from itinerary_flow_ui import _show_add
+    st.session_state["ux_organize_view"]="Por período ou data"
+    _show_add()
 
 
 def _cancel_batch():
@@ -344,8 +356,8 @@ def render_review(plan,catalog,view,*,global_continuity=False):
             if view["batches"][stage]["eligible"]:
                 st.write(LABELS_STAGE[stage]+": "+", ".join(r["name"] for r in view["batches"][stage]["eligible"]))
         st.button("Voltar a incluir destinos",key="flow_journey_review_build",on_click=_show,args=("build",))
+    _render_unavailable(view)
     if view["unsupported"]:
-        st.caption("Somente pesquisa: "+", ".join(r["name"] for r in view["unsupported"]))
         st.button("Consultar minha lista",key="flow_workspace_research_only",on_click=_choose)
     st.caption("Retornos, reservas, moradia e custos de 2027 ainda precisam de confirmação. "
                "Salvar registra decisões, não confirma reservas.")
@@ -428,8 +440,6 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
                       type="primary",on_click=_discover)
         elif action=="exploratory":
             from ux502_destination_interests_ui import _discover_eligible
-            for row in view["unsupported"]:
-                st.caption(row["name"] + " · " + row["eligibility"]["reason"])
             st.button("Descobrir destinos compatíveis",key="flow_journey_primary",
                       type="primary",on_click=_discover_eligible)
         elif action=="review" and state[VIEW]=="review":
@@ -445,6 +455,11 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
             st.button(visual["primary_label"] or LABELS_ACTION[action],
                       key="flow_journey_primary",type="primary",
                       on_click=_show,args=(action,))
+    if not organizing and state.get("ux_section")=="Meu planejamento":
+        st.caption("Prefira incluir destinos da sua lista. Para outros lugares, use o catálogo de passeios.")
+        st.button("Adicionar pelo catálogo de passeios",key="ux131_open_catalog",on_click=_open_catalog)
+        if state[VIEW] is None and not view["rows"]:
+            _render_unavailable(view)
     note=state.pop("flow_journey_notice",None) or state.pop("flow_notice",None)
     if note:
         st.success(note)
@@ -493,6 +508,7 @@ def render_planning_journey(plan,catalog,trip_data=None,finance_live=False,eurfx
             from ux63_timeline_ui import render_timeline
             def focus_visit(destination_id):
                 from itinerary_flow_ui import _organize_destination_changed
+                _show_organize()
                 state["flow_organize_destination"]=destination_id
                 _organize_destination_changed()
             render_timeline(active_plan(),catalog,stage,on_organize=focus_visit,pending_first=True)

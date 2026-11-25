@@ -6,7 +6,7 @@ from ux502_destination_interests_model import validate_interests, ordered_intere
 PLANNED = "planned_only"
 PRIORITY_LABELS = {**LABELS, PLANNED: "No roteiro · sem prioridade na lista"}
 ORDER = {"must_visit":0, "interested":1, "maybe":2, PLANNED:3, "discarded":4}
-PLANNED_WEIGHT = 1  # neutral minimum coefficient, not a user priority
+PLANNED_WEIGHT = 3  # default coefficient only; no wishlist priority is assigned
 
 
 @dataclass(frozen=True)

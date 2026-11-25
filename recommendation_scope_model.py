@@ -11,7 +11,9 @@ def _snapshot(interests, discovery):
     from comparison_destinations_model import ComparisonDestinations
     if isinstance(interests,ComparisonDestinations):
         return {"revision":interests.revision,"plan_id":interests.plan_id,
-                "items":sorted((key,priority) for key,priority,_,_ in interests.entries)}
+                "items":sorted((key,priority) for key,priority,_,_ in interests.entries),
+                "wishlist_items":sorted((key,original) for key,_,original,_ in interests.entries if original is not None),
+                "planned_ids":sorted(key for key,_,_,planned in interests.entries if planned)}
     doc = validate_interests(interests, discovery)
     return {
         "revision": doc["revision"],
@@ -67,6 +69,19 @@ def reconcile_scope(interests, scope, discovery, *, reset=False):
             raise ValueError("Snapshot inválido")
         old = {"revision": old["revision"], "items": sorted(tuple(x) for x in old_items),
                **({"plan_id":old["plan_id"]} if "plan_id" in old else {})}
+        raw_snapshot=scope["snapshot"]
+        def wishlist_items(snapshot):
+            rows=snapshot.get("wishlist_items",snapshot["items"])
+            if (not isinstance(rows,list) or any(not isinstance(x,(tuple,list)) or len(x)!=2
+                    or not isinstance(x[0],str) or x[1] not in
+                    ("must_visit","interested","maybe","discarded") for x in rows)
+                    or len({x[0] for x in rows})!=len(rows)):
+                raise ValueError("Lista inválida")
+            return sorted(tuple(x) for x in rows)
+        if "plan_id" in old and "wishlist_items" not in raw_snapshot:
+            raise ValueError("Escopo anterior sem origem")
+        old_wishes=wishlist_items(raw_snapshot)
+        new_wishes=wishlist_items(now)
         if "plan_id" in old and old.get("plan_id")!=now.get("plan_id"):
             raise ValueError("Roteiro substituído")
         chosen, pending = scope["destination_ids"], scope["pending_ids"]
@@ -77,8 +92,7 @@ def reconcile_scope(interests, scope, discovery, *, reset=False):
         if not set(chosen) <= _active(old) or not set(pending) <= _active(old):
             raise ValueError("Escopo inconsistente")
         if now["revision"] < old["revision"] or (
-                now["revision"] == old["revision"] and now != old
-                and "plan_id" not in now):
+                now["revision"] == old["revision"] and new_wishes != old_wishes):
             raise ValueError("Documento substituído")
     except (KeyError, TypeError, ValueError):
         return {"state": "scope_required", "scope": None, "pending_ids": sorted(active)}

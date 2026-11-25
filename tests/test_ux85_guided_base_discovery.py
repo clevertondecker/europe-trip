@@ -117,7 +117,7 @@ class GuidedComparisonTests(unittest.TestCase):
         self.assertIn('render_selection_toolbar(options,cities,navigation="explore")',source)
         self.assertIn('render_selection_toolbar(options,cities,navigation="compare")',source)
         self.assertIn("size=4",source)
-        self.assertIn("render_planning_handoff(plan,interests=interests",source)
+        self.assertIn("render_planning_handoff(plan,interests=wishes",source)
 
     def test_two_highlight_cards_show_inline_comparison(self):
         a=self.app()

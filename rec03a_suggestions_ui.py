@@ -539,7 +539,6 @@ def render_suggestions(*,plan,discovery=None,research=None):
     from ux99_base_cards_presentation import scope_chips
     st.markdown(scope_chips([x["id"] for x in result["destinations"]],names),
                 unsafe_allow_html=True)
-    st.caption(" · ".join(names[d["id"]]+": "+d.get("origin","Minha lista") for d in result["destinations"]))
     a,b=st.columns(2)
     a.button("Editar destinos",key="rec03a_edit",on_click=_edit)
     b.button("Minha lista",key="rec03a_back_wishlist",

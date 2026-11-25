@@ -190,7 +190,11 @@ class RecommendationAppTests(unittest.TestCase):
         self.assertEqual(a.text_input(key="rec03a_search").value,"Angers")
         self.assertEqual(a.session_state["advisor_plan"],original_plan)
         from base_recommendation_model import recommend_bases
-        result=recommend_bases(a.session_state["ux502_interests"],a.session_state[SCOPE],discovery=self.discovery)
+        from comparison_destinations_model import project_comparison_destinations
+        from attractions_model import load_attractions
+        projection=project_comparison_destinations(a.session_state["ux502_interests"],original_plan,self.discovery,load_attractions())
+        result=recommend_bases(projection,a.session_state[SCOPE],discovery=self.discovery)
+        self.assertIn(result["state"],("comparable","partial_evidence","insufficient_evidence"))
         angers=next(c for c in result["candidates"] if c["base_id"]=="angers")
         self.assertEqual(angers["evidence"]["angers"]["category"],"local")
         self.assertIsNone(angers["evidence"]["angers"]["display_min"])
