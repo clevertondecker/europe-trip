@@ -89,9 +89,18 @@ class AuditReportTests(unittest.TestCase):
                 path.write_text("stale", encoding="utf-8")
                 self.assertEqual(main(["--output", str(path), "--check"]), 1)
 
-    def test_report_snapshot_for_review(self):
-        # The first implementation CI supplies the actual generated Markdown.
-        # This temporary diagnostic is removed after the snapshot is committed.
-        report = render_report(self.audit, input_manifest())
-        for index, line in enumerate(report.splitlines()):
-            print("DATA24_REPORT_LINE " + json.dumps([index, line], ensure_ascii=False))
+    def test_committed_report_is_current(self):
+        root = Path(__file__).resolve().parents[1]
+        report = root / "docs/audits/data24_research_coverage.md"
+        self.assertEqual(report.read_text(encoding="utf-8"),
+                         render_report(self.audit, input_manifest()))
+    
+    def test_removed_inventory_is_not_imported_by_app(self):
+        root = Path(__file__).resolve().parents[1]
+        app = (root / "app.py").read_text(encoding="utf-8")
+        self.assertNotIn("render_weight_coverage", app)
+        self.assertIn('preserved_modes = ["Estudos de troca","Referências históricas"]', app)
+        self.assertIn('"Evidências e lacunas":"Referências históricas"', app)
+        self.assertIn('"Pesos das 30 cidades":"Referências históricas"', app)
+        self.assertIn('"Comparar mesmas viagens":"Referências históricas"', app)
+        self.assertIn("render_city_decision(", app)
