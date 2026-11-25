@@ -45,7 +45,6 @@ from planning_context_ui import (render_context,render_home_continue,
 from base_explorer_ui import render_base_explorer
 from base_change_ui import render_base_change
 from city_decision_ui import render_city_decision
-from base_weight_coverage_ui import render_weight_coverage
 from budget_sections_ui import render_budget_summary, render_budget_details
 from ux_shared_ui_presentation import page_header, kpi_cards, section_heading
 from base_scenario_model import base_options, choose_exploratory_base, hypothetical_city_name, expanded_rail_routes
@@ -732,23 +731,22 @@ elif page == "Comparar cidades":
     with st.expander("Pesquisas e estudos preservados · temporário", expanded=False):
         st.caption("Consultas e estudos ainda não migrados. Para comparar cidades, use a comparação principal acima.")
         # Migrate stale widget preferences without touching the official plan.
-        preserved_modes = ["Estudos de troca","Evidências e lacunas","Referências históricas"]
+        preserved_modes = ["Estudos de troca","Referências históricas"]
         legacy_modes = {"Impacto da troca":"Estudos de troca",
-                        "Pesos das 30 cidades":"Evidências e lacunas",
+                        "Pesos das 30 cidades":"Referências históricas",
+                        "Evidências e lacunas":"Referências históricas",
                         "Estudo histórico":"Referências históricas",
-                        "Comparar mesmas viagens":"Evidências e lacunas",
+                        "Comparar mesmas viagens":"Referências históricas",
                         "Uma ou duas bases":"Estudos de troca"}
         current_mode=st.session_state.get("ux_compare_mode")
         if current_mode not in preserved_modes:
             st.session_state["ux_compare_mode"]=legacy_modes.get(current_mode,"Estudos de troca")
         compare_mode=st.segmented_control(
             "Consultar",preserved_modes,key="ux_compare_mode",selection_mode="single")
-        if compare_mode=="Estudos de troca":
+        if compare_mode in ("Estudos de troca",None):
             render_city_decision(active_plan(),data,
                                  sync_sources["finance"]["status"]=="live",
                                  int(st.session_state.get("ux_days_value",60)))
-        elif compare_mode in ("Evidências e lacunas",None):
-            render_weight_coverage()
         else:
 
             import pandas as pd
