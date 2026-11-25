@@ -63,7 +63,11 @@ class TravelDashboardTests(unittest.TestCase):
         self.assertIn("ux120_visit_colmar",{b.key for b in app.button})
         self.assertNotIn("flow_edit_save_colmar",{b.key for b in app.button})
         self.assertTrue(any("Colmar" in x.value for x in app.markdown))
-        app.button(key="flow_organize_close").click().run()
+        # The contextual editor is closed by default. Use the public return
+        # action, not a close button belonging to a nonexistent editor.
+        self.assertNotIn("flow_organize_close",{b.key for b in app.button})
+        app.button(key="flow_journey_skip_dates").click().run()
+        self.assertEqual(app.session_state["ux64_public_task"],"Meus destinos")
         self.assertFalse(app.exception,[e.message for e in app.exception])
         self.assertIn("flow_workspace_edit_colmar",{b.key for b in app.button})
         app.button(key="flow_workspace_edit_colmar").click().run()
