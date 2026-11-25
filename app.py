@@ -91,7 +91,8 @@ bootstrap_ux(st.session_state)
 apply_navigation_request(st.session_state)
 apply_recommendation_navigation(st.session_state)
 apply_planning_request(st.session_state)
-apply_simulation_request(st.session_state)
+if apply_simulation_request(st.session_state):
+    st.session_state["ux127_custom_simulation"]=True
 # Legacy outing handoffs must reach the single editor rather than the summary.
 if ((st.session_state.get("ux_area"),st.session_state.get("ux_section"))==("Meu roteiro","Meu planejamento")
         and st.session_state.get("ux45_origin") and st.session_state.get("flow_edit_target")):
@@ -305,6 +306,8 @@ def _ux_days_changed() -> None:
     # Shared duration is a what-if input, never a mutation of TripPlan.
     st.session_state["ux_days_value"]=st.session_state["ux_days"]
     st.session_state["unified_stay"]=st.session_state["ux_days"]
+    if (st.session_state.get("ux_area"),st.session_state.get("ux_section"))==("Orçamento","Simulações"):
+        st.session_state["ux127_custom_simulation"]=True
 
 
 def _ux_budget_days_changed() -> None:
@@ -318,6 +321,8 @@ def _ux_next_task(area:str,task:str) -> None:
 
 def _ux_mode_changed() -> None:
     st.session_state["ux_mode_value"]=st.session_state["ux_mode"]
+    if (st.session_state.get("ux_area"),st.session_state.get("ux_section"))==("Orçamento","Simulações"):
+        st.session_state["ux127_custom_simulation"]=st.session_state["ux_mode"]=="Simulação"
     official=active_plan()["base_city"]
     if st.session_state["ux_mode"]=="Oficial":
         previous=st.session_state.get("scenario_base_selected",official)
@@ -1442,7 +1447,22 @@ elif page == "Orçamento":
             st.caption(f'Verba de referência para {official["reference_days"]} dias; roteiro atual de {official["planned_days"]} dias.')
         custom=st.checkbox("Personalizar premissas da simulação",key="ux127_custom_simulation",
                            help="Desmarque para restaurar a projeção oficial, sem alterar o roteiro.")
-        if not custom or "unified_scenario" not in st.session_state:
+        if not custom:
+            # Restore before mounting controls. No stale hypothetical inputs
+            # may be displayed as if they were official or applied on re-entry.
+            st.session_state.update({
+                "unified_scenario":active_plan()["budget_scenario"],
+                "unified_stay":official["french"]["french_days"],
+                "ux_days":official["french"]["french_days"],
+                "ux_days_value":official["french"]["french_days"],
+                "ux127_use_budget_dining":True,
+                "unified_style":"Equilibrado",
+                "unified_outings":2,"unified_outing_cost":60,"unified_fx":6.3,
+                "unified_override_rent":False,"unified_flight_extra":0,
+                "unified_tour_extra":0,"unified_transit_extra":0,
+                "unified_rent_extra":0,"budget_use_attraction_cost":True,
+            })
+        elif "unified_scenario" not in st.session_state:
             st.session_state["unified_scenario"]=active_plan()["budget_scenario"]
         scenario_id = st.segmented_control(
             "Cenário completo para o casal", ["60k","70k"], default="70k",
@@ -1471,7 +1491,10 @@ elif page == "Orçamento":
                              on_change=_ux_budget_days_changed,disabled=not custom)
             exploratory_options=base_options(include_candidates=True)
             city_ids=[item["id"] for item in exploratory_options]
-            sync_city_widget("ux94_simulation_city",city_ids)
+            if custom:
+                sync_city_widget("ux94_simulation_city",city_ids)
+            else:
+                st.session_state["ux94_simulation_city"]=active_plan()["base_city"]
             selected_base_id=st.selectbox(
                 "Cidade-base hipotética",city_ids,key="ux94_simulation_city",
                 format_func=lambda key:hypothetical_city_name(key,exploratory_options),
@@ -1514,7 +1537,7 @@ elif page == "Orçamento":
             use_city_rent = st.checkbox("Informar aluguel mensal hipotético para esta cidade",
                                         value=False,key="unified_override_rent",disabled=not custom)
             quoted_rent = None
-            if use_city_rent:
+            if custom and use_city_rent:
                 input_rent=st.number_input(
                     "Aluguel hipotético (€ por mês, sem taxas)",
                     min_value=0.,max_value=6000.,
@@ -1538,38 +1561,39 @@ elif page == "Orçamento":
                 extra1,extra2,extra3,extra4=st.columns(4,gap="small")
                 with extra1:
                     flight_delta=st.number_input("Variação em voos (R$)",min_value=-int(flight_budget),
-                                                 max_value=25000,value=0,step=250,key="unified_flight_extra")
+                                                 max_value=25000,value=0,step=250,key="unified_flight_extra",disabled=not custom)
                 with extra2:
                     excursions_delta=st.number_input("Variação em passeios (R$)",
                                                      min_value=-int(french["amounts"]["excursions"]*ratio),
-                                                     max_value=20000,value=0,step=250,key="unified_tour_extra")
+                                                     max_value=20000,value=0,step=250,key="unified_tour_extra",disabled=not custom)
                 with extra3:
                     transit_delta=st.number_input("Variação em transporte (R$)",
                                                   min_value=-int(french["amounts"]["transport"]*ratio),
-                                                  max_value=10000,value=0,step=250,key="unified_transit_extra")
+                                                  max_value=10000,value=0,step=250,key="unified_transit_extra",disabled=not custom)
                 with extra4:
                     rent_delta=st.number_input("Variação em taxas/moradia (R$)",
                                                min_value=-int(minimum_rent),max_value=10000,
-                                               value=0,step=250,key="unified_rent_extra")
-            housing_terms=render_optional_housing_commitments(fx,selected_base_id)
+                                               value=0,step=250,key="unified_rent_extra",disabled=not custom)
+            housing_terms=render_optional_housing_commitments(fx,selected_base_id,disabled=not custom)
         # Reference is intentionally only a known ticket subtotal. It must never
         # replace the entire tour allowance nor create a discount for missing quotes.
         catalog_extra=0.0
         attraction_ref=None
         current_plan=active_plan()
         from itinerary_flow_model import selected_rows, FRANCE_STAGE
-        official_cities=[row["id"] for row in selected_rows(current_plan,load_attractions())
-                         if row["stage"]==FRANCE_STAGE]
+        official_rows=[row for row in selected_rows(current_plan,load_attractions())
+                       if row["stage"]==FRANCE_STAGE]
+        official_cities=[row["id"] for row in official_rows]
         if official_cities:
             known_cost=package_cost(
                 load_attractions(),load_base_routes(),current_plan["base_city"],
-                [id for items in current_plan["packages"].values() for id in items],
+                [item for row in official_rows for item in row["attractions"]],
                 planned_destination_ids=official_cities)
             attraction_ref={
                 "eur":known_cost["known_by_currency"]["EUR"],
                 "chf":known_cost["known_by_currency"]["CHF"],
-                "fx_eur":fx,
-                "fx_chf":st.session_state.get("explore_chf_fx",7.1),
+                "fx_eur":fx if custom else 6.3,
+                "fx_chf":st.session_state.get("explore_chf_fx",7.1) if custom else 7.1,
                 "base":current_plan["base_city"],
                 "incomplete":not known_cost["complete"],
                 "destinations":official_cities}
@@ -1778,7 +1802,7 @@ if ux_area=="Orçamento" and ux_section=="Simulações":
         # The canonical hypothetical base is selected by the budget activity.
         # Keep the previous sidebar selector accessible only via Explorar ->
         # Fontes e ferramentas; do not mount two city widgets in Simulações.
-        st.caption("Cidade-base hipotética: ajuste no simulador abaixo. "
+        st.caption("Cidade-base hipotética: ajuste no simulador acima. "
                    "O seletor anterior continua em Explorar → Fontes e ferramentas.")
         st.number_input("Dias na França (simulação)",
                         min_value=40,max_value=80,
