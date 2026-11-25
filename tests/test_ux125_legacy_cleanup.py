@@ -67,6 +67,9 @@ class LegacyCleanupTests(unittest.TestCase):
                 for task in tasks:
                     app.segmented_control(key="ux64_public_task").set_value(task).run()
                     self.assertFalse(app.exception, [x.message for x in app.exception])
+                    self.assertNotIn("scenario_sidebar", {w.key for w in app.selectbox})
+                    self.assertNotIn("ux_mode", {w.key for w in app.segmented_control})
+                    self.assertNotIn("ux_days", {w.key for w in app.number_input})
                     labels = [normalize(e.label) for e in app.expander]
                     violations = [label for label in labels
                                   if re.search(r"anterior|temporario|[·•]\\s*avancado",label)

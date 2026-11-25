@@ -49,7 +49,7 @@ from base_change_ui import render_base_change
 from city_decision_ui import render_city_decision
 from budget_sections_ui import render_budget_summary, render_budget_details
 from ux_shared_ui_presentation import page_header, kpi_cards, section_heading
-from base_scenario_model import base_options, choose_exploratory_base, hypothetical_city_name, expanded_rail_routes
+from base_scenario_model import base_options, hypothetical_city_name, expanded_rail_routes
 from base_research_expanded_model import load_research, find_city, observed_housing
 from base_scenario_ui import render_scenario_impact
 from exploratory_selection import sync_city_widget, set_city_from_widget
@@ -239,14 +239,6 @@ def navigate_to_consultor() -> None:
     st.session_state["itinerary_section"] = "Meus passeios"
 
 
-def _select_scenario_sidebar() -> None:
-    chosen=choose_exploratory_base(st.session_state["scenario_sidebar"],_all_bases)
-    st.session_state["scenario_base_selected"]=chosen
-    st.session_state["ux_last_candidate"]=chosen
-    st.session_state["ux_mode"]="Simulação"
-    st.session_state["ux_mode_value"]="Simulação"
-
-
 def _ux_area_changed() -> None:
     st.session_state.pop("ux45_origin",None)
     st.session_state.pop("flow_edit_target",None)
@@ -297,14 +289,6 @@ def _ux_legacy_itinerary_changed() -> None:
 def _ux_legacy_guide_changed() -> None:
     set_ux_legacy(st.session_state,"Roteiro","Guias e pesquisas",
                   st.session_state["guide_section"])
-
-
-def _ux_days_changed() -> None:
-    # Shared duration is a what-if input, never a mutation of TripPlan.
-    st.session_state["ux_days_value"]=st.session_state["ux_days"]
-    st.session_state["unified_stay"]=st.session_state["ux_days"]
-    if (st.session_state.get("ux_area"),st.session_state.get("ux_section"))==("Orçamento","Simulações"):
-        st.session_state["ux127_custom_simulation"]=True
 
 
 def _ux_budget_days_changed() -> None:
@@ -436,19 +420,8 @@ with st.sidebar:
             st.segmented_control("Atividade legada",list(UX_SECTIONS[legacy_area]),
                                  key="ux_section",on_change=_ux_section_changed,
                                  selection_mode="single")
-        if legacy_area=="Explorar":
-            # Compatibility for old research/simulation deep links.
-            st.segmented_control("Visualizar",["Oficial","Simulação"],
-                                 key="ux_mode",on_change=_ux_mode_changed)
-            st.selectbox("Cidade-base da simulação",list(_base_details),
-                         key="scenario_sidebar",on_change=_select_scenario_sidebar,
-                         disabled=st.session_state["ux_mode_value"]=="Oficial",
-                         format_func=lambda key:_base_details[key]["name"]+
-                                            " · "+_base_details[key]["country"])
-            st.number_input("Dias na França (simulação)",
-                            min_value=40,max_value=80,
-                            key="ux_days",on_change=_ux_days_changed,
-                            disabled=st.session_state["ux_mode_value"]=="Oficial")
+        # Simulation inputs live only in Orçamento → Simulações;
+        # legacy route IDs and restored context remain available.
         # Compatibility: old indexed controls still work, but are not top-level tabs.
         for old_index,old_area in enumerate(("Minha viagem","Explorar",
                                              "Meu roteiro","Orçamento")):

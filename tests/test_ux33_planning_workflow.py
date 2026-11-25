@@ -133,7 +133,9 @@ class WorkflowAppTests(unittest.TestCase):
         self.assertEqual(app.session_state["advisor_plan"],original)
         app.button(key="ux64_sidebar_nav_0").click().run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
-        self.assertIn("scenario_sidebar",{x.key for x in app.selectbox})
+        self.assertNotIn("scenario_sidebar",{x.key for x in app.selectbox})
+        self.assertNotIn("ux_mode",{x.key for x in app.segmented_control})
+        self.assertNotIn("ux_days",{x.key for x in app.number_input})
         self.assertEqual(app.session_state["advisor_plan"],original)
 
     def test_budget_form_does_not_leak_into_wishlist(self):
