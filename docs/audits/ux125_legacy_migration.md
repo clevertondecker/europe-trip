@@ -34,3 +34,9 @@ Validação integrada do HEAD 82bc7b9: CI 45659852093, 1392 testes, 2 ignorados 
 | Estudos de cidades-base | Transitório | Preservar estudos privados, recuperação, referências e fontes históricas até equivalência contextual. |
 
 A classificação indica intenção de produto, não nova autorização de remoção. Os acessos diretos de comparação e pesquisa mostram apenas o guia e retorno contextual; nenhuma aba pública é selecionada quando a seção interna está ativa. A seleção nula é ignorada. As entradas genéricas permanecem disponíveis pela navegação secundária.
+
+## Renderizadores aposentados (item 5)
+
+- `base_weight_coverage_ui.py`: o inventário de cobertura histórica já saiu da interface no DATA24A; evidências DQ31/DQ32 e cobertura permanecem nos modelos e no anexo `docs/audits/data24_legacy_evidence.json`. Remoção apenas da apresentação concorrente.
+- `city_profiles_ui.py`: era um invólucro temporário que chamava a mesma ficha `ux124_city_profile_ui.render_city_profile` a partir do inventário acima. A ficha canônica e o modelo de perfis permanecem.
+- Retirada proposta nesta revisão, com teste AST sobre os arquivos Python do checkout para detectar imports diretos e imports dinâmicos literais remanescentes. A busca remota não é suficiente para comprovar ausência de consumidores; aceitar a remoção somente após a guarda e a suíte integral verdes. Nenhum modelo, dataset ou evidência é removido. CSS compartilhado preservado por falta de comprovação de que seja órfão.
