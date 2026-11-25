@@ -1801,22 +1801,8 @@ elif page == "Pesquisas & decisões":
         for col,(label,key) in zip(st.columns(2,gap="medium"),docs[4:]):
             with col: st.link_button(label,data["sources"][key],use_container_width=True)
 
-# UX127: existing alternative and advanced tools below the simulator, not above tabs.
-if ux_area=="Orçamento" and ux_section=="Simulações":
-    with st.expander("Ajustes avançados da simulação",expanded=False):
-        st.segmented_control("Visualizar",["Oficial","Simulação"],
-                             key="ux_mode",on_change=_ux_mode_changed)
-        # The canonical hypothetical base is selected by the budget activity.
-        # Keep the previous sidebar selector accessible only via Explorar ->
-        # Fontes e ferramentas; do not mount two city widgets in Simulações.
-        st.caption("Cidade-base hipotética: ajuste no simulador acima. "
-                   "O seletor anterior continua em Explorar → Fontes e ferramentas.")
-        st.number_input("Dias na França (simulação)",
-                        min_value=40,max_value=80,
-                        key="ux_days",on_change=_ux_days_changed,
-                        disabled=st.session_state["ux_mode_value"]=="Oficial")
-        st.caption("Entradas hipotéticas, não alteram o roteiro aprovado. "
-                   "Para alterar o plano oficial, use Configurar minha viagem.")
+# UX125B: the main simulator owns mode and duration. Preserve the
+# separate outing consultant until its contextual migration is verified.
 if ux_area=="Orçamento" and ux_section=="Simulações":
     # Retain the legacy tool selector and callback, but it should not compete
     # with the single budget scenario and hypothetical-base controls.
