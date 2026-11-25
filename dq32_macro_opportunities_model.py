@@ -211,7 +211,8 @@ def opportunity_overview(base_id, *, macro=None,catalog=None,exploration=None,
             entry["indicative_confidence"]=cell.get("confidence")
             entry["indicative_evidence_type"]=(
                 cell.get("gap_evidence_type")
-                or ("data23_candidate_reference" if cell.get("candidate_connectivity_applied")
+                or ("data25_priority_reference" if cell.get("data25_connectivity_applied")
+                    else "data23_candidate_reference" if cell.get("candidate_connectivity_applied")
                     else "data22_supplemental_reference" if cell.get("supplemental_connectivity_applied")
                     else "data13_directed_reference" if cell.get("data13_connectivity_applied")
                     else "data12_lille_reference" if cell.get("lille_connectivity_applied")
@@ -219,7 +220,8 @@ def opportunity_overview(base_id, *, macro=None,catalog=None,exploration=None,
                     else "data10_connectivity_reference" if cell.get("connectivity_applied")
                     else "routes7_reference"))
             entry["indicative_source_dataset"]=(
-                "data23_france_base_candidates_2026_11" if cell.get("candidate_connectivity_applied")
+                "data25_priority_rail_2026_11" if cell.get("data25_connectivity_applied")
+                else "data23_france_base_candidates_2026_11" if cell.get("candidate_connectivity_applied")
                 else "data22_supplemental_rail_2026_11" if cell.get("supplemental_connectivity_applied")
                 else "data13_directed_connectivity_2026_11" if cell.get("data13_connectivity_applied")
                 else "data12_lille_connectivity_2026_11" if cell.get("lille_connectivity_applied")
