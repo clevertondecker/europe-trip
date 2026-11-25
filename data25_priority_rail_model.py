@@ -7,7 +7,7 @@ from rail_gap_enrichment_model import validate_gap_dataset
 DATA = Path(__file__).resolve().parent / "data" / "data25_priority_rail_2026_11.json"
 RESEARCH_BASE_IDS = ("lille", "metz", "mulhouse", "nancy", "strasbourg")
 RESEARCH_SCOPE_APPROVED_AT = "2026-11-25"
-RESEARCH_DESTINATIONS = ("annecy",)
+RESEARCH_DESTINATIONS = ("annecy", "angers", "rennes", "selestat")
 
 
 def load_data25(path=DATA):

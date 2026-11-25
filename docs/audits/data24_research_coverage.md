@@ -10,7 +10,7 @@ Versão do esquema: 1.
 
 | Universo | Pares | Histórico | Indicativo | Local | Sem tempo | Cobertura |
 |---|---:|---:|---:|---:|---:|---:|
-| Global | 1870 | 54 | 525 | 34 | 1257 | 579/1836 · 31.5% |
+| Global | 1870 | 54 | 536 | 34 | 1246 | 590/1836 · 32.1% |
 
 ### Por origem
 
@@ -33,13 +33,13 @@ Versão do esquema: 1.
 | kehl | 55 | 0 | 17 | 1 | 37 | 17/54 · 31.5% |
 | le_mans | 55 | 0 | 1 | 1 | 53 | 1/54 · 1.9% |
 | liege | 55 | 0 | 19 | 1 | 35 | 19/54 · 35.2% |
-| lille | 55 | 8 | 34 | 1 | 12 | 42/54 · 77.8% |
+| lille | 55 | 8 | 36 | 1 | 10 | 44/54 · 81.5% |
 | lorrach | 55 | 0 | 8 | 1 | 46 | 8/54 · 14.8% |
 | luxembourg_city | 55 | 0 | 13 | 1 | 41 | 13/54 · 24.1% |
-| metz | 55 | 5 | 25 | 1 | 24 | 30/54 · 55.6% |
-| mulhouse | 55 | 8 | 39 | 1 | 7 | 47/54 · 87.0% |
+| metz | 55 | 5 | 28 | 1 | 21 | 33/54 · 61.1% |
+| mulhouse | 55 | 8 | 41 | 1 | 5 | 49/54 · 90.7% |
 | namur | 55 | 0 | 18 | 1 | 36 | 18/54 · 33.3% |
-| nancy | 55 | 4 | 31 | 1 | 19 | 35/54 · 64.8% |
+| nancy | 55 | 4 | 33 | 1 | 17 | 37/54 · 68.5% |
 | offenburg | 55 | 5 | 16 | 1 | 33 | 21/54 · 38.9% |
 | reims | 55 | 1 | 15 | 1 | 38 | 16/54 · 29.6% |
 | rennes | 55 | 0 | 2 | 1 | 52 | 2/54 · 3.7% |
@@ -47,7 +47,7 @@ Versão do esquema: 1.
 | saint_louis | 55 | 0 | 18 | 1 | 36 | 18/54 · 33.3% |
 | saverne | 55 | 0 | 11 | 1 | 43 | 11/54 · 20.4% |
 | selestat | 55 | 0 | 14 | 1 | 40 | 14/54 · 25.9% |
-| strasbourg | 55 | 15 | 26 | 1 | 13 | 41/54 · 75.9% |
+| strasbourg | 55 | 15 | 28 | 1 | 11 | 43/54 · 79.6% |
 | thionville | 55 | 0 | 14 | 1 | 40 | 14/54 · 25.9% |
 | trier | 55 | 1 | 17 | 1 | 36 | 18/54 · 33.3% |
 
@@ -57,7 +57,7 @@ Versão do esquema: 1.
 |---|---:|---:|---:|---:|---:|---:|
 | aachen | 34 | 0 | 8 | 1 | 25 | 8/33 · 24.2% |
 | amsterdam | 34 | 4 | 19 | 0 | 11 | 23/34 · 67.6% |
-| angers | 34 | 0 | 0 | 1 | 33 | 0/33 · 0.0% |
+| angers | 34 | 0 | 5 | 1 | 28 | 5/33 · 15.2% |
 | annecy | 34 | 0 | 5 | 1 | 28 | 5/33 · 15.2% |
 | arlon | 34 | 0 | 6 | 1 | 27 | 6/33 · 18.2% |
 | arras | 34 | 0 | 8 | 1 | 25 | 8/33 · 24.2% |
@@ -98,14 +98,14 @@ Versão do esquema: 1.
 | offenburg | 34 | 0 | 6 | 1 | 27 | 6/33 · 18.2% |
 | paris | 34 | 2 | 29 | 0 | 3 | 31/34 · 91.2% |
 | reims | 34 | 0 | 17 | 1 | 16 | 17/33 · 51.5% |
-| rennes | 34 | 0 | 0 | 1 | 33 | 0/33 · 0.0% |
+| rennes | 34 | 0 | 5 | 1 | 28 | 5/33 · 15.2% |
 | rotterdam | 34 | 3 | 8 | 0 | 23 | 11/34 · 32.4% |
 | saarbrucken | 34 | 0 | 6 | 1 | 27 | 6/33 · 18.2% |
 | saint_louis | 34 | 0 | 9 | 1 | 24 | 9/33 · 27.3% |
 | saint_malo | 34 | 0 | 1 | 0 | 33 | 1/34 · 2.9% |
 | saumur | 34 | 0 | 1 | 0 | 33 | 1/34 · 2.9% |
 | saverne | 34 | 0 | 8 | 1 | 25 | 8/33 · 24.2% |
-| selestat | 34 | 0 | 6 | 1 | 27 | 6/33 · 18.2% |
+| selestat | 34 | 0 | 7 | 1 | 26 | 7/33 · 21.2% |
 | strasbourg | 34 | 5 | 22 | 1 | 6 | 27/33 · 81.8% |
 | stuttgart | 34 | 2 | 7 | 0 | 25 | 9/34 · 26.5% |
 | thionville | 34 | 0 | 8 | 1 | 25 | 8/33 · 24.2% |
@@ -140,13 +140,13 @@ Versão do esquema: 1.
 - **kehl** (37): aachen, angers, annecy, arlon, arras, beaune, belfort, besancon, cologne, dijon, dinan, epernay, esch, freiburg, ghent, haguenau, interlaken, karlsruhe, lauterbrunnen, le_mans, liege, lorrach, lucerne, luxembourg, namur, obernai, oeschinen, reims, rennes, saarbrucken, saint_louis, saint_malo, saumur, saverne, selestat, thionville, trier
 - **le_mans** (53): aachen, amsterdam, angers, annecy, arlon, arras, baden_baden, basel, beaune, belfort, besancon, bruges_be, brussels, colmar, cologne, dijon, dinan, epernay, esch, freiburg, ghent, haguenau, interlaken, karlsruhe, kehl, lausanne, lauterbrunnen, liege, lille, lorrach, lucerne, luxembourg, lyon, metz, mulhouse, namur, nancy, obernai, oeschinen, offenburg, reims, rennes, rotterdam, saarbrucken, saint_louis, saint_malo, saumur, saverne, selestat, strasbourg, stuttgart, thionville, trier
 - **liege** (35): angers, annecy, arlon, arras, baden_baden, beaune, belfort, dinan, epernay, esch, freiburg, haguenau, interlaken, karlsruhe, kehl, lausanne, lauterbrunnen, le_mans, lorrach, lucerne, namur, obernai, oeschinen, offenburg, rennes, rotterdam, saarbrucken, saint_louis, saint_malo, saumur, saverne, selestat, stuttgart, thionville, trier
-- **lille** (12): angers, baden_baden, beaune, besancon, dinan, lauterbrunnen, le_mans, lorrach, oeschinen, rennes, saint_malo, saumur
+- **lille** (10): baden_baden, beaune, besancon, dinan, lauterbrunnen, le_mans, lorrach, oeschinen, saint_malo, saumur
 - **lorrach** (46): aachen, angers, annecy, arlon, arras, baden_baden, beaune, belfort, besancon, bruges_be, cologne, dinan, epernay, esch, ghent, haguenau, interlaken, karlsruhe, kehl, lausanne, lauterbrunnen, le_mans, liege, lille, lucerne, luxembourg, lyon, metz, mulhouse, namur, nancy, obernai, oeschinen, offenburg, reims, rennes, rotterdam, saarbrucken, saint_louis, saint_malo, saumur, saverne, selestat, stuttgart, thionville, trier
 - **luxembourg_city** (41): aachen, amsterdam, angers, annecy, arras, baden_baden, basel, beaune, belfort, besancon, bruges_be, brussels, cologne, dinan, epernay, freiburg, ghent, haguenau, interlaken, karlsruhe, kehl, lausanne, lauterbrunnen, le_mans, liege, lorrach, lucerne, lyon, namur, obernai, oeschinen, offenburg, rennes, rotterdam, saint_louis, saint_malo, saumur, saverne, selestat, stuttgart, trier
-- **metz** (24): aachen, angers, arlon, baden_baden, bruges_be, dinan, esch, freiburg, ghent, interlaken, kehl, lauterbrunnen, le_mans, liege, lorrach, namur, oeschinen, offenburg, rennes, saint_malo, saumur, selestat, stuttgart, trier
-- **mulhouse** (7): angers, dinan, le_mans, oeschinen, rennes, saint_malo, saumur
+- **metz** (21): aachen, arlon, baden_baden, bruges_be, dinan, esch, freiburg, ghent, interlaken, kehl, lauterbrunnen, le_mans, liege, lorrach, namur, oeschinen, offenburg, saint_malo, saumur, stuttgart, trier
+- **mulhouse** (5): dinan, le_mans, oeschinen, saint_malo, saumur
 - **namur** (36): angers, annecy, arras, baden_baden, basel, beaune, belfort, besancon, dinan, epernay, esch, freiburg, haguenau, interlaken, karlsruhe, kehl, lausanne, lauterbrunnen, le_mans, lorrach, lucerne, mulhouse, obernai, oeschinen, offenburg, reims, rennes, saarbrucken, saint_louis, saint_malo, saumur, saverne, selestat, stuttgart, thionville, trier
-- **nancy** (19): aachen, angers, arlon, baden_baden, dinan, ghent, interlaken, lauterbrunnen, le_mans, lorrach, lucerne, oeschinen, offenburg, rennes, saarbrucken, saint_malo, saumur, stuttgart, trier
+- **nancy** (17): aachen, arlon, baden_baden, dinan, ghent, interlaken, lauterbrunnen, le_mans, lorrach, lucerne, oeschinen, offenburg, saarbrucken, saint_malo, saumur, stuttgart, trier
 - **offenburg** (33): aachen, angers, annecy, arlon, arras, beaune, belfort, besancon, colmar, cologne, dinan, epernay, esch, ghent, haguenau, kehl, lauterbrunnen, le_mans, lorrach, lucerne, namur, obernai, oeschinen, reims, rennes, saarbrucken, saint_louis, saint_malo, saumur, saverne, selestat, thionville, trier
 - **reims** (38): aachen, angers, annecy, arlon, baden_baden, basel, belfort, bruges_be, brussels, cologne, dinan, esch, freiburg, ghent, haguenau, interlaken, karlsruhe, kehl, lauterbrunnen, le_mans, liege, lorrach, lucerne, luxembourg, namur, obernai, oeschinen, offenburg, rennes, rotterdam, saarbrucken, saint_malo, saumur, saverne, selestat, stuttgart, thionville, trier
 - **rennes** (52): aachen, amsterdam, angers, annecy, arlon, arras, baden_baden, basel, beaune, belfort, besancon, bruges_be, brussels, colmar, cologne, dijon, epernay, esch, freiburg, ghent, haguenau, interlaken, karlsruhe, kehl, lausanne, lauterbrunnen, le_mans, liege, lille, lorrach, lucerne, luxembourg, lyon, metz, mulhouse, namur, nancy, obernai, oeschinen, offenburg, paris, reims, rotterdam, saarbrucken, saint_louis, saumur, saverne, selestat, strasbourg, stuttgart, thionville, trier
@@ -154,7 +154,7 @@ Versão do esquema: 1.
 - **saint_louis** (36): aachen, amsterdam, angers, annecy, arlon, arras, baden_baden, beaune, bruges_be, cologne, dinan, epernay, esch, freiburg, ghent, haguenau, interlaken, karlsruhe, kehl, lauterbrunnen, le_mans, liege, lorrach, lucerne, namur, obernai, oeschinen, offenburg, rennes, rotterdam, saarbrucken, saint_malo, saumur, stuttgart, thionville, trier
 - **saverne** (43): aachen, amsterdam, angers, annecy, arlon, arras, baden_baden, beaune, belfort, besancon, bruges_be, cologne, dijon, dinan, epernay, esch, freiburg, ghent, interlaken, karlsruhe, kehl, lausanne, lauterbrunnen, le_mans, liege, lorrach, lucerne, luxembourg, namur, nancy, obernai, oeschinen, offenburg, reims, rennes, rotterdam, saarbrucken, saint_malo, saumur, selestat, stuttgart, thionville, trier
 - **selestat** (40): aachen, angers, annecy, arlon, arras, baden_baden, beaune, belfort, besancon, bruges_be, cologne, dinan, epernay, esch, freiburg, ghent, haguenau, interlaken, karlsruhe, kehl, lauterbrunnen, le_mans, liege, lorrach, lucerne, luxembourg, metz, namur, oeschinen, offenburg, reims, rennes, rotterdam, saarbrucken, saint_louis, saint_malo, saumur, saverne, thionville, trier
-- **strasbourg** (13): angers, arlon, dinan, esch, lauterbrunnen, le_mans, lorrach, namur, oeschinen, rennes, saint_malo, saumur, trier
+- **strasbourg** (11): arlon, dinan, esch, lauterbrunnen, le_mans, lorrach, namur, oeschinen, saint_malo, saumur, trier
 - **thionville** (40): aachen, angers, annecy, arlon, arras, baden_baden, beaune, belfort, besancon, dijon, dinan, epernay, esch, freiburg, haguenau, interlaken, karlsruhe, kehl, lauterbrunnen, le_mans, liege, lorrach, lucerne, lyon, mulhouse, namur, obernai, oeschinen, offenburg, reims, rennes, rotterdam, saarbrucken, saint_louis, saint_malo, saumur, saverne, selestat, stuttgart, trier
 - **trier** (36): angers, annecy, arras, baden_baden, beaune, belfort, besancon, colmar, dijon, dinan, epernay, esch, haguenau, interlaken, karlsruhe, kehl, lausanne, lauterbrunnen, le_mans, lorrach, lucerne, lyon, mulhouse, namur, obernai, oeschinen, offenburg, rennes, rotterdam, saint_louis, saint_malo, saumur, saverne, selestat, stuttgart, thionville
 
@@ -301,24 +301,24 @@ Denominador descritivo: 7 bases únicas; a triagem histórica não amplia o deno
 
 | Base | Anúncios históricos | Cotações 2027 | Restaurante EUR/2 pessoas | Passe EUR/pessoa/mês | Clima | Coworking (2026) | Idas documentadas/não locais |
 |---|---:|---:|---:|---:|---|---|---:|
-| lille | 2 | 0 | Desconhecido | Desconhecido | Documentado | Indeterminado | 42/54 |
-| metz | 3 | 0 | 60 | 45.9 | Documentado | Indeterminado | 30/54 |
-| mulhouse | 3 | 0 | 67.5 | 47 | Documentado | Horário insuficiente | 47/54 |
-| nancy | 3 | 0 | 60 | 47 | Documentado | Indeterminado | 35/54 |
+| lille | 2 | 0 | Desconhecido | Desconhecido | Documentado | Indeterminado | 44/54 |
+| metz | 3 | 0 | 60 | 45.9 | Documentado | Indeterminado | 33/54 |
+| mulhouse | 3 | 0 | 67.5 | 47 | Documentado | Horário insuficiente | 49/54 |
+| nancy | 3 | 0 | 60 | 47 | Documentado | Indeterminado | 37/54 |
 | offenburg | 3 | 0 | Desconhecido | Desconhecido | Desconhecido | Indeterminado | 21/54 |
-| strasbourg | 3 | 0 | 62.5 | 56 | Documentado | Horário insuficiente | 41/54 |
+| strasbourg | 3 | 0 | 62.5 | 56 | Documentado | Horário insuficiente | 43/54 |
 | trier | 3 | 0 | Desconhecido | Desconhecido | Desconhecido | Indeterminado | 18/54 |
 
 ### Lacunas por base — tipos de pesquisa, não prioridades oficiais
 
 | Base | Necessário para comparar a escolha | Complementar | Suficiente apenas para contexto |
 |---|---|---|---|
-| lille | três cotações comparáveis de 2027; internet no imóvel; pesquisar coworking e condições de acesso; cesta local comparável; tarifa e condições do transporte urbano; tempos ausentes (12/54) — validar destinos relevantes; retorno e porta a porta nos destinos relevantes | ampliar amostra histórica de moradia; restaurante para dois | normais climáticas |
-| metz | três cotações comparáveis de 2027; internet no imóvel; confirmar acesso de coworking no expediente; cesta local comparável; validar passe urbano para 2027; tempos ausentes (24/54) — validar destinos relevantes; retorno e porta a porta nos destinos relevantes | Nenhuma lacuna neste recorte | amostra histórica de moradia; passe urbano histórico; restaurante histórico; normais climáticas |
-| mulhouse | três cotações comparáveis de 2027; internet no imóvel; alternativa de coworking para expediente completo; cesta local comparável; validar passe urbano para 2027; tempos ausentes (7/54) — validar destinos relevantes; retorno e porta a porta nos destinos relevantes | Nenhuma lacuna neste recorte | amostra histórica de moradia; passe urbano histórico; restaurante histórico; normais climáticas |
-| nancy | três cotações comparáveis de 2027; internet no imóvel; confirmar acesso de coworking no expediente; cesta local comparável; validar passe urbano para 2027; tempos ausentes (19/54) — validar destinos relevantes; retorno e porta a porta nos destinos relevantes | Nenhuma lacuna neste recorte | amostra histórica de moradia; passe urbano histórico; restaurante histórico; normais climáticas |
+| lille | três cotações comparáveis de 2027; internet no imóvel; pesquisar coworking e condições de acesso; cesta local comparável; tarifa e condições do transporte urbano; tempos ausentes (10/54) — validar destinos relevantes; retorno e porta a porta nos destinos relevantes | ampliar amostra histórica de moradia; restaurante para dois | normais climáticas |
+| metz | três cotações comparáveis de 2027; internet no imóvel; confirmar acesso de coworking no expediente; cesta local comparável; validar passe urbano para 2027; tempos ausentes (21/54) — validar destinos relevantes; retorno e porta a porta nos destinos relevantes | Nenhuma lacuna neste recorte | amostra histórica de moradia; passe urbano histórico; restaurante histórico; normais climáticas |
+| mulhouse | três cotações comparáveis de 2027; internet no imóvel; alternativa de coworking para expediente completo; cesta local comparável; validar passe urbano para 2027; tempos ausentes (5/54) — validar destinos relevantes; retorno e porta a porta nos destinos relevantes | Nenhuma lacuna neste recorte | amostra histórica de moradia; passe urbano histórico; restaurante histórico; normais climáticas |
+| nancy | três cotações comparáveis de 2027; internet no imóvel; confirmar acesso de coworking no expediente; cesta local comparável; validar passe urbano para 2027; tempos ausentes (17/54) — validar destinos relevantes; retorno e porta a porta nos destinos relevantes | Nenhuma lacuna neste recorte | amostra histórica de moradia; passe urbano histórico; restaurante histórico; normais climáticas |
 | offenburg | três cotações comparáveis de 2027; internet no imóvel; pesquisar coworking e condições de acesso; cesta local comparável; tarifa e condições do transporte urbano; tempos ausentes (33/54) — validar destinos relevantes; retorno e porta a porta nos destinos relevantes | restaurante para dois; normais climáticas | amostra histórica de moradia |
-| strasbourg | três cotações comparáveis de 2027; internet no imóvel; alternativa de coworking para expediente completo; cesta local comparável; validar passe urbano para 2027; tempos ausentes (13/54) — validar destinos relevantes; retorno e porta a porta nos destinos relevantes | Nenhuma lacuna neste recorte | amostra histórica de moradia; passe urbano histórico; restaurante histórico; normais climáticas |
+| strasbourg | três cotações comparáveis de 2027; internet no imóvel; alternativa de coworking para expediente completo; cesta local comparável; validar passe urbano para 2027; tempos ausentes (11/54) — validar destinos relevantes; retorno e porta a porta nos destinos relevantes | Nenhuma lacuna neste recorte | amostra histórica de moradia; passe urbano histórico; restaurante histórico; normais climáticas |
 | trier | três cotações comparáveis de 2027; internet no imóvel; pesquisar coworking e condições de acesso; cesta local comparável; tarifa e condições do transporte urbano; tempos ausentes (36/54) — validar destinos relevantes; retorno e porta a porta nos destinos relevantes | restaurante para dois; normais climáticas | amostra histórica de moradia |
 
 ### Lacunas e condições para pesquisas seguintes
