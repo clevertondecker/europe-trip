@@ -206,18 +206,15 @@ def mini_budget() -> None:
     st.link_button("Abrir planilha original",data["sources"]["spreadsheet"],use_container_width=True)
 
 
-def bottom_source() -> None:
-    status_text = (f"Fontes do Drive verificadas às {escape(sync_time)} (UTC)." if sync_time
-                   else f"Snapshot local de {escape(data['snapshot_date'])}.")
-    details = " · ".join(f"{name}: {'Drive' if status['status'] == 'live' else 'snapshot'}" for name, status in sync_sources.items())
-    st.markdown(f"<div class='source-footer'>{status_text} {escape(details)}. "
-                "As finanças são estimativas, não preços cotados nem reservas. "
-                "O mapa usa uma base geográfica de referência, não rotas contratadas.</div>", unsafe_allow_html=True)
-    with st.expander("Fontes e documentação do projeto"):
-        for title,key in [("Pasta do Drive","project_folder"),("Estado atual","decisions"),("Planilha financeira","spreadsheet"),
-                           ("Markdown completo","knowledge"),("Pendências","tasks")]:
-            st.markdown(f"- [{title}]({data['sources'][key]})")
-        st.markdown(f"Crédito da fotografia: [{data['hero_image_credit']}]({data['hero_image_credit_url']}).")
+def render_source_documents() -> None:
+    """Global provenance links, mounted only in sidebar Drive details."""
+    for title,key in [("Estado atual","decisions"),("Planilha financeira","spreadsheet"),
+                       ("Markdown completo","knowledge"),("Pendências","tasks"),
+                       ("Guia do projeto","guide"),("Proveniência de pesquisas","evidence")]:
+        st.markdown(f"- [{title}]({data['sources'][key]})")
+    st.markdown(f"Crédito da fotografia: [{data['hero_image_credit']}]({data['hero_image_credit_url']}).")
+    st.caption("Finanças: estimativas, não cotações ou reservas. Mapa: referências geográficas, não rotas contratadas.")
+
 
 def navigate_page(destination: str) -> None:
     """Navigation from homepage controls, applied before the radio on rerun."""
@@ -419,6 +416,8 @@ with st.sidebar:
                 for issue in sync_issues:
                     st.warning(issue)
 
+        render_source_documents()
+
     # Retain legacy tools for compatibility without competing with main areas.
     with st.expander("Fontes e ferramentas", expanded=False):
         st.radio("Acesso à navegação anterior", list(LEGACY_PAGES),
@@ -580,16 +579,16 @@ if page == "Visão geral":
                             sync_sources["finance"]["status"]=="live",
                             st.session_state.get("advisor_eurfx",6.3),
                             st.session_state.get("advisor_chffx",7.1),summary_only=True,global_continuity=True)
-    # Keep legacy deep-link actions and recovery reachable without another dashboard.
-    with st.expander("Pesquisas e mapa · opcional", expanded=False):
+    # Decisions, research tasks and recovery have their own purpose; do not
+    # repeat Explore's map, comparison or destination tabs here.
+    with st.expander("Pendências e continuidade", expanded=False):
         render_home_continue(active_plan())
         render_next_actions(active_plan(),load_attractions())
-        st.button("Explorar cidades-base",key="home_continue_bases",
-                  on_click=_ux_next_task,args=("Explorar","Cidades-base"))
-        st.button("Ver mapa de destinos",key="home_go_map",
-                  on_click=navigate_page,args=("Mapa & destinos",))
-        st.button("Ver pesquisas e decisões",key="home_next_tasks",
-                  on_click=navigate_page,args=("Pesquisas & decisões",))
+        left,right=st.columns(2)
+        left.button("Pendências de pesquisa",key="home_next_tasks",
+                    on_click=_ux_next_task,args=("Minha viagem","Pendências"))
+        right.button("Decisões oficiais",key="ux125_home_decisions",
+                     on_click=_ux_next_task,args=("Minha viagem","Decisões"))
         st.button("Consultar propostas italianas e guias",key="home_open_consultor",
                   on_click=navigate_to_consultor)
 
@@ -688,9 +687,10 @@ elif page == "Mapa & destinos":
                 st.link_button("Consultar fonte",source_url)
     else:
         st.info("Nenhum ponto atende aos filtros. Ajuste país, tipo ou etapa para visualizar.")
-    st.button("Explorar atrações turísticas por cidade-base →",
-              on_click=navigate_to_attractions,use_container_width=True,
-              key="map_go_attractions")
+    from ux64_navigation_model import select_public_task
+    st.button("Descobrir destinos", key="map_go_attractions",
+              on_click=select_public_task,
+              args=(st.session_state,"Explorar","Descobrir"),use_container_width=True)
     with st.expander("Como interpretar o mapa",expanded=False):
         st.caption("O mapa representa dados geográficos de pesquisa histórica. "
                    "Desejado = wishlist; no roteiro = visita incluída; base candidata "
@@ -1783,4 +1783,3 @@ elif page == "Pesquisas & decisões":
         for col,(label,key) in zip(st.columns(2,gap="medium"),docs[4:]):
             with col: st.link_button(label,data["sources"][key],use_container_width=True)
 
-bottom_source()
