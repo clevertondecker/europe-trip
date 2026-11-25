@@ -160,17 +160,17 @@ def render_wishlist(discovery) -> bool:
         planning=project_planning(active_plan(),current,discovery,load_attractions())
         # This is presentation of the same authoritative action used by the
         # existing CTA; do not recompute eligibility or introduce another state.
-        if planning["rows"]:
-            headline="Seu rascunho está pronto para revisão"
-            detail="Confira os destinos incluídos e salve suas escolhas."
-        elif planning["eligible_count"]:
+        if planning["eligible_count"]:
             headline="Destinos compatíveis prontos para o roteiro"
             detail=f'{planning["eligible_count"]} destino(s) podem ser incluídos sem definir datas.'
+        elif planning["rows"]:
+            headline="Seu rascunho está pronto para revisão"
+            detail="Confira os destinos incluídos e salve suas escolhas."
         else:
             headline="Continue descobrindo destinos"
             detail="Os desejos atuais ainda estão disponíveis somente para pesquisa."
         st.markdown(next_action(headline,detail,variant="compact"),unsafe_allow_html=True)
-        if planning["eligible_count"] and not planning["rows"]:
+        if planning["eligible_count"]:
             st.button("Montar roteiro com meus destinos",key="flow_journey_from_wishlist",type="primary",
                       on_click=request_planning,args=(st.session_state,"build"))
         elif planning["rows"]:
