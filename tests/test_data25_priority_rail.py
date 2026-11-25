@@ -3,7 +3,8 @@ import unittest
 from copy import deepcopy
 
 from data25_priority_rail_model import load_data25, RESEARCH_BASE_IDS
-from data24_coverage_model import rail_coverage
+from trip01_supplemental_discovery import build_exploration_discovery
+from base_research_expanded_model import load_research
 from data24_audit_model import build_audit
 from ux503_destination_base_comparison_model import build_destination_matrix
 from rail_reference_projection_model import decorate_comparison
@@ -15,7 +16,10 @@ class Data25Tests(unittest.TestCase):
         expected = {"lille": 342, "metz": 363, "mulhouse": 352,
                     "nancy": 373, "strasbourg": 397}
         self.assertEqual(set(data["by_pair"]), {(b, "annecy") for b in RESEARCH_BASE_IDS})
-        matrix = build_destination_matrix(list(RESEARCH_BASE_IDS), ["annecy"])
+        matrix = build_destination_matrix(
+            list(RESEARCH_BASE_IDS), ["annecy"],
+            discovery=build_exploration_discovery(),
+            research=load_research(include_candidates=True))
         before = deepcopy(matrix)
         old = decorate_comparison(matrix, data25_overlay={"by_pair": {}})
         new = decorate_comparison(matrix)
