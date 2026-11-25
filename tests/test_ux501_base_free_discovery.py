@@ -149,7 +149,7 @@ class BaseFreeDiscoveryAppTests(unittest.TestCase):
         app.text_input(key="ux501_search").set_value("").run()
         self.assertEqual(app.session_state["ux501_interest_session"],chosen)
         self.assertEqual(app.session_state["ux502_transient_shadow"],chosen)
-        app.radio(key="ux502_view").set_value("Minha lista").run()
+        app.segmented_control(key="ux64_public_task").set_value("Minha lista").run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
         self.assertIn("ux502_migrate",{x.key for x in app.button})
         app.button(key="ux502_migrate").click().run()

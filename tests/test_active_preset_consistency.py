@@ -83,7 +83,7 @@ class ActivePresetConsistency(unittest.TestCase):
         self.assertFalse(app.exception,[e.message for e in app.exception])
         self.assertTrue(any("Roteiro Econômico sugerido" in x.value for x in app.info))
         app.segmented_control(key="ux_section").set_value("Organizar viagem").run()
-        app.button(key="flow_journey_step_organize").click().run()
+        app.segmented_control(key="ux64_public_task").set_value("Organizar").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
         self.assertIn("flow_add_open_button",{b.key for b in app.button})
         # Modern planner remains available; deprecated duplicate dashboard is gone.

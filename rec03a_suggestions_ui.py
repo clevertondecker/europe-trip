@@ -686,4 +686,8 @@ def render_recommendation_activity(*,plan,discovery=None,research=None):
                                         research=research)
     else:
         render_suggestions(plan=plan,discovery=discovery,research=research)
+        # Detailed basket filtering and recovery remain in the comparison task.
+        from rec03a_session import request_navigation
+        st.button("Ajustar comparação detalhada", key="ux125_open_manual_comparison",
+                  on_click=request_navigation, args=(state,"manual"))
     return state[ACTIVITY]

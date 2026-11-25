@@ -220,7 +220,7 @@ render_planning_journey(active_plan(),load_attractions(),summary_only=st.session
             app.run()
             self.assertFalse(app.exception,str(app.exception))
             self.assertEqual(app.button(key="flow_journey_primary").label,"Descobrir destinos compatíveis")
-            self.assertTrue(app.button(key="flow_journey_step_build").disabled)
+            self.assertNotIn("flow_journey_step_build",{b.key for b in app.button})
             self.assertFalse(any(w.key.startswith("flow_journey_batch_") for w in app.multiselect if w.key))
             self.assertEqual(app.session_state["advisor_plan"],plan)
             self.assertEqual(app.session_state["ux502_interests"],wishes)
@@ -253,21 +253,15 @@ render_planning_journey(active_plan(),load_attractions(),
             self.assertFalse(app.exception,str(app.exception))
             self.assertTrue(any("journey-header__eyebrow" in x.value
                                 for x in app.markdown))
-            self.assertIn("flow_journey_step_review",{x.key for x in app.button})
-            self.assertIn("flow_journey_step_build",{x.key for x in app.button})
+            self.assertNotIn("flow_journey_step_review",{x.key for x in app.button})
+            self.assertNotIn("flow_journey_step_build",{x.key for x in app.button})
             original=deepcopy(app.session_state["advisor_plan"])
-            app.button(key="flow_journey_step_review").click().run()
-            self.assertFalse(app.exception,str(app.exception))
-            self.assertEqual(app.session_state["flow_journey_view"],"review")
-            self.assertEqual(app.session_state["advisor_plan"],original)
-            self.assertTrue(any('href="#journey-review-anchor"' in x.value
-                                for x in app.markdown))
-            self.assertTrue(any('id="journey-review-anchor"' in x.value
-                                for x in app.markdown))
-            app.button(key="flow_journey_step_build").click().run()
+            app.button(key="flow_journey_primary").click().run()
             self.assertFalse(app.exception,str(app.exception))
             self.assertEqual(app.session_state["flow_journey_view"],"build")
             self.assertTrue(any('href="#journey-build-anchor"' in x.value
+                                for x in app.markdown))
+            self.assertTrue(any('id="journey-build-anchor"' in x.value
                                 for x in app.markdown))
             self.assertEqual(app.session_state["advisor_plan"],original)
 

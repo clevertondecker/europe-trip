@@ -8,7 +8,7 @@ from ux502_destination_interests_model import (
     import_interests, selected_destinations_for_comparison,
 )
 from private_continuity_store import StorageConflict, StorageUnavailable
-from ux_shared_ui_presentation import page_header, kpi_cards, next_action
+from ux_shared_ui_presentation import page_header, next_action
 
 
 def _current(discovery):
@@ -95,19 +95,13 @@ def render_wishlist(discovery) -> bool:
                 st.session_state["ux502_discovery_filters"] = snapshot
         _recover_previous_session_interests(st.session_state)
 
-    def legacy_view_changed():
-        remember_discovery_filters()
-        if "ux64_public_task" in st.session_state:
-            st.session_state["ux64_public_task"]=(
-                "Minha lista" if st.session_state["ux502_view"]=="Minha lista"
-                else "Descobrir")
     if "ux64_public_task" in st.session_state:
-        # Keep the original widget for existing bookmarks and navigation tests.
-        # Public task tabs remain the main way to switch views.
-        with st.expander("Visualização anterior · avançado", expanded=False):
-            view=st.radio("Visualização", ("Descobrir lugares", "Minha lista"),
-                          horizontal=True,key="ux502_view",
-                          on_change=legacy_view_changed)
+        remember_discovery_filters()
+        # Public task tabs are authoritative; keep the old state key only
+        # for bookmarks, compatibility and focused handoffs.
+        view = ("Minha lista" if st.session_state["ux64_public_task"] == "Minha lista"
+                else "Descobrir lugares")
+        st.session_state["ux502_view"] = view
     else:
         view = st.radio("Visualização", ("Descobrir lugares", "Minha lista"),
                         horizontal=True, key="ux502_view",
@@ -130,7 +124,9 @@ def render_wishlist(discovery) -> bool:
     items = ordered_interests(current, discovery)
     active = [r for r in items if r["priority"] != "discarded"]
     st.caption(f'{len(active)} destino(s) desejados · '
-               f'{sum(r["priority"] == "must_visit" for r in items)} imperdível(is). '
+               f'{sum(r["priority"] == "must_visit" for r in items)} imperdível(is) · '
+               f'{sum(r["priority"] == "interested" for r in items)} quero conhecer · '
+               f'{sum(r["priority"] == "maybe" for r in items)} talvez. '
                'Preferências não são reservas nem alteram o roteiro oficial.')
     transient = st.session_state.get("ux501_interest_session",
                                      st.session_state.get("ux502_transient_shadow", []))
@@ -185,13 +181,9 @@ def render_wishlist(discovery) -> bool:
             st.button("Descobrir destinos compatíveis",key="flow_journey_find_compatible",type="primary",
                       on_click=_discover_eligible)
             # Discovery remains accessible in the existing task tabs.
-        # UX89: one optional guided entry; the previous manual comparator
-        # stays available on demand for historical planning workflows.
+        # The canonical comparator is reachable through the public task.
         st.button("Comparar cidades-base", key="rec03a_open_from_wishlist",
                    on_click=request_navigation,args=(st.session_state,"suggestions"))
-        with st.expander("Comparação personalizada anterior · avançado"):
-            st.button("Abrir comparação personalizada",key="ux503_open_from_wishlist",
-                       on_click=request_navigation,args=(st.session_state,"manual"))
 
     if not active:
         st.info("Nenhum destino desejado por enquanto. Explore as fotos e escolha o que interessa.")
@@ -296,20 +288,4 @@ def render_wishlist(discovery) -> bool:
                     st.rerun()
 
 
-    with st.expander("Indicadores do catálogo de desejos · avançado",expanded=False):
-        metrics=kpi_cards([
-            {"name":"Destinos desejados","value":len(active),"hint":"Na minha lista",
-             "icon":"◎","highlight":bool(active)},
-            {"name":"Imperdíveis","value":sum(r["priority"] == "must_visit" for r in items),
-             "hint":"Maior prioridade","icon":"★"},
-            {"name":"Quero conhecer","value":sum(r["priority"] == "interested" for r in items),
-             "hint":"Interesses","icon":"◇"},
-            {"name":"Talvez","value":sum(r["priority"] == "maybe" for r in items),
-             "hint":"Para avaliar","icon":"○"},
-        ])
-        with st.container(key="ux82_wishlist_metrics"):
-            for column,markup in zip(st.columns(4,gap="small"),metrics):
-                column.markdown(markup,unsafe_allow_html=True)
-        st.caption("São preferências de pesquisa, não passeios, reservas ou trajetos confirmados. "
-                   "A cidade-base oficial e o TripPlan não são alterados.")
     return True

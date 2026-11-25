@@ -15,14 +15,17 @@ class HomeContextTests(unittest.TestCase):
         self.assertNotIn("ux_days",{x.key for x in at.number_input})
         self.assertNotIn("ux_mode",{x.key for x in at.segmented_control})
         self.assertNotIn("ux_section",{x.key for x in at.segmented_control})
-        self.assertIn("home_continue_bases",{x.key for x in at.button})
+        self.assertNotIn("home_continue_bases",{x.key for x in at.button})
+        self.assertIn("ux64_sidebar_nav_0",{x.key for x in at.button})
+        self.assertIn("ux125_home_decisions",{x.key for x in at.button})
         visible=" ".join(x.value for x in at.caption)
         self.assertIn("Roteiro oficial",visible)
 
     def test_exploration_configuration_and_home_status_are_connected(self):
         at=AppTest.from_file(str(ROOT/"app.py"),default_timeout=90).run()
         initial=at.session_state["advisor_plan"]["base_city"]
-        at.button(key="home_continue_bases").click().run()
+        at.button(key="ux64_sidebar_nav_0").click().run()
+        at.segmented_control(key="ux64_public_task").set_value("Comparar bases").run()
         self.assertFalse(at.exception,[x.message for x in at.exception])
         self.assertEqual(at.session_state["ux_area"],"Explorar")
         self.assertIn("scenario_sidebar",{x.key for x in at.selectbox})
