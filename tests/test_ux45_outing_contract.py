@@ -101,8 +101,10 @@ class HandoffTests(unittest.TestCase):
         state.pop("explore_countries")
         state["scenario_base_selected"]="strasbourg"
         self.assertTrue(return_to_origin(state))
-        self.assertEqual(state["ux_area"],"Explorar")
-        self.assertEqual(state["ux_section"],"Passeios")
+        self.assertEqual(state["ux_area"],"Meu roteiro")
+        self.assertEqual(state["ux_section"],"Melhorar meu roteiro")
+        self.assertEqual(state["ux_improve_view"],"Guias especializados")
+        self.assertEqual(state["ux_guide_view"],"Explorar atrações")
         self.assertEqual(state["explore_countries"],original["explore_countries"])
         self.assertEqual(state["scenario_base_selected"],"mulhouse")
         self.assertNotIn("flow_edit_target",state)
