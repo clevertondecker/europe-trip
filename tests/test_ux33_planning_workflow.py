@@ -90,9 +90,7 @@ class WorkflowAppTests(unittest.TestCase):
         self.assertFalse(at.exception,[e.message for e in at.exception])
         self.assertTrue(any(x.label=="Duração total (dias)" for x in at.number_input))
         self.assertEqual(at.session_state["advisor_plan"],initial)
-        # The alternative form now belongs to Orçamento > Simulações.
-        at.button(key="ux_sidebar_nav_3").click().run()
-        at.segmented_control(key="ux64_public_task").set_value("Simulações").run()
+        # Alternative review may approve settings; keep it in official planning.
         at.button(key="workflow_open_alternative").click().run()
         self.assertFalse(at.exception,[e.message for e in at.exception])
         at.selectbox(key="workflow_alt_base").set_value("offenburg").run()
@@ -101,8 +99,10 @@ class WorkflowAppTests(unittest.TestCase):
         self.assertIn("workflow_alt_detailed_impact",{b.key for b in at.button})
         at.button(key="workflow_alt_detailed_impact").click().run()
         self.assertFalse(at.exception,[e.message for e in at.exception])
-        self.assertEqual(at.session_state["ux_area"],"Explorar")
-        self.assertEqual(at.session_state["ux_section"],"Comparar")
+        self.assertEqual(at.session_state["ux_area"],"Meu roteiro")
+        self.assertEqual(at.session_state["ux_section"],"Melhorar meu roteiro")
+        self.assertEqual(at.session_state["ux_guide_view"],"Estudos de cidades-base")
+        self.assertIn("ux34_candidates",{w.key for w in at.multiselect})
         self.assertEqual(at.session_state["scenario_base_selected"],"offenburg")
         self.assertEqual(at.session_state["advisor_plan"],initial)
         at.button(key="workflow_back_to_edit").click().run()
@@ -138,11 +138,9 @@ class WorkflowAppTests(unittest.TestCase):
         self.assertNotIn("ux_days",{x.key for x in app.number_input})
         self.assertEqual(app.session_state["advisor_plan"],original)
 
-    def test_budget_form_does_not_leak_into_wishlist(self):
+    def test_alternative_review_does_not_leak_into_wishlist_or_simulations(self):
         at=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
         original=deepcopy(at.session_state["advisor_plan"])
-        at.button(key="ux64_sidebar_nav_2").click().run()
-        at.segmented_control(key="ux64_public_task").set_value("Simulações").run()
         at.button(key="workflow_open_alternative").click().run()
         self.assertIn("workflow_alt_base",{x.key for x in at.selectbox})
         at.button(key="ux64_sidebar_nav_0").click().run()
@@ -153,7 +151,13 @@ class WorkflowAppTests(unittest.TestCase):
         at.button(key="ux64_sidebar_nav_2").click().run()
         at.segmented_control(key="ux64_public_task").set_value("Simulações").run()
         self.assertFalse(at.exception,[x.message for x in at.exception])
+        self.assertNotIn("workflow_alt_base",{x.key for x in at.selectbox})
+        self.assertNotIn("workflow_open_alternative",{b.key for b in at.button})
+        self.assertNotIn("workflow_alt_confirm",{b.key for b in at.button})
+        at.button(key="ux64_sidebar_nav_1").click().run()
+        self.assertFalse(at.exception,[x.message for x in at.exception])
         self.assertIn("workflow_alt_base",{x.key for x in at.selectbox})
+        self.assertEqual(at.session_state["advisor_plan"],original)
 
     def test_resume_from_saved_in_session_destination(self):
         at=AppTest.from_file(str(ROOT/"app.py"),default_timeout=105).run()

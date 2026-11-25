@@ -451,7 +451,9 @@ ux_area=st.session_state["ux_area"]
 ux_section=st.session_state["ux_section"]
 if ux_area!="Orçamento":
     render_context(active_plan(),area=ux_area)
-if (ux_area in ("Explorar","Orçamento") and
+if ((ux_area in ("Explorar","Orçamento") or
+     ((ux_area,ux_section)==("Meu roteiro","Melhorar meu roteiro")
+      and st.session_state.get("ux_guide_view")=="Estudos de cidades-base")) and
     st.session_state.get("flow_return_stage")):
     render_breadcrumb(stage=st.session_state.get("flow_return_stage"),
                       city=st.session_state.get("flow_return_city"),

@@ -48,7 +48,10 @@ def open_detailed_impact()->None:
     state["flow_return_destination"]=state.get("flow_active_destination")
     state["flow_return_add_open"]=bool(state.get("flow_add_open",False))
     state["workflow_compare_open"]=False
-    set_task(state,"Explorar","Comparar")
+    state["ux_improve_view"]="Guias especializados"
+    state["ux_guide_view"]="Estudos de cidades-base"
+    state["ux_compare_mode"]="Estudos de troca"
+    set_task(state,"Meu roteiro","Melhorar meu roteiro")
 
 
 def close_overlays()->None:
@@ -306,7 +309,7 @@ def return_official_context()->None:
 
 
 def render_context(plan:dict,*,area:str)->None:
-    """Official settings in planning, alternative comparison in budget.
+    """Official settings and review of alternatives belong in planning.
 
     Previously these global controls appeared before Explore's own task
     heading. Keep a safe path to already-open forms across navigation.
@@ -338,15 +341,15 @@ def render_context(plan:dict,*,area:str)->None:
     if planning:
         st.button("Configurar minha viagem",key="workflow_open_settings",
                   on_click=show_settings)
-    elif budget_simulation:
-        st.button("Comparar alternativa",key="workflow_open_alternative",
+    if area=="Minha viagem" and section=="Resumo":
+        st.button("Revisar alternativa de roteiro",key="workflow_open_alternative",
                   on_click=show_alternative)
 
     if state.pop("workflow_change_notice",None):
         st.success("Plano atualizado nesta sessão. Salve para manter a revisão.")
     if planning and settings_open:
         _form_settings(active_plan())
-    elif budget_simulation and alternative_open:
+    elif area=="Minha viagem" and section=="Resumo" and alternative_open:
         _form_alternative(active_plan())
 
 
