@@ -144,6 +144,13 @@ def apply(state) -> tuple[str, str | None, str | None, str | None]:
     if section not in SECTIONS[area]:
         section = DEFAULT_SECTION[area]
         state["ux_section"] = section
+    focused=state.get("ux125b_focused_guide")
+    if (area,section)==("Meu roteiro","Melhorar meu roteiro") and focused in ("Estudos de cidades-base","Explorar atrações"):
+        # Keep route inputs durable when their widgets are intentionally unmounted.
+        state["ux_improve_view"]="Guias especializados"
+        state["ux_guide_view"]=focused
+    else:
+        state.pop("ux125b_focused_guide",None)
     # Remember a valid task independently of a deselected Streamlit widget.
     state["_ux_last_section"] = section
     research = ("Calendário completo" if state.get("ux_organize_view")=="Calendário completo"

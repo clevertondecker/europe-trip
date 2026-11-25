@@ -247,6 +247,7 @@ def _ux_area_changed() -> None:
 
 def _ux64_legacy_sidebar_clicked(area: str) -> None:
     # Original indexed controls remain reachable in advanced navigation.
+    st.session_state.pop("ux125b_focused_guide", None)
     st.session_state.pop("ux45_origin", None)
     st.session_state.pop("flow_edit_target", None)
     set_ux_area(st.session_state, area)
@@ -263,6 +264,8 @@ def _ux_section_changed() -> None:
     # A repeated click may yield None in Streamlit. Preserve the return
     # handoff unless the user actually selects a different task.
     requested=st.session_state["ux_section"]
+    if requested is not None and requested!=st.session_state.get("_ux_last_section"):
+        st.session_state.pop("ux125b_focused_guide",None)
     if requested is not None and requested!=st.session_state.get("_ux_last_section"):
         st.session_state.pop("ux45_origin",None)
         st.session_state.pop("flow_edit_target",None)
@@ -305,6 +308,7 @@ def _ux125b_open_base_studies() -> None:
     """Open specialist research without competing with the public comparison."""
     st.session_state["ux_improve_view"]="Guias especializados"
     st.session_state["ux_guide_view"]="Estudos de cidades-base"
+    st.session_state["ux125b_focused_guide"]="Estudos de cidades-base"
     set_ux_task(st.session_state,"Meu roteiro","Melhorar meu roteiro")
 
 
@@ -312,6 +316,7 @@ def _ux125b_open_base_outings() -> None:
     """Keep the legacy itinerary actions available without mounting a second catalog."""
     st.session_state["ux_improve_view"]="Guias especializados"
     st.session_state["ux_guide_view"]="Explorar atrações"
+    st.session_state["ux125b_focused_guide"]="Explorar atrações"
     set_ux_task(st.session_state,"Meu roteiro","Melhorar meu roteiro")
 
 
@@ -449,7 +454,9 @@ with st.sidebar:
 official_id=active_plan()["base_city"]
 ux_area=st.session_state["ux_area"]
 ux_section=st.session_state["ux_section"]
-if ux_area!="Orçamento":
+focused_guide=((ux_area,ux_section)==("Meu roteiro","Melhorar meu roteiro") and
+               st.session_state.get("ux125b_focused_guide") in ("Estudos de cidades-base","Explorar atrações"))
+if ux_area!="Orçamento" and not focused_guide:
     render_context(active_plan(),area=ux_area)
 if (ux_area in ("Explorar","Orçamento") and
     st.session_state.get("flow_return_stage")):
@@ -503,7 +510,7 @@ if ux_area=="Meu roteiro" and ux_section=="Organizar viagem":
     if not stage_rows:
         st.button("Incluir destinos nesta etapa",key="ux120_empty_stage",
                   on_click=select_public_task,args=(state,"Planejar","Meus destinos"))
-elif ux_area=="Meu roteiro" and ux_section=="Melhorar meu roteiro":
+elif ux_area=="Meu roteiro" and ux_section=="Melhorar meu roteiro" and not focused_guide:
     st.selectbox("Escolha uma ferramenta de apoio",[
         "Descobrir","Simular roteiros","Itália",
         "Temporada europeia","Calendário completo","Consultor de passeios","Guias especializados"],
@@ -536,14 +543,14 @@ page,itinerary_target,guide_target,base_target=ux_route(
 if page!="Comparar cidades" and st.session_state.get("ux114_review_context"):
     from rec03a_suggestions_ui import close_base_review
     close_base_review()
-if ux_area!="Minha viagem" and (ux_area,ux_section)!=("Explorar","Cidades-base"):
+if not focused_guide and ux_area!="Minha viagem" and (ux_area,ux_section)!=("Explorar","Cidades-base"):
     st.caption(UX_DESCRIPTIONS.get((ux_area,ux_section),"Continue o planejamento."))
-if (ux_area=="Meu roteiro" and ux_section=="Melhorar meu roteiro" and
+if (not focused_guide and ux_area=="Meu roteiro" and ux_section=="Melhorar meu roteiro" and
     st.session_state.get("flow_return_stage")):
     render_breadcrumb(stage=st.session_state.get("flow_return_stage"),
                       city=st.session_state.get("flow_return_city"),
                       show_return=True)
-if page != "Visão geral":
+if page != "Visão geral" and not focused_guide:
     render_return_to_summary()
 if page == "Visão geral":
     render_planning_journey(active_plan(),load_attractions(),data,
@@ -729,14 +736,14 @@ elif page == "Roteiro":
         # A stale/invalid profile must retain the normal page heading.
         from rec03b_handoff_ui import context_for
         individual_base_profile=context_for("profile")[0] is not None
-    if not individual_base_profile and ux_section not in ("Meu planejamento","Organizar viagem") and not (
+    if not focused_guide and not individual_base_profile and ux_section not in ("Meu planejamento","Organizar viagem") and not (
             ux_area=="Explorar" and ux_section=="Passeios"):
         st.markdown("<div class='page-eyebrow'>NOSSA EUROPA · "+escape(ux_area.upper())+"</div>"
                 "<div class='page-title'>"+escape(task_title)+"</div>"
                 "<div class='page-subtitle'>"+escape(
                     UX_DESCRIPTIONS.get((ux_area,ux_section),"Planeje sua viagem."))+
                 "</div>",unsafe_allow_html=True)
-    if ux_area=="Meu roteiro" and ux_section not in ("Meu planejamento","Organizar viagem"):
+    if not focused_guide and ux_area=="Meu roteiro" and ux_section not in ("Meu planejamento","Organizar viagem"):
         render_scenario_impact(active_plan(),data,
                                sync_sources["finance"]["status"]=="live")
     # UX 4.8: only task-based navigation is user-visible. Keep legacy routing
@@ -1810,7 +1817,3 @@ elif page == "Pesquisas & decisões":
         for col,(label,key) in zip(st.columns(2,gap="medium"),docs[4:]):
             with col: st.link_button(label,data["sources"][key],use_container_width=True)
 
-# Only the canonical simulator renders in Orçamento. The planning consultant
-# remains available in Planejar → Melhorar meu roteiro.
-if ux_area=="Orçamento" and ux_section=="Simulações":
-    render_context(active_plan(),area=ux_area)
