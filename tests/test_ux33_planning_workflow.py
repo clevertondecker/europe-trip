@@ -103,6 +103,7 @@ class WorkflowAppTests(unittest.TestCase):
         self.assertEqual(at.session_state["ux_section"],"Melhorar meu roteiro")
         self.assertEqual(at.session_state["ux_guide_view"],"Estudos de cidades-base")
         self.assertIn("ux34_candidates",{w.key for w in at.multiselect})
+        self.assertEqual(sum(b.key=="workflow_back_to_edit" for b in at.button),1)
         self.assertEqual(at.session_state["scenario_base_selected"],"offenburg")
         self.assertEqual(at.session_state["advisor_plan"],initial)
         at.button(key="workflow_back_to_edit").click().run()
