@@ -31,6 +31,9 @@ def official_budget_projection(data, source_live, plan, costs):
             "known_excursions_overage_brl": overage,
             "missing": tuple(costs.get("missing", ())),
             "has_unknown_costs": bool(costs.get("missing")),
+            "outings_available": costs.get("available", True),
+            "known_by_currency": dict(known),
+            "destination_ids": tuple(costs.get("destination_ids", ())),
             "reference_days": scenario["days"], "planned_days": plan["total_days"],
             "source": french["source"]}
 
@@ -41,12 +44,31 @@ def official_budget_for_plan(data, source_live, plan, catalog=None, routes=None)
     from itinerary_flow_model import selected_rows, FRANCE_STAGE
     catalog = load_attractions() if catalog is None else catalog
     routes = load_base_routes() if routes is None else routes
-    rows = [row for row in selected_rows(plan, catalog) if row["stage"] == FRANCE_STAGE]
-    selected = [row["id"] for row in rows]
-    chosen = [item for row in rows for item in row["attractions"]]
-    costs = package_cost(catalog, routes, plan["base_city"], chosen,
-                         planned_destination_ids=selected)
+    from destination_identity import outing_destination_id
+    try:
+        rows = [row for row in selected_rows(plan, catalog) if row["stage"] == FRANCE_STAGE]
+        selected = [row["id"] for row in rows]
+        # selected_rows deliberately skips obsolete destinations in old drafts.
+        # Detect that omission here rather than treating it as a zero-cost trip.
+        requested = {outing_destination_id(key) for key in plan.get("packages", {})}
+        requested.update(outing_destination_id(row["destination_id"])
+                         for row in plan.get("flexible_visits", [])
+                         if row["stage"] == FRANCE_STAGE)
+        if not requested <= set(selected):
+            raise ValueError("Passeios do plano ausentes no catálogo atual")
+        chosen = [item for row in rows for item in row["attractions"]]
+        costs = package_cost(catalog, routes, plan["base_city"], chosen,
+                             planned_destination_ids=selected)
+        costs = {**costs, "destination_ids": selected}
+    except ValueError:
+        # A legacy selection may no longer be valid. Keep the spreadsheet's
+        # entire reference (including its original outing allowance), without
+        # presenting an unverified additional amount as a calculated zero.
+        costs = {"known_by_currency": {"EUR": 0., "CHF": 0.},
+                 "missing": ["Passeios do plano não validados no catálogo atual"],
+                 "available": False}
     return official_budget_projection(data, source_live, plan, costs)
+
 
 
 def official_simulation_result(snapshot):
