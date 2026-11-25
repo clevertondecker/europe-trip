@@ -83,8 +83,6 @@ def route(area: str, section: str, *, research: str = "Pesquisa ampliada",
                 "Pesquisa ampliada" if city_view=="Pesquisa ampliada"
                 else "Destinos próximos")
     if area == "Orçamento":
-        if section == "Simulações" and budget_view == "Consultor de passeios":
-            return "Roteiro", "Orçamento", None, None
         return "Orçamento", None, None, None
     if section == "Meu planejamento":
         return "Roteiro", "Visão geral", None, None
@@ -96,6 +94,8 @@ def route(area: str, section: str, *, research: str = "Pesquisa ampliada",
         return "Roteiro","Itália",None,None
     if suggestion=="Temporada europeia":
         return "Roteiro","Meus passeios",None,None
+    if suggestion=="Consultor de passeios":
+        return "Roteiro","Orçamento",None,None
     if suggestion=="Calendário completo":
         return "Roteiro","Calendário",None,None
     if suggestion=="Guias especializados":
@@ -119,7 +119,7 @@ def from_legacy(page: str, itinerary: str | None = None,
     if itinerary in ("Itália","Descobrir","Simular roteiros"):
         return "Meu roteiro","Melhorar meu roteiro"
     if itinerary=="Explorar bases":return "Explorar","Cidades-base"
-    if itinerary=="Orçamento":return "Orçamento","Simulações"
+    if itinerary=="Orçamento":return "Meu roteiro","Melhorar meu roteiro"
     if itinerary=="Guias e pesquisas":
         if guide=="Explorar atrações" or guide is None:
             return "Explorar","Passeios"
@@ -154,10 +154,9 @@ def apply(state) -> tuple[str, str | None, str | None, str | None]:
                   else state.get("ux_suggestion",SUGGESTION_OPTIONS[0]))
     france = state.get("ux_france_view", "Meus passeios")
     city_view = state.get("ux_city_view","Visão da cidade")
-    budget_view = state.get("ux_budget_view","Simulação geral")
     guide_view = state.get("ux_guide_view",GUIDES[0])
     target = route(area, section, research=research, suggestion=suggestion,
-                   france=france,city_view=city_view,budget_view=budget_view,
+                   france=france,city_view=city_view,
                    guide_view=guide_view)
     page, itinerary, guide, base_mode = target
     state["main_navigation"] = page
@@ -177,13 +176,20 @@ def apply(state) -> tuple[str, str | None, str | None, str | None]:
 
 def bootstrap(state) -> tuple[str, str | None, str | None, str | None]:
     """Recover old bookmarks and internally-set legacy navigation requests."""
+    if (state.get("ux_area"),state.get("ux_section"))==("Orçamento","Simulações") and state.get("ux_budget_view")=="Consultor de passeios":
+        state.pop("ux_budget_view",None)
+        state["ux_improve_view"]="Consultor de passeios"
+        state["ux_area"],state["ux_section"]="Meu roteiro","Melhorar meu roteiro"
+        return apply(state)
     if "ux_area" not in state:
         area, section = from_legacy(
             state.get("main_navigation", "Visão geral"),
             state.get("itinerary_section"), state.get("guide_section"))
         state["ux_area"], state["ux_section"] = area, section
         itinerary=state.get("itinerary_section")
-        if itinerary=="Itália":
+        if itinerary=="Orçamento" and state.get("main_navigation")=="Roteiro":
+            state["ux_improve_view"]="Consultor de passeios"
+        elif itinerary=="Itália":
             state["ux_improve_view"]="Itália"
         elif itinerary=="Meus passeios":
             state["ux_improve_view"]="Temporada europeia"
@@ -198,6 +204,8 @@ def bootstrap(state) -> tuple[str, str | None, str | None, str | None]:
             area, section = from_legacy(
                 request, state.get("itinerary_section"), state.get("guide_section"))
             state["ux_area"], state["ux_section"] = area, section
+            if request=="Roteiro" and state.get("itinerary_section")=="Orçamento":
+                state["ux_improve_view"]="Consultor de passeios"
         elif (request == "Roteiro" and previous == "Roteiro"
               and state.get("_ux_legacy_itinerary") is not None
               and state.get("itinerary_section") != state["_ux_legacy_itinerary"]):
@@ -205,7 +213,9 @@ def bootstrap(state) -> tuple[str, str | None, str | None, str | None]:
             area, section = from_legacy("Roteiro", itinerary,
                                         state.get("guide_section"))
             state["ux_area"], state["ux_section"] = area, section
-            if itinerary in SUGGESTION_OPTIONS:
+            if itinerary=="Orçamento":
+                state["ux_improve_view"]="Consultor de passeios"
+            elif itinerary in SUGGESTION_OPTIONS:
                 state["ux_suggestion"] = itinerary
             if itinerary == "Guias e pesquisas" and state.get("guide_section") in RESEARCH_OPTIONS:
                 state["ux_research"] = state["guide_section"]
@@ -255,8 +265,9 @@ def set_from_legacy(state, page: str,
         state["ux_city_view"]=("Pesquisa ampliada" if
             state.get("base_explorer_mode")=="Pesquisa ampliada"
             else "Visão da cidade")
-    if itinerary == "Orçamento":
-        state["ux_budget_view"]="Consultor de passeios"
+    if page=="Roteiro" and itinerary == "Orçamento":
+        state.pop("ux_budget_view",None)
+        state["ux_improve_view"]="Consultor de passeios"
     if itinerary=="Itália":
         state["ux_improve_view"]="Itália"
     elif itinerary=="Meus passeios":

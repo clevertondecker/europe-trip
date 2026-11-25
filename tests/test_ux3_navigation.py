@@ -52,6 +52,22 @@ class UX3NavigationModelTests(unittest.TestCase):
         self.assertEqual((state["ux_area"],state["ux_section"]),
                          ("Meu roteiro","Organizar viagem"))
 
+    def test_old_consultant_routes_migrate_to_planning(self):
+        for state in (
+            {"main_navigation":"Roteiro","itinerary_section":"Orçamento"},
+            {"ux_area":"Orçamento","ux_section":"Simulações",
+             "ux_budget_view":"Consultor de passeios"},
+        ):
+            with self.subTest(state=state):
+                self.assertEqual(bootstrap(state)[:2],("Roteiro","Orçamento"))
+                self.assertEqual((state["ux_area"],state["ux_section"]),
+                                 ("Meu roteiro","Melhorar meu roteiro"))
+                self.assertEqual(state["ux_improve_view"],"Consultor de passeios")
+                set_task(state,"Orçamento","Simulações")
+                self.assertEqual(state["main_navigation"],"Orçamento")
+        self.assertEqual(route("Orçamento","Simulações",
+                         budget_view="Consultor de passeios")[0],"Orçamento")
+
     def test_comparisons_research_and_suggestions_are_reachable(self):
         self.assertEqual(route("Explorar","Comparar cidades")[0],"Comparar cidades")
         self.assertEqual(route("Explorar","Cidades-base")[3],"Destinos próximos")

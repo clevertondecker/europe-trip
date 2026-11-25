@@ -41,12 +41,8 @@ class LegacyCleanupTests(unittest.TestCase):
             self.assertEqual(app.session_state["ux502_interests"], doc)
 
     def test_no_unapproved_legacy_expanders_across_public_tasks(self):
-        # Explicit transitional exceptions belong exclusively to UX125B.
-        allowlist = {
-            ("Orçamento", "Simulações"): {
-                "outras ferramentas financeiras · avancado":
-                    "UX127 integration required before retiring finance tools"},
-        }
+        # No remaining transitional panel is allowed on a public task.
+        allowlist = {}
         from ux64_navigation_model import PUBLIC_TASKS
         def normalize(label):
             return " ".join("".join(ch for ch in unicodedata.normalize("NFKD", label.casefold())
@@ -67,9 +63,10 @@ class LegacyCleanupTests(unittest.TestCase):
                     self.assertNotIn("scenario_sidebar", {w.key for w in app.selectbox})
                     self.assertNotIn("ux_mode", {w.key for w in app.segmented_control})
                     self.assertNotIn("ux_days", {w.key for w in app.number_input})
+                    self.assertNotIn("ux_budget_view", {w.key for w in app.segmented_control})
                     labels = [normalize(e.label) for e in app.expander]
                     violations = [label for label in labels
-                                  if re.search(r"anterior|temporario|[·•]\\s*avancado",label)
+                                  if re.search(r"anterior|temporario|[·•]\s*avancado",label)
                                   and label not in allowlist.get((area,task),{})]
                     self.assertEqual(violations, [], (area,task,restored))
                     self.assertEqual(app.session_state["advisor_plan"], plan)
@@ -110,4 +107,20 @@ class LegacyCleanupTests(unittest.TestCase):
         self.assertFalse(app.exception, [x.message for x in app.exception])
         self.assertIn("ux501_search", {w.key for w in app.text_input})
         self.assertNotIn("attractions_scenario_base", {w.key for w in app.selectbox})
+        self.assertEqual(app.session_state["advisor_plan"], plan)
+
+    def test_consultant_is_in_planning_not_budget(self):
+        app = AppTest.from_file(str(ROOT / "app.py"), default_timeout=120).run()
+        plan = deepcopy(app.session_state["advisor_plan"])
+        app.button(key="ux64_sidebar_nav_2").click().run()
+        app.segmented_control(key="ux64_public_task").set_value("Simulações").run()
+        self.assertFalse(app.exception, [x.message for x in app.exception])
+        self.assertNotIn("ux_budget_view", {w.key for w in app.segmented_control})
+        self.assertNotIn("advisor_base", {w.key for w in app.selectbox})
+        self.assertNotIn("budget_preset_review_button", {w.key for w in app.button})
+        app.button(key="ux_sidebar_nav_2").click().run()
+        app.segmented_control(key="ux_section").set_value("Melhorar meu roteiro").run()
+        app.selectbox(key="ux_improve_view").set_value("Consultor de passeios").run()
+        self.assertFalse(app.exception, [x.message for x in app.exception])
+        self.assertIn("budget_preset_review_button", {w.key for w in app.button})
         self.assertEqual(app.session_state["advisor_plan"], plan)

@@ -506,7 +506,7 @@ if ux_area=="Meu roteiro" and ux_section=="Organizar viagem":
 elif ux_area=="Meu roteiro" and ux_section=="Melhorar meu roteiro":
     st.selectbox("Escolha uma ferramenta de apoio",[
         "Descobrir","Simular roteiros","Itália",
-        "Temporada europeia","Calendário completo","Guias especializados"],
+        "Temporada europeia","Calendário completo","Consultor de passeios","Guias especializados"],
         key="ux_improve_view",on_change=_ux_aux_changed)
     if st.session_state.get("ux_improve_view")=="Guias especializados":
         st.selectbox("Qual guia?",list(UX_GUIDES),
@@ -530,7 +530,6 @@ page,itinerary_target,guide_target,base_target=ux_route(
                 else st.session_state.get("ux_suggestion","Descobrir")),
     france=st.session_state.get("ux_france_view","Meus passeios"),
     city_view=st.session_state.get("ux_city_view","Visão da cidade"),
-    budget_view=st.session_state.get("ux_budget_view","Simulação geral"),
     guide_view=st.session_state.get("ux_guide_view","Itália e Costa Amalfitana"))
 # Contextual UX114 review ends on navigation away. Its candidate and scope
 # must not reappear as an apparently active approval on a later visit.
@@ -1811,15 +1810,7 @@ elif page == "Pesquisas & decisões":
         for col,(label,key) in zip(st.columns(2,gap="medium"),docs[4:]):
             with col: st.link_button(label,data["sources"][key],use_container_width=True)
 
-# UX125B: the main simulator owns mode and duration. Preserve the
-# separate outing consultant until its contextual migration is verified.
-if ux_area=="Orçamento" and ux_section=="Simulações":
-    # Retain the legacy tool selector and callback, but it should not compete
-    # with the single budget scenario and hypothetical-base controls.
-    with st.expander("Outras ferramentas financeiras · avançado",expanded=False):
-        st.segmented_control("Ferramenta de simulação",
-                             ["Simulação geral","Consultor de passeios"],
-                             key="ux_budget_view",on_change=_ux_aux_changed)
+# Only the canonical simulator renders in Orçamento. The planning consultant
+# remains available in Planejar → Melhorar meu roteiro.
 if ux_area=="Orçamento" and ux_section=="Simulações":
     render_context(active_plan(),area=ux_area)
-
