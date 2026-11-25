@@ -18,7 +18,8 @@ from planning_session import (active_plan,commit_outing,commit_undated_destinati
                               schedule_package,unschedule_package)
 from travel_advisor_ui import _owner_signed_in
 from attractions_model import load_base_routes,package_cost
-from advisor_finance import advisor_projection
+from official_budget_model import official_budget_for_plan
+from data_model import money_brl
 from continuity_ui import render_primary_private_save, private_status_label
 
 
@@ -386,25 +387,20 @@ def _compact_budget(plan:dict,catalog:dict,trip_data:dict,
         st.caption("Custos disponíveis em Orçamento; ainda há valores sem cotação.")
         return
     try:
-        selected=[a for group in plan["packages"].values() for a in group]
-        scheduled_cities=[row["id"] for row in selected_rows(plan,catalog)
-                          if row["stage"]==FRANCE_STAGE]
-        historical=package_cost(catalog,load_base_routes(),
-                                plan["base_city"],selected,
-                                planned_destination_ids=scheduled_cities)
-        snapshot=advisor_projection(trip_data,finance_live,plan,historical,
-                                    eurfx,chffx,False)
-    except (ValueError,KeyError,TypeError):
-        st.caption("Projeção parcial indisponível; consulte as premissas em Orçamento.")
+        snapshot=official_budget_for_plan(trip_data,finance_live,plan,catalog=catalog)
+    except (ValueError,KeyError,TypeError,StopIteration):
+        st.caption("Projeção oficial indisponível; consulte as premissas em Orçamento.")
         return
-    projection=snapshot["result"]
-    st.caption("**Orçamento resumido:** projeção do casal "+
-               _money(projection["total"])+
-               " · margem nominal "+_money(projection["margin"])+
-               " · "+str(len(historical["missing"]))+
+    st.caption("**Orçamento oficial:** projeção do casal "+
+               money_brl(snapshot["total"])+
+               " · margem nominal "+money_brl(snapshot["margin"])+
+               " · "+str(len(snapshot["missing"]))+
                " componente(s) de passeio com preço pendente.")
-    if projection["margin"]<0:
+    if snapshot["margin"]<0:
         st.warning("A projeção parcial excede o teto; as escolhas continuam editáveis.")
+    if snapshot["planned_days"]!=snapshot["reference_days"]:
+        st.caption(f'Verba de referência para {snapshot["reference_days"]} dias; '
+                   f'roteiro atual de {snapshot["planned_days"]} dias, sem reprecificação automática.')
     st.caption("A Itália permanece na verba agregada, sem somar novamente ingressos. "
                "Valores faltantes não são €0; a margem não é dinheiro livre.")
     if show_link:
