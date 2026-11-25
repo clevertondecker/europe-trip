@@ -100,9 +100,6 @@ if ((st.session_state.get("ux_area"),st.session_state.get("ux_section"))==("Meu 
     set_ux_task(st.session_state,"Meu roteiro","Organizar viagem")
     st.session_state["flow_journey_view"]="organize"
     st.session_state["ux_organize_view"]="Por período ou data"
-if st.session_state.pop("ux503_pending_return_to_wishlist", False):
-    set_ux_task(st.session_state, "Explorar", "Passeios")
-    st.session_state["ux502_view"] = "Minha lista"
 # One global exploratory base, separate from the approved TripPlan.
 _all_bases=base_options(include_candidates=True)
 _base_details={item["id"]:item for item in _all_bases}

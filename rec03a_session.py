@@ -12,7 +12,8 @@ INTENT = "rec03a_navigation_intent"
 IDENTITY = "rec03a_identity"
 SUGGESTED = "Cidades sugeridas"
 MANUAL = "Comparação personalizada"
-ACTIVITIES = (MANUAL, SUGGESTED)
+ACTIVITIES = (SUGGESTED,)
+# MANUAL is retained solely as a historical session compatibility token.
 
 
 def clear_recommendation_context(state):
@@ -30,9 +31,14 @@ def clear_recommendation_context(state):
     for key in list(state.keys()):
         if isinstance(key, str) and (
             (key.startswith("rec03a_") and key != IDENTITY)
-            or key.startswith(("ux111_", "ux112_", "ux114_"))
+            or key.startswith(("ux111_", "ux112_", "ux114_", "ux128_source_"))
         ):
             state.pop(key, None)
+    # Never migrate another account's legacy comparison filters.
+    for key in ("ux503_bases", "ux504_bases_shadow", "ux503_visible_destinations",
+                "ux504_visible_destinations_shadow", "ux503_detail_destination",
+                "ux503_pending_return_to_wishlist"):
+        state.pop(key, None)
     # An open contextual review must not outlive an account change.
     for key in ("ux34_review", "ux34_review_candidate",
                 "ux34_review_signature", "ux34_apply_ack"):
@@ -63,6 +69,11 @@ def request_navigation(state, target):
 
 def apply_navigation(state):
     target = state.pop(INTENT, None)
+    # UX128: consume restored legacy flags before page widgets are mounted.
+    if state.pop("ux503_pending_return_to_wishlist", False) and target is None:
+        target = "wishlist"
+    from ux128_comparison_migration import migrate_restored_comparison
+    migrate_restored_comparison(state)
     if "rec03a_handoff_pending" in state:
         from rec03b_handoffs import apply_handoff
         apply_handoff(state)
@@ -72,7 +83,10 @@ def apply_navigation(state):
         select_public_task(state, "Explorar", "Minha lista")
     elif target in ("suggestions", "manual"):
         select_public_task(state, "Explorar", "Comparar bases")
-        state[ACTIVITY] = SUGGESTED if target == "suggestions" else MANUAL
+        state[ACTIVITY] = SUGGESTED
+        if target == "manual":
+            state["ux112_active_view"] = "Minha comparação"
+            state["ux112_active_view_shadow"] = "Minha comparação"
     return target
 
 

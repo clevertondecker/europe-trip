@@ -15,8 +15,7 @@ def _italy_proposal():
 
 
 def render_overview(plan,catalog,view,storage_label,storage_hint,trip_data,finance_live,eurfx,chffx):
-    from ux_planning_journey_ui import request_planning,_discover,_workspace_base
-    from ux502_destination_interests_ui import _discover_eligible
+    from ux_planning_journey_ui import request_planning,_discover,_workspace_base,_open_catalog
     from ux64_navigation_model import select_public_task
     from itinerary_flow_ui import _compact_budget
     from data_model import get_scenario,money_brl
@@ -49,14 +48,17 @@ def render_overview(plan,catalog,view,storage_label,storage_hint,trip_data,finan
             st.write("Os destinos incluídos têm período ou data, individual ou em viagem agrupada. Consulte seu roteiro quando quiser.")
             label="Consultar meus destinos"
         elif action=="exploratory":
-            st.write("Seus desejos permanecem na lista. Confira os destinos que o planejador já suporta.")
-            label="Descobrir destinos compatíveis"
+            st.write("Seus desejos permanecem na lista e podem ser comparados. Para incluir outros lugares, use o catálogo de passeios.")
+            label="Adicionar pelo catálogo de passeios"
         else:
             st.write("Escolha os lugares que deseja conhecer para começar.")
             label="Escolher destinos"
         st.button(label,key="flow_journey_primary",type="primary",
-                  on_click=_discover if action=="choose" else _discover_eligible if action=="exploratory" else request_planning,
+                  on_click=_discover if action=="choose" else _open_catalog if action=="exploratory" else request_planning,
                   args=() if action in ("choose","exploratory") else (state,action,stage))
+        if action=="exploratory":
+            from rec03a_session import request_navigation
+            st.button("Comparar cidades-base",key="ux130_overview_compare",on_click=request_navigation,args=(state,"suggestions"))
     st.markdown("#### Etapas da viagem")
     for col,stage in zip(st.columns(2,gap="small"),(ITALY_STAGE,FRANCE_STAGE)):
         stage_info=view["stages"][stage]

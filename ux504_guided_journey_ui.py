@@ -11,7 +11,7 @@ def request_step(step_id: str) -> None:
     # Streamlit removes widget-owned session keys when switching pages.
     if (st.session_state.get("ux502_view") == "Descobrir lugares"
             and "ux502_discovery_filters" not in st.session_state):
-        keys = ("ux501_country","ux501_categories","ux501_search","ux501_page","ux126_eligibility_filter")
+        keys = ("ux501_country","ux501_categories","ux501_search","ux501_page")
         snapshot = dict(st.session_state.get("ux502_discovery_filters", {}))
         snapshot.update({key:st.session_state[key] for key in keys
                          if key in st.session_state})

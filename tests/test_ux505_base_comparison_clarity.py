@@ -8,85 +8,9 @@ from unittest.mock import patch
 
 from streamlit.testing.v1 import AppTest
 
-from ux505_base_comparison_presentation import (
-    comparison_overview, matrix_cell, known_findings, missing_research,
-)
 from ux502_destination_interests_model import empty_interests, set_interest
 
 ROOT = Path(__file__).resolve().parents[1]
-
-
-def sample_result():
-    return {
-        "base_ids":["strasbourg", "mulhouse"],
-        "destinations":[
-            {"id":"colmar","name":"Colmar","priority_label":"Imperdível"},
-            {"id":"strasbourg","name":"Strasbourg",
-             "priority_label":"Quero conhecer"}],
-        "rows":[
-            {"base_id":"strasbourg","destination_id":"colmar",
-             "destination_name":"Colmar","minimum_oneway_min":35,
-             "evidence_status":"historical_time","observations":[
-                 {"minimum_oneway_min":35}],
-             "divergent_sources":False},
-            {"base_id":"strasbourg","destination_id":"strasbourg",
-             "destination_name":"Strasbourg","minimum_oneway_min":None,
-             "evidence_status":"local","observations":[],
-             "divergent_sources":False},
-            {"base_id":"mulhouse","destination_id":"colmar",
-             "destination_name":"Colmar","minimum_oneway_min":None,
-             "evidence_status":"partial","observations":[{"source_url":"https://example.com"}],
-             "divergent_sources":True},
-            {"base_id":"mulhouse","destination_id":"strasbourg",
-             "destination_name":"Strasbourg","minimum_oneway_min":None,
-             "evidence_status":"not_researched","observations":[],
-             "divergent_sources":False},
-        ],
-        "summaries":[
-            {"base_id":"strasbourg","base_name":"Strasbourg"},
-            {"base_id":"mulhouse","base_name":"Mulhouse"},
-        ],
-    }
-
-
-class InterpretiveComparisonTests(TestCase):
-    def test_counts_describe_coverage_not_ranking_and_inputs_unchanged(self):
-        result=sample_result()
-        old=deepcopy(result)
-        view=comparison_overview(result)
-        self.assertEqual((view["total"],view["documented"],view["missing"],view["local"]),
-                         (4,1,2,1))
-        self.assertIn("1 possuem tempo histórico",view["description"])
-        self.assertIn("não temos informações suficientes",view["description"])
-        self.assertNotIn("melhor é",view["description"])
-        self.assertEqual(result,old)
-
-    def test_no_documented_time_does_not_mean_disconnected(self):
-        result=sample_result()
-        result["rows"][0]["minimum_oneway_min"]=None
-        result["rows"][0]["evidence_status"]="not_researched"
-        result["rows"][0]["observations"]=[]
-        view=comparison_overview(result)
-        self.assertEqual((view["documented"],view["missing"],view["local"]),(0,3,1))
-        self.assertIn("não significa ausência de conexão",view["description"])
-        self.assertIn("não podemos comparar com segurança",view["description"])
-
-    def test_matrix_keeps_local_partial_unknown_and_conflicts_distinct(self):
-        result=sample_result()
-        self.assertEqual(matrix_cell(result["rows"][0]),"35 min · ida histórica")
-        self.assertEqual(matrix_cell(result["rows"][1]),"Local — acesso a verificar")
-        self.assertEqual(matrix_cell(result["rows"][2]),
-                         "Pesquisa parcial · tempo não identificado · tempos publicados diferentes")
-        self.assertEqual(matrix_cell(result["rows"][3]),"Tempo não pesquisado")
-        self.assertIn("tempos publicados diferentes"," ".join(missing_research(result)))
-        self.assertIn("acesso local"," ".join(missing_research(result)).lower())
-
-    def test_findings_describe_observations_without_electing_base(self):
-        result=sample_result()
-        findings=known_findings(result)
-        self.assertIn("Colmar (35 min)",findings[0])
-        self.assertIn("ainda sem tempos históricos",findings[1])
-        self.assertIn("não qual cidade-base",findings[-1])
 
 
 class ComparisonPresentationAppTests(TestCase):
@@ -99,11 +23,15 @@ class ComparisonPresentationAppTests(TestCase):
         app.session_state["rec03a_activity"]="Comparação personalizada"
         app.segmented_control(key="ux_section").set_value("Comparar").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
+        if interests and interests.get("items"):
+            app.button(key="rec03a_confirm_subset").click().run()
+            app.session_state["rec03a_handoff_base_selection"]=["mulhouse","strasbourg"]
+            app.segmented_control(key="ux112_active_view").set_value("Minha comparação").run()
         return app,before
 
     def test_empty_list_explains_need_for_destinations_and_preserves_plan(self):
         app,plan=self._open(empty_interests())
-        self.assertTrue(any("Sua lista está vazia" in i.value for i in app.info))
+        self.assertTrue(any("Nenhum destino ativo" in i.value for i in app.info))
         self.assertEqual(app.session_state["advisor_plan"],plan)
 
     def test_selected_wishes_summary_matrix_and_navigation(self):
@@ -111,15 +39,13 @@ class ComparisonPresentationAppTests(TestCase):
         app,plan=self._open(wishes)
         values=" ".join(x.value for x in app.markdown)
         self.assertIn("Comparar cidades-base",values)
-        self.assertIn("O que sabemos até agora",values)
-        self.assertIn("O que ainda precisamos pesquisar?",values)
-        self.assertTrue(any("Trajetos com algum tempo pesquisado" in x.value
-                            for x in app.caption))
-        self.assertIn("ui-kpi-card",values)
-        self.assertTrue(app.dataframe)
+        self.assertIn("Tempos de ida por destino",values)
+        self.assertIn("Resumo da comparação",values)
+        self.assertIn("ux97-table",values)
+        self.assertTrue(any(x.key=="rec03a_inline_sources" for x in app.checkbox))
         self.assertEqual(app.session_state["advisor_plan"],plan)
         self.assertEqual(app.session_state["ux502_interests"],wishes)
-        app.button(key="ux503_back_to_wishes").click().run()
+        app.button(key="rec03a_back_wishlist").click().run()
         self.assertEqual(app.session_state["ux_section"],"Passeios")
         self.assertEqual(app.session_state["ux502_interests"],wishes)
         self.assertEqual(app.session_state["advisor_plan"],plan)
@@ -152,13 +78,10 @@ class ComparisonPresentationAppTests(TestCase):
         with patch("ux503_destination_base_comparison_model.get_rail_evidence",
                    side_effect=mock_evidence):
             app,plan=self._open(wishes)
-            app.multiselect(key="ux503_bases").set_value(["mulhouse","strasbourg"]).run()
-            matrix=next(f.value for f in app.dataframe
-                        if "Destino · prioridade" in f.value.columns)
-            cells=" ".join(str(x) for x in matrix.to_numpy().flatten())
-            self.assertIn("Local — acesso a verificar",cells)
+            cells=next(m.value for m in app.markdown if 'class="ux97-table"' in m.value)
+            self.assertIn("Acesso local pendente",cells)
             self.assertIn("tempos publicados diferentes",cells)
-            self.assertIn("Tempo não pesquisado",cells)
+            self.assertIn("Sem tempo",cells)
             self.assertEqual(app.session_state["advisor_plan"],plan)
             self.assertEqual(app.session_state["ux502_interests"],wishes)
             self.assertFalse(app.exception,[e.message for e in app.exception])

@@ -68,13 +68,9 @@ def _recover_previous_session_interests(state) -> None:
         state["ux501_interest_session"]=list(shadow)
 
 
-def _discover_eligible():
+def _discover_destinations():
     from ux64_navigation_model import select_public_task
-    state = st.session_state
-    select_public_task(state, "Explorar", "Descobrir")
-    state["ux502_discovery_filters"] = {"ux501_country": "Todos os países", "ux501_categories": [], "ux501_search": "", "ux501_page": 1, "ux126_eligibility_filter": "Posso planejar agora"}
-    for key, value in state["ux502_discovery_filters"].items():
-        state[key] = value
+    select_public_task(st.session_state, "Explorar", "Descobrir")
 
 
 def render_wishlist(discovery) -> bool:
@@ -85,7 +81,7 @@ def render_wishlist(discovery) -> bool:
     _recover_previous_session_interests(st.session_state)
     by_id = {row["id"]: row for row in discovery["destinations"]}
     def remember_discovery_filters():
-        keys = ("ux501_country", "ux501_categories", "ux501_search", "ux501_page", "ux126_eligibility_filter")
+        keys = ("ux501_country", "ux501_categories", "ux501_search", "ux501_page")
         # Streamlit removes keys for controls not mounted in the alternate view.
         # Only recover pre-UX126B widget state. New filter callbacks already
         # own the snapshot, including explicit navigation handoffs.
@@ -120,7 +116,7 @@ def render_wishlist(discovery) -> bool:
     if view != "Minha lista":
         return False
 
-    st.caption("Os destinos já incluídos no roteiro aparecem em Planejar → Organizar.")
+    st.caption("Escolha prioridades aqui; confirme visitas em Planejar → Meus destinos.")
     items = ordered_interests(current, discovery)
     active = [r for r in items if r["priority"] != "discarded"]
     st.caption(f'{len(active)} destino(s) desejados · '
@@ -151,26 +147,28 @@ def render_wishlist(discovery) -> bool:
     else:
         st.warning(st.session_state.get("ux502_status", "Alterações apenas nesta sessão. Salve ou exporte para recuperá-las."))
 
-    if active:
-        from rec03a_session import request_navigation
-        from ux_planning_journey_ui import request_planning
-        from ux_planning_journey_model import project_planning
-        from planning_session import active_plan
-        from attractions_model import load_attractions
-        planning=project_planning(active_plan(),current,discovery,load_attractions())
+    from rec03a_session import request_navigation
+    from ux_planning_journey_ui import request_planning
+    from ux_planning_journey_model import project_planning
+    from planning_session import active_plan
+    from attractions_model import load_attractions
+    plan=active_plan()
+    catalog=load_attractions()
+    planning=project_planning(plan,current,discovery,catalog)
+    if active or planning["rows"]:
         # This is presentation of the same authoritative action used by the
         # existing CTA; do not recompute eligibility or introduce another state.
-        if planning["rows"]:
-            headline="Seu rascunho está pronto para revisão"
-            detail="Confira os destinos incluídos e salve suas escolhas."
-        elif planning["eligible_count"]:
+        if planning["eligible_count"]:
             headline="Destinos compatíveis prontos para o roteiro"
             detail=f'{planning["eligible_count"]} destino(s) podem ser incluídos sem definir datas.'
+        elif planning["rows"]:
+            headline="Seu rascunho está pronto para revisão"
+            detail="Confira os destinos incluídos e salve suas escolhas."
         else:
             headline="Continue descobrindo destinos"
             detail="Os desejos atuais ainda estão disponíveis somente para pesquisa."
         st.markdown(next_action(headline,detail,variant="compact"),unsafe_allow_html=True)
-        if planning["eligible_count"] and not planning["rows"]:
+        if planning["eligible_count"]:
             st.button("Montar roteiro com meus destinos",key="flow_journey_from_wishlist",type="primary",
                       on_click=request_planning,args=(st.session_state,"build"))
         elif planning["rows"]:
@@ -178,11 +176,11 @@ def render_wishlist(discovery) -> bool:
                       on_click=request_planning,args=(st.session_state,"review"))
         else:
             st.info("Seus desejos continuam na lista. Veja o motivo em cada destino abaixo.")
-            st.button("Descobrir destinos compatíveis",key="flow_journey_find_compatible",type="primary",
-                      on_click=_discover_eligible)
+            st.button("Abrir planejamento",key="ux130_open_planning",
+                      on_click=request_planning,args=(st.session_state,"build"))
             # Discovery remains accessible in the existing task tabs.
         # The canonical comparator is reachable through the public task.
-        st.button("Comparar cidades-base", key="rec03a_open_from_wishlist",
+        st.button("Comparar cidades-base", key="rec03a_open_from_wishlist", type="primary" if not planning["eligible_count"] and not planning["rows"] else "secondary",
                    on_click=request_navigation,args=(st.session_state,"suggestions"))
 
     if not active:
@@ -194,9 +192,7 @@ def render_wishlist(discovery) -> bool:
     # Import/restore may replace values even if revision numbers coincide.
     # Never reuse a stale selectbox key from a previous document.
     fingerprint = sha256(export_interests(current, discovery)).hexdigest()[:16]
-    from itinerary_eligibility import itinerary_eligibility, eligibility_index
-    from attractions_model import load_attractions
-    catalog = load_attractions()
+    from itinerary_eligibility import itinerary_eligibility, eligibility_index, availability_label
     index = eligibility_index(catalog)
     for row in items:
         destination_id = row["destination_id"]
@@ -205,8 +201,7 @@ def render_wishlist(discovery) -> bool:
             cols = st.columns([3, 2, 1])
             cols[0].markdown("**" + destination["name"] + "** · " + destination["country"])
             status = itinerary_eligibility(destination_id, catalog, index=index)
-            if status["status"] != "eligible":
-                cols[0].caption(status["reason"])
+            cols[0].caption(availability_label(status,plan))
             widget_key = "ux502_priority_" + destination_id + "_" + fingerprint
             cols[1].selectbox("Prioridade", PRIORITIES,
                                index=PRIORITIES.index(row["priority"]),

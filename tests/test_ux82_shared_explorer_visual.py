@@ -11,7 +11,7 @@ class ExplorerDesignConsistencyTests(unittest.TestCase):
     def test_all_four_tasks_consume_shared_components(self):
         discovery=(ROOT/"ux501_destination_discovery_ui.py").read_text()
         wishlist=(ROOT/"ux502_destination_interests_ui.py").read_text()
-        comparison=(ROOT/"ux503_destination_base_comparison_ui.py").read_text()
+        comparison=(ROOT/"rec03a_suggestions_ui.py").read_text()
         app=(ROOT/"app.py").read_text()
         for name,code in (("Descobrir",discovery),("Minha lista",wishlist),
                           ("Comparar bases",comparison),("Mapa",app)):
@@ -20,7 +20,8 @@ class ExplorerDesignConsistencyTests(unittest.TestCase):
         # Discovery intentionally uses a gallery, not the obsolete catalog KPI panel.
         self.assertNotIn("kpi_cards(",discovery)
         self.assertNotIn("kpi_cards(",wishlist)
-        self.assertIn("kpi_cards(",comparison)
+        self.assertIn("render_inline_comparison(",comparison)
+        self.assertNotIn("kpi_cards(",comparison)
         self.assertIn("next_action(",wishlist)
         self.assertIn('variant="compact"',app)
 
@@ -48,9 +49,10 @@ render_independent_destination_discovery()
         self.assertEqual(PUBLIC_TASKS["Explorar"],
                          ("Descobrir","Minha lista","Comparar bases","Mapa"))
         self.assertEqual(TARGETS[("Explorar","Mapa")],("Explorar","Mapa"))
-        code=(ROOT/"ux503_destination_base_comparison_ui.py").read_text()
+        code=(ROOT/"ux87_inline_base_comparison_ui.py").read_text()
         self.assertIn('compare_wishlist_bases(',code)
-        self.assertIn('visible_destination_ids=visible',code)
+        self.assertIn('visible_destination_ids=list(scope["destination_ids"])',code)
+        self.assertFalse((ROOT/"ux503_destination_base_comparison_ui.py").exists())
         self.assertNotIn('update_fields(',code)
 
 

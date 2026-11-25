@@ -92,6 +92,7 @@ def project_inline_comparison(interests, scope, base_ids, *, discovery, research
     return {
         "base_ids": list(base_ids), "names": names, "destinations": destinations,
         "cells": cells, "counts": counts, "must_visit_without_time": missing_must,
+        "raw_rows": {(r["base_id"],r["destination_id"]): r for r in raw["rows"]},
         "common_timed_destination_ids": common, "table": table,
         "official_plan_modified": False, "ranking_available": False,
     }
@@ -218,28 +219,68 @@ def render_inline_comparison(interests, scope, selected, *, discovery, research)
     # Sources no longer depend on first opening the technical matrix.
     if st.checkbox("Consultar fontes e ressalvas dos trajetos",
                    key="rec03a_inline_sources"):
-        for d in projection["destinations"]:
-            st.markdown("**" + d["name"] + "**")
-            for base in selected:
-                cell = projection["cells"][(base, d["id"])]
-                st.caption(projection["names"][base] + " · " +
-                           LABELS[cell["category"]])
-                for field, prefix in (
-                    ("station_caveat", "Estações"),
-                    ("evidence_notes", "Observação"),
-                ):
+        by_id={d["id"]:d for d in projection["destinations"]}
+        if st.session_state.get("ux128_source_destination") not in by_id:
+            st.session_state.pop("ux128_source_destination",None)
+        detail=st.selectbox("Destino para examinar",list(by_id),
+                            format_func=lambda x:by_id[x]["name"],
+                            key="ux128_source_destination")
+        for base in selected:
+            cell=projection["cells"][(base,detail)]
+            route=projection["raw_rows"][(base,detail)]
+            with st.container(border=True):
+                st.markdown("**"+projection["names"][base]+"**")
+                st.caption(cell["label"])
+                st.caption(cell["typical_label"])
+                for field,prefix in (("station_caveat","Estações"),("evidence_notes","Observação"),
+                                     ("confidence","Confiança"),("gap_checked_at","Fonte consultada em")):
                     if cell.get(field):
-                        st.caption(prefix + ": " + str(cell[field]))
-                checked_at = cell.get("gap_checked_at")
-                if checked_at:
-                    st.caption("Fonte consultada em: " + str(checked_at))
+                        st.caption(prefix+": "+str(cell[field]))
+                transfers=route.get("transfers")
+                st.caption("Transferências: "+(str(transfers) if transfers is not None else "Não pesquisadas"))
+                st.caption("Data histórica: "+str(route.get("source_date") or "Não informada"))
                 if cell.get("legacy_divergent_sources"):
-                    st.warning("Há tempos publicados divergentes para este trecho.")
-                url = cell.get("source_url")
-                if url:
-                    st.link_button("Fonte · " + projection["names"][base] +
-                                   " → " + d["name"], url)
-                elif cell["category"] in TIMED:
-                    st.caption("Fonte de tempo não disponível para este trajeto.")
-                else:
-                    st.caption("Pesquisa de tempo ou acesso ainda pendente.")
+                    st.warning("Há tempos publicados divergentes; não demonstram contradição entre serviços equivalentes.")
+                if cell.get("reference_differs_from_legacy"):
+                    st.caption("A referência publicada difere do histórico.")
+                if cell.get("fastest_provenance")=="snapshot_only_unreproduced":
+                    st.warning("Referência original não reproduzida nesta consulta.")
+                seen=set()
+                sources=[("Fonte histórica",cell.get("historical_source_url")),
+                         ("Fonte da referência",cell.get("reference_source_url")),
+                         ("Fonte",cell.get("source_url"))]
+                sources.extend(("Observação histórica alternativa",o.get("source_url")) for o in route.get("observations",[]))
+                for label,url in sources:
+                    if url and url not in seen:
+                        seen.add(url)
+                        st.link_button(label+" · "+projection["names"][base],url)
+                if not seen:
+                    st.caption("Fonte ainda não disponível.")
+                from ux506_decision_readiness_projection import journey_readiness_detail
+                readiness=journey_readiness_detail(route)
+                temporal={"not_checked":"Não verificado","invalid":"Evidências inválidas",
+                          "documented_legs_only":"Trechos documentados",
+                          "historical_schedule_coherent_only":"Coerência histórica"}
+                status=readiness["temporal_status"]
+                st.caption("Estado temporal: "+temporal.get(status,str(status)))
+                if readiness["missing_components"]:
+                    st.caption("Faltam: "+", ".join(readiness["missing_components"])+".")
+                reasons=readiness["association_reasons"]
+                if reasons:
+                    labels={"missing_component":"Componentes necessários ausentes",
+                            "incomplete_train_identity":"Identidade ferroviária incompleta",
+                            "source_missing":"Fonte ausente",
+                            "duration_missing":"Duração ausente",
+                            "direction_mismatch":"Sentidos incompatíveis",
+                            "station_mismatch":"Estações incompatíveis",
+                            "attraction_destination_mismatch":"Identidade da atração/destino incompatível",
+                            "access_direction_mismatch":"Sentido da última milha incompatível",
+                            "access_duration_or_source_missing":"Duração ou fonte da última milha ausente",
+                            "reverse_last_mile_unknown":"Última milha de retorno desconhecida",
+                            "incomplete_access_identity":"Identidade do acesso incompleta",
+                            "temporal_contract_not_integrated":"Validação temporal indisponível",
+                            "invalid_temporal_or_service_evidence":"Evidências temporais inválidas",
+                            "calendar_or_schedule_incompatible":"Calendário ou horários incompatíveis",
+                            "missing_full_portal_to_portal_evidence":"Percurso completo ainda não documentado"}
+                    st.caption("Ressalvas da associação: "+"; ".join(labels.get(x,x) for x in reasons)+".")
+                st.caption("Retorno e última milha não confirmados para 2027.")

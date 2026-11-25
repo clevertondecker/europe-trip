@@ -76,7 +76,8 @@ class ContextualActivityAppTests(unittest.TestCase):
         self.assertFalse(any(b.key=="ux503_open_from_wishlist"
                              for b in app.button))
         app.button(key="rec03a_open_from_wishlist").click().run()
-        self.assertIn("ux125_open_manual_comparison",{b.key for b in app.button})
+        self.assertNotIn("ux125_open_manual_comparison",{b.key for b in app.button})
+        self.assertIn("rec03a_confirm_subset",{b.key for b in app.button})
         app.segmented_control(key="ux64_public_task").set_value("Minha lista").run()
         app.segmented_control(key="ux64_public_task").set_value("Descobrir").run()
         self.assertFalse(app.exception,[x.message for x in app.exception])

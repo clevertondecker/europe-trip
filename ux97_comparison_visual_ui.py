@@ -8,6 +8,15 @@ from __future__ import annotations
 from html import escape
 from rail_reference_projection_model import format_minutes
 
+COUNTRY_FLAGS = {"França":"🇫🇷", "Alemanha":"🇩🇪", "Bélgica":"🇧🇪",
+                 "Luxemburgo":"🇱🇺", "Países Baixos":"🇳🇱", "Suíça":"🇨🇭",
+                 "Itália":"🇮🇹", "Holanda":"🇳🇱", "Áustria":"🇦🇹", "Espanha":"🇪🇸"}
+
+def destination_country_label(name, country):
+    flag=COUNTRY_FLAGS.get(country)
+    return f"{flag} {name}" if flag else name
+
+
 TIMED=frozenset(("historical","reference_only"))
 LABELS={
     "historical":"Histórico",
@@ -92,7 +101,7 @@ def selected_matrix_html(projection: dict) -> str:
             for base in bases)
         body.append(
             '<tr><th scope="row" class="ux97-destination">'
-            +star+_safe(destination["name"])+'</th>'+cells_html+'</tr>')
+            +star+_safe(destination_country_label(destination["name"],destination.get("country")))+'</th>'+cells_html+'</tr>')
     return (
         '<div class="ux97-panel"><div class="ux97-section-title">'
         'Tempos de ida por destino</div>'

@@ -42,8 +42,9 @@ def build_wishlist_matrix(interests: dict, base_ids: list[str], *,
     discovery = discovery if discovery is not None else build_destination_discovery()
     research = research if research is not None else load_research(include_candidates=True)
     _validated_bases(base_ids, research)
-    ordered = ordered_interests(interests, discovery)
-    active = selected_destinations_for_comparison(interests, discovery)
+    from comparison_destinations_model import comparison_items, active_ids, PRIORITY_LABELS
+    ordered = comparison_items(interests, discovery)
+    active = active_ids(interests, discovery)
     if visible_destination_ids is not None:
         if (not isinstance(visible_destination_ids, (list, tuple)) or
                 len(set(visible_destination_ids)) != len(visible_destination_ids) or
@@ -59,10 +60,13 @@ def build_wishlist_matrix(interests: dict, base_ids: list[str], *,
         rail=rail, exploration=exploration)
     for destination in result["destinations"]:
         priority = priorities[destination["id"]]
-        destination.update(priority=priority, priority_label=LABELS[priority])
+        destination.update(priority=priority, priority_label=PRIORITY_LABELS[priority])
     for row in result["rows"]:
         priority = priorities[row["destination_id"]]
-        row.update(priority=priority, priority_label=LABELS[priority])
+        row.update(priority=priority, priority_label=PRIORITY_LABELS[priority])
+    origins={x["destination_id"]:x.get("origin","Minha lista") for x in ordered}
+    for row in result["destinations"]:
+        row["origin"]=origins[row["id"]]
     result.update(discarded_count=len(ordered)-len(active),
                   active_destination_count=len(active))
     return result

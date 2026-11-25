@@ -19,6 +19,11 @@ class Data8StreamlitIntegrationTests(unittest.TestCase):
         text=" ".join(str(x.value) for x in app.get("caption"))
         self.assertIn("não cadastrada",text)
 
+    def test_destination_preview_owns_cost_simulator(self):
+        app=AppTest.from_string("from data8_tourism_ui import render_data8_destination_preview\nrender_data8_destination_preview('aachen')\n").run()
+        self.assertFalse(app.exception)
+        self.assertEqual(app.checkbox(key="data8_enable_cost_aachen").value,False)
+
     def test_cost_simulator_inactive_does_not_set_amounts(self):
         script = ("from data8_tourism_ui import render_data8_cost_simulator\n"
                   "render_data8_cost_simulator('aachen')\n")

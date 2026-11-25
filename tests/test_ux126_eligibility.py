@@ -65,7 +65,7 @@ class EligibilityTests(unittest.TestCase):
 
 
 class DiscoveryAppTests(unittest.TestCase):
-    def test_card_action_and_filter(self):
+    def test_wishlist_first_and_planning_inclusion(self):
         from pathlib import Path
         from streamlit.testing.v1 import AppTest
         root = Path(__file__).resolve().parents[1]
@@ -73,24 +73,31 @@ class DiscoveryAppTests(unittest.TestCase):
         app.button(key="ux_sidebar_nav_1").click().run()
         app.segmented_control(key="ux_section").set_value("Passeios").run()
         app.segmented_control(key="ux64_public_task").set_value("Descobrir").run()
+        before=deepcopy(app.session_state["advisor_plan"])
         app.text_input(key="ux501_search").set_value("Aachen").run()
         self.assertFalse(app.exception, [x.message for x in app.exception])
-        self.assertNotIn("ux126_add_aachen", {x.key for x in app.button})
-        self.assertTrue(any("Em pesquisa" in x.value for x in app.caption))
-        self.assertTrue(any("ainda não foram catalogadas" in x.value for x in app.caption))
-        app.radio(key="ux126_eligibility_filter").set_value("Posso planejar agora").run()
-        self.assertNotIn("ux502_add_aachen", {x.key for x in app.button})
+        self.assertNotIn("ux126_eligibility_filter",{x.key for x in app.radio})
+        self.assertNotIn("ux126_add_aachen",{x.key for x in app.button})
+        self.assertTrue(any("Atrações ainda não catalogadas" in x.value for x in app.caption))
+        app.button(key="ux502_add_aachen").click().run()
+        self.assertEqual(app.session_state["advisor_plan"],before)
+        self.assertTrue(any("Na minha lista" in x.value for x in app.caption))
         app.text_input(key="ux501_search").set_value("Colmar").run()
-        app.button(key="ux126_add_colmar").click().run()
-        self.assertFalse(app.exception, [x.message for x in app.exception])
-        self.assertTrue(is_selected(app.session_state["advisor_plan"], "colmar"))
-        self.assertIn("ux126_organize_colmar", {x.key for x in app.button})
-        app.button(key="ux126_organize_colmar").click().run()
-        self.assertFalse(app.exception, [x.message for x in app.exception])
-        self.assertEqual(app.session_state["ux64_public_task"], "Organizar")
-        self.assertEqual(app.session_state["flow_organize_destination"], "colmar")
-        self.assertEqual(app.session_state["flow_active_stage"], FRANCE_STAGE)
-        self.assertTrue(is_selected(app.session_state["advisor_plan"], "colmar"))
+        self.assertEqual(app.button(key="ux502_add_colmar").label,"Quero conhecer")
+        self.assertNotIn("ux126_add_colmar",{x.key for x in app.button})
+        app.button(key="ux502_add_colmar").click().run()
+        self.assertEqual(app.session_state["advisor_plan"],before)
+        app.segmented_control(key="ux64_public_task").set_value("Minha lista").run()
+        self.assertTrue(any("Disponível para o roteiro" in x.value for x in app.caption))
+        self.assertTrue(any("Atrações ainda não catalogadas" in x.value for x in app.caption))
+        app.button(key="flow_journey_from_wishlist").click().run()
+        self.assertFalse(app.exception,[x.message for x in app.exception])
+        batch="flow_journey_batch_"+FRANCE_STAGE
+        app.multiselect(key=batch).set_value(["colmar"]).run()
+        app.button(key=batch+"_confirm").click().run()
+        self.assertFalse(app.exception,[x.message for x in app.exception])
+        self.assertTrue(is_selected(app.session_state["advisor_plan"],"colmar"))
+        self.assertFalse(is_selected(app.session_state["advisor_plan"],"aachen"))
 
 
 class AliasWriterTests(unittest.TestCase):
