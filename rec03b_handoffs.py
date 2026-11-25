@@ -75,33 +75,12 @@ def queue_restore_manual(state):
     state[PENDING] = {"kind":"restore_manual"}
 
 
-def manual_selection(state):
-    result={}
-    for widget, shadow in MANUAL_KEYS:
-        value=state.get(shadow,state.get(widget))
-        if isinstance(value,list):
-            result[shadow]=deepcopy(value)
-    return result
-
-
-def _write_manual(state, selection):
-    for widget, shadow in MANUAL_KEYS:
-        if shadow in selection:
-            state[shadow]=list(selection[shadow])
-            state[widget]=list(selection[shadow])
-        else:
-            state.pop(shadow,None)
-            state.pop(widget,None)
-    # This detail widget belongs to the prior list of destinations.
-    state.pop("ux503_detail_destination",None)
-
-
 def apply_handoff(state, *, interests=None, discovery=None, research=None):
     """Consume BEFORE relevant Streamlit widgets. No changes if validation fails."""
     request=state.pop(PENDING,None)
     if request is None:
         return None
-    from ux502_destination_interests_model import empty_interests, selected_destinations_for_comparison
+    from ux502_destination_interests_model import empty_interests
     from trip01_supplemental_discovery import build_exploration_discovery
     from base_research_expanded_model import load_research
     try:

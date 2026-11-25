@@ -7,7 +7,7 @@ from streamlit.testing.v1 import AppTest
 from trip_plan_model import new_plan
 from ux502_destination_interests_model import empty_interests, set_interest
 from ux503_destination_base_comparison_model import compare_wishlist_bases
-from ux503_destination_base_comparison_ui import destination_country_label
+from ux97_comparison_visual_ui import destination_country_label
 from ux501_destination_discovery_model import build_destination_discovery
 from base_research_expanded_model import load_research
 
@@ -155,12 +155,15 @@ class DestinationBaseComparisonAppTests(unittest.TestCase):
         app.segmented_control(key="ux64_public_task").set_value("Minha lista").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
         app.button(key="rec03a_open_from_wishlist").click().run()
-        app.button(key="ux125_open_manual_comparison").click().run()
+        app.button(key="rec03a_confirm_subset").click().run()
+        app.session_state["rec03a_handoff_base_selection"]=["lille","metz"]
+        app.segmented_control(key="ux112_active_view").set_value("Minha comparação").run()
         self.assertEqual(app.session_state["ux_section"],"Comparar")
         self.assertEqual(app.session_state["advisor_plan"],original)
         self.assertFalse(app.exception,[e.message for e in app.exception])
-        self.assertTrue(2 <= len(app.multiselect(key="ux503_bases").value) <= 5)
-        app.button(key="ux503_back_to_wishes").click().run()
+        self.assertTrue(2 <= len(app.session_state["rec03a_handoff_base_selection"]) <= 5)
+        self.assertTrue(any('class="ux97-table"' in m.value for m in app.markdown))
+        app.button(key="rec03a_back_wishlist").click().run()
         self.assertEqual(app.session_state["ux_section"],"Passeios")
         self.assertEqual(app.session_state["ux502_interests"],sample_wishes())
         self.assertEqual(app.session_state["advisor_plan"],original)
@@ -174,21 +177,24 @@ class DestinationBaseComparisonAppTests(unittest.TestCase):
         official=original["base_city"]
         app.session_state["ux502_interests"]=sample_wishes()
         app.run()
-        app.multiselect(key="ux503_bases").set_value(["lille","metz"]).run()
-        self.assertEqual(app.session_state["ux503_bases"],["lille","metz"])
-        self.assertNotIn(official,app.session_state["ux503_bases"])
+        app.button(key="rec03a_confirm_subset").click().run()
+        app.session_state["rec03a_handoff_base_selection"]=["lille","metz"]
+        app.segmented_control(key="ux112_active_view").set_value("Minha comparação").run()
+        self.assertEqual(app.session_state["rec03a_handoff_base_selection"],["lille","metz"])
+        self.assertNotIn(official,app.session_state["rec03a_handoff_base_selection"])
         self.assertFalse(app.exception,[e.message for e in app.exception])
-        self.assertEqual(app.session_state["advisor_plan"],original)
-        matrix=next(f.value for f in app.dataframe
-                    if "Destino · prioridade" in f.value.columns)
-        self.assertIn("Lille",matrix.columns)
-        self.assertIn("Metz",matrix.columns)
-        self.assertNotIn("Mulhouse",matrix.columns)
-        app.multiselect(key="ux503_bases").set_value(["lille"]).run()
-        self.assertTrue(app.warning, [w.value for w in app.warning])
-        app.multiselect(key="ux503_bases").set_value([
-            "mulhouse","strasbourg","lille","metz","nancy","basel"]).run()
-        self.assertTrue(app.warning, [w.value for w in app.warning])
+        matrix=next(m.value for m in app.markdown if 'class="ux97-table"' in m.value)
+        self.assertIn(">Lille</th>",matrix)
+        self.assertIn(">Metz</th>",matrix)
+        self.assertNotIn(">Mulhouse</th>",matrix)
+        app.button(key="ux111_remove_metz").click().run()
+        self.assertEqual(app.session_state["rec03a_handoff_base_selection"],["lille"])
+        self.assertFalse(any('class="ux97-table"' in m.value for m in app.markdown))
+        ids=["mulhouse","strasbourg","lille","metz","nancy","basel"]
+        app.session_state["rec03a_handoff_base_selection"]=ids
+        app.run()
+        self.assertTrue(app.warning)
+        self.assertEqual(app.session_state["rec03a_handoff_base_selection"],ids)
         self.assertEqual(app.session_state["advisor_plan"],original)
 
     def test_display_filter_and_priority_updates_matrix(self):
@@ -200,19 +206,21 @@ class DestinationBaseComparisonAppTests(unittest.TestCase):
         wish=sample_wishes()
         app.session_state["ux502_interests"]=wish
         app.run()
-        app.multiselect(key="ux503_visible_destinations").set_value(["bruges_be","colmar"]).run()
-        matrix=next(f.value for f in app.dataframe
-                    if "Destino · prioridade" in f.value.columns)
-        self.assertEqual(len(matrix),2)
-        self.assertIn("🇫🇷 Colmar · Imperdível",list(matrix["Destino · prioridade"]))
-        self.assertIn("🇧🇪 Bruges · Quero conhecer",list(matrix["Destino · prioridade"]))
+        app.multiselect(key="rec03a_scope_widget").set_value(["bruges_be","colmar"]).run()
+        app.button(key="rec03a_confirm_subset").click().run()
+        app.session_state["rec03a_handoff_base_selection"]=["lille","metz"]
+        app.segmented_control(key="ux112_active_view").set_value("Minha comparação").run()
+        matrix=next(m.value for m in app.markdown if 'class="ux97-table"' in m.value)
+        self.assertEqual(matrix.count('<tr><th scope="row"'),2)
+        self.assertIn("🇫🇷 Colmar",matrix)
+        self.assertIn("🇧🇪 Bruges",matrix)
+        self.assertEqual(matrix.count('aria-label="Imperdível"'),1)
         self.assertEqual(app.session_state["ux502_interests"],wish)
         revised=set_interest(wish,"bruges_be","must_visit")
         app.session_state["ux502_interests"]=revised
         app.run()
-        matrix=next(f.value for f in app.dataframe
-                    if "Destino · prioridade" in f.value.columns)
-        self.assertIn("🇧🇪 Bruges · Imperdível",list(matrix["Destino · prioridade"]))
+        matrix=next(m.value for m in app.markdown if 'class="ux97-table"' in m.value)
+        self.assertEqual(matrix.count('aria-label="Imperdível"'),2)
         self.assertEqual(app.session_state["advisor_plan"],original)
         self.assertEqual(app.session_state["ux502_interests"],revised)
 

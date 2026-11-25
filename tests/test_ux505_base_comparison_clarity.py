@@ -99,11 +99,15 @@ class ComparisonPresentationAppTests(TestCase):
         app.session_state["rec03a_activity"]="Comparação personalizada"
         app.segmented_control(key="ux_section").set_value("Comparar").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
+        if interests and interests.get("items"):
+            app.button(key="rec03a_confirm_subset").click().run()
+            app.session_state["rec03a_handoff_base_selection"]=["mulhouse","strasbourg"]
+            app.segmented_control(key="ux112_active_view").set_value("Minha comparação").run()
         return app,before
 
     def test_empty_list_explains_need_for_destinations_and_preserves_plan(self):
         app,plan=self._open(empty_interests())
-        self.assertTrue(any("Sua lista está vazia" in i.value for i in app.info))
+        self.assertTrue(any("Nenhum destino ativo" in i.value for i in app.info))
         self.assertEqual(app.session_state["advisor_plan"],plan)
 
     def test_selected_wishes_summary_matrix_and_navigation(self):
@@ -111,15 +115,13 @@ class ComparisonPresentationAppTests(TestCase):
         app,plan=self._open(wishes)
         values=" ".join(x.value for x in app.markdown)
         self.assertIn("Comparar cidades-base",values)
-        self.assertIn("O que sabemos até agora",values)
-        self.assertIn("O que ainda precisamos pesquisar?",values)
-        self.assertTrue(any("Trajetos com algum tempo pesquisado" in x.value
-                            for x in app.caption))
-        self.assertIn("ui-kpi-card",values)
-        self.assertTrue(app.dataframe)
+        self.assertIn("Tempos de ida por destino",values)
+        self.assertIn("Resumo da comparação",values)
+        self.assertIn("ux97-table",values)
+        self.assertTrue(any(x.key=="rec03a_inline_sources" for x in app.checkbox))
         self.assertEqual(app.session_state["advisor_plan"],plan)
         self.assertEqual(app.session_state["ux502_interests"],wishes)
-        app.button(key="ux503_back_to_wishes").click().run()
+        app.button(key="rec03a_back_wishlist").click().run()
         self.assertEqual(app.session_state["ux_section"],"Passeios")
         self.assertEqual(app.session_state["ux502_interests"],wishes)
         self.assertEqual(app.session_state["advisor_plan"],plan)
@@ -152,13 +154,10 @@ class ComparisonPresentationAppTests(TestCase):
         with patch("ux503_destination_base_comparison_model.get_rail_evidence",
                    side_effect=mock_evidence):
             app,plan=self._open(wishes)
-            app.multiselect(key="ux503_bases").set_value(["mulhouse","strasbourg"]).run()
-            matrix=next(f.value for f in app.dataframe
-                        if "Destino · prioridade" in f.value.columns)
-            cells=" ".join(str(x) for x in matrix.to_numpy().flatten())
-            self.assertIn("Local — acesso a verificar",cells)
+            cells=next(m.value for m in app.markdown if 'class="ux97-table"' in m.value)
+            self.assertIn("Acesso local pendente",cells)
             self.assertIn("tempos publicados diferentes",cells)
-            self.assertIn("Tempo não pesquisado",cells)
+            self.assertIn("Sem tempo",cells)
             self.assertEqual(app.session_state["advisor_plan"],plan)
             self.assertEqual(app.session_state["ux502_interests"],wishes)
             self.assertFalse(app.exception,[e.message for e in app.exception])

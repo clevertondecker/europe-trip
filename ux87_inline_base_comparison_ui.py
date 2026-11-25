@@ -220,6 +220,8 @@ def render_inline_comparison(interests, scope, selected, *, discovery, research)
     if st.checkbox("Consultar fontes e ressalvas dos trajetos",
                    key="rec03a_inline_sources"):
         by_id={d["id"]:d for d in projection["destinations"]}
+        if st.session_state.get("ux128_source_destination") not in by_id:
+            st.session_state.pop("ux128_source_destination",None)
         detail=st.selectbox("Destino para examinar",list(by_id),
                             format_func=lambda x:by_id[x]["name"],
                             key="ux128_source_destination")

@@ -126,19 +126,19 @@ class RecommendationAppTests(unittest.TestCase):
         self.assertEqual(a.session_state[SCOPE]["destination_ids"],["basel","paris"])
         self.click(a,"rec03a_cancel_edit")
         self.assertEqual(a.session_state[SCOPE]["destination_ids"],["basel","paris"])
+        from rec03b_handoffs import CHOICE
+        a.session_state["ux504_bases_shadow"]=["strasbourg","metz"]
         a.session_state[INTENT]="manual"
         self.run_ok(a)
-        self.assertIsNotNone(a.multiselect(key="ux503_bases"))
-        a.multiselect(key="ux503_bases").set_value(["strasbourg","metz"])
-        self.run_ok(a)
-        manual=list(a.session_state["ux503_bases"])
+        self.assertEqual(a.session_state[CHOICE],["strasbourg","metz"])
+        self.assertEqual(a.session_state["ux112_active_view"],"Minha comparação")
+        self.assertTrue(any('class="ux97-table"' in m.value for m in a.markdown))
+        self.assertFalse(any(x.key=="ux503_bases" for x in a.multiselect))
+        self.assertNotIn("ux125_open_manual_comparison",{b.key for b in a.button})
         a.session_state[INTENT]="suggestions"
         self.run_ok(a)
-        a.session_state[INTENT]="manual"
-        self.run_ok(a)
-        self.assertEqual(a.session_state["ux503_bases"],manual)
-        a.session_state[INTENT]="suggestions"
-        self.run_ok(a)
+        self.assertEqual(a.session_state[CHOICE],["strasbourg","metz"])
+        self.assertEqual(a.session_state["ux112_active_view"],"Explorar alternativas")
         self.click(a,"rec03a_back_wishlist")
         self.assertEqual(a.session_state["ux502_view"],"Minha lista")
         for k,v in before.items():

@@ -137,10 +137,10 @@ class JourneyAppTests(unittest.TestCase):
         self.assertFalse(app.exception,[x.message for x in app.exception])
         self.assertEqual(app.session_state["ux502_interests"],wished())
         app.button(key="rec03a_open_from_wishlist").click().run()
-        app.button(key="ux125_open_manual_comparison").click().run()
+        app.button(key="rec03a_confirm_subset").click().run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
         self.assertEqual(app.session_state["ux_section"],"Comparar")
-        app.button(key="ux503_back_to_wishes").click().run()
+        app.button(key="rec03a_back_wishlist").click().run()
         self.assertEqual((app.session_state["ux_area"],app.session_state["ux_section"]),
                          ("Explorar","Passeios"))
         self.assertEqual(app.session_state["ux502_view"],"Minha lista")
@@ -178,10 +178,11 @@ class JourneyAppTests(unittest.TestCase):
         app.run()
         # Minha lista -> Comparar, then customize bases and the visible basket.
         app.button(key="rec03a_open_from_wishlist").click().run()
-        app.button(key="ux125_open_manual_comparison").click().run()
-        app.multiselect(key="ux503_bases").set_value(["lille","metz"]).run()
-        app.multiselect(key="ux503_visible_destinations").set_value(["colmar"]).run()
-        self.assertEqual(app.session_state["ux504_bases_shadow"],["lille","metz"])
+        app.multiselect(key="rec03a_scope_widget").set_value(["colmar"]).run()
+        app.button(key="rec03a_confirm_subset").click().run()
+        app.session_state["rec03a_handoff_base_selection"]=["lille","metz"]
+        app.segmented_control(key="ux112_active_view").set_value("Minha comparação").run()
+        self.assertEqual(app.session_state["rec03a_handoff_base_selection"],["lille","metz"])
         self.assertFalse(app.exception,[e.message for e in app.exception])
         # Comparar -> Montar roteiro -> Organizar datas -> Orçamento.
         app.button(key="ux504_compare_to_itinerary").click().run()
@@ -193,14 +194,10 @@ class JourneyAppTests(unittest.TestCase):
         # view-only shadow must rehydrate the previously selected bases.
         app.button(key="ux64_sidebar_nav_0").click().run()
         app.segmented_control(key="ux64_public_task").set_value("Comparar bases").run()
-        # A public entry may restore the detailed view directly; if it opens
-        # suggestions, enter the detailed editor through its canonical CTA.
-        if "ux125_open_manual_comparison" in {b.key for b in app.button}:
-            app.button(key="ux125_open_manual_comparison").click().run()
-        self.assertEqual(app.multiselect(key="ux503_bases").value,["lille","metz"])
-        self.assertEqual(
-            app.multiselect(key="ux503_visible_destinations").value,["colmar"])
-        app.button(key="ux503_back_to_wishes").click().run()
+        self.assertEqual(app.session_state["rec03a_handoff_base_selection"],["lille","metz"])
+        self.assertEqual(app.session_state["rec03a_scope"]["destination_ids"],["colmar"])
+        self.assertNotIn("ux125_open_manual_comparison",{b.key for b in app.button})
+        app.button(key="rec03a_back_wishlist").click().run()
         self.assertEqual(app.session_state["ux502_view"],"Minha lista")
         app.segmented_control(key="ux64_public_task").set_value("Descobrir").run()
         self.assertEqual(app.text_input(key="ux501_search").value,"Colmar")

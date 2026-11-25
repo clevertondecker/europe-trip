@@ -14,7 +14,7 @@ A experiência pública passa a usar exclusivamente REC03A/UX87/UX97. O motor UX
 | Handoffs antigos | REC03B e UX128 | Redirecionar à comparação moderna, sem outra página |
 
 ## Estratégia
-Primeiro commit elimina acesso público ao comparador manual e migra capacidades; mantém provisoriamente o módulo antigo e alguns símbolos de compatibilidade enquanto se revisam testes históricos e consumidores indiretos. Segundo commit do mesmo PR deve retirar o renderizador completo, funções e estados obsoletos após adaptar testes de navegação à experiência moderna. Não mergear uma etapa incompleta. Validar CI do HEAD exato e QA de navegador se disponível. DATA25 permanece em branch independente.
+Primeiro commit elimina acesso público ao comparador manual e migra capacidades. Segundo commit remove o renderizador completo e os escritores de filtros antigos, adapta testes à comparação moderna e preserva apenas os tokens de compatibilidade de sessões antigas. Não mergear antes de CI verde e revisão. Validar CI do HEAD exato e QA de navegador se disponível. DATA25 permanece em branch independente.
 
 ## Estado
 Recorte de destinos legado só vira rascunho se não houver escopo moderno válido; não confirma uma nova escolha. IDs inválidos e descartados não são recuperados; acima de cinco, preservar e pedir remoção. Handoffs de perfil/mapa/planejamento seguem seus contratos. Nenhuma alteração de plano, wishlist, orçamento oficial ou pesquisa. QA visual e CI pendentes.

@@ -31,7 +31,7 @@ def clear_recommendation_context(state):
     for key in list(state.keys()):
         if isinstance(key, str) and (
             (key.startswith("rec03a_") and key != IDENTITY)
-            or key.startswith(("ux111_", "ux112_", "ux114_"))
+            or key.startswith(("ux111_", "ux112_", "ux114_", "ux128_source_"))
         ):
             state.pop(key, None)
     # Never migrate another account's legacy comparison filters.
@@ -82,6 +82,9 @@ def apply_navigation(state):
         if target == "manual":
             state["ux112_active_view"] = "Minha comparação"
             state["ux112_active_view_shadow"] = "Minha comparação"
+        else:
+            state["ux112_active_view"] = "Explorar alternativas"
+            state["ux112_active_view_shadow"] = "Explorar alternativas"
     return target
 
 

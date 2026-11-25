@@ -54,13 +54,12 @@ class Trip01BrowseComparisonTests(unittest.TestCase):
         self.assertFalse(app.exception, [e.message for e in app.exception])
         self.assertFalse(any("Lista de destinos incompatível" in e.value
                              for e in app.error))
-        comparison_tables = [
-            item.value for item in app.dataframe
-            if "Destino · prioridade" in item.value.columns
-        ]
-        self.assertTrue(comparison_tables, "Comparison matrix was not rendered")
-        rows = list(comparison_tables[0]["Destino · prioridade"])
-        self.assertTrue(any("Obernai" in row for row in rows))
+        app.button(key="rec03a_confirm_subset").click().run()
+        app.session_state["rec03a_handoff_base_selection"]=["mulhouse","lille","strasbourg"]
+        app.segmented_control(key="ux112_active_view").set_value("Minha comparação").run()
+        matrix = next(m.value for m in app.markdown if 'class="ux97-table"' in m.value)
+        self.assertIn("Obernai",matrix)
+        self.assertEqual(matrix.count('<tr><th scope="row"'),5)
         self.assertEqual(app.session_state["ux502_interests"], wishlist)
         self.assertEqual(app.session_state["advisor_plan"], original_plan)
 

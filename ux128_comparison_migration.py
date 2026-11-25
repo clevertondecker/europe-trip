@@ -18,8 +18,9 @@ def migrate_legacy_comparison(state, interests, discovery, research):
     had_manual = state.get(ACTIVITY)==MANUAL
     cities = {c["id"] for c in research["cities"]}
     active = set(selected_destinations_for_comparison(interests,discovery))
-    old_bases = state.get("ux504_bases_shadow",state.get("ux503_bases"))
-    old_destinations = state.get("ux504_visible_destinations_shadow",state.get("ux503_visible_destinations"))
+    previous=state.get(PREVIOUS) if isinstance(state.get(PREVIOUS),dict) else {}
+    old_bases = state.get("ux504_bases_shadow",state.get("ux503_bases",previous.get("ux504_bases_shadow")))
+    old_destinations = state.get("ux504_visible_destinations_shadow",state.get("ux503_visible_destinations",previous.get("ux504_visible_destinations_shadow")))
     modern = state.get(CHOICE)
     if not isinstance(modern,list) or any(not isinstance(x,str) or x not in cities for x in modern) or len(set(modern))!=len(modern):
         if isinstance(old_bases,list):
@@ -27,7 +28,7 @@ def migrate_legacy_comparison(state, interests, discovery, research):
     checked = reconcile_scope(interests,state.get(SCOPE),discovery)
     if checked["scope"] is None and DRAFT not in state and isinstance(old_destinations,list):
         state[DRAFT]=_valid_ids(old_destinations,active)
-    if had_manual:
+    if had_manual or (isinstance(old_bases,list) and "ux112_active_view_shadow" not in state):
         state["ux112_active_view"]="Minha comparação"
         state["ux112_active_view_shadow"]="Minha comparação"
     for key in LEGACY_KEYS:

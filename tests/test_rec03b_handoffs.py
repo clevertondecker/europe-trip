@@ -1,7 +1,7 @@
 """REC03B handoff contracts tested against real catalogs and REC02 evidence."""
 import unittest
 from copy import deepcopy
-from rec03b_handoffs import (PENDING,CONTEXT,PREVIOUS,queue_handoff,apply_handoff,
+from rec03b_handoffs import (PENDING,CONTEXT,PREVIOUS,CHOICE,queue_handoff,apply_handoff,
                             queue_restore_manual,contextual_points)
 from rec03a_session import clear_recommendation_context,SCOPE,sync_identity
 from recommendation_scope_model import confirm_scope
@@ -40,22 +40,23 @@ class HandoffTests(unittest.TestCase):
         queue_handoff(state,"manual",["strasbourg","angers","mulhouse"])
         self.assertEqual(self.apply(state),"manual")
         self.assertNotIn(PENDING,state)
-        self.assertEqual(state["ux503_visible_destinations"],before[SCOPE]["destination_ids"])
-        self.assertEqual(len(state["ux503_visible_destinations"]),7)
-        self.assertEqual(state["ux503_bases"],["strasbourg","angers","mulhouse"])
+        self.assertEqual(state[SCOPE],before[SCOPE])
+        self.assertEqual(len(state[SCOPE]["destination_ids"]),7)
+        self.assertEqual(state[CHOICE],["strasbourg","angers","mulhouse"])
+        self.assertEqual(state["ux112_active_view_shadow"],"Minha comparação")
         rec=recommend_bases(state["ux502_interests"],state[SCOPE],discovery=self.discovery,research=self.research)
-        raw=compare_wishlist_bases(state["ux502_interests"],state["ux503_bases"],
-                                   visible_destination_ids=state["ux503_visible_destinations"],
+        raw=compare_wishlist_bases(state["ux502_interests"],state[CHOICE],
+                                   visible_destination_ids=state[SCOPE]["destination_ids"],
                                    discovery=self.discovery,research=self.research)
         manual=decorate_comparison(raw)
         for c in rec["candidates"]:
-            if c["base_id"] in state["ux503_bases"]:
+            if c["base_id"] in state[CHOICE]:
                 for d,cell in c["evidence"].items():
                     self.assertEqual(cell,manual["cells"][c["base_id"],d])
         queue_restore_manual(state)
         self.assertEqual(self.apply(state),"restore_manual")
-        self.assertEqual(state["ux503_bases"],["metz","nancy"])
-        self.assertEqual(state["ux503_visible_destinations"],["paris"])
+        self.assertEqual(state[CHOICE],["strasbourg","angers","mulhouse"])
+        self.assertEqual(state[SCOPE],before[SCOPE])
         self.assertNotIn(PREVIOUS,state)
         for k in ("advisor_plan","scenario_base_selected","ux_mode","ux502_interests","ux41_favorites","ux36_cloud_dirty"):
             self.assertEqual(state[k],before[k])
@@ -145,8 +146,7 @@ class HandoffAppTests(unittest.TestCase):
         app.session_state["rec03a_activity"]="Comparação personalizada"
         app.segmented_control(key="ux_section").set_value("Comparar").run()
         self.assertFalse(app.exception,str(app.exception))
-        self.assertEqual(sum(b.key=="rec03a_handoff_back_manual"
-                             for b in app.button),1)
+        self.assertFalse(any(b.key=="rec03a_handoff_back_manual" for b in app.button))
         app.segmented_control(key="ux64_public_task").set_value("Mapa").run()
         self.assertFalse(app.exception,str(app.exception))
         app.segmented_control(key="ux64_public_task").set_value("Comparar bases").run()
@@ -192,16 +192,13 @@ class HandoffAppTests(unittest.TestCase):
         self.assertFalse(any(x.key=="rec03a_inline_matrix" for x in app.checkbox))
         self.assertTrue(any(x.key=="rec03a_inline_sources" for x in app.checkbox))
         self.assertFalse(any(b.key=="rec03a_handoff_compare" for b in app.button))
-        # REC03B manual handoff remains supported as a legitimate legacy path.
+        # REC03B historical intents resolve to the modern selection, not another page.
         queue_handoff(app.session_state,"manual",["strasbourg","angers"])
         app.run()
         self.assertFalse(app.exception,str(app.exception))
-        self.assertEqual(sum(b.key=="rec03a_handoff_back_manual"
-                             for b in app.button),1)
-        self.assertFalse(any(b.key=="rec03a_manual_to_suggested" for b in app.button))
-        self.assertEqual(app.multiselect(key="ux503_bases").value,["strasbourg","angers"])
-        self.assertEqual(set(app.multiselect(key="ux503_visible_destinations").value),set(scope["destination_ids"]))
-        click("rec03a_handoff_back_manual")
+        self.assertFalse(any(b.key=="rec03a_handoff_back_manual" for b in app.button))
+        self.assertFalse(any(w.key in ("ux503_bases","ux503_visible_destinations") for w in app.multiselect))
+        self.assertTrue(any('class="ux97-table"' in m.value for m in app.markdown))
         self.assertEqual(app.session_state[SCOPE],scope)
         self.assertEqual(app.session_state["rec03a_handoff_base_selection"],["strasbourg","angers"])
         app.segmented_control(key="ux112_active_view").set_value("Explorar alternativas").run()
