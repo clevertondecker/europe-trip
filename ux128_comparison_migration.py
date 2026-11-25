@@ -37,3 +37,27 @@ def migrate_legacy_comparison(state, interests, discovery, research):
     if isinstance(context,dict) and context.get("kind")=="manual":
         state.pop(CONTEXT,None)
     state[ACTIVITY]=SUGGESTED
+
+
+def migrate_restored_comparison(state):
+    """Bootstrap hook: no catalog loads or session writes for modern sessions."""
+    context=state.get(CONTEXT)
+    if not (state.get(ACTIVITY)==MANUAL or any(key in state for key in LEGACY_KEYS)
+            or (isinstance(context,dict) and context.get("kind")=="manual")):
+        return False
+    from base_research_expanded_model import load_research
+    from trip01_supplemental_discovery import build_exploration_discovery
+    from ux502_destination_interests_model import empty_interests
+    try:
+        migrate_legacy_comparison(state,state.get("ux502_interests",empty_interests()),
+                                  build_exploration_discovery(),load_research(include_candidates=True))
+    except (ValueError,KeyError,TypeError,ImportError,OSError):
+        # Fail closed: leave canonical selections untouched; do not retry a
+        # malformed restored payload on every rerun.
+        for key in LEGACY_KEYS:
+            state.pop(key,None)
+        if isinstance(context,dict) and context.get("kind")=="manual":
+            state.pop(CONTEXT,None)
+        state[ACTIVITY]=SUGGESTED
+        state["rec03a_handoff_error"]="Filtros antigos incompatíveis; revise sua comparação."
+    return True

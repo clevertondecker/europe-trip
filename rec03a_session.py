@@ -69,6 +69,11 @@ def request_navigation(state, target):
 
 def apply_navigation(state):
     target = state.pop(INTENT, None)
+    # UX128: consume restored legacy flags before page widgets are mounted.
+    if state.pop("ux503_pending_return_to_wishlist", False) and target is None:
+        target = "wishlist"
+    from ux128_comparison_migration import migrate_restored_comparison
+    migrate_restored_comparison(state)
     if "rec03a_handoff_pending" in state:
         from rec03b_handoffs import apply_handoff
         apply_handoff(state)

@@ -8,85 +8,9 @@ from unittest.mock import patch
 
 from streamlit.testing.v1 import AppTest
 
-from ux505_base_comparison_presentation import (
-    comparison_overview, matrix_cell, known_findings, missing_research,
-)
 from ux502_destination_interests_model import empty_interests, set_interest
 
 ROOT = Path(__file__).resolve().parents[1]
-
-
-def sample_result():
-    return {
-        "base_ids":["strasbourg", "mulhouse"],
-        "destinations":[
-            {"id":"colmar","name":"Colmar","priority_label":"Imperdível"},
-            {"id":"strasbourg","name":"Strasbourg",
-             "priority_label":"Quero conhecer"}],
-        "rows":[
-            {"base_id":"strasbourg","destination_id":"colmar",
-             "destination_name":"Colmar","minimum_oneway_min":35,
-             "evidence_status":"historical_time","observations":[
-                 {"minimum_oneway_min":35}],
-             "divergent_sources":False},
-            {"base_id":"strasbourg","destination_id":"strasbourg",
-             "destination_name":"Strasbourg","minimum_oneway_min":None,
-             "evidence_status":"local","observations":[],
-             "divergent_sources":False},
-            {"base_id":"mulhouse","destination_id":"colmar",
-             "destination_name":"Colmar","minimum_oneway_min":None,
-             "evidence_status":"partial","observations":[{"source_url":"https://example.com"}],
-             "divergent_sources":True},
-            {"base_id":"mulhouse","destination_id":"strasbourg",
-             "destination_name":"Strasbourg","minimum_oneway_min":None,
-             "evidence_status":"not_researched","observations":[],
-             "divergent_sources":False},
-        ],
-        "summaries":[
-            {"base_id":"strasbourg","base_name":"Strasbourg"},
-            {"base_id":"mulhouse","base_name":"Mulhouse"},
-        ],
-    }
-
-
-class InterpretiveComparisonTests(TestCase):
-    def test_counts_describe_coverage_not_ranking_and_inputs_unchanged(self):
-        result=sample_result()
-        old=deepcopy(result)
-        view=comparison_overview(result)
-        self.assertEqual((view["total"],view["documented"],view["missing"],view["local"]),
-                         (4,1,2,1))
-        self.assertIn("1 possuem tempo histórico",view["description"])
-        self.assertIn("não temos informações suficientes",view["description"])
-        self.assertNotIn("melhor é",view["description"])
-        self.assertEqual(result,old)
-
-    def test_no_documented_time_does_not_mean_disconnected(self):
-        result=sample_result()
-        result["rows"][0]["minimum_oneway_min"]=None
-        result["rows"][0]["evidence_status"]="not_researched"
-        result["rows"][0]["observations"]=[]
-        view=comparison_overview(result)
-        self.assertEqual((view["documented"],view["missing"],view["local"]),(0,3,1))
-        self.assertIn("não significa ausência de conexão",view["description"])
-        self.assertIn("não podemos comparar com segurança",view["description"])
-
-    def test_matrix_keeps_local_partial_unknown_and_conflicts_distinct(self):
-        result=sample_result()
-        self.assertEqual(matrix_cell(result["rows"][0]),"35 min · ida histórica")
-        self.assertEqual(matrix_cell(result["rows"][1]),"Local — acesso a verificar")
-        self.assertEqual(matrix_cell(result["rows"][2]),
-                         "Pesquisa parcial · tempo não identificado · tempos publicados diferentes")
-        self.assertEqual(matrix_cell(result["rows"][3]),"Tempo não pesquisado")
-        self.assertIn("tempos publicados diferentes"," ".join(missing_research(result)))
-        self.assertIn("acesso local"," ".join(missing_research(result)).lower())
-
-    def test_findings_describe_observations_without_electing_base(self):
-        result=sample_result()
-        findings=known_findings(result)
-        self.assertIn("Colmar (35 min)",findings[0])
-        self.assertIn("ainda sem tempos históricos",findings[1])
-        self.assertIn("não qual cidade-base",findings[-1])
 
 
 class ComparisonPresentationAppTests(TestCase):

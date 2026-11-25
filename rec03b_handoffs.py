@@ -34,6 +34,7 @@ def _ids(value, allowed, *, minimum=1, maximum=None):
 
 def validate_handoff(scope, interests, discovery, research, bases, kind):
     """Do not infer stages, include new interests or truncate a confirmed scope."""
+    # manual is a read-only compatibility token for pre-UX128 pending requests.
     if kind not in ("manual", "profile", "map", "planning"):
         raise ValueError("Destino do encaminhamento inválido.")
     checked = reconcile_scope(interests, scope, discovery)

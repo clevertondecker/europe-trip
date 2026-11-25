@@ -256,4 +256,31 @@ def render_inline_comparison(interests, scope, selected, *, discovery, research)
                         st.link_button(label+" · "+projection["names"][base],url)
                 if not seen:
                     st.caption("Fonte ainda não disponível.")
+                from ux506_decision_readiness_projection import journey_readiness_detail
+                readiness=journey_readiness_detail(route)
+                temporal={"not_checked":"Não verificado","invalid":"Evidências inválidas",
+                          "documented_legs_only":"Trechos documentados",
+                          "historical_schedule_coherent_only":"Coerência histórica"}
+                status=readiness["temporal_status"]
+                st.caption("Estado temporal: "+temporal.get(status,str(status)))
+                if readiness["missing_components"]:
+                    st.caption("Faltam: "+", ".join(readiness["missing_components"])+".")
+                reasons=readiness["association_reasons"]
+                if reasons:
+                    labels={"missing_component":"Componentes necessários ausentes",
+                            "incomplete_train_identity":"Identidade ferroviária incompleta",
+                            "source_missing":"Fonte ausente",
+                            "duration_missing":"Duração ausente",
+                            "direction_mismatch":"Sentidos incompatíveis",
+                            "station_mismatch":"Estações incompatíveis",
+                            "attraction_destination_mismatch":"Identidade da atração/destino incompatível",
+                            "access_direction_mismatch":"Sentido da última milha incompatível",
+                            "access_duration_or_source_missing":"Duração ou fonte da última milha ausente",
+                            "reverse_last_mile_unknown":"Última milha de retorno desconhecida",
+                            "incomplete_access_identity":"Identidade do acesso incompleta",
+                            "temporal_contract_not_integrated":"Validação temporal indisponível",
+                            "invalid_temporal_or_service_evidence":"Evidências temporais inválidas",
+                            "calendar_or_schedule_incompatible":"Calendário ou horários incompatíveis",
+                            "missing_full_portal_to_portal_evidence":"Percurso completo ainda não documentado"}
+                    st.caption("Ressalvas da associação: "+"; ".join(labels.get(x,x) for x in reasons)+".")
                 st.caption("Retorno e última milha não confirmados para 2027.")

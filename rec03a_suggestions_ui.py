@@ -503,9 +503,6 @@ def render_suggestions(*,plan,discovery=None,research=None):
         active=[x for x in ordered_interests(interests,discovery)
                 if x["priority"]!="discarded"]
         names={x["id"]:x["name"] for x in discovery["destinations"]}
-        research=research if research is not None else load_research(include_candidates=True)
-        from ux128_comparison_migration import migrate_legacy_comparison
-        migrate_legacy_comparison(st.session_state, interests, discovery, research)
         checked=reconcile_session_scope(st.session_state,interests,discovery)
         if checked["state"]=="no_destinations":
             st.info("Nenhum destino ativo. Adicione lugares ou revise as prioridades em Minha lista.")
@@ -515,6 +512,7 @@ def render_suggestions(*,plan,discovery=None,research=None):
         if checked["state"]!="ready" or st.session_state.get("rec03a_edit_scope"):
             _render_scope(interests,discovery,active,names,checked)
             return
+        research=research if research is not None else load_research(include_candidates=True)
         result=recommend_bases(interests,checked["scope"],
                                discovery=discovery,research=research)
         cities={x["id"]:x for x in research["cities"]}

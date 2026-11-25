@@ -83,3 +83,35 @@ class UX128MigrationTests(unittest.TestCase):
                 if any(x.split(".")[-1]=="ux503_destination_base_comparison_ui" for x in modules):
                     consumers.append(str(file.relative_to(root)))
         self.assertEqual(consumers,[])
+
+
+    def test_bootstrap_migration_skips_modern_state(self):
+        from unittest.mock import patch
+        from ux128_comparison_migration import migrate_restored_comparison
+        state={CHOICE:["metz","lille"],SCOPE:confirm_scope(self.wishes,["colmar"],self.discovery)}
+        before=deepcopy(state)
+        with patch("base_research_expanded_model.load_research") as load:
+            self.assertFalse(migrate_restored_comparison(state))
+            load.assert_not_called()
+        self.assertEqual(state,before)
+
+    def test_bootstrap_consumes_legacy_once(self):
+        from rec03a_session import apply_navigation
+        state={ACTIVITY:MANUAL,"ux504_bases_shadow":["metz","lille"],
+               "ux504_visible_destinations_shadow":["colmar","paris"],
+               "ux502_interests":deepcopy(self.wishes)}
+        apply_navigation(state)
+        self.assertEqual(state[CHOICE],["metz","lille"])
+        self.assertEqual(state[DRAFT],["colmar"])
+        self.assertNotIn("ux504_bases_shadow",state)
+        before=deepcopy(state)
+        apply_navigation(state)
+        self.assertEqual(state,before)
+
+    def test_journey_pending_components_keep_temporal_association(self):
+        from ux506_decision_readiness_projection import journey_readiness_detail
+        result=journey_readiness_detail({"minimum_oneway_min":35})
+        self.assertEqual(result["temporal_status"],"not_checked")
+        self.assertIn("missing_component",result["association_reasons"])
+        self.assertEqual(len(result["missing_components"]),3)
+        self.assertFalse(result["outing_feasible_2027"])

@@ -309,3 +309,21 @@ def compatible_evidence_association(rail: dict | None, return_leg: dict | None,
             "reasons": ["missing_full_portal_to_portal_evidence"],
             "temporal_status": status,
             "full_door_to_door_min": None, "outing_feasible_2027": False}
+
+
+def journey_readiness_detail(row):
+    """Read-only UX87 detail; no timetable synthesis or promotion of minimums."""
+    association = compatible_evidence_association(
+        row.get("outbound_service"), row.get("return_service"),
+        row.get("bidirectional_last_mile"), attraction_window=row.get("attraction_window"))
+    missing = []
+    if not row.get("outbound_service"):
+        missing.append("serviço de ida com data e estações")
+    if not row.get("return_service"):
+        missing.append("serviço de retorno com data e estações")
+    if not row.get("bidirectional_last_mile"):
+        missing.append("última milha nos dois sentidos")
+    return {"temporal_status": association["temporal_status"],
+            "association_reasons": association["reasons"],
+            "missing_components": missing,
+            "outing_feasible_2027": False}
