@@ -16,20 +16,15 @@ REPORT = ROOT / "docs/audits/data24_research_coverage.md"
 ANNEX = REPORT.with_suffix(".json")
 
 
-def input_manifest(root=ROOT):
-    # Conservative invalidation: public research data and pure projection code.
-    # No private backups, .streamlit secrets, or saved user state are read.
-    paths = sorted([*root.glob("data/**/*.json"), *root.glob("*_model.py"),
-                    *root.glob("tools/data24_research_coverage.py"),
-                    root / "trip01_supplemental_discovery.py",
-                    root / "destination_identity.py"])
-    return {p.relative_to(root).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
-            for p in paths if p.is_file()}
+def input_manifest(audit):
+    """Fingerprint the actual public projection, not unrelated repository files.
 
-
-def manifest_hash(manifest):
-    return hashlib.sha256(json.dumps(manifest, ensure_ascii=False, sort_keys=True,
-                                     separators=(",", ":")).encode()).hexdigest()
+    Source provenance and dates remain in the records. A content fingerprint
+    intentionally stays unchanged when unrelated implementation code changes.
+    """
+    return {"audit_sha256": hashlib.sha256(json.dumps(
+        audit, ensure_ascii=False, sort_keys=True,
+        separators=(",", ":"), allow_nan=False).encode("utf-8")).hexdigest()}
 
 
 def coverage_line(name, c):
@@ -38,7 +33,7 @@ def coverage_line(name, c):
             f'{c["local"]} | {c["missing"]} | {c["timed"]}/{c["eligible"]} · {rate} |')
 
 
-def render_report(audit, manifest):
+def render_report(audit, manifest=None):
     a = audit["attractions"]["counts"]
     legacy = audit["legacy_summary"]
     pairs = audit["rail_pairs"]
@@ -49,7 +44,7 @@ def render_report(audit, manifest):
         "Relatório gerado offline a partir dos dados públicos versionados. "
         "Não é ranking, cotação ou confirmação de viabilidade para 2027.",
         "",
-        f"Versão do esquema: {audit['schema_version']}. SHA-256 das entradas: `{manifest_hash(manifest)}`.",
+        f"Versão do esquema: {audit['schema_version']}.",
         "",
         "## Universo ferroviário — pares dirigidos",
         "",
@@ -134,8 +129,11 @@ def render_report(audit, manifest):
                   "", "## Reprodução", "",
                   "```sh", "python tools/data24_research_coverage.py",
                   "python tools/data24_research_coverage.py --check", "```", "",
-                  "A execução grava o Markdown e o anexo JSON; --check compara ambos byte a byte "
-                  "com os dados atuais. Nenhuma chamada de rede ou estado privado é necessário.", "",
+                  "A execução grava o Markdown e o anexo JSON completo sob demanda. "
+                  "--check verifica o Markdown versionado e o anexo histórico compacto; "
+                  "--check-annex exige também o JSON completo gerado localmente. "
+                  "O anexo completo não é necessário em um checkout limpo. "
+                  "Nenhuma chamada de rede ou estado privado é necessário.", "",
                   "### Migração do painel anterior", "",
                   "| Campo anterior | Destino no anexo/relatório |", "|---|---|",
                   "| Matriz de evidências por cidade | legacy_evidence[].criteria e status |",
@@ -146,29 +144,40 @@ def render_report(audit, manifest):
                   "| DQ31: ida, retorno, última milha e bloqueios | legacy_dq31.rows[].routes e missing |",
                   "| DQ32: atrações, aliases e cobertura | attractions e rail_counts (universo atual explícito) |",
                   "| Ficha Conhecer cidade | UX124, sem duplicar a ficha |",
-                  "", "### Entradas versionadas", ""])
-    lines.extend(f"- `{p}`: `{h}`" for p, h in sorted(manifest.items()))
+                  "", "Evidências históricas consultáveis sem executar código: "
+                  "[anexo histórico compacto](data24_legacy_evidence.json)."])
+
     return "\n".join(lines) + "\n"
 
 
-def render_annex(audit, manifest):
-    return json.dumps({"inputs": manifest, **audit}, ensure_ascii=False,
+def render_annex(audit, manifest=None):
+    return json.dumps({"inputs": input_manifest(audit) if manifest is None else manifest, **audit}, ensure_ascii=False,
                       sort_keys=True, indent=2, allow_nan=False) + "\n"
+
+
+def render_legacy_annex(audit):
+    """Only migrated exclusive records; do not duplicate the global pair matrix."""
+    return json.dumps({key: audit[key] for key in
+                       ("schema_version", "legacy_summary", "legacy_evidence", "legacy_dq31",
+                        "dq32_reconciled_aliases")},
+                      ensure_ascii=False, sort_keys=True,
+                      separators=(",", ":"), allow_nan=False) + "\n"
 
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--check", action="store_true", help="Falhar se os artefatos estão ausentes ou desatualizados")
+    parser.add_argument("--check", action="store_true", help="Verificar os artefatos versionados")
+    parser.add_argument("--check-annex", action="store_true", help="Verificar também o anexo completo gerado localmente")
     parser.add_argument("--output", type=Path, default=REPORT)
     args = parser.parse_args(argv)
     start = perf_counter()
-    manifest = input_manifest()
     audit = build_audit()
-    if manifest != input_manifest():
-        raise RuntimeError("Entradas mudaram durante a auditoria")
-    files = {args.output: render_report(audit, manifest),
-             args.output.with_suffix(".json"): render_annex(audit, manifest)}
-    if args.check:
+    legacy_path = args.output.with_name("data24_legacy_evidence.json")
+    files = {args.output: render_report(audit),
+             legacy_path: render_legacy_annex(audit)}
+    if not (args.check or args.check_annex) or args.check_annex:
+        files[args.output.with_suffix(".json")] = render_annex(audit)
+    if args.check or args.check_annex:
         stale = [str(p) for p, content in files.items()
                  if not p.is_file() or p.read_bytes() != content.encode("utf-8")]
         if stale:
