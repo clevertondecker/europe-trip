@@ -21,10 +21,16 @@ CRITERIA = {
     "conditional": "Interseção explícita de trajetos conhecidos; sem extrapolar para toda a lista.",
     "investigation": "Fronteira de presença documental: outra base acrescenta IDs com tempo ou local sem perder os mesmos IDs; não avalia a qualidade das fontes. Em conjuntos idênticos, destacar menor mínimo ponderado no próprio subconjunto.",
 }
-def _weights(weights):
+def _weights(weights, *, planned=False):
+    from comparison_destinations_model import PLANNED, PLANNED_WEIGHT
     result = dict(DEFAULT_WEIGHTS if weights is None else weights)
-    if set(result) != set(DEFAULT_WEIGHTS) or any(type(v) is not int or v <= 0 for v in result.values()):
+    required=set(DEFAULT_WEIGHTS)
+    if not required <= set(result) or set(result)-required-{PLANNED}:
         raise ValueError("Pesos de prioridade inválidos")
+    if any(type(v) is not int or v <= 0 for v in result.values()):
+        raise ValueError("Pesos de prioridade inválidos")
+    if planned:
+        result.setdefault(PLANNED,PLANNED_WEIGHT)
     return result
 
 
@@ -78,10 +84,11 @@ def evaluate_matrix(matrix, *, weights=None):
     O(B*D + B²*D): one comparison per pair outside equal full-scope groups,
     not an exponential enumeration; IDs and denominators always explicit.
     """
-    weights = _weights(weights)
     raw, evidence = matrix["comparison"], matrix["evidence"]
     bases = sorted(raw["base_ids"])
     destinations = sorted(raw["destinations"], key=lambda x: x["id"])
+    from comparison_destinations_model import PLANNED
+    weights = _weights(weights,planned=any(d["priority"]==PLANNED for d in destinations))
     by_id = {d["id"]: d for d in destinations}
     scope_ids = set(by_id)
     cells = evidence["cells"]

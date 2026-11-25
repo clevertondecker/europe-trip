@@ -240,7 +240,8 @@ def render_card_selection_summary(result, cities, *, selection_already_shown=Fal
 def render_planning_handoff(plan, *, interests, discovery, research):
     from attractions_model import load_attractions
     from rec03b_handoffs import validate_handoff
-    ctx=validate_handoff(st.session_state.get(SCOPE),interests,discovery,research,[],"planning")
+    from comparison_destinations_model import from_state
+    ctx=validate_handoff(st.session_state.get(SCOPE),from_state(st.session_state,discovery),discovery,research,[],"planning")
     view=planning_handoff_projection(ctx,plan,interests,discovery,load_attractions())
     st.caption(f'{len(view["eligible"])} destinos do escopo podem entrar no roteiro · '
                f'{len(view["included"])} já incluídos · '
@@ -400,7 +401,8 @@ def render_contextual_map(plan):
         if missing:
             st.caption("Sem coordenada no catálogo: "+", ".join(missing))
         st.caption("Marcadores de cidades, não rotas ferroviárias. Nenhum trajeto foi inferido.")
-        result=recommend_bases(st.session_state.get("ux502_interests",empty_interests()),
+        from comparison_destinations_model import from_state
+        result=recommend_bases(from_state(st.session_state,discovery),
                                context["scope"],discovery=discovery,research=research)
         candidate=next(c for c in result["candidates"] if c["base_id"]==context["base_ids"][0])
         names={x["id"]:x["name"] for x in result["destinations"]}

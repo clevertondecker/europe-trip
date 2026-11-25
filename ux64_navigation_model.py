@@ -55,7 +55,7 @@ def select_public_task(state, area, task):
             and "ux502_discovery_filters" not in state):
         filters=dict(state.get("ux502_discovery_filters",{}))
         filters.update({key:state[key] for key in
-                        ("ux501_country","ux501_categories","ux501_search","ux501_page","ux126_eligibility_filter")
+                        ("ux501_country","ux501_categories","ux501_search","ux501_page")
                         if key in state})
         if filters:
             state["ux502_discovery_filters"]=filters

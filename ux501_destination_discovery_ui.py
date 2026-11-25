@@ -120,40 +120,20 @@ def _destination_wishlist_state(interests: dict | None, destination_id: str) -> 
     return "new"
 
 
-def _ordered_matches(matches, eligibility, mode):
-    """Stable partition; this is not a recommendation ranking."""
-    eligible = [row for row in matches if eligibility[row["id"]]["status"] == "eligible"]
-    if mode == "Posso planejar agora":
-        return eligible
-    return eligible + [row for row in matches if eligibility[row["id"]]["status"] != "eligible"]
-
-
-def _result_caption(matches, eligibility):
-    total = len(matches)
-    counts = {status: sum(eligibility[row["id"]]["status"] == status for row in matches)
-              for status in ("eligible", "research_only", "other_stage")}
-    if total == 0:
-        return "Nenhum destino"
-    if total == 1:
-        return ("1 destino pode entrar no roteiro" if counts["eligible"] else
-                "1 destino em pesquisa" if counts["research_only"] else "1 destino em outra etapa")
-    parts = [f"{total} destinos"]
-    n = counts["eligible"]
-    if n:
-        parts.append(f"{n} pode entrar no roteiro" if n == 1 else f"{n} podem entrar no roteiro")
-    for status, label in (("research_only", "em pesquisa"), ("other_stage", "em outra etapa")):
-        if counts[status]:
-            parts.append(f"{counts[status]} {label}")
-    return " · ".join(parts)
+def _result_caption(matches):
+    n=len(matches)
+    return "Nenhum destino" if not n else "1 destino" if n==1 else f"{n} destinos"
 
 
 _FILTER_DEFAULTS = {"ux501_country": "Todos os países", "ux501_categories": [],
-                    "ux501_search": "", "ux126_eligibility_filter": "Todos", "ux501_page": 1}
+                    "ux501_search": "", "ux501_page": 1}
 
 
 def _remember_filters():
     state = st.session_state
-    snapshot = {**_FILTER_DEFAULTS, **state.get("ux502_discovery_filters", {})}
+    saved=state.get("ux502_discovery_filters", {})
+    snapshot = {key:saved.get(key,value) for key,value in _FILTER_DEFAULTS.items()}
+    state.pop("ux126_eligibility_filter",None)
     for key in _FILTER_DEFAULTS:
         if key != "ux501_page" and key in state:
             snapshot[key] = state[key]
@@ -184,7 +164,9 @@ def _render_pagination(page, pages, *, bottom=False):
 
 def _restore_filters(discovery):
     state = st.session_state
-    snapshot = {**_FILTER_DEFAULTS, **state.get("ux502_discovery_filters", {})}
+    saved=state.get("ux502_discovery_filters", {})
+    snapshot = {key:saved.get(key,value) for key,value in _FILTER_DEFAULTS.items()}
+    state.pop("ux126_eligibility_filter",None)
     # Explicit navigation and filter callbacks update the stable snapshot.
     # Widget keys may be stale after a handoff; bootstrap them only once.
     if "ux502_discovery_filters" not in state:
@@ -203,12 +185,9 @@ def _restore_filters(discovery):
 def render_independent_destination_discovery(*, discovery=None, focused_destination=None) -> None:
     discovery = discovery if discovery is not None else _cached_discovery()
     from attractions_model import load_attractions
-    from itinerary_eligibility import itinerary_eligibility, eligibility_index
+    from itinerary_eligibility import itinerary_eligibility, eligibility_index, availability_label
     from destination_identity import canonical_destination_id
-    from itinerary_flow_model import is_selected, UNASSIGNED
-    from planning_session import active_plan, commit_outing
-    from ux_planning_journey_ui import _workspace_organize
-    from dataclasses import asdict
+    from planning_session import active_plan
     catalog = load_attractions()
     destinations = discovery["destinations"]
     index = eligibility_index(catalog)
@@ -254,7 +233,6 @@ def render_independent_destination_discovery(*, discovery=None, focused_destinat
             query = st.text_input(
                 "Buscar cidade ou atração", placeholder="Ex.: Colmar, museu, catedral",
                 key="ux501_search", on_change=_remember_filters)
-        mode = st.radio("Mostrar", ("Todos", "Posso planejar agora"), horizontal=True, key="ux126_eligibility_filter", on_change=_remember_filters)
         matches = filter_destinations(
             discovery,
             country=None if country == "Todos os países" else country,
@@ -262,8 +240,7 @@ def render_independent_destination_discovery(*, discovery=None, focused_destinat
             query=query,
             selected=selected,
         )
-        matches = _ordered_matches(matches, eligibility, mode)
-        st.caption(_result_caption(matches, eligibility))
+        st.caption(_result_caption(matches))
         st.caption("Resultados do catálogo; não é uma lista de viagens ferroviárias confirmadas.")
         page_size = 12
         pages = max(1, (len(matches)+page_size-1)//page_size)
@@ -278,8 +255,7 @@ def render_independent_destination_discovery(*, discovery=None, focused_destinat
             return
         _render_pagination(page, pages)
         subset = matches[(page-1)*page_size:page*page_size]
-    if any(eligibility[item["id"]]["status"] == "eligible" for item in subset):
-        st.caption("Roteiro: entra no planejamento e no orçamento · Lista: só para pesquisar e comparar bases")
+    plan = active_plan()
     # Bundled images require no HTTP request. Query Wikimedia only when
     # neither editorial nor local files cover a destination on this page.
     local_photos = {item["id"]: local_destination_photo(item["id"])
@@ -302,26 +278,7 @@ def render_independent_destination_discovery(*, discovery=None, focused_destinat
                     # A short, sourced reason to explore: only catalogued
                     # attractions and categories, not invented editorial text.
                     st.caption(_destination_teaser(item))
-                    status = eligibility[item["id"]]
-                    canonical_id = status["outing_id"]
-                    if status["status"] == "eligible":
-                        if is_selected(active_plan(), canonical_id):
-                            from itinerary_flow_model import selected_rows
-                            visit = next((v for v in selected_rows(active_plan(), catalog) if v["id"] == canonical_id), None)
-                            st.caption("✓ No roteiro")
-                            if visit and not visit["attractions"] and not visit["exact_dates"]:
-                                st.caption("Atrações e datas a definir" if visit["period"] == UNASSIGNED else "Atrações a definir")
-                            st.button("Organizar " + item["name"], key="ux126_organize_"+item["id"], on_click=_workspace_organize, args=(canonical_id, status["stage"]))
-                        elif st.button("Adicionar ao roteiro", key="ux126_add_"+item["id"], type="primary", use_container_width=True):
-                            try:
-                                outcome = commit_outing(canonical_id, [], UNASSIGNED, confirmed=True)
-                                st.session_state["ux45_flow_result"] = asdict(outcome)
-                                st.rerun()
-                            except (ValueError, KeyError) as exc:
-                                st.error(str(exc))
-                    else:
-                        st.caption("Em pesquisa" if status["status"] == "research_only" else "Outra etapa")
-                        st.caption(status["reason"])
+                    st.caption(availability_label(eligibility[item["id"]], plan))
                     state = _destination_wishlist_state(
                         st.session_state.get("ux502_interests"), item["id"])
                     if state == "saved":
@@ -329,12 +286,12 @@ def render_independent_destination_discovery(*, discovery=None, focused_destinat
                     elif state == "discarded":
                         st.caption("Destino descartado anteriormente")
                         st.button("Reconsiderar destino",
-                                  key="ux502_restore_"+item["id"],
+                                  key="ux502_restore_"+item["id"], type="primary",
                                   use_container_width=True,
                                   on_click=add_destination, args=(item["id"], discovery))
                     else:
-                        st.button("Salvar na lista",
-                                  key="ux502_add_"+item["id"],
+                        st.button("Quero conhecer",
+                                  key="ux502_add_"+item["id"], type="primary",
                                   use_container_width=True,
                                   on_click=add_destination, args=(item["id"], discovery))
                     with st.container(key=f"ux53_footer_destination_{item['id']}"):

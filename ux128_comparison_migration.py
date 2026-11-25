@@ -2,7 +2,7 @@
 from rec03a_session import ACTIVITY, SUGGESTED, MANUAL, SCOPE, DRAFT
 from rec03b_handoffs import CHOICE, CONTEXT, PREVIOUS
 from recommendation_scope_model import reconcile_scope
-from ux502_destination_interests_model import selected_destinations_for_comparison
+from comparison_destinations_model import active_ids
 
 LEGACY_KEYS = ("ux503_bases", "ux504_bases_shadow",
                "ux503_visible_destinations", "ux504_visible_destinations_shadow",
@@ -17,7 +17,7 @@ def migrate_legacy_comparison(state, interests, discovery, research):
     """Canonical choices win (even empty). Legacy basket becomes a draft, not approval."""
     had_manual = state.get(ACTIVITY)==MANUAL
     cities = {c["id"] for c in research["cities"]}
-    active = set(selected_destinations_for_comparison(interests,discovery))
+    active = set(active_ids(interests,discovery))
     previous=state.get(PREVIOUS) if isinstance(state.get(PREVIOUS),dict) else {}
     old_bases = state.get("ux504_bases_shadow",state.get("ux503_bases",previous.get("ux504_bases_shadow")))
     old_destinations = state.get("ux504_visible_destinations_shadow",state.get("ux503_visible_destinations",previous.get("ux504_visible_destinations_shadow")))
