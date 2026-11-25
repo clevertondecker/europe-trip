@@ -15,6 +15,7 @@ from dq31_logistics_evaluation_model import logistics_comparison
 from five_base_comparison_model import load_five_base_evidence
 from rail_evidence_unified_model import load_rail_evidence
 from trip01_supplemental_discovery import build_exploration_discovery
+from data24_d004_audit_model import build_d004_audit
 
 
 def attributed_photo(photo):
@@ -164,6 +165,7 @@ def build_audit():
         "rail_by_destination": {key: coverage_counts(by_destination[key])
                                 for key in coverage["destination_ids"]},
         "rail_pairs": pairs, "attractions": attractions,
+        "d004": build_d004_audit(research, five, coverage["by_base"]),
         "legacy_summary": coverage_summary(historical),
         "legacy_evidence": historical, "legacy_dq31": last_mile,
         "dq32_reconciled_aliases": deepcopy(discovery.get("reconciled_aliases", [])),

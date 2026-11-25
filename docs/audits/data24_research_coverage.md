@@ -274,11 +274,77 @@ A cesta DQ31 é histórica, não a wishlist nem o recorte oficial D-004.
 | luxembourg_city | 0 | 0/15 | 0/15 |
 | esch | 0 | 0/15 | 0/15 |
 
+## D-004 — auditoria descritiva (recorte ainda não confirmado)
+
+A decisão oficial permanece sem lista fechada de finalistas no snapshot. Não há ranking, prioridade por cidade ou alteração da decisão. A união abaixo é um recorte documental, não uma seleção.
+
+- Candidatas transcritas e revisadas do snapshot 2026-11-14 (decisão no snapshot 2026-11-14: aberta): metz, mulhouse, nancy, strasbourg.
+- Estudo de cinco bases (2026-11-15): lille, mulhouse, offenburg, strasbourg, trier.
+- Triagem histórica (2026-11-15): aachen, dijon, freiburg, karlsruhe, liege, lille, metz, mulhouse, nancy, offenburg, strasbourg, trier. Não é o recorte D-004.
+- Confirmar a lista final com o responsável pela decisão antes de atribuir prioridades.
+
+Denominador descritivo: 7 bases únicas; a triagem histórica não amplia o denominador.
+
+| Evidência | Bases com registro | Denominador |
+|---|---:|---:|
+| Amostra histórica de moradia | 7 | 7 |
+| Três cotações verificadas para 2027 | 0 | 7 |
+| Restaurante para dois (referência histórica) | 4 | 7 |
+| Passe urbano nominal (referência histórica) | 4 | 7 |
+| Cesta local completa comparável | 0 | 7 |
+| Normais climáticas de setembro a novembro | 5 | 7 |
+| Coworking pesquisado | 4 | 7 |
+| Internet residencial confirmada para 2027 | 0 | 7 |
+
+### Evidências por base — sem pontuação
+
+| Base | Anúncios históricos | Cotações 2027 | Restaurante EUR/2 pessoas | Passe EUR/pessoa/mês | Clima | Coworking (2026) | Idas documentadas/não locais |
+|---|---:|---:|---:|---:|---|---|---:|
+| lille | 2 | 0 | Desconhecido | Desconhecido | Documentado | Indeterminado | 41/54 |
+| metz | 3 | 0 | 60 | 45.9 | Documentado | Indeterminado | 29/54 |
+| mulhouse | 3 | 0 | 67.5 | 47 | Documentado | Horário insuficiente | 46/54 |
+| nancy | 3 | 0 | 60 | 47 | Documentado | Indeterminado | 34/54 |
+| offenburg | 3 | 0 | Desconhecido | Desconhecido | Desconhecido | Indeterminado | 21/54 |
+| strasbourg | 3 | 0 | 62.5 | 56 | Documentado | Horário insuficiente | 40/54 |
+| trier | 3 | 0 | Desconhecido | Desconhecido | Desconhecido | Indeterminado | 18/54 |
+
+### Lacunas por base — tipos de pesquisa, não prioridades oficiais
+
+| Base | Necessário para comparar a escolha | Complementar | Suficiente apenas para contexto |
+|---|---|---|---|
+| lille | três cotações comparáveis de 2027; internet no imóvel; pesquisar coworking e condições de acesso; cesta local comparável; tarifa e condições do transporte urbano; tempos ausentes (13/54) — validar destinos relevantes; retorno e porta a porta nos destinos relevantes | ampliar amostra histórica de moradia; restaurante para dois | normais climáticas |
+| metz | três cotações comparáveis de 2027; internet no imóvel; confirmar acesso de coworking no expediente; cesta local comparável; validar passe urbano para 2027; tempos ausentes (25/54) — validar destinos relevantes; retorno e porta a porta nos destinos relevantes | Nenhuma lacuna neste recorte | amostra histórica de moradia; passe urbano histórico; restaurante histórico; normais climáticas |
+| mulhouse | três cotações comparáveis de 2027; internet no imóvel; alternativa de coworking para expediente completo; cesta local comparável; validar passe urbano para 2027; tempos ausentes (8/54) — validar destinos relevantes; retorno e porta a porta nos destinos relevantes | Nenhuma lacuna neste recorte | amostra histórica de moradia; passe urbano histórico; restaurante histórico; normais climáticas |
+| nancy | três cotações comparáveis de 2027; internet no imóvel; confirmar acesso de coworking no expediente; cesta local comparável; validar passe urbano para 2027; tempos ausentes (20/54) — validar destinos relevantes; retorno e porta a porta nos destinos relevantes | Nenhuma lacuna neste recorte | amostra histórica de moradia; passe urbano histórico; restaurante histórico; normais climáticas |
+| offenburg | três cotações comparáveis de 2027; internet no imóvel; pesquisar coworking e condições de acesso; cesta local comparável; tarifa e condições do transporte urbano; tempos ausentes (33/54) — validar destinos relevantes; retorno e porta a porta nos destinos relevantes | restaurante para dois; normais climáticas | amostra histórica de moradia |
+| strasbourg | três cotações comparáveis de 2027; internet no imóvel; alternativa de coworking para expediente completo; cesta local comparável; validar passe urbano para 2027; tempos ausentes (14/54) — validar destinos relevantes; retorno e porta a porta nos destinos relevantes | Nenhuma lacuna neste recorte | amostra histórica de moradia; passe urbano histórico; restaurante histórico; normais climáticas |
+| trier | três cotações comparáveis de 2027; internet no imóvel; pesquisar coworking e condições de acesso; cesta local comparável; tarifa e condições do transporte urbano; tempos ausentes (36/54) — validar destinos relevantes; retorno e porta a porta nos destinos relevantes | restaurante para dois; normais climáticas | amostra histórica de moradia |
+
+### Lacunas e condições para pesquisas seguintes
+
+- Moradia: comparar três unidades privativas para dois adultos, mesmas datas e 56–60 noites, preço total, taxas, caução separada, contrato, internet e estação. Anúncios EUR/mês de 2026 não são cotações; as amostras de mercado e pacotes podem repetir anúncios e não são somadas.
+- Vida cotidiana: pesquisar uma cesta local homogênea, lavanderia e condições dos passes; a cesta compartilhada do orçamento não é evidência de cidade. Restaurante e clima são contexto histórico.
+- Trabalho remoto: validar acesso no plano contratado e no expediente real, internet no imóvel e modalidades/taxas. Horário publicado não confirma acesso em 2027; sem inferência de fuso.
+- Logística: reutilizar os pares DATA24A; mínimos de ida não demonstram retorno ou porta a porta. O recorte de destinos relevante à decisão ainda precisa ser confirmado.
+- Evidência suficiente apenas para contexto: normais climáticas documentadas e observações históricas com fonte e unidade; nenhuma delas fecha os requisitos de 2027.
+
+O JSON completo gerado localmente pelo comando de reprodução (não versionado) contém os registros detalhados em d004. O anexo histórico compacto versionado não contém d004. As fontes originais podem ser consultadas diretamente no repositório, sem executar código:
+
+- [Moradia: anúncios, requisitos e datas](../../data/base_city_research_expanded_2026_11.json)
+- [Pacotes: bairros, clima, internet e referências de coworking](../../data/city_research_packs_2026_11.json)
+- [Alimentação e coworking: fontes, preços, modalidades e horários](../../data/city_research_round2_2026.json)
+- [Mercado: amostras, passes urbanos e premissas compartilhadas](../../data/city_market_observations_2026.json)
+- [Perfis: evidências públicas e limitações](../../data/city_profiles_enriched.json)
+- [Estudo de cinco bases](../../data/five_base_comparison_evidence_2026_11.json)
+- [Snapshot da decisão](../../data/trip.json)
+
+Contagens zero indicam ausência de registros verificados, nunca custo zero ou indisponibilidade comprovada.
+
 ## Anexo técnico e rastreabilidade
 
 O anexo JSON gerado pela mesma execução mantém os registros completos: pares, fontes, datas, observações e variações; atrações com IDs, aliases, ingressos, fotos e acesso; evidências históricas por cidade, requisitos, valores, unidades, limitações, moradia e DQ31 (todos os destinos da cesta).
 
-Prioridades de pesquisa, sem ranking: completar tempos ausentes relevantes à decisão; reconciliar variações; pesquisar retornos, tarifas equivalentes e última milha; completar descrições, durações, ingressos e fotos. DATA24C+D+E aprofundará o recorte D-004; esta seção histórica não o substitui.
+Prioridades de pesquisa, sem ranking: completar tempos ausentes relevantes à decisão; reconciliar variações; pesquisar retornos, tarifas equivalentes e última milha; completar descrições, durações, ingressos e fotos. O recorte D-004 acima é descritivo e requer confirmação; não substitui a decisão oficial.
 
 ## Reprodução
 

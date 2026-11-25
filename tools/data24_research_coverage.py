@@ -11,6 +11,7 @@ from time import perf_counter
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from data24_audit_model import build_audit
+from data24_d004_audit_model import render_d004_section
 
 REPORT = ROOT / "docs/audits/data24_research_coverage.md"
 ANNEX = REPORT.with_suffix(".json")
@@ -117,6 +118,7 @@ def render_report(audit, manifest=None):
         n = r["route_basket_total"]
         lines.append(f"| {r['id']} | {r['housing']['count']} | {r['route_basket_with_time']}/{n} | "
                      f"{r['route_basket_with_fare']}/{n} |")
+    lines.extend(["", *render_d004_section(audit["d004"])])
     lines.extend(["", "## Anexo técnico e rastreabilidade", "",
                   "O anexo JSON gerado pela mesma execução mantém os registros completos: "
                   "pares, fontes, datas, observações e variações; atrações com IDs, aliases, "
@@ -125,7 +127,7 @@ def render_report(audit, manifest=None):
                   "", "Prioridades de pesquisa, sem ranking: completar tempos ausentes relevantes "
                   "à decisão; reconciliar variações; pesquisar retornos, tarifas equivalentes "
                   "e última milha; completar descrições, durações, ingressos e fotos. "
-                  "DATA24C+D+E aprofundará o recorte D-004; esta seção histórica não o substitui.",
+                  "O recorte D-004 acima é descritivo e requer confirmação; não substitui a decisão oficial.",
                   "", "## Reprodução", "",
                   "```sh", "python tools/data24_research_coverage.py",
                   "python tools/data24_research_coverage.py --check", "```", "",
