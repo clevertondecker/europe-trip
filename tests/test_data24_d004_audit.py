@@ -2,7 +2,9 @@
 import unittest
 from copy import deepcopy
 from data24_audit_model import build_audit
-from data24_d004_audit_model import coworking_state, render_d004_section, scope_for_d004
+from data24_d004_audit_model import (D004_SNAPSHOT_CANDIDATES, coworking_state,
+                                    render_d004_section, scope_for_d004,
+                                    validate_scope_coverage, research_gaps)
 from base_research_expanded_model import load_research, observed_housing
 from data_model import load_data
 from five_base_comparison_model import load_five_base_evidence
@@ -16,7 +18,8 @@ class D004AuditTests(unittest.TestCase):
 
     def test_scope_is_descriptive_and_does_not_assign_priority(self):
         scope = self.data["scope"]
-        self.assertEqual(set(scope["named_candidates"]), {"mulhouse", "strasbourg", "metz", "nancy"})
+        self.assertEqual(scope["named_candidates"], sorted(D004_SNAPSHOT_CANDIDATES))
+        self.assertEqual(set(D004_SNAPSHOT_CANDIDATES), {"mulhouse", "strasbourg", "metz", "nancy"})
         self.assertEqual(set(scope["five_base_study_ids"]), set(load_five_base_evidence()["base_ids"]))
         self.assertEqual(set(scope["descriptive_ids"]), set(scope["named_candidates"]) | set(scope["five_base_study_ids"]))
         self.assertIsNone(scope["official_finalist_ids"])
@@ -57,3 +60,34 @@ class D004AuditTests(unittest.TestCase):
         before_inputs = deepcopy(inputs)
         scope_for_d004(*inputs)
         self.assertEqual(inputs, before_inputs)
+
+    def test_scope_does_not_parse_free_text(self):
+        snapshot, research, five = load_data(), load_research(), load_five_base_evidence()
+        decision = next(d for d in snapshot["decisions"] if d["id"] == "D-004")
+        decision["note"] = "Metz saiu da avaliação. Colmar entrou."
+        scope = scope_for_d004(snapshot, research, five)
+        self.assertEqual(scope["named_candidates"], sorted(D004_SNAPSHOT_CANDIDATES))
+        self.assertIsNone(scope["official_finalist_ids"])
+
+    def test_missing_base_has_actionable_error(self):
+        snapshot, research, five = load_data(), load_research(), load_five_base_evidence()
+        five["base_ids"].append("not_registered")
+        with self.assertRaisesRegex(ValueError, "pesquisa ampliada: not_registered"):
+            scope_for_d004(snapshot, research, five)
+        with self.assertRaisesRegex(ValueError, "cobertura ferroviária DATA24A: trier"):
+            validate_scope_coverage(["trier"], {"cobertura ferroviária DATA24A": {}})
+
+    def test_research_gaps_differ_and_do_not_rank(self):
+        rows = {r["id"]: r for r in self.data["rows"]}
+        self.assertIn("alternativa de coworking para expediente completo",
+                      rows["mulhouse"]["research_gaps"]["decision_blockers"])
+        self.assertIn("pesquisar coworking e condições de acesso",
+                      rows["trier"]["research_gaps"]["decision_blockers"])
+        self.assertIn("normais climáticas", rows["trier"]["research_gaps"]["complementary"])
+        self.assertIn("normais climáticas", rows["mulhouse"]["research_gaps"]["sufficient_for_context_only"])
+        for row in rows.values():
+            self.assertEqual(row["research_gaps"], research_gaps(row))
+            self.assertIsNone(row["decision_evidence"]["research_priority"])
+        report = "\n".join(render_d004_section(self.data))
+        self.assertIn("não versionado", report)
+        self.assertIn("../../data/city_research_packs_2026_11.json", report)

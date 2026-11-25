@@ -17,8 +17,16 @@ Testar reutilização dos contratos, recorte, estados desconhecidos, unidades, r
 ## Dependências e prioridade
 Depende da infraestrutura e relatório de DATA24A. Implementação após UX126B, UX127, DATA24A, UX125 e avaliação de DATA24B. #258 e #259 foram encerrados como consolidados neste PR; preservar seu histórico. Manter draft até revisão, sem merge sem autorização específica.
 
-**Status:** primeira implementação para revisão; CI e recorte oficial pendentes.
+**Status:** ajustes de review implementados; nova CI e recorte oficial pendentes.
 
 ## Recorte encontrado
 
 O snapshot D-004 cita quatro cidades em avaliação e o estudo de cinco bases é uma hipótese de pesquisa independente. A auditoria descritiva usa a união de sete IDs, mantendo os grupos e a triagem histórica separados. Não declara finalistas oficiais nem atribui prioridades. Confirmar o recorte com o responsável antes de avançar DATA25–28. O relatório e o anexo são gerados pelo DATA24 existente, sem mudanças de UI. A CI verificará o Markdown versionado; não foi executado QA visual (sem mudança de interface).
+
+## Ajustes de review
+
+- IDs das quatro candidatas transcritos explicitamente em constante revisada do snapshot de 14/11; a nota livre não participa do recorte, que continua provisório.
+- O relatório identifica o JSON completo como gerado localmente, não versionado, e fornece links relativos às fontes existentes. O anexo histórico compacto permanece inalterado.
+- Validação de cobertura do cadastro, moradia e pares ferroviários com erro explícito por origem e ID.
+- Lacunas calculadas por base e separadas em requisitos para comparação, complementos e evidências suficientes apenas para contexto. Sem prioridade oficial nem ranking.
+- A decisão D-004 continua aberta; confirmar as cidades antes de DATA25–28.

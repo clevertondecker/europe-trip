@@ -15,14 +15,31 @@ from city_profiles_model import load_profiles
 from data_model import load_data
 
 
+# Transcription reviewed against data/trip.json snapshot 2026-11-14.
+# This is a historical candidate reference, not the owner's finalist decision.
+# Changing the free-text note cannot add or remove IDs. Review explicitly when
+# the source changes; do not silently reinterpret the note.
+D004_SNAPSHOT_CANDIDATES = ("metz", "mulhouse", "nancy", "strasbourg")
+D004_CANDIDATES_REFERENCE_DATE = "2026-11-14"
+
+
+def validate_scope_coverage(ids, sources):
+    for source, available in sources.items():
+        missing = sorted(set(ids) - set(available))
+        if missing:
+            raise ValueError(f"D-004: IDs ausentes em {source}: {', '.join(missing)}")
+
+
 def scope_for_d004(snapshot, research, five):
     decision = next(d for d in snapshot["decisions"] if d["id"] == "D-004")
-    # A versioned decision note names candidates, not a closed finalist set.
-    # Do not extract "finalists" from free text or historical shortlist flags.
-    named = sorted(c["id"] for c in research["cities"]
-                   if c["country"] == "França" and
-                   c["name"].casefold() in decision.get("note", "").casefold())
+    # Explicit reviewed reference, never a parser of the decision's prose.
+    named = sorted(D004_SNAPSHOT_CANDIDATES)
     historical = sorted(five["base_ids"])
+    validate_scope_coverage(named + historical, {
+        "pesquisa ampliada": {c["id"] for c in research["cities"]},
+    })
+    if len(historical) != len(set(historical)):
+        raise ValueError("D-004: IDs duplicados no estudo de cinco bases")
     shortlist = sorted(c["id"] for c in research["cities"] if c["shortlist"])
     return {
         "decision_id": "D-004", "decision_status": decision["status"],
@@ -31,6 +48,8 @@ def scope_for_d004(snapshot, research, five):
         "official_source_url": snapshot["sources"]["decisions"],
         "snapshot_note": decision.get("note"),
         "named_candidates": named,
+        "named_candidates_reference_date": D004_CANDIDATES_REFERENCE_DATE,
+        "named_candidates_source": "reviewed D004_SNAPSHOT_CANDIDATES constant; historical snapshot",
         "five_base_study_ids": historical,
         "five_base_study_source": "data/five_base_comparison_evidence_2026_11.json",
         "five_base_study_date": five["checked_at"],
@@ -62,6 +81,11 @@ def project_d004(*, snapshot, research, five, round2, packs, market, profiles,
     profile_rows = {c["city_id"]: c for c in profiles["cities"]}
     housing_overview = {c["base_id"]: c for c in
                         housing_research_overview(research=research)["bases"]}
+    validate_scope_coverage(scope["descriptive_ids"], {
+        "pesquisa ampliada": by_city,
+        "visão de moradia": housing_overview,
+        "cobertura ferroviária DATA24A": rail_by_base,
+    })
     rows = []
     for ident in scope["descriptive_ids"]:
         city = by_city[ident]
@@ -132,6 +156,8 @@ def project_d004(*, snapshot, research, five, round2, packs, market, profiles,
                 "research_priority": None,
             },
         })
+    for row in rows:
+        row["research_gaps"] = research_gaps(row)
     counts = {
         "bases": len(rows),
         "with_historical_housing": sum(r["housing"]["summary"]["count"] > 0 for r in rows),
@@ -152,6 +178,47 @@ def project_d004(*, snapshot, research, five, round2, packs, market, profiles,
     })
 
 
+def research_gaps(row):
+    """Classify evidence needs, not cities; no ranking or official priority."""
+    h, d, w, rail = (row[k] for k in ("housing", "daily_life", "remote_work", "rail"))
+    blockers, complementary, context = [], [], []
+    if h["overview"]["available_for_56_to_60_nights_2027"] < 3:
+        blockers.append("três cotações comparáveis de 2027")
+    if h["summary"]["count"] < 3:
+        complementary.append("ampliar amostra histórica de moradia")
+    else:
+        context.append("amostra histórica de moradia")
+    if w["residential_internet_2027"] is not True:
+        blockers.append("internet no imóvel")
+    if w["compatibility_2027"] != "compatible":
+        if w["compatibility_2026"] == "incompatible_2026":
+            blockers.append("alternativa de coworking para expediente completo")
+        elif not w["coworking"]:
+            blockers.append("pesquisar coworking e condições de acesso")
+        else:
+            blockers.append("confirmar acesso de coworking no expediente")
+    if d["comparable_local_basket_eur"] is None:
+        blockers.append("cesta local comparável")
+    if d["urban_pass"] is None:
+        blockers.append("tarifa e condições do transporte urbano")
+    else:
+        blockers.append("validar passe urbano para 2027")
+        context.append("passe urbano histórico")
+    if rail["missing"]:
+        blockers.append(f"tempos ausentes ({rail['missing']}/{rail['eligible']}) — validar destinos relevantes")
+    blockers.append("retorno e porta a porta nos destinos relevantes")
+    if d["restaurant_eur_two"] is None:
+        complementary.append("restaurante para dois")
+    else:
+        context.append("restaurante histórico")
+    if (d["climate"] or {}).get("months_9_10_11") is None:
+        complementary.append("normais climáticas")
+    else:
+        context.append("normais climáticas")
+    return {"decision_blockers": blockers, "complementary": complementary,
+            "sufficient_for_context_only": context}
+
+
 def build_d004_audit(research, five, rail_by_base):
     return project_d004(snapshot=load_data(), research=research, five=five,
                         round2=load_round2(), packs=load_city_packs(),
@@ -168,7 +235,7 @@ def render_d004_section(audit):
         "Não há ranking, prioridade por cidade ou alteração da decisão. "
         "A união abaixo é um recorte documental, não uma seleção.",
         "",
-        f"- Snapshot {s['snapshot_date']} ({s['decision_status']}): "
+        f"- Candidatas transcritas e revisadas do snapshot {s['named_candidates_reference_date']} (decisão no snapshot {s['snapshot_date']}: {s['decision_status']}): "
         + (", ".join(s["named_candidates"]) or "nenhuma candidata identificada") + ".",
         f"- Estudo de cinco bases ({s['five_base_study_date']}): "
         + ", ".join(s["five_base_study_ids"]) + ".",
@@ -210,6 +277,14 @@ def render_d004_section(audit):
                      f"{fmt(d['restaurant_eur_two'])} | "
                      f"{fmt((d['urban_pass'] or {}).get('fare_eur_month_person'))} | "
                      f"{climate} | {state} | {rail['timed']}/{rail['eligible']} |")
+    lines.extend(["", "### Lacunas por base — tipos de pesquisa, não prioridades oficiais", "",
+                  "| Base | Necessário para comparar a escolha | Complementar | Suficiente apenas para contexto |",
+                  "|---|---|---|---|"])
+    for r in audit["rows"]:
+        gaps = r["research_gaps"]
+        parts = ["; ".join(gaps[k]) or "Nenhuma lacuna neste recorte"
+                 for k in ("decision_blockers", "complementary", "sufficient_for_context_only")]
+        lines.append(f"| {r['id']} | " + " | ".join(parts) + " |")
     lines.extend([
         "", "### Lacunas e condições para pesquisas seguintes", "",
         "- Moradia: comparar três unidades privativas para dois adultos, mesmas datas e 56–60 noites, "
@@ -223,8 +298,16 @@ def render_d004_section(audit):
         "O recorte de destinos relevante à decisão ainda precisa ser confirmado.",
         "- Evidência suficiente apenas para contexto: normais climáticas documentadas e observações históricas "
         "com fonte e unidade; nenhuma delas fecha os requisitos de 2027.",
-        "", "O anexo JSON contém as observações originais, URLs, datas, modalidades, condições, "
-        "bairros, requisitos e estados desconhecidos em d004. Contagens zero indicam ausência de "
-        "registros verificados, nunca custo zero ou indisponibilidade comprovada.",
+        "", "O JSON completo gerado localmente pelo comando de reprodução (não versionado) "
+        "contém os registros detalhados em d004. O anexo histórico compacto versionado não contém d004. "
+        "As fontes originais podem ser consultadas diretamente no repositório, sem executar código:",
+        "", "- [Moradia: anúncios, requisitos e datas](../../data/base_city_research_expanded_2026_11.json)",
+        "- [Pacotes: bairros, clima, internet e referências de coworking](../../data/city_research_packs_2026_11.json)",
+        "- [Alimentação e coworking: fontes, preços, modalidades e horários](../../data/city_research_round2_2026.json)",
+        "- [Mercado: amostras, passes urbanos e premissas compartilhadas](../../data/city_market_observations_2026.json)",
+        "- [Perfis: evidências públicas e limitações](../../data/city_profiles_enriched.json)",
+        "- [Estudo de cinco bases](../../data/five_base_comparison_evidence_2026_11.json)",
+        "- [Snapshot da decisão](../../data/trip.json)",
+        "", "Contagens zero indicam ausência de registros verificados, nunca custo zero ou indisponibilidade comprovada.",
     ])
     return lines
