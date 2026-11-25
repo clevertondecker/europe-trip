@@ -92,3 +92,22 @@ class LegacyCleanupTests(unittest.TestCase):
         self.assertFalse(app.exception, [x.message for x in app.exception])
         self.assertNotIn("ux_compare_mode", {w.key for w in app.segmented_control})
         self.assertEqual(app.session_state["advisor_plan"], plan)
+
+    def test_base_outings_guide_is_not_mounted_in_discovery_or_wishlist(self):
+        app = AppTest.from_file(str(ROOT / "app.py"), default_timeout=120).run()
+        plan = deepcopy(app.session_state["advisor_plan"])
+        app.button(key="ux64_sidebar_nav_0").click().run()
+        for task in ("Descobrir", "Minha lista"):
+            app.segmented_control(key="ux64_public_task").set_value(task).run()
+            self.assertFalse(app.exception, [x.message for x in app.exception])
+            self.assertNotIn("attractions_scenario_base", {w.key for w in app.selectbox})
+        app.button(key="ux64_sidebar_nav_1").click().run()
+        app.button(key="ux125b_home_base_outings").click().run()
+        self.assertFalse(app.exception, [x.message for x in app.exception])
+        self.assertIn("attractions_scenario_base", {w.key for w in app.selectbox})
+        self.assertNotIn("ux501_search", {w.key for w in app.text_input})
+        app.button(key="ux125b_return_discovery").click().run()
+        self.assertFalse(app.exception, [x.message for x in app.exception])
+        self.assertIn("ux501_search", {w.key for w in app.text_input})
+        self.assertNotIn("attractions_scenario_base", {w.key for w in app.selectbox})
+        self.assertEqual(app.session_state["advisor_plan"], plan)

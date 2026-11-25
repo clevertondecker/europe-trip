@@ -116,7 +116,8 @@ class SharedRailAppTests(unittest.TestCase):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
         before=deepcopy(app.session_state["advisor_plan"])
         app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
-        app.segmented_control(key="ux_section").set_value("Passeios").run()
+        app.button(key="ux64_sidebar_nav_1").click().run()
+        app.button(key="ux125b_home_base_outings").click().run()
         app.selectbox(key="attractions_scenario_base").set_value("mulhouse").run()
         app.selectbox(key="ux_dq32_opportunity_group").set_value(
             "Referências indicativas de ida").run()
@@ -140,7 +141,8 @@ class SharedRailAppTests(unittest.TestCase):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
         before=deepcopy(app.session_state["advisor_plan"])
         app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
-        app.segmented_control(key="ux_section").set_value("Passeios").run()
+        app.button(key="ux64_sidebar_nav_1").click().run()
+        app.button(key="ux125b_home_base_outings").click().run()
         app.selectbox(key="attractions_scenario_base").set_value("strasbourg").run()
         app.selectbox(key="ux_dq32_opportunity_group").set_value(
             "Referências indicativas de ida").run()

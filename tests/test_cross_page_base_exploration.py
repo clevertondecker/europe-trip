@@ -32,7 +32,8 @@ class CrossPageExplorationTests(unittest.TestCase):
 
         app.radio(key="main_navigation").set_value("Roteiro").run()
         app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
-        app.segmented_control(key="ux_section").set_value("Passeios").run()
+        app.button(key="ux64_sidebar_nav_1").click().run()
+        app.button(key="ux125b_home_base_outings").click().run()
         app.selectbox(key="attractions_scenario_base").set_value("offenburg").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
         self.assertEqual(app.session_state["advisor_plan"]["base_city"],original["base_city"])

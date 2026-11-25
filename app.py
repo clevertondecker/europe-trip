@@ -308,6 +308,13 @@ def _ux125b_open_base_studies() -> None:
     set_ux_task(st.session_state,"Meu roteiro","Melhorar meu roteiro")
 
 
+def _ux125b_open_base_outings() -> None:
+    """Keep the legacy itinerary actions available without mounting a second catalog."""
+    st.session_state["ux_improve_view"]="Guias especializados"
+    st.session_state["ux_guide_view"]="Explorar atrações"
+    set_ux_task(st.session_state,"Meu roteiro","Melhorar meu roteiro")
+
+
 def _ux_mode_changed() -> None:
     st.session_state["ux_mode_value"]=st.session_state["ux_mode"]
     if (st.session_state.get("ux_area"),st.session_state.get("ux_section"))==("Orçamento","Simulações"):
@@ -503,6 +510,7 @@ elif ux_area=="Meu roteiro" and ux_section=="Melhorar meu roteiro":
         key="ux_improve_view",on_change=_ux_aux_changed)
     if st.session_state.get("ux_improve_view")=="Guias especializados":
         st.selectbox("Qual guia?",list(UX_GUIDES),
+                     format_func=lambda name: "Passeios por cidade-base" if name=="Explorar atrações" else name,
                      key="ux_guide_view",on_change=_ux_aux_changed)
 # Initialize the organizer on navigation entry, never on each Streamlit rerun.
 _organize_activity=(ux_area,ux_section)==("Meu roteiro","Organizar viagem")
@@ -555,6 +563,8 @@ if page == "Visão geral":
                      on_click=_ux_next_task,args=("Minha viagem","Decisões"))
         st.button("Consultar propostas italianas e guias",key="home_open_consultor",
                   on_click=navigate_to_consultor)
+        st.button("Pesquisa de passeios por cidade-base",key="ux125b_home_base_outings",
+                  on_click=_ux125b_open_base_outings)
 
 elif page == "Mapa & destinos" and (st.session_state.get(CONTEXT) or {}).get("kind")=="map":
     render_contextual_map(active_plan())
@@ -1169,16 +1179,21 @@ elif page == "Roteiro":
 
 
     elif itinerary_section == "Explorar atrações":
-        # UX 5.0.1: destination-first discovery, no base choice required.
-        from rec03b_handoff_ui import render_profile_discovery_return
-        focused_destination=render_profile_discovery_return()
-        render_independent_destination_discovery(focused_destination=focused_destination)
-        if st.session_state.get("ux502_view","Descobrir lugares")=="Descobrir lugares":
-            render_contextual_shortcuts("discovery")
-        st.divider()
-        with st.popover("Pesquisar por cidade-base · opcional", use_container_width=True):
-            st.caption("Ferramenta anterior preservada para investigar alternativas de cidade-base.")
+        if (ux_area,ux_section)==("Meu roteiro","Melhorar meu roteiro"):
+            from ux64_navigation_model import select_public_task
+            st.button("← Voltar a Descobrir",key="ux125b_return_discovery",
+                      on_click=select_public_task,
+                      args=(st.session_state,"Explorar","Descobrir"))
+            st.caption("Pesquisa de passeios, conexões e custos a partir de uma base. "
+                       "O catálogo independente continua em Explorar → Descobrir.")
             render_explorer(data,sync_sources,map_view)
+        else:
+            # UX501/126B: destination-first catalog; no second base-specific renderer.
+            from rec03b_handoff_ui import render_profile_discovery_return
+            focused_destination=render_profile_discovery_return()
+            render_independent_destination_discovery(focused_destination=focused_destination)
+            if st.session_state.get("ux502_view","Descobrir lugares")=="Descobrir lugares":
+                render_contextual_shortcuts("discovery")
 
     elif itinerary_section == "Explorar bases":
         if ((st.session_state.get(CONTEXT) or {}).get("kind")!="profile"
