@@ -3,8 +3,9 @@ import unittest
 from copy import deepcopy
 from data_model import load_data, calculate_scenario, get_scenario
 from trip_plan_model import new_plan
-from official_budget_model import official_budget_projection, official_budget_for_plan
-from unified_budget import resolve_french_budget
+from official_budget_model import (official_budget_projection, official_budget_for_plan,
+                                   official_simulation_result)
+from unified_budget import resolve_french_budget, scenario_total
 
 
 class OfficialBudgetTests(unittest.TestCase):
@@ -44,3 +45,36 @@ class OfficialBudgetTests(unittest.TestCase):
         self.assertEqual(result["reference_days"], 70)
         self.assertEqual(result["planned_days"], 72)
         self.assertEqual(result["total"], get_scenario(self.data, "70k")["reported_total_brl"])
+
+    def test_simulation_starts_at_official_and_restores_without_mutation(self):
+        costs = {"known_by_currency": {"EUR": 10000., "CHF": 100.},
+                 "missing": ["unknown"]}
+        snapshot = official_budget_projection(self.data, False, self.plan, costs)
+        before = deepcopy((self.plan, snapshot))
+        initial = official_simulation_result(snapshot)
+        self.assertEqual(initial["total"], snapshot["total"])
+        self.assertEqual(initial["margin"], snapshot["margin"])
+        self.assertEqual(initial["new_components"]["dining"],
+                         round(snapshot["french"]["amounts"]["dining"], 2))
+        self.assertEqual(initial["deltas"]["dining"], 0.)
+        changed = scenario_total(snapshot["scenario"], snapshot["french"],
+                                 french_days=snapshot["french"]["french_days"],
+                                 outings_weekly=2, outing_couple_eur=60,
+                                 fx_brl_per_eur=6.3,
+                                 excursions_delta_brl=snapshot["known_excursions_overage_brl"],
+                                 flight_delta_brl=500, use_budget_dining=True)
+        self.assertEqual(changed["total"], round(snapshot["total"] + 500, 2))
+        self.assertEqual(official_simulation_result(snapshot), initial)
+        self.assertEqual((self.plan, snapshot), before)
+
+    def test_custom_restaurant_hypothesis_is_opt_in(self):
+        official = official_budget_projection(self.data, False, self.plan, self.costs)
+        args = dict(french_days=official["french"]["french_days"],
+                    outings_weekly=0, outing_couple_eur=60, fx_brl_per_eur=6.3)
+        same = scenario_total(official["scenario"], official["french"],
+                              **args, use_budget_dining=True)
+        changed = scenario_total(official["scenario"], official["french"], **args)
+        self.assertEqual(same["total"], official["total"])
+        self.assertEqual(same["deltas"]["dining"], 0.)
+        self.assertEqual(changed["new_components"]["dining"], 0.)
+        self.assertLess(changed["total"], same["total"])
