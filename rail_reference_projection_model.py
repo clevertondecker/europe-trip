@@ -14,6 +14,7 @@ from data12_lille_connectivity_model import load_lille_connectivity
 from data13_directed_connectivity_model import load_data13
 from data22_supplemental_rail_model import load_data22
 from data23_france_candidates_model import load_data23
+from data25_priority_rail_model import load_data25
 
 
 def format_minutes(value):
@@ -58,10 +59,15 @@ def _cached_data23():
     return {(r['base_id'],r['destination_id']):r for r in load_data23()['routes']}
 
 
+@lru_cache(maxsize=1)
+def _cached_data25():
+    return load_data25()
+
+
 def decorate_comparison(result, *, references=None, gap_overlay=None,
                         connectivity_overlay=None, priority_overlay=None,
                         lille_overlay=None, data13_overlay=None, supplemental_overlay=None,
-                        candidate_overlay=None):
+                        candidate_overlay=None, data25_overlay=None):
     """All matrix categories are mutually exclusive, including custom baskets."""
     refs = references if references is not None else load_route_references()
     gaps = gap_overlay if gap_overlay is not None else _cached_route_gaps()
@@ -74,6 +80,7 @@ def decorate_comparison(result, *, references=None, gap_overlay=None,
     supplemental = (supplemental_overlay if supplemental_overlay is not None
                     else _cached_data22())
     candidate = candidate_overlay if candidate_overlay is not None else _cached_data23()
+    data25 = data25_overlay if data25_overlay is not None else _cached_data25()
     cells = {}
     categories = {
         "historical": 0, "reference_only": 0, "local": 0, "no_time": 0,
@@ -233,6 +240,25 @@ def decorate_comparison(result, *, references=None, gap_overlay=None,
                 "weekend_return_known":False,"valid_for_2027":False,
                 "evidence_notes":city_row["notes"],
             }
+        # DATA25 is strictly additive, after every existing evidence source.
+        new_row = data25["by_pair"].get(key) or data25["by_pair"].get(source_key)
+        if (new_row is not None and evidence.get("display_min") is None
+                and row["evidence_status"] != "local"):
+            evidence = {
+                **evidence,
+                "display_basis": "data25_priority_reference",
+                "display_min": new_row["oneway_min"],
+                "source_url": new_row["source_url"],
+                "reference_source_url": new_row["source_url"],
+                "gap_checked_at": new_row["source_checked_at"],
+                "confidence": new_row["confidence"],
+                "source_kind": new_row["evidence_type"],
+                "station_comparability": "city_level_ambiguous",
+                "comparability": "indicative_only_not_station_comparable",
+                "weekend_return_known": False,
+                "valid_for_2027": False,
+                "evidence_notes": new_row["note"],
+            }
         basis = evidence["display_basis"]
         if basis == "local_not_rail":
             category = "local"
@@ -277,6 +303,9 @@ def decorate_comparison(result, *, references=None, gap_overlay=None,
                          if evidence.get("source_kind") == "official_operator_minimum"
                          else "referência secundária · mínimo divulgado")
             label = f'~{format_minutes(evidence["display_min"])} · {qualifier}'
+        elif basis == "data25_priority_reference":
+            category = "reference_only"
+            label = f'~{format_minutes(evidence["display_min"])} · mínimo publicado · operadora'
         elif basis == "data23_candidate_reference":
             category = "reference_only"
             label = f'~{format_minutes(evidence["display_min"])} · mínimo publicado · operadora'
@@ -321,6 +350,7 @@ def decorate_comparison(result, *, references=None, gap_overlay=None,
             "data13_connectivity_applied": basis == "data13_reference",
             "supplemental_connectivity_applied": basis == "data22_supplemental_reference",
             "candidate_connectivity_applied": basis == "data23_candidate_reference",
+            "data25_connectivity_applied": basis == "data25_priority_reference",
             "station_caveat": (
                 "Fonte refere-se à chegada na estação " + evidence["arrival_station"]
                 + "; não confirma acesso a atrações fora da estação."

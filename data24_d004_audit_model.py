@@ -13,6 +13,7 @@ from city_research_packs_model import load_city_packs
 from city_market import load_market
 from city_profiles_model import load_profiles
 from data_model import load_data
+from data25_priority_rail_model import RESEARCH_BASE_IDS, RESEARCH_SCOPE_APPROVED_AT
 
 
 # Transcription reviewed against data/trip.json snapshot 2026-11-14.
@@ -35,7 +36,7 @@ def scope_for_d004(snapshot, research, five):
     # Explicit reviewed reference, never a parser of the decision's prose.
     named = sorted(D004_SNAPSHOT_CANDIDATES)
     historical = sorted(five["base_ids"])
-    validate_scope_coverage(named + historical, {
+    validate_scope_coverage(named + historical + list(RESEARCH_BASE_IDS), {
         "pesquisa ampliada": {c["id"] for c in research["cities"]},
     })
     if len(historical) != len(set(historical)):
@@ -58,6 +59,8 @@ def scope_for_d004(snapshot, research, five):
         "historical_shortlist_source": "data/base_city_research_expanded_2026_11.json",
         "historical_shortlist_date": research["retrieved_at"],
         "official_finalist_ids": None,
+        "approved_research_base_ids": list(RESEARCH_BASE_IDS),
+        "research_scope_approved_at": RESEARCH_SCOPE_APPROVED_AT,
         "status": "scope_unconfirmed",
         "descriptive_ids": sorted(set(named) | set(historical)),
         "priority_assignment": None,
@@ -241,7 +244,9 @@ def render_d004_section(audit):
         + ", ".join(s["five_base_study_ids"]) + ".",
         f"- Triagem histórica ({s['historical_shortlist_date']}): "
         + ", ".join(s["historical_shortlist_ids"]) + ". Não é o recorte D-004.",
-        "- Confirmar a lista final com o responsável pela decisão antes de atribuir prioridades.",
+        f"- Recorte prioritário de pesquisa autorizado em {s['research_scope_approved_at']}: "
+        + ", ".join(s["approved_research_base_ids"]) + ". Não é decisão oficial de base.",
+        "- Confirmar a decisão final D-004 com o responsável; nenhuma prioridade por cidade é atribuída.",
         "",
         f"Denominador descritivo: {c['bases']} bases únicas; a triagem histórica não amplia o denominador.",
         "",
