@@ -129,8 +129,9 @@ def _draft_download(proposal):
         st.download_button("Baixar proposta",
                            data=raw,file_name="nossa-europa-datas-propostas.json",
                            mime="application/json",key="ux35_download_draft")
+        st.caption("Arquivo .json exportado por este app")
         file=st.file_uploader("Reabrir proposta JSON",type=["json"],
-                              key="ux35_draft_import")
+                              key="ux35_draft_import", max_upload_size=5)
         if file and st.button("Validar rascunho importado",
                               key="ux35_import_review"):
             try:

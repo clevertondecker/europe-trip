@@ -31,9 +31,9 @@ class PredefinedBudgetTests(unittest.TestCase):
 
     def test_budget_cannot_mutate_official_before_confirmation(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=100).run()
-        app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Orçamento"))).click().run()
-        app.segmented_control(key="ux_section").set_value("Simulações").run()
-        app.segmented_control(key="ux_budget_view").set_value("Consultor de passeios").run()
+        app.button(key="ux_sidebar_nav_2").click().run()
+        app.segmented_control(key="ux_section").set_value("Melhorar meu roteiro").run()
+        app.selectbox(key="ux_improve_view").set_value("Consultor de passeios").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
         original=deepcopy(app.session_state["advisor_plan"])
         self.assertIn("budget_preset_review_button",{b.key for b in app.button})

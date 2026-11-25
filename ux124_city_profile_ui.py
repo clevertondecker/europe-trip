@@ -2,7 +2,7 @@
 from __future__ import annotations
 import streamlit as st
 from ux124_city_profile_model import (TOPICS,city_profile,
-    personalize_routes,route_scope,ROUTE_SCOPES)
+    personalize_routes,route_scope,ROUTE_SCOPES,MISSING_WISHLIST_SCOPE)
 from ux502_destination_interests_model import empty_interests,ordered_interests,LABELS
 from routes7_comparison_projection import format_minutes
 from ux47_photo_ui import photo_markup,photo_credit
@@ -221,9 +221,20 @@ def _logistics(v):
         counts.append(f'{selection["local"]} locais')
     if selection["missing"]:
         counts.append(f'{selection["missing"]} sem tempo')
-    st.caption(" · ".join(counts)+". Não confirma bate-volta.")
+    if scope==MISSING_WISHLIST_SCOPE:
+        st.caption(f'{selection["missing"]} sem tempo. Não confirma bate-volta.')
+    else:
+        st.caption(" · ".join(counts)+". Não confirma bate-volta.")
+    if scope==MISSING_WISHLIST_SCOPE:
+        st.caption("Destinos ativos da sua lista sem referência de tempo de ida. "
+                   "Não significa que o trajeto seja impossível; o acesso local e as "
+                   "referências indicativas não entram neste recorte.")
     if not rows:
-        st.info("Nenhum destino neste recorte. Altere o filtro ou consulte Minha lista.")
+        if scope==MISSING_WISHLIST_SCOPE:
+            st.info("Nenhum destino da sua lista neste recorte." if desired["total"] else
+                    "Sua lista ainda não tem destinos ativos. Escolha lugares em Minha lista.")
+        else:
+            st.info("Nenhum destino neste recorte. Altere o filtro ou consulte Minha lista.")
     else:
         table,has_typical=logistics_table(rows)
         st.dataframe(table,hide_index=True,width="stretch")

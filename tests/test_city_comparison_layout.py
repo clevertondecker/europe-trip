@@ -8,7 +8,8 @@ class CityComparisonLayoutTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         contents = APP.read_text(encoding="utf-8")
-        cls.page = contents.split('elif page == "Comparar cidades":', 1)[1].split('elif page == "Roteiro":', 1)[0]
+        cls.comparison = contents.split('elif page == "Comparar cidades":', 1)[1].split('elif page == "Roteiro":', 1)[0]
+        cls.page = contents.split('elif itinerary_section == "Estudos de cidades-base":', 1)[1].split('elif itinerary_section == "Explorar atrações":', 1)[0]
         cls.app = contents
 
     def test_preserved_reference_sections(self):
@@ -27,10 +28,12 @@ class CityComparisonLayoutTests(unittest.TestCase):
         for code in ("rank_cities(", "initialize_weight_state(", "city_compare_pair", "city_weight_"):
             self.assertNotIn(code,self.page)
         for code in ("st.column_config.LinkColumn", "load_market()", "load_audit()",
-                     "Requisitos e documentos históricos", "render_city_decision(",
-                     "render_recommendation_activity("):
+                     "Requisitos e documentos históricos", "render_city_decision("):
             self.assertIn(code,self.page)
         self.assertNotIn("render_route_comparison(",self.page)
+        self.assertIn("render_recommendation_activity(",self.comparison)
+        self.assertIn("ux125b_open_base_studies",self.comparison)
+        self.assertNotIn("city_compare_section",self.comparison)
 
     def test_no_old_repeated_rail_links(self):
         self.assertNotIn('st.link_button(f"Fonte TER: {item', self.page)

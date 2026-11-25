@@ -288,7 +288,7 @@ def render_data8_cost_simulator(destination_id, *, tourism=None):
                        key="data8_enable_cost_"+destination_id):
         return
     selected=st.multiselect("Atrações a incluir",options,
-                            key="data8_cost_attractions_"+destination_id)
+                            key="data8_cost_attractions_"+destination_id, placeholder="Escolha uma ou mais opções")
     if not selected:
         st.info("Selecione atrações para simular, sem adicioná-las ao roteiro.")
         return
@@ -327,7 +327,7 @@ def render_data8_cost_simulator(destination_id, *, tourism=None):
                           [x["activity_id"] for x in available],
                           format_func=lambda key:next(x["name"] for x in available
                                                       if x["activity_id"]==key),
-                          key="data8_addons_"+destination_id)
+                          key="data8_addons_"+destination_id, placeholder="Escolha uma ou mais opções")
     fx_raw=st.text_input("Câmbio hipotético EUR→BRL (opcional)",
                          placeholder="Ex.: 6.00",
                          key="data8_fx_"+destination_id)

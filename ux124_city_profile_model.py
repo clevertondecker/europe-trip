@@ -24,7 +24,8 @@ from attraction_last_mile_model import load_access_pilot
 TOPICS=("Visão geral","Moradia","Logística","Vida cotidiana","Trabalho remoto","Atrações")
 
 ACTIVE_PRIORITIES=PRIORITIES[:3]
-ROUTE_SCOPES=("Minha lista","Todos os destinos","Com tempo pesquisado")
+MISSING_WISHLIST_SCOPE="Sem tempo (lista)"
+ROUTE_SCOPES=("Minha lista","Todos os destinos","Com tempo pesquisado",MISSING_WISHLIST_SCOPE)
 TIMED=("historical","reference_only")
 
 def personalize_routes(routes,priorities):
@@ -40,6 +41,10 @@ def route_scope(routes,scope):
         rows=[r for r in routes if r["priority"] in ACTIVE_PRIORITIES]
     elif scope==ROUTE_SCOPES[2]:
         rows=[r for r in routes if r["cell"]["category"] in TIMED]
+    elif scope==MISSING_WISHLIST_SCOPE:
+        # A filtered view of the existing canonical pairs, not new eligibility.
+        rows=[r for r in routes if r["priority"] in ACTIVE_PRIORITIES
+              and r["cell"]["category"]=="no_time"]
     else:
         rows=list(routes)
     counts=Counter(r["cell"]["category"] for r in rows)

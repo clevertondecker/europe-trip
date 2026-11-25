@@ -85,6 +85,8 @@ class PriorityRailAppTest(unittest.TestCase):
         original=deepcopy(app.session_state["advisor_plan"])
         app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
         app.segmented_control(key="ux_section").set_value("Comparar").run()
+        app.button(key="ux125b_open_base_studies").click().run()
+        app.segmented_control(key="ux_compare_mode").set_value("Estudos de troca").run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
         app.multiselect(key="ux34_destinations").set_value(list(DESTINATIONS)).run()
         self.assertFalse(app.exception,[x.message for x in app.exception])

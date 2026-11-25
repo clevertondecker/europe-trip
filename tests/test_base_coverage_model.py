@@ -113,28 +113,33 @@ class CoverageModelTests(unittest.TestCase):
 
 
 class CoverageStreamlitTests(unittest.TestCase):
-    def test_preserved_evidence_inventory_reachable_and_no_official_change(self):
+    def test_preserved_evidence_inventory_migrated_and_no_official_change(self):
+        from data24_audit_model import build_audit
+        audit = build_audit()
+        self.assertEqual(audit["legacy_evidence"], coverage_matrix("general"))
+        self.assertEqual(audit["legacy_summary"]["cities"], 30)
+        self.assertEqual(audit["legacy_summary"]["shortlist"], 12)
         at=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
         self.assertFalse(at.exception,[x.message for x in at.exception])
         original=deepcopy(at.session_state["advisor_plan"])
-        at.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
-        at.segmented_control(key="ux_section").set_value("Comparar").run()
+        at.button(key="ux64_sidebar_nav_0").click().run()
+        at.session_state["ux_compare_mode"]="Evidências e lacunas"
+        at.segmented_control(key="ux64_public_task").set_value("Comparar bases").run()
         self.assertFalse(at.exception,[x.message for x in at.exception])
-        at.segmented_control(key="ux_compare_mode").set_value(
-            "Evidências e lacunas").run()
+        self.assertNotIn("ux_compare_mode",{w.key for w in at.segmented_control})
+        at.button(key="ux125b_open_base_studies").click().run()
         self.assertFalse(at.exception,[x.message for x in at.exception])
-        self.assertTrue(any("Evidências históricas · o que já sabemos" in x.value
-                            for x in at.markdown))
-        self.assertTrue(any(x.label=="Cidades" and x.value=="30"
-                            for x in at.metric))
-        at.checkbox(key="ux_30_only_finalists").uncheck().run()
-        self.assertFalse(at.exception,[x.message for x in at.exception])
+        self.assertEqual(at.session_state["ux_compare_mode"],"Referências históricas")
+        self.assertNotIn("Evidências e lacunas", at.segmented_control(key="ux_compare_mode").options)
+        self.assertFalse(any("Evidências históricas · o que já sabemos" in x.value
+                             for x in at.markdown))
+        self.assertNotIn("ux_30_only_finalists",{w.key for w in at.checkbox})
         self.assertNotIn("ux_30_weight_profile",{w.key for w in at.segmented_control})
         self.assertNotIn("ux_dq31_logistics_weights",{w.key for w in at.selectbox})
         self.assertNotIn("ux_30_shortlist_compare",{w.key for w in at.multiselect})
         self.assertNotIn("ux_city_profile_compare",{w.key for w in at.multiselect})
-        self.assertTrue(any(w.key=="ux_city_profile_detail" for w in at.selectbox))
-        self.assertTrue(any(w.key=="ux_dq31_city_detail" for w in at.selectbox))
+        self.assertNotIn("ux_city_profile_detail",{w.key for w in at.selectbox})
+        self.assertNotIn("ux_dq31_city_detail",{w.key for w in at.selectbox})
         self.assertEqual(at.session_state["advisor_plan"],original)
 
 

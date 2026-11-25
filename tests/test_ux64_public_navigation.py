@@ -15,6 +15,7 @@ class PublicNavigationTests(unittest.TestCase):
         self.assertEqual(public_area("Minha viagem"),"Planejar")
         self.assertEqual(public_area("Meu roteiro"),"Planejar")
         self.assertEqual(public_task("Meu roteiro","Organizar viagem"),"Organizar")
+        self.assertIsNone(public_task("Meu roteiro","Melhorar meu roteiro"))
 
     def test_wishlist_and_discovery_share_one_legacy_tool(self):
         state={}
@@ -71,9 +72,12 @@ class ContextualActivityAppTests(unittest.TestCase):
         self.assertEqual(
             [b.label for b in app.button if b.key=="rec03a_open_from_wishlist"],
             ["Comparar cidades-base"])
-        # Manual comparison remains in the advanced-only compatibility section.
-        self.assertTrue(any(b.key=="ux503_open_from_wishlist"
-                            for b in app.button))
+        # Detailed comparison is reachable only within its canonical task.
+        self.assertFalse(any(b.key=="ux503_open_from_wishlist"
+                             for b in app.button))
+        app.button(key="rec03a_open_from_wishlist").click().run()
+        self.assertIn("ux125_open_manual_comparison",{b.key for b in app.button})
+        app.segmented_control(key="ux64_public_task").set_value("Minha lista").run()
         app.segmented_control(key="ux64_public_task").set_value("Descobrir").run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
         self.assertFalse(any("page-title'>Meu roteiro" in m.value

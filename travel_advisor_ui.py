@@ -338,8 +338,9 @@ def render_advisor(trip_data:dict,sync_sources:dict,workspace_area:str='Meus pas
                                    data=json.dumps(p,ensure_ascii=False,indent=2),
                                    file_name=p["plan_id"]+".json",mime="application/json",
                                    use_container_width=True,key="advisor_export_backup")
+                st.caption("Arquivo .json exportado por este app")
                 uploaded=st.file_uploader("Importar backup salvo no computador",
-                                          type=["json"],key="advisor_import_json")
+                                          type=["json"],key="advisor_import_json", max_upload_size=5)
                 if uploaded is not None:
                     if st.button("Conferir e importar backup",key="advisor_import_confirm"):
                         try:

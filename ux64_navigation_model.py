@@ -38,6 +38,8 @@ def public_task(legacy_area, legacy_section, wishlist_view=None):
     if legacy_area=="Minha viagem":
         return "Visão geral"
     if legacy_area=="Meu roteiro":
+        if legacy_section=="Melhorar meu roteiro":
+            return None  # Secondary content is not the public destination editor.
         return "Organizar" if legacy_section=="Organizar viagem" else "Meus destinos"
     if legacy_area=="Orçamento":
         return "Simulações" if legacy_section=="Simulações" else "Visão financeira"
@@ -49,12 +51,14 @@ def select_public_task(state, area, task):
         raise ValueError("Área/atividade desconhecida")
     state["ux64_public_task"] = task
     from ux_navigation import set_task
-    if area=="Explorar" and task in ("Descobrir","Minha lista"):
+    if (area=="Explorar" and task in ("Descobrir","Minha lista")
+            and "ux502_discovery_filters" not in state):
         filters=dict(state.get("ux502_discovery_filters",{}))
         filters.update({key:state[key] for key in
                         ("ux501_country","ux501_categories","ux501_search","ux501_page","ux126_eligibility_filter")
                         if key in state})
-        state["ux502_discovery_filters"]=filters
+        if filters:
+            state["ux502_discovery_filters"]=filters
     target_area,target_section=TARGETS[(area,task)]
     previous=(state.get("ux_area"),state.get("ux_section"))
     set_task(state,target_area,target_section)

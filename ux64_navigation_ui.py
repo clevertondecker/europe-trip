@@ -7,7 +7,9 @@ from ux64_navigation_model import PUBLIC_TASKS,public_area,public_task,select_pu
 def _changed():
     area=public_area(st.session_state.get("ux_area"))
     selected=st.session_state["ux64_public_task"]
-    select_public_task(st.session_state,area,selected)
+    if selected is not None:
+        select_public_task(st.session_state,area,selected)
+    # Deselecting an active tab is a no-op; render restores the canonical task.
 
 
 def render_public_task_tabs():
@@ -15,9 +17,9 @@ def render_public_task_tabs():
     current=public_task(st.session_state.get("ux_area"),
                         st.session_state.get("ux_section"),
                         st.session_state.get("ux502_view"))
-    if (area=="Explorar" and st.session_state.get("ux_section")=="Passeios"
-            and st.session_state.get("ux64_public_task") in ("Descobrir","Minha lista")):
-        current=st.session_state["ux64_public_task"]
+    # The public widget callback synchronizes the canonical route and view.
+    # A queued handoff can change that view before the widget renders; never
+    # allow an old widget value to override the requested destination.
     if st.session_state.get("ux64_public_task")!=current:
         st.session_state["ux64_public_task"]=current
     st.segmented_control("Atividade",list(PUBLIC_TASKS[area]),

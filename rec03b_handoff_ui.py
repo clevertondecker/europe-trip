@@ -96,7 +96,7 @@ def render_compare_selection(result,cities):
     selected=st.multiselect("Cidades para a comparação personalizada",options,
                             key=widget,max_selections=5,
                             format_func=lambda b:cities[b]["name"]+" · "+cities[b]["country"],
-                            on_change=remember)
+                            on_change=remember, placeholder="Escolha uma ou mais opções")
     previous=manual_selection(state)
     scope_ids=[x["id"] for x in result["destinations"]]
     if previous:

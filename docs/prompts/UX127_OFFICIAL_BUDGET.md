@@ -1,0 +1,29 @@
+# UX127 — Um número oficial de orçamento, simulação só em Simulações
+
+## Contexto
+QA desktop de 24/11/2026 apontou contradição: Planejar → Visão geral mostrava R$ 71.209 e margem −R$ 1.209; Orçamento → Visão financeira mostrava R$ 69.683,18 e margem +R$ 316,82. Investigar no HEAD atual e reproduzir antes de corrigir. Números acima são observações, não resultados esperados hardcoded.
+
+## Escopo
+- Uma projeção oficial compartilhada baseada em calculate_scenario + known_excursions_overage_brl, usando as premissas e cenário oficiais vigentes. Todos os resumos oficiais devem consumir o mesmo total, margem e estado de completude; despesas desconhecidas permanecem desconhecidas.
+- Simulações somente em Orçamento → Simulações; preservar advisor_projection e seus consumidores legítimos. Separar estado, KPIs, deltas e rótulos da simulação dos números oficiais. Não aplicar cenário hipotético automaticamente ao planejamento.
+- Auditar Planejar, Orçamento → Visão financeira e Simulações, componentes de resumo e mensagens de teto; distinguir valores parciais de previsão completa. Formatação monetária consistente e arredondamento apenas na apresentação. Evitar duplicar cards ou introduzir nova navegação.
+- Executar em três commits/revisões lógicas: A projeção oficial e testes; B isolamento das simulações; C acabamento visual e regressão integrada. Dividir em PRs dependentes somente se a auditoria demonstrar necessidade, sem publicar estado contraditório intermediário.
+- Não mudar planilha, premissas, teto, cenário oficial, TripPlan, cotações, datasets de pesquisa, regras financeiras ou persistência. Não interferir em DATA24/UX125/UX126B.
+## Causa conhecida (confirmar no HEAD antes de corrigir)
+- `itinerary_flow_ui._compact_budget` (chamado em `ux121_overview_ui.py` e em `itinerary_flow_ui.py`) usa `advisor_finance.advisor_projection`. Essa função fixa `outings_weekly=2, outing_couple_eur=60` (`advisor_finance.py:35`) e, por meio de `scenario_total`, substitui a verba de bares e restaurantes da planilha pelo padrão de saídas. Na observação de 24/11, isso somou +R$ 1.526,21.
+- Em Orçamento → Simulações (`app.py`, sliders “Saídas por semana” e “Gasto por saída”), os valores iniciais também são 2 e €60. Por isso a simulação abre diferente do oficial antes de qualquer interação. Confirmar a cadeia de cálculo no HEAD; não fixar os valores observados como constantes de produção.
+
+## Critérios de aceite adicionais
+1. **A simulação abre igual ao oficial.** Sem interação, Simulações mostra delta zero em relação ao oficial: os valores iniciais reproduzem a verba da planilha (ex.: modo “Usar verba da planilha” ligado por padrão). O delta só muda depois que o usuário muda uma premissa, sempre com o rótulo “Simulação, não altera o oficial” e o valor (“+R$ X vs. oficial”, com sinal correto). Permitir restaurar a verba oficial. Se os sliders não representarem exatamente a verba, não arredondar ou inventar equivalência; preservar o modo oficial até ação explícita. Reconciliar estados antigos e alterações legítimas das premissas.
+2. **Um bloco de KPIs por natureza.** Em Simulações, um bloco “Oficial” compacto e um bloco “Simulação” com delta. Nunca dois blocos com os mesmos rótulos (Total, Margem) e valores diferentes sem identificação explícita da natureza. Preservar detalhes exclusivos como decomposição.
+3. **Controles abaixo das abas.** Em Orçamento, a barra Visão financeira | Simulações é o primeiro controle depois do título. “Ajustes avançados da simulação”, “Outras ferramentas financeiras · avançado” e “Comparar alternativa” descem para dentro da aba Simulações, abaixo do simulador. UX127 só reposiciona esses controles, preservando ações e estado; a decisão de remover ou manter é do UX125.
+4. **`advisor_projection` congelada.** Antes de qualquer mudança de produção, adicionar um teste que fixe a saída atual de `advisor_projection` para plano de fixture e para os consumidores existentes (consultor, cenários, perfis, my_outings, base_scenario_impact, travel_dashboard etc.). Inventariar todos os consumidores (nove outros reportados, confirmar no HEAD). A assinatura e os resultados não mudam; consumidores oficiais incorretos migram à projeção oficial apropriada. Os literais 2 e 60 podem virar constantes nomeadas e documentadas como hipótese de simulação, com o mesmo valor.
+5. **Formato monetário.** Todas as tabelas de Orçamento usam formato brasileiro (R$ 16.920,00) via `money_brl` ou `NumberColumn` comprovadamente formatada em pt-BR. Nenhum valor monetário float cru, como 16920 ou 14636.2. Teste que falhe se houver célula monetária numérica sem formato nessas tabelas; não formatar contagens ou percentuais como moeda.
+
+## Teste de regressão do caso original
+Com o mesmo plano (sessão nova, sem destinos), Planejar → Visão geral, Orçamento → Visão financeira e o bloco “Oficial” de Simulações exibem o mesmo total e a mesma margem, e o aviso de estouro só aparece quando a margem oficial é negativa. Testar também Simulações sem interação → alterar premissas → restaurar oficial → retornar a Planejar; verificar delta zero inicial/restaurado, isolamento da hipótese, identificação dos blocos, controles após abas e ausência de mutação. Repetir com passeios, sessão anterior, fontes indisponíveis e margens positiva/negativa. AppTest e testes puros; QA visual quando disponível.
+
+## Aceite
+Reproduzir o caso original, testar plano vazio e com passeios, alterações legítimas do plano e simulação ativa/inativa, margem positiva/negativa, fontes e valores desconhecidos. Testar paridade exata entre telas, isolamento da simulação e ausência de mutação. Rodar suíte e CI no HEAD exato; QA visual real quando disponível, declarar limitações. Manter draft até revisão, sem merge sem autorização específica.
+## Prioridade
+Após validação UX126B (#254), antes de DATA24A. Independente da DATA24.

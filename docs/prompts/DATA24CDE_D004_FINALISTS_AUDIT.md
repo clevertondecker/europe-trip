@@ -17,4 +17,8 @@ Testar reutilização dos contratos, recorte, estados desconhecidos, unidades, r
 ## Dependências e prioridade
 Depende da infraestrutura e relatório de DATA24A. Implementação após UX126B, UX127, DATA24A, UX125 e avaliação de DATA24B. #258 e #259 foram encerrados como consolidados neste PR; preservar seu histórico. Manter draft até revisão, sem merge sem autorização específica.
 
-**Status:** especificação consolidada; implementação pendente.
+**Status:** primeira implementação para revisão; CI e recorte oficial pendentes.
+
+## Recorte encontrado
+
+O snapshot D-004 cita quatro cidades em avaliação e o estudo de cinco bases é uma hipótese de pesquisa independente. A auditoria descritiva usa a união de sete IDs, mantendo os grupos e a triagem histórica separados. Não declara finalistas oficiais nem atribui prioridades. Confirmar o recorte com o responsável antes de avançar DATA25–28. O relatório e o anexo são gerados pelo DATA24 existente, sem mudanças de UI. A CI verificará o Markdown versionado; não foi executado QA visual (sem mudança de interface).

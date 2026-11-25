@@ -185,10 +185,11 @@ class MacroOpportunityUXTests(unittest.TestCase):
         self.assertFalse(at.exception,[x.message for x in at.exception])
         original=deepcopy(at.session_state["advisor_plan"])
         at.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
-        at.segmented_control(key="ux_section").set_value("Passeios").run()
+        at.button(key="ux64_sidebar_nav_1").click().run()
+        at.button(key="ux125b_home_base_outings").click().run()
         at.selectbox(key="attractions_scenario_base").set_value("lille").run()
         self.assertFalse(at.exception,[x.message for x in at.exception])
-        self.assertTrue(any("Descubra lugares para conhecer" in x.value for x in at.markdown))
+        self.assertTrue(any("O que poderemos conhecer a partir da nossa base?" in x.value for x in at.markdown))
         self.assertTrue(any("Atrações na base" == x.label for x in at.metric))
         at.selectbox(key="ux_dq32_opportunity_group").set_value(
             "Trem histórico documentado").run()
@@ -197,16 +198,26 @@ class MacroOpportunityUXTests(unittest.TestCase):
         self.assertFalse(at.exception,[x.message for x in at.exception])
         self.assertEqual(at.session_state["advisor_plan"],original)
 
-    def test_comparison_panel_is_exploratory_and_plan_unchanged(self):
+    def test_macro_opportunities_preserved_in_offline_audit(self):
+        from data24_audit_model import build_audit
+        audit = build_audit()
+        identities = reconcile_attractions(load_attractions(), load_macro_tourism())
+        expected = {a["id"] for rows in identities["new_by_city"].values()
+                    for a in rows}
+        actual = {a["id"] for a in audit["attractions"]["rows"]
+                  if a["kind"] == "dq32_sourced_local"}
+        self.assertEqual(actual, expected)
+        self.assertEqual(audit["dq32_reconciled_aliases"], identities["reconciled"])
+        self.assertFalse(audit["official_plan_modified"])
+        self.assertTrue(all(not p["return_2027_verified"] for p in audit["rail_pairs"]))
         at=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
         self.assertFalse(at.exception,[x.message for x in at.exception])
         before=deepcopy(at.session_state["advisor_plan"])
-        at.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
-        at.segmented_control(key="ux_section").set_value("Comparar").run()
-        at.segmented_control(key="ux_compare_mode").set_value("Evidências e lacunas").run()
+        at.button(key="ux64_sidebar_nav_0").click().run()
+        at.segmented_control(key="ux64_public_task").set_value("Comparar bases").run()
         self.assertFalse(at.exception,[x.message for x in at.exception])
-        self.assertTrue(any("Cobertura ampliada de oportunidades" in x.value
-                            for x in at.markdown))
+        self.assertFalse(any("Cobertura ampliada de oportunidades" in x.value
+                             for x in at.markdown))
         self.assertEqual(at.session_state["advisor_plan"],before)
 
 

@@ -126,9 +126,9 @@ class ResearchPriceUITests(unittest.TestCase):
         text=" ".join(x.label for x in app.expander)
         self.assertIn("Pesquisa de preços",text)
         self.assertEqual(app.session_state["advisor_plan"]["packages"],{})
-        app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Orçamento"))).click().run()
-        app.segmented_control(key="ux_section").set_value("Simulações").run()
-        app.segmented_control(key="ux_budget_view").set_value("Consultor de passeios").run()
+        app.button(key="ux_sidebar_nav_2").click().run()
+        app.segmented_control(key="ux_section").set_value("Melhorar meu roteiro").run()
+        app.selectbox(key="ux_improve_view").set_value("Consultor de passeios").run()
         self.assertTrue(any("Comparar preços de alimentação pesquisados" in x.label
                             for x in app.expander))
         self.assertFalse(app.exception,[e.message for e in app.exception])
