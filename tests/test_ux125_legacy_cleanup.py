@@ -43,9 +43,6 @@ class LegacyCleanupTests(unittest.TestCase):
     def test_no_unapproved_legacy_expanders_across_public_tasks(self):
         # Explicit transitional exceptions belong exclusively to UX125B.
         allowlist = {
-            ("Explorar", "Comparar bases"): {
-                "pesquisas e estudos preservados · temporario":
-                    "DATA24A migration and private studies must be verified first"},
             ("Orçamento", "Simulações"): {
                 "outras ferramentas financeiras · avancado":
                     "UX127 integration required before retiring finance tools"},
@@ -76,3 +73,22 @@ class LegacyCleanupTests(unittest.TestCase):
                                   and label not in allowlist.get((area,task),{})]
                     self.assertEqual(violations, [], (area,task,restored))
                     self.assertEqual(app.session_state["advisor_plan"], plan)
+
+    def test_base_studies_are_secondary_and_preserve_official_plan(self):
+        app = AppTest.from_file(str(ROOT / "app.py"), default_timeout=120).run()
+        plan = deepcopy(app.session_state["advisor_plan"])
+        app.button(key="ux64_sidebar_nav_0").click().run()
+        app.segmented_control(key="ux64_public_task").set_value("Comparar bases").run()
+        self.assertFalse(app.exception, [x.message for x in app.exception])
+        self.assertNotIn("ux_compare_mode", {w.key for w in app.segmented_control})
+        app.button(key="ux125b_open_base_studies").click().run()
+        self.assertFalse(app.exception, [x.message for x in app.exception])
+        self.assertEqual(app.selectbox(key="ux_guide_view").value, "Estudos de cidades-base")
+        self.assertIn("ux_compare_mode", {w.key for w in app.segmented_control})
+        app.segmented_control(key="ux_compare_mode").set_value("Referências históricas").run()
+        self.assertFalse(app.exception, [x.message for x in app.exception])
+        self.assertIn("city_compare_section", {w.key for w in app.segmented_control})
+        app.button(key="ux125b_return_comparison").click().run()
+        self.assertFalse(app.exception, [x.message for x in app.exception])
+        self.assertNotIn("ux_compare_mode", {w.key for w in app.segmented_control})
+        self.assertEqual(app.session_state["advisor_plan"], plan)

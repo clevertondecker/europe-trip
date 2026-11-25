@@ -32,7 +32,7 @@ TASK_ALIASES = {
 DEFAULT_SECTION = {area: sections[0] for area, sections in SECTIONS.items()}
 GUIDES = ("Explorar atrações", "Itália e Costa Amalfitana",
           "França e escapadas", "Transportes e custos",
-          "Calendário de pesquisa", "Cronograma oficial")
+          "Calendário de pesquisa", "Cronograma oficial", "Estudos de cidades-base")
 RESEARCH_OPTIONS = ("Pesquisa ampliada", "França e escapadas",
                     "Transportes e custos", "Itália e Costa Amalfitana",
                     "Calendário de pesquisa", "Cronograma oficial")

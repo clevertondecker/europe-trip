@@ -161,9 +161,13 @@ class BaseExplorerUITests(unittest.TestCase):
         self.assertEqual(app.session_state["ux502_interests"],wishes)
         self.assertEqual(app.session_state["advisor_plan"],old)
         self.assertNotIn("base_compare_destinations",{x.key for x in app.multiselect})
+        self.assertNotIn("ux_compare_mode",{w.key for w in app.segmented_control})
+        app.button(key="ux125b_open_base_studies").click().run()
+        self.assertFalse(app.exception,[e.message for e in app.exception])
         modes=app.segmented_control(key="ux_compare_mode").options
         self.assertNotIn("Uma ou duas bases",modes)
         self.assertNotIn("Comparar mesmas viagens",modes)
+        app.button(key="ux125b_return_comparison").click().run()
         app.segmented_control(key="ux_section").set_value("Cidades-base").run()
         app.segmented_control(key="ux42_city_activity").set_value("Passeios e conexões").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
