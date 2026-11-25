@@ -41,9 +41,9 @@ def official_budget_for_plan(data, source_live, plan, catalog=None, routes=None)
     from itinerary_flow_model import selected_rows, FRANCE_STAGE
     catalog = load_attractions() if catalog is None else catalog
     routes = load_base_routes() if routes is None else routes
-    selected = [row["id"] for row in selected_rows(plan, catalog)
-                if row["stage"] == FRANCE_STAGE]
-    chosen = [item for dest in selected for item in plan["packages"].get(dest, [])]
+    rows = [row for row in selected_rows(plan, catalog) if row["stage"] == FRANCE_STAGE]
+    selected = [row["id"] for row in rows]
+    chosen = [item for row in rows for item in row["attractions"]]
     costs = package_cost(catalog, routes, plan["base_city"], chosen,
                          planned_destination_ids=selected)
     return official_budget_projection(data, source_live, plan, costs)
