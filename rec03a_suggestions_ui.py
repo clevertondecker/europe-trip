@@ -498,6 +498,17 @@ def render_suggestions(*,plan,discovery=None,research=None):
         "Encontre cidades para investigar a partir dos destinos que vocês escolheram.",
         tag="Pesquisa, não reserva",variant="compact",
     ),unsafe_allow_html=True)
+    modes=("Explorar alternativas","Minha comparação","Cobertura dos dados")
+    _restore_widget("ux112_active_view","ux112_active_view_shadow",
+                    modes[0],lambda x:x in modes)
+    view=st.segmented_control("Área da pesquisa",list(modes),
+                              key="ux112_active_view",default=modes[0],
+                              on_change=_remember,
+                              args=("ux112_active_view","ux112_active_view_shadow")) or modes[0]
+    if view=="Cobertura dos dados":
+        from ux132_research_coverage_ui import render_research_coverage
+        render_research_coverage(discovery=discovery,research=research)
+        return
     try:
         discovery=discovery if discovery is not None else build_exploration_discovery()
         wishes=st.session_state.get("ux502_interests",empty_interests())
@@ -557,13 +568,6 @@ def render_suggestions(*,plan,discovery=None,research=None):
     from rec03b_handoff_ui import selected_card_bases, render_selection_toolbar, render_planning_handoff
     selected=selected_card_bases(st.session_state,options)
     st.caption("Compare até cinco cidades; a base oficial só muda após uma confirmação explícita.")
-    modes=("Explorar alternativas","Minha comparação")
-    _restore_widget("ux112_active_view","ux112_active_view_shadow",
-                    modes[0],lambda x:x in modes)
-    view=st.segmented_control("Área da pesquisa",list(modes),
-                              key="ux112_active_view",default=modes[0],
-                              on_change=_remember,
-                              args=("ux112_active_view","ux112_active_view_shadow"))
     if view=="Explorar alternativas":
         st.markdown(section_heading(
             "EXPLORAR ALTERNATIVAS", "Cidades-base para investigar",
