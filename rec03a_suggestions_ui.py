@@ -17,6 +17,7 @@ from ux502_destination_interests_model import (
 from rec03a_session import (SCOPE, DRAFT, ACTIVITY, ACTIVITIES, MANUAL, SUGGESTED,
                             request_navigation, reconcile_session_scope)
 from ux_shared_ui_presentation import page_header, section_heading
+from ux_widget_state import remember as _remember, restore_widget as _restore_widget
 
 _REASON = {
     "menor_minimo_ponderado_no_mesmo_escopo_completo": (
@@ -302,21 +303,6 @@ def evidence_examples(candidate, destinations, limit=3):
             if candidate["evidence"][d["id"]]["category"] in ("historical","reference_only","local")][:limit]
 
 
-def _remember(widget, shadow):
-    st.session_state[shadow] = st.session_state[widget]
-
-
-def _restore_widget(widget, shadow, default, valid=None):
-    state=st.session_state
-    value=state.get(shadow,default)
-    if valid is not None and not valid(value):
-        value=default
-    if state.get(widget)!=value:
-        state[widget]=value
-    state[shadow]=value
-    return value
-
-
 def _overview_caveats(cell):
     """Only factual qualifications from the existing canonical projection."""
     caveats=[]
@@ -506,7 +492,7 @@ def render_suggestions(*,plan,discovery=None,research=None):
                               on_change=_remember,
                               args=("ux112_active_view","ux112_active_view_shadow")) or modes[0]
     if view=="Cobertura dos dados":
-        from ux132_research_coverage_ui import render_research_coverage
+        from ux132_coverage_page import render_research_coverage
         render_research_coverage(discovery=discovery,research=research)
         return
     try:
