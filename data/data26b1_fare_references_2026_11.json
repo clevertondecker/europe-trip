@@ -26,7 +26,16 @@
     "batch_destinations": [
       "paris",
       "colmar",
-      "basel"
+      "basel",
+      "freiburg",
+      "luxembourg_city",
+      "reims",
+      "bruxelles",
+      "bruges",
+      "amsterdam",
+      "dijon",
+      "bern",
+      "interlaken"
     ]
   },
   "references": [
@@ -238,6 +247,196 @@
       "availability": null,
       "service_id": null,
       "valid_for_2027": false
+    },
+    {
+      "origin_id": "nancy",
+      "destination_id": "reims",
+      "travel_date": "2026-12-05",
+      "amount_minor": 3500,
+      "currency": "EUR",
+      "passengers": 1,
+      "direction": "oneway",
+      "fare_class": "second",
+      "kind": "advertised_from",
+      "operator_label": "Fluo",
+      "source_snapshot_recency": "last week",
+      "source_url": "https://www.sncf-connect.com/train/trajet/nancy/reims",
+      "discount_eligibility": null,
+      "mandatory_fees_included": null,
+      "availability": null,
+      "service_id": null,
+      "valid_for_2027": false
+    },
+    {
+      "origin_id": "lille",
+      "destination_id": "amsterdam",
+      "travel_date": "2026-12-05",
+      "amount_minor": 6900,
+      "currency": "EUR",
+      "passengers": 1,
+      "direction": "oneway",
+      "fare_class": "second",
+      "kind": "advertised_from",
+      "operator_label": "EUROSTAR",
+      "source_snapshot_recency": "today",
+      "source_url": "https://www.sncf-connect.com/train/trajet/lille/amsterdam",
+      "discount_eligibility": null,
+      "mandatory_fees_included": null,
+      "availability": null,
+      "service_id": null,
+      "valid_for_2027": false
+    },
+    {
+      "origin_id": "lille",
+      "destination_id": "bruxelles",
+      "travel_date": "2026-12-05",
+      "amount_minor": 1700,
+      "currency": "EUR",
+      "passengers": 1,
+      "direction": "oneway",
+      "fare_class": "second",
+      "kind": "advertised_from",
+      "operator_label": "TGV INOUI",
+      "source_snapshot_recency": "2 days ago",
+      "source_url": "https://www.sncf-connect.com/train/trajet/lille/bruxelles",
+      "discount_eligibility": null,
+      "mandatory_fees_included": null,
+      "availability": null,
+      "service_id": null,
+      "valid_for_2027": false
+    },
+    {
+      "origin_id": "lille",
+      "destination_id": "reims",
+      "travel_date": "2026-11-28",
+      "amount_minor": 4700,
+      "currency": "EUR",
+      "passengers": 1,
+      "direction": "oneway",
+      "fare_class": "second",
+      "kind": "advertised_from",
+      "operator_label": "Fluo",
+      "source_snapshot_recency": "today",
+      "source_url": "https://www.sncf-connect.com/train/trajet/lille/reims",
+      "discount_eligibility": null,
+      "mandatory_fees_included": null,
+      "availability": null,
+      "service_id": null,
+      "valid_for_2027": false
+    },
+    {
+      "origin_id": "metz",
+      "destination_id": "reims",
+      "travel_date": "2026-12-05",
+      "amount_minor": 2500,
+      "currency": "EUR",
+      "passengers": 1,
+      "direction": "oneway",
+      "fare_class": "second",
+      "kind": "advertised_from",
+      "operator_label": "Fluo",
+      "source_snapshot_recency": "last week",
+      "source_url": "https://www.sncf-connect.com/train/trajet/metz/reims",
+      "discount_eligibility": null,
+      "mandatory_fees_included": null,
+      "availability": null,
+      "service_id": null,
+      "valid_for_2027": false
+    },
+    {
+      "origin_id": "strasbourg",
+      "destination_id": "reims",
+      "travel_date": "2026-12-05",
+      "amount_minor": 5100,
+      "currency": "EUR",
+      "passengers": 1,
+      "direction": "oneway",
+      "fare_class": "second",
+      "kind": "advertised_from",
+      "operator_label": "Fluo",
+      "source_snapshot_recency": "2 days ago",
+      "source_url": "https://www.sncf-connect.com/train/trajet/strasbourg/reims",
+      "discount_eligibility": null,
+      "mandatory_fees_included": null,
+      "availability": null,
+      "service_id": null,
+      "valid_for_2027": false
+    },
+    {
+      "origin_id": "metz",
+      "destination_id": "dijon",
+      "travel_date": "2026-12-06",
+      "amount_minor": 3600,
+      "currency": "EUR",
+      "passengers": 1,
+      "direction": "oneway",
+      "fare_class": "second",
+      "kind": "advertised_from",
+      "operator_label": "TGV INOUI",
+      "source_snapshot_recency": "last week",
+      "source_url": "https://www.sncf-connect.com/train/trajet/metz/dijon",
+      "discount_eligibility": null,
+      "mandatory_fees_included": null,
+      "availability": null,
+      "service_id": null,
+      "valid_for_2027": false
+    },
+    {
+      "origin_id": "nancy",
+      "destination_id": "dijon",
+      "travel_date": "2026-11-28",
+      "amount_minor": 2900,
+      "currency": "EUR",
+      "passengers": 1,
+      "direction": "oneway",
+      "fare_class": "second",
+      "kind": "advertised_from",
+      "operator_label": "INTERCITES",
+      "source_snapshot_recency": "4 days ago",
+      "source_url": "https://www.sncf-connect.com/train/trajet/nancy/dijon",
+      "discount_eligibility": null,
+      "mandatory_fees_included": null,
+      "availability": null,
+      "service_id": null,
+      "valid_for_2027": false
+    },
+    {
+      "origin_id": "strasbourg",
+      "destination_id": "dijon",
+      "travel_date": "2026-11-28",
+      "amount_minor": 3500,
+      "currency": "EUR",
+      "passengers": 1,
+      "direction": "oneway",
+      "fare_class": "second",
+      "kind": "advertised_from",
+      "operator_label": "TGV INOUI",
+      "source_snapshot_recency": "yesterday",
+      "source_url": "https://www.sncf-connect.com/train/trajet/strasbourg/dijon",
+      "discount_eligibility": null,
+      "mandatory_fees_included": null,
+      "availability": null,
+      "service_id": null,
+      "valid_for_2027": false
+    },
+    {
+      "origin_id": "strasbourg",
+      "destination_id": "bruxelles",
+      "travel_date": "2026-12-05",
+      "amount_minor": 9800,
+      "currency": "EUR",
+      "passengers": 1,
+      "direction": "oneway",
+      "fare_class": "second",
+      "kind": "advertised_from",
+      "operator_label": "TGV INOUI",
+      "source_snapshot_recency": "today",
+      "source_url": "https://www.sncf-connect.com/train/trajet/strasbourg/bruxelles",
+      "discount_eligibility": null,
+      "mandatory_fees_included": null,
+      "availability": null,
+      "service_id": null,
+      "valid_for_2027": false
     }
   ],
   "gaps": [
@@ -264,6 +463,216 @@
       "destination_id": "basel",
       "reason": "no_numeric_fare_visible_in_consulted_snapshot",
       "source_url": "https://www.sncf-connect.com/train/trajet/lille/bale"
+    },
+    {
+      "origin_id": "lille",
+      "destination_id": "freiburg",
+      "reason": "research_pending",
+      "source_url": null
+    },
+    {
+      "origin_id": "lille",
+      "destination_id": "luxembourg_city",
+      "reason": "no_usable_weekend_rail_fare_in_consulted_snapshot",
+      "source_url": "https://www.sncf-connect.com/train/trajet/lille/luxembourg"
+    },
+    {
+      "origin_id": "lille",
+      "destination_id": "bruges",
+      "reason": "ambiguous_destination_wrong_country",
+      "source_url": null
+    },
+    {
+      "origin_id": "lille",
+      "destination_id": "dijon",
+      "reason": "no_usable_weekend_rail_fare_in_consulted_snapshot",
+      "source_url": "https://www.sncf-connect.com/train/trajet/lille/dijon"
+    },
+    {
+      "origin_id": "lille",
+      "destination_id": "bern",
+      "reason": "research_pending",
+      "source_url": null
+    },
+    {
+      "origin_id": "lille",
+      "destination_id": "interlaken",
+      "reason": "research_pending",
+      "source_url": null
+    },
+    {
+      "origin_id": "metz",
+      "destination_id": "freiburg",
+      "reason": "research_pending",
+      "source_url": null
+    },
+    {
+      "origin_id": "metz",
+      "destination_id": "luxembourg_city",
+      "reason": "no_usable_weekend_rail_fare_in_consulted_snapshot",
+      "source_url": "https://www.sncf-connect.com/train/trajet/metz/luxembourg"
+    },
+    {
+      "origin_id": "metz",
+      "destination_id": "bruxelles",
+      "reason": "no_usable_weekend_rail_fare_in_consulted_snapshot",
+      "source_url": "https://www.sncf-connect.com/train/trajet/metz/bruxelles"
+    },
+    {
+      "origin_id": "metz",
+      "destination_id": "bruges",
+      "reason": "research_pending",
+      "source_url": null
+    },
+    {
+      "origin_id": "metz",
+      "destination_id": "amsterdam",
+      "reason": "research_pending",
+      "source_url": null
+    },
+    {
+      "origin_id": "metz",
+      "destination_id": "bern",
+      "reason": "research_pending",
+      "source_url": null
+    },
+    {
+      "origin_id": "metz",
+      "destination_id": "interlaken",
+      "reason": "research_pending",
+      "source_url": null
+    },
+    {
+      "origin_id": "nancy",
+      "destination_id": "freiburg",
+      "reason": "research_pending",
+      "source_url": null
+    },
+    {
+      "origin_id": "nancy",
+      "destination_id": "luxembourg_city",
+      "reason": "no_usable_weekend_rail_fare_in_consulted_snapshot",
+      "source_url": "https://www.sncf-connect.com/train/trajet/nancy/luxembourg"
+    },
+    {
+      "origin_id": "nancy",
+      "destination_id": "bruxelles",
+      "reason": "no_usable_weekend_rail_fare_in_consulted_snapshot",
+      "source_url": "https://www.sncf-connect.com/train/trajet/nancy/bruxelles"
+    },
+    {
+      "origin_id": "nancy",
+      "destination_id": "bruges",
+      "reason": "research_pending",
+      "source_url": null
+    },
+    {
+      "origin_id": "nancy",
+      "destination_id": "amsterdam",
+      "reason": "research_pending",
+      "source_url": null
+    },
+    {
+      "origin_id": "nancy",
+      "destination_id": "bern",
+      "reason": "research_pending",
+      "source_url": null
+    },
+    {
+      "origin_id": "nancy",
+      "destination_id": "interlaken",
+      "reason": "research_pending",
+      "source_url": null
+    },
+    {
+      "origin_id": "mulhouse",
+      "destination_id": "freiburg",
+      "reason": "no_usable_weekend_rail_fare_in_consulted_snapshot",
+      "source_url": "https://www.sncf-connect.com/train/trajet/mulhouse/fribourg-en-brisgau"
+    },
+    {
+      "origin_id": "mulhouse",
+      "destination_id": "luxembourg_city",
+      "reason": "no_usable_weekend_rail_fare_in_consulted_snapshot",
+      "source_url": "https://www.sncf-connect.com/train/trajet/mulhouse/luxembourg"
+    },
+    {
+      "origin_id": "mulhouse",
+      "destination_id": "reims",
+      "reason": "no_usable_weekend_rail_fare_in_consulted_snapshot",
+      "source_url": "https://www.sncf-connect.com/train/trajet/mulhouse/reims"
+    },
+    {
+      "origin_id": "mulhouse",
+      "destination_id": "bruxelles",
+      "reason": "no_usable_weekend_rail_fare_in_consulted_snapshot",
+      "source_url": "https://www.sncf-connect.com/train/trajet/mulhouse/bruxelles"
+    },
+    {
+      "origin_id": "mulhouse",
+      "destination_id": "bruges",
+      "reason": "research_pending",
+      "source_url": null
+    },
+    {
+      "origin_id": "mulhouse",
+      "destination_id": "amsterdam",
+      "reason": "research_pending",
+      "source_url": null
+    },
+    {
+      "origin_id": "mulhouse",
+      "destination_id": "dijon",
+      "reason": "no_usable_weekend_rail_fare_in_consulted_snapshot",
+      "source_url": "https://www.sncf-connect.com/train/trajet/mulhouse/dijon"
+    },
+    {
+      "origin_id": "mulhouse",
+      "destination_id": "bern",
+      "reason": "research_pending",
+      "source_url": null
+    },
+    {
+      "origin_id": "mulhouse",
+      "destination_id": "interlaken",
+      "reason": "research_pending",
+      "source_url": null
+    },
+    {
+      "origin_id": "strasbourg",
+      "destination_id": "freiburg",
+      "reason": "research_pending",
+      "source_url": null
+    },
+    {
+      "origin_id": "strasbourg",
+      "destination_id": "luxembourg_city",
+      "reason": "no_usable_weekend_rail_fare_in_consulted_snapshot",
+      "source_url": "https://www.sncf-connect.com/train/trajet/strasbourg/luxembourg"
+    },
+    {
+      "origin_id": "strasbourg",
+      "destination_id": "bruges",
+      "reason": "research_pending",
+      "source_url": null
+    },
+    {
+      "origin_id": "strasbourg",
+      "destination_id": "amsterdam",
+      "reason": "research_pending",
+      "source_url": null
+    },
+    {
+      "origin_id": "strasbourg",
+      "destination_id": "bern",
+      "reason": "research_pending",
+      "source_url": null
+    },
+    {
+      "origin_id": "strasbourg",
+      "destination_id": "interlaken",
+      "reason": "research_pending",
+      "source_url": null
     }
   ]
 }
