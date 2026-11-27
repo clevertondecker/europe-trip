@@ -9,7 +9,7 @@ from dq30_walking_access_model import load_walking_access
 from trip01_supplemental_discovery import build_exploration_discovery
 from ux132_coverage_shared import search_key
 
-# key, label, denominator, missing key (None means not a gap metric)
+# key, label, denominator
 INDICATORS = (
     ("destinations_with_attractions", "Destinos com atrações catalogadas", "destinations"),
     ("destinations_with_attributed_photo", "Destinos com foto contextual atribuída", "destinations"),
