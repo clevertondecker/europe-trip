@@ -50,30 +50,7 @@ def render_rail_coverage(*, discovery=None, research=None):
     st.caption("Universo global: pares dirigidos. Pares locais ficam fora do denominador.")
     st.info("Cobertura documental mede disponibilidade de referências, não viabilidade logística. "
             "Retorno, última milha e horários de 2027 não estão confirmados.")
-    with st.expander("Tarifas e retornos documentados"):
-        try:
-            from data26b_rail_fare_evidence_model import load_rail_fares
-            fares = load_rail_fares()
-            st.caption(f'{fares["documented"]} observações tarifárias · {fares["roundtrips"]} com ida e retorno · {fares["complete_documentation"]} com documentação completa.')
-            st.caption("Total para duas pessoas; nenhuma confirmação independente para 2027. Não altera o orçamento.")
-            if fares["records"]:
-                st.dataframe([{
-                    "Origem": x["outbound"]["origin_id"],
-                    "Destino": x["outbound"]["destination_id"],
-                    "Ida": x["outbound"]["departure_at"],
-                    "Retorno": x["inbound"]["departure_at"] if x["inbound"] else None,
-                    "Moeda": x["quote"]["currency"],
-                    "Total": x["quote"]["total_minor"] / 100 if x["quote"]["total_minor"] is not None else None,
-                    "Condições": x["quote"]["fare_conditions"],
-                    "Consulta": x["quote"]["checked_at"],
-                    "Fonte": x["quote"]["source_url"],
-                } for x in fares["records"]], hide_index=True,
-                    column_config={"Fonte": st.column_config.LinkColumn("Fonte")})
-            else:
-                st.caption("Nenhuma cotação individual cadastrada.")
-        except Exception:
-            _LOG.exception("DATA26B fare evidence unavailable")
-            st.warning("Observações tarifárias indisponíveis.")
+    render_fare_evidence(view)
     priority = view["priority"]
     st.caption(f'Cinco bases prioritárias: {_pct(priority)} '
                f'({priority["timed"]}/{priority["eligible"]} pares não locais).')
@@ -209,3 +186,48 @@ def render_rail_coverage(*, discovery=None, research=None):
                     st.caption("Referência de ida; retorno, última milha e horários de 2027 não confirmados.")
         st.caption("Sem tempo pesquisado não significa ausência de conexão. "
                    "Local indica acesso urbano a verificar, não lacuna ferroviária.")
+
+
+def render_fare_evidence(view, fares=None):
+    with st.expander("Tarifas e retornos documentados"):
+        try:
+            from data26b_rail_fare_evidence_model import load_rail_fares
+            fares = load_rail_fares() if fares is None else fares
+            names = {r["id"]: r["name"] for r in view["bases"] + view["destinations"]}
+            st.caption(f'{fares["documented"]} observações · {fares["roundtrips"]} com retorno registrado.')
+            st.caption("Evidência documental, sem confirmação independente para 2027. Não altera o orçamento.")
+            if not fares["records"]:
+                st.caption("Nenhuma cotação individual cadastrada.")
+            for record in fares["records"]:
+                q, out, back = record["quote"], record["outbound"], record["inbound"]
+                origin = names.get(out["origin_id"], out["origin_id"].replace("_", " ").title())
+                destination = names.get(out["destination_id"], out["destination_id"].replace("_", " ").title())
+                scope = "Ida e retorno" if back else "Somente ida"
+                amount = q["total_minor"]
+                price = "Preço desconhecido" if amount is None else f'{q["currency"]} {amount // 100},{amount % 100:02d}'
+                fees = {True: "Taxas e reservas obrigatórias incluídas", False: "Taxas ou reservas obrigatórias excluídas", None: "Inclusão de taxas e reservas desconhecida"}[q["mandatory_fees_included"]]
+                state = {"documented_offer": "Oferta documentada", "unavailable": "Indisponível na consulta", "unknown": "Disponibilidade desconhecida"}[q["availability"]]
+                with st.container(border=True):
+                    st.write(f"**{origin} → {destination} · {scope}**")
+                    st.write(f"{price} · 2 adultos · {state}")
+                    st.caption(f'{fees} · Classe: {q["fare_class"] or "Desconhecida"}')
+                    st.caption(f'Consulta: {q["checked_at_time"] or q["checked_at"]}')
+                    st.link_button("Fonte da tarifa", q["source_url"])
+                    if back:
+                        st.caption("Retorno temporalmente coerente · " + ("Calendário documentado" if record["return_calendar_documented"] else "Calendário incompleto"))
+                        if not record["same_destination_station"] or not record["same_base_station"]:
+                            st.caption("Estações diferentes; deslocamento entre estações não verificado.")
+                    st.caption("Documentação tarifária completa para o escopo" if record["complete_documentation"] else "Documentação tarifária incompleta")
+                    with st.expander("Condições e horários"):
+                        st.write("Condições: " + (q["fare_conditions"] or "Desconhecidas"))
+                        st.write("Elegibilidade: " + (q["discount_eligibility"] or "Desconhecida"))
+                        st.write("Bilhete: " + {None: "Desconhecido", "integrated": "Integrado", "separate": "Separado"}[q["ticket_structure"]])
+                        for label, leg in (("Ida", out), ("Retorno", back)):
+                            if leg:
+                                st.write(f'{label}: {leg["origin_station_id"]} → {leg["destination_station_id"]}')
+                                st.caption(f'{leg["departure_at"]} → {leg["arrival_at"]}')
+                                st.link_button("Fonte do trecho — " + label, leg["source_url"])
+                        st.caption("Viabilidade da visita e última milha não verificadas.")
+        except Exception:
+            _LOG.exception("DATA26B fare evidence unavailable")
+            st.warning("Observações tarifárias indisponíveis.")
