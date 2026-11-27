@@ -403,6 +403,10 @@ def _card(candidate, result, names, cities, official, options):
             is_official=base==official,
             official_supported=base in BASES,
         ),unsafe_allow_html=True)
+        if candidate.get("highlight_kind")=="complete_reference_group":
+            st.caption("Destaque automático · menor mínimo ponderado no mesmo conjunto completo de trajetos.")
+        elif candidate.get("highlight"):
+            st.caption("Destaque automático · alternativa para investigação documental; não é uma recomendação de preço.")
         from ux98_base_insights_presentation import project_base_insights
         from ux99_base_cards_presentation import insight_panels
         st.markdown(insight_panels(project_base_insights(candidate)),
@@ -484,17 +488,13 @@ def render_suggestions(*,plan,discovery=None,research=None):
         "Encontre cidades para investigar a partir dos destinos que vocês escolheram.",
         tag="Pesquisa, não reserva",variant="compact",
     ),unsafe_allow_html=True)
-    modes=("Explorar alternativas","Minha comparação","Cobertura dos dados")
+    modes=("Explorar alternativas","Minha comparação")
     _restore_widget("ux112_active_view","ux112_active_view_shadow",
                     modes[0],lambda x:x in modes)
     view=st.segmented_control("Área da pesquisa",list(modes),
                               key="ux112_active_view",default=modes[0],
                               on_change=_remember,
                               args=("ux112_active_view","ux112_active_view_shadow")) or modes[0]
-    if view=="Cobertura dos dados":
-        from ux132_coverage_page import render_research_coverage
-        render_research_coverage(discovery=discovery,research=research)
-        return
     try:
         discovery=discovery if discovery is not None else build_exploration_discovery()
         wishes=st.session_state.get("ux502_interests",empty_interests())
@@ -557,9 +557,10 @@ def render_suggestions(*,plan,discovery=None,research=None):
     if view=="Explorar alternativas":
         st.markdown(section_heading(
             "EXPLORAR ALTERNATIVAS", "Cidades-base para investigar",
-            "Pesquise por cidade ou país. Selecione candidatas para comparar, ou conheça sua ficha individual.",
+            "Escolha manualmente as cidades que quer comparar. Nenhuma sugestão é adicionada automaticamente.",
             variant="compact",
         ),unsafe_allow_html=True)
+        render_selection_toolbar(options,cities,navigation="explore")
         # Search is always accessible, without an extra checkbox first.
         _restore_widget("rec03a_search","rec03a_search_shadow","",
                         lambda x:isinstance(x,str))
@@ -590,7 +591,8 @@ def render_suggestions(*,plan,discovery=None,research=None):
                       (not search or search in
                        (cities[c["base_id"]]["name"]+" "+
                         cities[c["base_id"]]["country"]).casefold())]
-            st.caption(f"{len(filtered)} de {len(result['candidates'])} cidades-base encontradas.")
+            st.markdown("#### Catálogo de cidades-base")
+            st.caption(f"{len(filtered)} de {len(result['candidates'])} cidades-base encontradas. Não é uma classificação das melhores bases.")
             if filtered:
                 size=4
                 pages=(len(filtered)+size-1)//size
@@ -609,6 +611,11 @@ def render_suggestions(*,plan,discovery=None,research=None):
                 st.info("Nenhuma cidade corresponde aos filtros.")
         else:
             featured=_featured_ids(result)
+            st.markdown("#### Sugestões automáticas para seus destinos")
+            st.caption("Destaques de pesquisa: menor mínimo ponderado de ida em conjuntos comparáveis ou alternativas com cobertura documental relevante. Não constituem ranking de melhor logística completa ou menor preço.")
+            with st.expander("Como as sugestões são escolhidas?"):
+                st.write("O motor compara mínimos de ida para os mesmos destinos e considera suas prioridades. Também destaca conjuntos de conexões documentadas que acrescentam alternativas de pesquisa.")
+                st.caption("Não avalia preços de passagens, moradia, custo de vida, trabalho remoto, frequência ou retorno. Uma cidade pouco pesquisada pode ser uma boa alternativa; consulte Cobertura dos dados em Explorar.")
             if featured:
                 with st.container(key="ux99_base_gallery_featured"):
                     columns=st.columns(min(2,len(featured)),gap="medium")
@@ -618,7 +625,6 @@ def render_suggestions(*,plan,discovery=None,research=None):
             else:
                 st.info("Não há destaques para este escopo. Pesquise uma cidade acima "
                         "ou abra todas as alternativas.")
-        render_selection_toolbar(options,cities,navigation="explore")
     else:
         st.markdown(section_heading(
             "MINHA COMPARAÇÃO", "Comparar minhas cidades",
