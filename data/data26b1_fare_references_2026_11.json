@@ -641,8 +641,8 @@
     {
       "origin_id": "strasbourg",
       "destination_id": "freiburg",
-      "reason": "research_pending",
-      "source_url": null
+      "reason": "no_usable_weekend_rail_fare_in_consulted_snapshot",
+      "source_url": "https://www.sncf-connect.com/train/trajet/strasbourg/fribourg-en-brisgau"
     },
     {
       "origin_id": "strasbourg",
@@ -665,8 +665,8 @@
     {
       "origin_id": "strasbourg",
       "destination_id": "bern",
-      "reason": "research_pending",
-      "source_url": null
+      "reason": "no_usable_weekend_rail_fare_in_consulted_snapshot",
+      "source_url": "https://www.sncf-connect.com/train/trajet/strasbourg/berne"
     },
     {
       "origin_id": "strasbourg",
