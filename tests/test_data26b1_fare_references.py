@@ -110,3 +110,17 @@ class FareReferencesTest(unittest.TestCase):
         gaps = table(("Origem", "Destino", "Motivo"))
         self.assertGreater(len(gaps), 0)
         self.assertTrue(all(gaps["Origem"] == "Metz"))
+
+    def test_review_must_match_historical_status(self):
+        data = copy.deepcopy(self.data)
+        row = next(r for r in data["references"] if r["status"] == "divergent_price")
+        row["review"]["amount_minor"] = row["amount_minor"]
+        with self.assertRaisesRegex(ValueError, "revisão inconsistente"):
+            validate_fare_references(data)
+
+    def test_catalog_detects_wrong_country(self):
+        from unittest.mock import patch
+        from data26b1_fare_reference_model import validate_catalog_scope
+        with patch("base_research_expanded_model.load_research", return_value={"cities":[{"id":"metz","country":"França"}]}), patch("trip01_supplemental_discovery.build_exploration_discovery", return_value={"destinations":[{"id":"bruges_be","country":"França"}]}):
+            with self.assertRaisesRegex(ValueError, "catálogo"):
+                validate_catalog_scope({"metz"}, {"bruges_be"})
