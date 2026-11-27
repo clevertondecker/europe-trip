@@ -1,0 +1,14 @@
+# UX132C3 — Consolidação da cobertura e clareza das sugestões
+
+Atue como Staff Software Engineer e Principal Product Designer. Dependência: #272 UX132C2 (HEAD 9eeb9c8); antes de integrar, sincronizar eventuais correções do #272, retarget para main e confirmar diff exclusivo. Não alterar datasets, contratos DATA24, orçamento, recomendação REC02 ou o TripPlan.
+
+## Objetivo
+Reduzir hierarquia e esforço para encontrar lacunas e entender a diferença entre sugestões automáticas e cidades escolhidas. Cobertura agora tem três domínios, não apenas transporte. Mover a entrada para Explorar → Cobertura dos dados, como tarefa pública no roteador canônico existente; manter Comparar bases com apenas Explorar alternativas e Minha comparação. Não criar nova área principal ou duplicar renderização. Migrar sessão antiga que estava na cobertura uma única vez, preservar os estados de domínio e filtros, comparação, DRAFT, SCOPE, CHOICE, wishlist, TripPlan, orçamento, persistência, handoffs e links legados. Deselect é no-op. Acesso à cobertura sem wishlist/escopo e sem chamar recomendação. Voltar à comparação restaura sua seleção/modo, sem alterar plano.
+## Sugestões
+- Cabeçalho acima dos cartões distingue sugestões automáticas do catálogo completo e da seleção manual. Explicar que destaques REC02 usam mínimos de ida em conjuntos comparáveis e fronteira documental; não ranking global ou recomendação de preço, retorno, frequência, moradia/custo de vida ou trabalho remoto. Não promover falta de dados a desvantagem logística.
+- Expor seleção/contador e ação de comparar antes da galeria, sem segundo seletor ou toolbar duplicada. Manter feedback local nos cartões. Distinguir destaque por menor mínimo ponderado do mesmo conjunto de alternativa com evidência parcial, usando highlight_kind/reasons existentes, sem inventar ordenação.
+- Corrigir descrições que prometem comparar custos não utilizados nas sugestões; preservar comparação financeira oficial e ações existentes.
+## Cobertura
+- Composição única com visão geral e áreas especializadas; resumo ferroviário explícito, atrações com indicadores essenciais compactos, estados de ingresso separados, morar/trabalhar distingue requisitos futuros de referências históricas. Denominadores reais, N/A, sem nota geral, detalhes e fontes na área correspondente. Sem novo motor, cache ou novas métricas artificiais. Preservar filtros por domínio e estado do usuário.
+## Aceite
+Testar rota canônica, migração, ausência de entrada duplicada, acesso sem wishlist, alternância por tarefa pública, recuperação de seleção, navegação com escopo em edição, handoffs, seleção manual, ausência de novas escritas e isolamento de projeções. Adaptar testes de UX132A/B/C1/C2 à nova entrada sem remover regressões. QA desktop/mobile se disponível; CI final e auditoria versionada obrigatórias. Manter draft. DATA26 e recomendação multidimensional ficam fora do escopo.
