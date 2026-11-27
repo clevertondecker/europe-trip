@@ -200,6 +200,7 @@ def bootstrap(state) -> tuple[str, str | None, str | None, str | None]:
         state["ux_improve_view"]="Consultor de passeios"
         state["ux_area"],state["ux_section"]="Meu roteiro","Melhorar meu roteiro"
         return apply(state)
+    explicit_request = False
     if "ux_area" not in state:
         area, section = from_legacy(
             state.get("main_navigation", "Visão geral"),
@@ -220,6 +221,7 @@ def bootstrap(state) -> tuple[str, str | None, str | None, str | None]:
         previous = state.get("_ux_legacy_page")
         request = state.get("main_navigation")
         if previous and request and request != previous:
+            explicit_request = True
             area, section = from_legacy(
                 request, state.get("itinerary_section"), state.get("guide_section"))
             state["ux_area"], state["ux_section"] = area, section
@@ -238,7 +240,7 @@ def bootstrap(state) -> tuple[str, str | None, str | None, str | None]:
                 state["ux_suggestion"] = itinerary
             if itinerary == "Guias e pesquisas" and state.get("guide_section") in RESEARCH_OPTIONS:
                 state["ux_research"] = state["guide_section"]
-    return apply(state)
+    return apply(state, explicit_task=explicit_request)
 
 
 def set_area(state, area: str) -> None:
@@ -302,4 +304,4 @@ def set_from_legacy(state, page: str,
     if itinerary == "Explorar bases" and state.get("base_explorer_mode") == "Pesquisa ampliada":
         state["ux_research"] = "Pesquisa ampliada"
         state["ux_section"] = "Cidades-base"
-    apply(state)
+    apply(state, explicit_task=True)
