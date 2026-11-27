@@ -7,7 +7,7 @@ from data23_france_candidates_model import load_data23
 from dq32_macro_opportunities_model import load_macro_tourism
 from dq30_walking_access_model import load_walking_access
 from trip01_supplemental_discovery import build_exploration_discovery
-from ux132_research_coverage_model import _search_key
+from ux132_coverage_shared import search_key
 
 # key, label, denominator, missing key (None means not a gap metric)
 INDICATORS = (
@@ -34,11 +34,14 @@ GAP_OPTIONS = {
 SORT_OPTIONS = ("Nome", "Mais pendências no filtro")
 
 
-def build_attraction_view(*, discovery=None):
+def build_attraction_inventory(*, discovery=None):
     discovery = build_exploration_discovery() if discovery is None else discovery
-    inventory = attraction_inventory(discovery, load_attractions(), load_data23(),
-                                     load_macro_tourism(), load_walking_access())
-    return project_attraction_view(inventory)
+    return attraction_inventory(discovery, load_attractions(), load_data23(),
+                                load_macro_tourism(), load_walking_access())
+
+
+def build_attraction_view(*, discovery=None):
+    return project_attraction_view(build_attraction_inventory(discovery=discovery))
 
 
 def project_attraction_view(inventory):
@@ -47,14 +50,14 @@ def project_attraction_view(inventory):
         grouped[attr["destination_id"]].append(attr)
     destinations = []
     for dest in inventory["destinations"]:
-        rows = sorted(grouped[dest["id"]], key=lambda r: (_search_key(r["name"]), r["id"]))
+        rows = sorted(grouped[dest["id"]], key=lambda r: (search_key(r["name"]), r["id"]))
         counts = attraction_counts([dest], rows)
         if counts["attractions"] != dest["attractions"]:
             raise ValueError("Inventário de atrações inconsistente")
         destinations.append({"id": dest["id"], "name": dest["name"],
                              "counts": counts, "rows": rows, "destination": dest})
     return {"counts": inventory["counts"],
-            "destinations": sorted(destinations, key=lambda r: (_search_key(r["name"]), r["id"]))}
+            "destinations": sorted(destinations, key=lambda r: (search_key(r["name"]), r["id"]))}
 
 
 def indicator_rows(counts):
@@ -105,10 +108,10 @@ def filter_destinations(view, *, query="", gap="all", gaps_only=False, sort="Nom
     if gap not in GAP_OPTIONS.values() or sort not in SORT_OPTIONS:
         raise ValueError("Filtro inválido")
     rows = [r for r in view["destinations"]
-            if _search_key(query) in _search_key(r["name"])
+            if search_key(query) in search_key(r["name"])
             and (not gaps_only or gap_count(r, gap))]
     return sorted(rows, key=lambda r: ((-gap_count(r, gap) if sort != "Nome" else 0),
-                                       _search_key(r["name"]), r["id"]))
+                                       search_key(r["name"]), r["id"]))
 
 
 def detail_rows(destination, *, gap="all", gaps_only=False):
