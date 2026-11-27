@@ -1,6 +1,6 @@
 """Read-only presentation of DATA24 rail coverage; no recommendation logic."""
 from copy import deepcopy
-from unicodedata import normalize, combining
+from ux132_coverage_shared import search_key
 from data24_coverage_model import coverage_counts, rail_coverage
 from data25_priority_rail_model import RESEARCH_BASE_IDS
 from base_research_expanded_model import load_research
@@ -69,20 +69,15 @@ STATUS_OPTIONS = {
 }
 
 
-def _search_key(value):
-    return "".join(c for c in normalize("NFKD", value.casefold())
-                   if not combining(c)).strip()
-
-
 def filter_coverage_rows(rows, *, query="", gaps_only=False, sort="Nome"):
     """Presentation-only filters: never recompute denominators or rank bases."""
     if sort not in SORT_OPTIONS:
         raise ValueError("Ordenação inválida")
-    query = _search_key(query)
-    filtered = [row for row in rows if query in _search_key(row["name"])
+    query = search_key(query)
+    filtered = [row for row in rows if query in search_key(row["name"])
                 and (not gaps_only or row["missing"] > 0)]
     def key(row):
-        name = _search_key(row["name"])
+        name = search_key(row["name"])
         if sort == "Mais lacunas":
             return (-row["missing"], name, row["id"])
         if sort == "Menor cobertura":
@@ -117,7 +112,7 @@ def connection_rows(view, axis, ident, status="Sem tempo pesquisado"):
             **_documentary_detail(cell, raw),
         })
     counterpart = "destination" if axis == "bases" else "origin"
-    return sorted(result, key=lambda r: (_search_key(r[counterpart]),
+    return sorted(result, key=lambda r: (search_key(r[counterpart]),
                                          r["base_id"], r["destination_id"]))
 
 
