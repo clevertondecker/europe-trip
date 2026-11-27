@@ -1,6 +1,9 @@
 """UX132C2: D-004 parity, scope, documentary semantics and navigation."""
 import unittest
 from copy import deepcopy
+import json
+from pathlib import Path
+from tempfile import TemporaryDirectory
 from statistics import median
 from time import perf_counter
 from unittest.mock import patch
@@ -8,9 +11,12 @@ from unittest.mock import patch
 from streamlit.testing.v1 import AppTest
 from data24_audit_model import build_audit
 from data24_d004_audit_model import living_counts, living_research_gaps, coworking_state
+from base_research_expanded_model import load_research
+from city_research_packs_model import load_city_packs, validate_city_packs
+from city_research_round2 import load_round2, validate_round2
 from ux132c2_living_coverage_model import (
     build_living_view, scope_rows, scope_counts, indicator_rows,
-    city_detail, compact_rows, PRIORITY, ALL,
+    city_detail, compact_rows, PRIORITY, ALL, scope_membership, complementary_coworking,
 )
 
 
@@ -84,7 +90,9 @@ class LivingCoverageTests(unittest.TestCase):
         self.assertEqual(coworking_state({"late_work_compatible": True}), "compatible_2026")
         self.assertEqual(self.view, before)
 
-    def test_controlled_update_zero_and_empty_denominator(self):
+    def test_unit_count_semantics_zero_and_empty_denominator(self):
+        # Pure counter unit test only: zero restaurant price is not accepted
+        # by the historical dataset validator; no origin-level claim here.
         original = deepcopy(self.view)
         fixture = deepcopy(self.view)
         r = city_detail(fixture, "lille")
@@ -106,6 +114,107 @@ class LivingCoverageTests(unittest.TestCase):
                          scope_counts(self.view)["with_residential_internet"] + 1)
         self.assertTrue(all(x["fraction"] is None for x in indicator_rows(living_counts([]))))
         self.assertEqual(self.view, original)
+
+    def test_validated_origin_updates_reach_projection(self):
+        # Use the actual loader and schema validators, not an edited output.
+        packs = load_city_packs()
+        lille = next(x for x in packs["cities"] if x["city_id"] == "lille")
+        lille["daily_life"].update(restaurant_two_midrange_eur_2026=52,
+                                   restaurant_source_url="https://example.org/lille/menu",
+                                   restaurant_basis="Synthetic historical menu fixture for two adults")
+        validated = validate_city_packs(packs)
+        round2 = load_round2()
+        metz = next(x for x in round2["cities"] if x["id"] == "metz")
+        metz["coworking"].update(price_eur=17, price_basis="day",
+                                 source_url="https://example.org/metz/day",
+                                 note="Synthetic provider reference",
+                                 schedule="8h–23h weekdays", late_work_compatible=True)
+        validate_round2(round2)
+        with patch("data24_d004_audit_model.load_city_packs", return_value=validated), \
+             patch("data24_d004_audit_model.load_round2", return_value=round2):
+            view = build_living_view()
+        d = city_detail(view, "lille")["daily_life"]
+        self.assertEqual(d["restaurant_eur_two"], 52)
+        self.assertEqual(d["restaurant_source_url"], "https://example.org/lille/menu")
+        self.assertEqual(d["restaurant_basis"], lille["daily_life"]["restaurant_basis"])
+        self.assertEqual(d["restaurant_source_date"], packs["checked_at"])
+        self.assertEqual(scope_counts(view)["with_restaurant"], scope_counts(self.view)["with_restaurant"] + 1)
+        self.assertNotIn("restaurante para dois", city_detail(view, "lille")["research_gaps"]["complementary"])
+        w = city_detail(view, "metz")["remote_work"]
+        self.assertEqual(w["coworking"]["price_eur"], 17)
+        self.assertEqual(w["coworking"]["price_basis"], "day")
+        self.assertEqual(w["coworking"]["source_url"], "https://example.org/metz/day")
+        self.assertEqual(w["compatibility_2026"], "compatible_2026")
+        self.assertEqual(w["compatibility_2027"], "indeterminate")
+        self.assertIsNotNone(complementary_coworking(w))
+        self.assertEqual(scope_counts(view)["bases"], scope_counts(self.view)["bases"])
+        self.assertIsNone(city_detail(self.view, "lille")["daily_life"]["restaurant_eur_two"])
+
+    def test_historical_contract_rejects_unverified_future_fields(self):
+        packs = load_city_packs()
+        for field, value in (("restaurant_two_midrange_eur_2026", 0),
+                             ("complete_comparable_basket_eur", 150),
+                             ("grocery_basket_eur", 30)):
+            invalid = deepcopy(packs)
+            metz = next(x for x in invalid["cities"] if x["city_id"] == "metz")
+            metz["daily_life"][field] = value
+            with self.assertRaises(ValueError):
+                validate_city_packs(invalid)
+        invalid = deepcopy(packs)
+        invalid["cities"][0]["remote_work"]["internet_in_rental_verified"] = True
+        with self.assertRaises(ValueError):
+            validate_city_packs(invalid)
+        round2 = load_round2()
+        round2["cities"][0]["coworking"]["verified_2027"] = True
+        with self.assertRaises(ValueError):
+            validate_round2(round2)
+
+    def test_declared_quote_counter_cannot_close_evidence_gap(self):
+        research = load_research()
+        metz = next(x for x in research["cities"] if x["id"] == "metz")
+        metz["eligible_2027_quotes"] = 3
+        with TemporaryDirectory() as tmp:
+            path = Path(tmp) / "research.json"
+            path.write_text(json.dumps(research), encoding="utf-8")
+            validated = load_research(path)
+        view = build_living_view(research=validated)
+        row = city_detail(view, "metz")
+        h, w = row["housing"], row["remote_work"]
+        self.assertEqual(h["overview"]["available_for_56_to_60_nights_2027"], 3)
+        self.assertEqual(scope_counts(view)["with_three_verified_quotes"],
+                         scope_counts(self.view)["with_three_verified_quotes"] + 1)
+        self.assertIsNone(h["total_2027"])
+        self.assertIsNone(h["deposit_2027"])
+        self.assertIsNone(h["contract_2027_verified"])
+        self.assertIsNone(w["residential_internet_2027"])
+        self.assertFalse(h["overview"]["decision_ready"])
+        self.assertIn("validar comprovantes individuais das cotações declaradas",
+                      row["research_gaps"]["decision_blockers"])
+
+    def test_approved_but_unaudited_scope_is_not_zero_coverage(self):
+        approved = tuple(self.view["scope"]["approved_research_base_ids"]) + ("colmar",)
+        with patch("data24_d004_audit_model.RESEARCH_BASE_IDS", approved):
+            view = build_living_view()
+        membership = scope_membership(view)
+        self.assertEqual([r["id"] for r in membership["priority_unaudited"]], ["colmar"])
+        self.assertEqual(len(membership["priority_audited"]), 5)
+        self.assertEqual({r["id"] for r in membership["additional_audited"]}, {"offenburg", "trier"})
+        self.assertEqual(scope_counts(view), scope_counts(self.view))
+        self.assertEqual(scope_counts(view, ALL), scope_counts(self.view, ALL))
+        self.assertIsNone(city_detail(view, "colmar"))
+
+    def test_coworking_equivalent_and_distinct_records(self):
+        w = deepcopy(city_detail(self.view, "metz")["remote_work"])
+        self.assertIsNone(complementary_coworking(w))
+        extra = w["pack_reference"]
+        for field, value in (("source_url", "https://example.org/alternate"),
+                             ("price_eur_2026", 19), ("hours", "8h–23h"),
+                             ("limitations", "New restriction"), ("price_basis", "month")):
+            changed = deepcopy(w)
+            changed["pack_reference"][field] = value
+            self.assertEqual(complementary_coworking(changed), changed["pack_reference"])
+        w["coworking"] = None
+        self.assertEqual(complementary_coworking(w), extra)
 
     def test_living_projection_timing(self):
         timings, details = [], []
@@ -142,7 +251,7 @@ class LivingNavigationTests(unittest.TestCase):
         before = {k: deepcopy(app.session_state[k]) for k in ("advisor_plan", "ux502_interests")}
         app.segmented_control(key="ux112_active_view").set_value("Cobertura dos dados").run()
         self.assertFalse(app.exception)
-        self.assertTrue(any(m.label == "Três cotações de 2027" for m in app.metric))
+        self.assertTrue(any(m.label == "Internet residencial confirmada" for m in app.metric))
         with patch("ux132_coverage_page.rail_coverage") as rail_summary, \
              patch("ux132_coverage_page.build_attraction_inventory") as attraction_summary, \
              patch("ux132_research_coverage_ui.build_coverage_view") as rail_detail, \
