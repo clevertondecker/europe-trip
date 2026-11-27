@@ -146,6 +146,27 @@ class RecommendationAppTests(unittest.TestCase):
         for k,v in before.items():
             self.assertEqual(a.session_state[k],v)
 
+    def test_coverage_preserves_confirmed_scope_and_comparison(self):
+        from rec03b_handoffs import CHOICE
+        a=self.make_app([("paris","must_visit"),("basel","interested")],"compare")
+        self.click(a,"rec03a_confirm_subset")
+        a.session_state[CHOICE]=["strasbourg","metz"]
+        self.run_ok(a)
+        keys=(SCOPE,CHOICE,"advisor_plan","ux502_interests","ux41_favorites","ux36_cloud_dirty")
+        before={key:deepcopy(a.session_state[key]) for key in keys}
+        with patch("rec03a_suggestions_ui.recommend_bases") as engine:
+            a.segmented_control(key="ux112_active_view").set_value("Cobertura dos dados")
+            self.run_ok(a)
+            self.assertTrue(any(m.label=="Cobertura ferroviária" for m in a.metric))
+            engine.assert_not_called()
+        for key,value in before.items():
+            self.assertEqual(a.session_state[key],value)
+        a.segmented_control(key="ux112_active_view").set_value("Minha comparação")
+        self.run_ok(a)
+        self.assertTrue(any('class="ux97-table"' in m.value for m in a.markdown))
+        for key,value in before.items():
+            self.assertEqual(a.session_state[key],value)
+
     def test_scope_reconciles_real_edits_and_same_revision_replacement(self):
         a=self.make_app([("paris","interested"),("colmar","maybe")],"compare")
         self.click(a,"rec03a_confirm_subset")
