@@ -1,9 +1,13 @@
-"""UX132A: documentary coverage without itinerary or wishlist dependencies."""
+"""UX132: documentary coverage without itinerary or wishlist dependencies."""
 import logging
 from time import perf_counter
 import streamlit as st
 
-from ux132_research_coverage_model import build_coverage_view
+from ux132_research_coverage_model import (
+    build_coverage_view, connection_rows, filter_coverage_rows,
+    SORT_OPTIONS, STATUS_OPTIONS,
+)
+from rail_reference_projection_model import format_minutes
 from ux_shared_ui_presentation import section_heading
 
 _LOG = logging.getLogger(__name__)
@@ -68,9 +72,19 @@ def render_research_coverage(*, discovery=None, research=None):
                              key="ux132_base_scope")
         if scope == "Cinco bases prioritárias":
             rows = [r for r in rows if r["id"] in view["priority_ids"]]
-    st.caption("Ordem alfabética; cobertura não indica a melhor cidade.")
+    axis = "bases" if section == "Cidades-base" else "destinations"
+    left, right = st.columns(2)
+    query = left.text_input("Pesquisar cidade", placeholder="Digite o nome",
+                            key="ux132_search_" + axis)
+    order = right.selectbox("Ordenar por", SORT_OPTIONS, key="ux132_sort_" + axis)
+    gaps_only = st.checkbox("Somente cidades com lacunas de tempo",
+                            key="ux132_only_gaps_" + axis)
+    total = len(rows)
+    rows = filter_coverage_rows(rows, query=query, gaps_only=gaps_only, sort=order)
+    st.caption(f'{len(rows)} de {total} cidades no recorte. Os filtros não alteram os '
+               "indicadores globais. Cobertura não indica a melhor cidade.")
     if not rows:
-        st.info("Nenhum registro neste recorte.")
+        st.info("Nenhuma cidade corresponde aos filtros. Altere a busca ou o recorte.")
         return
     st.dataframe(_table(rows), hide_index=True, width="stretch",
                  column_config={"Cobertura": st.column_config.ProgressColumn(
@@ -93,17 +107,54 @@ def render_research_coverage(*, discovery=None, research=None):
         b.metric("Lacunas de pesquisa", row["missing"])
         b.caption("Conexões sem tempo documentado")
         st.divider()
-        st.markdown("#### O que falta pesquisar")
-        if row["missing_names"]:
-            label = "Destino" if section == "Cidades-base" else "Origem"
-            st.dataframe(
-                [{label: name, "Pendência": "Sem referência de tempo"}
-                 for name in row["missing_names"]],
-                hide_index=True, width="stretch",
-                key="ux132_gaps_" + section,
-            )
-        elif row["fraction"] is None:
-            st.caption("Nenhum par não local neste recorte.")
+        st.markdown("#### Conexões e lacunas de pesquisa")
+        status = st.selectbox("Tipo de evidência", list(STATUS_OPTIONS),
+                              key="ux132_status_" + axis)
+        connections = connection_rows(view, axis, row["id"], status)
+        st.caption(f'{len(connections)} conexões no filtro · os indicadores acima consideram '
+                   "todos os pares não locais desta cidade.")
+        if not connections:
+            st.info("Nenhuma conexão neste filtro.")
         else:
-            st.caption("Nenhuma lacuna de tempo neste recorte; retorno e acesso ainda exigem verificação.")
-        st.caption("Sem tempo pesquisado não significa ausência de conexão.")
+            counterpart = "destination" if axis == "bases" else "origin"
+            label = "Destino" if axis == "bases" else "Origem"
+            if status == "Sem tempo pesquisado":
+                # Keep the original compact gap table as the default.
+                table = [{label: c[counterpart], "Pendência": "Sem referência de tempo"}
+                         for c in connections]
+                config = None
+            else:
+                table = [{
+                    label: c[counterpart], "Evidência": c["label"],
+                    "Mínimo de ida": format_minutes(c["minimum"]) if c["minimum"] is not None else None,
+                    "Data registrada": c["source_date"], "Fonte": c["source_url"],
+                } for c in connections]
+                config = {"Fonte": st.column_config.LinkColumn("Fonte", display_text="Abrir fonte")}
+            st.dataframe(table, hide_index=True, width="stretch",
+                         column_config=config, key="ux132_gaps_" + section)
+            timed = { (c["destination_id"] if axis == "bases" else c["base_id"]): c
+                      for c in connections if c["category"] in ("historical", "reference_only") }
+            if timed:
+                with st.expander("Consultar fonte e ressalvas"):
+                    key = "ux132_connection_" + axis
+                    if st.session_state.get(key) not in timed:
+                        st.session_state[key] = next(iter(timed))
+                    chosen = st.selectbox("Conexão documentada", list(timed),
+                                          format_func=lambda k: timed[k][counterpart], key=key)
+                    c = timed[chosen]
+                    st.write(f'**{c["origin"]} → {c["destination"]}**')
+                    st.write(c["label"])
+                    st.caption("Data registrada: " + str(c["source_date"] or "Não informada"))
+                    if c["source_url"]:
+                        st.link_button("Abrir fonte do mínimo exibido", c["source_url"])
+                    else:
+                        st.caption("Fonte do mínimo não informada.")
+                    if c["station_caveat"]:
+                        st.caption(c["station_caveat"])
+                    if c["notes"]:
+                        st.caption(str(c["notes"]))
+                    if c["variation"]:
+                        st.caption("Há variação entre referências; não implica contradição confirmada.")
+                    st.caption("Referência de ida; retorno, última milha e horários de 2027 não confirmados.")
+        st.caption("Sem tempo pesquisado não significa ausência de conexão. "
+                   "Local indica acesso urbano a verificar, não lacuna ferroviária.")
