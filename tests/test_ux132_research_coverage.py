@@ -7,7 +7,10 @@ from statistics import median
 
 from streamlit.testing.v1 import AppTest
 from data24_coverage_model import rail_coverage, coverage_counts
-from ux132_research_coverage_model import build_coverage_view, project_coverage_view
+from ux132_research_coverage_model import (
+    build_coverage_view, project_coverage_view, filter_coverage_rows, connection_rows,
+    STATUS_OPTIONS,
+)
 
 
 class CoverageModelTests(unittest.TestCase):
@@ -66,6 +69,61 @@ class CoverageModelTests(unittest.TestCase):
             "max_seconds": round(max(durations), 4),
         })
 
+    def test_filter_and_order_preserve_input_and_denominators(self):
+        rows = [
+            {"id": "a", "name": "Sélestat", "fraction": .5, "missing": 2},
+            {"id": "b", "name": "Metz", "fraction": .2, "missing": 4},
+            {"id": "c", "name": "Annecy", "fraction": None, "missing": 0},
+            {"id": "d", "name": "Paris", "fraction": 1, "missing": 0},
+        ]
+        before = deepcopy(rows)
+        self.assertEqual([r["id"] for r in filter_coverage_rows(rows, query=" SELESTAT ")], ["a"])
+        self.assertEqual([r["id"] for r in filter_coverage_rows(rows, gaps_only=True, sort="Mais lacunas")], ["b","a"])
+        self.assertEqual([r["id"] for r in filter_coverage_rows(rows, sort="Menor cobertura")], ["b","a","d","c"])
+        self.assertEqual(filter_coverage_rows(rows, query="absent"), [])
+        self.assertEqual(rows, before)
+
+    def test_detail_direction_counts_and_source_provenance(self):
+        view = build_coverage_view()
+        before = deepcopy(view)
+        for axis, ident in (("bases","metz"), ("destinations","annecy")):
+            summary = next(r for r in view[axis] if r["id"] == ident)
+            all_rows = connection_rows(view, axis, ident, "Todas")
+            self.assertEqual(len(all_rows), summary["total"])
+            for status, count_key in (("Histórico","historical"), ("Indicativo","indicative"),
+                                      ("Local","local"), ("Sem tempo pesquisado","missing")):
+                filtered = connection_rows(view, axis, ident, status)
+                self.assertEqual(len(filtered), summary[count_key])
+                for row in filtered:
+                    self.assertEqual(row["category"], STATUS_OPTIONS[status])
+                    self.assertEqual(row["base_id" if axis == "bases" else "destination_id"], ident)
+                    original = view["pairs"][(row["base_id"],row["destination_id"])]
+                    if status == "Histórico":
+                        self.assertEqual(row["source_date"], original["row"]["source_date"])
+                        self.assertEqual(row["source_url"], original["row"]["source_url"])
+                    elif status == "Indicativo":
+                        self.assertEqual(row["minimum"], original["cell"]["display_min"])
+                    else:
+                        self.assertIsNone(row["source_url"])
+                        self.assertIsNone(row["minimum"])
+            self.assertEqual(len(connection_rows(view, axis, ident)), summary["missing"])
+        route = next(r for r in connection_rows(view,"bases","metz","Indicativo")
+                     if r["destination_id"] == "annecy")
+        self.assertEqual(route["minimum"], 363)
+        self.assertEqual(route["source_url"], "https://www.sncf-connect.com/train/trajet/metz/annecy")
+        self.assertEqual(route["source_date"], "2026-11-25")
+        self.assertEqual(view, before)
+
+    def test_historical_source_not_replaced_by_alternate_reference(self):
+        view = {"bases":[{"id":"a","name":"A"}], "destinations":[{"id":"b","name":"B"}],
+                "pairs":{("a","b"):{"cell":{"category":"historical","label":"1h · histórico",
+                        "display_min":60,"source_url":"https://example.org/alternate",
+                        "reference_source_url":"https://example.org/alternate","checked_at":"2026-11-25"},
+                        "row":{"source_url":"https://example.org/historical","source_date":"2026-01-01"}}}}
+        result = connection_rows(view,"bases","a","Histórico")[0]
+        self.assertEqual(result["source_url"],"https://example.org/historical")
+        self.assertEqual(result["source_date"],"2026-01-01")
+
     def test_local_only_and_empty(self):
         for categories in ([], ["local"]):
             raw = {"base_ids": ["metz"], "destination_ids": ["metz"] if categories else [],
@@ -94,6 +152,32 @@ render_suggestions(plan=s["advisor_plan"])
 
 
 class CoverageNavigationTests(unittest.TestCase):
+    def test_search_filter_and_evidence_detail(self):
+        app = AppTest.from_string(APP, default_timeout=90)
+        app.run()
+        app.segmented_control(key="ux112_active_view").set_value("Cobertura dos dados").run()
+        app.segmented_control(key="ux132_coverage_section").set_value("Cidades-base").run()
+        self.assertFalse(app.exception)
+        global_before = next(m.value for m in app.metric if m.label=="Cobertura ferroviária")
+        app.text_input(key="ux132_search_bases").set_value("Metz").run()
+        self.assertFalse(app.exception)
+        self.assertEqual(len(app.dataframe[0].value), 1)
+        self.assertEqual(app.session_state["ux132_detail_Cidades-base"], "metz")
+        app.selectbox(key="ux132_status_bases").select("Indicativo").run()
+        self.assertFalse(app.exception)
+        app.selectbox(key="ux132_connection_bases").select("annecy").run()
+        self.assertFalse(app.exception)
+        self.assertTrue(any("Metz → Annecy" in m.value for m in app.markdown))
+        app.text_input(key="ux132_search_bases").set_value("no-such-city").run()
+        self.assertFalse(app.exception)
+        self.assertTrue(any("Nenhuma cidade corresponde" in m.value for m in app.info))
+        self.assertEqual(next(m.value for m in app.metric if m.label=="Cobertura ferroviária"),global_before)
+        app.text_input(key="ux132_search_bases").set_value("").run()
+        app.selectbox(key="ux132_sort_bases").select("Mais lacunas").run()
+        self.assertFalse(app.exception)
+        gaps = app.dataframe[0].value["Sem tempo"].tolist()
+        self.assertEqual(gaps, sorted(gaps,reverse=True))
+
     def test_empty_wishlist_access_and_return(self):
         app = AppTest.from_string(APP, default_timeout=90)
         with patch("rec03a_suggestions_ui.recommend_bases") as engine:
