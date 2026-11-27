@@ -47,3 +47,13 @@ Indicadores suportados hoje pela auditoria:
 
 ## Resultado esperado
 Uma evolução incremental da tela existente, orientada a lacunas acionáveis de destinos e atrações, baseada em dados reais e sem novo motor de pesquisa.
+
+
+## Registro da implementação
+- #270 integrado; PR retargetado para main e diff inicial exclusivo.
+- Reutilizado attraction_inventory; extraído apenas attraction_counts para que os totais por destino e globais compartilhem o mesmo contrato. Nenhuma alteração em datasets, cobertura ferroviária ou artefatos gerados da auditoria.
+- Seletor de domínio acima da navegação existente. Transporte continua padrão, com resumo de atrações na visão geral; domínio Atrações oferece visão geral e destinos. Inventário é carregado somente quando necessário, sem cache novo ou build_audit completo.
+- Filtros de destino por texto, campo e pendências; ordenação por nome ou quantidade de campos pendentes. Não representa ranking turístico. Seleção por ID e estado shadow independentes do ferroviário.
+- Ingressos: fonte específica exibida apenas se registrada no ticket; a fonte geral não foi reclassificada como fonte de ingresso. Data genérica identificada como data do registro geral. Atribuição fotográfica e acesso de estação mantêm suas fontes próprias.
+- Horários de abertura permanecem não medidos; valores/condições documentados não confirmam 2027.
+- Testes acrescentados: paridade global/por destino, reconciliação, N/A, preço zero versus não aplicável, foto contextual versus própria, acesso válido, atualização controlada, busca sem acentos, seleção e persistência por domínio, navegação real e preservação do escopo. Diagnóstico UX132C1_ATTRACTION_TIMING mede projeção e filtros/detalhe no catálogo real. Execução e QA visual ainda pendentes no momento deste registro; validar CI do HEAD final antes de merge.
