@@ -15,10 +15,18 @@ def load_fare_references(path=PATH):
     scope = data["scope"]
     universe = {(b, d) for b in scope["bases"] for d in scope["batch_destinations"]}
     seen = set()
+    reference_pairs = {(r["origin_id"], r["destination_id"]) for r in data["references"]}
     for row in data["references"] + data["gaps"]:
         pair = (row["origin_id"], row["destination_id"])
-        expected = "https://www.sncf-connect.com/train/trajet/" + pair[0] + "/" + ("bale" if pair[1] == "basel" else pair[1])
-        if pair not in universe or pair in seen or row["source_url"] != expected:
+        slug = {"basel": "bale", "freiburg": "fribourg-en-brisgau", "luxembourg_city": "luxembourg", "bern": "berne", "bruges": "brugge"}.get(pair[1], pair[1])
+        expected = "https://www.sncf-connect.com/train/trajet/" + pair[0] + "/" + slug
+        if pair in reference_pairs:
+            valid_source = row["source_url"] == expected
+        else:
+            reason = row.get("reason")
+            valid_source = (row["source_url"] is None if reason in ("research_pending", "ambiguous_destination_wrong_country") else
+                            row["source_url"] == expected if reason in ("no_numeric_fare_visible_in_consulted_snapshot", "no_usable_weekend_rail_fare_in_consulted_snapshot") else False)
+        if pair not in universe or pair in seen or not valid_source:
             raise ValueError("Par ou fonte inválida/duplicada")
         seen.add(pair)
     if seen != universe:
