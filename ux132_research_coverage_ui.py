@@ -8,8 +8,7 @@ from ux132_research_coverage_model import (
     SORT_OPTIONS, STATUS_OPTIONS,
 )
 from rail_reference_projection_model import format_minutes
-from ux_shared_ui_presentation import section_heading
-from rec03a_suggestions_ui import _restore_widget, _remember
+from ux_widget_state import widget_state
 
 _LOG = logging.getLogger(__name__)
 
@@ -32,19 +31,7 @@ def _table(rows):
     } for r in rows]
 
 
-def _widget_state(key, default, valid):
-    """Keep ephemeral coverage filters when Streamlit removes hidden widgets."""
-    shadow = key + "_shadow"
-    _restore_widget(key, shadow, default, valid)
-    return {"key": key, "on_change": _remember, "args": (key, shadow)}
-
-
-def render_research_coverage(*, discovery=None, research=None):
-    st.markdown(section_heading(
-        "COBERTURA DOCUMENTAL", "Cobertura dos dados",
-        "Acompanhe os dados documentados e as lacunas de pesquisa.",
-        variant="compact",
-    ), unsafe_allow_html=True)
+def render_rail_coverage(*, discovery=None, research=None):
     try:
         started = perf_counter()
         view = build_coverage_view(discovery=discovery, research=research)
@@ -66,32 +53,26 @@ def render_research_coverage(*, discovery=None, research=None):
     priority = view["priority"]
     st.caption(f'Cinco bases prioritárias: {_pct(priority)} '
                f'({priority["timed"]}/{priority["eligible"]} pares não locais).')
-    sections = ("Visão geral", "Cidades-base", "Destinos")
+    sections = ("Cidades-base", "Destinos")
     section = st.segmented_control(
         "Detalhamento da cobertura", sections,
-        **_widget_state("ux132_coverage_section", sections[0], lambda v: v in sections),
+        **widget_state("ux132_coverage_section", sections[0], lambda v: v in sections),
     ) or sections[0]
-    if section == "Visão geral":
-        st.markdown("#### Transporte ferroviário")
-        st.write(f'{counts["historical"]} históricos · {counts["indicative"]} indicativos · '
-                 f'{counts["missing"]} sem tempo · {counts["local"]} locais')
-        st.caption("Os demais domínios terão indicadores próprios; não há nota geral de qualidade.")
-        return
     rows = view["bases"] if section == "Cidades-base" else view["destinations"]
     axis = "bases" if section == "Cidades-base" else "destinations"
     cols = st.columns(3 if axis == "bases" else 2)
     query = cols[0].text_input("Pesquisar cidade", placeholder="Digite o nome",
-                              **_widget_state("ux132_search_" + axis, "", lambda v: isinstance(v, str)))
+                              **widget_state("ux132_search_" + axis, "", lambda v: isinstance(v, str)))
     order = cols[1].selectbox("Ordenar por", SORT_OPTIONS,
-                             **_widget_state("ux132_sort_" + axis, SORT_OPTIONS[0], lambda v: v in SORT_OPTIONS))
+                             **widget_state("ux132_sort_" + axis, SORT_OPTIONS[0], lambda v: v in SORT_OPTIONS))
     if axis == "bases":
         scopes = ("Cinco bases prioritárias", "Todas as bases")
         scope = cols[2].selectbox("Recorte de bases", scopes,
-                                  **_widget_state("ux132_base_scope", scopes[0], lambda v: v in scopes))
+                                  **widget_state("ux132_base_scope", scopes[0], lambda v: v in scopes))
         if scope == scopes[0]:
             rows = [r for r in rows if r["id"] in view["priority_ids"]]
     gaps_only = st.checkbox("Somente cidades com lacunas de tempo",
-                            **_widget_state("ux132_only_gaps_" + axis, False, lambda v: isinstance(v, bool)))
+                            **widget_state("ux132_only_gaps_" + axis, False, lambda v: isinstance(v, bool)))
     total = len(rows)
     rows = filter_coverage_rows(rows, query=query, gaps_only=gaps_only, sort=order)
     st.caption(f'{len(rows)} de {total} cidades no recorte. Os filtros não alteram os '
@@ -110,7 +91,7 @@ def render_research_coverage(*, discovery=None, research=None):
     # and avoids coupling the detail to ephemeral dataframe row positions.
     selected = st.selectbox("Escolha uma cidade para detalhar", list(names),
                             format_func=names.__getitem__,
-                            **_widget_state(detail_key, next(iter(names)), lambda v: v in names))
+                            **widget_state(detail_key, next(iter(names)), lambda v: v in names))
     row = next(r for r in rows if r["id"] == selected)
     with st.container(border=True):
         a, b = st.columns(2)
@@ -123,7 +104,7 @@ def render_research_coverage(*, discovery=None, research=None):
         st.divider()
         st.markdown("#### Conexões e lacunas de pesquisa")
         status = st.selectbox("Tipo de evidência", list(STATUS_OPTIONS),
-                              **_widget_state("ux132_status_" + axis, next(iter(STATUS_OPTIONS)),
+                              **widget_state("ux132_status_" + axis, next(iter(STATUS_OPTIONS)),
                                               lambda v: v in STATUS_OPTIONS))
         connections = connection_rows(view, axis, row["id"], status)
         st.caption(f'{len(connections)} conexões no filtro · os indicadores acima consideram '
@@ -158,7 +139,7 @@ def render_research_coverage(*, discovery=None, research=None):
                     chosen = st.selectbox(
                         "Conexão documentada", list(timed),
                         format_func=lambda k: timed[k][counterpart],
-                        **_widget_state(key, next(iter(timed)), lambda v: v in timed),
+                        **widget_state(key, next(iter(timed)), lambda v: v in timed),
                     )
                     c = timed[chosen]
                     st.write(f'**{c["origin"]} → {c["destination"]}**')

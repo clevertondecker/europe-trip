@@ -185,6 +185,8 @@ class RecommendationAppTests(unittest.TestCase):
         self.assertTrue(any(m.label=="Cobertura ferroviária" for m in a.metric))
         for key,value in before.items():
             self.assertEqual(a.session_state[key],value)
+        a.segmented_control(key="ux132_domain").set_value("Transporte ferroviário")
+        self.run_ok(a)
         a.segmented_control(key="ux132_coverage_section").set_value("Cidades-base")
         self.run_ok(a)
         a.text_input(key="ux132_search_bases").set_value("Metz")
@@ -195,12 +197,22 @@ class RecommendationAppTests(unittest.TestCase):
         self.run_ok(a)
         a.selectbox(key="ux132_connection_bases").select("annecy")
         self.run_ok(a)
+        a.segmented_control(key="ux132_domain").set_value("Atrações turísticas")
+        self.run_ok(a)
+        a.text_input(key="ux132c1_search").set_value("Colmar")
+        self.run_ok(a)
+        for key,value in before.items():
+            self.assertEqual(a.session_state[key],value)
         a.session_state[INTENT]="wishlist"
         self.run_ok(a)
         self.assertEqual(a.session_state["ux64_public_task"],"Minha lista")
         a.session_state[INTENT]="suggestions"
         self.run_ok(a)
         self.assertEqual(a.session_state["ux64_public_task"],"Comparar bases")
+        self.assertTrue(any(m.label=="Atrações únicas" for m in a.metric))
+        self.assertEqual(a.text_input(key="ux132c1_search").value,"Colmar")
+        a.segmented_control(key="ux132_domain").set_value("Transporte ferroviário")
+        self.run_ok(a)
         self.assertTrue(any(m.label=="Cobertura ferroviária" for m in a.metric))
         self.assertEqual(a.text_input(key="ux132_search_bases").value,"Metz")
         self.assertEqual(a.selectbox(key="ux132_sort_bases").value,"Mais lacunas")

@@ -39,7 +39,10 @@ def append_trip01_candidates(discovery: dict, path: Path = DATA) -> dict:
             {"id": a["id"], "name": a["name"], "category": a["category"],
              "source_url": a["source_url"], "kind": "supplemental_exploratory",
              "reconciled_source_ids": [], "additional_sources": [],
-             "alias_names": []}
+             "alias_names": [],
+             # Preserve the exact supplementary record for DATA24. A catalog
+             # snapshot date is general provenance, not a field-specific date.
+             "documentary_record": {**deepcopy(a), "checked_at": a.get("checked_at", payload.get("checked_at"))}}
             for a in attrs
         ]
         by_id[entry["id"]] = {
