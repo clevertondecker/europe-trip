@@ -178,7 +178,7 @@ def living_counts(rows):
         "with_local_basket": sum(r["daily_life"]["comparable_local_basket_eur"] is not None for r in rows),
         "with_climate": sum((r["daily_life"]["climate"] or {}).get("months_9_10_11") is not None for r in rows),
         "with_coworking": sum(r["remote_work"]["coworking"] is not None for r in rows),
-        "with_residential_internet": sum(r["remote_work"]["residential_internet_2027"] is not None for r in rows),
+        "with_residential_internet": sum(r["remote_work"]["residential_internet_2027"] is True for r in rows),
     }
 
 
