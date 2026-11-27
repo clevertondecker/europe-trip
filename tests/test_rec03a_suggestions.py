@@ -203,12 +203,25 @@ class RecommendationAppTests(unittest.TestCase):
         self.run_ok(a)
         for key,value in before.items():
             self.assertEqual(a.session_state[key],value)
+        a.segmented_control(key="ux132_domain").set_value("Morar e trabalhar")
+        self.run_ok(a)
+        a.selectbox(key="ux132c2_scope").select("all")
+        self.run_ok(a)
+        a.selectbox(key="ux132c2_base").select("trier")
+        self.run_ok(a)
+        for key,value in before.items():
+            self.assertEqual(a.session_state[key],value)
         a.session_state[INTENT]="wishlist"
         self.run_ok(a)
         self.assertEqual(a.session_state["ux64_public_task"],"Minha lista")
         a.session_state[INTENT]="suggestions"
         self.run_ok(a)
         self.assertEqual(a.session_state["ux64_public_task"],"Comparar bases")
+        self.assertEqual(a.segmented_control(key="ux132_domain").value,"Morar e trabalhar")
+        self.assertEqual(a.selectbox(key="ux132c2_scope").value,"all")
+        self.assertEqual(a.selectbox(key="ux132c2_base").value,"trier")
+        a.segmented_control(key="ux132_domain").set_value("Atrações turísticas")
+        self.run_ok(a)
         self.assertTrue(any(m.label=="Atrações únicas" for m in a.metric))
         self.assertEqual(a.text_input(key="ux132c1_search").value,"Colmar")
         a.segmented_control(key="ux132_domain").set_value("Transporte ferroviário")
