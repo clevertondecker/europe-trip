@@ -108,6 +108,8 @@ def project_living_evidence(*, snapshot, research, five, round2, packs, market, 
             "named_in_snapshot": ident in scope["named_candidates"],
             "in_five_base_study": ident in scope["five_base_study_ids"],
             "housing": {
+                # Historical eligibility counters have no individual verified
+                # quote records. Never promote them to price, contract or access.
                 "summary": observed, "overview": overview,
                 "historical_offers": city["housing_offers"],
                 "market_sample_separate_not_additive": local.get("offers"),
@@ -202,6 +204,10 @@ def living_research_gaps(row):
     blockers, complementary, context = [], [], []
     if h["overview"]["available_for_56_to_60_nights_2027"] < 3:
         blockers.append("três cotações comparáveis de 2027")
+    else:
+        # The historical schema stores only a declared count. DATA26 must
+        # provide individual verified evidence before this gap can be closed.
+        blockers.append("validar comprovantes individuais das cotações declaradas")
     if h["summary"]["count"] < 3:
         complementary.append("ampliar amostra histórica de moradia")
     else:
