@@ -322,7 +322,7 @@ class CoverageNavigationTests(unittest.TestCase):
             self.assertFalse(app.exception)
             self.assertEqual(app.session_state["ux64_public_task"], "Cobertura dos dados")
             app.segmented_control(key="ux64_public_task").set_value("Comparar bases").run()
-            self.assertEqual(app.session_state["ux112_active_view"], "Explorar alternativas")
+            self.assertNotIn("ux112_active_view", {w.key for w in app.segmented_control})
             self.assertFalse(app.exception)
             self.assertTrue(any("Nenhum destino ativo" in x.value for x in app.info))
             engine.assert_not_called()
