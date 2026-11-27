@@ -1,5 +1,6 @@
 """UX132A: documentary coverage without itinerary or wishlist dependencies."""
 import logging
+from time import perf_counter
 import streamlit as st
 
 from ux132_research_coverage_model import build_coverage_view
@@ -28,12 +29,14 @@ def _table(rows):
 
 def render_research_coverage(*, discovery=None, research=None):
     st.markdown(section_heading(
-        "QUALIDADE DA PESQUISA", "Cobertura dos dados",
+        "COBERTURA DOCUMENTAL", "Cobertura dos dados",
         "Acompanhe os dados documentados e as lacunas de pesquisa.",
         variant="compact",
     ), unsafe_allow_html=True)
     try:
+        started = perf_counter()
         view = build_coverage_view(discovery=discovery, research=research)
+        _LOG.debug("UX132 coverage projection: %.3fs", perf_counter() - started)
     except Exception:
         _LOG.exception("UX132 coverage unavailable")
         st.error("Não foi possível carregar a cobertura. Seu roteiro e suas escolhas permanecem intactos.")
@@ -73,16 +76,34 @@ def render_research_coverage(*, discovery=None, research=None):
                  column_config={"Cobertura": st.column_config.ProgressColumn(
                      "Cobertura", min_value=0, max_value=100, format="%.1f%%")},
                  key="ux132_coverage_table_" + section)
-    st.markdown("#### O que falta pesquisar")
-    selected = st.selectbox("Escolha uma cidade para detalhar", [r["id"] for r in rows],
-                            format_func=lambda ident: next(r["name"] for r in rows if r["id"] == ident),
-                            key="ux132_detail_" + section)
+    st.markdown("#### Detalhamento da cidade")
+    detail_key = "ux132_detail_" + section
+    names = {r["id"]: r["name"] for r in rows}
+    if st.session_state.get(detail_key) not in names:
+        st.session_state[detail_key] = next(iter(names))
+    selected = st.selectbox("Escolha uma cidade para detalhar", list(names),
+                            format_func=names.__getitem__, key=detail_key)
     row = next(r for r in rows if r["id"] == selected)
-    st.write(f'{row["name"]}: {_pct(row)} · {row["timed"]}/{row["eligible"]} pares não locais.')
-    if row["missing_names"]:
-        label = "Destinos" if section == "Cidades-base" else "Origens"
-        st.write(f'{label} sem tempo pesquisado ({row["missing"]}):')
-        st.write(", ".join(row["missing_names"]))
-    else:
-        st.caption("Nenhuma lacuna de tempo neste recorte; retorno e acesso ainda exigem verificação.")
-    st.caption("Sem tempo pesquisado não significa ausência de conexão.")
+    with st.container(border=True):
+        a, b = st.columns(2)
+        a.metric(f'{row["name"]} — cobertura ferroviária', _pct(row))
+        if row["fraction"] is not None:
+            a.progress(row["fraction"])
+        a.caption(f'{row["timed"]} de {row["eligible"]} conexões documentadas')
+        b.metric("Lacunas de pesquisa", row["missing"])
+        b.caption("Conexões sem tempo documentado")
+        st.divider()
+        st.markdown("#### O que falta pesquisar")
+        if row["missing_names"]:
+            label = "Destino" if section == "Cidades-base" else "Origem"
+            st.dataframe(
+                [{label: name, "Pendência": "Sem referência de tempo"}
+                 for name in row["missing_names"]],
+                hide_index=True, width="stretch",
+                key="ux132_gaps_" + section,
+            )
+        elif row["fraction"] is None:
+            st.caption("Nenhum par não local neste recorte.")
+        else:
+            st.caption("Nenhuma lacuna de tempo neste recorte; retorno e acesso ainda exigem verificação.")
+        st.caption("Sem tempo pesquisado não significa ausência de conexão.")
