@@ -9,7 +9,7 @@ from __future__ import annotations
 AREAS = ("Minha viagem", "Explorar", "Meu roteiro", "Orçamento")
 SECTIONS = {
     "Minha viagem": ("Resumo", "Pendências", "Decisões"),
-    "Explorar": ("Cidades-base", "Comparar", "Passeios", "Mapa"),
+    "Explorar": ("Cidades-base", "Comparar", "Passeios", "Mapa", "Cobertura dos dados"),
     "Meu roteiro": ("Meu planejamento", "Organizar viagem", "Melhorar meu roteiro"),
     "Orçamento": ("Resumo financeiro", "Simulações", "Detalhamento"),
 }
@@ -48,7 +48,8 @@ DESCRIPTIONS = {
     ("Minha viagem", "Pendências"): "Pesquisas e decisões ainda por resolver.",
     ("Minha viagem", "Decisões"): "Escolhas registradas e evidências oficiais.",
     ("Explorar", "Cidades-base"): "Conheça cidades e suas pesquisas sem mudar o plano.",
-    ("Explorar", "Comparar"): "Veja o custo e os destinos afetados ao trocar de base.",
+    ("Explorar", "Comparar"): "Investigue alternativas a partir dos destinos escolhidos.",
+    ("Explorar", "Cobertura dos dados"): "Identifique lacunas de pesquisa sem alterar sua viagem.",
     ("Explorar", "Passeios"): "Explore atrações e viagens próximas.",
     ("Explorar", "Mapa"): "Localize cidades e referências geográficas.",
     ("Meu roteiro", "Meu planejamento"): "Escolha atrações e continue do ponto atual.",
@@ -73,6 +74,8 @@ def route(area: str, section: str, *, research: str = "Pesquisa ampliada",
         return ("Visão geral" if section == "Resumo" else "Pesquisas & decisões",
                 None, None, None)
     if area == "Explorar":
+        if section == "Cobertura dos dados":
+            return "Cobertura dos dados", None, None, None
         if section == "Comparar":
             return "Comparar cidades", None, None, None
         if section == "Mapa":
@@ -113,6 +116,7 @@ def from_legacy(page: str, itinerary: str | None = None,
     if page=="Orçamento":return "Orçamento","Resumo financeiro"
     if page=="Mapa & destinos":return "Explorar","Mapa"
     if page=="Comparar cidades":return "Explorar","Comparar"
+    if page=="Cobertura dos dados":return "Explorar","Cobertura dos dados"
     if itinerary in ("Visão geral","Meus passeios"):
         return "Meu roteiro","Meu planejamento"
     if itinerary=="Calendário":return "Meu roteiro","Organizar viagem"
@@ -144,6 +148,14 @@ def apply(state) -> tuple[str, str | None, str | None, str | None]:
     if section not in SECTIONS[area]:
         section = DEFAULT_SECTION[area]
         state["ux_section"] = section
+    # Migrate the former nested coverage view once, before mounting widgets.
+    old_view=state.get("ux112_active_view_shadow",state.get("ux112_active_view"))
+    if old_view=="Cobertura dos dados":
+        state["ux112_active_view_shadow"]="Explorar alternativas"
+        state["ux112_active_view"]="Explorar alternativas"
+        if (area,section)==("Explorar","Comparar"):
+            section="Cobertura dos dados"
+            state["ux_section"]=section
     focused=state.get("ux125b_focused_guide")
     if (area,section)==("Meu roteiro","Melhorar meu roteiro") and focused in ("Estudos de cidades-base","Explorar atrações"):
         # Keep route inputs durable when their widgets are intentionally unmounted.
