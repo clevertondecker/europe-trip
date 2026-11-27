@@ -63,9 +63,6 @@ def select_public_task(state, area, task):
             state["ux502_discovery_filters"]=filters
     target_area,target_section=TARGETS[(area,task)]
     previous=(state.get("ux_area"),state.get("ux_section"))
-    if (area,task)==("Explorar","Comparar bases") and state.get("ux112_active_view_shadow",state.get("ux112_active_view"))=="Cobertura dos dados":
-        state["ux112_active_view_shadow"]="Explorar alternativas"
-        state["ux112_active_view"]="Explorar alternativas"
     set_task(state,target_area,target_section)
     if (area,task)==("Explorar","Comparar bases"):
         # Public task navigation starts at suggestions; REC03B/manual intents
