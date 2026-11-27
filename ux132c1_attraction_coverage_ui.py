@@ -7,7 +7,7 @@ from ux132c1_attraction_coverage_model import (
     build_attraction_view, indicator_rows, filter_destinations, detail_rows,
     attraction_gaps, gap_count, GAP_OPTIONS, SORT_OPTIONS,
 )
-from ux132_research_coverage_ui import _widget_state
+from ux_widget_state import widget_state
 
 _LOG = logging.getLogger(__name__)
 GAP_LABELS = {key: label for label, key in GAP_OPTIONS.items()}
@@ -31,27 +31,12 @@ def _link(label, url):
         st.caption(label + ": fonte específica não documentada.")
 
 
-def render_attraction_overview_summary(discovery=None):
-    """Compact cross-domain overview; isolate a failure from the rail screen."""
-    try:
-        view = _load(discovery)
-    except Exception:
-        _LOG.exception("UX132C1 attraction summary unavailable")
-        st.warning("Cobertura de atrações temporariamente indisponível.")
-        return
-    c = view["counts"]
-    st.markdown("#### Atrações turísticas")
-    st.write(f'{_ratio(c["destinations_with_attractions"], c["destinations"])} destinos '
-             f'com atrações catalogadas · {c["attractions"]} atrações únicas.')
-    st.caption("Selecione Atrações turísticas para consultar cobertura por campo e pendências.")
-
-
-def _render_indicators(counts):
+def render_attraction_indicators(counts):
     table = []
     for metric in indicator_rows(counts):
         table.append({
             "Indicador": metric["label"],
-            "Documentado / total": _ratio(metric["documented"], metric["total"]),
+            "Quantidade / total": _ratio(metric["documented"], metric["total"]),
             "Percentual": metric["fraction"] * 100 if metric["fraction"] is not None else None,
             "Pendências": (
                 None if not metric["total"]
@@ -74,14 +59,11 @@ def _destination_table(rows, gap):
         "Destino": r["name"],
         "Atrações": c["attractions"],
         "Foto contextual": "Atribuída" if c["destinations_with_attributed_photo"] else "Não documentada",
-        "Descrição": _ratio(c["described"], c["attractions"]),
-        "Duração editorial": _ratio(c["editorial_duration"], c["attractions"]),
-        "Ingressos (publicado / N/A / desconhecido)": (
-            f'{c["ticket_published"]} / {c["ticket_not_applicable"]} / {c["ticket_unknown"]}'
-            if c["attractions"] else "N/A (0 atrações)"),
-        "Foto própria": _ratio(c["attraction_photo_attributed"], c["attractions"]),
-        "Acesso de estação": _ratio(c["station_access_documented"], c["attractions"]),
-        "Pendências no filtro": gap_count(r, gap),
+        "Pendências do destino": gap_count(r, "catalog") + gap_count(r, "context_photo"),
+        "Campos de atrações pendentes": (
+            gap_count(r, "all") - gap_count(r, "catalog") - gap_count(r, "context_photo")
+            if c["attractions"] else None),
+        **({"Pendências no filtro": gap_count(r, gap)} if gap != "all" else {}),
     } for r in rows for c in (r["counts"],)]
 
 
@@ -111,6 +93,12 @@ def _render_source_detail(row):
         st.write(row["description"])
     if row["editorial_duration_min"] is not None:
         st.caption(f'Duração editorial: {row["editorial_duration_min"]} min (estimativa, não verificada).')
+    for field, record in row.get("field_records", {}).items():
+        if record and record["record_id"] != row["id"]:
+            st.caption(f'Registro complementar ({field}): {record["record_id"]} · '
+                       f'data do registro: {record["record_date"] or "não informada"}')
+            for index, url in enumerate(record["record_sources"], 1):
+                _link(f"Registro complementar {field} {index}", url)
     st.markdown("**Ingresso**")
     st.write(_ticket_label(row))
     ticket = row["ticket"]
@@ -148,13 +136,13 @@ def _render_source_detail(row):
 def _render_destinations(view):
     cols = st.columns(3)
     query = cols[0].text_input("Pesquisar destino", placeholder="Ex.: Colmar",
-                              **_widget_state("ux132c1_search", "", lambda v: isinstance(v, str)))
+                              **widget_state("ux132c1_search", "", lambda v: isinstance(v, str)))
     gap_label = cols[1].selectbox("Campo de pesquisa", list(GAP_OPTIONS),
-                                  **_widget_state("ux132c1_gap", next(iter(GAP_OPTIONS)), lambda v: v in GAP_OPTIONS))
+                                  **widget_state("ux132c1_gap", next(iter(GAP_OPTIONS)), lambda v: v in GAP_OPTIONS))
     order = cols[2].selectbox("Ordenar por", SORT_OPTIONS,
-                             **_widget_state("ux132c1_sort", SORT_OPTIONS[0], lambda v: v in SORT_OPTIONS))
+                             **widget_state("ux132c1_sort", SORT_OPTIONS[0], lambda v: v in SORT_OPTIONS))
     gaps_only = st.checkbox("Somente destinos com pendências",
-                            **_widget_state("ux132c1_only_gaps", False, lambda v: isinstance(v, bool)))
+                            **widget_state("ux132c1_only_gaps", False, lambda v: isinstance(v, bool)))
     gap = GAP_OPTIONS[gap_label]
     rows = filter_destinations(view, query=query, gap=gap, gaps_only=gaps_only, sort=order)
     st.caption(f'{len(rows)} de {len(view["destinations"])} destinos. Pendências são campos de pesquisa, não nota de qualidade.')
@@ -164,14 +152,16 @@ def _render_destinations(view):
     st.dataframe(_destination_table(rows, gap), hide_index=True, width="stretch", key="ux132c1_destinations")
     names = {r["id"]: r["name"] for r in rows}
     chosen = st.selectbox("Destino para detalhar", list(names), format_func=names.__getitem__,
-                          **_widget_state("ux132c1_destination", next(iter(names)), lambda v: v in names))
+                          **widget_state("ux132c1_destination", next(iter(names)), lambda v: v in names))
     dest = next(r for r in rows if r["id"] == chosen)
     c = dest["counts"]
     with st.container(border=True):
         st.markdown(f'#### {dest["name"]}')
         a, b = st.columns(2)
         a.metric("Atrações catalogadas", c["attractions"])
-        b.metric("Pendências no filtro", gap_count(dest, gap))
+        b.metric("Campos de atrações pendentes", gap_count(dest, "all") -
+                 gap_count(dest, "catalog") - gap_count(dest, "context_photo") if c["attractions"] else "N/A")
+        st.caption(f'Pendências do destino: {gap_count(dest, "catalog") + gap_count(dest, "context_photo")}.')
         st.caption("Foto contextual: " + ("atribuição documentada" if dest["destination"]["photo_attributed"] else "não documentada"))
         if dest["destination"]["photo_attributed"]:
             with st.expander("Fonte e licença da foto contextual"):
@@ -191,7 +181,7 @@ def _render_destinations(view):
         with st.expander("Consultar fontes e ressalvas"):
             attr_names = {r["id"]: r["name"] for r in attrs}
             attr_id = st.selectbox("Atração", list(attr_names), format_func=attr_names.__getitem__,
-                                   **_widget_state("ux132c1_attraction", next(iter(attr_names)), lambda v: v in attr_names))
+                                   **widget_state("ux132c1_attraction", next(iter(attr_names)), lambda v: v in attr_names))
             _render_source_detail(next(r for r in attrs if r["id"] == attr_id))
 
 
@@ -208,10 +198,4 @@ def render_attraction_coverage(*, discovery=None):
     b.metric("Atrações únicas", counts["attractions"])
     c.metric("Destinos com atrações", _ratio(counts["destinations_with_attractions"], counts["destinations"]))
     st.info("Cobertura documental mede registros disponíveis, não qualidade turística ou viabilidade de 2027.")
-    sections = ("Visão geral", "Destinos")
-    section = st.segmented_control("Detalhamento das atrações", sections,
-                                   **_widget_state("ux132c1_section", sections[0], lambda v: v in sections)) or sections[0]
-    if section == "Visão geral":
-        _render_indicators(counts)
-    else:
-        _render_destinations(view)
+    _render_destinations(view)
