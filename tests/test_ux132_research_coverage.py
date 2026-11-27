@@ -227,6 +227,12 @@ else:
 
 
 class CoverageNavigationTests(unittest.TestCase):
+    def coverage_table(self, app):
+        matches = [element.value for element in app.dataframe
+                   if {"Cidade", "Cobertura", "Sem tempo", "Com tempo"} <= set(element.value.columns)]
+        self.assertEqual(len(matches), 1)
+        return matches[0]
+
     def test_search_filter_and_evidence_detail(self):
         app = AppTest.from_string(APP, default_timeout=90)
         app.run()
@@ -237,7 +243,7 @@ class CoverageNavigationTests(unittest.TestCase):
         global_before = next(m.value for m in app.metric if m.label=="Cobertura ferroviária")
         app.text_input(key="ux132_search_bases").set_value("Metz").run()
         self.assertFalse(app.exception)
-        self.assertEqual(len(app.dataframe[0].value), 1)
+        self.assertEqual(len(self.coverage_table(app)), 1)
         self.assertEqual(app.session_state["ux132_detail_Cidades-base"], "metz")
         app.selectbox(key="ux132_status_bases").select("Indicativo").run()
         self.assertFalse(app.exception)
@@ -251,7 +257,7 @@ class CoverageNavigationTests(unittest.TestCase):
         app.text_input(key="ux132_search_bases").set_value("").run()
         app.selectbox(key="ux132_sort_bases").select("Mais lacunas").run()
         self.assertFalse(app.exception)
-        gaps = app.dataframe[0].value["Sem tempo"].tolist()
+        gaps = self.coverage_table(app)["Sem tempo"].tolist()
         self.assertEqual(gaps, sorted(gaps,reverse=True))
 
     def test_axis_filters_and_valid_selection_survive_hidden_widgets(self):
@@ -302,10 +308,10 @@ class CoverageNavigationTests(unittest.TestCase):
             app.segmented_control(key="ux132_domain").set_value("Transporte ferroviário").run()
             app.segmented_control(key="ux132_coverage_section").set_value("Cidades-base").run()
             self.assertFalse(app.exception)
-            self.assertEqual(len(app.dataframe[0].value), 5)
+            self.assertEqual(len(self.coverage_table(app)), 5)
             app.selectbox(key="ux132_base_scope").select("Todas as bases").run()
             self.assertFalse(app.exception)
-            self.assertGreater(len(app.dataframe[0].value), 5)
+            self.assertGreater(len(self.coverage_table(app)), 5)
             app.selectbox(key="ux132_detail_Cidades-base").select("offenburg").run()
             self.assertFalse(app.exception)
             self.assertEqual(app.session_state["ux132_detail_Cidades-base"], "offenburg")
@@ -314,7 +320,7 @@ class CoverageNavigationTests(unittest.TestCase):
             self.assertFalse(app.exception)
             self.assertIn(app.session_state["ux132_detail_Cidades-base"],
                           ("lille", "metz", "mulhouse", "nancy", "strasbourg"))
-            self.assertEqual(len(app.dataframe[0].value), 5)
+            self.assertEqual(len(self.coverage_table(app)), 5)
             app.segmented_control(key="ux132_coverage_section").set_value("Destinos").run()
             self.assertFalse(app.exception)
             self.assertTrue(app.dataframe)
