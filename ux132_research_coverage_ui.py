@@ -50,6 +50,30 @@ def render_rail_coverage(*, discovery=None, research=None):
     st.caption("Universo global: pares dirigidos. Pares locais ficam fora do denominador.")
     st.info("Cobertura documental mede disponibilidade de referências, não viabilidade logística. "
             "Retorno, última milha e horários de 2027 não estão confirmados.")
+    with st.expander("Tarifas e retornos documentados"):
+        try:
+            from data26b_rail_fare_evidence_model import load_rail_fares
+            fares = load_rail_fares()
+            st.caption(f'{fares["documented"]} observações tarifárias · {fares["roundtrips"]} com ida e retorno · {fares["complete_documentation"]} com documentação completa.')
+            st.caption("Total para duas pessoas; nenhuma confirmação independente para 2027. Não altera o orçamento.")
+            if fares["records"]:
+                st.dataframe([{
+                    "Origem": x["outbound"]["origin_id"],
+                    "Destino": x["outbound"]["destination_id"],
+                    "Ida": x["outbound"]["departure_at"],
+                    "Retorno": x["inbound"]["departure_at"] if x["inbound"] else None,
+                    "Moeda": x["quote"]["currency"],
+                    "Total": x["quote"]["total_minor"] / 100 if x["quote"]["total_minor"] is not None else None,
+                    "Condições": x["quote"]["fare_conditions"],
+                    "Consulta": x["quote"]["checked_at"],
+                    "Fonte": x["quote"]["source_url"],
+                } for x in fares["records"]], hide_index=True,
+                    column_config={"Fonte": st.column_config.LinkColumn("Fonte")})
+            else:
+                st.caption("Nenhuma cotação individual cadastrada.")
+        except Exception:
+            _LOG.exception("DATA26B fare evidence unavailable")
+            st.warning("Observações tarifárias indisponíveis.")
     priority = view["priority"]
     st.caption(f'Cinco bases prioritárias: {_pct(priority)} '
                f'({priority["timed"]}/{priority["eligible"]} pares não locais).')
