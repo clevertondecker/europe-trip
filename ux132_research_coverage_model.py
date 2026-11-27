@@ -5,10 +5,11 @@ from base_research_expanded_model import load_research
 from trip01_supplemental_discovery import build_exploration_discovery
 
 
-def build_coverage_view(*, research=None, discovery=None):
+def build_coverage_view(*, research=None, discovery=None, projection_options=None):
     research = load_research(include_candidates=True) if research is None else research
     discovery = build_exploration_discovery() if discovery is None else discovery
-    coverage = rail_coverage(research=research, discovery=discovery)
+    coverage = rail_coverage(research=research, discovery=discovery,
+                             projection_options=projection_options)
     return project_coverage_view(
         coverage,
         {row["id"]: row["name"] for row in research["cities"]},
