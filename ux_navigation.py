@@ -38,7 +38,7 @@ RESEARCH_OPTIONS = ("Pesquisa ampliada", "França e escapadas",
                     "Calendário de pesquisa", "Cronograma oficial")
 SUGGESTION_OPTIONS = ("Descobrir", "Simular roteiros", "Guias especializados")
 LEGACY_PAGES = ("Visão geral", "Mapa & destinos", "Comparar cidades",
-                "Roteiro", "Orçamento", "Pesquisas & decisões")
+                "Roteiro", "Orçamento", "Pesquisas & decisões", "Cobertura dos dados")
 LEGACY_ITINERARY = ("Visão geral", "Itália", "Meus passeios", "Explorar bases",
                     "Descobrir", "Orçamento", "Calendário",
                     "Simular roteiros", "Guias e pesquisas")
@@ -131,7 +131,7 @@ def from_legacy(page: str, itinerary: str | None = None,
     return "Meu roteiro","Meu planejamento"
 
 
-def apply(state) -> tuple[str, str | None, str | None, str | None]:
+def apply(state, *, explicit_task=False) -> tuple[str, str | None, str | None, str | None]:
     """Synchronize legacy keys BEFORE Streamlit instantiates corresponding widgets."""
     area = state.get("ux_area", AREAS[0])
     from ux64_navigation_model import TARGETS
@@ -153,7 +153,7 @@ def apply(state) -> tuple[str, str | None, str | None, str | None]:
     if old_view=="Cobertura dos dados":
         state["ux112_active_view_shadow"]="Explorar alternativas"
         state["ux112_active_view"]="Explorar alternativas"
-        if (area,section)==("Explorar","Comparar"):
+        if not explicit_task and (area,section)==("Explorar","Comparar"):
             section="Cobertura dos dados"
             state["ux_section"]=section
     focused=state.get("ux125b_focused_guide")
@@ -261,7 +261,7 @@ def set_task(state, area: str, section: str | None) -> None:
     section = TASK_ALIASES.get((area, section), section)
     if (area, section)==("Explorar", "Cidades-base"):
         state["ux42_city_activity"]="Explorar cidades"
-    apply(state)
+    apply(state, explicit_task=True)
 
 
 def set_from_legacy(state, page: str,
