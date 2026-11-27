@@ -7,7 +7,7 @@ import streamlit as st
 from data24_coverage_model import rail_coverage
 from trip01_supplemental_discovery import build_exploration_discovery
 from ux_shared_ui_presentation import section_heading
-from ux_widget_state import widget_state, remember
+from ux_widget_state import widget_state
 from ux132_research_coverage_ui import render_rail_coverage
 from ux132c1_attraction_coverage_ui import render_attraction_coverage, render_attraction_indicators
 from ux132c1_attraction_coverage_model import build_attraction_inventory
@@ -46,6 +46,7 @@ def _render_overview(discovery, research):
             a, b = st.columns(2)
             a.metric("Atrações únicas", counts["attractions"])
             b.metric("Destinos com atrações", f'{counts["destinations_with_attractions"]}/{counts["destinations"]}' if counts["destinations"] else "N/A")
+            st.caption(f'{counts["destinations"] - counts["destinations_with_attractions"]} destinos sem atrações catalogadas.')
             render_attraction_indicators(counts)
         except Exception:
             _LOG.exception("Coverage overview attractions unavailable")
