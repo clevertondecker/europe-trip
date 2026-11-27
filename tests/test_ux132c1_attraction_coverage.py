@@ -133,12 +133,12 @@ class AttractionNavigationTests(unittest.TestCase):
         app = AppTest.from_string(APP,default_timeout=90).run()
         before = {k:deepcopy(app.session_state[k]) for k in ("advisor_plan","ux502_interests")}
         app.segmented_control(key="ux112_active_view").set_value("Cobertura dos dados").run()
+        app.segmented_control(key="ux132_domain").set_value("Transporte ferroviário").run()
         app.segmented_control(key="ux132_coverage_section").set_value("Cidades-base").run()
         app.text_input(key="ux132_search_bases").set_value("Metz").run()
         app.segmented_control(key="ux132_domain").set_value("Atrações turísticas").run()
         self.assertFalse(app.exception)
         self.assertTrue(any(m.label=="Atrações únicas" for m in app.metric))
-        app.segmented_control(key="ux132c1_section").set_value("Destinos").run()
         app.text_input(key="ux132c1_search").set_value("Colmar").run()
         self.assertFalse(app.exception)
         self.assertEqual(app.selectbox(key="ux132c1_destination").value,"colmar")
