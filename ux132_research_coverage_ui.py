@@ -9,6 +9,7 @@ from ux132_research_coverage_model import (
 )
 from rail_reference_projection_model import format_minutes
 from ux_shared_ui_presentation import section_heading
+from rec03a_suggestions_ui import _restore_widget, _remember
 
 _LOG = logging.getLogger(__name__)
 
@@ -29,6 +30,13 @@ def _table(rows):
         "Locais": r["local"],
         "Sem tempo": r["missing"],
     } for r in rows]
+
+
+def _widget_state(key, default, valid):
+    """Keep ephemeral coverage filters when Streamlit removes hidden widgets."""
+    shadow = key + "_shadow"
+    _restore_widget(key, shadow, default, valid)
+    return {"key": key, "on_change": _remember, "args": (key, shadow)}
 
 
 def render_research_coverage(*, discovery=None, research=None):
@@ -52,14 +60,17 @@ def render_research_coverage(*, discovery=None, research=None):
     cols[1].metric("Destinos no catálogo", view["destination_count"])
     cols[2].metric("Conexões com tempo", f'{counts["timed"]}/{counts["eligible"]}')
     cols[3].metric("Cobertura ferroviária", _pct(counts))
-    st.caption("Universo global: pares dirigidos. Pares locais ficam fora do denominador; "
-               "tempos de ida não confirmam retorno, viabilidade ou horários de 2027.")
+    st.caption("Universo global: pares dirigidos. Pares locais ficam fora do denominador.")
+    st.info("Cobertura documental mede disponibilidade de referências, não viabilidade logística. "
+            "Retorno, última milha e horários de 2027 não estão confirmados.")
     priority = view["priority"]
     st.caption(f'Cinco bases prioritárias: {_pct(priority)} '
                f'({priority["timed"]}/{priority["eligible"]} pares não locais).')
     sections = ("Visão geral", "Cidades-base", "Destinos")
-    section = st.segmented_control("Detalhamento da cobertura", sections,
-                                   default=sections[0], key="ux132_coverage_section") or sections[0]
+    section = st.segmented_control(
+        "Detalhamento da cobertura", sections,
+        **_widget_state("ux132_coverage_section", sections[0], lambda v: v in sections),
+    ) or sections[0]
     if section == "Visão geral":
         st.markdown("#### Transporte ferroviário")
         st.write(f'{counts["historical"]} históricos · {counts["indicative"]} indicativos · '
@@ -67,18 +78,20 @@ def render_research_coverage(*, discovery=None, research=None):
         st.caption("Os demais domínios terão indicadores próprios; não há nota geral de qualidade.")
         return
     rows = view["bases"] if section == "Cidades-base" else view["destinations"]
-    if section == "Cidades-base":
-        scope = st.selectbox("Recorte de bases", ("Cinco bases prioritárias", "Todas as bases"),
-                             key="ux132_base_scope")
-        if scope == "Cinco bases prioritárias":
-            rows = [r for r in rows if r["id"] in view["priority_ids"]]
     axis = "bases" if section == "Cidades-base" else "destinations"
-    left, right = st.columns(2)
-    query = left.text_input("Pesquisar cidade", placeholder="Digite o nome",
-                            key="ux132_search_" + axis)
-    order = right.selectbox("Ordenar por", SORT_OPTIONS, key="ux132_sort_" + axis)
+    cols = st.columns(3 if axis == "bases" else 2)
+    query = cols[0].text_input("Pesquisar cidade", placeholder="Digite o nome",
+                              **_widget_state("ux132_search_" + axis, "", lambda v: isinstance(v, str)))
+    order = cols[1].selectbox("Ordenar por", SORT_OPTIONS,
+                             **_widget_state("ux132_sort_" + axis, SORT_OPTIONS[0], lambda v: v in SORT_OPTIONS))
+    if axis == "bases":
+        scopes = ("Cinco bases prioritárias", "Todas as bases")
+        scope = cols[2].selectbox("Recorte de bases", scopes,
+                                  **_widget_state("ux132_base_scope", scopes[0], lambda v: v in scopes))
+        if scope == scopes[0]:
+            rows = [r for r in rows if r["id"] in view["priority_ids"]]
     gaps_only = st.checkbox("Somente cidades com lacunas de tempo",
-                            key="ux132_only_gaps_" + axis)
+                            **_widget_state("ux132_only_gaps_" + axis, False, lambda v: isinstance(v, bool)))
     total = len(rows)
     rows = filter_coverage_rows(rows, query=query, gaps_only=gaps_only, sort=order)
     st.caption(f'{len(rows)} de {total} cidades no recorte. Os filtros não alteram os '
@@ -93,10 +106,11 @@ def render_research_coverage(*, discovery=None, research=None):
     st.markdown("#### Detalhamento da cidade")
     detail_key = "ux132_detail_" + section
     names = {r["id"]: r["name"] for r in rows}
-    if st.session_state.get(detail_key) not in names:
-        st.session_state[detail_key] = next(iter(names))
+    # A stable-ID selectbox supports keyboard access, restores state across pages
+    # and avoids coupling the detail to ephemeral dataframe row positions.
     selected = st.selectbox("Escolha uma cidade para detalhar", list(names),
-                            format_func=names.__getitem__, key=detail_key)
+                            format_func=names.__getitem__,
+                            **_widget_state(detail_key, next(iter(names)), lambda v: v in names))
     row = next(r for r in rows if r["id"] == selected)
     with st.container(border=True):
         a, b = st.columns(2)
@@ -109,7 +123,8 @@ def render_research_coverage(*, discovery=None, research=None):
         st.divider()
         st.markdown("#### Conexões e lacunas de pesquisa")
         status = st.selectbox("Tipo de evidência", list(STATUS_OPTIONS),
-                              key="ux132_status_" + axis)
+                              **_widget_state("ux132_status_" + axis, next(iter(STATUS_OPTIONS)),
+                                              lambda v: v in STATUS_OPTIONS))
         connections = connection_rows(view, axis, row["id"], status)
         st.caption(f'{len(connections)} conexões no filtro · os indicadores acima consideram '
                    "todos os pares não locais desta cidade.")
@@ -120,14 +135,13 @@ def render_research_coverage(*, discovery=None, research=None):
             label = "Destino" if axis == "bases" else "Origem"
             if status == "Sem tempo pesquisado":
                 # Keep the original compact gap table as the default.
-                table = [{label: c[counterpart], "Pendência": "Sem referência de tempo"}
+                table = [{label: c[counterpart], "Pendência": c["label"]}
                          for c in connections]
                 config = None
             else:
                 table = [{
                     label: c[counterpart], "Evidência": c["label"],
-                    "Mínimo de ida": format_minutes(c["minimum"]) if c["minimum"] is not None else None,
-                    "Data registrada": c["source_date"], "Fonte": c["source_url"],
+                    "Fonte": c["source_url"],
                 } for c in connections]
                 config = {"Fonte": st.column_config.LinkColumn("Fonte", display_text="Abrir fonte")}
             st.dataframe(table, hide_index=True, width="stretch",
@@ -137,10 +151,11 @@ def render_research_coverage(*, discovery=None, research=None):
             if timed:
                 with st.expander("Consultar fonte e ressalvas"):
                     key = "ux132_connection_" + axis
-                    if st.session_state.get(key) not in timed:
-                        st.session_state[key] = next(iter(timed))
-                    chosen = st.selectbox("Conexão documentada", list(timed),
-                                          format_func=lambda k: timed[k][counterpart], key=key)
+                    chosen = st.selectbox(
+                        "Conexão documentada", list(timed),
+                        format_func=lambda k: timed[k][counterpart],
+                        **_widget_state(key, next(iter(timed)), lambda v: v in timed),
+                    )
                     c = timed[chosen]
                     st.write(f'**{c["origin"]} → {c["destination"]}**')
                     st.write(c["label"])
@@ -155,8 +170,18 @@ def render_research_coverage(*, discovery=None, research=None):
                         st.caption(str(c["notes"]))
                     if c["variation"]:
                         st.caption("Há variação entre referências; não implica contradição confirmada.")
+                    if c["alternative"]:
+                        alt = c["alternative"]
+                        st.markdown("**Referência indicativa alternativa (não substitui o histórico)**")
+                        st.write(format_minutes(alt["minimum"]))
+                        st.caption("Data registrada: " + str(alt["source_date"]))
+                        st.link_button("Abrir fonte alternativa", alt["source_url"])
+                        if alt["station_caveat"]:
+                            st.caption(alt["station_caveat"])
+                        if alt["notes"]:
+                            st.caption(str(alt["notes"]))
                     if c["observations"]:
-                        st.markdown("**Observações históricas catalogadas (separadas do mínimo exibido)**")
+                        st.markdown("**Outras observações históricas catalogadas**")
                         observations = []
                         for obs in c["observations"]:
                             minutes = obs.get("minimum_oneway_min")
@@ -164,6 +189,9 @@ def render_research_coverage(*, discovery=None, research=None):
                             observations.append({
                                 "Mínimo registrado": format_minutes(minutes) if type(minutes) is int and minutes > 0 else None,
                                 "Data": obs.get("evidence_date"),
+                                "Estação de origem": obs.get("origin_station"),
+                                "Estação de destino": obs.get("destination_station"),
+                                "Observação": obs.get("notes"),
                                 "Fonte": url if isinstance(url, str) and url.startswith("https://") else None,
                             })
                         st.dataframe(observations, hide_index=True, width="stretch",
