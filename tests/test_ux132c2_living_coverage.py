@@ -98,6 +98,12 @@ class LivingCoverageTests(unittest.TestCase):
         self.assertNotIn("restaurante para dois", r["research_gaps"]["complementary"])
         self.assertEqual(scope_counts(fixture)["with_three_verified_quotes"],
                          scope_counts(self.view)["with_three_verified_quotes"])
+        r["remote_work"]["residential_internet_2027"] = False
+        self.assertEqual(scope_counts(fixture)["with_residential_internet"],
+                         scope_counts(self.view)["with_residential_internet"])
+        r["remote_work"]["residential_internet_2027"] = True
+        self.assertEqual(scope_counts(fixture)["with_residential_internet"],
+                         scope_counts(self.view)["with_residential_internet"] + 1)
         self.assertTrue(all(x["fraction"] is None for x in indicator_rows(living_counts([]))))
         self.assertEqual(self.view, original)
 
