@@ -42,6 +42,33 @@ def _day(value):
         raise ValueError("Data inválida")
     return parsed
 
+def validate_catalog_scope(bases, destinations):
+    from base_research_expanded_model import load_research
+    from trip01_supplemental_discovery import build_exploration_discovery
+    countries = {"França":"FR", "Alemanha":"DE", "Suíça":"CH", "Luxemburgo":"LU",
+                 "Bélgica":"BE", "Países Baixos":"NL", "Holanda":"NL"}
+    base_catalog = {canonical_place(r["id"]): countries.get(r["country"]) for r in load_research(include_candidates=True)["cities"]}
+    dest_catalog = {canonical_place(r["id"]): countries.get(r["country"]) for r in build_exploration_discovery()["destinations"]}
+    if any(base_catalog.get(b) != "FR" for b in bases) or any(dest_catalog.get(d) != COUNTRIES[d] for d in destinations):
+        raise ValueError("Identidade ou país divergente do catálogo")
+
+def validate_review(row, checked):
+    review = row["review"]
+    if not isinstance(review, dict) or not official_source(review.get("source_url")):
+        raise ValueError("Fonte de revisão inválida")
+    research = _day(review["researched_at"])
+    capture = review["source_capture_date"]
+    if research > checked or research > _day(row["travel_date"]) or (capture is not None and _day(capture) > research):
+        raise ValueError("Data de revisão inválida")
+    amount = review["amount_minor"]
+    if amount is not None and (type(amount) is not int or amount <= 0):
+        raise ValueError("Preço revisado inválido")
+    mode = review["transport_mode"]
+    expected = ("not_reproduced_nonrail" if mode == "bus" else "not_reproduced" if amount is None else
+                "corroborated_price" if amount == row["amount_minor"] else "divergent_price")
+    if mode not in ("bus", "rail_label", "unknown") or row["status"] != expected or not review.get("note"):
+        raise ValueError("Classificação de revisão inconsistente")
+
 def validate_fare_references(data):
     if type(data["schema_version"]) is not int or data["schema_version"] != 2:
         raise ValueError("Versão inválida")
@@ -50,6 +77,7 @@ def validate_fare_references(data):
     bases, destinations, batch = (_unique(scope[k]) for k in ("bases", "destinations", "batch_destinations"))
     if bases != BASES or destinations != set(COUNTRIES) or not batch or not batch <= destinations:
         raise ValueError("Escopo histórico inválido")
+    validate_catalog_scope(bases, destinations)
     universe = {(b,d) for b in bases for d in batch}
     covered, seen, gaps = set(), set(), set()
     for r in data["references"]:
@@ -74,6 +102,8 @@ def validate_fare_references(data):
             covered.add(p)
         elif status not in HISTORICAL or r["transport_mode"] != "unknown" or not r["review"]:
             raise ValueError("Histórico inválido")
+        if status in HISTORICAL:
+            validate_review(r, checked)
         key = (p, travel, research, capture, r["source_url"], r["amount_minor"], r["commercial_brand"],
                "historical" if status in HISTORICAL else "calendar")
         if key in seen:
