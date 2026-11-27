@@ -280,7 +280,8 @@ def _render_scope(interests, discovery, active, names, checked):
                    format_func=lambda x: names[x]+" · "+priorities[x],
                    key="rec03a_scope_widget", on_change=_draft_changed, placeholder="Escolha uma ou mais opções")
     st.caption(f"{len(draft)} de {len(active_ids)} destinos selecionados.")
-    st.button("Analisar estes destinos", key="rec03a_confirm_subset", type="primary",
+    label = "Atualizar análise" if scope and scope.get("confirmed") else "Confirmar destinos e analisar"
+    st.button(label, key="rec03a_confirm_subset", type="primary",
               disabled=not draft, on_click=_scope_select, args=(draft,interests,discovery))
     if scope and scope.get("confirmed"):
         st.button("Cancelar edição do escopo", key="rec03a_cancel_edit", on_click=_cancel_edit)
@@ -508,9 +509,6 @@ def render_suggestions(*,plan,discovery=None,research=None):
         "Encontre cidades para investigar a partir dos destinos que vocês escolheram.",
         tag="Pesquisa, não reserva",variant="compact",
     ),unsafe_allow_html=True)
-    modes=("Explorar alternativas","Minha comparação")
-    view=st.segmented_control("Área da pesquisa",list(modes),
-                              **navigation_widget_state("ux112_active_view", modes)) or st.session_state["ux112_active_view_shadow"]
     try:
         discovery=discovery if discovery is not None else build_exploration_discovery()
         wishes=st.session_state.get("ux502_interests",empty_interests())
@@ -564,6 +562,12 @@ def render_suggestions(*,plan,discovery=None,research=None):
         st.info("As evidências são parciais. Não há grupo completo equivalente.")
     if result["has_local_only"]:
         st.caption("Destinos locais têm acesso urbano ainda não confirmado.")
+
+    # Only expose distinct research modes once their shared prerequisite is
+    # satisfied. The shadow remains untouched while editing the scope.
+    modes=("Explorar alternativas","Minha comparação")
+    view=st.segmented_control("Área da pesquisa",list(modes),
+                              **navigation_widget_state("ux112_active_view", modes)) or st.session_state["ux112_active_view_shadow"]
 
     options=[c["base_id"] for c in result["candidates"]]
     by_id={c["base_id"]:c for c in result["candidates"]}
