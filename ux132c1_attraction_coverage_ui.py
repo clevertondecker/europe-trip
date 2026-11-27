@@ -34,6 +34,9 @@ def _link(label, url):
 def render_attraction_indicators(counts):
     table = []
     for metric in indicator_rows(counts):
+        if metric["key"] == "destinations_with_attractions":
+            # Already shown as the destination count in the overview card.
+            continue
         table.append({
             "Indicador": metric["label"],
             "Quantidade / total": _ratio(metric["documented"], metric["total"]),
