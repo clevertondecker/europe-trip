@@ -216,7 +216,8 @@ class LivingCoverageTests(unittest.TestCase):
         extra = w["pack_reference"]
         for field, value in (("source_url", "https://example.org/alternate"),
                              ("price_eur_2026", 19), ("hours", "8h–23h"),
-                             ("limitations", "New restriction"), ("price_basis", "month")):
+                             ("limitations", "New restriction"), ("price_basis", "month"),
+                             ("checked_at", "2026-11-26")):
             changed = deepcopy(w)
             changed["pack_reference"][field] = value
             self.assertEqual(complementary_coworking(changed), changed["pack_reference"])
