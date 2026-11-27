@@ -16,3 +16,11 @@ Em Explorar → Comparar bases, adicionar a terceira opção “Cobertura dos da
 
 ## Aceite
 Testes puros para paridade das contagens, local, 0/0, filtro e lacunas; AppTest para entrada sem desejos, troca de área e preservação de escolhas, inclusive escopo confirmado. Garantir navegação e ausência de mutações. Rodar CI no HEAD final; QA visual real quando disponível. Manter draft, sem merge sem autorização.
+
+## Refinamentos após review (27/11/2026)
+- Manter a localização em Comparar bases nesta entrega; reavaliar navegação independente após UX132C, sem criar nova página agora.
+- Cabeçalho “Cobertura documental”; não apresentar disponibilidade de dados como confiabilidade.
+- Detalhe com percentual, barra, numerador/denominador, quantidade de lacunas e tabela de origem/destino e pendência. Não usar valores ilustrativos nem inventar destinos.
+- Validar seleção antes de montar o widget após alterar recorte. Cobrir fallback de None, DRAFT durante edição, ida/volta à lista e handoff manual.
+- Testar a inclusão de uma referência DATA25 real via overlay controlado: altera os numeradores e lacunas dos dois eixos, preserva denominadores e não grava datasets.
+- Medir três projeções consecutivas do catálogo real na CI (UX132_COVERAGE_TIMING: amostras, mediana, máximo), com igualdade de resultados. Registrar duração de projeção em log debug no app. Sem cache novo nem limite de tempo frágil antes de observar os resultados; se necessário, avaliar invalidação por revisão efetiva dos dados. A medição não equivale à latência total de renderização no navegador.
