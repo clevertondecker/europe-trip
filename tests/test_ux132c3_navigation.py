@@ -87,6 +87,18 @@ class RealAppNavigationTests(unittest.TestCase):
         app.session_state["ux_section"] = "Comparar"
         app.run()
         self.assertFalse(app.exception, str(app.exception))
+        # Real app now requires confirmed destinations before exposing the mode.
+        from trip01_supplemental_discovery import build_exploration_discovery
+        from ux502_destination_interests_model import empty_interests, set_interest
+        discovery = build_exploration_discovery()
+        wishes = set_interest(empty_interests(), "paris", "must_visit", discovery)
+        wishes = set_interest(wishes, "basel", "interested", discovery)
+        app.session_state["ux502_interests"] = wishes
+        app.run()
+        self.assertFalse(app.exception, str(app.exception))
+        self.assertNotIn("ux112_active_view", {w.key for w in app.segmented_control})
+        app.button(key="rec03a_confirm_subset").click().run()
+        self.assertFalse(app.exception, str(app.exception))
         app.segmented_control(key="ux112_active_view").set_value("Minha comparação").run()
         self.assertFalse(app.exception, str(app.exception))
         app.segmented_control(key="ux112_active_view").set_value(None).run()
