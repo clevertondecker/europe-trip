@@ -54,8 +54,9 @@ def _render_indicators(counts):
             "Documentado / total": _ratio(metric["documented"], metric["total"]),
             "Percentual": metric["fraction"] * 100 if metric["fraction"] is not None else None,
             "Pendências": (
-                counts["ticket_unknown"] if metric["key"] == "ticket_published"
-                else None if metric["key"] in ("ticket_not_applicable", "ticket_unknown") or not metric["total"]
+                None if not metric["total"]
+                else counts["ticket_unknown"] if metric["key"] == "ticket_published"
+                else None if metric["key"] in ("ticket_not_applicable", "ticket_unknown")
                 else metric["total"] - metric["documented"]
             ),
         })
@@ -75,7 +76,9 @@ def _destination_table(rows, gap):
         "Foto contextual": "Atribuída" if c["destinations_with_attributed_photo"] else "Não documentada",
         "Descrição": _ratio(c["described"], c["attractions"]),
         "Duração editorial": _ratio(c["editorial_duration"], c["attractions"]),
-        "Ingresso desconhecido": c["ticket_unknown"] if c["attractions"] else None,
+        "Ingressos (publicado / N/A / desconhecido)": (
+            f'{c["ticket_published"]} / {c["ticket_not_applicable"]} / {c["ticket_unknown"]}'
+            if c["attractions"] else "N/A (0 atrações)"),
         "Foto própria": _ratio(c["attraction_photo_attributed"], c["attractions"]),
         "Acesso de estação": _ratio(c["station_access_documented"], c["attractions"]),
         "Pendências no filtro": gap_count(r, gap),
