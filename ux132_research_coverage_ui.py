@@ -8,7 +8,7 @@ from ux132_research_coverage_model import (
     SORT_OPTIONS, STATUS_OPTIONS,
 )
 from rail_reference_projection_model import format_minutes
-from ux_widget_state import widget_state
+from ux_widget_state import widget_state, navigation_widget_state
 
 _LOG = logging.getLogger(__name__)
 
@@ -56,8 +56,8 @@ def render_rail_coverage(*, discovery=None, research=None):
     sections = ("Cidades-base", "Destinos")
     section = st.segmented_control(
         "Detalhamento da cobertura", sections,
-        **widget_state("ux132_coverage_section", sections[0], lambda v: v in sections),
-    ) or sections[0]
+        **navigation_widget_state("ux132_coverage_section", sections),
+    ) or st.session_state["ux132_coverage_section_shadow"]
     rows = view["bases"] if section == "Cidades-base" else view["destinations"]
     axis = "bases" if section == "Cidades-base" else "destinations"
     cols = st.columns(3 if axis == "bases" else 2)
