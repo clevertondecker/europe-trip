@@ -1,4 +1,4 @@
-"""UX82: Explorer's four public tasks share the same UX81 visual language."""
+"""UX82: Explorer's public tasks share the same UX81 visual language."""
 from pathlib import Path
 from copy import deepcopy
 import unittest
@@ -47,8 +47,12 @@ render_independent_destination_discovery()
     def test_visual_changes_do_not_introduce_a_second_router_or_persistence(self):
         from ux64_navigation_model import TARGETS,PUBLIC_TASKS
         self.assertEqual(PUBLIC_TASKS["Explorar"],
-                         ("Descobrir","Minha lista","Comparar bases","Mapa"))
+                         ("Descobrir","Minha lista","Comparar bases","Cobertura dos dados","Mapa"))
         self.assertEqual(TARGETS[("Explorar","Mapa")],("Explorar","Mapa"))
+        self.assertEqual(TARGETS[("Explorar","Cobertura dos dados")],("Explorar","Cobertura dos dados"))
+        from ux_navigation import route, LEGACY_PAGES
+        self.assertEqual(route(*TARGETS[("Explorar","Cobertura dos dados")])[0],"Cobertura dos dados")
+        self.assertIn("Cobertura dos dados",LEGACY_PAGES)
         code=(ROOT/"ux87_inline_base_comparison_ui.py").read_text()
         self.assertIn('compare_wishlist_bases(',code)
         self.assertIn('visible_destination_ids=list(scope["destination_ids"])',code)
