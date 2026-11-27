@@ -179,6 +179,7 @@ def _render_remote(w):
     if coworking:
         st.write(_amount(coworking.get("price_eur"), "EUR"))
         st.caption(coworking.get("price_basis") or "Modalidade não informada")
+        st.caption("Tipo de fonte: " + str(coworking.get("source_type") or UNKNOWN))
         st.write(coworking.get("schedule") or "Horário não documentado")
         st.caption("Data específica da observação: " + str(coworking.get("observed_at") or coworking.get("checked_at") or UNKNOWN))
         st.caption("Data geral do levantamento: " + str(w["coworking_source_date"] or UNKNOWN))
@@ -192,6 +193,7 @@ def _render_remote(w):
         st.write(p.get("name") or UNKNOWN)
         st.write(_amount(p.get("price_eur_2026"), "EUR (histórico)"))
         st.caption(p.get("price_basis") or "Modalidade não informada")
+        st.caption("Tipo de fonte: " + str(p.get("source_type") or UNKNOWN))
         st.write(p.get("hours") or "Horário não documentado")
         st.caption(p.get("limitations") or "Condições não confirmadas")
         st.caption("Data específica: " + str(p.get("observed_at") or p.get("checked_at") or UNKNOWN))
@@ -227,7 +229,7 @@ def render_living_coverage(*, research=None):
         _LOG.exception("UX132C2 living coverage unavailable")
         st.error("Não foi possível carregar a cobertura de moradia e trabalho. Seu roteiro permanece intacto.")
         return
-    labels = {PRIORITY: f'Bases prioritárias ({len(scope_rows(view))})',
+    labels = {PRIORITY: f'Prioritárias auditadas ({len(scope_rows(view))})',
               ALL: f'Todas as bases auditadas ({len(view["rows"])})'}
     scope = st.selectbox("Recorte de pesquisa", list(labels), format_func=labels.__getitem__,
                          **widget_state("ux132c2_scope", PRIORITY, lambda v: v in labels))
@@ -242,7 +244,7 @@ def render_living_coverage(*, research=None):
     st.dataframe([{
         "Cidade-base": r["name"],
         "Anúncios históricos": r["historical_offers"],
-        "Contador legado de cotações": r["verified_quotes"],
+        "Contador legado de cotações": r["declared_quotes"],
         "Vida cotidiana": " · ".join(
             label + (": sim" if r[key] else ": pendente")
             for key, label in (("restaurant", "Restaurante"), ("urban_pass", "Passe"), ("local_basket", "Cesta"))),
