@@ -185,6 +185,16 @@ class RecommendationAppTests(unittest.TestCase):
         self.assertTrue(any(m.label=="Cobertura ferroviária" for m in a.metric))
         for key,value in before.items():
             self.assertEqual(a.session_state[key],value)
+        a.segmented_control(key="ux132_coverage_section").set_value("Cidades-base")
+        self.run_ok(a)
+        a.text_input(key="ux132_search_bases").set_value("Metz")
+        self.run_ok(a)
+        a.selectbox(key="ux132_sort_bases").select("Mais lacunas")
+        self.run_ok(a)
+        a.selectbox(key="ux132_status_bases").select("Indicativo")
+        self.run_ok(a)
+        a.selectbox(key="ux132_connection_bases").select("annecy")
+        self.run_ok(a)
         a.session_state[INTENT]="wishlist"
         self.run_ok(a)
         self.assertEqual(a.session_state["ux64_public_task"],"Minha lista")
@@ -192,6 +202,9 @@ class RecommendationAppTests(unittest.TestCase):
         self.run_ok(a)
         self.assertEqual(a.session_state["ux64_public_task"],"Comparar bases")
         self.assertTrue(any(m.label=="Cobertura ferroviária" for m in a.metric))
+        self.assertEqual(a.text_input(key="ux132_search_bases").value,"Metz")
+        self.assertEqual(a.selectbox(key="ux132_sort_bases").value,"Mais lacunas")
+        self.assertEqual(a.selectbox(key="ux132_connection_bases").value,"annecy")
         a.segmented_control(key="ux112_active_view").set_value("Explorar alternativas")
         self.run_ok(a)
         self.assertEqual(a.multiselect(key="rec03a_scope_widget").value,["paris"])
@@ -202,6 +215,11 @@ class RecommendationAppTests(unittest.TestCase):
         self.run_ok(a)
         self.assertEqual(a.session_state["ux112_active_view"],"Minha comparação")
         self.assertTrue(any('class="ux97-table"' in m.value for m in a.markdown))
+        self.assertEqual(a.session_state[CHOICE],before[CHOICE])
+        a.segmented_control(key="ux112_active_view").set_value("Cobertura dos dados")
+        self.run_ok(a)
+        self.assertEqual(a.text_input(key="ux132_search_bases").value,"Metz")
+        self.assertEqual(a.selectbox(key="ux132_connection_bases").value,"annecy")
         self.assertEqual(a.session_state[CHOICE],before[CHOICE])
 
     def test_scope_reconciles_real_edits_and_same_revision_replacement(self):
