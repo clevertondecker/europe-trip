@@ -6,3 +6,6 @@ CI e revisão obrigatórias; QA visual pendente.
 
 ## Revisão
 Identidade inclui estações, instantes UTC, serviços e baldeações normalizadas. Preço não integra a chave; divergências de preço/estado/taxas na mesma chave são conflitos. Consulta pode incluir instante com offset ou apenas data; não inventar hora. Perfil fixo dois adultos, elegibilidade explícita (none ou descrição, null desconhecido), estrutura de bilhete e condições textuais de flexibilidade/reembolso/restrições. Taxas incluem reservas obrigatórias. Escopo derivado dos trechos, calendário separado da coerência temporal; estações diferentes não comprovam transferência urbana. Nenhuma viabilidade ou confirmação independente. Dataset vazio preservado. Testes ampliados; CI, paridade DATA24 e QA visual ainda precisam de confirmação.
+
+## Fechamento da revisão
+Reembolso e alteração são dimensões explícitas (permitido, condicional, não permitido, desconhecido). Instantes de consulta equivalentes em UTC compartilham identidade mesmo com datas locais diferentes. Contadores completos separados por escopo. AppTest com múltiplas ofertas, preço zero e desconhecido; teste de paridade DATA24 com fixture não vazia. Removidos expanders aninhados e widgets de link repetidos. Resultados de CI e QA visual ainda não confirmados.
