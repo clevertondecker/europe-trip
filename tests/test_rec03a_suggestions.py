@@ -101,6 +101,35 @@ class RecommendationAppTests(unittest.TestCase):
         a.button(key=key).click()
         return self.run_ok(a)
 
+    def test_automatic_highlights_do_not_select_cities(self):
+        from rec03b_handoffs import CHOICE
+        a=self.make_app([("paris","must_visit"),("basel","interested")],"compare")
+        self.click(a,"rec03a_confirm_subset")
+        self.assertEqual(a.session_state[CHOICE] if CHOICE in a.session_state else [],[])
+        self.assertTrue(any("Sugestões automáticas para seus destinos" in m.value for m in a.markdown))
+        self.assertTrue(any("Não avalia preços de passagens" in c.value for c in a.caption))
+        self.assertNotIn("Cobertura dos dados",a.segmented_control(key="ux112_active_view").options)
+        self.assertIn("Cobertura dos dados",a.segmented_control(key="ux64_public_task").options)
+        before=deepcopy(a.session_state["advisor_plan"])
+        a.checkbox(key="rec03a_show_all").check()
+        self.run_ok(a)
+        self.assertTrue(any("Catálogo de cidades-base" in m.value for m in a.markdown))
+        picks=[c for c in a.checkbox if c.key and c.key.startswith("rec03a_pick_")]
+        self.assertTrue(picks)
+        key=picks[0].key
+        a.checkbox(key=key).check()
+        self.run_ok(a)
+        chosen=key.removeprefix("rec03a_pick_")
+        self.assertEqual(a.session_state[CHOICE],[chosen])
+        self.assertEqual(a.session_state["advisor_plan"],before)
+        a.segmented_control(key="ux64_public_task").set_value("Cobertura dos dados")
+        self.run_ok(a)
+        a.segmented_control(key="ux64_public_task").set_value("Comparar bases")
+        self.run_ok(a)
+        self.assertEqual(a.session_state[CHOICE],[chosen])
+        self.assertTrue(a.checkbox(key=key).value)
+        self.assertEqual(a.session_state["advisor_plan"],before)
+
     def test_empty_and_discarded_no_engine_call(self):
         for items in ([],[("paris","discarded")]):
             with self.subTest(items=items),patch("rec03a_suggestions_ui.recommend_bases") as engine:
