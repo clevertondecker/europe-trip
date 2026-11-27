@@ -28,7 +28,7 @@ def attributed_photo(photo):
 
 
 def attraction_inventory(discovery, catalog, data23, macro, geography):
-    """Respect the discovery reconciliation and enrich only the exact source IDs."""
+    """Respect discovery reconciliation, exact source IDs and declared aliases."""
     source_rows = {}
     for records in (catalog["attractions"], data23["attractions"], macro["attractions"]):
         for row in records:
@@ -59,32 +59,70 @@ def attraction_inventory(discovery, catalog, data23, macro, geography):
             if ident in seen:
                 raise ValueError("Duplicate projected attraction")
             seen.add(ident)
-            raw = source_rows.get(ident, {})
-            ticket = raw.get("ticket") or {}
-            status = ticket.get("status", "unknown")
-            if status == "operator_published" and (
-                    ticket.get("amount") is None or not ticket.get("currency") or
-                    not ticket.get("per")):
-                raise ValueError("Published ticket lacks amount, currency or modality")
-            if status not in ("operator_published", "not_applicable", "unknown"):
-                raise ValueError("Unknown ticket status")
-            # Destination photography is not an attraction photograph.
-            photo = raw.get("photo")
-            duration = raw.get("visit_minutes")
-            description = raw.get("summary") or raw.get("description")
+            # Discovery already resolved identity. Only exact IDs and explicitly
+            # reconciled aliases participate; never match by name here.
+            raw = source_rows.get(ident, attr.get("documentary_record", {}))
+            aliases = attr.get("reconciled_source_ids", [])
+            candidates = [(ident, raw)] + [(key, source_rows[key]) for key in aliases
+                                          if key in source_rows]
+            def record_for(predicate):
+                return next(((key, record) for key, record in candidates
+                             if predicate(record)), (None, {}))
+
+            def duration_of(record):
+                return (record.get("visit_minutes") if
+                        record.get("visit_minutes_status") == "editorial_assumption"
+                        else record.get("editorial_duration_min"))
+
+            def ticket_of(record):
+                ticket = record.get("ticket") or {}
+                status = ticket.get("status", "unknown")
+                if status == "operator_published" and (
+                        ticket.get("amount") is None or not ticket.get("currency") or
+                        not ticket.get("per")):
+                    raise ValueError("Published ticket lacks amount, currency or modality")
+                if status not in ("operator_published", "not_applicable", "unknown"):
+                    raise ValueError("Unknown ticket status")
+                return ticket
+
+            # Preserve canonical populated values; only fill genuinely absent
+            # fields from an explicitly reconciled record. A known ticket state
+            # is atomic (including not applicable), never merge its attributes.
+            desc_id, desc_record = record_for(lambda r: bool(r.get("summary") or r.get("description")))
+            dur_id, dur_record = record_for(lambda r: duration_of(r) is not None)
+            ticket_id, ticket_record = record_for(
+                lambda r: ticket_of(r).get("status", "unknown") != "unknown")
+            if ticket_id is None:
+                ticket_id, ticket_record = ident, raw
+            ticket = ticket_of(ticket_record)
+            photo_id, photo_record = record_for(lambda r: attributed_photo(r.get("photo")))
+            photo = photo_record.get("photo") if photo_id else raw.get("photo")
+
+            def provenance(key, record):
+                if key is None:
+                    return None
+                return {"record_id": key, "record_date": record.get("checked_at"),
+                        "record_sources": deepcopy(record.get("source_urls") or
+                            ([record["source_url"]] if record.get("source_url") else []))}
+
             rows.append({
                 "id": ident, "destination_id": dest["id"], "name": attr["name"],
                 "kind": attr["kind"], "source_url": attr["source_url"],
                 "additional_sources": deepcopy(attr.get("additional_sources", [])),
-                "reconciled_source_ids": deepcopy(attr.get("reconciled_source_ids", [])),
+                "reconciled_source_ids": deepcopy(aliases),
                 "checked_at": raw.get("checked_at"),
-                "description": description,
-                "editorial_duration_min": duration if
-                    raw.get("visit_minutes_status") == "editorial_assumption"
-                    else raw.get("editorial_duration_min"),
-                "ticket_status": status, "ticket": deepcopy(ticket),
+                "description": desc_record.get("summary") or desc_record.get("description"),
+                "editorial_duration_min": duration_of(dur_record),
+                "ticket_status": ticket.get("status", "unknown"), "ticket": deepcopy(ticket),
                 "photo_attributed": attributed_photo(photo), "photo": deepcopy(photo),
-                "station_access": deepcopy(access.get(ident, [])),
+                "field_records": {
+                    "description": provenance(desc_id, desc_record),
+                    "editorial_duration": provenance(dur_id, dur_record),
+                    "ticket": provenance(ticket_id, ticket_record),
+                    "photo": provenance(photo_id, photo_record),
+                },
+                "station_access": deepcopy([route for key in dict.fromkeys([ident, *aliases])
+                                            for route in access.get(key, [])]),
             })
     counts = attraction_counts(destinations, rows)
     return {"counts": counts, "destinations": destinations, "rows": rows,
