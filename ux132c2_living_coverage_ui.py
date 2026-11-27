@@ -5,7 +5,7 @@ import streamlit as st
 
 from ux132c2_living_coverage_model import (
     build_living_view, scope_rows, scope_counts, indicator_rows, compact_rows,
-    PRIORITY, ALL, scope_membership, complementary_coworking,
+    PRIORITY, ALL, scope_membership, complementary_coworking, documented_housing_counts,
 )
 from ux_widget_state import widget_state
 
@@ -71,6 +71,9 @@ def render_living_summary(*, research=None):
     st.caption(f'Bases com contador de 3 ou mais cotações elegíveis declaradas: '
                f'{_ratio(counts["with_three_verified_quotes"], n)}. '
                "O contador histórico não confirma disponibilidade nem condições.")
+    current = documented_housing_counts(scope_rows(view))
+    st.caption("Bases com cotações individuais documentadas: " +
+               _ratio(current["with_documented_quotes"], n) + " · sem confirmação independente.")
     st.markdown("**Referências históricas**")
     st.caption(f'Moradia: {_ratio(counts["with_historical_housing"], n)} · '
                f'Clima: {_ratio(counts["with_climate"], n)} · '
@@ -93,6 +96,37 @@ def _render_indicators(counts):
         table([r for r in rows if r["key"] in historical_keys], "ux132c2_indicators")
         st.caption("Cada indicador conta bases auditadas. Zero registros não prova indisponibilidade. "
                    "Academia e lavanderia: cobertura não medida por este inventário.")
+
+
+def _render_current_housing(observations):
+    st.markdown("**Cotações individuais para 2027 — documentação**")
+    if not observations:
+        st.caption("Nenhuma observação individual registrada. Não significa indisponibilidade.")
+        return
+    st.write(f'{observations["documented"]} observações · '
+             f'{observations["independently_verified"]} confirmadas independentemente.')
+    st.caption("Documentação não garante disponibilidade atual nem confirma a contratação.")
+    for group in observations["groups"]:
+        st.write(f'{group["checkin"]} a {group["checkout"]} · {group["currency"]} · '
+                 f'{group["complete_documentation"]}/{group["documented"]} com requisitos documentais completos.')
+        for record in group["records"]:
+            q, evaluation = record["quote"], record["evaluation"]
+            st.markdown("**" + record["listing_id"] + "**")
+            st.caption("Consulta: " + q["checked_at"] + " · dois adultos")
+            st.write("Soma das despesas declaradas: " + _amount(evaluation["expense_total"], q["currency"]))
+            st.write("Caução reembolsável declarada: " + _amount(evaluation["refundable_deposit_separate"], q["currency"]))
+            st.caption("Contrato: " + (record["contract_terms"] or UNKNOWN))
+            st.caption("Cancelamento: " + (record["cancellation_terms"] or UNKNOWN))
+            st.caption("Requisitos pendentes ou negativos: " +
+                       (", ".join(record["missing_requirements"]) or "Nenhum no registro declarado"))
+            st.caption("Disponibilidade declarada: " + _evidence_state(q["available_on_dates"]) +
+                       " · Internet declarada: " + _evidence_state(q["internet_verified"]))
+            _link("Anúncio individual", q["source_url"])
+            _link("Evidência documental", record["evidence_url"])
+
+
+def _evidence_state(value):
+    return "Sim" if value is True else "Não" if value is False else "Desconhecido"
 
 
 def _render_housing(h):
@@ -213,6 +247,7 @@ def _render_detail(row):
         st.caption("Pesquisas complementares: " + " · ".join(gaps["complementary"]))
     st.caption("Lacunas ferroviárias estão em Transporte. Registros históricos não confirmam a estadia.")
     with st.expander("Moradia — registros e fontes"):
+        _render_current_housing(row.get("housing_observations"))
         _render_housing(row["housing"])
     with st.expander("Vida cotidiana e custos"):
         _render_daily(row["daily_life"])
@@ -240,6 +275,11 @@ def render_living_coverage(*, research=None):
         st.info("Nenhuma base auditada neste recorte.")
         return
     _render_indicators(scope_counts(view, scope))
+    current = documented_housing_counts(rows)
+    st.caption("Cotações individuais documentadas: " + _ratio(current["with_documented_quotes"], len(rows)) +
+               " bases · três com documentação completa para mesmas datas/moeda: " +
+               _ratio(current["with_three_comparable_documented_quotes"], len(rows)) +
+               " bases. Nenhuma confirmação independente por este inventário.")
     st.markdown("#### Evidências por cidade-base")
     st.dataframe([{
         "Cidade-base": r["name"],
