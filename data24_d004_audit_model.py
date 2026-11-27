@@ -74,8 +74,8 @@ def coworking_state(observation):
             "incompatible_2026" if value is False else "indeterminate")
 
 
-def project_d004(*, snapshot, research, five, round2, packs, market, profiles,
-                 rail_by_base):
+def project_living_evidence(*, snapshot, research, five, round2, packs, market, profiles):
+    """D-004 non-rail evidence, independent of the railway matrix."""
     scope = scope_for_d004(snapshot, research, five)
     by_city = {c["id"]: c for c in research["cities"]}
     costs = {c["id"]: c for c in round2["cities"]}
@@ -87,7 +87,6 @@ def project_d004(*, snapshot, research, five, round2, packs, market, profiles,
     validate_scope_coverage(scope["descriptive_ids"], {
         "pesquisa ampliada": by_city,
         "visão de moradia": housing_overview,
-        "cobertura ferroviária DATA24A": rail_by_base,
     })
     rows = []
     for ident in scope["descriptive_ids"]:
@@ -104,12 +103,13 @@ def project_d004(*, snapshot, research, five, round2, packs, market, profiles,
         # copies of the same offers, or add monthly prices into a season quote.
         observed = observed_housing(city)
         overview = housing_overview[ident]
-        rail = rail_by_base[ident]
         rows.append({
             "id": ident, "name": city["name"], "country": city["country"],
             "named_in_snapshot": ident in scope["named_candidates"],
             "in_five_base_study": ident in scope["five_base_study_ids"],
             "housing": {
+                # Historical eligibility counters have no individual verified
+                # quote records. Never promote them to price, contract or access.
                 "summary": observed, "overview": overview,
                 "historical_offers": city["housing_offers"],
                 "market_sample_separate_not_additive": local.get("offers"),
@@ -149,29 +149,17 @@ def project_d004(*, snapshot, research, five, round2, packs, market, profiles,
                 "profile_evidence": [e for e in profile.get("evidence", [])
                                      if e["section"] == "remote_work"],
             },
-            "rail": rail,
             "decision_evidence": {
                 "housing_quotes": "not_confirmed",
                 "comparable_local_basket": "documented" if daily.get("complete_comparable_basket_eur") is not None else "unknown",
                 "remote_work_access_2027": "unknown",
-                "return_and_door_to_door_2027": "not_confirmed",
                 "climate_normals": "documented_context" if climate.get("months_9_10_11") is not None else "unknown",
                 "research_priority": None,
             },
         })
     for row in rows:
-        row["research_gaps"] = research_gaps(row)
-    counts = {
-        "bases": len(rows),
-        "with_historical_housing": sum(r["housing"]["summary"]["count"] > 0 for r in rows),
-        "with_three_verified_quotes": sum(r["housing"]["overview"]["available_for_56_to_60_nights_2027"] >= 3 for r in rows),
-        "with_restaurant": sum(r["daily_life"]["restaurant_eur_two"] is not None for r in rows),
-        "with_urban_pass": sum(r["daily_life"]["urban_pass"] is not None for r in rows),
-        "with_local_basket": sum(r["daily_life"]["comparable_local_basket_eur"] is not None for r in rows),
-        "with_climate": sum((r["daily_life"]["climate"] or {}).get("months_9_10_11") is not None for r in rows),
-        "with_coworking": sum(r["remote_work"]["coworking"] is not None for r in rows),
-        "with_residential_internet": sum(r["remote_work"]["residential_internet_2027"] is not None for r in rows),
-    }
+        row["research_gaps"] = living_research_gaps(row)
+    counts = living_counts(rows)
     return deepcopy({
         "scope": scope, "rows": rows, "counts": counts,
         "shared_budget_context_not_local": market["common_costs"],
@@ -181,12 +169,45 @@ def project_d004(*, snapshot, research, five, round2, packs, market, profiles,
     })
 
 
-def research_gaps(row):
-    """Classify evidence needs, not cities; no ranking or official priority."""
-    h, d, w, rail = (row[k] for k in ("housing", "daily_life", "remote_work", "rail"))
+def living_counts(rows):
+    """Canonical D-004 counts for the audited scope or an exact subset."""
+    return {
+        "bases": len(rows),
+        "with_historical_housing": sum(r["housing"]["summary"]["count"] > 0 for r in rows),
+        "with_three_verified_quotes": sum(r["housing"]["overview"]["available_for_56_to_60_nights_2027"] >= 3 for r in rows),
+        "with_restaurant": sum(r["daily_life"]["restaurant_eur_two"] is not None for r in rows),
+        "with_urban_pass": sum(r["daily_life"]["urban_pass"] is not None for r in rows),
+        "with_local_basket": sum(r["daily_life"]["comparable_local_basket_eur"] is not None for r in rows),
+        "with_climate": sum((r["daily_life"]["climate"] or {}).get("months_9_10_11") is not None for r in rows),
+        "with_coworking": sum(r["remote_work"]["coworking"] is not None for r in rows),
+        "with_residential_internet": sum(r["remote_work"]["residential_internet_2027"] is True for r in rows),
+    }
+
+
+def project_d004(*, snapshot, research, five, round2, packs, market, profiles,
+                 rail_by_base):
+    result = project_living_evidence(snapshot=snapshot, research=research, five=five,
+                                    round2=round2, packs=packs, market=market, profiles=profiles)
+    validate_scope_coverage(result["scope"]["descriptive_ids"], {
+        "cobertura ferroviária DATA24A": rail_by_base,
+    })
+    for row in result["rows"]:
+        row["rail"] = deepcopy(rail_by_base[row["id"]])
+        row["decision_evidence"]["return_and_door_to_door_2027"] = "not_confirmed"
+        row["research_gaps"] = research_gaps(row)
+    return result
+
+
+def living_research_gaps(row):
+    """Classify non-rail evidence needs; no ranking or official priority."""
+    h, d, w = (row[k] for k in ("housing", "daily_life", "remote_work"))
     blockers, complementary, context = [], [], []
     if h["overview"]["available_for_56_to_60_nights_2027"] < 3:
         blockers.append("três cotações comparáveis de 2027")
+    else:
+        # The historical schema stores only a declared count. DATA26 must
+        # provide individual verified evidence before this gap can be closed.
+        blockers.append("validar comprovantes individuais das cotações declaradas")
     if h["summary"]["count"] < 3:
         complementary.append("ampliar amostra histórica de moradia")
     else:
@@ -207,9 +228,6 @@ def research_gaps(row):
     else:
         blockers.append("validar passe urbano para 2027")
         context.append("passe urbano histórico")
-    if rail["missing"]:
-        blockers.append(f"tempos ausentes ({rail['missing']}/{rail['eligible']}) — validar destinos relevantes")
-    blockers.append("retorno e porta a porta nos destinos relevantes")
     if d["restaurant_eur_two"] is None:
         complementary.append("restaurante para dois")
     else:
@@ -220,6 +238,23 @@ def research_gaps(row):
         context.append("normais climáticas")
     return {"decision_blockers": blockers, "complementary": complementary,
             "sufficient_for_context_only": context}
+
+
+def research_gaps(row):
+    """Retain the historical full-audit gap ordering and railway semantics."""
+    result = living_research_gaps(row)
+    rail = row["rail"]
+    blockers = result["decision_blockers"]
+    if rail["missing"]:
+        blockers.append(f"tempos ausentes ({rail['missing']}/{rail['eligible']}) — validar destinos relevantes")
+    blockers.append("retorno e porta a porta nos destinos relevantes")
+    return result
+
+
+def build_living_evidence(research, five):
+    return project_living_evidence(snapshot=load_data(), research=research, five=five,
+                                   round2=load_round2(), packs=load_city_packs(),
+                                   market=load_market(), profiles=load_profiles(canonical=research))
 
 
 def build_d004_audit(research, five, rail_by_base):
