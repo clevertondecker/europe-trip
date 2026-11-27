@@ -1,0 +1,5 @@
+# DATA26B1 — Referências tarifárias indicativas
+
+Consulta 27/11/2026 às páginas públicas SNCF Connect. Amostras de 28/11 e 05/12, não equivalentes em antecedência; Metz–Colmar usa snapshot da semana anterior. Não comparar como cesta homogênea. Fluo é rótulo exibido, não prova uso de Carte Fluo. Preços anunciados desde, uma pessoa, ida, segunda classe, impostos incluídos conforme nota pública, reservas e taxas adicionais desconhecidas. Sem associação a serviço, disponibilidade ou tarifa do casal.
+
+Escopo: 5 bases × 12 destinos (60 pares); lote Paris/Colmar/Basel (15 pares). Auditoria dos cinco conjuntos legados consumidos pelo adaptador rail_evidence_unified_model: 6 pares com valor no universo e 4 no lote; 11 novas referências, 4 sobreposições, 7 pares adicionais; união esperada 13/60 (21,7%) contra 6/60 (10%); lote 11/15 (73,3%) contra 4/15 (26,7%). Cotações completas DATA26B: 0/60 antes e depois. Contagem dinâmica implementada; números aguardam execução CI. Não alterar DATA24 ou orçamento. Quatro lacunas preservadas; nenhum preço inventado.
