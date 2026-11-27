@@ -155,6 +155,15 @@ def render_research_coverage(*, discovery=None, research=None):
                         st.caption(str(c["notes"]))
                     if c["variation"]:
                         st.caption("Há variação entre referências; não implica contradição confirmada.")
+                    if c["observations"]:
+                        st.markdown("**Observações históricas catalogadas (separadas do mínimo exibido)**")
+                        for obs in c["observations"]:
+                            minutes = obs.get("minimum_oneway_min")
+                            duration = format_minutes(minutes) if type(minutes) is int and minutes > 0 else "Tempo não informado"
+                            st.caption(duration + " · " + str(obs.get("evidence_date") or "Data não informada"))
+                            url = obs.get("source_url")
+                            if isinstance(url, str) and url.startswith("https://"):
+                                st.link_button("Abrir fonte da observação", url)
                     st.caption("Referência de ida; retorno, última milha e horários de 2027 não confirmados.")
         st.caption("Sem tempo pesquisado não significa ausência de conexão. "
                    "Local indica acesso urbano a verificar, não lacuna ferroviária.")
