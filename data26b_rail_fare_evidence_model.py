@@ -10,7 +10,7 @@ PATH = Path(__file__).resolve().parent / "data" / "rail_fare_observations_2027.j
 FIELDS = {"id", "outbound", "inbound", "checked_at", "source_url", "currency",
           "travelers", "total_minor", "mandatory_fees_included", "fare_class",
           "fare_conditions", "availability", "passenger_profile", "discount_eligibility",
-          "ticket_structure", "checked_at_time"}
+          "ticket_structure", "checked_at_time", "refundability", "changeability"}
 
 def _text(value):
     return isinstance(value, str) and bool(value.strip()) and value == value.strip()
@@ -29,7 +29,10 @@ def _utc(value):
 
 def identity(leg):
     def service(row):
-        return tuple(row.get(k) for k in ("operator", "service_id", "arrival_service_id", "departure_service_id"))
+        values = tuple(row.get(k) for k in ("operator", "service_id", "arrival_service_id", "departure_service_id"))
+        if any(v is not None and not _text(v) for v in values):
+            raise ValueError("Identificador de serviço inválido")
+        return values
     transfers = tuple((x["station_id"], _utc(x.get("arrival_at", x.get("arrival_local"))),
                        _utc(x.get("departure_at", x.get("departure_local"))), service(x))
                       for x in leg["transfer_legs"])
@@ -62,6 +65,9 @@ def project_rail_fares(payload):
             observed = moment.astimezone(timezone.utc)
         if q["passenger_profile"] != "two_adults":
             raise ValueError("Perfil deve ser dois adultos")
+        for field in ("refundability", "changeability"):
+            if q[field] not in (None, "allowed", "conditional", "not_allowed"):
+                raise ValueError("Condição comercial inválida: " + field)
         if q["ticket_structure"] not in (None, "integrated", "separate"):
             raise ValueError("Estrutura de bilhete inválida")
         if q["discount_eligibility"] is not None and not _text(q["discount_eligibility"]):
@@ -91,7 +97,7 @@ def project_rail_fares(payload):
                 raise ValueError("Fonte de trecho inválida")
             normalized = validate_service_leg(leg)
             departure = datetime.fromisoformat(normalized["departure_at"])
-            if checked > departure.date() or (observed is not None and observed > departure.astimezone(timezone.utc)):
+            if (observed is None and checked > departure.date()) or (observed is not None and observed > departure.astimezone(timezone.utc)):
                 raise ValueError("Consulta posterior à partida")
             legs.append(normalized)
         out = legs[0]
@@ -99,9 +105,10 @@ def project_rail_fares(payload):
         pair = weekend_roundtrip_evidence(out, back)
         if pair["status"] == "incompatible":
             raise ValueError("Ida e retorno incompatíveis")
-        key = (tuple(identity(x) for x in legs), q["checked_at"], observed,
+        key = (tuple(identity(x) for x in legs), (observed if observed is not None else checked),
                q["source_url"].split("#", 1)[0], q["currency"], q["fare_class"],
-               q["fare_conditions"], q["discount_eligibility"], q["ticket_structure"])
+               q["fare_conditions"], q["discount_eligibility"], q["ticket_structure"],
+               q["refundability"], q["changeability"])
         claims = (amount, q["availability"], q["mandatory_fees_included"])
         if key in identities:
             raise ValueError("Observação duplicada" if identities[key] == claims
@@ -111,7 +118,8 @@ def project_rail_fares(payload):
         complete = (q["availability"] == "documented_offer" and amount is not None
                     and q["mandatory_fees_included"] is True and q["fare_class"] is not None
                     and q["fare_conditions"] is not None and q["discount_eligibility"] is not None
-                    and q["ticket_structure"] is not None and all(x["calendar_date_applicable"] for x in legs))
+                    and q["ticket_structure"] is not None and q["refundability"] is not None
+                    and q["changeability"] is not None and all(x["calendar_date_applicable"] for x in legs))
         records.append({"quote": q, "outbound": out, "inbound": back,
                         "roundtrip_status": pair["status"], "complete_documentation": complete,
                         "scope": "roundtrip" if back else "oneway",
@@ -124,6 +132,8 @@ def project_rail_fares(payload):
     return {"records": records, "documented": len(records),
             "roundtrips": sum(x["inbound"] is not None for x in records),
             "complete_documentation": sum(x["complete_documentation"] for x in records),
+            "complete_oneway": sum(x["complete_documentation"] and x["scope"] == "oneway" for x in records),
+            "complete_roundtrip": sum(x["complete_documentation"] and x["scope"] == "roundtrip" for x in records),
             "independently_verified": 0}
 
 def load_rail_fares(path=PATH):
