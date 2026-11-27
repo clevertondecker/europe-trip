@@ -3,6 +3,7 @@ from base_research_expanded_model import load_research
 from five_base_comparison_model import load_five_base_evidence
 from data24_d004_audit_model import build_living_evidence, living_counts
 from ux132_coverage_shared import search_key
+from data26a_housing_evidence_model import load_housing_observations, project_housing_observations
 
 INDICATORS = (
     ("Moradia", "Amostra histórica", "with_historical_housing"),
@@ -18,11 +19,16 @@ PRIORITY = "priority"
 ALL = "all"
 
 
-def build_living_view(*, research=None, five=None):
+def build_living_view(*, research=None, five=None, housing_observations=None):
     research = load_research(include_candidates=True) if research is None else research
     five = load_five_base_evidence() if five is None else five
     view = build_living_evidence(research, five)
     view["base_names"] = {r["id"]: r["name"] for r in research["cities"]}
+    observations = load_housing_observations(research=research) if housing_observations is None else housing_observations
+    current = project_housing_observations(observations, research=research)["by_base"]
+    # New documentary evidence is not a modification of the historical D-004 audit.
+    for row in view["rows"]:
+        row["housing_observations"] = current.get(row["id"])
     return view
 
 
@@ -100,3 +106,14 @@ def compact_rows(rows):
             "internet_2027": w["residential_internet_2027"],
         })
     return result
+
+
+def documented_housing_counts(rows):
+    """Count only bases in the actual audited recorte; no legacy counter."""
+    return {
+        "bases": len(rows),
+        "with_documented_quotes": sum(bool(r.get("housing_observations")) for r in rows),
+        "with_three_comparable_documented_quotes": sum(
+            (r.get("housing_observations") or {}).get("largest_comparable_documented_group", 0) >= 3
+            for r in rows),
+    }
