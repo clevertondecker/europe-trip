@@ -54,11 +54,15 @@ class CoverageModelTests(unittest.TestCase):
     def test_projection_rerun_cost_diagnostic(self):
         # Record real timings in CI without a flaky wall-clock assertion.
         durations = []
+        detail_durations = []
         baseline = None
         for _ in range(3):
             start = perf_counter()
             result = build_coverage_view()
             durations.append(perf_counter() - start)
+            start = perf_counter()
+            connection_rows(result, "bases", "metz", "Todas")
+            detail_durations.append(perf_counter() - start)
             if baseline is None:
                 baseline = result
             else:
@@ -67,6 +71,8 @@ class CoverageModelTests(unittest.TestCase):
             "samples_seconds": [round(x, 4) for x in durations],
             "median_seconds": round(median(durations), 4),
             "max_seconds": round(max(durations), 4),
+            "detail_median_seconds": round(median(detail_durations), 4),
+            "detail_max_seconds": round(max(detail_durations), 4),
         })
 
     def test_filter_and_order_preserve_input_and_denominators(self):
