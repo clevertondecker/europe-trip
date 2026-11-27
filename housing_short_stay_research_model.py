@@ -40,7 +40,7 @@ def housing_research_overview(*, research=None):
     }
 
 
-def evaluate_short_stay_quote(quote: dict, *, source_evidence=None, independent_verifier=None) -> dict:
+def evaluate_short_stay_quote(quote: dict, *, source_evidence=None, independent_verifier=None, research=None) -> dict:
     """Separate booking availability, habitability, budget and upfront deposit."""
     if not isinstance(quote, dict):
         raise ValueError("Cotação inválida")
@@ -52,7 +52,7 @@ def evaluate_short_stay_quote(quote: dict, *, source_evidence=None, independent_
                 "station_access_verified", "mandatory_fees_verified")
     if any(key not in q for key in required):
         raise ValueError("Contrato de cotação incompleto")
-    research = load_research()
+    research = load_research() if research is None else research
     if q["base_id"] not in {x["id"] for x in research["cities"]}:
         raise ValueError("Base não cadastrada")
     try:
