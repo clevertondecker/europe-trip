@@ -234,13 +234,14 @@ def render_living_coverage(*, research=None):
         "Cidade-base": r["name"],
         "Anúncios históricos": r["historical_offers"],
         "Cotações 2027": f'{r["verified_quotes"]}/3',
-        "Restaurante": "Registrado" if r["restaurant"] else "Pendente",
-        "Passe urbano": "Registrado" if r["urban_pass"] else "Pendente",
-        "Cesta local": "Registrada" if r["local_basket"] else "Pendente",
+        "Vida cotidiana": " · ".join(
+            label + (": sim" if r[key] else ": pendente")
+            for key, label in (("restaurant", "Restaurante"), ("urban_pass", "Passe"), ("local_basket", "Cesta"))),
         "Clima": "Registrado" if r["climate"] else "Pendente",
-        "Coworking": "Registrado" if r["coworking"] else "Pendente",
-        "Internet 2027": "Confirmada" if r["internet_2027"] else "Não confirmada",
+        "Trabalho remoto": ("Coworking: registro" if r["coworking"] else "Coworking: pendente") +
+            (" · Internet 2027: confirmada" if r["internet_2027"] else " · Internet 2027: não confirmada"),
     } for r in compact_rows(rows)], hide_index=True, width="stretch", key="ux132c2_bases")
+    st.caption("Vida cotidiana: registros históricos ou cesta comparável. Trabalho remoto: pesquisa de coworking e confirmação residencial são distintos.")
     names = {r["id"]: r["name"] for r in rows}
     ident = st.selectbox("Cidade para detalhar", list(names), format_func=names.__getitem__,
                          **widget_state("ux132c2_base", next(iter(names)), lambda v: v in names))
