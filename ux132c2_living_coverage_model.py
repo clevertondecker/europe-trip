@@ -52,7 +52,9 @@ def complementary_coworking(remote):
         fields = (("name", "name"), ("price_eur", "price_eur_2026"),
                   ("price_basis", "price_basis"), ("source_url", "source_url"),
                   ("source_type", "source_type"), ("schedule", "hours"), ("note", "limitations"))
-        if all(primary.get(a) == extra.get(b) for a, b in fields):
+        primary_date = primary.get("observed_at") or primary.get("checked_at")
+        extra_date = extra.get("observed_at") or extra.get("checked_at")
+        if primary_date == extra_date and all(primary.get(a) == extra.get(b) for a, b in fields):
             return None
     return extra
 
@@ -89,7 +91,7 @@ def compact_rows(rows):
         result.append({
             "id": row["id"], "name": row["name"],
             "historical_offers": h["summary"]["count"],
-            "verified_quotes": h["overview"]["available_for_56_to_60_nights_2027"],
+            "declared_quotes": h["overview"]["available_for_56_to_60_nights_2027"],
             "restaurant": d["restaurant_eur_two"] is not None,
             "urban_pass": d["urban_pass"] is not None,
             "local_basket": d["comparable_local_basket_eur"] is not None,
