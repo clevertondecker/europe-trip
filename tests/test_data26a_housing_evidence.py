@@ -46,10 +46,11 @@ class HousingEvidenceTests(unittest.TestCase):
     def project(self, data):
         return project_housing_observations(data, research=self.research)
 
-    def test_empty_production_inventory_and_historical_audit(self):
+    def test_empty_fixture_valid_production_inventory_and_historical_audit(self):
         source = load_housing_observations(research=self.research)
-        self.assertEqual(source, payload())
-        self.assertEqual(self.project(source)["documented"], 0)
+        self.assertEqual(self.project(payload())["documented"], 0)
+        self.assertEqual(self.project(source)["documented"], len(source["quotes"]))
+        self.assertEqual(self.project(source)["independently_verified"], 0)
         self.assertEqual(REPORT.read_bytes(), render_report(build_audit()).encode("utf-8"))
 
     def test_validated_file_flows_to_coverage_without_promoting_confirmation(self):
