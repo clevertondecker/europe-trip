@@ -17,7 +17,7 @@ from ux502_destination_interests_model import (
 from rec03a_session import (SCOPE, DRAFT, ACTIVITY, ACTIVITIES, MANUAL, SUGGESTED,
                             request_navigation, reconcile_session_scope)
 from ux_shared_ui_presentation import page_header, section_heading
-from ux_widget_state import remember as _remember, restore_widget as _restore_widget
+from ux_widget_state import remember as _remember, restore_widget as _restore_widget, navigation_widget_state
 
 _REASON = {
     "menor_minimo_ponderado_no_mesmo_escopo_completo": (
@@ -385,6 +385,27 @@ def _render_quick_comparison(result, names, cities, base_ids, selected=()):
                        "Os tempos são mínimos de ida, não duração de ida e volta; "
                        "sem tempo pesquisado não significa rota inviável.")
 
+def highlight_explanation(candidate):
+    """Explain REC02's existing highlight classification, without scoring."""
+    if not candidate.get("highlight"):
+        return None
+    kind = candidate.get("highlight_kind")
+    reasons = candidate.get("reasons", ())
+    if kind == "complete_reference_group":
+        return "Destaque automático · " + _REASON["menor_minimo_ponderado_no_mesmo_escopo_completo"]
+    if kind == "individual_complete":
+        return ("Destaque automático · Referências para todos os destinos do escopo, "
+                "sem grupo completo equivalente para afirmar vantagem logística.")
+    if kind == "local_investigation":
+        return "Destaque automático · Destino local identificado. " + _REASON["acesso_local_a_verificar"]
+    if kind == "conditional_investigation":
+        reason = ("menor_minimo_ponderado_no_mesmo_subconjunto"
+                  if "menor_minimo_ponderado_no_mesmo_subconjunto" in reasons
+                  else "fronteira_documental_do_escopo")
+        return "Destaque automático · " + _REASON[reason]
+    return None
+
+
 def _card(candidate, result, names, cities, official, options):
     """Compact choice card; documentary details stay available on demand."""
     from rec03b_handoff_ui import render_card_choice
@@ -403,10 +424,9 @@ def _card(candidate, result, names, cities, official, options):
             is_official=base==official,
             official_supported=base in BASES,
         ),unsafe_allow_html=True)
-        if candidate.get("highlight_kind")=="complete_reference_group":
-            st.caption("Destaque automático · menor mínimo ponderado no mesmo conjunto completo de trajetos.")
-        elif candidate.get("highlight"):
-            st.caption("Destaque automático · alternativa para investigação documental; não é uma recomendação de preço.")
+        explanation = highlight_explanation(candidate)
+        if explanation:
+            st.caption(explanation)
         from ux98_base_insights_presentation import project_base_insights
         from ux99_base_cards_presentation import insight_panels
         st.markdown(insight_panels(project_base_insights(candidate)),
@@ -489,12 +509,8 @@ def render_suggestions(*,plan,discovery=None,research=None):
         tag="Pesquisa, não reserva",variant="compact",
     ),unsafe_allow_html=True)
     modes=("Explorar alternativas","Minha comparação")
-    _restore_widget("ux112_active_view","ux112_active_view_shadow",
-                    modes[0],lambda x:x in modes)
     view=st.segmented_control("Área da pesquisa",list(modes),
-                              key="ux112_active_view",default=modes[0],
-                              on_change=_remember,
-                              args=("ux112_active_view","ux112_active_view_shadow")) or modes[0]
+                              **navigation_widget_state("ux112_active_view", modes)) or st.session_state["ux112_active_view_shadow"]
     try:
         discovery=discovery if discovery is not None else build_exploration_discovery()
         wishes=st.session_state.get("ux502_interests",empty_interests())
