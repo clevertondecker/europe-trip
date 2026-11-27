@@ -151,6 +151,10 @@ def render_research_coverage(*, discovery=None, research=None):
             if timed:
                 with st.expander("Consultar fonte e ressalvas"):
                     key = "ux132_connection_" + axis
+                    owner_key = key + "_city"
+                    if st.session_state.get(owner_key) != row["id"]:
+                        st.session_state.pop(key + "_shadow", None)
+                        st.session_state[owner_key] = row["id"]
                     chosen = st.selectbox(
                         "Conexão documentada", list(timed),
                         format_func=lambda k: timed[k][counterpart],
