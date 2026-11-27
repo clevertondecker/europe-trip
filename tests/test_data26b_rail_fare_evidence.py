@@ -19,7 +19,8 @@ def fixture():
         mandatory_fees_included=True, fare_class="standard",
         fare_conditions="non-refundable", availability="documented_offer",
         passenger_profile="two_adults", discount_eligibility="none",
-        ticket_structure="integrated", checked_at_time=None)]}
+        ticket_structure="integrated", checked_at_time=None,
+        refundability="not_allowed", changeability="not_allowed")]}
 
 class RailFareTest(unittest.TestCase):
     def test_empty_fixture(self):
@@ -130,3 +131,67 @@ class RailFareTest(unittest.TestCase):
         result = project_rail_fares(payload)["records"][0]
         self.assertTrue(result["return_temporally_coherent"])
         self.assertFalse(result["outing_feasible"])
+
+    def test_equivalent_utc_consultation_is_duplicate(self):
+        payload = fixture()
+        first = payload["quotes"][0]
+        first["checked_at_time"] = "2026-11-27T23:30+00:00"
+        second = copy.deepcopy(first)
+        second.update(id="second", checked_at="2026-11-28",
+                      checked_at_time="2026-11-28T00:30+01:00")
+        payload["quotes"].append(second)
+        with self.assertRaisesRegex(ValueError, "duplicada"):
+            project_rail_fares(payload)
+
+    def test_commercial_unknown_and_scope_counts(self):
+        payload = fixture()
+        q = payload["quotes"][0]
+        q["refundability"] = None
+        self.assertEqual(project_rail_fares(payload)["complete_roundtrip"], 0)
+        q["refundability"] = "conditional"
+        self.assertEqual(project_rail_fares(payload)["complete_roundtrip"], 1)
+        q["inbound"] = None
+        result = project_rail_fares(payload)
+        self.assertEqual(result["complete_roundtrip"], 0)
+        self.assertEqual(result["complete_oneway"], 1)
+
+    def test_data24_parity_with_populated_fares(self):
+        from data24_coverage_model import rail_coverage
+        from ux132_research_coverage_model import build_coverage_view
+        from unittest.mock import patch
+        before = rail_coverage()
+        with patch("data26b_rail_fare_evidence_model.load_rail_fares",
+                   return_value=project_rail_fares(fixture())):
+            view = build_coverage_view()
+            after = rail_coverage()
+        self.assertEqual(before, after)
+        self.assertEqual(view["global"], before["global"])
+        self.assertEqual(view["pairs"], before["pairs"])
+
+    def test_streamlit_multiple_fare_cards(self):
+        from streamlit.testing.v1 import AppTest
+        payload = fixture()
+        other = copy.deepcopy(payload["quotes"][0])
+        other.update(id="unknown", inbound=None, total_minor=None,
+                     availability="unknown", mandatory_fees_included=None)
+        payload["quotes"].append(other)
+        third = copy.deepcopy(payload["quotes"][0])
+        third.update(id="zero", total_minor=0, mandatory_fees_included=False,
+                     checked_at="2026-11-28")
+        payload["quotes"].append(third)
+        script = (
+            "from ux132_research_coverage_ui import render_fare_evidence\n"
+            "from data26b_rail_fare_evidence_model import project_rail_fares\n"
+            "view = {'bases': [{'id': 'mulhouse', 'name': 'Mulhouse'}], "
+            "'destinations': [{'id': 'colmar', 'name': 'Colmar'}]}\n"
+            "render_fare_evidence(view, project_rail_fares(" + repr(payload) + "))\n"
+        )
+        app = AppTest.from_string(script).run(timeout=30)
+        self.assertFalse(app.exception)
+        self.assertFalse(app.warning)
+        text = " ".join(str(x.value) for x in app.markdown + app.caption)
+        for expected in ("Mulhouse", "Colmar", "Ida e retorno", "Somente ida",
+                         "EUR 40,00", "EUR 0,00", "Preço desconhecido",
+                         "Disponibilidade desconhecida", "Calendário documentado",
+                         "2 adultos", "Valor observado", "Total documentado"):
+            self.assertIn(expected, text)
