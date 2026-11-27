@@ -7,7 +7,7 @@ import streamlit as st
 from data24_coverage_model import rail_coverage
 from trip01_supplemental_discovery import build_exploration_discovery
 from ux_shared_ui_presentation import section_heading
-from ux_widget_state import widget_state
+from ux_widget_state import navigation_widget_state
 from ux132_research_coverage_ui import render_rail_coverage
 from ux132c1_attraction_coverage_ui import render_attraction_coverage, render_attraction_indicators
 from ux132c1_attraction_coverage_model import build_attraction_inventory
@@ -70,7 +70,7 @@ def render_research_coverage(*, discovery=None, research=None):
         variant="compact",
     ), unsafe_allow_html=True)
     domain = st.segmented_control("Área da cobertura", DOMAINS,
-                                  **widget_state("ux132_domain", DOMAINS[0], lambda v: v in DOMAINS)) or DOMAINS[0]
+                                  **navigation_widget_state("ux132_domain", DOMAINS)) or st.session_state["ux132_domain_shadow"]
     if domain == DOMAINS[1]:
         render_rail_coverage(discovery=discovery, research=research)
     elif domain == DOMAINS[2]:
