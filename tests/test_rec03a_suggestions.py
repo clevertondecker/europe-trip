@@ -17,6 +17,7 @@ import streamlit as st
 from trip01_supplemental_discovery import build_exploration_discovery
 from rec03a_session import apply_navigation,sync_identity
 from rec03a_suggestions_ui import render_recommendation_activity
+from ux132_coverage_page import render_research_coverage
 from ux502_destination_interests_ui import render_wishlist
 from ux64_navigation_ui import render_public_task_tabs
 from ux_navigation import bootstrap
@@ -31,6 +32,8 @@ render_public_task_tabs()
 discovery=build_exploration_discovery()
 if s["ux_section"]=="Comparar":
     render_recommendation_activity(plan=s["advisor_plan"],discovery=discovery)
+elif s["ux_section"]=="Cobertura dos dados":
+    render_research_coverage(discovery=discovery)
 else:
     render_wishlist(discovery)
 """
@@ -155,12 +158,14 @@ class RecommendationAppTests(unittest.TestCase):
         keys=(SCOPE,CHOICE,"advisor_plan","ux502_interests","ux41_favorites","ux36_cloud_dirty")
         before={key:deepcopy(a.session_state[key]) for key in keys}
         with patch("rec03a_suggestions_ui.recommend_bases") as engine:
-            a.segmented_control(key="ux112_active_view").set_value("Cobertura dos dados")
+            a.segmented_control(key="ux64_public_task").set_value("Cobertura dos dados")
             self.run_ok(a)
             self.assertTrue(any(m.label=="Cobertura ferroviária" for m in a.metric))
             engine.assert_not_called()
         for key,value in before.items():
             self.assertEqual(a.session_state[key],value)
+        a.segmented_control(key="ux64_public_task").set_value("Comparar bases")
+        self.run_ok(a)
         a.segmented_control(key="ux112_active_view").set_value("Minha comparação")
         self.run_ok(a)
         self.assertTrue(any('class="ux97-table"' in m.value for m in a.markdown))
@@ -180,7 +185,7 @@ class RecommendationAppTests(unittest.TestCase):
               "ux41_favorites","ux36_cloud_dirty")
         before={key:deepcopy(a.session_state[key]) for key in keys}
         self.assertEqual(before[DRAFT],["paris"])
-        a.segmented_control(key="ux112_active_view").set_value("Cobertura dos dados")
+        a.segmented_control(key="ux64_public_task").set_value("Cobertura dos dados")
         self.run_ok(a)
         self.assertTrue(any(m.label=="Cobertura ferroviária" for m in a.metric))
         for key,value in before.items():
@@ -217,6 +222,8 @@ class RecommendationAppTests(unittest.TestCase):
         a.session_state[INTENT]="suggestions"
         self.run_ok(a)
         self.assertEqual(a.session_state["ux64_public_task"],"Comparar bases")
+        a.segmented_control(key="ux64_public_task").set_value("Cobertura dos dados")
+        self.run_ok(a)
         self.assertEqual(a.segmented_control(key="ux132_domain").value,"Morar e trabalhar")
         self.assertEqual(a.selectbox(key="ux132c2_scope").value,"all")
         self.assertEqual(a.selectbox(key="ux132c2_base").value,"trier")
@@ -230,6 +237,8 @@ class RecommendationAppTests(unittest.TestCase):
         self.assertEqual(a.text_input(key="ux132_search_bases").value,"Metz")
         self.assertEqual(a.selectbox(key="ux132_sort_bases").value,"Mais lacunas")
         self.assertEqual(a.selectbox(key="ux132_connection_bases").value,"annecy")
+        a.segmented_control(key="ux64_public_task").set_value("Comparar bases")
+        self.run_ok(a)
         a.segmented_control(key="ux112_active_view").set_value("Explorar alternativas")
         self.run_ok(a)
         self.assertEqual(a.multiselect(key="rec03a_scope_widget").value,["paris"])
@@ -241,7 +250,7 @@ class RecommendationAppTests(unittest.TestCase):
         self.assertEqual(a.session_state["ux112_active_view"],"Minha comparação")
         self.assertTrue(any('class="ux97-table"' in m.value for m in a.markdown))
         self.assertEqual(a.session_state[CHOICE],before[CHOICE])
-        a.segmented_control(key="ux112_active_view").set_value("Cobertura dos dados")
+        a.segmented_control(key="ux64_public_task").set_value("Cobertura dos dados")
         self.run_ok(a)
         self.assertEqual(a.text_input(key="ux132_search_bases").value,"Metz")
         self.assertEqual(a.selectbox(key="ux132_connection_bases").value,"annecy")
