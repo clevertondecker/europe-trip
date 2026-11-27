@@ -130,11 +130,60 @@ class RecommendationAppTests(unittest.TestCase):
         self.assertTrue(a.checkbox(key=key).value)
         self.assertEqual(a.session_state["advisor_plan"],before)
 
+    def test_modes_only_available_after_scope_confirmation_and_preserve_selection(self):
+        from rec03b_handoffs import CHOICE
+        items=[("paris","must_visit"),("basel","interested")]
+        with patch("rec03a_suggestions_ui.recommend_bases") as engine:
+            a=self.make_app(items,"compare")
+            self.assertNotIn("ux112_active_view",{w.key for w in a.segmented_control})
+            self.assertEqual(a.button(key="rec03a_confirm_subset").label,"Confirmar destinos e analisar")
+            engine.assert_not_called()
+        self.click(a,"rec03a_confirm_subset")
+        self.assertEqual(a.segmented_control(key="ux112_active_view").value,"Explorar alternativas")
+        self.assertTrue(any("Sugestões automáticas para seus destinos" in m.value for m in a.markdown))
+        a.session_state[CHOICE]=["strasbourg","metz"]
+        a.segmented_control(key="ux112_active_view").set_value("Minha comparação")
+        self.run_ok(a)
+        self.assertTrue(any('class="ux97-table"' in m.value for m in a.markdown))
+        before={k:deepcopy(a.session_state[k]) for k in (SCOPE,CHOICE,"advisor_plan","ux502_interests","ux36_cloud_dirty")}
+        with patch("rec03a_suggestions_ui.recommend_bases") as engine:
+            self.click(a,"rec03a_edit")
+            self.assertNotIn("ux112_active_view",{w.key for w in a.segmented_control})
+            self.assertEqual(a.session_state["ux112_active_view_shadow"],"Minha comparação")
+            self.assertEqual(a.button(key="rec03a_confirm_subset").label,"Atualizar análise")
+            engine.assert_not_called()
+        self.click(a,"rec03a_cancel_edit")
+        self.assertEqual(a.segmented_control(key="ux112_active_view").value,"Minha comparação")
+        for key,value in before.items():
+            self.assertEqual(a.session_state[key],value)
+        self.click(a,"rec03a_edit")
+        a.multiselect(key="rec03a_scope_widget").set_value(["paris"])
+        self.run_ok(a)
+        self.assertNotIn("ux112_active_view",{w.key for w in a.segmented_control})
+        self.click(a,"rec03a_confirm_subset")
+        self.assertEqual(a.segmented_control(key="ux112_active_view").value,"Minha comparação")
+        self.assertEqual(a.session_state[SCOPE]["destination_ids"],["paris"])
+        self.assertEqual(a.session_state[CHOICE],before[CHOICE])
+        for key in ("advisor_plan","ux502_interests","ux36_cloud_dirty"):
+            self.assertEqual(a.session_state[key],before[key])
+
+    def test_manual_intent_before_confirmation_preserves_mode(self):
+        a=self.make_app([("paris","must_visit")],"compare")
+        a.session_state[INTENT]="manual"
+        with patch("rec03a_suggestions_ui.recommend_bases") as engine:
+            self.run_ok(a)
+            self.assertNotIn("ux112_active_view",{w.key for w in a.segmented_control})
+            self.assertEqual(a.session_state["ux112_active_view_shadow"],"Minha comparação")
+            engine.assert_not_called()
+        self.click(a,"rec03a_confirm_subset")
+        self.assertEqual(a.segmented_control(key="ux112_active_view").value,"Minha comparação")
+
     def test_empty_and_discarded_no_engine_call(self):
         for items in ([],[("paris","discarded")]):
             with self.subTest(items=items),patch("rec03a_suggestions_ui.recommend_bases") as engine:
                 a=self.make_app(items,"compare")
                 self.assertTrue(any("Nenhum destino ativo" in x.value for x in a.info))
+                self.assertNotIn("ux112_active_view",{w.key for w in a.segmented_control})
                 engine.assert_not_called()
 
     def test_wishlist_to_scope_subset_edit_cancel_return_and_manual(self):
@@ -268,8 +317,8 @@ class RecommendationAppTests(unittest.TestCase):
         self.assertEqual(a.selectbox(key="ux132_connection_bases").value,"annecy")
         a.segmented_control(key="ux64_public_task").set_value("Comparar bases")
         self.run_ok(a)
-        a.segmented_control(key="ux112_active_view").set_value("Explorar alternativas")
-        self.run_ok(a)
+        self.assertNotIn("ux112_active_view",{w.key for w in a.segmented_control})
+        self.assertEqual(a.session_state["ux112_active_view_shadow"],"Explorar alternativas")
         self.assertEqual(a.multiselect(key="rec03a_scope_widget").value,["paris"])
         for key,value in before.items():
             self.assertEqual(a.session_state[key],value)
@@ -299,6 +348,7 @@ class RecommendationAppTests(unittest.TestCase):
         self.run_ok(a)
         self.assertFalse(a.session_state[SCOPE]["confirmed"])
         self.assertEqual(a.session_state[SCOPE]["pending_ids"],["basel"])
+        self.assertNotIn("ux112_active_view",{w.key for w in a.segmented_control})
         self.assertNotIn("basel",a.session_state[SCOPE]["destination_ids"])
         self.click(a,"rec03a_confirm_subset")
         removed=remove_interest(added,"colmar",self.discovery)
