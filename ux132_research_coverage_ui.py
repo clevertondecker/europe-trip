@@ -197,6 +197,22 @@ def render_fare_evidence(view, fares=None):
             names = {r["id"]: r["name"] for r in view["bases"] + view["destinations"]}
             st.caption(f'{fares["documented"]} observações · {fares["roundtrips"]} com retorno registrado.')
             st.caption("Evidência documental, sem confirmação independente para 2027. Não altera o orçamento.")
+            from data26b1_fare_reference_model import load_fare_references, fare_reference_coverage
+            refs = load_fare_references()
+            coverage = fare_reference_coverage(data=refs, quotes=fares)
+            total = coverage["scope"]
+            st.caption(f'Pesquisa prioritária: {total["with_references"]}/{total["total"]} pares com referência de preço; {total["complete_roundtrip"]}/{total["total"]} com cotação completa de ida e volta.')
+            st.caption("Preços publicados a partir de, por pessoa, somente ida. Datas e condições podem variar; não são cotações para o casal.")
+            st.dataframe([{
+                "Origem": names.get(r["origin_id"], r["origin_id"]),
+                "Destino": names.get(r["destination_id"], r["destination_id"]),
+                "Data de viagem": r["travel_date"],
+                "Desde (EUR)": r["amount_minor"] / 100,
+                "Operadora": r["operator_label"],
+                "Atualidade da captura": r["source_snapshot_recency"],
+                "Fonte": r["source_url"],
+            } for r in refs["references"]], hide_index=True,
+                column_config={"Fonte": st.column_config.LinkColumn("Fonte", display_text="Abrir fonte")})
             if not fares["records"]:
                 st.caption("Nenhuma cotação individual cadastrada.")
             for record in fares["records"]:
