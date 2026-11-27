@@ -124,6 +124,65 @@ class CoverageModelTests(unittest.TestCase):
         self.assertEqual(result["source_url"],"https://example.org/historical")
         self.assertEqual(result["source_date"],"2026-01-01")
 
+    def test_qualifications_belong_to_the_matching_evidence(self):
+        # Identical URL and duration on different dates must not attach stale notes.
+        primary = {"source_url":"https://example.org/history","evidence_date":"2026-01-02",
+                   "source_dataset":"historic","minimum_oneway_min":60,
+                   "origin_station":"A Central","destination_station":"B Central","notes":"Primary note"}
+        older = {**primary,"evidence_date":"2026-01-01","notes":"Older note"}
+        view = {"bases":[{"id":"a","name":"A"}], "destinations":[{"id":"b","name":"B"}],
+                "pairs":{("a","b"):{"cell":{"category":"historical","label":"1h · histórico",
+                        "display_min":60,"source_url":"https://example.org/recheck",
+                        "reference_source_url":"https://example.org/original","checked_at":"2026-11-25",
+                        "fastest_min":70,"reference_display_allowed":True,
+                        "station_caveat":"Alternative station qualification",
+                        "evidence_notes":"Alternative note","reference_differs_from_legacy":True},
+                        "row":{"source_url":primary["source_url"],"source_date":primary["evidence_date"],
+                               "source_dataset":"historic","observations":[older,primary]}}}}
+        before = deepcopy(view)
+        row = connection_rows(view,"bases","a","Histórico")[0]
+        self.assertEqual(row["minimum"],60)
+        self.assertEqual(row["notes"],"Primary note")
+        self.assertIn("A Central → B Central", row["station_caveat"])
+        self.assertNotIn("Alternative", row["station_caveat"])
+        self.assertEqual(row["observations"],[older])
+        alternative = row["alternative"]
+        self.assertEqual(alternative["minimum"],70)
+        self.assertEqual(alternative["source_url"],"https://example.org/recheck")
+        self.assertEqual(alternative["source_date"],"2026-11-25")
+        self.assertEqual(alternative["station_caveat"],"Alternative station qualification")
+        self.assertEqual(alternative["notes"],"Alternative note")
+        self.assertEqual(view,before)
+        cell = view["pairs"][("a","b")]["cell"]
+        cell["reference_display_allowed"] = False
+        self.assertIsNone(connection_rows(view,"bases","a","Histórico")[0]["alternative"])
+        cell.update(category="reference_only", display_min=70, reference_display_allowed=True)
+        indicative = connection_rows(view,"bases","a","Indicativo")[0]
+        self.assertEqual(indicative["source_url"],"https://example.org/recheck")
+        self.assertEqual(indicative["source_date"],"2026-11-25")
+        self.assertEqual(indicative["notes"],"Alternative note")
+        self.assertEqual(indicative["station_caveat"],"Alternative station qualification")
+        self.assertEqual(indicative["observations"],[older,primary])
+
+    def test_comparator_parity_for_real_mixed_evidence(self):
+        from ux503_destination_base_comparison_model import build_destination_matrix
+        from rail_reference_projection_model import decorate_comparison
+        from trip01_supplemental_discovery import build_exploration_discovery
+        from base_research_expanded_model import load_research
+        view = build_coverage_view()
+        discovery = build_exploration_discovery()
+        research = load_research(include_candidates=True)
+        destinations = [d["id"] for d in view["destinations"]]
+        matrix = build_destination_matrix(["metz"],destinations,discovery=discovery,research=research)
+        projected = decorate_comparison(matrix)["cells"]
+        rows = connection_rows(view,"bases","metz","Todas")
+        self.assertEqual(len(rows),len(projected))
+        for row in rows:
+            cell = projected[("metz",row["destination_id"])]
+            self.assertEqual(row["category"],cell["category"])
+            self.assertEqual(row["label"],cell["label"])
+            self.assertEqual(row["minimum"],cell.get("display_min"))
+
     def test_local_only_and_empty(self):
         for categories in ([], ["local"]):
             raw = {"base_ids": ["metz"], "destination_ids": ["metz"] if categories else [],
@@ -177,6 +236,40 @@ class CoverageNavigationTests(unittest.TestCase):
         self.assertFalse(app.exception)
         gaps = app.dataframe[0].value["Sem tempo"].tolist()
         self.assertEqual(gaps, sorted(gaps,reverse=True))
+
+    def test_axis_filters_and_valid_selection_survive_hidden_widgets(self):
+        app = AppTest.from_string(APP, default_timeout=90)
+        app.run()
+        app.segmented_control(key="ux112_active_view").set_value("Cobertura dos dados").run()
+        app.segmented_control(key="ux132_coverage_section").set_value("Cidades-base").run()
+        app.text_input(key="ux132_search_bases").set_value("Metz").run()
+        app.selectbox(key="ux132_sort_bases").select("Mais lacunas").run()
+        app.checkbox(key="ux132_only_gaps_bases").check().run()
+        app.selectbox(key="ux132_status_bases").select("Indicativo").run()
+        app.selectbox(key="ux132_connection_bases").select("annecy").run()
+        self.assertFalse(app.exception)
+        app.segmented_control(key="ux132_coverage_section").set_value("Destinos").run()
+        app.text_input(key="ux132_search_destinations").set_value("Annecy").run()
+        app.segmented_control(key="ux112_active_view").set_value("Explorar alternativas").run()
+        app.segmented_control(key="ux112_active_view").set_value("Cobertura dos dados").run()
+        self.assertFalse(app.exception)
+        self.assertEqual(app.segmented_control(key="ux132_coverage_section").value,"Destinos")
+        self.assertEqual(app.text_input(key="ux132_search_destinations").value,"Annecy")
+        app.segmented_control(key="ux132_coverage_section").set_value("Cidades-base").run()
+        self.assertEqual(app.text_input(key="ux132_search_bases").value,"Metz")
+        self.assertEqual(app.selectbox(key="ux132_sort_bases").value,"Mais lacunas")
+        self.assertTrue(app.checkbox(key="ux132_only_gaps_bases").value)
+        self.assertEqual(app.selectbox(key="ux132_detail_Cidades-base").value,"metz")
+        self.assertEqual(app.selectbox(key="ux132_status_bases").value,"Indicativo")
+        self.assertEqual(app.selectbox(key="ux132_connection_bases").value,"annecy")
+        app.selectbox(key="ux132_status_bases").select("Histórico").run()
+        self.assertFalse(app.exception)
+        self.assertNotEqual(app.selectbox(key="ux132_connection_bases").value,"annecy")
+        app.text_input(key="ux132_search_bases").set_value("no-such-city").run()
+        self.assertFalse(app.exception)
+        app.text_input(key="ux132_search_bases").set_value("Metz").run()
+        self.assertFalse(app.exception)
+        self.assertEqual(app.selectbox(key="ux132_detail_Cidades-base").value,"metz")
 
     def test_empty_wishlist_access_and_return(self):
         app = AppTest.from_string(APP, default_timeout=90)
