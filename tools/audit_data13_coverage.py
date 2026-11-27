@@ -30,6 +30,10 @@ def audit_coverage():
             x for x in v["destinations"]
             if x.get("indicative_source_dataset") == "data13_directed_connectivity_2026_11"
         ]
+        data25_rows = [
+            x for x in v["destinations"]
+            if x.get("indicative_source_dataset") == "data25_priority_rail_2026_11"
+        ]
         historical = v["rail_time_documented_count"]
         indicative = v["indicative_rail_reference_count"]
         local = len(v["local_destinations"])
@@ -40,6 +44,7 @@ def audit_coverage():
             "base_id": base["id"], "base_name": base["name"],
             "historical": historical, "indicative": indicative,
             "new_data13_displayed": len(data13_rows),
+            "new_data25_displayed": len(data25_rows),
             "unknown": missing, "local": local,
             "researched": historical + indicative,
             "coverage_pct": round(100*(historical+indicative)/(destination_count-local), 2),
@@ -49,9 +54,10 @@ def audit_coverage():
     target_researched = (eligible_pairs + 1) // 2
     researched = sum(x["researched"] for x in rows)
     new = sum(x["new_data13_displayed"] for x in rows)
+    data25 = sum(x["new_data25_displayed"] for x in rows)
     unknown = sum(x["unknown"] for x in rows)
     assert researched + unknown == eligible_pairs
-    assert researched - new == BASELINE_RESEARCHED, (
+    assert researched - new - data25 == BASELINE_RESEARCHED, (
         "Historical coverage changed unexpectedly; investigate precedence")
     return {
         "scope": "directed_pairs_oneway_2026_no_2027_guarantee",
@@ -60,6 +66,7 @@ def audit_coverage():
         "eligible_pairs": eligible_pairs,
         "historical_plus_indicative": researched,
         "new_displayed_data13": new,
+        "new_displayed_data25": data25,
         "previous_coverage": BASELINE_RESEARCHED,
         "unresearched": unknown,
         "coverage_pct": round(researched*100/eligible_pairs,2),

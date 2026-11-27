@@ -133,8 +133,8 @@ class Data13DirectedRailCoverageTests(unittest.TestCase):
                 self.assertFalse(row["weekend_return_verified"])
                 self.assertFalse(row["reachable_confirmed"])
         audit=audit_coverage()
-        self.assertEqual(audit["historical_plus_indicative"],558)
-        self.assertEqual(audit["unresearched"],792)
+        self.assertEqual(audit["historical_plus_indicative"] - audit["new_displayed_data25"],558)
+        self.assertEqual(audit["unresearched"] + audit["new_displayed_data25"],792)
 
     def test_data17_liege_rows_are_visible_in_discovery(self):
         expected={"dijon":301,"reims":233,"mulhouse":351,"besancon":455}
@@ -150,8 +150,8 @@ class Data13DirectedRailCoverageTests(unittest.TestCase):
                 self.assertFalse(record["reachable_confirmed"])
                 self.assertFalse(record["weekend_return_verified"])
         audit=audit_coverage()
-        self.assertEqual(audit["historical_plus_indicative"],558)
-        self.assertEqual(audit["unresearched"],792)
+        self.assertEqual(audit["historical_plus_indicative"] - audit["new_displayed_data25"],558)
+        self.assertEqual(audit["unresearched"] + audit["new_displayed_data25"],792)
 
     def test_data18_nancy_visible_in_actual_discovery_projection(self):
         expected={
@@ -178,14 +178,28 @@ class Data13DirectedRailCoverageTests(unittest.TestCase):
                 self.assertFalse(row["weekend_return_verified"])
                 self.assertFalse(row["reachable_confirmed"])
         audit=audit_coverage()
-        self.assertEqual(audit["historical_plus_indicative"],558)
-        self.assertEqual(audit["unresearched"],792)
+        self.assertEqual(audit["historical_plus_indicative"] - audit["new_displayed_data25"],558)
+        self.assertEqual(audit["unresearched"] + audit["new_displayed_data25"],792)
 
     def test_exact_matrix_and_target_gap_are_audited(self):
         out=audit_coverage()
         self.assertEqual(out["eligible_pairs"],1350)
         self.assertEqual(out["previous_coverage"],227)
         self.assertGreater(out["new_displayed_data13"],0)
+        # Only Metz → Sélestat is in the historical 30-base/46-destination registry.
+        # Angers, Rennes and Annecy belong to the expanded comparison scope.
+        self.assertEqual(out["new_displayed_data25"],1)
+        self.assertEqual(out["historical_plus_indicative"],559)
+        self.assertEqual(out["unresearched"],791)
+        self.assertEqual(out["historical_plus_indicative"] - out["new_displayed_data13"]
+                         - out["new_displayed_data25"],227)
+        metz=next(row for row in out["per_base"] if row["base_id"]=="metz")
+        self.assertEqual(metz["new_data25_displayed"],1)
+        entry=next(row for row in opportunity_overview("metz")["destinations"]
+                   if row["destination_id"]=="selestat")
+        self.assertEqual(entry["indicative_source_dataset"],"data25_priority_rail_2026_11")
+        self.assertEqual(entry["indicative_train_oneway_min"],83)
+        self.assertFalse(entry["weekend_return_verified"])
         self.assertEqual(out["historical_plus_indicative"]+out["unresearched"],1350)
         self.assertEqual(out["still_needed_for_50pct"],675-out["historical_plus_indicative"])
         self.assertEqual(len(out["per_base"]),30)
