@@ -48,7 +48,7 @@ def _render_overview(discovery, research):
             a.metric("Atrações únicas", counts["attractions"])
             b.metric("Destinos com atrações", f'{counts["destinations_with_attractions"]}/{counts["destinations"]}' if counts["destinations"] else "N/A")
             st.caption(f'{counts["destinations"] - counts["destinations_with_attractions"]} destinos sem atrações catalogadas.')
-            render_attraction_indicators(counts)
+            render_attraction_indicators(counts, compact=True)
         except Exception:
             _LOG.exception("Coverage overview attractions unavailable")
             st.warning("Resumo de atrações indisponível.")
@@ -66,7 +66,7 @@ def _render_overview(discovery, research):
 def render_research_coverage(*, discovery=None, research=None):
     st.markdown(section_heading(
         "COBERTURA DOCUMENTAL", "Cobertura dos dados",
-        "Acompanhe as informações disponíveis e identifique o que ainda precisa ser pesquisado.",
+        "Veja o que já sabemos e quais pesquisas ainda faltam para escolher a base e organizar as visitas.",
         variant="compact",
     ), unsafe_allow_html=True)
     domain = st.segmented_control("Área da cobertura", DOMAINS,
