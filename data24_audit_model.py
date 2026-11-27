@@ -86,7 +86,14 @@ def attraction_inventory(discovery, catalog, data23, macro, geography):
                 "photo_attributed": attributed_photo(photo), "photo": deepcopy(photo),
                 "station_access": deepcopy(access.get(ident, [])),
             })
-    counts = {
+    counts = attraction_counts(destinations, rows)
+    return {"counts": counts, "destinations": destinations, "rows": rows,
+            "by_kind": dict(Counter(x["kind"] for x in rows))}
+
+
+def attraction_counts(destinations, rows):
+    """Canonical documentary counts for the full inventory or an exact subset."""
+    return {
         "destinations": len(destinations),
         "destinations_with_attractions": sum(x["attractions"] > 0 for x in destinations),
         "destinations_with_attributed_photo": sum(x["photo_attributed"] for x in destinations),
@@ -100,8 +107,6 @@ def attraction_inventory(discovery, catalog, data23, macro, geography):
         "station_access_documented": sum(bool(x["station_access"]) for x in rows),
         "reconciled_aliases": sum(len(x["reconciled_source_ids"]) for x in rows),
     }
-    return {"counts": counts, "destinations": destinations, "rows": rows,
-            "by_kind": dict(Counter(x["kind"] for x in rows))}
 
 
 def pair_components(pair):
