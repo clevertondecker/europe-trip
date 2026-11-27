@@ -9,6 +9,7 @@ from ux132_research_coverage_model import (
 )
 from rail_reference_projection_model import format_minutes
 from ux_widget_state import widget_state, navigation_widget_state
+from rail_evidence_unified_model import canonical_place
 
 _LOG = logging.getLogger(__name__)
 
@@ -87,7 +88,7 @@ def render_rail_coverage(*, discovery=None, research=None):
                  key="ux132_coverage_table_" + section)
     st.markdown("#### Detalhamento da cidade")
     detail_key = "ux132_detail_" + section
-    names = {r["id"]: r["name"] for r in rows}
+    names = {canonical_place(r["id"]): r["name"] for r in rows}
     # A stable-ID selectbox supports keyboard access, restores state across pages
     # and avoids coupling the detail to ephemeral dataframe row positions.
     selected = st.selectbox("Escolha uma cidade para detalhar", list(names),
@@ -209,24 +210,27 @@ def render_fare_evidence(view, fares=None):
                 state = {"documented_offer": "Oferta documentada", "unavailable": "Indisponível na consulta", "unknown": "Disponibilidade desconhecida"}[q["availability"]]
                 with st.container(border=True):
                     st.write(f"**{origin} → {destination} · {scope}**")
-                    st.write(f"{price} · 2 adultos · {state}")
+                    st.write(f'{("Total documentado" if q["mandatory_fees_included"] is True else "Valor observado")}: {price} · 2 adultos · {state}')
                     st.caption(f'{fees} · Classe: {q["fare_class"] or "Desconhecida"}')
                     st.caption(f'Consulta: {q["checked_at_time"] or q["checked_at"]}')
-                    st.link_button("Fonte da tarifa", q["source_url"])
+                    st.markdown(f'[Fonte da tarifa]({q["source_url"]})')
                     if back:
                         st.caption("Retorno temporalmente coerente · " + ("Calendário documentado" if record["return_calendar_documented"] else "Calendário incompleto"))
                         if not record["same_destination_station"] or not record["same_base_station"]:
                             st.caption("Estações diferentes; deslocamento entre estações não verificado.")
                     st.caption("Documentação tarifária completa para o escopo" if record["complete_documentation"] else "Documentação tarifária incompleta")
-                    with st.expander("Condições e horários"):
+                    with st.container():
+                        st.markdown("**Condições e horários**")
                         st.write("Condições: " + (q["fare_conditions"] or "Desconhecidas"))
                         st.write("Elegibilidade: " + (q["discount_eligibility"] or "Desconhecida"))
+                        commercial = {None: "Desconhecido", "allowed": "Permitido", "conditional": "Condicional", "not_allowed": "Não permitido"}
+                        st.caption(f'Reembolso: {commercial[q["refundability"]]} · Alteração: {commercial[q["changeability"]]}')
                         st.write("Bilhete: " + {None: "Desconhecido", "integrated": "Integrado", "separate": "Separado"}[q["ticket_structure"]])
                         for label, leg in (("Ida", out), ("Retorno", back)):
                             if leg:
                                 st.write(f'{label}: {leg["origin_station_id"]} → {leg["destination_station_id"]}')
                                 st.caption(f'{leg["departure_at"]} → {leg["arrival_at"]}')
-                                st.link_button("Fonte do trecho — " + label, leg["source_url"])
+                                st.markdown(f'[Fonte do trecho — {label}]({leg["source_url"]})')
                         st.caption("Viabilidade da visita e última milha não verificadas.")
         except Exception:
             _LOG.exception("DATA26B fare evidence unavailable")
