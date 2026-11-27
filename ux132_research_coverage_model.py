@@ -1,4 +1,5 @@
 """Read-only presentation of DATA24 rail coverage; no recommendation logic."""
+from copy import deepcopy
 from unicodedata import normalize, combining
 from data24_coverage_model import coverage_counts, rail_coverage
 from data25_priority_rail_model import RESEARCH_BASE_IDS
@@ -109,30 +110,72 @@ def connection_rows(view, axis, ident, status="Sem tempo pesquisado"):
         category = cell["category"]
         if category_filter is not None and category != category_filter:
             continue
-        timed = category in ("historical", "reference_only")
-        # An alternative reference must never supply the provenance for a
-        # historical minimum. For indicative cells prefer the displayed source.
-        if category == "historical":
-            url, date = raw.get("source_url"), raw.get("source_date")
-        elif category == "reference_only":
-            url = cell.get("source_url") or cell.get("reference_source_url")
-            date = cell.get("gap_checked_at") or cell.get("checked_at")
-        else:
-            url, date = None, None
-        if not isinstance(url, str) or not url.startswith("https://"):
-            url = None
         result.append({
             "base_id": base, "destination_id": dest,
             "origin": names_b[base], "destination": names_d[dest],
             "category": category, "label": cell["label"],
-            "minimum": cell.get("display_min") if timed else None,
-            "source_url": url, "source_date": date,
-            "observations": [dict(obs) for obs in raw.get("observations", [])] if timed else [],
-            "station_caveat": cell.get("station_caveat"),
-            "notes": cell.get("evidence_notes"),
-            "variation": bool(cell.get("legacy_divergent_sources")
-                              or cell.get("reference_differs_from_legacy")),
+            **_documentary_detail(cell, raw),
         })
     counterpart = "destination" if axis == "bases" else "origin"
     return sorted(result, key=lambda r: (_search_key(r[counterpart]),
                                          r["base_id"], r["destination_id"]))
+
+
+def _https(url):
+    return url if isinstance(url, str) and url.startswith("https://") else None
+
+
+def _documentary_detail(cell, raw):
+    """Bind metadata to the already-selected canonical minimum, not to another source."""
+    category = cell["category"]
+    timed = category in ("historical", "reference_only")
+    detail = {
+        "minimum": cell.get("display_min") if timed else None,
+        "source_url": None, "source_date": None, "station_caveat": None,
+        "notes": None, "observations": [], "alternative": None,
+        "variation": False,
+    }
+    if not timed:
+        return detail
+    observations = deepcopy(raw.get("observations", []))
+    detail["variation"] = bool(cell.get("legacy_divergent_sources")
+                               or cell.get("reference_differs_from_legacy"))
+    if category == "reference_only":
+        # The overlay already selected by decorate_comparison owns these fields.
+        detail.update(source_url=_https(cell.get("source_url")),
+                      source_date=cell.get("gap_checked_at") or cell.get("checked_at"),
+                      station_caveat=cell.get("station_caveat"),
+                      notes=cell.get("evidence_notes"), observations=observations)
+        return detail
+
+    # Historical source is the canonical row's primary observation. Match its
+    # full provenance, not just the URL (which can contain several services).
+    detail.update(source_url=_https(raw.get("source_url")),
+                  source_date=raw.get("source_date"))
+    primary = next((obs for obs in observations
+                    if obs.get("source_url") == raw.get("source_url")
+                    and obs.get("evidence_date") == raw.get("source_date")
+                    and obs.get("source_dataset") == raw.get("source_dataset")
+                    and obs.get("minimum_oneway_min") == detail["minimum"]), None)
+    if primary is not None:
+        detail["notes"] = primary.get("notes")
+        origin = primary.get("origin_station")
+        destination = primary.get("destination_station")
+        if origin or destination:
+            detail["station_caveat"] = (
+                f'Estações registradas nesta observação: {origin or "origem não informada"}'
+                f' → {destination or "destino não informado"}.')
+        observations.remove(primary)
+    detail["observations"] = observations
+    # ROUTES7 can coexist with historical precedence. Only corroborated minima
+    # are shown as alternatives; unreproduced snapshots are not researched times.
+    if (cell.get("reference_display_allowed") and cell.get("fastest_min") is not None
+            and _https(cell.get("source_url")) and cell.get("checked_at")):
+        detail["alternative"] = {
+            "minimum": cell["fastest_min"],
+            "source_url": _https(cell["source_url"]),
+            "source_date": cell["checked_at"],
+            "station_caveat": cell.get("station_caveat"),
+            "notes": cell.get("evidence_notes"),
+        }
+    return detail
