@@ -1,6 +1,7 @@
 """UX132C1: audit parity, documentary gaps and domain navigation."""
 import unittest
 from copy import deepcopy
+from unittest.mock import patch
 from statistics import median
 from time import perf_counter
 
@@ -95,6 +96,51 @@ class AttractionCoverageTests(unittest.TestCase):
         self.assertEqual(updated["counts"]["attractions"],counts["attractions"])
         self.assertEqual(len(detail_rows(city,gap="ticket_unknown",gaps_only=True)),1)
 
+    def test_real_trip01_and_reconciled_alias_provenance(self):
+        view = build_attraction_view()
+        rows = {a["id"]: a for d in view["destinations"] for a in d["rows"]}
+        for ident in ("obernai_market", "lucerne_chapel"):
+            self.assertEqual(rows[ident]["checked_at"], "2026-11-20")
+            self.assertIsNone(rows[ident]["description"])
+            self.assertEqual(rows[ident]["ticket_status"], "unknown")
+        bock = rows["lux_bock"]
+        self.assertIn("dq32_luxembourg_city_22", bock["reconciled_source_ids"])
+        self.assertEqual(bock["ticket_status"], "operator_published")
+        self.assertEqual(bock["field_records"]["ticket"]["record_id"], "lux_bock")
+        self.assertNotIn("dq32_luxembourg_city_22", rows)
+
+    def test_complementary_alias_and_supplemental_fields(self):
+        photo = {"url":"https://example.org/photo.jpg","source_page":"https://example.org/photo",
+                 "author":"Author","license":"CC BY","license_url":"https://example.org/license"}
+        discovery = {"destinations":[{"id":"city","name":"City","attraction_count":2,"attractions":[
+            {"id":"a","name":"A","kind":"legacy_catalog","source_url":"https://example.org/a",
+             "reconciled_source_ids":["alias"]},
+            {"id":"b","name":"B","kind":"supplemental_exploratory","source_url":"https://example.org/b",
+             "documentary_record":{"id":"b","summary":"Supplemental description",
+                                   "checked_at":"2026-11-20","source_url":"https://example.org/b"}},
+        ]}]}
+        catalog = {"attractions":[{"id":"a","summary":"Canonical description",
+                                   "ticket":{"status":"not_applicable"}}]}
+        macro = {"attractions":[{"id":"alias","description":"Alternative description",
+             "source_url":"https://example.org/alias","checked_at":"2026-11-21",
+             "photo":photo,"editorial_duration_min":45,
+             "ticket":{"status":"operator_published","amount":12,"currency":"EUR","per":"adult"}}]}
+        geo = {"stations":[{"id":"station"}],"walking_routes":[
+            {"origin_id":"station","destination_id":"alias","status":"pedestrian_routed",
+             "duration_min":12,"source_url":"https://example.org/access","checked_at":"2026-11-22"}]}
+        inventory = attraction_inventory(discovery,catalog,{"attractions":[]},macro,geo)
+        a,b = inventory["rows"]
+        self.assertEqual(a["description"],"Canonical description")
+        self.assertEqual(a["ticket_status"],"not_applicable")
+        self.assertEqual(a["field_records"]["photo"]["record_id"],"alias")
+        self.assertEqual(a["field_records"]["editorial_duration"]["record_date"],"2026-11-21")
+        self.assertEqual(a["station_access"][0]["destination_id"],"alias")
+        self.assertEqual(b["description"],"Supplemental description")
+        self.assertEqual(b["field_records"]["description"]["record_id"],"b")
+        self.assertEqual(b["ticket_status"],"unknown")
+        self.assertEqual(inventory["counts"]["attractions"],2)
+        self.assertEqual(inventory["counts"]["reconciled_aliases"],1)
+
     def test_attraction_projection_timing(self):
         timings, details = [], []
         baseline = None
@@ -129,6 +175,26 @@ render_suggestions(plan=st.session_state["advisor_plan"])
 
 
 class AttractionNavigationTests(unittest.TestCase):
+    def test_overview_links_and_independent_domain_loads(self):
+        app = AppTest.from_string(APP,default_timeout=90).run()
+        app.segmented_control(key="ux112_active_view").set_value("Cobertura dos dados").run()
+        self.assertFalse(app.exception)
+        self.assertEqual(app.segmented_control(key="ux132_domain").value,"Visão geral")
+        with patch("ux132_coverage_page.build_attraction_inventory") as summary, \
+             patch("ux132c1_attraction_coverage_ui.build_attraction_view") as detail:
+            app.button(key="ux132_open_rail").click().run()
+            self.assertFalse(app.exception)
+            summary.assert_not_called()
+            detail.assert_not_called()
+        app.segmented_control(key="ux132_domain").set_value("Visão geral").run()
+        with patch("ux132_coverage_page.rail_coverage") as summary, \
+             patch("ux132_research_coverage_ui.build_coverage_view") as detail:
+            app.button(key="ux132_open_attractions").click().run()
+            self.assertFalse(app.exception)
+            summary.assert_not_called()
+            detail.assert_not_called()
+        self.assertEqual(app.segmented_control(key="ux132_domain").value,"Atrações turísticas")
+
     def test_domain_switch_preserves_filters_and_plan(self):
         app = AppTest.from_string(APP,default_timeout=90).run()
         before = {k:deepcopy(app.session_state[k]) for k in ("advisor_plan","ux502_interests")}
