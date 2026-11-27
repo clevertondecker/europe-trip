@@ -115,7 +115,7 @@ def connection_rows(view, axis, ident, status="Sem tempo pesquisado"):
         if category == "historical":
             url, date = raw.get("source_url"), raw.get("source_date")
         elif category == "reference_only":
-            url = cell.get("reference_source_url") or cell.get("source_url")
+            url = cell.get("source_url") or cell.get("reference_source_url")
             date = cell.get("gap_checked_at") or cell.get("checked_at")
         else:
             url, date = None, None
@@ -127,7 +127,7 @@ def connection_rows(view, axis, ident, status="Sem tempo pesquisado"):
             "category": category, "label": cell["label"],
             "minimum": cell.get("display_min") if timed else None,
             "source_url": url, "source_date": date,
-            "typical_label": cell.get("typical_label") if timed else None,
+            "observations": [dict(obs) for obs in raw.get("observations", [])] if timed else [],
             "station_caveat": cell.get("station_caveat"),
             "notes": cell.get("evidence_notes"),
             "variation": bool(cell.get("legacy_divergent_sources")
