@@ -189,7 +189,7 @@ class RailFareTest(unittest.TestCase):
         app = AppTest.from_string(script).run(timeout=30)
         self.assertFalse(app.exception)
         self.assertFalse(app.warning)
-        text = " ".join(str(x.value) for x in app.markdown + app.caption)
+        text = " ".join(str(x.value) for x in [*app.markdown, *app.caption])
         for expected in ("Mulhouse", "Colmar", "Ida e retorno", "Somente ida",
                          "EUR 40,00", "EUR 0,00", "Preço desconhecido",
                          "Disponibilidade desconhecida", "Calendário documentado",
