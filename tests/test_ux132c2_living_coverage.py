@@ -10,6 +10,7 @@ from unittest.mock import patch
 
 from streamlit.testing.v1 import AppTest
 from data24_audit_model import build_audit
+from tools.data24_research_coverage import render_report, render_legacy_annex, REPORT
 from data24_d004_audit_model import living_counts, living_research_gaps, coworking_state
 from base_research_expanded_model import load_research
 from city_research_packs_model import load_city_packs, validate_city_packs
@@ -48,6 +49,12 @@ class LivingCoverageTests(unittest.TestCase):
             self.assertEqual(original["research_gaps"]["decision_blockers"][:len(r["research_gaps"]["decision_blockers"])],
                              r["research_gaps"]["decision_blockers"])
         self.assertFalse(self.view["official_plan_modified"])
+
+    def test_versioned_audit_artifacts_are_unchanged(self):
+        audit = build_audit()
+        self.assertEqual(REPORT.read_bytes(), render_report(audit).encode("utf-8"))
+        annex = REPORT.with_name("data24_legacy_evidence.json")
+        self.assertEqual(annex.read_bytes(), render_legacy_annex(audit).encode("utf-8"))
 
     def test_documentary_semantics_and_provenance(self):
         before = deepcopy(self.view)
@@ -246,18 +253,41 @@ render_suggestions(plan=st.session_state["advisor_plan"])
 
 
 class LivingNavigationTests(unittest.TestCase):
+    def test_unaudited_priority_disclosed_in_ui(self):
+        app = AppTest.from_string(APP, default_timeout=90).run()
+        view = build_living_view()
+        approved = tuple(view["scope"]["approved_research_base_ids"]) + ("colmar",)
+        with patch("data24_d004_audit_model.RESEARCH_BASE_IDS", approved):
+            app.segmented_control(key="ux112_active_view").set_value("Cobertura dos dados").run()
+            self.assertFalse(app.exception)
+            self.assertTrue(any("Prioritárias ainda não auditadas" in w.value and "Colmar" in w.value
+                                for w in app.warning))
+            app.button(key="ux132_open_living").click().run()
+            self.assertFalse(app.exception)
+            self.assertTrue(any("Prioritárias ainda não auditadas" in w.value and "Colmar" in w.value
+                                for w in app.warning))
+            self.assertNotIn("Colmar", app.selectbox(key="ux132c2_base").options)
+            self.assertTrue(any("5 bases auditadas no recorte" in c.value for c in app.caption))
+
+
     def test_scope_selection_domain_independence_and_return(self):
         app = AppTest.from_string(APP, default_timeout=90).run()
         before = {k: deepcopy(app.session_state[k]) for k in ("advisor_plan", "ux502_interests")}
+        start = perf_counter()
         app.segmented_control(key="ux112_active_view").set_value("Cobertura dos dados").run()
+        overview_seconds = perf_counter() - start
         self.assertFalse(app.exception)
         self.assertTrue(any(m.label == "Internet residencial confirmada" for m in app.metric))
         with patch("ux132_coverage_page.rail_coverage") as rail_summary, \
              patch("ux132_coverage_page.build_attraction_inventory") as attraction_summary, \
              patch("ux132_research_coverage_ui.build_coverage_view") as rail_detail, \
              patch("ux132c1_attraction_coverage_ui.build_attraction_view") as attraction_detail:
+            start = perf_counter()
             app.button(key="ux132_open_living").click().run()
+            living_seconds = perf_counter() - start
             self.assertFalse(app.exception)
+            print("UX132C2_UI_TIMING", {"overview_apptest_seconds": overview_seconds,
+                  "living_apptest_seconds": living_seconds})
             for loader in (rail_summary, attraction_summary, rail_detail, attraction_detail):
                 loader.assert_not_called()
         self.assertEqual(app.segmented_control(key="ux132_domain").value, "Morar e trabalhar")
