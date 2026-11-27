@@ -45,6 +45,13 @@ def render_research_coverage(*, discovery=None, research=None):
         "Acompanhe os dados documentados e as lacunas de pesquisa.",
         variant="compact",
     ), unsafe_allow_html=True)
+    domains = ("Transporte ferroviário", "Atrações turísticas")
+    domain = st.segmented_control("Domínio de pesquisa", domains,
+                                  **_widget_state("ux132_domain", domains[0], lambda v: v in domains)) or domains[0]
+    if domain == domains[1]:
+        from ux132c1_attraction_coverage_ui import render_attraction_coverage
+        render_attraction_coverage(discovery=discovery)
+        return
     try:
         started = perf_counter()
         view = build_coverage_view(discovery=discovery, research=research)
@@ -75,7 +82,9 @@ def render_research_coverage(*, discovery=None, research=None):
         st.markdown("#### Transporte ferroviário")
         st.write(f'{counts["historical"]} históricos · {counts["indicative"]} indicativos · '
                  f'{counts["missing"]} sem tempo · {counts["local"]} locais')
-        st.caption("Os demais domínios terão indicadores próprios; não há nota geral de qualidade.")
+        from ux132c1_attraction_coverage_ui import render_attraction_overview_summary
+        render_attraction_overview_summary(discovery)
+        st.caption("Não há nota geral de qualidade: cada domínio usa seu próprio denominador.")
         return
     rows = view["bases"] if section == "Cidades-base" else view["destinations"]
     axis = "bases" if section == "Cidades-base" else "destinations"
