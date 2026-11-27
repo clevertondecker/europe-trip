@@ -207,12 +207,22 @@ import streamlit as st
 from trip_plan_model import new_plan
 from ux502_destination_interests_model import empty_interests
 from rec03a_suggestions_ui import render_suggestions
+from ux132_coverage_page import render_research_coverage
+from ux_navigation import bootstrap
+from ux64_navigation_ui import render_public_task_tabs
 s = st.session_state
 if "advisor_plan" not in s:
     s["advisor_plan"] = new_plan()
 if "ux502_interests" not in s:
     s["ux502_interests"] = empty_interests()
-render_suggestions(plan=s["advisor_plan"])
+if "ux_area" not in s:
+    s["ux_area"], s["ux_section"] = "Explorar", "Comparar"
+bootstrap(s)
+render_public_task_tabs()
+if s["ux_section"] == "Cobertura dos dados":
+    render_research_coverage()
+else:
+    render_suggestions(plan=s["advisor_plan"])
 """
 
 
@@ -220,7 +230,7 @@ class CoverageNavigationTests(unittest.TestCase):
     def test_search_filter_and_evidence_detail(self):
         app = AppTest.from_string(APP, default_timeout=90)
         app.run()
-        app.segmented_control(key="ux112_active_view").set_value("Cobertura dos dados").run()
+        app.segmented_control(key="ux64_public_task").set_value("Cobertura dos dados").run()
         app.segmented_control(key="ux132_domain").set_value("Transporte ferroviário").run()
         app.segmented_control(key="ux132_coverage_section").set_value("Cidades-base").run()
         self.assertFalse(app.exception)
@@ -247,7 +257,7 @@ class CoverageNavigationTests(unittest.TestCase):
     def test_axis_filters_and_valid_selection_survive_hidden_widgets(self):
         app = AppTest.from_string(APP, default_timeout=90)
         app.run()
-        app.segmented_control(key="ux112_active_view").set_value("Cobertura dos dados").run()
+        app.segmented_control(key="ux64_public_task").set_value("Cobertura dos dados").run()
         app.segmented_control(key="ux132_domain").set_value("Transporte ferroviário").run()
         app.segmented_control(key="ux132_coverage_section").set_value("Cidades-base").run()
         app.text_input(key="ux132_search_bases").set_value("Metz").run()
@@ -258,8 +268,8 @@ class CoverageNavigationTests(unittest.TestCase):
         self.assertFalse(app.exception)
         app.segmented_control(key="ux132_coverage_section").set_value("Destinos").run()
         app.text_input(key="ux132_search_destinations").set_value("Annecy").run()
-        app.segmented_control(key="ux112_active_view").set_value("Explorar alternativas").run()
-        app.segmented_control(key="ux112_active_view").set_value("Cobertura dos dados").run()
+        app.segmented_control(key="ux64_public_task").set_value("Comparar bases").run()
+        app.segmented_control(key="ux64_public_task").set_value("Cobertura dos dados").run()
         self.assertFalse(app.exception)
         self.assertEqual(app.segmented_control(key="ux132_coverage_section").value,"Destinos")
         self.assertEqual(app.text_input(key="ux132_search_destinations").value,"Annecy")
@@ -286,7 +296,7 @@ class CoverageNavigationTests(unittest.TestCase):
             self.assertFalse(app.exception)
             before = {key: deepcopy(app.session_state[key]) for key in
                       ("advisor_plan", "ux502_interests")}
-            app.segmented_control(key="ux112_active_view").set_value("Cobertura dos dados").run()
+            app.segmented_control(key="ux64_public_task").set_value("Cobertura dos dados").run()
             self.assertFalse(app.exception)
             self.assertTrue(any(m.label == "Cobertura ferroviária" for m in app.metric))
             app.segmented_control(key="ux132_domain").set_value("Transporte ferroviário").run()
@@ -308,8 +318,10 @@ class CoverageNavigationTests(unittest.TestCase):
             app.segmented_control(key="ux132_coverage_section").set_value("Destinos").run()
             self.assertFalse(app.exception)
             self.assertTrue(app.dataframe)
-            app.segmented_control(key="ux112_active_view").set_value(None).run()
+            app.segmented_control(key="ux64_public_task").set_value(None).run()
             self.assertFalse(app.exception)
+            self.assertEqual(app.session_state["ux64_public_task"], "Cobertura dos dados")
+            app.segmented_control(key="ux64_public_task").set_value("Comparar bases").run()
             self.assertEqual(app.session_state["ux112_active_view"], "Explorar alternativas")
             self.assertFalse(app.exception)
             self.assertTrue(any("Nenhum destino ativo" in x.value for x in app.info))

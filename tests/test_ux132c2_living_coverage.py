@@ -242,14 +242,25 @@ class LivingCoverageTests(unittest.TestCase):
 
 APP = """
 import streamlit as st
-from rec03a_suggestions_ui import render_suggestions
 from trip_plan_model import new_plan
 from ux502_destination_interests_model import empty_interests
-if "advisor_plan" not in st.session_state:
-    st.session_state["advisor_plan"] = new_plan()
-if "ux502_interests" not in st.session_state:
-    st.session_state["ux502_interests"] = empty_interests()
-render_suggestions(plan=st.session_state["advisor_plan"])
+from rec03a_suggestions_ui import render_suggestions
+from ux132_coverage_page import render_research_coverage
+from ux_navigation import bootstrap
+from ux64_navigation_ui import render_public_task_tabs
+s = st.session_state
+if "advisor_plan" not in s:
+    s["advisor_plan"] = new_plan()
+if "ux502_interests" not in s:
+    s["ux502_interests"] = empty_interests()
+if "ux_area" not in s:
+    s["ux_area"], s["ux_section"] = "Explorar", "Comparar"
+bootstrap(s)
+render_public_task_tabs()
+if s["ux_section"] == "Cobertura dos dados":
+    render_research_coverage()
+else:
+    render_suggestions(plan=s["advisor_plan"])
 """
 
 
@@ -259,7 +270,7 @@ class LivingNavigationTests(unittest.TestCase):
         view = build_living_view()
         approved = tuple(view["scope"]["approved_research_base_ids"]) + ("colmar",)
         with patch("data24_d004_audit_model.RESEARCH_BASE_IDS", approved):
-            app.segmented_control(key="ux112_active_view").set_value("Cobertura dos dados").run()
+            app.segmented_control(key="ux64_public_task").set_value("Cobertura dos dados").run()
             self.assertFalse(app.exception)
             self.assertTrue(any("Prioritárias ainda não auditadas" in w.value and "Colmar" in w.value
                                 for w in app.warning))
@@ -275,7 +286,7 @@ class LivingNavigationTests(unittest.TestCase):
         app = AppTest.from_string(APP, default_timeout=90).run()
         before = {k: deepcopy(app.session_state[k]) for k in ("advisor_plan", "ux502_interests")}
         start = perf_counter()
-        app.segmented_control(key="ux112_active_view").set_value("Cobertura dos dados").run()
+        app.segmented_control(key="ux64_public_task").set_value("Cobertura dos dados").run()
         overview_seconds = perf_counter() - start
         self.assertFalse(app.exception)
         self.assertTrue(any(m.label == "Internet residencial confirmada" for m in app.metric))
@@ -311,8 +322,8 @@ class LivingNavigationTests(unittest.TestCase):
         self.assertIn(app.selectbox(key="ux132c2_base").value,
                       {"lille","metz","mulhouse","nancy","strasbourg"})
         app.selectbox(key="ux132c2_base").select("metz").run()
-        app.segmented_control(key="ux112_active_view").set_value("Explorar alternativas").run()
-        app.segmented_control(key="ux112_active_view").set_value("Cobertura dos dados").run()
+        app.segmented_control(key="ux64_public_task").set_value("Comparar bases").run()
+        app.segmented_control(key="ux64_public_task").set_value("Cobertura dos dados").run()
         self.assertFalse(app.exception)
         self.assertEqual(app.segmented_control(key="ux132_domain").value, "Morar e trabalhar")
         self.assertEqual(app.selectbox(key="ux132c2_base").value, "metz")

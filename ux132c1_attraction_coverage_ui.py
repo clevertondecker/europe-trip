@@ -31,7 +31,21 @@ def _link(label, url):
         st.caption(label + ": fonte específica não documentada.")
 
 
-def render_attraction_indicators(counts):
+def render_attraction_indicators(counts, *, compact=False):
+    if compact:
+        # Same canonical counts; no additional projection or composite score.
+        for metric in indicator_rows(counts):
+            if metric["key"] in ("destinations_with_attractions", "ticket_published",
+                                  "ticket_not_applicable", "ticket_unknown"):
+                continue
+            st.caption(metric["label"] + " · " + _ratio(metric["documented"], metric["total"]))
+            if metric["fraction"] is not None:
+                st.progress(metric["fraction"])
+        st.caption(f'Ingressos: {counts["ticket_published"]} com preço publicado · '
+                   f'{counts["ticket_not_applicable"]} não aplicáveis · '
+                   f'{counts["ticket_unknown"]} desconhecidos / {counts["attractions"]} atrações.')
+        st.caption("Horários de abertura: não medidos. Consulte Atrações turísticas para ver pendências por destino.")
+        return
     table = []
     for metric in indicator_rows(counts):
         if metric["key"] == "destinations_with_attractions":

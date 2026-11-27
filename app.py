@@ -673,6 +673,10 @@ elif page == "Mapa & destinos":
                    "Desejado = wishlist; no roteiro = visita incluída; base candidata "
                    "= opção em estudo. Reservas, horários e rotas não são inferidos.")
 
+elif page == "Cobertura dos dados":
+    from ux132_coverage_page import render_research_coverage
+    render_research_coverage()
+
 elif page == "Comparar cidades":
     # UX114: an explicit candidate can enter the EXISTING official review
     # without exposing the entire legacy comparison below the main journey.

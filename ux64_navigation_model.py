@@ -7,7 +7,7 @@ from __future__ import annotations
 
 PUBLIC_AREAS=("Explorar","Planejar","Orçamento")
 PUBLIC_TASKS={
-    "Explorar":("Descobrir","Minha lista","Comparar bases","Mapa"),
+    "Explorar":("Descobrir","Minha lista","Comparar bases","Cobertura dos dados","Mapa"),
     "Planejar":("Visão geral","Meus destinos","Organizar"),
     "Orçamento":("Visão financeira","Simulações"),
 }
@@ -15,6 +15,7 @@ TARGETS={
     ("Explorar","Descobrir"):("Explorar","Passeios"),
     ("Explorar","Minha lista"):("Explorar","Passeios"),
     ("Explorar","Comparar bases"):("Explorar","Comparar"),
+    ("Explorar","Cobertura dos dados"):("Explorar","Cobertura dos dados"),
     ("Explorar","Mapa"):("Explorar","Mapa"),
     ("Planejar","Visão geral"):("Minha viagem","Resumo"),
     ("Planejar","Meus destinos"):("Meu roteiro","Meu planejamento"),
@@ -34,7 +35,8 @@ def public_task(legacy_area, legacy_section, wishlist_view=None):
         return ("Minha lista" if legacy_section=="Passeios"
                 and wishlist_view=="Minha lista" else
                 "Descobrir" if legacy_section=="Passeios" else
-                "Mapa" if legacy_section=="Mapa" else "Comparar bases")
+                "Mapa" if legacy_section=="Mapa" else
+                "Cobertura dos dados" if legacy_section=="Cobertura dos dados" else "Comparar bases")
     if legacy_area=="Minha viagem":
         return "Visão geral"
     if legacy_area=="Meu roteiro":
