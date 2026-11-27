@@ -80,3 +80,33 @@ class FareReferencesTest(unittest.TestCase):
         fare_reference_coverage(data=self.data)
         after = rail_coverage()
         self.assertEqual(before, after)
+
+    def test_fare_panel_filters_and_nonempty_tables(self):
+        from streamlit.testing.v1 import AppTest
+        script = (
+            "from ux132_research_coverage_ui import render_fare_evidence\n"
+            "render_fare_evidence({'bases': [], 'destinations': []})\n"
+        )
+        app = AppTest.from_string(script, default_timeout=30).run()
+        def table(columns):
+            matches = [e.value for e in app.dataframe if set(columns) <= set(e.value.columns)]
+            self.assertEqual(len(matches), 1)
+            return matches[0]
+        self.assertFalse(app.exception)
+        self.assertFalse(app.warning)
+        recent = table(("Origem", "Destino", "Valor", "Estado"))
+        self.assertGreater(len(recent), 0)
+        self.assertTrue(all(recent["Estado"] == "Calendário observado"))
+        app.selectbox(key="ux132_fare_reference_status").select("Histórico").run()
+        self.assertFalse(app.exception)
+        self.assertFalse(app.warning)
+        historical = table(("Origem", "Destino", "Valor", "Estado"))
+        self.assertGreater(len(historical), 0)
+        self.assertTrue(all(historical["Estado"].str.startswith("Histórico:")))
+        app.selectbox(key="ux132_fare_reference_status").select("Lacunas").run()
+        app.selectbox(key="ux132_fare_reference_base").select("metz").run()
+        self.assertFalse(app.exception)
+        self.assertFalse(app.warning)
+        gaps = table(("Origem", "Destino", "Motivo"))
+        self.assertGreater(len(gaps), 0)
+        self.assertTrue(all(gaps["Origem"] == "Metz"))
