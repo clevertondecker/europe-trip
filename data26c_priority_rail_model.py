@@ -10,25 +10,39 @@ INITIAL_SLUGS = {"saumur": "saumur", "dinan": "dinan", "le_mans": "le-mans", "sa
 SLUGS = {**INITIAL_SLUGS, "beaune": "beaune", "besancon": "besancon",
          "freiburg": "fribourg-en-brisgau", "saarbrucken": "sarrebruck",
          "stuttgart": "stuttgart", "arlon": "arlon",
-         "trier": "treves", "offenburg": "offenburg"}
+         "trier": "treves", "offenburg": "offenburg",
+         "aachen": "aix-la-chapelle", "baden_baden": "baden-baden", "kehl": "kehl"}
 ADDITIONAL_PAIRS = {("lille", "beaune"), ("lille", "besancon"),
                     ("metz", "freiburg"), ("nancy", "saarbrucken"),
                     ("metz", "stuttgart"), ("nancy", "stuttgart"),
                     ("metz", "arlon"), ("nancy", "arlon"),
                     ("metz", "trier"), ("nancy", "trier"), ("strasbourg", "trier"),
-                    ("metz", "offenburg"), ("nancy", "offenburg")}
+                    ("metz", "offenburg"), ("nancy", "offenburg"),
+                    ("metz", "aachen"), ("nancy", "aachen"),
+                    ("metz", "baden_baden"), ("nancy", "baden_baden"),
+                    ("lille", "baden_baden"), ("metz", "kehl")}
 EXPECTED_PAIRS = {(b, d) for b in RESEARCH_BASE_IDS for d in INITIAL_SLUGS} | ADDITIONAL_PAIRS
 
 def _valid_source(row):
     origin, dest = row["origin_id"], row["destination_id"]
     kind = row.get("evidence_type")
     if kind == "secondary_sample":
-        slug = "trier-hbf" if dest == "trier" else dest.replace("_", "-")
-        if dest == "trier" and row.get("published_arrival_station") != "Trier Hbf":
-            return False
+        station_destinations = {"trier": ("trier-hbf", "Trier Hbf"),
+                                "aachen": ("aachen-hbf", "Aachen Hbf")}
+        slug = dest.replace("_", "-")
+        if dest in station_destinations:
+            slug, station = station_destinations[dest]
+            if row.get("published_arrival_station") != station:
+                return False
+        origin_slug = origin
+        if (origin, dest) == ("lille", "baden_baden"):
+            if row.get("published_origin_station") != "Lille-Europe":
+                return False
+            origin_slug = "lille-europe"
         return row["source_url"] in (
-            f"https://www.thetrainline.com/en/train-times/{origin}-to-{slug}",
-            f"https://www.thetrainline.com/fr/horaires-train/{origin}-a-{slug}",
+            f"https://www.thetrainline.com/en/train-times/{origin_slug}-to-{slug}",
+            f"https://www.thetrainline.com/train-times/{origin_slug}-to-{slug}",
+            f"https://www.thetrainline.com/fr/horaires-train/{origin_slug}-a-{slug}",
         )
     return row["source_url"] == f"https://www.sncf-connect.com/train/trajet/{origin}/{SLUGS[dest]}"
 
