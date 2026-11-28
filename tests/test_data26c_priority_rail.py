@@ -239,6 +239,31 @@ class PriorityRailResearchTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     load_data26c_rail(path)
 
+    def test_original_42_records_have_individual_quality_audits(self):
+        data = load_data26c_rail()["records"]
+        # Freeze the original review cohort; subsequent batches may extend it.
+        cohort = data[:42]
+        self.assertEqual(len(cohort), 42)
+        self.assertEqual(sum(r["evidence_type"] == "official_route_minimum" for r in cohort), 21)
+        self.assertEqual(sum(r["evidence_type"] == "secondary_sample" for r in cohort), 21)
+        for row in cohort:
+            with self.subTest(pair=(row["origin_id"], row["destination_id"])):
+                review = row["quality_review"]
+                self.assertEqual(review["source_url"], row["source_url"])
+                self.assertEqual(review["direction"], "outbound_only")
+                self.assertFalse(review["service_legs_verified"])
+                self.assertFalse(review["valid_for_2027"])
+                self.assertEqual(review["selected_summary_reproduced"], any(
+                    (s["minimum_min"], s["average_min"]) ==
+                    (row["oneway_min"], row["published_average_min"])
+                    for s in review["samples"]))
+        ambiguous = next(r for r in cohort if (r["origin_id"], r["destination_id"]) ==
+                         ("strasbourg", "arlon"))
+        self.assertIn("Flixbus", ambiguous["note"])
+        self.assertIn("inconclusiva", ambiguous["note"])
+        self.assertEqual(ambiguous["confidence"], "low")
+        self.assertFalse(ambiguous["valid_for_2027"])
+
     def test_documentary_coverage_before_after(self):
         dataset = load_data26c_rail()
         baseline = rail_coverage(projection_options={"data26c_overlay": {"by_pair": {}}})
