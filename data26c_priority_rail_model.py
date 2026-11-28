@@ -2,6 +2,7 @@
 from pathlib import Path
 from datetime import date
 import json
+from urllib.parse import urlsplit
 
 from data25_priority_rail_model import RESEARCH_BASE_IDS
 from rail_gap_enrichment_model import validate_gap_dataset
@@ -67,6 +68,7 @@ def _validate_quality_review(row, snapshot):
         return
     if (review["source_url"] != row["source_url"]
             or not date.fromisoformat(row["source_checked_at"]) <= date.fromisoformat(review["checked_at"]) <= snapshot
+            or review.get("modality_status") not in ("rail_summary", "inconclusive")
             or review["direction"] != "outbound_only"
             or review["origin_country"] != "FR"
             or review["destination_country"] != DESTINATION_COUNTRIES[row["destination_id"]]
@@ -74,6 +76,17 @@ def _validate_quality_review(row, snapshot):
             or review["valid_for_2027"] is not False
             or not review["note"] or not review["samples"]):
         raise ValueError("DATA26C: invalid quality review provenance")
+    checks = review.get("official_cross_checks", [])
+    if review["modality_status"] == "inconclusive" and not checks:
+        raise ValueError("DATA26C: inconclusive modality requires documented checks")
+    for check in checks:
+        url = urlsplit(check["source_url"])
+        if (url.scheme != "https" or url.hostname not in (
+                "www.sncf-connect.com", "www.belgiantrain.be", "www.cfl.lu", "www.bahn.de")
+                or url.username or url.password
+                or not date.fromisoformat(review["checked_at"]) <= date.fromisoformat(check["checked_at"]) <= snapshot
+                or not check["finding"]):
+            raise ValueError("DATA26C: invalid official cross-check")
     for sample in review["samples"]:
         if (type(sample["minimum_min"]) is not int or type(sample["average_min"]) is not int
                 or not 1 <= sample["minimum_min"] <= sample["average_min"] <= 1440
