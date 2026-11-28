@@ -154,31 +154,35 @@ class QuickComparisonAppTests(unittest.TestCase):
 
     def test_single_filtered_city_offers_direct_investigation(self):
         app,plan,wishes=self.app(("colmar",))
-        app.checkbox(key="rec03a_show_all").check().run()
-        app.text_input(key="rec03a_search").set_value("Metz").run()
+        app.segmented_control(key="rec03a_catalog_mode").set_value("Todas as cidades").run()
+        app.selectbox(key="rec03a_city").select("metz").run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
         self.assertTrue(any("Metz" in x.value and "ux96-city-header" in x.value
                             for x in app.markdown))
         self.assertIn("rec03a_handoff_profile_card_metz",{x.key for x in app.button})
         self.assertFalse(any("ux97-table" in x.value for x in app.markdown))
-        app.text_input(key="rec03a_search").set_value("cidade-que-nao-existe-ux95").run()
+        self.assertNotIn("cidade-que-nao-existe-ux95",app.selectbox(key="rec03a_city").options)
+        # An obsolete restored city must reconcile to the full catalog.
+        app.session_state["rec03a_city_shadow"]="cidade-que-nao-existe-ux95"
+        app.run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
-        self.assertFalse(any("ux96-city-header" in x.value for x in app.markdown))
-        app.text_input(key="rec03a_search").set_value("").run()
+        self.assertIsNone(app.selectbox(key="rec03a_city").value)
+        self.assertTrue(any("ux96-city-header" in x.value for x in app.markdown))
+        app.selectbox(key="rec03a_city").select(None).run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
         self.assertEqual(app.session_state["advisor_plan"],plan)
         self.assertEqual(app.session_state["ux502_interests"],wishes)
 
     def test_browsing_filters_and_pagination_preserve_selection(self):
         app,plan,wishes=self.app(("colmar","paris"))
-        app.checkbox(key="rec03a_show_all").check().run()
+        app.segmented_control(key="rec03a_catalog_mode").set_value("Todas as cidades").run()
         self.assertLessEqual(sum(x.key.startswith("rec03a_pick_")
                                  for x in app.checkbox if x.key),4)
         first=next(x.key for x in app.checkbox
                    if x.key and x.key.startswith("rec03a_pick_"))
         app.checkbox(key=first).check().run()
         selected=deepcopy(app.session_state[CHOICE])
-        app.text_input(key="rec03a_search").set_value("Metz").run()
+        app.selectbox(key="rec03a_city").select("metz").run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
         self.assertEqual(app.session_state[CHOICE],selected)
         self.assertFalse(any("ux97-table" in x.value for x in app.markdown))
