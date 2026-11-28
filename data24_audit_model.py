@@ -176,7 +176,7 @@ def pair_components(pair):
     }
 
 
-def build_audit():
+def build_audit(*, projection_options=None):
     """Build once per CLI execution. Retain historic study separately from catalog scope."""
     discovery = build_exploration_discovery()
     research = load_research(include_candidates=True)
@@ -187,7 +187,8 @@ def build_audit():
     rail = load_rail_evidence()
     exploration = load_exploration()
     coverage = rail_coverage(research=research, discovery=discovery,
-                             rail=rail, exploration=exploration)
+                             rail=rail, exploration=exploration,
+                             projection_options=projection_options)
     attractions = attraction_inventory(discovery, catalog, data23, macro, geography)
     pairs = [{"base_id": b, "destination_id": d, **pair_components(pair)}
              for (b, d), pair in sorted(coverage["pairs"].items())]
