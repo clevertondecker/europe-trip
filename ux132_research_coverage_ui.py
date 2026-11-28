@@ -255,6 +255,53 @@ def render_fare_evidence(view, fares=None):
                 st.dataframe(rows, hide_index=True, column_config={"Fonte": st.column_config.LinkColumn("Fonte", display_text="Abrir fonte")}, key="ux132_fare_reference_rows")
             else:
                 st.caption("Nenhuma observação neste filtro.")
+            returns = refs.get("return_references", [])
+            if returns:
+                st.markdown("**Retorno — referências indicativas independentes**")
+                st.caption("Por pessoa, trecho único e segunda classe. Datas e serviços não vinculados às amostras de horários. Não somar com a ida para declarar uma cotação.")
+                st.dataframe([{
+                    "Origem": city(r["origin_id"]), "Destino": city(r["destination_id"]),
+                    "Data de viagem": r["travel_date"], "Preço indicativo": r["amount_minor"] / 100,
+                    "Moeda": r["currency"], "Marca": r["commercial_brand"],
+                    "Consulta": r["researched_at"], "Fonte": r["source_url"],
+                } for r in returns], hide_index=True, width="stretch",
+                    column_config={"Fonte": st.column_config.LinkColumn("Fonte", display_text="Abrir fonte")},
+                    key="ux132_return_calendar")
+            products = refs.get("regional_products", [])
+            if products:
+                st.markdown("**Produtos regionais e transfronteiriços**")
+                st.caption("Condições publicadas, não ofertas de reserva. Não alteram o orçamento nem confirmam validade em 2027.")
+                units = {"person_day": "pessoa/dia", "group_day": "grupo/dia", "person_roundtrip": "pessoa/ida e volta"}
+                eligibility = {"group_allowed": "Grupo inclui dois viajantes", "individual_ticket": "Bilhete individual",
+                               "requires_children": "Fórmula familiar: exige crianças conforme fonte", "unknown": "Elegibilidade não documentada"}
+                def product_price(p):
+                    if p["amount_minor"] is None:
+                        return "Preço não publicado"
+                    amount = p["amount_minor"]
+                    return (("A partir de " if p["price_kind"] == "from" else "") +
+                            f'{p["currency"]} {amount // 100},{amount % 100:02d} · {units[p["price_unit"]]}')
+                st.dataframe([{
+                    "Produto": p["name"], "Preço publicado": product_price(p),
+                    "Uso": eligibility[p["couple_use"]], "Validade": p["validity"],
+                    "Fonte": p["source_url"],
+                } for p in products], hide_index=True, width="stretch",
+                    column_config={"Fonte": st.column_config.LinkColumn("Fonte", display_text="Abrir fonte")},
+                    key="ux132_regional_products")
+                indexed = {p["id"]: p for p in products}
+                product_key = st.selectbox("Detalhar produto regional", list(indexed),
+                    format_func=lambda k: indexed[k]["name"],
+                    **widget_state("ux132_regional_product", next(iter(indexed)), lambda v: v in indexed))
+                p = indexed[product_key]
+                st.write(product_price(p) + " · " + eligibility[p["couple_use"]])
+                st.caption("Abrangência: " + p["geography"])
+                st.caption("Classe: " + {None: "Não documentada", "second": "2ª", "first": "1ª", "both": "1ª e 2ª"}[p["fare_class"]])
+                st.caption("Modalidades: " + ", ".join({"rail": "trem", "bus": "ônibus", "tram": "tram", "boat": "barco"}[m] for m in p["modes"]))
+                st.caption("Reservas: " + (p["reservations"] or "Não documentadas na fonte"))
+                st.caption(p["conditions"])
+                st.caption("Consulta: " + p["checked_at"] + " · " + p["operator"])
+                st.markdown(f'[Fonte oficial do produto]({p["source_url"]})')
+                for url in p["additional_source_urls"]:
+                    st.markdown(f'[Fonte complementar oficial]({url})')
             samples = fares.get("schedule_samples", [])
             if samples:
                 st.markdown("**Horários datados de ida e retorno — amostras documentais**")
