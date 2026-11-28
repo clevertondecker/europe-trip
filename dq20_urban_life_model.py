@@ -93,6 +93,3 @@ def compare_urban_life(packs:dict|None=None,delta:dict|None=None,
                        "rank":None,"housing_bookability_verified":False})
     return {"cities":cities,"dimension_names":DIMENSIONS,"comparison_is_factual":True,
             "score_allowed":False,"reference_period":"existing 1991–2020 climate and 2026 services"}
-
-def _by_city(comparison:dict,city_id:str)->dict:
-    return next(c for c in comparison["cities"] if c["city_id"]==city_id)
