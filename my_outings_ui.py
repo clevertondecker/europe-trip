@@ -120,8 +120,8 @@ def render_my_outings(plan: dict, catalog: dict, *, routes: dict | None = None,
         c3.metric("Saldo nominal da provisão",brl(max(0,allowance-known), decimals=0, missing=REQUIRED))
         if allowance>0:
             st.progress(min(1.,known/allowance))
-        st.caption("Projeção global do casal: "+money(financial["result"]["total"])+
-                   " · margem até o teto: "+money(financial["result"]["margin"])+".")
+        st.caption("Projeção global do casal: "+brl(financial["result"]["total"], decimals=0, missing=REQUIRED)+
+                   " · margem até o teto: "+brl(financial["result"]["margin"], decimals=0, missing=REQUIRED)+".")
         if prices["missing"]:
             st.warning(f"{len(prices['missing'])} componente(s) sem preço completo. "
                        "O saldo nominal não significa dinheiro disponível.")
