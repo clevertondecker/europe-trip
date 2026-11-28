@@ -54,6 +54,11 @@ class PriorityRailResearchTests(unittest.TestCase):
             (("nancy", "arlon"), "secondary_sample"),
             (("strasbourg", "dinan"), "secondary_sample"),
             (("mulhouse", "saumur"), "secondary_sample"),
+            (("metz", "trier"), "secondary_sample"),
+            (("nancy", "trier"), "secondary_sample"),
+            (("strasbourg", "trier"), "secondary_sample"),
+            (("metz", "offenburg"), "secondary_sample"),
+            (("nancy", "offenburg"), "secondary_sample"),
         ):
             with self.subTest(pair=key):
                 record = data["by_pair"][key]
@@ -74,6 +79,27 @@ class PriorityRailResearchTests(unittest.TestCase):
         for key in (("strasbourg", "dinan"), ("mulhouse", "saumur")):
             self.assertEqual(data["by_pair"][key]["previous_attempts"][0]["reason"],
                              "technical_failure")
+
+    def test_trier_requires_exact_published_station_source(self):
+        payload = json.loads(DATA.read_text(encoding="utf-8"))
+        index = next(i for i, row in enumerate(payload["records"])
+                     if (row["origin_id"], row["destination_id"]) == ("metz", "trier"))
+        for changes in (
+            {"source_url": "https://www.thetrainline.com/en/train-times/metz-to-trier"},
+            {"published_arrival_station": "Trier Süd"},
+            {"source_url": "https://www.thetrainline.com/en/train-times/trier-hbf-to-metz"},
+        ):
+            with self.subTest(changes=changes), tempfile.TemporaryDirectory() as tmp:
+                altered = copy.deepcopy(payload)
+                altered["records"][index].update(changes)
+                path = Path(tmp) / "research.json"
+                path.write_text(json.dumps(altered), encoding="utf-8")
+                with self.assertRaises(ValueError):
+                    load_data26c_rail(path)
+        record = load_data26c_rail()["by_pair"][("metz", "trier")]
+        self.assertEqual(record["published_arrival_station"], "Trier Hbf")
+        self.assertEqual(record["station_status"], "not_reconciled")
+        self.assertIsNone(record["destination_station_id"])
 
     def test_documentary_coverage_before_after(self):
         dataset = load_data26c_rail()
