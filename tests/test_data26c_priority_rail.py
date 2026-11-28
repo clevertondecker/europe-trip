@@ -59,6 +59,12 @@ class PriorityRailResearchTests(unittest.TestCase):
             (("strasbourg", "trier"), "secondary_sample"),
             (("metz", "offenburg"), "secondary_sample"),
             (("nancy", "offenburg"), "secondary_sample"),
+            (("metz", "kehl"), "secondary_sample"),
+            (("nancy", "baden_baden"), "secondary_sample"),
+            (("metz", "baden_baden"), "secondary_sample"),
+            (("metz", "aachen"), "secondary_sample"),
+            (("nancy", "aachen"), "secondary_sample"),
+            (("lille", "baden_baden"), "secondary_sample"),
         ):
             with self.subTest(pair=key):
                 record = data["by_pair"][key]
@@ -100,6 +106,32 @@ class PriorityRailResearchTests(unittest.TestCase):
         self.assertEqual(record["published_arrival_station"], "Trier Hbf")
         self.assertEqual(record["station_status"], "not_reconciled")
         self.assertIsNone(record["destination_station_id"])
+
+    def test_aachen_and_lille_station_sources_are_not_citywide_claims(self):
+        payload = json.loads(DATA.read_text(encoding="utf-8"))
+        scenarios = (
+            (("metz", "aachen"), {"published_arrival_station": "Aachen West"}),
+            (("nancy", "aachen"), {"source_url": "https://www.thetrainline.com/en/train-times/aachen-hbf-to-nancy"}),
+            (("lille", "baden_baden"), {"published_origin_station": "Lille Flandres"}),
+            (("lille", "baden_baden"), {"source_url": "https://www.thetrainline.com/en/train-times/lille-to-baden-baden"}),
+        )
+        for key, changes in scenarios:
+            with self.subTest(key=key, changes=changes), tempfile.TemporaryDirectory() as tmp:
+                altered = copy.deepcopy(payload)
+                record = next(row for row in altered["records"]
+                              if (row["origin_id"], row["destination_id"]) == key)
+                record.update(changes)
+                path = Path(tmp) / "research.json"
+                path.write_text(json.dumps(altered), encoding="utf-8")
+                with self.assertRaises(ValueError):
+                    load_data26c_rail(path)
+        data = load_data26c_rail()["by_pair"]
+        for key, _ in scenarios:
+            self.assertEqual(data[key]["station_status"], "not_reconciled")
+            self.assertIsNone(data[key]["origin_station_id"])
+            self.assertIsNone(data[key]["destination_station_id"])
+            self.assertIsNone(data[key]["transfer_count"])
+            self.assertFalse(data[key]["return_weekend_verified"])
 
     def test_documentary_coverage_before_after(self):
         dataset = load_data26c_rail()
