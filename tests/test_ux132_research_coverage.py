@@ -295,6 +295,24 @@ class CoverageNavigationTests(unittest.TestCase):
         self.assertFalse(app.exception)
         self.assertEqual(app.selectbox(key="ux132_detail_Cidades-base").value,"metz")
 
+    def test_overview_distinguishes_priority_and_global_without_changing_data24(self):
+        app = AppTest.from_string(APP, default_timeout=90).run()
+        app.segmented_control(key="ux64_public_task").set_value("Cobertura dos dados").run()
+        self.assertFalse(app.exception)
+        view = build_coverage_view()
+        def label(counts):
+            rate = counts["fraction"]
+            return "N/A" if rate is None else f"{rate:.1%}".replace(".", ",")
+        metrics = {metric.label: metric.value for metric in app.metric}
+        self.assertEqual(metrics["Cobertura das cinco bases prioritárias"], label(view["priority"]))
+        self.assertEqual(metrics["Cobertura ferroviária"], label(view["global"]))
+        self.assertEqual(view["global"], rail_coverage()["global"])
+        print("DATA26C_PRIORITY_BASELINE", {
+            row["id"]: {"timed": row["timed"], "eligible": row["eligible"],
+                        "missing": row["missing"], "missing_names": row["missing_names"]}
+            for row in view["bases"] if row["id"] in view["priority_ids"]
+        })
+
     def test_empty_wishlist_access_and_return(self):
         app = AppTest.from_string(APP, default_timeout=90)
         with patch("rec03a_suggestions_ui.recommend_bases") as engine:
