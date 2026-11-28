@@ -9,6 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -20,5 +22,7 @@ jobs:
         run: python -m compileall -q .
       - name: Research data contracts
         run: python tools/validate_research_data.py
+      - name: ARCH15E repository evidence and reachability
+        run: python tools/audit_root_module_reachability.py --evidence
       - name: Unit tests
         run: python -m unittest discover -s tests -v
