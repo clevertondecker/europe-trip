@@ -13,6 +13,9 @@ class FareReferencesTest(unittest.TestCase):
         for counts in (result["scope"], result["batch"], *result["by_base"].values(), *result["by_destination"].values()):
             self.assertLessEqual(counts["legacy"], counts["with_references"])
             self.assertLessEqual(counts["with_references"], counts["total"])
+            self.assertEqual(counts["with_references"], counts["legacy"] + counts["net_new_references"])
+            self.assertEqual(counts["batch_references"], counts["legacy_overlap"] + counts["net_new_references"])
+            self.assertEqual(counts["legacy"], counts["legacy_overlap"] + counts["legacy_only"])
 
     def test_sources(self):
         for domain in ("www.bahn.de", "www.sbb.ch", "www.cfl.lu", "www.belgiantrain.be", "www.nsinternational.com", "www.eurostar.com"):
@@ -32,6 +35,51 @@ class FareReferencesTest(unittest.TestCase):
         row["destination_id"] = "brussels"
         data["references"].append(row)
         with self.assertRaises(ValueError):
+            validate_fare_references(data)
+
+    def test_same_capture_changed_price_is_conflict_not_new_observation(self):
+        data = copy.deepcopy(self.data)
+        row = copy.deepcopy(next(r for r in data["references"] if r["status"] == "observed_calendar"))
+        row["amount_minor"] += 100
+        data["references"].append(row)
+        with self.assertRaisesRegex(ValueError, "Conflito de preço"):
+            validate_fare_references(data)
+
+    def test_distinct_capture_can_have_another_price(self):
+        data = copy.deepcopy(self.data)
+        row = copy.deepcopy(next(r for r in data["references"] if r["status"] == "observed_calendar"
+                                 and r["travel_date"] > data["checked_at"]))
+        row["source_capture_date"] = row["researched_at"]
+        row["amount_minor"] += 100
+        data["references"].append(row)
+        validate_fare_references(data)
+
+    def test_revision_requires_matching_currency_units_direction_and_date(self):
+        for field, value in (("currency", "GBP"), ("passengers", 2),
+                             ("direction", "roundtrip"), ("kind", "quote"),
+                             ("travel_date", "2026-12-06"), ("destination_id", "reims")):
+            with self.subTest(field=field):
+                data = copy.deepcopy(self.data)
+                row = next(r for r in data["references"] if r["status"] == "corroborated_price")
+                row["review"][field] = value
+                with self.assertRaises(ValueError):
+                    validate_fare_references(data)
+
+    def test_unknown_mode_cannot_corroborate_even_equal_price(self):
+        data = copy.deepcopy(self.data)
+        row = next(r for r in data["references"] if r["status"] == "corroborated_price")
+        row["review"].update(transport_mode="unknown", currency=None, passengers=None,
+                             direction=None, kind=None, unit_provenance="not_documented")
+        with self.assertRaisesRegex(ValueError, "revisão inconsistente"):
+            validate_fare_references(data)
+        row["status"] = "not_reproduced"
+        validate_fare_references(data)
+
+    def test_review_must_have_independent_matching_calendar(self):
+        data = copy.deepcopy(self.data)
+        row = next(r for r in data["references"] if r["status"] == "corroborated_price")
+        row["review"]["commercial_brand"] = "unsupported"
+        with self.assertRaisesRegex(ValueError, "calendário correspondente"):
             validate_fare_references(data)
 
     def test_legitimate_date_difference(self):
@@ -72,6 +120,10 @@ class FareReferencesTest(unittest.TestCase):
         result = fare_reference_coverage(data, legacy, {"records": []})["scope"]
         self.assertEqual(result["legacy"], 1)
         self.assertEqual(result["with_references"], 1)
+        self.assertEqual(result["legacy_overlap"], 1)
+        self.assertEqual(result["net_new_references"], 0)
+        self.assertEqual(result["legacy_only"], 0)
+        self.assertEqual(result["batch_references"], 1)
         self.assertEqual(result["complete_roundtrip"], 0)
 
     def test_data24_parity(self):
