@@ -1,13 +1,17 @@
 """Additional directed operator summaries; no dated itinerary or fare claim."""
 from pathlib import Path
-from urllib.parse import urlsplit
 import json
 
 from data25_priority_rail_model import RESEARCH_BASE_IDS
 from rail_gap_enrichment_model import validate_gap_dataset
 
 DATA = Path(__file__).resolve().parent / "data" / "data26c_priority_rail_2026_11.json"
-SLUGS = {"saumur": "saumur", "dinan": "dinan", "le_mans": "le-mans", "saint_malo": "saint-malo"}
+INITIAL_SLUGS = {"saumur": "saumur", "dinan": "dinan", "le_mans": "le-mans", "saint_malo": "saint-malo"}
+SLUGS = {**INITIAL_SLUGS, "beaune": "beaune", "besancon": "besancon",
+         "freiburg": "fribourg-en-brisgau", "saarbrucken": "sarrebruck"}
+ADDITIONAL_PAIRS = {("lille", "beaune"), ("lille", "besancon"),
+                    ("metz", "freiburg"), ("nancy", "saarbrucken")}
+EXPECTED_PAIRS = {(b, d) for b in RESEARCH_BASE_IDS for d in INITIAL_SLUGS} | ADDITIONAL_PAIRS
 
 def load_data26c_rail(path=DATA):
     payload = json.loads(Path(path).read_text(encoding="utf-8"))
@@ -30,7 +34,7 @@ def load_data26c_rail(path=DATA):
                 raise ValueError("DATA26C: unsupported summary evidence")
         elif row["reason"] != "technical_failure":
             raise ValueError("DATA26C: unsupported unresolved consultation")
-    if seen != {(b, d) for b in RESEARCH_BASE_IDS for d in SLUGS}:
+    if seen != EXPECTED_PAIRS:
         raise ValueError("DATA26C: incomplete consultation batch")
     result["unresolved"] = payload["unresolved"]
     return result
