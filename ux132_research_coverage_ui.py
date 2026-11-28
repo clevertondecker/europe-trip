@@ -201,8 +201,10 @@ def render_fare_evidence(view, fares=None):
             refs = load_fare_references()
             coverage = fare_reference_coverage(data=refs, quotes=fares)
             total = coverage["scope"]
-            st.caption(f'Pesquisa prioritária ({refs["checked_at"]}): {total["with_references"]}/{total["total"]} pares com referência indicativa (inclui legado); {total["complete_roundtrip"]}/{total["total"]} com cotação completa de ida e volta.')
-            st.caption(f'{total["pending"]} pares pendentes · {total["consulted_without_result"]} consultados sem resultado aproveitável nesta pesquisa.')
+            st.caption(f'Cobertura acumulada: {total["with_references"]}/{total["total"]} pares com referência indicativa (inclui legado); {total["complete_roundtrip"]}/{total["total"]} com cotação completa de ida e volta.')
+            batch = coverage["batch"]
+            st.caption(f'Pesquisa atual ({refs["checked_at"]}): {batch["batch_references"]}/{batch["total"]} pares com referência de calendário; {batch["net_new_references"]} novos pares e {batch["legacy_overlap"]} já documentados no legado.')
+            st.caption(f'{batch["pending"]} pares pendentes · {batch["consulted_without_result"]} consultados sem resultado aproveitável nesta pesquisa.')
             st.caption("Valores anunciados por pessoa, somente ida, em datas específicas. Marca ferroviária no calendário não comprova todos os trechos. Perfil, descontos e taxas podem ser desconhecidos.")
             labels = {"observed_calendar": "Calendário observado", "corroborated_price": "Histórico: preço corroborado", "divergent_price": "Histórico: preço divergente", "not_reproduced": "Histórico: não reproduzido", "not_reproduced_nonrail": "Histórico: oferta atual rodoviária"}
             def city(ident):
