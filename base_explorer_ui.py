@@ -5,6 +5,8 @@ separate explicit confirmation; new bases stay as session-only shortlists.
 """
 from __future__ import annotations
 
+from formatting import eur, _RAISE
+
 import pydeck as pdk
 import streamlit as st
 
@@ -22,11 +24,7 @@ EXISTING_BASES=frozenset({"mulhouse","strasbourg","metz","nancy"})
 
 
 def _format_eur(value:float)->str:
-    return "€ "+f"{value:,.2f}".replace(",","_").replace(".",",").replace("_",".")
-
-
-def _format_brl(value:float)->str:
-    return "R$ "+f"{value:,.0f}".replace(",",".")
+    return eur(value, decimals=2, missing=_RAISE)
 
 
 def _base_name(data:dict,base_id:str)->str:

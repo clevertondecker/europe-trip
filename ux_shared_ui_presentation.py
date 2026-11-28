@@ -7,18 +7,14 @@ Callers provide projected data and use native Streamlit widgets for actions.
 """
 from __future__ import annotations
 
+from formatting import html_safe as _safe
+
 from collections.abc import Mapping, Sequence
-from html import escape
 from typing import Literal
 
 HeaderVariant = Literal["standard", "compact"]
 ActionVariant = Literal["strong", "compact"]
 StatusKind = Literal["neutral", "saved", "warning", "disabled"]
-
-
-def _safe(value: object) -> str:
-    """Escape text AND attribute data, including quotation marks."""
-    return escape(str(value), quote=True)
 
 
 def page_header(

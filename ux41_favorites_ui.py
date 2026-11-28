@@ -3,6 +3,8 @@
 No official plan mutation and no public repository persistence.
 """
 from __future__ import annotations
+
+from formatting import eur
 import streamlit as st
 
 from base_research_expanded_model import COUNTRY_FLAGS
@@ -40,7 +42,7 @@ def _label(value):
 
 
 def _currency(value):
-    return "Não pesquisado" if value is None else "€ "+f"{value:,.0f}".replace(",",".")
+    return eur(value, decimals=0, missing="Não pesquisado")
 
 
 def _brief_matrix(matrix):

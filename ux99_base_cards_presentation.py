@@ -1,11 +1,8 @@
 """Escaped, read-only UI fragments for REC03A's city cards."""
 from __future__ import annotations
-from html import escape
+
+from formatting import html_safe as _safe
 from collections.abc import Mapping
-
-
-def _safe(value) -> str:
-    return escape(str(value), quote=True)
 
 
 def scope_chips(destination_ids: list[str], names: Mapping[str, str]) -> str:

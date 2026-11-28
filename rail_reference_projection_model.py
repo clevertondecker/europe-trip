@@ -5,6 +5,8 @@ Historical rail evidence retains the existing display precedence.
 """
 from __future__ import annotations
 
+from formatting import minutes
+
 from routes7_reference_model import load_route_references, planning_reference
 from functools import lru_cache
 from copy import deepcopy
@@ -20,11 +22,7 @@ from data26c_priority_rail_model import load_data26c_rail
 
 
 def format_minutes(value):
-    if value is None:
-        return "não informado"
-    if type(value) is not int or value < 1:
-        raise ValueError("duration invalid")
-    return f"{value // 60}h{value % 60:02d}" if value >= 60 else f"{value} min"
+    return minutes(value, missing="não informado", allow_zero=False)
 
 
 @lru_cache(maxsize=1)

@@ -5,16 +5,13 @@ catalog. No generic image search or external API on reruns.
 """
 from __future__ import annotations
 
-from html import escape
+from formatting import html_safe as _safe
+
 from functools import lru_cache
 import streamlit as st
 from destination_photo_assets import local_destination_photo, preferred_destination_photo
 from ux501_destination_photo_service import curated_destination_photo
 from attractions_model import load_attractions
-
-
-def _safe(value) -> str:
-    return escape(str(value), quote=True)
 
 
 @lru_cache(maxsize=1)

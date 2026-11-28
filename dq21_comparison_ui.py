@@ -1,5 +1,7 @@
 """Compact DQ 2.1 comparison inside favorites, no new application page."""
 from __future__ import annotations
+
+from formatting import minutes as format_duration
 from datetime import date
 import streamlit as st
 from dq21_decision_model import decision_research
@@ -10,7 +12,8 @@ NAMES={"mulhouse":"Mulhouse","strasbourg":"Strasbourg",
        "bruges_be":"Bruges (Bélgica)","rotterdam":"Rotterdam"}
 
 def _duration(minutes):
-    return "Não documentado" if minutes is None else f"{minutes//60}h{minutes%60:02d}"
+    return format_duration(minutes, missing="Não documentado", always_hours=True, strict=False)
+
 
 def render_dq21_panel(selected:list[str])->None:
     if len(selected)<2 or not set(selected)<={"mulhouse","strasbourg","freiburg"}:
