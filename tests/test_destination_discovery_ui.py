@@ -1,5 +1,6 @@
 """Streamlit integration: discovery must work from an empty itinerary."""
 import unittest
+from tests.nav_helpers import open_support
 from pathlib import Path
 from streamlit.testing.v1 import AppTest
 
@@ -7,9 +8,7 @@ ROOT=Path(__file__).resolve().parents[1]
 class DiscoveryUISmoke(unittest.TestCase):
     def test_discover_then_choose_colmar_without_auto_approval_or_gh_write(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=65).run()
-        app.radio(key="main_navigation").set_value("Roteiro").run()
-        app.segmented_control(key="ux_section").set_value("Melhorar meu roteiro").run()
-        app.selectbox(key="ux_improve_view").set_value("Descobrir").run()
+        open_support(app,"Descobrir")
         self.assertEqual(len(app.exception),0,[e.message for e in app.exception])
         self.assertFalse(app.session_state["advisor_plan"]["packages"])
         self.assertNotIn("advisor_generate",{b.key for b in app.button})
@@ -34,7 +33,7 @@ class DiscoveryUISmoke(unittest.TestCase):
         self.assertIn("ux45_back_to_origin",{b.key for b in app.button})
         self.assertIsNone(app.session_state.get("advisor_github_sha"))
         self.assertFalse(app.session_state.get("advisor_autosave_pending",False))
-        app.segmented_control(key="ux_section").set_value("Organizar viagem").run()
+        app.segmented_control(key="ux64_public_task").set_value("Organizar").run()
         app.segmented_control(key="ux120_mode").set_value("Calendário").run()
         app.segmented_control(key="ux120_calendar_layout").set_value("Completo").run()
         self.assertFalse(app.exception,[e.message for e in app.exception])

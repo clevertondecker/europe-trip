@@ -2,6 +2,7 @@
 from pathlib import Path
 from copy import deepcopy
 import unittest
+from tests.nav_helpers import open_public
 from streamlit.testing.v1 import AppTest
 from attractions_model import load_attractions
 
@@ -11,8 +12,7 @@ class ExplorerOutingContinuity(unittest.TestCase):
     def test_add_edit_return_preserves_selection_and_existing_plan(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
-        app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
-        app.button(key="ux64_sidebar_nav_1").click().run()
+        open_public(app,"Planejar","Visão geral")
         app.button(key="ux125b_home_base_outings").click().run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
         app.slider(key="explore_max_minutes").set_value(120).run()

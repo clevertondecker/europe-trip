@@ -1,5 +1,6 @@
 """UX125: public navigation replaces duplicated task panels, not stored data."""
 import unittest
+from tests.nav_helpers import open_support
 import re
 import unicodedata
 from copy import deepcopy
@@ -125,9 +126,7 @@ class LegacyCleanupTests(unittest.TestCase):
         self.assertNotIn("ux_budget_view", {w.key for w in app.segmented_control})
         self.assertNotIn("advisor_base", {w.key for w in app.selectbox})
         self.assertNotIn("budget_preset_review_button", {w.key for w in app.button})
-        app.button(key="ux_sidebar_nav_2").click().run()
-        app.segmented_control(key="ux_section").set_value("Melhorar meu roteiro").run()
-        app.selectbox(key="ux_improve_view").set_value("Consultor de passeios").run()
+        open_support(app,"Consultor de passeios")
         self.assertFalse(app.exception, [x.message for x in app.exception])
         self.assertIn("budget_preset_review_button", {w.key for w in app.button})
         self.assertEqual(app.session_state["advisor_plan"], plan)

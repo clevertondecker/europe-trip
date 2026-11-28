@@ -1,5 +1,6 @@
 """Validate real-price provenance and read-only Italy honeymoon alternatives."""
 import unittest
+from tests.nav_helpers import open_support
 from copy import deepcopy
 from pathlib import Path
 
@@ -99,10 +100,8 @@ class ItalyHoneymoonModelTests(unittest.TestCase):
 class ItalyHoneymoonAppTests(unittest.TestCase):
     def test_italy_tab_is_visible_and_never_modifies_canonical_trip(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=100).run()
-        app.radio(key="main_navigation").set_value("Roteiro").run()
         initial=deepcopy(app.session_state["advisor_plan"])
-        app.segmented_control(key="ux_section").set_value("Melhorar meu roteiro").run()
-        app.selectbox(key="ux_improve_view").set_value("Itália").run()
+        open_support(app,"Itália")
         self.assertFalse(app.exception,[e.message for e in app.exception])
         self.assertIn("italy_honeymoon_variant",
                       {x.key for x in app.segmented_control})

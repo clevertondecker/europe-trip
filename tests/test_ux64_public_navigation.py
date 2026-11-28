@@ -1,5 +1,6 @@
 """Legacy route identities survive 3-area visual migration."""
 import unittest
+from tests.nav_helpers import open_public
 from ux64_navigation_model import (
     PUBLIC_AREAS, PUBLIC_TASKS, TARGETS,
     public_area, public_task, select_public_area, select_public_task,
@@ -56,8 +57,7 @@ class ContextualActivityAppTests(unittest.TestCase):
         from streamlit.testing.v1 import AppTest
         app=AppTest.from_file(str(Path(__file__).resolve().parents[1]/"app.py"),
                               default_timeout=120).run()
-        app.button(key="ux_sidebar_nav_1").click().run()
-        app.segmented_control(key="ux64_public_task").set_value("Minha lista").run()
+        open_public(app,"Explorar","Minha lista")
         self.assertFalse(app.exception,[x.message for x in app.exception])
         self.assertFalse(any("page-title'>Meu roteiro" in m.value
                              for m in app.markdown))
@@ -95,10 +95,7 @@ class ContextualActivityAppTests(unittest.TestCase):
                           ("Planejar","Organizar"),("Orçamento","Visão financeira"),
                           ("Orçamento","Simulações")):
             with self.subTest(area=area,task=task):
-                target={"Explorar":1,"Planejar":2,"Orçamento":3}[area]
-                app.button(key="ux_sidebar_nav_"+str(target)).click().run()
-                self.assertFalse(app.exception,[x.message for x in app.exception])
-                app.segmented_control(key="ux64_public_task").set_value(task).run()
+                open_public(app,area,task)
                 self.assertFalse(app.exception,[x.message for x in app.exception])
                 self.assertEqual(app.session_state["advisor_plan"],original)
 

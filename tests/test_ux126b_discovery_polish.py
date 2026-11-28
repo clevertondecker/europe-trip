@@ -2,6 +2,7 @@
 import ast
 from pathlib import Path
 import unittest
+from tests.nav_helpers import open_public
 
 from ux501_destination_discovery_ui import _result_caption
 
@@ -59,8 +60,7 @@ class DiscoveryNavigationTests(unittest.TestCase):
         from itinerary_eligibility import itinerary_eligibility, eligibility_index
         from copy import deepcopy
         app = AppTest.from_file(str(ROOT / "app.py"), default_timeout=120).run()
-        app.button(key="ux_sidebar_nav_1").click().run()
-        app.segmented_control(key="ux64_public_task").set_value("Descobrir").run()
+        open_public(app,"Explorar","Descobrir")
         self.assertFalse(app.exception, [e.message for e in app.exception])
         original = deepcopy(app.session_state["advisor_plan"])
         catalog = load_attractions()
@@ -89,12 +89,11 @@ class DiscoveryNavigationTests(unittest.TestCase):
         if categories.options:
             categories.set_value([categories.options[0]]).run()
         expected = deepcopy(app.session_state["ux502_discovery_filters"])
-        app.button(key="ux_sidebar_nav_2").click().run()
+        open_public(app,"Planejar","Meus destinos")
         # Simulate widget state left behind by a previously rendered view.
         app.session_state["ux501_search"] = "Aachen"
         app.session_state["ux126_eligibility_filter"] = "Todos"
-        app.button(key="ux_sidebar_nav_1").click().run()
-        app.segmented_control(key="ux64_public_task").set_value("Descobrir").run()
+        open_public(app,"Explorar","Descobrir")
         self.assertFalse(app.exception, [e.message for e in app.exception])
         self.assertNotIn("ux126_eligibility_filter",{x.key for x in app.radio})
         self.assertNotIn("ux126_eligibility_filter",app.session_state["ux502_discovery_filters"])

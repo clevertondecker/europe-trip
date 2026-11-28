@@ -1,5 +1,6 @@
 """UX 4.8: weekend draft model, conflict validation and Streamlit smoke."""
 import unittest
+from tests.nav_helpers import open_public
 from copy import deepcopy
 from json import loads
 from streamlit.testing.v1 import AppTest
@@ -181,8 +182,7 @@ class WeekendGroupUITests(unittest.TestCase):
     def test_workflow_uses_current_navigation_without_legacy_menu(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
         self.assertFalse(app.exception,[e.message for e in app.exception])
-        app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Meu roteiro"))).click().run()
-        app.segmented_control(key="ux_section").set_value("Organizar viagem").run()
+        open_public(app,"Planejar","Organizar")
         self.assertFalse(app.exception,[e.message for e in app.exception])
         self.assertFalse(any("Acesso a ferramentas antigas" in e.label
                              for e in app.expander))

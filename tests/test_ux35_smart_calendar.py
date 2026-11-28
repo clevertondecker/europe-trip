@@ -1,5 +1,6 @@
 """UX 3.5: dates are suggestions, not bookings, and only confirmed changes persist."""
 import unittest
+from tests.nav_helpers import open_public
 from copy import deepcopy
 from datetime import date
 from pathlib import Path
@@ -172,8 +173,7 @@ class SmartCalendarUITests(unittest.TestCase):
     def test_calendar_is_contextual_and_proposes_without_mutation(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=115).run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
-        app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Meu roteiro"))).click().run()
-        app.segmented_control(key="ux_section").set_value("Organizar viagem").run()
+        open_public(app,"Planejar","Organizar")
         app.segmented_control(key="ux120_mode").set_value(
             "Calendário").run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
@@ -187,8 +187,7 @@ class SmartCalendarUITests(unittest.TestCase):
 
     def test_navigation_returns_to_smart_calendar(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=115).run()
-        app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Meu roteiro"))).click().run()
-        app.segmented_control(key="ux_section").set_value("Organizar viagem").run()
+        open_public(app,"Planejar","Organizar")
         app.segmented_control(key="ux120_mode").set_value(
             "Calendário").run()
         self.assertFalse(app.exception,[x.message for x in app.exception])

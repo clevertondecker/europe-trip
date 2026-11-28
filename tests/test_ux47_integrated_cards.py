@@ -1,5 +1,6 @@
 """UX 4.7: one read-only destination card, one existing editor."""
 import unittest
+from tests.nav_helpers import open_public
 from copy import deepcopy
 from pathlib import Path
 from attractions_model import load_attractions,load_base_routes
@@ -52,9 +53,7 @@ class IntegratedDestinationCardsTests(unittest.TestCase):
 
     def test_single_card_in_app_without_separate_gallery(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
-        app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Meu roteiro"))).click().run()
-        app.segmented_control(key="ux_section").set_value("Organizar viagem").run()
-        app.segmented_control(key="ux64_public_task").set_value("Organizar").run()
+        open_public(app,"Planejar","Organizar")
         app.segmented_control(key="flow_active_stage").set_value("França").run()
         p=deepcopy(app.session_state["advisor_plan"])
         p["packages"]=self._plan(("colmar",))["packages"]
@@ -123,9 +122,7 @@ class IntegratedDestinationCardsTests(unittest.TestCase):
 
     def test_multiple_destinations_one_editor_each(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
-        app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Meu roteiro"))).click().run()
-        app.segmented_control(key="ux_section").set_value("Organizar viagem").run()
-        app.segmented_control(key="ux64_public_task").set_value("Organizar").run()
+        open_public(app,"Planejar","Organizar")
         app.segmented_control(key="flow_active_stage").set_value("França").run()
         p=deepcopy(app.session_state["advisor_plan"])
         p["packages"]=self._plan(("colmar","strasbourg"))["packages"]
