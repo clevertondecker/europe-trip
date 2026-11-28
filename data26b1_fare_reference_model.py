@@ -76,7 +76,18 @@ def validate_review(row, checked):
     if amount is not None and (type(amount) is not int or amount <= 0):
         raise ValueError("Preço revisado inválido")
     mode = review["transport_mode"]
-    expected = ("not_reproduced_nonrail" if mode == "bus" else "not_reproduced" if amount is None else
+    if pair(review) != pair(row) or _day(review["travel_date"]) != _day(row["travel_date"]):
+        raise ValueError("Identidade, direção ou data de revisão inválida")
+    unit = (review["currency"], review["passengers"], review["direction"], review["kind"])
+    expected_unit = (row["currency"], row["passengers"], row["direction"], row["kind"])
+    if mode == "rail_label" and amount is not None:
+        if (unit != expected_unit or type(review["passengers"]) is not int
+                or review["unit_provenance"] != "matching_observed_calendar"):
+            raise ValueError("Moeda, direção ou unidade de revisão incompatível")
+    elif unit != (None, None, None, None) or review["unit_provenance"] != "not_documented":
+        raise ValueError("Unidade de revisão não documentada")
+    expected = ("not_reproduced_nonrail" if mode == "bus" else
+                "not_reproduced" if mode != "rail_label" or amount is None else
                 "corroborated_price" if amount == row["amount_minor"] else "divergent_price")
     if mode not in ("bus", "rail_label", "unknown") or row["status"] != expected or not review.get("note"):
         raise ValueError("Classificação de revisão inconsistente")
@@ -91,7 +102,7 @@ def validate_fare_references(data):
         raise ValueError("Escopo histórico inválido")
     validate_catalog_scope(bases, destinations)
     universe = {(b,d) for b in bases for d in batch}
-    covered, seen, gaps = set(), set(), set()
+    covered, seen, gaps = set(), {}, set()
     for r in data["references"]:
         p = pair(r)
         if p not in universe or r["origin_country"] != "FR" or r["destination_country"] != COUNTRIES[p[1]] or not official_source(r["source_url"]):
@@ -116,11 +127,29 @@ def validate_fare_references(data):
             raise ValueError("Histórico inválido")
         if status in HISTORICAL:
             validate_review(r, checked)
-        key = (p, travel, research, capture, r["source_url"], r["amount_minor"], r["commercial_brand"],
+        # Price is the observation's value, not its identity. Historical
+        # claims and a newly observed calendar remain separate evidence layers.
+        key = (p, travel, research, capture, r["source_url"], r["commercial_brand"],
+               r["currency"], r["passengers"], r["direction"], r["kind"], r["fare_class"],
                "historical" if status in HISTORICAL else "calendar")
         if key in seen:
+            if seen[key] != r["amount_minor"]:
+                raise ValueError("Conflito de preço na mesma captura")
             raise ValueError("Observação duplicada")
-        seen.add(key)
+        seen[key] = r["amount_minor"]
+    # Revisions marked comparable must have an independent calendar row
+    # with exactly the reviewed terms, not merely a matching number.
+    for r in data["references"]:
+        review = r.get("review")
+        if not review or review["unit_provenance"] != "matching_observed_calendar":
+            continue
+        if not any(c["status"] == "observed_calendar" and pair(c) == pair(r)
+                   and all(c[k] == review[k] for k in (
+                       "travel_date", "researched_at", "source_capture_date", "source_url",
+                       "amount_minor", "commercial_brand", "currency", "passengers",
+                       "direction", "kind"))
+                   for c in data["references"]):
+            raise ValueError("Revisão inconsistente: calendário correspondente ausente")
     for g in data["gaps"]:
         p = pair(g)
         reason = g["reason"]
@@ -159,7 +188,11 @@ def fare_reference_coverage(data=None, legacy=None, quotes=None):
     consulted = {pair(g) for g in data.get("gaps", []) if g["reason"] != "research_pending"}
     def counts(pairs):
         return {"total":len(pairs), "legacy":len(previous & pairs), "with_references":len((previous | added) & pairs),
-                "batch_references":len(added & pairs), "complete_roundtrip":len(complete & pairs),
+                "batch_references":len(added & pairs),
+                "legacy_overlap":len(previous & added & pairs),
+                "net_new_references":len((added - previous) & pairs),
+                "legacy_only":len((previous - added) & pairs),
+                "complete_roundtrip":len(complete & pairs),
                 "pending":len(pending & pairs), "consulted_without_result":len(consulted & pairs)}
     return {"scope":counts(universe), "batch":counts(batch),
             "by_base":{b:counts({p for p in universe if p[0]==b}) for b in sorted({p[0] for p in universe})},
