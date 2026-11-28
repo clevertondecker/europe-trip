@@ -9,20 +9,26 @@ DATA = Path(__file__).resolve().parent / "data" / "data26c_priority_rail_2026_11
 INITIAL_SLUGS = {"saumur": "saumur", "dinan": "dinan", "le_mans": "le-mans", "saint_malo": "saint-malo"}
 SLUGS = {**INITIAL_SLUGS, "beaune": "beaune", "besancon": "besancon",
          "freiburg": "fribourg-en-brisgau", "saarbrucken": "sarrebruck",
-         "stuttgart": "stuttgart", "arlon": "arlon"}
+         "stuttgart": "stuttgart", "arlon": "arlon",
+         "trier": "treves", "offenburg": "offenburg"}
 ADDITIONAL_PAIRS = {("lille", "beaune"), ("lille", "besancon"),
                     ("metz", "freiburg"), ("nancy", "saarbrucken"),
                     ("metz", "stuttgart"), ("nancy", "stuttgart"),
-                    ("metz", "arlon"), ("nancy", "arlon")}
+                    ("metz", "arlon"), ("nancy", "arlon"),
+                    ("metz", "trier"), ("nancy", "trier"), ("strasbourg", "trier"),
+                    ("metz", "offenburg"), ("nancy", "offenburg")}
 EXPECTED_PAIRS = {(b, d) for b in RESEARCH_BASE_IDS for d in INITIAL_SLUGS} | ADDITIONAL_PAIRS
 
 def _valid_source(row):
     origin, dest = row["origin_id"], row["destination_id"]
     kind = row.get("evidence_type")
     if kind == "secondary_sample":
+        slug = "trier-hbf" if dest == "trier" else dest.replace("_", "-")
+        if dest == "trier" and row.get("published_arrival_station") != "Trier Hbf":
+            return False
         return row["source_url"] in (
-            f"https://www.thetrainline.com/en/train-times/{origin}-to-{dest.replace('_', '-')}",
-            f"https://www.thetrainline.com/fr/horaires-train/{origin}-a-{dest.replace('_', '-')}",
+            f"https://www.thetrainline.com/en/train-times/{origin}-to-{slug}",
+            f"https://www.thetrainline.com/fr/horaires-train/{origin}-a-{slug}",
         )
     return row["source_url"] == f"https://www.sncf-connect.com/train/trajet/{origin}/{SLUGS[dest]}"
 
