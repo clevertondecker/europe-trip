@@ -320,6 +320,8 @@ def render_independent_destination_discovery(*, discovery=None, focused_destinat
                                 st.caption("Atrações individuais ainda não cadastradas.")
                             if item.get("source_url"):
                                 st.link_button("Consultar fonte turística",item["source_url"])
+                            from destination_village_research_ui import render_village_research
+                            render_village_research(item["id"])
                             render_data8_destination_preview(
                                 item["id"], attraction_names={
                                     a["id"]:a["name"] for a in item["attractions"]})

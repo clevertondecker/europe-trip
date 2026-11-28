@@ -231,6 +231,44 @@
       "photo": null,
       "coordinates_precision": "city_area",
       "checked_at": "2026-11-16"
+    },
+    {
+      "id": "wengen",
+      "name": "Wengen",
+      "country": "Suíça",
+      "lat": 46.6054,
+      "lon": 7.9217,
+      "kind": "overnight",
+      "photo": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Wengen.jpg",
+        "author": "Jonas Ulrich",
+        "license": "CC BY-SA 3.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/3.0/",
+        "source_page": "https://commons.wikimedia.org/wiki/File:Wengen.jpg"
+      },
+      "source_url": "https://wengen.swiss/en/destination/getting-here.html",
+      "coordinates_precision": "city_area",
+      "coordinate_source_url": "https://mapcarta.com/Wengen",
+      "checked_at": "2026-11-28"
+    },
+    {
+      "id": "riquewihr",
+      "name": "Riquewihr",
+      "country": "França",
+      "lat": 48.16672,
+      "lon": 7.29707,
+      "kind": "excursion",
+      "photo": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Riquewihr_Rue_du_G%C3%A9n%C3%A9ral_de_Gaulle.jpg",
+        "author": "MEIER alain albert",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "source_page": "https://commons.wikimedia.org/wiki/File:Riquewihr_Rue_du_G%C3%A9n%C3%A9ral_de_Gaulle.jpg"
+      },
+      "source_url": "https://visitgrandest.fr/en/lieux/riquewihr/",
+      "coordinates_precision": "city_area",
+      "coordinate_source_url": "https://digital.library.unt.edu/explore/locations/p14933/",
+      "checked_at": "2026-11-28"
     }
   ],
   "attractions": [
@@ -2118,6 +2156,211 @@
       "confidence": "operator_destination_guide",
       "reservation_required": null,
       "notes": "A duração é hipótese editorial; verificar acesso, abertura e custo quando houver datas"
+    },
+    {
+      "id": "wengen_village",
+      "destination_id": "wengen",
+      "name": "Centro e chalés de Wengen",
+      "category": "arquitetura",
+      "summary": "Vila alpina sem circulação geral de carros; passeio a pé.",
+      "visit_minutes": 90,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "none",
+        "status": "not_applicable",
+        "validity": null,
+        "notes": ""
+      },
+      "source_urls": [
+        "https://wengen.swiss/en/destination/getting-here.html"
+      ],
+      "checked_at": "2026-11-28",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": ""
+    },
+    {
+      "id": "wengen_church_view",
+      "destination_id": "wengen",
+      "name": "Mirante da igreja reformada",
+      "category": "natureza",
+      "summary": "Ponto panorâmico no percurso a pé desde a vila.",
+      "visit_minutes": 45,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "none",
+        "status": "not_applicable",
+        "validity": null,
+        "notes": ""
+      },
+      "source_urls": [
+        "https://wengen.swiss/en/discover/summer-activities/hiking.html"
+      ],
+      "checked_at": "2026-11-28",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": ""
+    },
+    {
+      "id": "wengen_maennlichen",
+      "destination_id": "wengen",
+      "name": "Männlichen — teleférico ida e volta",
+      "category": "natureza",
+      "summary": "Acesso ao cume e Royal Walk; a caminhada não exige outro ingresso.",
+      "visit_minutes": 180,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": 62,
+        "currency": "CHF",
+        "per": "person",
+        "status": "operator_published",
+        "validity": "Referência publicada em 2026; não cotação 2027",
+        "notes": "Tarifa adulta ida e volta sem desconto; não inclui Royal Ride."
+      },
+      "source_urls": [
+        "https://www.maennlichen.ch/en/summer/information/fare-prices-from-wengen.html",
+        "https://wengen.swiss/en/map/detail/mannlichen-03097adf-7871-48a1-a13b-ad7132922767.html"
+      ],
+      "checked_at": "2026-11-28",
+      "opening_hours": null,
+      "seasonality": "Verão 2026; operação e clima a reconfirmar em 2027",
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "Tarifa adulta ida e volta sem desconto; não inclui Royal Ride."
+    },
+    {
+      "id": "riquewihr_old_town",
+      "destination_id": "riquewihr",
+      "name": "Centro medieval e Rue du Général-de-Gaulle",
+      "category": "arquitetura",
+      "summary": "Ruelas e casas em enxaimel na rota dos vinhos.",
+      "visit_minutes": 120,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "none",
+        "status": "not_applicable",
+        "validity": null,
+        "notes": ""
+      },
+      "source_urls": [
+        "https://visitgrandest.fr/en/lieux/riquewihr/"
+      ],
+      "checked_at": "2026-11-28",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": ""
+    },
+    {
+      "id": "riquewihr_dolder",
+      "destination_id": "riquewihr",
+      "name": "Musée du Dolder",
+      "category": "historia",
+      "summary": "Museu na torre medieval; quatro andares.",
+      "visit_minutes": 45,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": 3,
+        "currency": "EUR",
+        "per": "person",
+        "status": "operator_published",
+        "validity": "Referência publicada em 2026; não cotação 2027",
+        "notes": "Entrada individual; alternativa ao bilhete combinado, não somar os dois."
+      },
+      "source_urls": [
+        "https://www.riquewihr.fr/fr/rb/738389/musees-2",
+        "https://musee-riquewihr.fr/musee-du-dolder/"
+      ],
+      "checked_at": "2026-11-28",
+      "opening_hours": null,
+      "seasonality": "Abril a novembro; dias e horários a reconfirmar",
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "Entrada individual; alternativa ao bilhete combinado, não somar os dois."
+    },
+    {
+      "id": "riquewihr_thieves_tower",
+      "destination_id": "riquewihr",
+      "name": "Tour des Voleurs e Maison de Vigneron",
+      "category": "historia",
+      "summary": "Visita conjunta aos dois espaços de museu.",
+      "visit_minutes": 60,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": 5,
+        "currency": "EUR",
+        "per": "person",
+        "status": "operator_published",
+        "validity": "Referência publicada em 2026; não cotação 2027",
+        "notes": "Entrada conjunta de dois espaços; bilhete combinado com Dolder custa €7 por adulto e não deve ser somado."
+      },
+      "source_urls": [
+        "https://www.riquewihr.fr/fr/rb/738389/musees-2"
+      ],
+      "checked_at": "2026-11-28",
+      "opening_hours": null,
+      "seasonality": "Abril a novembro; calendário a reconfirmar",
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": "Entrada conjunta de dois espaços; bilhete combinado com Dolder custa €7 por adulto e não deve ser somado."
+    },
+    {
+      "id": "riquewihr_vineyards",
+      "destination_id": "riquewihr",
+      "name": "Paisagem dos vinhedos",
+      "category": "natureza",
+      "summary": "Passeio pelos arredores e paisagem vitícola; acesso a propriedades privadas e degustações não incluídos.",
+      "visit_minutes": 60,
+      "visit_minutes_status": "editorial_assumption",
+      "ticket": {
+        "amount": null,
+        "currency": null,
+        "per": "none",
+        "status": "not_applicable",
+        "validity": null,
+        "notes": ""
+      },
+      "source_urls": [
+        "https://visitgrandest.fr/en/lieux/riquewihr/"
+      ],
+      "checked_at": "2026-11-28",
+      "opening_hours": null,
+      "seasonality": null,
+      "coordinates": null,
+      "coordinate_precision": "unknown",
+      "photo": null,
+      "confidence": "operator_destination_guide",
+      "reservation_required": null,
+      "notes": ""
     }
   ]
 }

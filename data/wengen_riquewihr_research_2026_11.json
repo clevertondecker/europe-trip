@@ -1,0 +1,353 @@
+{
+  "schema_version": 1,
+  "checked_at": "2026-11-28",
+  "travelers": 2,
+  "methodology": "Tempos de rota inteira são referências secundárias; somas de segmentos não são itinerários, nem mínimos comprovados. Valores de 2026 não são cotações 2027. Custos locais separados da viagem, sem inferir ida e volta ferroviária.",
+  "connections": [
+    {
+      "base_id": "mulhouse",
+      "destination_id": "wengen",
+      "mode": "rail",
+      "kind": "published_full_route",
+      "minimum_oneway_min": 202,
+      "typical_oneway_min": 249,
+      "segment_sum_min": null,
+      "segments": [
+        {
+          "from": "Mulhouse",
+          "to": "Wengen",
+          "minimum_min": 202,
+          "typical_min": 249,
+          "source_url": "https://www.thetrainline.com/en/train-times/mulhouse-to-wengen"
+        }
+      ],
+      "route_note": "Vila sem carros. Corredor sugerido via Interlaken Ost e Lauterbrunnen; itinerário completo e conexões a reconfirmar.",
+      "source_checked_at": "2026-11-28",
+      "full_route_fare_couple": null,
+      "weekend_return_verified": false,
+      "valid_for_2027": false,
+      "scenario": "1–2 noites a avaliar"
+    },
+    {
+      "base_id": "mulhouse",
+      "destination_id": "riquewihr",
+      "mode": "rail_bus",
+      "kind": "separate_segments_not_timetable",
+      "minimum_oneway_min": null,
+      "typical_oneway_min": null,
+      "segment_sum_min": 47,
+      "segments": [
+        {
+          "from": "Mulhouse",
+          "to": "Colmar",
+          "minimum_min": 19,
+          "typical_min": 24,
+          "source_url": "https://www.sncf-connect.com/train/trajet/mulhouse/colmar"
+        },
+        {
+          "from": "Colmar Gare SNCF",
+          "to": "Riquewihr Poste",
+          "minimum_min": 28,
+          "service_date": "2026-11-28",
+          "source_url": "https://services.fluo.grandest.fr/fr/schedules/line/30671"
+        }
+      ],
+      "route_note": "Trem até Colmar, ônibus Fluo 816 até Poste; soma sem espera de conexão, não é duração total. Tarifa de ônibus pode ser dispensada com bilhete TER datado do dia conforme Fluo; verificar elegibilidade.",
+      "source_checked_at": "2026-11-28",
+      "full_route_fare_couple": null,
+      "weekend_return_verified": false,
+      "valid_for_2027": false,
+      "scenario": "Bate-volta candidato"
+    },
+    {
+      "base_id": "strasbourg",
+      "destination_id": "wengen",
+      "mode": "rail",
+      "kind": "published_full_route",
+      "minimum_oneway_min": 260,
+      "typical_oneway_min": 318,
+      "segment_sum_min": null,
+      "segments": [
+        {
+          "from": "Strasbourg",
+          "to": "Wengen",
+          "minimum_min": 260,
+          "typical_min": 318,
+          "source_url": "https://www.thetrainline.com/en/train-times/strasbourg-to-wengen"
+        }
+      ],
+      "route_note": "Vila sem carros. Corredor sugerido via Interlaken Ost e Lauterbrunnen; itinerário completo e conexões a reconfirmar.",
+      "source_checked_at": "2026-11-28",
+      "full_route_fare_couple": null,
+      "weekend_return_verified": false,
+      "valid_for_2027": false,
+      "scenario": "2–3 noites a avaliar"
+    },
+    {
+      "base_id": "strasbourg",
+      "destination_id": "riquewihr",
+      "mode": "rail_bus",
+      "kind": "separate_segments_not_timetable",
+      "minimum_oneway_min": null,
+      "typical_oneway_min": null,
+      "segment_sum_min": 53,
+      "segments": [
+        {
+          "from": "Strasbourg",
+          "to": "Colmar",
+          "minimum_min": 25,
+          "typical_min": 32,
+          "source_url": "https://www.sncf-connect.com/train/trajet/strasbourg/colmar"
+        },
+        {
+          "from": "Colmar Gare SNCF",
+          "to": "Riquewihr Poste",
+          "minimum_min": 28,
+          "service_date": "2026-11-28",
+          "source_url": "https://services.fluo.grandest.fr/fr/schedules/line/30671"
+        }
+      ],
+      "route_note": "Trem até Colmar, ônibus Fluo 816 até Poste; soma sem espera de conexão, não é duração total. Tarifa de ônibus pode ser dispensada com bilhete TER datado do dia conforme Fluo; verificar elegibilidade.",
+      "source_checked_at": "2026-11-28",
+      "full_route_fare_couple": null,
+      "weekend_return_verified": false,
+      "valid_for_2027": false,
+      "scenario": "Bate-volta candidato"
+    },
+    {
+      "base_id": "metz",
+      "destination_id": "wengen",
+      "mode": "rail",
+      "kind": "separate_segments_not_timetable",
+      "minimum_oneway_min": null,
+      "typical_oneway_min": null,
+      "segment_sum_min": 320,
+      "segments": [
+        {
+          "from": "Metz",
+          "to": "Interlaken Ost",
+          "minimum_min": 283,
+          "typical_min": 353,
+          "source_url": "https://www.thetrainline.com/en/train-times/metz-to-interlaken-ost"
+        },
+        {
+          "from": "Interlaken Ost",
+          "to": "Wengen via Lauterbrunnen",
+          "minimum_min": 37,
+          "source_url": "https://wengen.swiss/en/destination/getting-here.html"
+        }
+      ],
+      "route_note": "Vila sem carros. Corredor sugerido via Interlaken Ost e Lauterbrunnen; itinerário completo e conexões a reconfirmar.",
+      "source_checked_at": "2026-11-28",
+      "full_route_fare_couple": null,
+      "weekend_return_verified": false,
+      "valid_for_2027": false,
+      "scenario": "2–3 noites a avaliar"
+    },
+    {
+      "base_id": "metz",
+      "destination_id": "riquewihr",
+      "mode": "rail_bus",
+      "kind": "separate_segments_not_timetable",
+      "minimum_oneway_min": null,
+      "typical_oneway_min": null,
+      "segment_sum_min": 115,
+      "segments": [
+        {
+          "from": "Metz",
+          "to": "Colmar",
+          "minimum_min": 87,
+          "typical_min": 129,
+          "source_url": "https://www.sncf-connect.com/train/trajet/metz/colmar"
+        },
+        {
+          "from": "Colmar Gare SNCF",
+          "to": "Riquewihr Poste",
+          "minimum_min": 28,
+          "service_date": "2026-11-28",
+          "source_url": "https://services.fluo.grandest.fr/fr/schedules/line/30671"
+        }
+      ],
+      "route_note": "Trem até Colmar, ônibus Fluo 816 até Poste; soma sem espera de conexão, não é duração total. Tarifa de ônibus pode ser dispensada com bilhete TER datado do dia conforme Fluo; verificar elegibilidade.",
+      "source_checked_at": "2026-11-28",
+      "full_route_fare_couple": null,
+      "weekend_return_verified": false,
+      "valid_for_2027": false,
+      "scenario": "Dia inteiro ou pernoite a avaliar"
+    },
+    {
+      "base_id": "nancy",
+      "destination_id": "wengen",
+      "mode": "rail",
+      "kind": "separate_segments_not_timetable",
+      "minimum_oneway_min": null,
+      "typical_oneway_min": null,
+      "segment_sum_min": 326,
+      "segments": [
+        {
+          "from": "Nancy",
+          "to": "Interlaken Ost",
+          "minimum_min": 289,
+          "typical_min": 388,
+          "source_url": "https://www.thetrainline.com/en/train-times/nancy-to-interlaken-ost"
+        },
+        {
+          "from": "Interlaken Ost",
+          "to": "Wengen via Lauterbrunnen",
+          "minimum_min": 37,
+          "source_url": "https://wengen.swiss/en/destination/getting-here.html"
+        }
+      ],
+      "route_note": "Vila sem carros. Corredor sugerido via Interlaken Ost e Lauterbrunnen; itinerário completo e conexões a reconfirmar.",
+      "source_checked_at": "2026-11-28",
+      "full_route_fare_couple": null,
+      "weekend_return_verified": false,
+      "valid_for_2027": false,
+      "scenario": "2–3 noites a avaliar"
+    },
+    {
+      "base_id": "nancy",
+      "destination_id": "riquewihr",
+      "mode": "rail_bus",
+      "kind": "separate_segments_not_timetable",
+      "minimum_oneway_min": null,
+      "typical_oneway_min": null,
+      "segment_sum_min": 125,
+      "segments": [
+        {
+          "from": "Nancy",
+          "to": "Colmar",
+          "minimum_min": 97,
+          "typical_min": 140,
+          "source_url": "https://www.sncf-connect.com/train/trajet/nancy/colmar"
+        },
+        {
+          "from": "Colmar Gare SNCF",
+          "to": "Riquewihr Poste",
+          "minimum_min": 28,
+          "service_date": "2026-11-28",
+          "source_url": "https://services.fluo.grandest.fr/fr/schedules/line/30671"
+        }
+      ],
+      "route_note": "Trem até Colmar, ônibus Fluo 816 até Poste; soma sem espera de conexão, não é duração total. Tarifa de ônibus pode ser dispensada com bilhete TER datado do dia conforme Fluo; verificar elegibilidade.",
+      "source_checked_at": "2026-11-28",
+      "full_route_fare_couple": null,
+      "weekend_return_verified": false,
+      "valid_for_2027": false,
+      "scenario": "Dia inteiro ou pernoite a avaliar"
+    },
+    {
+      "base_id": "lille",
+      "destination_id": "wengen",
+      "mode": "rail",
+      "kind": "published_full_route",
+      "minimum_oneway_min": 462,
+      "typical_oneway_min": 739,
+      "segment_sum_min": null,
+      "segments": [
+        {
+          "from": "Lille",
+          "to": "Wengen",
+          "minimum_min": 462,
+          "typical_min": 739,
+          "source_url": "https://www.thetrainline.com/en/train-times/lille-to-wengen"
+        }
+      ],
+      "route_note": "Vila sem carros. Corredor sugerido via Interlaken Ost e Lauterbrunnen; itinerário completo e conexões a reconfirmar.",
+      "source_checked_at": "2026-11-28",
+      "full_route_fare_couple": null,
+      "weekend_return_verified": false,
+      "valid_for_2027": false,
+      "scenario": "3 noites a avaliar"
+    },
+    {
+      "base_id": "lille",
+      "destination_id": "riquewihr",
+      "mode": "rail_bus",
+      "kind": "separate_segments_not_timetable",
+      "minimum_oneway_min": null,
+      "typical_oneway_min": null,
+      "segment_sum_min": 252,
+      "segments": [
+        {
+          "from": "Lille",
+          "to": "Colmar",
+          "minimum_min": 224,
+          "typical_min": 276,
+          "source_url": "https://www.sncf-connect.com/train/trajet/lille/colmar"
+        },
+        {
+          "from": "Colmar Gare SNCF",
+          "to": "Riquewihr Poste",
+          "minimum_min": 28,
+          "service_date": "2026-11-28",
+          "source_url": "https://services.fluo.grandest.fr/fr/schedules/line/30671"
+        }
+      ],
+      "route_note": "Trem até Colmar, ônibus Fluo 816 até Poste; soma sem espera de conexão, não é duração total. Tarifa de ônibus pode ser dispensada com bilhete TER datado do dia conforme Fluo; verificar elegibilidade.",
+      "source_checked_at": "2026-11-28",
+      "full_route_fare_couple": null,
+      "weekend_return_verified": false,
+      "valid_for_2027": false,
+      "scenario": "Fim de semana a avaliar"
+    }
+  ],
+  "local_costs": {
+    "wengen": [
+      {
+        "label": "Teleférico Männlichen ida e volta (casal, sem desconto)",
+        "amount": 124,
+        "currency": "CHF",
+        "source_url": "https://www.maennlichen.ch/en/summer/information/fare-prices-from-wengen.html",
+        "conditions": "Verão 2026; opcional."
+      },
+      {
+        "label": "Royal Ride adicional ida e volta (casal)",
+        "amount": 20,
+        "currency": "CHF",
+        "source_url": "https://www.maennlichen.ch/en/summer/information/fare-prices-from-wengen.html",
+        "conditions": "Opcional, adicional ao teleférico."
+      }
+    ],
+    "riquewihr": [
+      {
+        "label": "Ônibus Fluo 816 ida e volta (casal, quatro bilhetes)",
+        "amount": 16,
+        "currency": "EUR",
+        "source_url": "https://www.fluo.grandest.fr/cars-fluo/",
+        "conditions": "Tarifa avulsa; pode ser dispensada com TER válido do dia. Não somar se integrado."
+      },
+      {
+        "label": "Bilhete combinado Dolder + Tour des Voleurs + Maison de Vigneron (casal)",
+        "amount": 14,
+        "currency": "EUR",
+        "source_url": "https://www.riquewihr.fr/fr/rb/738389/musees-2",
+        "conditions": "Alternativa aos ingressos individuais, não somar."
+      },
+      {
+        "label": "Kut’zig passe diário (casal)",
+        "amount": 64,
+        "currency": "EUR",
+        "source_url": "https://kutzig.fr/en/produit/ticket/",
+        "conditions": "Alternativa sazonal ao Fluo; operação 2027 a verificar."
+      }
+    ]
+  },
+  "scenarios": {
+    "wengen": [
+      "Econômico: 1–2 noites em Lauterbrunnen/Interlaken, caminhada na vila; cotar trem, hotel e alimentação.",
+      "Equilibrado: 2 noites, Männlichen em dia de céu aberto; reservar margem de clima.",
+      "Experiência: 3 noites, avaliar Jungfraujoch separadamente; cotar ingresso e transporte sem duplicar passes."
+    ],
+    "riquewihr": [
+      "Econômico: bate-volta de trem + Fluo; centro gratuito.",
+      "Equilibrado: centro e museus, almoço; conferir ônibus de retorno.",
+      "Experiência: combinar vilarejos da rota dos vinhos com Kut’zig sazonal, ou uma noite em Colmar."
+    ]
+  },
+  "missing": [
+    "Tarifa internacional/ferroviária integral para dois adultos em ambas direções",
+    "Horários de retorno em fim de semana e conexões datadas para setembro–novembro 2027",
+    "Hospedagem, refeições, taxa turística e acesso a pé medido; não estimados como fatos"
+  ]
+}

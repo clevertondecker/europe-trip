@@ -105,13 +105,24 @@ def load_rail_evidence()->dict:
             fare_conditions=x["fare_kind"],url=x["source_url"],
             kind="operator_overview_not_date_specific",notes=x["notes"],
             missing=("dated_weekend_return","last_mile","2027_schedule")))
+    # Only full published rail routes belong in the rail-time projection.
+    # Mixed-mode and unsynchronised sums remain in destination detail.
+    from destination_village_research_model import load_village_research
+    for x in load_village_research()["connections"]:
+        if x["kind"] != "published_full_route" or x["base_id"] != "lille":
+            continue
+        rows.append(_record(x["base_id"], x["destination_id"], "village_secondary_2026",
+                            x["source_checked_at"], minimum=x["minimum_oneway_min"],
+                            typical=x["typical_oneway_min"], url=x["segments"][0]["source_url"],
+                            destination_station="Wengen", kind="secondary_timetable_reference_2026",
+                            notes=x["route_note"], missing=("weekend_return","last_mile","2027_schedule")))
     # Only records containing a documented time count as a researched journey.
     by_pair=defaultdict(list)
     for row in rows:
         by_pair[(row["origin_id"],row["destination_id"])].append(row)
     return {"observations":rows,"by_pair":dict(by_pair),"sources":(
         "five_base_operator_2026","expanded_rail_sample_2026","four_base_routes_2026",
-        "dq30_dated_operator_2026","dq30_operator_overview_2026")}
+        "dq30_dated_operator_2026","dq30_operator_overview_2026","village_secondary_2026")}
 
 def route_evidence(data:dict,origin:str,destination:str)->dict:
     origin,destination=canonical_place(origin),canonical_place(destination)
@@ -133,7 +144,7 @@ def route_evidence(data:dict,origin:str,destination:str)->dict:
     # Stable source preference is for display ONLY, not taking the minimum
     # across dissimilar evidence. The complete provenance is returned.
     priority=("five_base_operator_2026","expanded_rail_sample_2026","four_base_routes_2026",
-              "dq30_dated_operator_2026","dq30_operator_overview_2026")
+              "dq30_dated_operator_2026","dq30_operator_overview_2026","village_secondary_2026")
     best=sorted(timed,key=lambda x:priority.index(x["source_dataset"]))[0]
     return {"status":"historical_time","minimum_oneway_min":best["minimum_oneway_min"],
             "typical_oneway_min":best["typical_oneway_min"],
