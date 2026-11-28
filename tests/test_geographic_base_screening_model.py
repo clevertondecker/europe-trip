@@ -1,7 +1,7 @@
 """The registered universe is not interchangeable with exploratory candidates."""
 import unittest
 
-from geographic_base_screening_model import geographic_screening
+from tools.geographic_base_screening_model import geographic_screening
 
 
 class GeographicScreeningTests(unittest.TestCase):
