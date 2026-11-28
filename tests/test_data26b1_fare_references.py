@@ -124,3 +124,17 @@ class FareReferencesTest(unittest.TestCase):
         with patch("base_research_expanded_model.load_research", return_value={"cities":[{"id":"metz","country":"França"}]}), patch("trip01_supplemental_discovery.build_exploration_discovery", return_value={"destinations":[{"id":"bruges_be","country":"França"}]}):
             with self.assertRaisesRegex(ValueError, "catálogo"):
                 validate_catalog_scope({"metz"}, {"bruges_be"})
+
+    def test_bern_is_research_only_without_catalog_mutation(self):
+        from unittest.mock import patch
+        from data26b1_fare_reference_model import validate_catalog_scope
+        bases = {"cities": [{"id":"metz","country":"França"}]}
+        destinations = {"destinations": []}
+        with patch("base_research_expanded_model.load_research", return_value=bases), patch("trip01_supplemental_discovery.build_exploration_discovery", return_value=destinations):
+            validate_catalog_scope({"metz"}, {"bern"})
+            with self.assertRaisesRegex(ValueError, "destino paris"):
+                validate_catalog_scope({"metz"}, {"paris"})
+        self.assertEqual(destinations, {"destinations": []})
+        with patch("base_research_expanded_model.load_research", return_value=bases), patch("trip01_supplemental_discovery.build_exploration_discovery", return_value={"destinations":[{"id":"bern","country":"França"}]}):
+            with self.assertRaisesRegex(ValueError, "destino bern"):
+                validate_catalog_scope({"metz"}, {"bern"})
