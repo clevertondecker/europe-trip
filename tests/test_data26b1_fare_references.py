@@ -190,3 +190,62 @@ class FareReferencesTest(unittest.TestCase):
         with patch("base_research_expanded_model.load_research", return_value=bases), patch("trip01_supplemental_discovery.build_exploration_discovery", return_value={"destinations":[{"id":"bern","country":"França"}]}):
             with self.assertRaisesRegex(ValueError, "destino bern"):
                 validate_catalog_scope({"metz"}, {"bern"})
+
+
+    def test_return_and_product_references_do_not_expand_outbound_coverage(self):
+        result = fare_reference_coverage(data=self.data)
+        stripped = copy.deepcopy(self.data)
+        returns = stripped.pop("return_references")
+        products = stripped.pop("regional_products")
+        self.assertEqual(len(returns), 5)
+        self.assertEqual(len(products), 12)
+        self.assertEqual(result["scope"]["total"], 60)
+        self.assertEqual(result, fare_reference_coverage(data=stripped))
+        for r in returns:
+            self.assertEqual(r["origin_id"], "paris")
+            self.assertEqual(r["travel_date"], "2026-12-06")
+            self.assertIsNone(r["service_id"])
+            self.assertIsNone(r["availability"])
+        indexed = {p["id"]: p for p in products}
+        self.assertEqual(indexed["dual_2_family"]["couple_use"], "requires_children")
+        self.assertEqual(indexed["fluo_group_weekend"]["price_unit"], "group_day")
+        self.assertIsNone(indexed["saar_lor_lux"]["amount_minor"])
+
+    def test_invalid_return_or_product_rejected(self):
+        for kind, key, changes in (
+            ("return_references", "lille", {"origin_id": "lille"}),
+            ("return_references", "lille", {"passengers": 2}),
+            ("return_references", "lille", {"service_id": "7014"}),
+            ("return_references", "lille", {"availability": True}),
+            ("regional_products", "dual_2_family", {"couple_use": "group_allowed"}),
+            ("regional_products", "sbb_saver_day_no_card", {"valid_for_2027": True}),
+            ("regional_products", "saar_lor_lux", {"amount_minor": 1000}),
+            ("regional_products", "fluo_group_weekend", {"group_max": 1}),
+        ):
+            with self.subTest(kind=kind, key=key, changes=changes):
+                data = copy.deepcopy(self.data)
+                row = next(r for r in data[kind]
+                           if r.get("id", r.get("destination_id")) == key)
+                row.update(changes)
+                with self.assertRaises(ValueError):
+                    validate_fare_references(data)
+
+    def test_regional_product_and_return_tables_in_existing_panel(self):
+        from streamlit.testing.v1 import AppTest
+        app = AppTest.from_string(
+            "from ux132_research_coverage_ui import render_fare_evidence\n"
+            "render_fare_evidence({'bases': [], 'destinations': []})\n"
+        ).run(timeout=30)
+        self.assertFalse(app.exception)
+        self.assertFalse(app.warning)
+        returns = [e.value for e in app.dataframe
+                   if {"Origem", "Destino", "Preço indicativo"} <= set(e.value.columns)]
+        products = [e.value for e in app.dataframe
+                    if {"Produto", "Preço publicado", "Uso"} <= set(e.value.columns)]
+        self.assertEqual(len(returns), 1)
+        self.assertEqual(len(returns[0]), 5)
+        self.assertEqual(len(products), 1)
+        self.assertEqual(len(products[0]), 12)
+        app.selectbox(key="ux132_regional_product").select("dual_2_family").run()
+        self.assertFalse(app.exception)
+        self.assertTrue(any("exige crianças" in str(x.value) for x in app.markdown))
