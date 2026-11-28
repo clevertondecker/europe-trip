@@ -11,7 +11,8 @@ SLUGS = {**INITIAL_SLUGS, "beaune": "beaune", "besancon": "besancon",
          "freiburg": "fribourg-en-brisgau", "saarbrucken": "sarrebruck",
          "stuttgart": "stuttgart", "arlon": "arlon",
          "trier": "treves", "offenburg": "offenburg",
-         "aachen": "aix-la-chapelle", "baden_baden": "baden-baden", "kehl": "kehl"}
+         "aachen": "aix-la-chapelle", "baden_baden": "baden-baden", "kehl": "kehl",
+         "interlaken": "interlaken", "liege": "liege", "namur": "namur"}
 ADDITIONAL_PAIRS = {("lille", "beaune"), ("lille", "besancon"),
                     ("metz", "freiburg"), ("nancy", "saarbrucken"),
                     ("metz", "stuttgart"), ("nancy", "stuttgart"),
@@ -20,7 +21,10 @@ ADDITIONAL_PAIRS = {("lille", "beaune"), ("lille", "besancon"),
                     ("metz", "offenburg"), ("nancy", "offenburg"),
                     ("metz", "aachen"), ("nancy", "aachen"),
                     ("metz", "baden_baden"), ("nancy", "baden_baden"),
-                    ("lille", "baden_baden"), ("metz", "kehl")}
+                    ("lille", "baden_baden"), ("metz", "kehl"),
+                    ("nancy", "interlaken"), ("metz", "interlaken"),
+                    ("metz", "liege"), ("strasbourg", "arlon"),
+                    ("metz", "namur"), ("strasbourg", "namur")}
 EXPECTED_PAIRS = {(b, d) for b in RESEARCH_BASE_IDS for d in INITIAL_SLUGS} | ADDITIONAL_PAIRS
 
 def _valid_source(row):
@@ -28,7 +32,9 @@ def _valid_source(row):
     kind = row.get("evidence_type")
     if kind == "secondary_sample":
         station_destinations = {"trier": ("trier-hbf", "Trier Hbf"),
-                                "aachen": ("aachen-hbf", "Aachen Hbf")}
+                                "aachen": ("aachen-hbf", "Aachen Hbf"),
+                                "interlaken": ("interlaken-ost", "Interlaken Ost"),
+                                "liege": ("liege-guillemins", "Liège-Guillemins")}
         slug = dest.replace("_", "-")
         if dest in station_destinations:
             slug, station = station_destinations[dest]
