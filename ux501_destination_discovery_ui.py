@@ -29,10 +29,22 @@ def _cached_discovery():
 
 
 
+from time import monotonic
+from commons_client import NEGATIVE_TTL
+
+_visible_photo_cache = {}
+
 def _cached_visible_photos(identity: tuple[tuple[str, str], ...]) -> dict:
-    # Do not persist partial/failed lookups. No catalog writes.
-    return lookup_destination_photos(
-        [{"id":destination_id,"name":name} for destination_id,name in identity])
+    now = monotonic()
+    pending = [(i, n) for i, n in identity
+               if (i, n) not in _visible_photo_cache or _visible_photo_cache[i, n][1] <= now]
+    if pending:
+        found = lookup_destination_photos([{"id": i, "name": n} for i, n in pending])
+        for i, n in pending:
+            result = found.get(i)
+            _visible_photo_cache[i, n] = (result, float("inf") if result else monotonic() + NEGATIVE_TTL)
+    return {i: _visible_photo_cache[i, n][0] for i, n in identity
+            if _visible_photo_cache[i, n][0] is not None}
 
 
 def _render_destination_media(destination: dict, photo: dict | None) -> None:
