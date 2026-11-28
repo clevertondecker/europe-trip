@@ -13,8 +13,6 @@ import json
 
 DEFAULT = Path(__file__).resolve().parent / "data" / "dq30_walking_access_2026_11.json"
 VALID_PRECISION = {"unknown", "attraction_point", "area_centroid", "entrance"}
-VALID_DISTANCE_KINDS = {"walking_route", "straight_line", "rail_distance"}
-VALID_MODES = {"walking", "rail", "public_transport"}
 # Legacy values remain accepted; new evidence types have distinct contracts.
 VALID_STATUS = {
     "operator_published_walk_duration", "pending_verified_pedestrian_route",
