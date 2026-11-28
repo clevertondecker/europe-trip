@@ -165,3 +165,22 @@ Referências oficiais observadas em 28/11/2026, por adulto, EUR. IDs corresponde
 - Nenhuma distância em linha reta foi convertida em rota pedestre. Não há ganho de cobertura de última milha validada até integrar os registros na projeção com testes de preservação do baseline.
 
 Pendências reais: cotações completas para dois adultos nos cinco pares de Paris (não combinar preços independentes), quinze ofertas de moradia para a mesma janela com disponibilidade e total, confirmação de internet no imóvel reservado, cesta de consumo comparável completa, ampliar atrações restantes, integrar referências contemporâneas sem modificar as observações históricas DATA24, validar CI e revisão visual. Não declarar conclusão do PR com base nestas evidências parciais.
+
+
+### Checklist de consolidação — revisão do HEAD aa1c36f e posteriores (28/11/2026)
+
+Congelar a expansão do escopo. Os datasets e projeções são as fontes da aplicação; as tabelas anteriores neste Markdown são registro histórico de pesquisa, não fonte operacional. Não importar seus dados sem verificar o contrato e a fonte.
+
+- [x] Expor revisão documental DATA26C no detalhe existente, preservando observações originais, versões, confiança e divergências.
+- [x] Classificar Strasbourg–Arlon como modalidade inconclusiva; preservar a observação, excluir da projeção de tempo elegível. Cobertura esperada 247/270 (91,5%), antes 248/270. Confirmar com CI, sem mudar denominador ou algoritmo REC02.
+- [x] Integrar cinco amostras datadas de Paris (29/11/2026) no DATA26B, coleção `schedule_samples` distinta de `quotes`. Identidades de estação locais à fonte; horários com offset, serviços e janela bruta derivada. Tempo líquido, última milha, disponibilidade e viabilidade 2027 desconhecidos.
+- [x] Integrar cinco referências indicativas inversas (06/12/2026) em DATA26B1 `return_references`, não vinculadas aos serviços de 29/11 e fora do denominador histórico de 60 pares.
+- [x] Integrar 12 variantes de produtos regionais em DATA26B1 `regional_products`, com unidades e restrições; apresentar na página existente, sem cotação, cálculo de economia ou alteração do orçamento.
+- [x] Acrescentar testes específicos para as novas projeções, serviços e produtos. Implementação ainda aguarda confirmação da CI do HEAD final.
+- [ ] Revisar a qualidade das referências e cobertura efetiva; executar testes de paridade DATA24 e integração REC02, incluindo caso inconclusivo.
+- [ ] Avaliar Colmar e Luxemburgo sob condições comparáveis quando fontes datadas acessíveis; preservar lacuna se não.
+- [ ] Integrar pesquisa de 15 estabelecimentos como candidatos documentais, não como cotações; preservar DATA26A/UX132C2 e datas hipotéticas. Ofertas completas e internet efetivamente comprovada continuam indisponíveis.
+- [ ] Integrar cinco tarifas urbanas e referências de atrações/última milha nos contratos existentes, preservando histórico e conflitos. Cesta local completa permanece desconhecida.
+- [ ] Consolidar checklist e relatório por domínio, confirmar CI integral no HEAD final, QA visual desktop/mobile se disponível. Não declarar QA se não executado.
+- [ ] Manter draft; não fazer merge sem autorização.
+
