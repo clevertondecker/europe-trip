@@ -98,7 +98,7 @@ class GuidedComparisonTests(unittest.TestCase):
         self.assertEqual(sum("ui-page-header" in m.value for m in a.markdown),1)
         self.assertLessEqual(sum(x.key.startswith("rec03a_pick_")
                                 for x in a.checkbox if x.key),4)
-        self.assertTrue(any(x.key=="rec03a_show_all" for x in a.checkbox))
+        self.assertEqual(a.segmented_control(key="rec03a_catalog_mode").value,"Sugestões automáticas")
         self.assertEqual(a.session_state["advisor_plan"],plan)
         self.assertEqual(a.session_state["ux502_interests"],wishes)
         a.run()
@@ -112,11 +112,12 @@ class GuidedComparisonTests(unittest.TestCase):
         self.assertNotIn("render_card_selection_summary(",source)
         self.assertNotIn("_render_quick_comparison(",source)
         self.assertIn('view=st.segmented_control("Área da pesquisa"',source)
-        self.assertLess(source.index('search=st.text_input("Pesquisar cidade ou país"'),
-                        source.index('show_all=st.checkbox('))
+        self.assertLess(source.index('render_selection_toolbar(options,cities,navigation="explore")'),
+                        source.index('render_catalog_filters(result["candidates"], cities)'))
         self.assertIn('render_selection_toolbar(options,cities,navigation="explore")',source)
         self.assertIn('render_selection_toolbar(options,cities,navigation="compare")',source)
-        self.assertIn("size=4",source)
+        from rec03a_suggestions_ui import catalog_page
+        self.assertEqual(inspect.signature(catalog_page).parameters["size"].default,4)
         self.assertIn("render_planning_handoff(plan,interests=wishes",source)
 
     def test_two_highlight_cards_show_inline_comparison(self):
@@ -176,8 +177,8 @@ class GuidedComparisonTests(unittest.TestCase):
         a.checkbox(key=first).check().run()
         self.assertFalse(a.exception,[x.message for x in a.exception])
         other="angers" if not first.endswith("_angers") else "metz"
-        a.checkbox(key="rec03a_show_all").check().run()
-        a.text_input(key="rec03a_search").set_value(other).run()
+        a.segmented_control(key="rec03a_catalog_mode").set_value("Todas as cidades").run()
+        a.selectbox(key="rec03a_city").select(other).run()
         self.assertFalse(a.exception,[x.message for x in a.exception])
         a.checkbox(key="rec03a_pick_"+other).check().run()
         self.assertFalse(a.exception,[x.message for x in a.exception])
@@ -187,21 +188,22 @@ class GuidedComparisonTests(unittest.TestCase):
         a.button(key="ux112_open_comparison").click().run()
         self.assertTrue(any("ux97-table" in x.value for x in a.markdown))
         a.button(key="ux112_open_exploration").click().run()
-        a.checkbox(key="rec03a_show_all").uncheck().run()
+        a.segmented_control(key="rec03a_catalog_mode").set_value("Sugestões automáticas").run()
         self.assertFalse(a.exception,[x.message for x in a.exception])
         self.assertEqual(a.session_state[CHOICE],selected)
         a.segmented_control(key="ux112_active_view").set_value("Minha comparação").run()
         self.assertTrue(any("ux97-table" in x.value for x in a.markdown))
 
-    def test_search_without_opening_catalog_and_preserve_canonical_plan(self):
+    def test_explicit_catalog_city_lookup_preserves_canonical_plan(self):
         a=self.app()
         a.button(key="rec03a_confirm_subset").click().run()
         before=deepcopy(a.session_state["advisor_plan"])
-        self.assertFalse(a.checkbox(key="rec03a_show_all").value)
-        self.assertIn("rec03a_search",{x.key for x in a.text_input})
-        a.text_input(key="rec03a_search").set_value("Metz").run()
+        self.assertEqual(a.segmented_control(key="rec03a_catalog_mode").value,"Sugestões automáticas")
+        self.assertNotIn("rec03a_city",{x.key for x in a.selectbox})
+        a.segmented_control(key="rec03a_catalog_mode").set_value("Todas as cidades").run()
+        a.selectbox(key="rec03a_city").select("metz").run()
         self.assertFalse(a.exception,[x.message for x in a.exception])
-        self.assertFalse(a.checkbox(key="rec03a_show_all").value)
+        self.assertEqual(a.segmented_control(key="rec03a_catalog_mode").value,"Todas as cidades")
         self.assertIn("rec03a_pick_metz",{x.key for x in a.checkbox})
         self.assertEqual(a.session_state["advisor_plan"],before)
 
@@ -267,9 +269,9 @@ class GuidedComparisonTests(unittest.TestCase):
     def test_selection_below_filter_remains_authoritative(self):
         a=self.app()
         a.button(key="rec03a_confirm_subset").click().run()
-        a.checkbox(key="rec03a_show_all").check().run()
+        a.segmented_control(key="rec03a_catalog_mode").set_value("Todas as cidades").run()
         self.assertFalse(a.exception,[x.message for x in a.exception])
-        self.assertTrue(any(x.key=="rec03a_search" for x in a.text_input))
+        self.assertTrue(any(x.key=="rec03a_city" for x in a.selectbox))
         # The catalog is still searchable; no duplicate multiselect for bases.
         self.assertFalse(any(x.key==CHOICE+"_widget" for x in a.multiselect))
         self.assertEqual(len([x for x in a.checkbox
