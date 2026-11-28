@@ -5,33 +5,27 @@ Run only during curation (CI once), never when the Streamlit app renders.
 Requires Pillow; no API for choosing imagery at runtime.
 """
 from __future__ import annotations
-import hashlib
 import io
 import json
 from pathlib import Path
-from urllib.parse import quote
+import sys
 import requests
 from PIL import Image, ImageOps
 
 ROOT=Path(__file__).resolve().parents[1]
 MANIFEST=ROOT/"data/destination_photo_assets.json"
-HEADERS={"User-Agent":"NossaEuropa2027/1.0 (https://github.com/clevertondecker/europe-trip; travel imagery curation)"}
-
-
-def commons_thumbnail(filename: str, width: int = 960) -> str:
-    """Direct upload.wikimedia.org thumbnail path, bypassing Action API/redirect."""
-    title=filename.replace(" ", "_")
-    md5=hashlib.md5(title.encode("utf-8")).hexdigest()
-    part=quote(title,safe="(),'!_-")
-    return (f"https://upload.wikimedia.org/wikipedia/commons/thumb/"
-            f"{md5[0]}/{md5[:2]}/{part}/{width}px-{part}")
+sys.path.insert(0, str(ROOT))
+from commons_client import fetch_photo, is_image_url, USER_AGENT
+HEADERS = {"User-Agent": USER_AGENT}
 
 
 def fetch_image(filename: str) -> Image.Image:
-    # Wikimedia can serve optimized thumbnails from either upload or thumb host.
-    url=commons_thumbnail(filename)
+    photo = fetch_photo(filename)
+    if not photo or not is_image_url(photo["url"]):
+        raise RuntimeError("No licensed Commons image: " + filename)
+    url = photo["url"]
     errors=[]
-    for candidate in (url, url.replace("upload.wikimedia.org","thumb.wikimedia.org")):
+    for candidate in (url,):
         try:
             response=requests.get(candidate,headers=HEADERS,timeout=35)
             response.raise_for_status()
