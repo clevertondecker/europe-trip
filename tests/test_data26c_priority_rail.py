@@ -65,6 +65,12 @@ class PriorityRailResearchTests(unittest.TestCase):
             (("metz", "aachen"), "secondary_sample"),
             (("nancy", "aachen"), "secondary_sample"),
             (("lille", "baden_baden"), "secondary_sample"),
+            (("nancy", "interlaken"), "secondary_sample"),
+            (("metz", "interlaken"), "secondary_sample"),
+            (("metz", "liege"), "secondary_sample"),
+            (("strasbourg", "arlon"), "secondary_sample"),
+            (("metz", "namur"), "secondary_sample"),
+            (("strasbourg", "namur"), "secondary_sample"),
         ):
             with self.subTest(pair=key):
                 record = data["by_pair"][key]
@@ -129,6 +135,31 @@ class PriorityRailResearchTests(unittest.TestCase):
         for key, _ in scenarios:
             self.assertEqual(data[key]["station_status"], "not_reconciled")
             self.assertIsNone(data[key]["origin_station_id"])
+            self.assertIsNone(data[key]["destination_station_id"])
+            self.assertIsNone(data[key]["transfer_count"])
+            self.assertFalse(data[key]["return_weekend_verified"])
+
+    def test_interlaken_and_liege_require_exact_station_and_direction(self):
+        payload = json.loads(DATA.read_text(encoding="utf-8"))
+        scenarios = (
+            (("metz", "interlaken"), {"published_arrival_station": "Interlaken West"}),
+            (("nancy", "interlaken"), {"source_url": "https://www.thetrainline.com/en/train-times/interlaken-ost-to-nancy"}),
+            (("metz", "liege"), {"published_arrival_station": "Liège-Saint-Lambert"}),
+            (("metz", "liege"), {"source_url": "https://www.thetrainline.com/en/train-times/metz-to-liege"}),
+        )
+        for key, changes in scenarios:
+            with self.subTest(key=key, changes=changes), tempfile.TemporaryDirectory() as tmp:
+                altered = copy.deepcopy(payload)
+                record = next(row for row in altered["records"]
+                              if (row["origin_id"], row["destination_id"]) == key)
+                record.update(changes)
+                path = Path(tmp) / "research.json"
+                path.write_text(json.dumps(altered), encoding="utf-8")
+                with self.assertRaises(ValueError):
+                    load_data26c_rail(path)
+        data = load_data26c_rail()["by_pair"]
+        for key, _ in scenarios:
+            self.assertEqual(data[key]["station_status"], "not_reconciled")
             self.assertIsNone(data[key]["destination_station_id"])
             self.assertIsNone(data[key]["transfer_count"])
             self.assertFalse(data[key]["return_weekend_verified"])
