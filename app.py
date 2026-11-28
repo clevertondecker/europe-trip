@@ -160,7 +160,7 @@ st.markdown("<style>" + (Path(__file__).resolve().parent / "assets" / "styles.cs
 def link(label: str, key: str) -> None:
     url = data["sources"].get(key)
     if url:
-        st.link_button(label, url, use_container_width=True)
+        st.link_button(label, url, width="stretch")
 
 
 def note(msg: str) -> None:
@@ -203,7 +203,7 @@ def mini_budget() -> None:
     st.caption(f"Limite {money_brl(scenario['cap_brl'])} · Margem {money_brl(calc['balance'])} · Reserva já incluída")
     if calc["balance"] < 1000:
         st.warning("Margem muito pequena. Não aprovar compras com estes valores sem novas cotações.")
-    st.link_button("Abrir planilha original",data["sources"]["spreadsheet"],use_container_width=True)
+    st.link_button("Abrir planilha original",data["sources"]["spreadsheet"],width="stretch")
 
 
 def render_source_documents() -> None:
@@ -400,11 +400,11 @@ with st.sidebar:
             date_info = f" · fonte: {modified_at[:10]}" if modified_at else " · data não informada"
             label = "sincronizada" if state["status"] == "live" else "snapshot"
             st.caption(f"{'✅' if state['status'] == 'live' else '⚪'} {source_label}: {label}{date_info}")
-        if st.button("Atualizar dados do Drive", use_container_width=True):
+        if st.button("Atualizar dados do Drive", width="stretch"):
             fetch_live.clear()
             st.rerun()
         st.link_button("Abrir pasta no Drive", data["sources"]["project_folder"],
-                       use_container_width=True)
+                       width="stretch")
         if sync_error:
             # Exception class only; never expose keys, tokens or raw API errors.
             st.warning("Sincronização indisponível; exibindo snapshot.")
@@ -667,7 +667,7 @@ elif page == "Mapa & destinos":
     from ux64_navigation_model import select_public_task
     st.button("Descobrir destinos", key="map_go_attractions",
               on_click=select_public_task,
-              args=(st.session_state,"Explorar","Descobrir"),use_container_width=True)
+              args=(st.session_state,"Explorar","Descobrir"),width="stretch")
     with st.expander("Como interpretar o mapa",expanded=False):
         st.caption("O mapa representa dados geográficos de pesquisa histórica. "
                    "Desejado = wishlist; no roteiro = visita incluída; base candidata "
@@ -974,7 +974,7 @@ elif page == "Roteiro":
                                   "Viagem simulada (R$)":guess["total"],
                                   "Margem até o teto (R$)":guess["margin"],
                                   "Confiabilidade":"Referência histórica — não cotada"})
-                st.dataframe(pd.DataFrame(quick),hide_index=True,use_container_width=True,
+                st.dataframe(pd.DataFrame(quick),hide_index=True,width="stretch",
                              column_config={
                                 "Aluguel hipotético €/mês":st.column_config.NumberColumn(format="€ %.0f"),
                                 "Viagem simulada (R$)":st.column_config.NumberColumn(format="R$ %.0f"),
@@ -1028,7 +1028,7 @@ elif page == "Roteiro":
                             "Área (m²)": offer["size_m2"], "€/mês": offer["observed_eur_month"],
                             "Contas": utilities, "Fonte": city["housing_catalogue"],
                         })
-                st.dataframe(pd.DataFrame(housing_rows), hide_index=True, use_container_width=True,
+                st.dataframe(pd.DataFrame(housing_rows), hide_index=True, width="stretch",
                              column_config={
                                  "€/mês": st.column_config.NumberColumn(format="€ %.0f"),
                                  "Área (m²)": st.column_config.NumberColumn(format="%d m²"),
@@ -1060,7 +1060,7 @@ elif page == "Roteiro":
                      "Operadora": city["urban_pass"]["source_url"]}
                     for city in market["cities"]
                 ]
-                st.dataframe(pd.DataFrame(pass_rows), hide_index=True, use_container_width=True,
+                st.dataframe(pd.DataFrame(pass_rows), hide_index=True, width="stretch",
                              column_config={
                                  "€/pessoa/mês": st.column_config.NumberColumn(format="€ %.2f"),
                                  "Operadora": st.column_config.LinkColumn("Fonte oficial", display_text="Consultar"),
@@ -1078,7 +1078,7 @@ elif page == "Roteiro":
                             "€/pessoa/trecho*": route["discounted_eur_leg_person"],
                             "Fonte": route["source_url"],
                         })
-                st.dataframe(pd.DataFrame(rail_rows), hide_index=True, use_container_width=True,
+                st.dataframe(pd.DataFrame(rail_rows), hide_index=True, width="stretch",
                              column_config={
                                  "Trem (min)": st.column_config.NumberColumn(format="%d min"),
                                  "€/pessoa/trecho*": st.column_config.NumberColumn(format="€ %.2f"),
@@ -1119,7 +1119,7 @@ elif page == "Roteiro":
                         "Jantar para dois €":rec["restaurant_two_midrange_eur"],
                         "Fonte jantar":rec["restaurant_source_url"]
                     })
-                st.dataframe(pd.DataFrame(economic_rows), hide_index=True, use_container_width=True,
+                st.dataframe(pd.DataFrame(economic_rows), hide_index=True, width="stretch",
                              column_config={
                                  "Aluguel residencial €/m²/mês":st.column_config.NumberColumn(format="€ %.2f"),
                                  "Jantar para dois €":st.column_config.NumberColumn(format="€ %.2f"),
@@ -1146,7 +1146,7 @@ elif page == "Roteiro":
                         "Compatível até 22–23h":("Não" if office["late_work_compatible"] is False else "A confirmar"),
                         "Fonte":office["source_url"]
                     })
-                st.dataframe(pd.DataFrame(coworking_rows), hide_index=True, use_container_width=True,
+                st.dataframe(pd.DataFrame(coworking_rows), hide_index=True, width="stretch",
                              column_config={
                                  "Preço publicado €":st.column_config.NumberColumn(format="€ %.2f"),
                                  "Fonte":st.column_config.LinkColumn("Fonte", display_text="Consultar")
@@ -1388,7 +1388,7 @@ elif page == "Roteiro":
              "Passeio escolhido":destination_names.get(
                  explore_calendar.get(r["date"],""),
                  explore_calendar.get(r["date"],""))} for r in schedule]),
-            hide_index=True,use_container_width=True,height=450)
+            hide_index=True,width="stretch",height=450)
         if explore_calendar:
             st.caption("Passeios escolhidos aparecem pelo nome. As datas são sugestões de planejamento, "
                        "não reservas, nem confirmação dos horários de 2027.")
@@ -1401,7 +1401,7 @@ elif page == "Roteiro":
         st.info("Este calendário distribui etapas por regras simples. Não agenda passeios individuais, "
                 "não calcula horários locais de trabalho nem confirma operações para os dias específicos.")
         st.link_button("Ver cronograma original no Drive",data["sources"]["spreadsheet"],
-                       use_container_width=True)
+                       width="stretch")
 
     elif itinerary_section == "Cronograma oficial":
         finance_live=sync_sources["finance"]["status"]=="live"
@@ -1418,9 +1418,9 @@ elif page == "Roteiro":
                 unsafe_allow_html=True)
         col1,col2=st.columns(2)
         with col1:
-            st.link_button("Documento de decisões no Drive",data["sources"]["decisions"],use_container_width=True)
+            st.link_button("Documento de decisões no Drive",data["sources"]["decisions"],width="stretch")
         with col2:
-            st.link_button("Planilha do cronograma no Drive",data["sources"]["spreadsheet"],use_container_width=True)
+            st.link_button("Planilha do cronograma no Drive",data["sources"]["spreadsheet"],width="stretch")
 
 elif page == "Orçamento":
     if ux_section=="Simulações":
@@ -1689,7 +1689,7 @@ elif page == "Orçamento":
                "Simulado (R$)":money_brl(result["new_components"][k]),
                "Variação (R$)":money_brl(result["deltas"][k])} for k in
               ("rent","groceries","dining","transport","excursions")]
-        st.dataframe(pd.DataFrame(rows),use_container_width=True,hide_index=True)
+        st.dataframe(pd.DataFrame(rows),width="stretch",hide_index=True)
         st.caption("Moradia, compras e transporte ajustados proporcionalmente aos dias; "
                    "passeios ajustados proporcionalmente apenas como hipótese; "
                     "bares/restaurantes usam a verba da planilha, salvo hipótese explícita de saídas. "
@@ -1711,7 +1711,7 @@ elif page == "Orçamento":
                 st.warning("Há divergência entre o subtotal de componentes e o total do modelo. "
                            "Validar a planilha antes de compras.")
             st.link_button("Planilha financeira oficial",data["sources"]["spreadsheet"],
-                           use_container_width=True)
+                           width="stretch")
 
 elif page == "Pesquisas & decisões":
     st.markdown("<div class='page-eyebrow'>CENTRAL DE PLANEJAMENTO · FONTES DO DRIVE</div>"
@@ -1783,7 +1783,7 @@ elif page == "Pesquisas & decisões":
                                 f"<div class='page-task__status'>{'✓ Concluída' if done else '○ Pendente'}"
                                 "</div></div>",unsafe_allow_html=True)
         st.link_button("Atualizar pendências no Drive",data["sources"]["tasks"],
-                       use_container_width=True)
+                       width="stretch")
     elif view=="Decisões oficiais":
         st.markdown("<div class='page-section'>Registro de decisões</div>",unsafe_allow_html=True)
         for decision in data["decisions"]:
@@ -1796,7 +1796,7 @@ elif page == "Pesquisas & decisões":
                         f"<div class='page-panel__desc'>{escape(decision.get('note',''))}</div>"
                         "</div>",unsafe_allow_html=True)
         st.link_button("Consultar documento de decisões",data["sources"]["decisions"],
-                       use_container_width=True)
+                       width="stretch")
     else:
         st.markdown("<div class='page-section'>Integridade e origem</div>",unsafe_allow_html=True)
         for key,title in [("decisions","Decisões"),("tasks","Pendências"),("finance","Finanças e cronograma")]:
@@ -1812,9 +1812,9 @@ elif page == "Pesquisas & decisões":
             ("Proveniência de pesquisas","evidence"),("Pendências","tasks"),
             ("Base de conhecimento","knowledge"),("Modelo financeiro","spreadsheet")]
         for col,(label,key) in zip(st.columns(2,gap="medium"),docs[:2]):
-            with col: st.link_button(label,data["sources"][key],use_container_width=True)
+            with col: st.link_button(label,data["sources"][key],width="stretch")
         for col,(label,key) in zip(st.columns(2,gap="medium"),docs[2:4]):
-            with col: st.link_button(label,data["sources"][key],use_container_width=True)
+            with col: st.link_button(label,data["sources"][key],width="stretch")
         for col,(label,key) in zip(st.columns(2,gap="medium"),docs[4:]):
-            with col: st.link_button(label,data["sources"][key],use_container_width=True)
+            with col: st.link_button(label,data["sources"][key],width="stretch")
 
