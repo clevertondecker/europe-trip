@@ -75,7 +75,15 @@
         "source_capture_date": null,
         "source_recency_reported": "today",
         "transport_mode": "rail_label",
-        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified"
+        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified",
+        "travel_date": "2026-12-05",
+        "origin_id": "lille",
+        "destination_id": "paris",
+        "currency": "EUR",
+        "passengers": 1,
+        "direction": "oneway",
+        "kind": "advertised_from",
+        "unit_provenance": "matching_observed_calendar"
       }
     },
     {
@@ -114,7 +122,15 @@
         "source_capture_date": null,
         "source_recency_reported": "today",
         "transport_mode": "rail_label",
-        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified"
+        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified",
+        "travel_date": "2026-11-28",
+        "origin_id": "metz",
+        "destination_id": "paris",
+        "currency": "EUR",
+        "passengers": 1,
+        "direction": "oneway",
+        "kind": "advertised_from",
+        "unit_provenance": "matching_observed_calendar"
       }
     },
     {
@@ -153,7 +169,15 @@
         "source_capture_date": null,
         "source_recency_reported": "today",
         "transport_mode": "rail_label",
-        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified"
+        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified",
+        "travel_date": "2026-12-05",
+        "origin_id": "nancy",
+        "destination_id": "paris",
+        "currency": "EUR",
+        "passengers": 1,
+        "direction": "oneway",
+        "kind": "advertised_from",
+        "unit_provenance": "matching_observed_calendar"
       }
     },
     {
@@ -192,7 +216,15 @@
         "source_capture_date": null,
         "source_recency_reported": "today",
         "transport_mode": "rail_label",
-        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified"
+        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified",
+        "travel_date": "2026-11-28",
+        "origin_id": "mulhouse",
+        "destination_id": "paris",
+        "currency": "EUR",
+        "passengers": 1,
+        "direction": "oneway",
+        "kind": "advertised_from",
+        "unit_provenance": "matching_observed_calendar"
       }
     },
     {
@@ -231,7 +263,15 @@
         "source_capture_date": null,
         "source_recency_reported": "today",
         "transport_mode": "rail_label",
-        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified"
+        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified",
+        "travel_date": "2026-12-05",
+        "origin_id": "strasbourg",
+        "destination_id": "paris",
+        "currency": "EUR",
+        "passengers": 1,
+        "direction": "oneway",
+        "kind": "advertised_from",
+        "unit_provenance": "matching_observed_calendar"
       }
     },
     {
@@ -270,7 +310,15 @@
         "source_capture_date": null,
         "source_recency_reported": "yesterday",
         "transport_mode": "rail_label",
-        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified"
+        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified",
+        "travel_date": "2026-12-05",
+        "origin_id": "lille",
+        "destination_id": "colmar",
+        "currency": "EUR",
+        "passengers": 1,
+        "direction": "oneway",
+        "kind": "advertised_from",
+        "unit_provenance": "matching_observed_calendar"
       }
     },
     {
@@ -309,7 +357,15 @@
         "source_capture_date": null,
         "source_recency_reported": "today",
         "transport_mode": "rail_label",
-        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified"
+        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified",
+        "travel_date": "2026-12-05",
+        "origin_id": "metz",
+        "destination_id": "colmar",
+        "currency": "EUR",
+        "passengers": 1,
+        "direction": "oneway",
+        "kind": "advertised_from",
+        "unit_provenance": "matching_observed_calendar"
       }
     },
     {
@@ -348,7 +404,15 @@
         "source_capture_date": null,
         "source_recency_reported": "today",
         "transport_mode": "rail_label",
-        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified"
+        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified",
+        "travel_date": "2026-11-28",
+        "origin_id": "mulhouse",
+        "destination_id": "colmar",
+        "currency": "EUR",
+        "passengers": 1,
+        "direction": "oneway",
+        "kind": "advertised_from",
+        "unit_provenance": "matching_observed_calendar"
       }
     },
     {
@@ -387,7 +451,15 @@
         "source_capture_date": null,
         "source_recency_reported": "today",
         "transport_mode": "rail_label",
-        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified"
+        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified",
+        "travel_date": "2026-11-28",
+        "origin_id": "strasbourg",
+        "destination_id": "colmar",
+        "currency": "EUR",
+        "passengers": 1,
+        "direction": "oneway",
+        "kind": "advertised_from",
+        "unit_provenance": "matching_observed_calendar"
       }
     },
     {
@@ -426,7 +498,15 @@
         "source_capture_date": null,
         "source_recency_reported": "today",
         "transport_mode": "rail_label",
-        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified"
+        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified",
+        "travel_date": "2026-11-28",
+        "origin_id": "mulhouse",
+        "destination_id": "basel",
+        "currency": "EUR",
+        "passengers": 1,
+        "direction": "oneway",
+        "kind": "advertised_from",
+        "unit_provenance": "matching_observed_calendar"
       }
     },
     {
@@ -465,7 +545,15 @@
         "source_capture_date": null,
         "source_recency_reported": "today",
         "transport_mode": "rail_label",
-        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified"
+        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified",
+        "travel_date": "2026-11-28",
+        "origin_id": "strasbourg",
+        "destination_id": "basel",
+        "currency": "EUR",
+        "passengers": 1,
+        "direction": "oneway",
+        "kind": "advertised_from",
+        "unit_provenance": "matching_observed_calendar"
       }
     },
     {
@@ -504,7 +592,15 @@
         "source_capture_date": null,
         "source_recency_reported": "today",
         "transport_mode": "rail_label",
-        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified"
+        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified",
+        "travel_date": "2026-12-05",
+        "origin_id": "nancy",
+        "destination_id": "reims",
+        "currency": "EUR",
+        "passengers": 1,
+        "direction": "oneway",
+        "kind": "advertised_from",
+        "unit_provenance": "matching_observed_calendar"
       }
     },
     {
@@ -543,7 +639,15 @@
         "source_capture_date": null,
         "source_recency_reported": "today",
         "transport_mode": "rail_label",
-        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified"
+        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified",
+        "travel_date": "2026-12-05",
+        "origin_id": "lille",
+        "destination_id": "amsterdam",
+        "currency": "EUR",
+        "passengers": 1,
+        "direction": "oneway",
+        "kind": "advertised_from",
+        "unit_provenance": "matching_observed_calendar"
       }
     },
     {
@@ -582,7 +686,15 @@
         "source_capture_date": null,
         "source_recency_reported": "today",
         "transport_mode": "rail_label",
-        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified"
+        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified",
+        "travel_date": "2026-12-05",
+        "origin_id": "lille",
+        "destination_id": "bruxelles",
+        "currency": "EUR",
+        "passengers": 1,
+        "direction": "oneway",
+        "kind": "advertised_from",
+        "unit_provenance": "matching_observed_calendar"
       }
     },
     {
@@ -621,7 +733,15 @@
         "source_capture_date": null,
         "source_recency_reported": "today",
         "transport_mode": "rail_label",
-        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified"
+        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified",
+        "travel_date": "2026-11-28",
+        "origin_id": "lille",
+        "destination_id": "reims",
+        "currency": "EUR",
+        "passengers": 1,
+        "direction": "oneway",
+        "kind": "advertised_from",
+        "unit_provenance": "matching_observed_calendar"
       }
     },
     {
@@ -660,7 +780,15 @@
         "source_capture_date": null,
         "source_recency_reported": "today",
         "transport_mode": "bus",
-        "note": "Calendar cheapest offer explicitly labelled AUTOCAR; excluded"
+        "note": "Calendar cheapest offer explicitly labelled AUTOCAR; excluded",
+        "travel_date": "2026-12-05",
+        "origin_id": "metz",
+        "destination_id": "reims",
+        "currency": null,
+        "passengers": null,
+        "direction": null,
+        "kind": null,
+        "unit_provenance": "not_documented"
       }
     },
     {
@@ -699,7 +827,15 @@
         "source_capture_date": null,
         "source_recency_reported": "today",
         "transport_mode": "rail_label",
-        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified"
+        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified",
+        "travel_date": "2026-12-05",
+        "origin_id": "strasbourg",
+        "destination_id": "reims",
+        "currency": "EUR",
+        "passengers": 1,
+        "direction": "oneway",
+        "kind": "advertised_from",
+        "unit_provenance": "matching_observed_calendar"
       }
     },
     {
@@ -738,7 +874,15 @@
         "source_capture_date": null,
         "source_recency_reported": "today",
         "transport_mode": "unknown",
-        "note": "Calendar shows price not yet available"
+        "note": "Calendar shows price not yet available",
+        "travel_date": "2026-12-06",
+        "origin_id": "metz",
+        "destination_id": "dijon",
+        "currency": null,
+        "passengers": null,
+        "direction": null,
+        "kind": null,
+        "unit_provenance": "not_documented"
       }
     },
     {
@@ -777,7 +921,15 @@
         "source_capture_date": null,
         "source_recency_reported": "today",
         "transport_mode": "rail_label",
-        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified"
+        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified",
+        "travel_date": "2026-11-28",
+        "origin_id": "nancy",
+        "destination_id": "dijon",
+        "currency": "EUR",
+        "passengers": 1,
+        "direction": "oneway",
+        "kind": "advertised_from",
+        "unit_provenance": "matching_observed_calendar"
       }
     },
     {
@@ -816,7 +968,15 @@
         "source_capture_date": null,
         "source_recency_reported": "today",
         "transport_mode": "rail_label",
-        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified"
+        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified",
+        "travel_date": "2026-11-28",
+        "origin_id": "strasbourg",
+        "destination_id": "dijon",
+        "currency": "EUR",
+        "passengers": 1,
+        "direction": "oneway",
+        "kind": "advertised_from",
+        "unit_provenance": "matching_observed_calendar"
       }
     },
     {
@@ -855,7 +1015,15 @@
         "source_capture_date": null,
         "source_recency_reported": "today",
         "transport_mode": "rail_label",
-        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified"
+        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified",
+        "travel_date": "2026-12-05",
+        "origin_id": "strasbourg",
+        "destination_id": "bruxelles",
+        "currency": "EUR",
+        "passengers": 1,
+        "direction": "oneway",
+        "kind": "advertised_from",
+        "unit_provenance": "matching_observed_calendar"
       }
     },
     {
