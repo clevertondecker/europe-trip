@@ -1,5 +1,6 @@
 """UX 3.4 decision simulator: fixed assumptions, no fake lost trips or savings."""
 import unittest
+from nav_helpers import open_public
 from copy import deepcopy
 from pathlib import Path
 from streamlit.testing.v1 import AppTest
@@ -154,8 +155,7 @@ class DecisionUITests(unittest.TestCase):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=110).run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
         original=deepcopy(app.session_state["advisor_plan"])
-        app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
-        app.segmented_control(key="ux_section").set_value("Comparar").run()
+        open_public(app,"Explorar","Comparar bases")
         app.button(key="ux125b_open_base_studies").click().run()
         app.segmented_control(key="ux_compare_mode").set_value("Estudos de troca").run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
@@ -177,8 +177,7 @@ class DecisionUITests(unittest.TestCase):
     def test_review_and_reject_before_official_change(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=110).run()
         original=deepcopy(app.session_state["advisor_plan"])
-        app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
-        app.segmented_control(key="ux_section").set_value("Comparar").run()
+        open_public(app,"Explorar","Comparar bases")
         app.button(key="ux125b_open_base_studies").click().run()
         app.segmented_control(key="ux_compare_mode").set_value("Estudos de troca").run()
         app.multiselect(key="ux34_candidates").set_value(["strasbourg"]).run()
