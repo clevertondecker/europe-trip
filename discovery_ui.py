@@ -1,5 +1,7 @@
 """Discover real destinations and compare actionable profile itineraries in Streamlit."""
 from __future__ import annotations
+
+from formatting import brl, REQUIRED
 from copy import deepcopy
 import streamlit as st
 from destination_recommender import recommend_destinations
@@ -16,7 +18,8 @@ from outing_guide_model import build_outing_guide
 from outing_guide_ui import render_outing_guide
 
 def money(value):
-    return "R$ "+f"{value:,.0f}".replace(",",".")
+    return brl(value, decimals=0, missing=REQUIRED)
+
 
 def _financial_snapshot(plan,catalog,routes,trip_data,live,eurfx,chffx,use_city_rent):
     """Use the exact same projection settings as the workspace's budget tab."""

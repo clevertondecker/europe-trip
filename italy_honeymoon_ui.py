@@ -1,5 +1,7 @@
 """Read-only Italian honeymoon study with evidence-based daily logistics."""
 from __future__ import annotations
+
+from formatting import eur, brl, REQUIRED
 import json
 from pathlib import Path
 
@@ -27,7 +29,7 @@ LEGACY={"60k":12545,"70k":14636}
 
 
 def _eur(value:float)->str:
-    return "€ "+f"{value:,.2f}".replace(",","_").replace(".",",").replace("_",".")
+    return eur(value, decimals=2, missing=REQUIRED)
 
 
 def _logistics()->None:
@@ -246,7 +248,7 @@ def render_italy_honeymoon()->None:
             st.metric("Estimativa manual da etapa Itália (€)",
                       _eur(preview["illustrative_italy_total_eur"]))
             st.metric("Estimativa manual da etapa Itália (R$)",
-                      "R$ "+f"{preview['illustrative_italy_total_brl']:,.2f}")
+                      brl(preview["illustrative_italy_total_brl"], decimals=2, missing=REQUIRED, decimal_comma=False))
         st.caption("Referências originais de orçamento do casal: Itália R$12.545 "
                    "(teto global 60k) / R$14.636 (teto global 70k). "
                    "Voos e seguro já possuem verba própria; não foram somados. "

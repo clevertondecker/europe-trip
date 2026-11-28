@@ -4,14 +4,11 @@ Old "transfers" can be an int (count only) or a list (documented connections).
 A count alone does not prove a timed connection.
 """
 from __future__ import annotations
+
+from evidence_validation import is_https_url
 from copy import deepcopy
 from datetime import timezone
-from urllib.parse import urlparse
 from rail_temporal_contract import normalize_service_instants
-
-def _https(url):
-    p=urlparse(url or "")
-    return p.scheme=="https" and bool(p.netloc)
 
 def normalize_transfers(record: dict, *, require_details: bool=False) -> dict:
     if not isinstance(record, dict):
@@ -41,7 +38,7 @@ def normalize_transfers(record: dict, *, require_details: bool=False) -> dict:
         raise ValueError("transfer count does not document the actual connections")
     legs=[] if legs is None else legs
     for leg in legs:
-        if not isinstance(leg,dict) or not leg.get("station_id") or not _https(leg.get("source_url")):
+        if not isinstance(leg,dict) or not leg.get("station_id") or not is_https_url(leg.get("source_url")):
             raise ValueError("invalid transfer identity or source")
         if require_details:
             timing=normalize_service_instants({

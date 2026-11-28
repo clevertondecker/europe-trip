@@ -6,12 +6,13 @@ Unknown ticket, food or transport remains unknown; zero must be justified.
 """
 from __future__ import annotations
 
+from evidence_validation import is_https_url
+
 from copy import deepcopy
 from datetime import date
 from decimal import Decimal, ROUND_HALF_UP
 from math import isfinite
 from pathlib import Path
-from urllib.parse import urlparse
 import json
 
 from data8_priority_tourism_model import load_priority_lot
@@ -21,11 +22,6 @@ DATA = Path(__file__).resolve().parent / "data" / "data8_cost_reference_2026_11.
 
 def _nonnegative(v):
     return type(v) in (int,float) and isfinite(v) and v >= 0
-
-
-def _https(value):
-    p = urlparse(value or "")
-    return p.scheme == "https" and bool(p.hostname)
 
 
 def load_cost_addons(path=DATA):
@@ -42,7 +38,7 @@ def load_cost_addons(path=DATA):
         seen.add(key)
         if (row.get("status") != "operator_published_historical" or
                 row.get("valid_for_2027") is not False or
-                not _https(row.get("source_url"))):
+                not is_https_url(row.get("source_url"))):
             raise ValueError("activity price needs source and historic status")
         date.fromisoformat(row["checked_at"])
         if (row.get("currency") != "EUR" or row.get("unit") not in

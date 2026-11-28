@@ -1,21 +1,17 @@
 """Source-backed tourism research overlays, never a second attraction catalog."""
 from __future__ import annotations
 
+from evidence_validation import is_https_url
+
 from copy import deepcopy
 from datetime import date, datetime, timedelta, time, timezone
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from pathlib import Path
-from urllib.parse import urlparse
 import json
 
 from ux501_destination_discovery_model import build_destination_discovery
 
 DATA = Path(__file__).resolve().parent / "data/tourism_visit_evidence_pilot_2026_11.json"
-
-
-def _https(value):
-    parsed = urlparse(value or "")
-    return parsed.scheme == "https" and bool(parsed.netloc)
 
 
 def _mins(clock):
@@ -37,7 +33,7 @@ def validate_opening_schedule(schedule: dict):
     x=deepcopy(schedule)
     if x.get("state") not in ("unknown","partial","historical","verified_current_rule"):
         raise ValueError("Estado de horário inválido")
-    if not _https(x.get("source_url")):
+    if not is_https_url(x.get("source_url")):
         raise ValueError("Horário sem fonte")
     date.fromisoformat(x["checked_at"])
     try:
@@ -166,8 +162,8 @@ def load_visit_evidence(path=DATA, *, discovery=None):
             raise ValueError("Atração duplicada ou identidade de destino inválida")
         seen.add(aid)
         date.fromisoformat(row["checked_at"])
-        if not (_https(row.get("source_url")) and
-                _https(row.get("address_source_url"))):
+        if not (is_https_url(row.get("source_url")) and
+                is_https_url(row.get("address_source_url"))):
             raise ValueError("Pesquisa sem fonte oficial URL HTTPS")
         if not row.get("experience_reason") or not row.get("address"):
             raise ValueError("Identidade/experiência insuficiente")
@@ -188,7 +184,7 @@ def load_visit_evidence(path=DATA, *, discovery=None):
             additional = row["additional_activity"]
             if (type(additional["amount"]) not in (int, float)
                     or additional["amount"] <= 0 or
-                    not _https(additional["source_url"])):
+                    not is_https_url(additional["source_url"])):
                 raise ValueError("Atividade adicional sem fonte/preço positivo")
             if additional.get("valid_for_2027") is not False:
                 raise ValueError("Tarifa adicional futura não pesquisada")

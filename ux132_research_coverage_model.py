@@ -1,4 +1,5 @@
 """Read-only presentation of DATA24 rail coverage; no recommendation logic."""
+from evidence_validation import is_https_url
 from copy import deepcopy
 from ux132_coverage_shared import search_key
 from data24_coverage_model import coverage_counts, rail_coverage
@@ -117,7 +118,7 @@ def connection_rows(view, axis, ident, status="Sem tempo pesquisado"):
 
 
 def _https(url):
-    return url if isinstance(url, str) and url.startswith("https://") else None
+    return url if is_https_url(url) else None
 
 
 def _documentary_detail(cell, raw):

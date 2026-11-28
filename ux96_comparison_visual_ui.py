@@ -5,11 +5,8 @@ existing REC03A recommendation projection; card selection remains CHOICE.
 """
 from __future__ import annotations
 
-from html import escape
+from formatting import html_safe as _safe
 
-
-def _safe(value) -> str:
-    return escape(str(value), quote=True)
 
 
 def city_card_header(candidate: dict, city: dict, *, is_selected: bool = False,

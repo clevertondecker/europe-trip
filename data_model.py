@@ -1,6 +1,8 @@
 """Pure data and calculation helpers for the Streamlit travel dashboard."""
 from __future__ import annotations
 
+from formatting import brl, REQUIRED
+
 import json
 from pathlib import Path
 from typing import Any
@@ -15,7 +17,7 @@ def load_data(path: Path = DATA_FILE) -> dict[str, Any]:
 
 
 def money_brl(value: float | int) -> str:
-    return "R$ " + f"{value:,.2f}".replace(",", "_").replace(".", ",").replace("_", ".")
+    return brl(value, decimals=2, missing=REQUIRED)
 
 
 def select_places(places: list[dict], countries: list[str] | None = None, statuses: list[str] | None = None) -> list[dict]:

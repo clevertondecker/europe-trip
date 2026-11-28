@@ -5,7 +5,8 @@ missing rail times, cost, 2027 schedules or comparative winners.
 """
 from __future__ import annotations
 
-from html import escape
+from formatting import html_safe as _safe
+
 from rail_reference_projection_model import format_minutes
 
 COUNTRY_FLAGS = {"França":"🇫🇷", "Alemanha":"🇩🇪", "Bélgica":"🇧🇪",
@@ -24,10 +25,6 @@ LABELS={
     "local":"Acesso local pendente",
     "no_time":"Sem tempo",
 }
-
-
-def _safe(value) -> str:
-    return escape(str(value),quote=True)
 
 
 def _cell_html(cell: dict) -> str:

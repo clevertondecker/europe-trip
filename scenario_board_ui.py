@@ -4,6 +4,8 @@ All draft edits reside in Streamlit session state; only a confirmed review
 changes the canonical itinerary.
 """
 from __future__ import annotations
+
+from formatting import REQUIRED, eur as format_eur, chf as format_chf
 from copy import deepcopy
 import streamlit as st
 from scenario_editor_model import (new_board,is_stale,change_board,undo_board,
@@ -24,7 +26,8 @@ from research_cost_ui import render_research_profiles
 from reconciled_trip_ui import render_reconciled_profiles,render_grocery_and_weekend_examples
 
 def _currency(eur:float,chf:float)->str:
-    return f"€ {eur:,.2f}  ·  CHF {chf:,.2f}"
+    return format_eur(eur, decimals=2, missing=REQUIRED, decimal_comma=False) + "  ·  " + format_chf(chf, decimals=2, missing=REQUIRED, decimal_comma=False)
+
 
 def _photo(dest:dict):
     photo=dest.get("photo")

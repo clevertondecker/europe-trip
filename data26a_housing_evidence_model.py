@@ -5,12 +5,13 @@ evidence separately; no JSON field can grant independent verification.
 """
 from __future__ import annotations
 
+from evidence_validation import is_https_url
+
 import json
 from collections import defaultdict
 from copy import deepcopy
 from datetime import date
 from pathlib import Path
-from urllib.parse import urlparse
 
 from base_research_expanded_model import load_research
 from housing_short_stay_research_model import evaluate_short_stay_quote
@@ -29,16 +30,6 @@ QUOTE_FIELDS = {"base_id", "checkin", "checkout", "source_url", "checked_at",
                 "currency", "travelers", *CHECKS, *PRICES}
 RECORD_FIELDS = {"id", "listing_id", "quote", "evidence_url",
                  "contract_terms", "cancellation_terms"}
-
-
-def _https(value):
-    if not isinstance(value, str) or value != value.strip():
-        return False
-    try:
-        parsed = urlparse(value)
-        return parsed.scheme == "https" and bool(parsed.hostname) and not parsed.username and not parsed.password
-    except ValueError:
-        return False
 
 
 def _text(value):
@@ -74,7 +65,7 @@ def _validate_and_project(payload, research):
             raise ValueError("Campos da cotação inválidos; use null para desconhecido")
         if not _text(q["base_id"]) or q["base_id"] not in cities:
             raise ValueError("Cidade-base desconhecida")
-        if not _https(q["source_url"]) or not _https(record["evidence_url"]):
+        if not is_https_url(q["source_url"]) or not is_https_url(record["evidence_url"]):
             raise ValueError("Fonte individual e evidência documental devem usar HTTPS")
         # An evidence link describes a captured observation; it is not proof
         # that a provider still offers the accommodation at the recorded price.

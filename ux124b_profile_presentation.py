@@ -1,5 +1,7 @@
 """UX124B: small read-only presentation helpers; not a new decision model."""
 from __future__ import annotations
+
+from formatting import eur
 from html import escape
 import re
 from ux124_city_profile_model import TIMED,profile_summary_facts,route_scope,ROUTE_SCOPES
@@ -85,10 +87,8 @@ def simulation_note(capability):
     return capability["budget_note"]+". Aluguel e caução de 2027 não cotados."
 
 def compact_money(value):
-    if value is None:
-        return "Não pesquisado"
-    text=f"{value:,.2f}".replace(",","_").replace(".",",").replace("_",".")
-    return "€ "+(text[:-3] if text.endswith(",00") else text)
+    return eur(value, decimals=2, missing="Não pesquisado", trim_zeros=True)
+
 
 def route_display(row):
     """Use canonical label and minutes unchanged; split for visual hierarchy."""

@@ -1,6 +1,8 @@
 """Adoption UX for already generated concrete per-profile budget itineraries."""
 from __future__ import annotations
 
+from formatting import brl, REQUIRED
+
 import streamlit as st
 
 from predefined_budget_model import preset_budget_summary
@@ -12,7 +14,7 @@ from destination_labels import destination_names
 
 
 def _money(value:float)->str:
-    return "R$ "+f"{value:,.0f}".replace(",", ".")
+    return brl(value, decimals=0, missing=REQUIRED)
 
 
 def _confirm_preset(plan:dict,option:dict)->None:

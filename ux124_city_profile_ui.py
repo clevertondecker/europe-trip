@@ -1,5 +1,7 @@
 """UX124 shared, topic-based research profile. No planning writes."""
 from __future__ import annotations
+
+from formatting import amount
 import streamlit as st
 from ux124_city_profile_model import (TOPICS,city_profile,
     personalize_routes,route_scope,ROUTE_SCOPES,MISSING_WISHLIST_SCOPE)
@@ -10,8 +12,8 @@ from ux113_comparison_panorama_ui import coworking_night_status
 from ux124b_profile_presentation import city_intro,practical_facts,compact_money,route_preview,route_list_html,ticket_text,typical_time_label,logistics_table,destination_name,editorial_risk_text
 
 def money(value,unit="€"):
-    return ("Não pesquisado" if value is None else
-            f"{value:,.2f}".replace(",","_").replace(".",",").replace("_",".")+" "+unit)
+    return amount(value, decimals=2, missing="Não pesquisado", symbol=unit, suffix=True)
+
 
 def source(url,label="Fonte"):
     if isinstance(url,str) and url.startswith("https://"):
