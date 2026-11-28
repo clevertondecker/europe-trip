@@ -137,3 +137,31 @@ Resultado: **5/5 preços mensais urbanos documentados como referências contempo
 - RegioZone €3 por duas horas ou €5 por dia (até 04:00 seguinte), exclusivamente ônibus transfronteiriços elegíveis; não vale para trens internacionais. Não inserir como tarifa ferroviária. Fonte: https://www.cfl.lu/en-gb/ticket/international/grande-region/regiozone-1-ou-2-%282%29
 - Pass Groupe Week-End: reconfirmado preço de €40 por grupo/dia e reserva gratuita limitada para TER Paris. FAQ atual da operadora inclui Basel e Luxemburgo, enquanto a página turística Explore Grand Est ainda contém exclusão transfronteiriça de lançamento; prevalece a regra da operadora, sujeita à verificação do serviço específico. Fontes: https://www.ter.sncf.com/grand-est/tarifs-cartes/tarifs-regionaux/pass-groupe-week-end ; https://www.explore-grandest.com/en/offerings/activities/city-adventures/weekend-group-pass-for-group-travel-in-the-grand-est-region/
 - Referências de produto e transporte local, não cotações datadas; nenhum ganho nos denominadores de cobertura ferroviária/tarifária. Ainda faltam serviços de ida/retorno datados para Colmar/Luxemburgo e acesso efetivo às atrações.
+
+
+### Pesquisa complementar — atrações e última milha (2026-11-28)
+
+Referências oficiais observadas em 28/11/2026, por adulto, EUR. IDs correspondem ao catálogo existente; não são novos IDs ou cotações de 2027. Nenhuma projeção de custo ou cobertura é alterada neste incremento documental.
+
+| ID | Tarifa / evidência | Condição e fonte |
+|---|---|---|
+| mulhouse_historical | 0 EUR | Município confirma acesso gratuito: https://www.mulhouse.fr/culture/les-structures-culturelles-municipales/les-musees-2/ |
+| mulhouse_finearts | 0 EUR | Município confirma acesso gratuito: https://www.mulhouse.fr/culture/les-structures-culturelles-municipales/les-musees-2/ |
+| mulhouse_auto | 19 EUR | Tarifa integral; visita à coleção cerca de 2h, estimativa do operador: https://www.musee-automobile.fr/informations-pratiques/ |
+| mulhouse_fabric | 10 EUR, histórico expirado | A própria página limita validade a 31/08/2026; não tratar como tarifa atual: https://www.musee-impression.com/contact/ |
+| metz_cour | 0 EUR | Gratuidade geral durante o ano; fechado às terças: https://musee.eurometropolemetz.eu/fr/informations-pratiques.html |
+| metz_pompidou | 7, 10 ou 14 EUR | Tarifa integral variável; bilhete com hora marcada. Fim de semana: 7 EUR condicionado a TER Grand Est ou Pass Groupe do dia: https://www.centrepompidou-metz.fr/fr/preparer-ma-visite/tarifs-offres |
+| nancy_ecole | 7,50 EUR | Tarifa normal, bilhete combinado Villa Majorelle 9 EUR anunciado; primeiro domingo gratuito; não pressupor que o combinado continua disponível durante obras: https://musee-ecole-de-nancy.nancy.fr/visiter/tarifs |
+| nancy_beaux | 7,50 ou 10 EUR | Conforme exposições; primeiro domingo gratuito: https://musee-des-beaux-arts.nancy.fr/visiter/tarifs |
+| nancy_aquarium | 7,10 EUR | Tarifa publicada desde 01/01/2025; primeiro domingo gratuito: https://www.museumaquariumdenancy.eu/votre-visite/horaires-tarifs |
+| nancy_majorelle | tarifa reduzida para todos durante obras; preço atual não confirmado isoladamente | Desde 28/10/2026, somente térreo acessível, reserva obrigatória; obras previstas até fim de 2028. Não usar valor anterior de visita integral como cotação: https://musee-ecole-de-nancy.nancy.fr/la-villa-majorelle |
+| strasbourg_vauban | preço não confirmado | Horário publicado da terrasse em set-out 8–19h e nov-fev 8h30–16h; tram B/F Faubourg National: https://www.visitstrasbourg.fr/a-voir-a-faire-strasbourg/culture/sites-a-visiter/sites-et-monuments-historiques/f223005692_terrasse-panoramique-du-barrage-vauban-strasbourg/ |
+
+Última milha:
+- Mulhouse Gare Centrale → Musée National de l'Automobile: tram linha 1 direção Châtaignier, parada Musée de l'Auto; entrada 17 rue de la Mertzau; duração não publicada: https://www.musee-automobile.fr/contact/
+- Metz Gare → Musée de la Cour d'Or: mesmo trajeto descrito pelo museu (Saint-Louis, Fournirue, Armes, Chanoine Colin) com tempos conflitantes: 20 min em https://musee.eurometropolemetz.eu/fr/informations-pratiques.html e 10 min em https://musee.eurometropolemetz.eu/fr/faq.html . Manter conflito e duração não selecionada; acesso por linhas 3 e 83 indicado.
+- Metz-Ville → Pompidou: operador confirma estação Metz-Ville, endereço 1 parvis des Droits de l'Homme e Mettis A/B, linha 5 e navette N83; não publica duração de caminhada estação-museu: https://www.centrepompidou-metz.fr/fr/preparer-ma-visite/horaires-acces
+- Mulhouse Musée de l'Impression: endereço 14 rue Jean-Jacques Henner; Gare Centrale e tram/tram-train Gare Centrale; duração da caminhada desconhecida. Fonte na tabela.
+- Nenhuma distância em linha reta foi convertida em rota pedestre. Não há ganho de cobertura de última milha validada até integrar os registros na projeção com testes de preservação do baseline.
+
+Pendências reais: cotações completas para dois adultos nos cinco pares de Paris (não combinar preços independentes), quinze ofertas de moradia para a mesma janela com disponibilidade e total, confirmação de internet no imóvel reservado, cesta de consumo comparável completa, ampliar atrações restantes, integrar referências contemporâneas sem modificar as observações históricas DATA24, validar CI e revisão visual. Não declarar conclusão do PR com base nestas evidências parciais.
