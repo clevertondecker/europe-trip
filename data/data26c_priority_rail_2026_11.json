@@ -29,6 +29,32 @@
       "previous_index_summary": {
         "minimum": 222,
         "average": 271
+      },
+      "quality_review": {
+        "checked_at": "2026-11-28",
+        "source_url": "https://www.sncf-connect.com/train/trajet/lille/saumur",
+        "direction": "outbound_only",
+        "origin_country": "FR",
+        "destination_country": "FR",
+        "selected_summary_reproduced": false,
+        "samples": [
+          {
+            "index_recency": "last month",
+            "minimum_min": 222,
+            "average_min": 271,
+            "origin_station_labels": [
+              "LILLE EUROPE",
+              "LILLE FLANDRES"
+            ],
+            "arrival_station_labels": [
+              "SAUMUR"
+            ],
+            "mode_basis": "explicit rail route summary"
+          }
+        ],
+        "service_legs_verified": false,
+        "valid_for_2027": false,
+        "note": "Reproduces earlier index summary, not selected average 290. Multiple departure stations; no specific station assigned to selected observation."
       }
     },
     {
@@ -73,6 +99,31 @@
         "connections": "published as possible; individual legs not verified",
         "fare_status": "no numeric fare in route summary",
         "service_date": null
+      },
+      "quality_review": {
+        "checked_at": "2026-11-28",
+        "source_url": "https://www.sncf-connect.com/train/trajet/metz/saumur",
+        "direction": "outbound_only",
+        "origin_country": "FR",
+        "destination_country": "FR",
+        "selected_summary_reproduced": false,
+        "samples": [
+          {
+            "index_recency": "today",
+            "minimum_min": 288,
+            "average_min": 327,
+            "origin_station_labels": [
+              "METZ"
+            ],
+            "arrival_station_labels": [
+              "SAUMUR"
+            ],
+            "mode_basis": "explicit rail route summary"
+          }
+        ],
+        "service_legs_verified": false,
+        "valid_for_2027": false,
+        "note": "Different dynamic summary from selected observation 242/310 and prior revalidation. No automatic replacement."
       }
     },
     {
@@ -674,7 +725,44 @@
           "source_url": "https://www.sncf-connect.com/train/trajet/strasbourg/dinan",
           "source_checked_at": "2026-11-28"
         }
-      ]
+      ],
+      "quality_review": {
+        "checked_at": "2026-11-28",
+        "source_url": "https://www.thetrainline.com/en/train-times/strasbourg-to-dinan",
+        "direction": "outbound_only",
+        "origin_country": "FR",
+        "destination_country": "FR",
+        "selected_summary_reproduced": true,
+        "samples": [
+          {
+            "index_recency": "3 months ago",
+            "minimum_min": 329,
+            "average_min": 479,
+            "origin_station_labels": [
+              "Strasbourg"
+            ],
+            "arrival_station_labels": [
+              "Dinan"
+            ],
+            "mode_basis": "explicit train narrative gives both minimum and average"
+          },
+          {
+            "index_recency": "today",
+            "minimum_min": 329,
+            "average_min": 528,
+            "origin_station_labels": [
+              "Strasbourg"
+            ],
+            "arrival_station_labels": [
+              "Dinan"
+            ],
+            "mode_basis": "train FAQ gives both durations; SNCF listed"
+          }
+        ],
+        "service_legs_verified": false,
+        "valid_for_2027": false,
+        "note": "Earlier version reproduces both selected values; current average differs. Dinan, France, not Dinant, Belgium; individual legs not verified."
+      }
     },
     {
       "origin_id": "mulhouse",
@@ -1035,7 +1123,44 @@
       "valid_for_2027": false,
       "fare_couple_eur": null,
       "transfer_count": null,
-      "note": "TGV, OUIGO, SNCF, TGV Lyria. FAQ ferroviária consultada em 28/11/2026. Mínimo e média da mesma versão aberta; número mínimo de trocas refere-se ao resumo, não ao itinerário mais rápido. Sem confirmação de retorno ou serviço em 2027."
+      "note": "TGV, OUIGO, SNCF, TGV Lyria. FAQ ferroviária consultada em 28/11/2026. Mínimo e média da mesma versão aberta; número mínimo de trocas refere-se ao resumo, não ao itinerário mais rápido. Sem confirmação de retorno ou serviço em 2027.",
+      "quality_review": {
+        "checked_at": "2026-11-28",
+        "source_url": "https://www.thetrainline.com/en/train-times/metz-to-interlaken-ost",
+        "direction": "outbound_only",
+        "origin_country": "FR",
+        "destination_country": "CH",
+        "selected_summary_reproduced": true,
+        "samples": [
+          {
+            "index_recency": "2 months ago",
+            "minimum_min": 289,
+            "average_min": 345,
+            "origin_station_labels": [
+              "Metz"
+            ],
+            "arrival_station_labels": [
+              "Interlaken Ost"
+            ],
+            "mode_basis": "rail narrative and train-specific summary; mixed train/bus operator list"
+          },
+          {
+            "index_recency": "today",
+            "minimum_min": 283,
+            "average_min": 353,
+            "origin_station_labels": [
+              "Metz"
+            ],
+            "arrival_station_labels": [
+              "Interlaken Ost"
+            ],
+            "mode_basis": "explicit train FAQ confirms both durations; mixed operator list includes Flixbus"
+          }
+        ],
+        "service_legs_verified": false,
+        "valid_for_2027": false,
+        "note": "Earlier opened version reproduces the selected durations; later version differs. No bus-only duration imported. Individual legs not verified."
+      }
     },
     {
       "origin_id": "metz",
