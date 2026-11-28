@@ -1,5 +1,6 @@
 """Compact home is a dashboard; scenario configuration lives in task screens."""
 import unittest
+from nav_helpers import open_public
 from pathlib import Path
 from streamlit.testing.v1 import AppTest
 
@@ -39,7 +40,7 @@ class HomeContextTests(unittest.TestCase):
         at.slider(key="unified_stay").set_value(65).run()
         self.assertFalse(at.exception,[x.message for x in at.exception])
         self.assertEqual(at.session_state["advisor_plan"]["base_city"],initial)
-        at.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Minha viagem"))).click().run()
+        open_public(at,"Planejar","Visão geral")
         self.assertFalse(at.exception,[x.message for x in at.exception])
         self.assertNotIn("scenario_sidebar",{x.key for x in at.selectbox})
         self.assertNotIn("ux_days",{x.key for x in at.number_input})
@@ -52,7 +53,7 @@ class HomeContextTests(unittest.TestCase):
         self.assertEqual(at.session_state["ux_mode_value"],"Oficial")
         self.assertEqual(at.session_state["scenario_base_selected"],initial)
         self.assertEqual(at.session_state["advisor_plan"]["base_city"],initial)
-        at.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Orçamento"))).click().run()
+        open_public(at,"Orçamento","Visão financeira")
         self.assertFalse(at.exception,[x.message for x in at.exception])
         # The budget reuses scenario context instead of duplicating controls.
         self.assertNotIn("ux_mode",{x.key for x in at.segmented_control})
