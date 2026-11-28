@@ -53,7 +53,27 @@
       "valid_for_2027": false,
       "fare_couple_eur": null,
       "transfer_count": null,
-      "note": "Resumo de rota SNCF Connect consultado via índice web; mínimo e média publicados, sem data de serviço ou verificação de todos os trechos. A recência do índice é relativa, não uma data de captura comprovada."
+      "note": "Resumo de rota SNCF Connect consultado via índice web; mínimo e média publicados, sem data de serviço ou verificação de todos os trechos. A recência do índice é relativa, não uma data de captura comprovada.",
+      "revalidation": {
+        "checked_at": "2026-11-28",
+        "source_url": "https://www.sncf-connect.com/train/trajet/metz/saumur",
+        "status": "published_summary_reproduced",
+        "minimum_min": 242,
+        "average_min": 310,
+        "station_labels": [
+          "METZ",
+          "SAUMUR"
+        ],
+        "listed_rail_operators": [
+          "TGV INOUI",
+          "TER",
+          "INTERCITES",
+          "OUIGO"
+        ],
+        "connections": "published as possible; individual legs not verified",
+        "fare_status": "no numeric fare in route summary",
+        "service_date": null
+      }
     },
     {
       "origin_id": "nancy",
@@ -77,7 +97,26 @@
       "valid_for_2027": false,
       "fare_couple_eur": null,
       "transfer_count": null,
-      "note": "Resumo de rota SNCF Connect consultado via índice web; mínimo e média publicados, sem data de serviço ou verificação de todos os trechos. A recência do índice é relativa, não uma data de captura comprovada."
+      "note": "Resumo de rota SNCF Connect consultado via índice web; mínimo e média publicados, sem data de serviço ou verificação de todos os trechos. A recência do índice é relativa, não uma data de captura comprovada.",
+      "revalidation": {
+        "checked_at": "2026-11-28",
+        "source_url": "https://www.sncf-connect.com/train/trajet/nancy/saumur",
+        "status": "published_summary_reproduced",
+        "minimum_min": 275,
+        "average_min": 308,
+        "station_labels": [
+          "NANCY",
+          "SAUMUR"
+        ],
+        "listed_rail_operators": [
+          "TGV INOUI",
+          "TER",
+          "INTERCITES"
+        ],
+        "connections": "published as possible; individual legs not verified",
+        "fare_status": "no numeric fare in route summary",
+        "service_date": null
+      }
     },
     {
       "origin_id": "strasbourg",
@@ -101,7 +140,28 @@
       "valid_for_2027": false,
       "fare_couple_eur": null,
       "transfer_count": null,
-      "note": "Resumo de rota SNCF Connect consultado via índice web; mínimo e média publicados, sem data de serviço ou verificação de todos os trechos. A recência do índice é relativa, não uma data de captura comprovada."
+      "note": "Resumo de rota SNCF Connect consultado via índice web; mínimo e média publicados, sem data de serviço ou verificação de todos os trechos. A recência do índice é relativa, não uma data de captura comprovada.",
+      "revalidation": {
+        "checked_at": "2026-11-28",
+        "source_url": "https://www.sncf-connect.com/train/trajet/strasbourg/saumur",
+        "status": "published_summary_reproduced",
+        "minimum_min": 268,
+        "average_min": 324,
+        "station_labels": [
+          "STRASBOURG",
+          "SAUMUR"
+        ],
+        "listed_rail_operators": [
+          "TGV INOUI",
+          "TER",
+          "INTERCITES",
+          "DB SNCF Voyageurs",
+          "OUIGO"
+        ],
+        "connections": "published as possible; individual legs not verified",
+        "fare_status": "no numeric fare in route summary",
+        "service_date": null
+      }
     },
     {
       "origin_id": "lille",
