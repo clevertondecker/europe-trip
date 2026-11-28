@@ -255,6 +255,35 @@ def render_fare_evidence(view, fares=None):
                 st.dataframe(rows, hide_index=True, column_config={"Fonte": st.column_config.LinkColumn("Fonte", display_text="Abrir fonte")}, key="ux132_fare_reference_rows")
             else:
                 st.caption("Nenhuma observação neste filtro.")
+            samples = fares.get("schedule_samples", [])
+            if samples:
+                st.markdown("**Horários datados de ida e retorno — amostras documentais**")
+                st.caption(f'{len(samples)} pares de horários datados. Não são cotações para dois adultos nem confirmação de lugares. Estações identificadas na fonte, não reconciliadas.')
+                st.dataframe([{
+                    "Origem": city(s["outbound"]["origin_id"]),
+                    "Destino": city(s["outbound"]["destination_id"]),
+                    "Data da ida": s["outbound"]["departure_at"][:10],
+                    "Data do retorno": s["inbound"]["departure_at"][:10],
+                    "Duração da ida": format_minutes(s["outbound_duration_min"]),
+                    "Duração do retorno": format_minutes(s["inbound_duration_min"]),
+                    "Janela bruta": format_minutes(s["gross_destination_minutes"]),
+                    "Tempo líquido": "Não documentado",
+                } for s in samples], hide_index=True, width="stretch",
+                    key="ux132_dated_schedule_summary")
+                by_id = {s["id"]: s for s in samples}
+                chosen = st.selectbox("Detalhar amostra datada", list(by_id),
+                    format_func=lambda k: city(by_id[k]["outbound"]["origin_id"]) + " → " +
+                        city(by_id[k]["outbound"]["destination_id"]) + " · " +
+                        by_id[k]["outbound"]["departure_at"][:10],
+                    **widget_state("ux132_dated_schedule", next(iter(by_id)), lambda v: v in by_id))
+                sample = by_id[chosen]
+                st.caption("Consulta: " + sample["checked_at"] + " · horários locais publicados")
+                for label, leg in (("Ida", sample["outbound"]), ("Retorno", sample["inbound"])):
+                    st.write(f'**{label}** · {leg["operator"]} {leg["service_id"]}')
+                    st.caption(f'{leg["origin_station_label"]} → {leg["destination_station_label"]}')
+                    st.caption(f'{leg["departure_at"]} → {leg["arrival_at"]}')
+                    st.markdown(f'[Fonte do horário — {label}]({leg["source_url"]})')
+                st.caption("Janela bruta entre chegada e partida; última milha, tempo líquido, preços e viabilidade para 2027 não verificados.")
             if not fares["records"]:
                 st.caption("Nenhuma cotação individual cadastrada.")
             for record in fares["records"]:
