@@ -2000,7 +2000,7 @@
       "valid_for_2027": false,
       "fare_couple_eur": null,
       "transfer_count": null,
-      "note": "FAQ separa trem de ônibus. Versão aberta diverge do índice de 2h23 e 4h18; não combinado. FAQ ferroviária consultada em 28/11/2026. Mínimo e média da mesma versão aberta; número mínimo de trocas refere-se ao resumo, não ao itinerário mais rápido. Sem confirmação de retorno ou serviço em 2027.",
+      "note": "FAQ separa trem de ônibus. Versão aberta diverge do índice de 2h23 e 4h18; não combinado. FAQ ferroviária consultada em 28/11/2026. Mínimo e média da mesma versão aberta; número mínimo de trocas refere-se ao resumo, não ao itinerário mais rápido. Sem confirmação de retorno ou serviço em 2027. Revisão de qualidade: embora a FAQ reproduza os tempos ferroviários, a lista de operadores cita apenas Flixbus. Modalidade de todos os trechos inconclusiva; não usar como itinerário ferroviário confirmado.",
       "quality_review": {
         "checked_at": "2026-11-28",
         "source_url": "https://www.thetrainline.com/en/train-times/strasbourg-to-arlon",
