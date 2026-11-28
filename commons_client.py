@@ -2,8 +2,12 @@
 import json
 import re
 from html import unescape
-from urllib.parse import urlencode
-from urllib.request import Request,urlopen
+from urllib.parse import urlencode, unquote, urlsplit
+from urllib.request import Request
+import urllib.request
+
+def urlopen(*args, **kwargs):
+    return urllib.request.urlopen(*args, **kwargs)
 
 def _plain(value):
     return unescape(re.sub(r"<[^>]+>","",str(value or ""))).strip()
@@ -46,14 +50,29 @@ WIDTH = 720
 TIMEOUT = 6
 USER_AGENT = "NossaEuropa2027/1.0 (https://github.com/clevertondecker/europe-trip; contact via GitHub issues)"
 
+COMMONS_API = "https://commons.wikimedia.org/w/api.php"
+
+def file_path_title(url):
+    p = urlsplit(url)
+    prefix = "/wiki/Special:FilePath/"
+    if p.scheme == "https" and p.netloc == "commons.wikimedia.org" and p.path.startswith(prefix):
+        title = unquote(p.path[len(prefix):]).replace("_", " ")
+        if title and "/" not in title and chr(92) not in title:
+            return title
+    return None
+
+def request_json(url, params, timeout=TIMEOUT):
+    req = Request(url + "?" + urlencode(params), headers={"User-Agent": USER_AGENT, "Accept": "application/json"})
+    with urlopen(req, timeout=timeout) as response:
+        return json.load(response)
+
+def query_imageinfo(titles, fetch_json=None, timeout=TIMEOUT):
+    params = {"action":"query", "prop":"imageinfo", "titles":"|".join(titles),
+              "iiprop":"url|extmetadata", "iiurlwidth":WIDTH, "format":"json", "formatversion":2}
+    return fetch_json(COMMONS_API, params) if fetch_json else request_json(COMMONS_API, params, timeout)
+
 def fetch_photo(file_title,timeout=TIMEOUT):
-    q=urlencode({"action":"query","prop":"imageinfo","titles":"File:"+file_title,
-                 "iiprop":"url|extmetadata","iiurlwidth":WIDTH,"format":"json"})
-    req=Request("https://commons.wikimedia.org/w/api.php?"+q,
-                headers={"User-Agent":USER_AGENT,
-                         "Accept":"application/json"})
     try:
-        with urlopen(req,timeout=timeout) as response:
-            return parse_metadata(json.load(response),file_title)
+        return parse_metadata(query_imageinfo(["File:"+file_title], timeout=timeout),file_title)
     except (OSError,ValueError,TypeError,KeyError):
         return None
