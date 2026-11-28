@@ -243,11 +243,6 @@ def _draft_changed():
     st.session_state[DRAFT] = list(st.session_state["rec03a_scope_widget"])
 
 
-def _draft_all(ids):
-    st.session_state[DRAFT] = list(ids)
-    st.session_state["rec03a_scope_widget"] = list(ids)
-
-
 def _edit():
     st.session_state["rec03a_edit_scope"] = True
     scope = st.session_state.get(SCOPE) or {}
