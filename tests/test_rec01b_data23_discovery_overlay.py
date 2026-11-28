@@ -108,8 +108,9 @@ class Data23WishlistAppTests(unittest.TestCase):
             app.button(key="rec03a_open_from_wishlist").click().run()
             app.button(key="rec03a_confirm_subset").click().run()
             app.segmented_control(key="ux112_active_view").set_value("Explorar alternativas").run()
+            app.segmented_control(key="rec03a_catalog_mode").set_value("Todas as cidades").run()
             for base in ("angers", "rennes"):
-                app.text_input(key="rec03a_search").set_value(base).run()
+                app.selectbox(key="rec03a_city").select(base).run()
                 app.checkbox(key="rec03a_pick_"+base).check().run()
                 self.assertFalse(app.exception, [e.message for e in app.exception])
             app.button(key="ux112_open_comparison").click().run()
