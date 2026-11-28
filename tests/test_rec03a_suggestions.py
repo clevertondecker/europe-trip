@@ -389,6 +389,42 @@ class RecommendationAppTests(unittest.TestCase):
         self.assertEqual(angers["evidence"]["angers"]["category"],"local")
         self.assertIsNone(angers["evidence"]["angers"]["display_min"])
 
+    def test_integrated_catalog_filters_and_real_pagination_preserve_context(self):
+        from rec03b_handoffs import CHOICE
+        a=self.make_app([("paris","must_visit"),("basel","interested")],"compare")
+        self.click(a,"rec03a_confirm_subset")
+        a.session_state[CHOICE]=["metz","strasbourg"]
+        self.run_ok(a)
+        keys=(SCOPE,CHOICE,"advisor_plan","ux502_interests","ux41_favorites","ux36_cloud_dirty")
+        before={key:deepcopy(a.session_state[key]) for key in keys}
+        a.segmented_control(key="rec03a_catalog_mode").set_value("Todas as cidades")
+        self.run_ok(a)
+        a.number_input(key="rec03a_page").set_value(2)
+        self.run_ok(a)
+        self.assertEqual(a.number_input(key="rec03a_page").value,2)
+        a.selectbox(key="rec03a_country").select("França")
+        self.run_ok(a)
+        self.assertEqual(a.number_input(key="rec03a_page").value,1)
+        a.selectbox(key="rec03a_city").select("angers")
+        self.run_ok(a)
+        self.assertIsNotNone(a.checkbox(key="rec03a_pick_angers"))
+        self.assertNotIn("rec03a_category",{w.key for w in a.selectbox})
+        a.segmented_control(key="ux112_active_view").set_value("Minha comparação")
+        self.run_ok(a)
+        self.assertTrue(any('class="ux97-table"' in m.value for m in a.markdown))
+        a.segmented_control(key="ux64_public_task").set_value("Cobertura dos dados")
+        self.run_ok(a)
+        a.segmented_control(key="ux64_public_task").set_value("Comparar bases")
+        self.run_ok(a)
+        a.segmented_control(key="ux112_active_view").set_value("Explorar alternativas")
+        self.run_ok(a)
+        self.assertEqual(a.selectbox(key="rec03a_country").value,"França")
+        self.assertEqual(a.selectbox(key="rec03a_city").value,"angers")
+        self.click(a,"rec03a_clear_filters")
+        self.assertEqual(a.segmented_control(key="rec03a_catalog_mode").value,"Sugestões automáticas")
+        for key,value in before.items():
+            self.assertEqual(a.session_state[key],value)
+
     def test_planned_only_destination_appears_and_new_visit_requires_review(self):
         from attractions_model import load_attractions
         from itinerary_flow_model import add_undated_choices,FRANCE_STAGE
