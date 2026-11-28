@@ -92,6 +92,78 @@ def validate_review(row, checked):
     if mode not in ("bus", "rail_label", "unknown") or row["status"] != expected or not review.get("note"):
         raise ValueError("Classificação de revisão inconsistente")
 
+def _validate_return_references(rows, checked):
+    """Complementary reverse calendar evidence, outside the historic outbound scope."""
+    seen = {}
+    for r in rows:
+        origin, dest = pair(r)
+        travel, research = _day(r["travel_date"]), _day(r["researched_at"])
+        capture = r["source_capture_date"]
+        if (origin != "paris" or dest not in BASES
+                or r["source_url"] != f"https://www.sncf-connect.com/train/trajet/paris/{dest}"
+                or r["origin_country"] != "FR" or r["destination_country"] != "FR"
+                or research > travel or research > checked
+                or (capture is not None and _day(capture) > research)
+                or type(r["amount_minor"]) is not int or r["amount_minor"] <= 0
+                or r["currency"] != "EUR" or r["kind"] != "advertised_from"
+                or type(r["passengers"]) is not int or r["passengers"] != 1
+                or r["direction"] != "oneway" or r["fare_class"] != "second"
+                or r["transport_mode"] != "rail_label" or r["status"] != "observed_calendar"
+                or r["valid_for_2027"] is not False or any(r[k] is not None for k in
+                    ("discount_eligibility", "mandatory_fees_included", "availability",
+                     "service_id", "review", "passenger_profile", "actual_operator"))
+                or not r["evidence_note"] or not r["commercial_brand"]):
+            raise ValueError("Referência indicativa de retorno inválida")
+        key = (origin, dest, travel, research, capture, r["source_url"], r["commercial_brand"])
+        if key in seen:
+            raise ValueError("Referência de retorno duplicada" if seen[key] == r["amount_minor"]
+                             else "Conflito de preço de retorno na mesma captura")
+        seen[key] = r["amount_minor"]
+
+
+def _validate_regional_products(rows, checked):
+    """Published product conditions, never fare quotes or a savings calculator."""
+    fields = {"id", "name", "operator", "source_url", "additional_source_urls",
+              "checked_at", "amount_minor", "currency", "price_kind", "price_unit",
+              "group_min", "group_max", "couple_use", "fare_class", "validity",
+              "geography", "modes", "reservations", "conditions", "valid_for_2027"}
+    seen = set()
+    for r in rows:
+        if not isinstance(r, dict) or set(r) != fields:
+            raise ValueError("Produto regional inválido")
+        if (not r["id"] or r["id"] in seen or not official_source(r["source_url"])
+                or not isinstance(r["additional_source_urls"], list)
+                or any(not official_source(u) for u in r["additional_source_urls"])
+                or _day(r["checked_at"]) > checked or r["valid_for_2027"] is not False
+                or any(not isinstance(r[k], str) or not r[k].strip() for k in
+                       ("name", "operator", "validity", "geography", "conditions"))
+                or r["fare_class"] not in (None, "second", "first", "both")
+                or r["couple_use"] not in ("group_allowed", "individual_ticket", "requires_children", "unknown")
+                or not isinstance(r["modes"], list) or not r["modes"]
+                or set(r["modes"]) - {"rail", "bus", "tram", "boat"}
+                or r["reservations"] is not None and not isinstance(r["reservations"], str)):
+            raise ValueError("Proveniência ou condições de produto regional inválidas")
+        size = (r["group_min"], r["group_max"])
+        if size != (None, None) and (any(type(n) is not int for n in size)
+                or not 1 <= size[0] <= size[1] <= 5):
+            raise ValueError("Grupo de produto regional inválido")
+        if (r["couple_use"] == "group_allowed" and (size == (None, None) or not size[0] <= 2 <= size[1])
+                or r["couple_use"] == "individual_ticket" and size != (1, 1)
+                or r["couple_use"] == "requires_children" and size != (4, 4)):
+            raise ValueError("Elegibilidade do produto incompatível com o grupo")
+        if r["amount_minor"] is None:
+            if (r["currency"], r["price_kind"], r["price_unit"]) != (None, "not_published", None):
+                raise ValueError("Preço de produto não publicado")
+        elif (type(r["amount_minor"]) is not int or r["amount_minor"] <= 0
+              or r["currency"] not in ("EUR", "CHF", "GBP")
+              or r["price_kind"] not in ("fixed", "from")
+              or r["price_unit"] not in ("person_day", "group_day", "person_roundtrip")):
+            raise ValueError("Unidade ou preço de produto regional inválido")
+        if r["price_unit"] == "group_day" and r["couple_use"] == "individual_ticket":
+            raise ValueError("Unidade de produto incompatível")
+        seen.add(r["id"])
+
+
 def validate_fare_references(data):
     if type(data["schema_version"]) is not int or data["schema_version"] != 2:
         raise ValueError("Versão inválida")
@@ -166,6 +238,8 @@ def validate_fare_references(data):
     for check in data["alternative_source_checks"]:
         if pair(check) not in universe or not official_source(check["source_url"]) or _day(check["researched_at"]) > checked or not check["note"]:
             raise ValueError("Consulta alternativa inválida")
+    _validate_return_references(data.get("return_references", []), checked)
+    _validate_regional_products(data.get("regional_products", []), checked)
     return data
 
 def load_fare_references(path=PATH):
