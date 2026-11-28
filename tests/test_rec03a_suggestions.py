@@ -111,7 +111,7 @@ class RecommendationAppTests(unittest.TestCase):
         self.assertNotIn("Cobertura dos dados",a.segmented_control(key="ux112_active_view").options)
         self.assertIn("Cobertura dos dados",a.segmented_control(key="ux64_public_task").options)
         before=deepcopy(a.session_state["advisor_plan"])
-        a.checkbox(key="rec03a_show_all").check()
+        a.segmented_control(key="rec03a_catalog_mode").set_value("Todas as cidades")
         self.run_ok(a)
         self.assertTrue(any("Catálogo de cidades-base" in m.value for m in a.markdown))
         picks=[c for c in a.checkbox if c.key and c.key.startswith("rec03a_pick_")]
@@ -366,9 +366,9 @@ class RecommendationAppTests(unittest.TestCase):
         original_plan=deepcopy(a.session_state["advisor_plan"])
         self.click(a,"rec03a_confirm_subset")
         self.assertEqual(a.session_state[SCOPE]["destination_ids"],["angers","paris","saint_malo"])
-        a.checkbox(key="rec03a_show_all").check()
+        a.segmented_control(key="rec03a_catalog_mode").set_value("Todas as cidades")
         self.run_ok(a)
-        a.text_input(key="rec03a_search").set_value("Angers")
+        a.selectbox(key="rec03a_city").select("angers")
         self.run_ok(a)
         a.session_state[INTENT]="manual"
         self.run_ok(a)
@@ -376,7 +376,8 @@ class RecommendationAppTests(unittest.TestCase):
         self.run_ok(a)
         a.segmented_control(key="ux112_active_view").set_value("Explorar alternativas")
         self.run_ok(a)
-        self.assertEqual(a.text_input(key="rec03a_search").value,"Angers")
+        self.assertEqual(a.selectbox(key="rec03a_city").value,"angers")
+        self.assertIsNotNone(a.checkbox(key="rec03a_pick_angers"))
         self.assertEqual(a.session_state["advisor_plan"],original_plan)
         from base_recommendation_model import recommend_bases
         from comparison_destinations_model import project_comparison_destinations
@@ -417,6 +418,10 @@ class RecommendationAppTests(unittest.TestCase):
             self.assertTrue(a.error)
             self.assertFalse(any("Todas as cidades-base" in x.value for x in a.markdown))
         self.run_ok(a)
+        a.segmented_control(key="rec03a_catalog_mode").set_value("Todas as cidades")
+        self.run_ok(a)
+        a.selectbox(key="rec03a_city").select("metz")
+        self.run_ok(a)
         a.session_state["test_identity"]="other"
         self.run_ok(a)
         # The safer default reopens a PROPOSED scope, never a confirmed one.
@@ -429,6 +434,9 @@ class RecommendationAppTests(unittest.TestCase):
             self.assertIsNone(a.session_state[SCOPE])
             self.assertIsNotNone(a.button(key="rec03a_confirm_subset"))
             engine.assert_not_called()
+        self.click(a,"rec03a_confirm_subset")
+        self.assertEqual(a.segmented_control(key="rec03a_catalog_mode").value,"Sugestões automáticas")
+        self.assertNotIn("rec03a_city_shadow",a.session_state)
 
 
 if __name__=="__main__":
