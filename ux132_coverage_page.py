@@ -4,7 +4,8 @@ from time import perf_counter
 
 import streamlit as st
 
-from data24_coverage_model import rail_coverage
+from data24_coverage_model import rail_coverage, coverage_counts
+from data25_priority_rail_model import RESEARCH_BASE_IDS
 from trip01_supplemental_discovery import build_exploration_discovery
 from ux_shared_ui_presentation import section_heading
 from ux_widget_state import navigation_widget_state
@@ -29,13 +30,24 @@ def _render_overview(discovery, research):
     with st.container(border=True):
         st.markdown("#### Transporte ferroviário")
         try:
-            counts = rail_coverage(discovery=discovery, research=research)["global"]
-            rate = counts["fraction"]
-            st.metric("Cobertura ferroviária", "N/A" if rate is None else f"{rate:.1%}".replace(".", ","))
+            coverage = rail_coverage(discovery=discovery, research=research)
+            priority = coverage_counts(
+                pair["cell"]["category"]
+                for (base, _), pair in coverage["pairs"].items()
+                if base in RESEARCH_BASE_IDS
+            )
+            rate = priority["fraction"]
+            st.metric("Cobertura das cinco bases prioritárias",
+                      "N/A" if rate is None else f"{rate:.1%}".replace(".", ","))
             if rate is not None:
                 st.progress(rate)
-            st.caption(f'{counts["timed"]}/{counts["eligible"]} conexões não locais com tempo · '
-                       f'{counts["missing"]} sem tempo documentado.')
+            st.caption(f'{priority["timed"]}/{priority["eligible"]} conexões não locais com tempo · '
+                       f'{priority["missing"]} sem tempo documentado. Lille, Metz, Mulhouse, Nancy e Strasbourg.')
+            counts = coverage["global"]
+            rate = counts["fraction"]
+            st.metric("Cobertura ferroviária", "N/A" if rate is None else f"{rate:.1%}".replace(".", ","))
+            st.caption(f'Universo global: {counts["timed"]}/{counts["eligible"]} conexões não locais com tempo · '
+                       f'{counts["missing"]} sem tempo documentado. Ambos os indicadores medem referências de ida, não retornos ou tarifas.')
         except Exception:
             _LOG.exception("Coverage overview rail unavailable")
             st.warning("Resumo ferroviário indisponível.")
