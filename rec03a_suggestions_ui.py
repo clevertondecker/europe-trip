@@ -503,21 +503,32 @@ def _featured_ids(result):
     return featured[:4]
 
 
+_CATALOG_MODES = ("Sugestões automáticas", "Todas as cidades")
+_EVIDENCE_GROUPS = {"Comparáveis":"comparable", "Condicionais":"conditional",
+                    "Para investigar":"investigate"}
+
+
 def _catalog_filter_changed(key):
-    state = st.session_state
-    state[key + "_shadow"] = state[key]
-    state["rec03a_page_shadow"] = 1
-    if key == "rec03a_country":
-        # The next render reconciles the city with the new country options.
-        pass
+    _remember(key, key + "_shadow")
+    st.session_state["rec03a_page_shadow"] = 1
 
 
 def _clear_catalog_filters():
     state = st.session_state
-    for key, default in (("rec03a_country", None), ("rec03a_city", None),
+    for key, default in (("rec03a_catalog_mode", _CATALOG_MODES[0]),
+                         ("rec03a_country", None), ("rec03a_city", None),
                          ("rec03a_category", "Todas"), ("rec03a_page", 1)):
         state[key + "_shadow"] = default
         state.pop(key, None)
+
+
+def _restore_filter(key, default, options):
+    state = st.session_state
+    previous = state.get(key + "_shadow", default)
+    current = _restore_widget(key, key + "_shadow", default, lambda x: x in options)
+    if previous != current:
+        state["rec03a_page_shadow"] = 1
+    return current
 
 
 def catalog_filter_options(candidates, cities, country=None):
@@ -529,42 +540,56 @@ def catalog_filter_options(candidates, cities, country=None):
 
 
 def render_catalog_filters(candidates, cities):
+    # This is a presentation mode, independent of the comparison selection.
+    mode = st.segmented_control("Cidades a explorar", _CATALOG_MODES,
+                                **navigation_widget_state("rec03a_catalog_mode", _CATALOG_MODES))
+    mode = mode or st.session_state["rec03a_catalog_mode_shadow"]
+    if mode == _CATALOG_MODES[0]:
+        return False, []
     countries, _ = catalog_filter_options(candidates, cities)
-    # Country None = suggestions unless a city is selected; explicit empty
-    # string = browse every country. Values are session-only, never CHOICE.
-    country_options = [None, "", *countries]
-    _restore_widget("rec03a_country", "rec03a_country_shadow", None,
-                    lambda x: x in country_options)
+    country_options = [None, *countries]
+    _restore_filter("rec03a_country", None, country_options)
     flags = {"França":"🇫🇷", "Alemanha":"🇩🇪", "Bélgica":"🇧🇪", "Luxemburgo":"🇱🇺",
              "Suíça":"🇨🇭", "Países Baixos":"🇳🇱"}
     left, right = st.columns(2)
     country = left.selectbox("País", country_options,
-                             format_func=lambda x: "Sugestões automáticas" if x is None else
-                             "Todos os países" if x == "" else (flags.get(x, "") + " " + x).strip(),
+                             format_func=lambda x: "Todos os países" if x is None else
+                             (flags.get(x, "") + " " + x).strip(),
                              key="rec03a_country", on_change=_catalog_filter_changed,
                              args=("rec03a_country",))
-    _, available = catalog_filter_options(candidates, cities, country or None)
+    _, available = catalog_filter_options(candidates, cities, country)
     city_options = [None, *available]
-    _restore_widget("rec03a_city", "rec03a_city_shadow", None,
-                    lambda x: x in city_options)
+    _restore_filter("rec03a_city", None, city_options)
     city = right.selectbox("Cidade-base", city_options,
                            format_func=lambda x: "Todas as cidades" if x is None else cities[x]["name"],
                            key="rec03a_city", on_change=_catalog_filter_changed,
                            args=("rec03a_city",))
-    browsing = country is not None or city is not None
-    if not browsing:
-        return False, []
     st.button("Limpar filtros", key="rec03a_clear_filters", on_click=_clear_catalog_filters)
-    categories = ("Todas", "Comparáveis", "Condicionais", "Para investigar")
-    _restore_widget("rec03a_category", "rec03a_category_shadow", "Todas",
-                    lambda x: x in categories)
+    matching = [c for c in candidates if c["base_id"] in available]
+    groups = {c["group"] for c in matching}
+    categories = ["Todas", *[label for label, group in _EVIDENCE_GROUPS.items() if group in groups]]
+    category = _restore_filter("rec03a_category", "Todas", categories)
+    if city is not None:
+        # Explicit city lookup wins; only clear an incompatible category.
+        chosen = next(c for c in matching if c["base_id"] == city)
+        if category != "Todas" and _EVIDENCE_GROUPS[category] != chosen["group"]:
+            _restore_filter("rec03a_category", "Todas", ["Todas"])
+        return True, [chosen]
     category = st.selectbox("Disponibilidade de evidências", categories,
                             key="rec03a_category", on_change=_catalog_filter_changed,
                             args=("rec03a_category",))
-    groups = {"Comparáveis":"comparable", "Condicionais":"conditional", "Para investigar":"investigate"}
-    return True, [c for c in candidates if c["base_id"] in available
-                  and (city is None or c["base_id"] == city)
-                  and (category == "Todas" or c["group"] == groups[category])]
+    return True, [c for c in matching if category == "Todas" or
+                  c["group"] == _EVIDENCE_GROUPS[category]]
+
+
+def catalog_page(filtered, size=4):
+    pages = max(1, (len(filtered) + size - 1) // size)
+    _restore_widget("rec03a_page", "rec03a_page_shadow", 1,
+                    lambda x: type(x) is int and 1 <= x <= pages)
+    page = st.number_input("Página", min_value=1, max_value=pages, step=1,
+                           key="rec03a_page", on_change=_remember,
+                           args=("rec03a_page", "rec03a_page_shadow"))
+    return filtered[(page-1)*size:page*size]
 
 
 def render_suggestions(*,plan,discovery=None,research=None):
@@ -650,14 +675,7 @@ def render_suggestions(*,plan,discovery=None,research=None):
             st.markdown("#### Catálogo de cidades-base")
             st.caption(f"{len(filtered)} de {len(result['candidates'])} cidades-base encontradas. Não é uma classificação das melhores bases.")
             if filtered:
-                size=4
-                pages=(len(filtered)+size-1)//size
-                _restore_widget("rec03a_page","rec03a_page_shadow",1,
-                                lambda x:type(x) is int and 1<=x<=pages)
-                page=st.number_input("Página",min_value=1,max_value=pages,step=1,
-                                     key="rec03a_page",on_change=_remember,
-                                     args=("rec03a_page","rec03a_page_shadow"))
-                visible=filtered[(page-1)*size:page*size]
+                visible = catalog_page(filtered)
                 with st.container(key="ux99_base_gallery_all"):
                     columns=st.columns(min(2,len(visible)),gap="medium")
                     for index,candidate in enumerate(visible):
