@@ -93,6 +93,9 @@ def _image_metadata(page: dict) -> dict | None:
     result = parse_metadata({"query":{"pages":[page]}}, title[5:])
     if not result:
         return None
+     # TODO(ARCH15B): reuse evidence_validation.is_https_url after merge.
+    if not result["license_url"].startswith("https://"):
+        result["license_url"] = None
     return {**result, "source_page":"https://commons.wikimedia.org/wiki/" +
             quote(title.replace(" ", "_"), safe=":()_-"), "origin":"wikimedia_commons"}
 
@@ -101,7 +104,7 @@ def lookup_destination_photos(destinations: list[dict], fetch_json=None) -> dict
     """Find licensed photos for visible destinations, with exact article identity.
 
     Network errors return an empty mapping; no false substitutions or writes.
-    The caller caches this result with Streamlit to avoid repeated requests.
+    The caller caches successful photos per destination and failures briefly.
     """
     fetch = fetch_json or _request_json
     requested = {}
