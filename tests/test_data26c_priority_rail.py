@@ -26,6 +26,55 @@ class PriorityRailResearchTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     load_data26c_rail(path)
 
+    def test_secondary_source_cannot_be_mislabeled_or_reversed(self):
+        payload = json.loads(DATA.read_text(encoding="utf-8"))
+        index = next(i for i, row in enumerate(payload["records"])
+                     if (row["origin_id"], row["destination_id"]) == ("metz", "arlon"))
+        for changes in (
+            {"source_url": "https://www.thetrainline.com/en/train-times/arlon-to-metz"},
+            {"confidence": "medium"},
+            {"evidence_type": "official_route_minimum", "confidence": "medium",
+             "evidence_level": "operator_city_level"},
+        ):
+            with self.subTest(changes=changes), tempfile.TemporaryDirectory() as tmp:
+                altered = copy.deepcopy(payload)
+                altered["records"][index].update(changes)
+                path = Path(tmp) / "research.json"
+                path.write_text(json.dumps(altered), encoding="utf-8")
+                with self.assertRaises(ValueError):
+                    load_data26c_rail(path)
+
+    def test_new_batch_is_directional_and_tiers_are_visible(self):
+        data = load_data26c_rail()
+        cells = rail_coverage()["pairs"]
+        for key, kind in (
+            (("metz", "stuttgart"), "official_route_minimum"),
+            (("nancy", "stuttgart"), "official_route_minimum"),
+            (("metz", "arlon"), "secondary_sample"),
+            (("nancy", "arlon"), "secondary_sample"),
+            (("strasbourg", "dinan"), "secondary_sample"),
+            (("mulhouse", "saumur"), "secondary_sample"),
+        ):
+            with self.subTest(pair=key):
+                record = data["by_pair"][key]
+                cell = cells[key]["cell"]
+                self.assertEqual(record["evidence_type"], kind)
+                self.assertEqual(cell["category"], "reference_only")
+                self.assertEqual(cell["source_kind"], kind)
+                self.assertEqual(cell["confidence"], record["confidence"])
+                self.assertEqual(cell["source_url"], record["source_url"])
+                self.assertFalse(cell["valid_for_2027"])
+                self.assertFalse(cell["weekend_return_known"])
+                if kind == "secondary_sample":
+                    self.assertIn("referência secundária", cell["label"])
+                    self.assertNotIn("operadora", cell["label"])
+                    self.assertEqual(cell["confidence"], "low")
+                else:
+                    self.assertIn("operadora", cell["label"])
+        for key in (("strasbourg", "dinan"), ("mulhouse", "saumur")):
+            self.assertEqual(data["by_pair"][key]["previous_attempts"][0]["reason"],
+                             "technical_failure")
+
     def test_documentary_coverage_before_after(self):
         dataset = load_data26c_rail()
         baseline = rail_coverage(projection_options={"data26c_overlay": {"by_pair": {}}})
