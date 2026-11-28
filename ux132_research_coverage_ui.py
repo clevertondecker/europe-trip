@@ -130,7 +130,8 @@ def render_rail_coverage(*, discovery=None, research=None):
             st.dataframe(table, hide_index=True, width="stretch",
                          column_config=config, key="ux132_gaps_" + section)
             timed = { (c["destination_id"] if axis == "bases" else c["base_id"]): c
-                      for c in connections if c["category"] in ("historical", "reference_only") }
+                      for c in connections if c["category"] in ("historical", "reference_only")
+                      or c.get("quality_review") }
             if timed:
                 with st.expander("Consultar fonte e ressalvas"):
                     key = "ux132_connection_" + axis
@@ -157,6 +158,36 @@ def render_rail_coverage(*, discovery=None, research=None):
                         st.caption(str(c["notes"]))
                     if c["variation"]:
                         st.caption("Há variação entre referências; não implica contradição confirmada.")
+                    review = c.get("quality_review")
+                    original = c.get("reviewed_observation")
+                    if review and original:
+                        st.markdown("**Auditoria documental DATA26C**")
+                        reproduction = ("Valores reproduzidos" if review["selected_summary_reproduced"]
+                                        else "Valores divergentes — histórico preservado")
+                        modality = ("Modalidade inconclusiva — excluída da cobertura ferroviária"
+                                    if review["modality_status"] == "inconclusive"
+                                    else "Resumo ferroviário publicado; trechos não verificados")
+                        st.write(reproduction)
+                        st.caption(modality)
+                        st.caption("Confiança da referência: " + {"medium": "média", "low": "baixa"}.get(original["confidence"], original["confidence"]))
+                        st.caption("Observação original (mínimo / média): " +
+                                   format_minutes(original["minimum_min"]) + " / " +
+                                   format_minutes(original["average_min"]) +
+                                   " · " + original["checked_at"])
+                        st.link_button("Abrir fonte da observação auditada", original["source_url"])
+                        st.caption("Reconsulta: " + review["checked_at"])
+                        st.dataframe([{
+                            "Mínimo": format_minutes(s["minimum_min"]),
+                            "Média": format_minutes(s["average_min"]),
+                            "Origem publicada": ", ".join(s["origin_station_labels"]),
+                            "Chegada publicada": ", ".join(s["arrival_station_labels"]),
+                            "Versão indexada": s["index_recency"],
+                            "Base da modalidade": s["mode_basis"],
+                        } for s in review["samples"]], hide_index=True, width="stretch",
+                            key="ux132_review_samples_" + axis)
+                        st.caption(review["note"])
+                        for check in review.get("official_cross_checks", []):
+                            st.markdown(f'[{check["finding"]}]({check["source_url"]})')
                     if c["alternative"]:
                         alt = c["alternative"]
                         st.markdown("**Referência indicativa alternativa (não substitui o histórico)**")
