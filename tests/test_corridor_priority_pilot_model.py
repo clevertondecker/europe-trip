@@ -4,7 +4,7 @@ import tempfile
 from pathlib import Path
 import unittest
 
-from corridor_priority_pilot_model import load_pilot, pilot_matrix, DATA
+from tools.corridor_priority_pilot_model import load_pilot, pilot_matrix, DATA
 
 
 class CorridorPilotTests(unittest.TestCase):
