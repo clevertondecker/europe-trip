@@ -133,8 +133,10 @@ class Data13DirectedRailCoverageTests(unittest.TestCase):
                 self.assertFalse(row["weekend_return_verified"])
                 self.assertFalse(row["reachable_confirmed"])
         audit=audit_coverage()
-        self.assertEqual(audit["historical_plus_indicative"] - audit["new_displayed_data25"],558)
-        self.assertEqual(audit["unresearched"] + audit["new_displayed_data25"],792)
+        self.assertEqual(audit["historical_plus_indicative"] - audit["new_displayed_data25"]
+                         - audit["new_displayed_data26c"],558)
+        self.assertEqual(audit["unresearched"] + audit["new_displayed_data25"]
+                         + audit["new_displayed_data26c"],792)
 
     def test_data17_liege_rows_are_visible_in_discovery(self):
         expected={"dijon":301,"reims":233,"mulhouse":351,"besancon":455}
@@ -150,8 +152,10 @@ class Data13DirectedRailCoverageTests(unittest.TestCase):
                 self.assertFalse(record["reachable_confirmed"])
                 self.assertFalse(record["weekend_return_verified"])
         audit=audit_coverage()
-        self.assertEqual(audit["historical_plus_indicative"] - audit["new_displayed_data25"],558)
-        self.assertEqual(audit["unresearched"] + audit["new_displayed_data25"],792)
+        self.assertEqual(audit["historical_plus_indicative"] - audit["new_displayed_data25"]
+                         - audit["new_displayed_data26c"],558)
+        self.assertEqual(audit["unresearched"] + audit["new_displayed_data25"]
+                         + audit["new_displayed_data26c"],792)
 
     def test_data18_nancy_visible_in_actual_discovery_projection(self):
         expected={
@@ -178,8 +182,10 @@ class Data13DirectedRailCoverageTests(unittest.TestCase):
                 self.assertFalse(row["weekend_return_verified"])
                 self.assertFalse(row["reachable_confirmed"])
         audit=audit_coverage()
-        self.assertEqual(audit["historical_plus_indicative"] - audit["new_displayed_data25"],558)
-        self.assertEqual(audit["unresearched"] + audit["new_displayed_data25"],792)
+        self.assertEqual(audit["historical_plus_indicative"] - audit["new_displayed_data25"]
+                         - audit["new_displayed_data26c"],558)
+        self.assertEqual(audit["unresearched"] + audit["new_displayed_data25"]
+                         + audit["new_displayed_data26c"],792)
 
     def test_exact_matrix_and_target_gap_are_audited(self):
         out=audit_coverage()
@@ -189,10 +195,13 @@ class Data13DirectedRailCoverageTests(unittest.TestCase):
         # Only Metz → Sélestat is in the historical 30-base/46-destination registry.
         # Angers, Rennes and Annecy belong to the expanded comparison scope.
         self.assertEqual(out["new_displayed_data25"],1)
-        self.assertEqual(out["historical_plus_indicative"],559)
-        self.assertEqual(out["unresearched"],791)
+        self.assertEqual(out["historical_plus_indicative"] - out["new_displayed_data26c"],559)
+        self.assertEqual(out["unresearched"] + out["new_displayed_data26c"],791)
         self.assertEqual(out["historical_plus_indicative"] - out["new_displayed_data13"]
-                         - out["new_displayed_data25"],227)
+                         - out["new_displayed_data25"] - out["new_displayed_data26c"],227)
+        self.assertEqual(out["new_displayed_data26c"],
+                         sum(row["new_data26c_displayed"] for row in out["per_base"]))
+        self.assertGreater(out["new_displayed_data26c"], 0)
         metz=next(row for row in out["per_base"] if row["base_id"]=="metz")
         self.assertEqual(metz["new_data25_displayed"],1)
         entry=next(row for row in opportunity_overview("metz")["destinations"]
