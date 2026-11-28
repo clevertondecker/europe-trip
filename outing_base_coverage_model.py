@@ -13,7 +13,6 @@ from base_scenario_model import base_options
 from rail_evidence_unified_model import (load_rail_evidence, canonical_place)
 from evidence_query_model import get_rail_evidence
 
-OFFICIAL_FARE_BASES = frozenset({"mulhouse", "strasbourg", "metz", "nancy"})
 
 
 def preview_for_base(base_id: str, *, catalog: dict | None = None,
