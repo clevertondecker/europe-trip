@@ -6,6 +6,8 @@ official base requires separate review and confirmation.
 """
 from __future__ import annotations
 
+from formatting import brl
+
 import streamlit as st
 
 from base_change_model import (destination_catalog,_canonical_destination,
@@ -21,8 +23,7 @@ from planning_session import active_plan,update_fields
 
 
 def _currency(value:float|None)->str:
-    return "Não calculável" if value is None else (
-        "R$ "+f"{value:,.0f}".replace(",","."))
+    return brl(value, decimals=0, missing="Não calculável")
 
 
 def _names()->dict:

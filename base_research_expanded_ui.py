@@ -5,6 +5,8 @@ are all owned by existing unchanged modules.
 """
 from __future__ import annotations
 
+from formatting import eur, amount
+
 import streamlit as st
 
 from base_research_expanded_model import (
@@ -21,7 +23,7 @@ from ux40_research_model import (
 
 
 def _money(amount):
-    return "Não pesquisado" if amount is None else "€ "+f"{amount:,.0f}".replace(",",".")
+    return eur(amount, decimals=0, missing="Não pesquisado")
 
 
 def _restore_widget(widget_key:str,saved_key:str,default):

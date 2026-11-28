@@ -1,16 +1,12 @@
 """Read-only UX117 presentation of the existing UX115 decision projection."""
-from html import escape
+from formatting import amount, _RAISE, minutes, html_safe as _safe
 from base_change_model import SIMILARITY_THRESHOLD_MINUTES
 from rail_reference_projection_model import format_minutes
 from ux_shared_ui_presentation import kpi_cards
 
-def _safe(value):
-    return escape(str(value),quote=True)
-
 def _duration(value):
-    if value is None:
-        return "Sem tempo"
-    return format_minutes(value) if value>0 else "0 min"
+    return minutes(value, missing="Sem tempo", nonpositive_as_zero=True, allow_zero=False)
+
 
 def _signed(value):
     if value is None:
@@ -138,9 +134,7 @@ def subtotals_html(view):
             'Não inclui retornos, frequência, custos ou última milha. Não é uma economia garantida.</p></section>')
 
 def _money(value):
-    """Preserve cent precision when present, using Portuguese separators."""
-    formatted=f"{abs(value):,.2f}".replace(",","_").replace(".",",").replace("_",".")
-    return formatted[:-3] if formatted.endswith(",00") else formatted
+    return amount(value, decimals=2, missing=_RAISE, absolute=True, trim_zeros=True)
 
 
 def housing_html(comparison,view):

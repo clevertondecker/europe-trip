@@ -1,13 +1,16 @@
 """Evidence-first weekend/daily shopping and reconciled budget dashboards."""
 from __future__ import annotations
 
+from formatting import brl, _RAISE
+
 import streamlit as st
 
 from reconciled_trip_research import (grocery_reference,load_extended_research,
                                       reconcile_researched_itinerary)
 
 def _money(value:float)->str:
-    return "R$ "+f"{value:,.2f}".replace(",","_").replace(".",",").replace("_",".")
+    return brl(value, decimals=2, missing=_RAISE)
+
 
 def render_grocery_and_weekend_examples()->None:
     with st.expander("Supermercado e restaurantes de fim de semana — preços pesquisados"):

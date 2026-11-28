@@ -1,6 +1,8 @@
 """Editorial comparison UI for three real itinerary proposals."""
 from __future__ import annotations
 
+from formatting import brl, _RAISE
+
 from html import escape
 
 import pydeck as pdk
@@ -12,7 +14,7 @@ from scenario_comparison_model import (scenario_comparison,comparison_table,
 
 
 def money(value:float)->str:
-    return "R$ "+f"{value:,.0f}".replace(",",".")
+    return brl(value, decimals=0, missing=_RAISE)
 
 
 def _name(key:str,names:dict)->str:

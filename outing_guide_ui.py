@@ -1,6 +1,8 @@
 """Reusable, compact travel guide from the canonical catalog and route matrix."""
 from __future__ import annotations
 
+from formatting import brl, _RAISE, eur as format_eur, chf as format_chf
+
 import streamlit as st
 import pydeck as pdk
 
@@ -11,11 +13,11 @@ from planning_session import select_package
 
 
 def _money(value:float)->str:
-    return "R$ "+f"{value:,.0f}".replace(",",".")
+    return brl(value, decimals=0, missing=_RAISE)
 
 
 def _currency(eur:float,chf:float)->str:
-    return f"€ {eur:.2f} · CHF {chf:.2f}"
+    return format_eur(eur, decimals=2, missing=_RAISE, grouping=False, decimal_comma=False) + " · " + format_chf(chf, decimals=2, missing=_RAISE, grouping=False, decimal_comma=False)
 
 
 def _add_optional(destination_id:str,selected_ids:list[str],optional_id:str)->None:

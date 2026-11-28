@@ -4,6 +4,8 @@ This UI edits only the canonical TripPlan in session. Private cloud save is
 owner-gated; Italian proposals are not confirmed reservations.
 """
 from __future__ import annotations
+
+from formatting import brl, _RAISE
 from html import escape
 from dataclasses import asdict
 from datetime import date,timedelta
@@ -121,7 +123,7 @@ def _show_save()->None:
 
 
 def _money(n:float)->str:
-    return "R$ "+f"{n:,.0f}".replace(",",".")
+    return brl(n, decimals=0, missing=_RAISE)
 
 
 def _render_add(plan:dict,catalog:dict)->None:
