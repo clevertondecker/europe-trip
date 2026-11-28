@@ -1,5 +1,6 @@
 """UX 5.0.1 — base-independent catalog and no official mutations."""
 import unittest
+from tests.nav_helpers import open_public
 from copy import deepcopy
 from pathlib import Path
 
@@ -114,8 +115,7 @@ class BaseFreeDiscoveryAppTests(unittest.TestCase):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
         initial=deepcopy(app.session_state["advisor_plan"])
-        app.button(key="ux_sidebar_nav_1").click().run()
-        app.segmented_control(key="ux_section").set_value("Passeios").run()
+        open_public(app,"Explorar","Descobrir")
         self.assertFalse(app.exception,[x.message for x in app.exception])
         self.assertTrue(any("Descobrir destinos" in x.value for x in app.markdown))
         self.assertFalse(any(x.key=="ux501_interest_session" for x in app.multiselect))
@@ -131,8 +131,7 @@ class BaseFreeDiscoveryAppTests(unittest.TestCase):
     def test_previous_interests_survive_navigation_and_reconcile_in_wishlist(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
         initial=deepcopy(app.session_state["advisor_plan"])
-        app.button(key="ux_sidebar_nav_1").click().run()
-        app.segmented_control(key="ux_section").set_value("Passeios").run()
+        open_public(app,"Explorar","Descobrir")
         chosen=["colmar","lille","brussels","basel","bruges_be"]
         # Previously saved session-only choices must remain recoverable
         # even though the obsolete editor is no longer rendered.
@@ -162,8 +161,7 @@ class BaseFreeDiscoveryAppTests(unittest.TestCase):
 
     def test_empty_filter_results_preserve_legacy_session_choices(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
-        app.button(key="ux_sidebar_nav_1").click().run()
-        app.segmented_control(key="ux_section").set_value("Passeios").run()
+        open_public(app,"Explorar","Descobrir")
         app.session_state["ux501_interest_session"]=["colmar"]
         app.run()
         app.text_input(key="ux501_search").set_value("inexistente-ux90-999").run()
@@ -203,8 +201,7 @@ class BaseFreeDiscoveryAppTests(unittest.TestCase):
 
     def test_first_discovery_does_not_require_exploratory_base(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
-        app.button(key="ux_sidebar_nav_1").click().run()
-        app.segmented_control(key="ux_section").set_value("Passeios").run()
+        open_public(app,"Explorar","Descobrir")
         self.assertFalse(app.exception,[x.message for x in app.exception])
         self.assertTrue(any("Descobrir destinos" in x.value for x in app.markdown))
         self.assertFalse(any("Destinos para descobrir" in x.value

@@ -156,7 +156,7 @@ class JourneyAppTests(unittest.TestCase):
         app.segmented_control(key="ux64_public_task").set_value("Organizar").run()
         self.assertEqual(app.session_state["ux_section"],"Organizar viagem")
         # Return through the ordinary task navigation and go to budget.
-        app.segmented_control(key="ux_section").set_value("Meu planejamento").run()
+        app.segmented_control(key="ux64_public_task").set_value("Meus destinos").run()
         app.button(key="flow_journey_budget").click().run()
         self.assertEqual((app.session_state["ux_area"],app.session_state["ux_section"]),
                          ("Orçamento","Resumo financeiro"))
@@ -187,7 +187,7 @@ class JourneyAppTests(unittest.TestCase):
         # Comparar -> Montar roteiro -> Organizar datas -> Orçamento.
         app.button(key="ux504_compare_to_itinerary").click().run()
         app.segmented_control(key="ux64_public_task").set_value("Organizar").run()
-        app.segmented_control(key="ux_section").set_value("Meu planejamento").run()
+        app.segmented_control(key="ux64_public_task").set_value("Meus destinos").run()
         app.button(key="flow_journey_budget").click().run()
         self.assertEqual(app.session_state["ux_area"],"Orçamento")
         # Back to comparison. Streamlit removes unmounted widget keys; the

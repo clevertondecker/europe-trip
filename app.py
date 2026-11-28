@@ -196,8 +196,10 @@ def navigate_to_base_explorer() -> None:
 
 
 def navigate_to_consultor() -> None:
-    st.session_state["main_navigation"] = "Roteiro"
-    st.session_state["itinerary_section"] = "Meus passeios"
+    """Open the contextual planning tools through the canonical internal route."""
+    st.session_state.pop("ux125b_focused_guide", None)
+    st.session_state["ux_improve_view"] = "Consultor de passeios"
+    set_ux_task(st.session_state, "Meu roteiro", "Melhorar meu roteiro")
 
 
 def _ux64_legacy_sidebar_clicked(area: str) -> None:
@@ -505,7 +507,7 @@ if page == "Visão geral":
                     on_click=_ux_next_task,args=("Minha viagem","Pendências"))
         right.button("Decisões oficiais",key="ux125_home_decisions",
                      on_click=_ux_next_task,args=("Minha viagem","Decisões"))
-        st.button("Consultar propostas italianas e guias",key="home_open_consultor",
+        st.button("Consultar propostas de roteiro e guias",key="home_open_consultor",
                   on_click=navigate_to_consultor)
         st.button("Pesquisa de passeios por cidade-base",key="ux125b_home_base_outings",
                   on_click=_ux125b_open_base_outings)
