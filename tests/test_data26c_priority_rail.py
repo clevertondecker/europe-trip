@@ -218,6 +218,27 @@ class PriorityRailResearchTests(unittest.TestCase):
         self.assertEqual(cell["station_status"], "not_reconciled")
         self.assertIn("Lille-Europe", cell["station_caveat"])
 
+    def test_quality_review_cannot_combine_versions_or_claim_2027(self):
+        payload = json.loads(DATA.read_text(encoding="utf-8"))
+        scenarios = (
+            (("lille", "saumur"), lambda review: review.update(selected_summary_reproduced=True)),
+            (("metz", "interlaken"), lambda review: review.update(destination_country="FR")),
+            (("metz", "interlaken"), lambda review: review.update(direction="both")),
+            (("metz", "interlaken"), lambda review: review.update(service_legs_verified=True)),
+            (("strasbourg", "dinan"), lambda review: review.update(valid_for_2027=True)),
+            (("strasbourg", "dinan"), lambda review: review["samples"][0].update(average_min=1)),
+        )
+        for key, mutate in scenarios:
+            with self.subTest(key=key), tempfile.TemporaryDirectory() as tmp:
+                altered = copy.deepcopy(payload)
+                row = next(r for r in altered["records"]
+                           if (r["origin_id"], r["destination_id"]) == key)
+                mutate(row["quality_review"])
+                path = Path(tmp) / "research.json"
+                path.write_text(json.dumps(altered), encoding="utf-8")
+                with self.assertRaises(ValueError):
+                    load_data26c_rail(path)
+
     def test_documentary_coverage_before_after(self):
         dataset = load_data26c_rail()
         baseline = rail_coverage(projection_options={"data26c_overlay": {"by_pair": {}}})
