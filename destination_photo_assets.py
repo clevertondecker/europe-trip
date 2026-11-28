@@ -69,23 +69,29 @@ def preferred_destination_photo(destination: dict, online_photo: dict | None = N
 
 
 
-@lru_cache(maxsize=256)
-def _resolved_photo(title: str) -> str:
-    from commons_client import fetch_photo
-    photo = fetch_photo(title)
-    if not photo:
-        # functools does not cache exceptions.
-        raise LookupError(title)
-    return photo["url"]
+from collections import OrderedDict
+from time import monotonic
+from commons_client import NEGATIVE_TTL, file_path_title, fetch_photo
+
+_resolution_cache = OrderedDict()
 
 
-def display_photo_url(url: str) -> str | None:
-    """Resolve legacy references; failed resolutions never enter the cache."""
-    from commons_client import file_path_title
+def display_photo_url(url: str) -> str:
+    """Direct URLs bypass lookup; failed lookups retry after a short TTL."""
     title = file_path_title(url)
     if not title:
         return url
-    try:
-        return _resolved_photo(title)
-    except LookupError:
-        return None
+    now = monotonic()
+    cached = _resolution_cache.get(title)
+    if cached is not None:
+        result, expires = cached
+        if now < expires:
+            _resolution_cache.move_to_end(title)
+            return result or url
+    photo = fetch_photo(title)
+    result = photo["url"] if photo else None
+    _resolution_cache[title] = (result, float("inf") if result else monotonic() + NEGATIVE_TTL)
+    _resolution_cache.move_to_end(title)
+    while len(_resolution_cache) > 256:
+        _resolution_cache.popitem(last=False)
+    return result or url
