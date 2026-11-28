@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from routes7_reference_model import load_route_references, planning_reference
 from functools import lru_cache
+from copy import deepcopy
 from rail_gap_enrichment_model import load_gap_enrichment
 from data10_connectivity_model import load_connectivity_references
 from data11_priority_connectivity_model import load_priority_connectivity
@@ -270,16 +271,18 @@ def decorate_comparison(result, *, references=None, gap_overlay=None,
         data26c_row = data26c["by_pair"].get(key) or data26c["by_pair"].get(source_key)
         if (data26c_row is not None and evidence.get("display_min") is None
                 and row["evidence_status"] != "local"):
+            quality_review = deepcopy(data26c_row.get("quality_review"))
+            inconclusive = (quality_review or {}).get("modality_status") == "inconclusive"
             # Do not inherit ROUTES7 metadata: an unreproduced snapshot may
             # describe another observation, date, station or commercial offer.
             published_origin = data26c_row.get("published_origin_station")
             published_arrival = data26c_row.get("published_arrival_station")
             evidence = {
-                "status": "published_reference",
-                "display_basis": "data26c_priority_reference",
-                "display_min": data26c_row["oneway_min"],
-                "fastest_min": data26c_row["oneway_min"],
-                "average_min": data26c_row["published_average_min"],
+                "status": "modality_inconclusive" if inconclusive else "published_reference",
+                "display_basis": "data26c_inconclusive" if inconclusive else "data26c_priority_reference",
+                "display_min": None if inconclusive else data26c_row["oneway_min"],
+                "fastest_min": None if inconclusive else data26c_row["oneway_min"],
+                "average_min": None if inconclusive else data26c_row["published_average_min"],
                 "legacy_min": None,
                 "source_url": data26c_row["source_url"],
                 "reference_source_url": data26c_row["source_url"],
@@ -298,13 +301,23 @@ def decorate_comparison(result, *, references=None, gap_overlay=None,
                 "comparability": "indicative_only_not_station_comparable",
                 "fastest_provenance": "data26c_published_summary",
                 "average_provenance": "data26c_published_summary",
-                "reference_display_allowed": True,
+                "reference_display_allowed": not inconclusive,
                 "reference_differs_from_legacy": False,
                 "conflict_with_legacy": False,
                 "typical_time_known": False,
                 "weekend_return_known": False,
                 "valid_for_2027": False,
                 "evidence_notes": data26c_row["note"],
+                "data26c_quality_review": quality_review,
+                "data26c_reviewed_observation": {
+                    "minimum_min": data26c_row["oneway_min"],
+                    "average_min": data26c_row["published_average_min"],
+                    "source_url": data26c_row["source_url"],
+                    "checked_at": data26c_row["source_checked_at"],
+                    "confidence": data26c_row["confidence"],
+                    "published_origin_station": published_origin,
+                    "published_arrival_station": published_arrival,
+                },
             }
         basis = evidence["display_basis"]
         if basis == "local_not_rail":
@@ -373,7 +386,9 @@ def decorate_comparison(result, *, references=None, gap_overlay=None,
         else:
             category = "no_time"
             label = "Tempo não pesquisado"
-            if evidence["status"] == "unreproduced_snapshot":
+            if evidence["status"] == "modality_inconclusive":
+                label = "Tempo ferroviário não comprovado · modalidade inconclusiva"
+            elif evidence["status"] == "unreproduced_snapshot":
                 label += " · fonte original não reproduzida"
         categories[category] += 1
 
