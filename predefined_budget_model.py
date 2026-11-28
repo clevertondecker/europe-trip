@@ -35,9 +35,3 @@ def preset_budget_summary(option:dict, plan:dict, eurfx:float, chffx:float)->dic
         "base_city":plan["base_city"],
     }
 
-
-def validate_predefined_budget(plan:dict,option:dict)->None:
-    """Reject stale and disallowed proposals before deliberate application."""
-    from recommended_itineraries import approve_profile_scenario
-    # Probe the domain approval without persisting, so review uses identical rules.
-    approve_profile_scenario(plan,option,approved=True)
