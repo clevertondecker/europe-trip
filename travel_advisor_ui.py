@@ -337,7 +337,7 @@ def render_advisor(trip_data:dict,sync_sources:dict,workspace_area:str='Meus pas
                 st.download_button("Baixar backup",
                                    data=json.dumps(p,ensure_ascii=False,indent=2),
                                    file_name=p["plan_id"]+".json",mime="application/json",
-                                   use_container_width=True,key="advisor_export_backup")
+                                   width="stretch",key="advisor_export_backup")
                 st.caption("Arquivo .json exportado por este app")
                 uploaded=st.file_uploader("Importar backup salvo no computador",
                                           type=["json"],key="advisor_import_json", max_upload_size=5)
@@ -391,7 +391,7 @@ def render_advisor(trip_data:dict,sync_sources:dict,workspace_area:str='Meus pas
                 else:
                     col1,col2=st.columns(2)
                     with col1:
-                        if st.button("Salvar planejamento",key="advisor_save",use_container_width=True,
+                        if st.button("Salvar planejamento",key="advisor_save",width="stretch",
                                      disabled=not (st.session_state.get("advisor_saved_snapshot") is None
                                                    or st.session_state["advisor_saved_snapshot"]!=p
                                                    or st.session_state.get("ux36_cloud_dirty",False))):
@@ -421,7 +421,7 @@ def render_advisor(trip_data:dict,sync_sources:dict,workspace_area:str='Meus pas
                                             "O erro acima informa o motivo da validação; "
                                             "nenhuma gravação foi confirmada.")
                     with col2:
-                        if st.button("Reabrir planejamento salvo",key="advisor_load",use_container_width=True):
+                        if st.button("Reabrir planejamento salvo",key="advisor_load",width="stretch"):
                             try:
                                 repository=GitHubPlanRepository(cfg["token"])
                                 available=repository.recent_plans()
@@ -475,7 +475,7 @@ def render_advisor(trip_data:dict,sync_sources:dict,workspace_area:str='Meus pas
                                      " campo(s) diferente(s) entre esta sessão e o GitHub.")
                             if comparison["different_fields"]:
                                 st.dataframe(comparison["different_fields"],
-                                             hide_index=True, use_container_width=True)
+                                             hide_index=True, width="stretch")
                                 if comparison["difference_count"] > len(comparison["different_fields"]):
                                     st.warning("Há diferenças não exibidas. Baixe e revise os JSONs completos; a publicação fica bloqueada nesta tela.")
                             else:
@@ -554,7 +554,7 @@ def render_advisor(trip_data:dict,sync_sources:dict,workspace_area:str='Meus pas
                                     (" · revisão "+str(entry["revision"])
                                      if entry["revision"] is not None else "")))
                             if st.button("Abrir planejamento selecionado",key="advisor_load_selected",
-                                         use_container_width=True):
+                                         width="stretch"):
                                 try:
                                     loaded,sha=GitHubPlanRepository(cfg["token"]).load(
                                         selected_plan["plan_id"])
@@ -654,7 +654,7 @@ def render_advisor(trip_data:dict,sync_sources:dict,workspace_area:str='Meus pas
             st.info("Você ainda não escolheu passeios. Veja as recomendações acima e clique em "
                     "'Quero visitar' para começar; depois será possível organizar as datas.")
             st.session_state.pop("advisor_proposals",None)
-        elif st.button("Encontrar uma organização melhor",key="advisor_generate",use_container_width=True):
+        elif st.button("Encontrar uma organização melhor",key="advisor_generate",width="stretch"):
             new_proposals=propose_schedule(p,catalog,routes,profile)
             st.session_state["advisor_proposals"]=new_proposals
             if not new_proposals:
@@ -676,7 +676,7 @@ def render_advisor(trip_data:dict,sync_sources:dict,workspace_area:str='Meus pas
                 if diff:
                     st.markdown("**O que mudaria:**")
                     st.dataframe([{"Data":day,"Passeio":bydest[dest]["name"]}
-                                  for day,dest in diff],hide_index=True,use_container_width=True)
+                                  for day,dest in diff],hide_index=True,width="stretch")
                 else:st.caption("Esta opção não muda o calendário atual.")
                 if comparison["unresolved"]:
                     st.warning(str(comparison["unresolved_count"])+" passeio(s) ainda precisam de pesquisa: "+
@@ -691,12 +691,12 @@ def render_advisor(trip_data:dict,sync_sources:dict,workspace_area:str='Meus pas
                 c1,c2=st.columns(2)
                 with c1:
                     if st.button("Aprovar esta proposta",key=f"advisor_accept_{index}",
-                                 disabled=not diff,use_container_width=True):
+                                 disabled=not diff,width="stretch"):
                         updated=apply_proposal(p,proposal,approved=True)
                         accept_approved_plan(updated)
                         st.success("Sugestão aprovada! Seu planejamento tem alterações para salvar.")
                         st.rerun()
                 with c2:
-                    if st.button("Rejeitar",key=f"advisor_reject_{index}",use_container_width=True):
+                    if st.button("Rejeitar",key=f"advisor_reject_{index}",width="stretch"):
                         st.session_state["advisor_proposals"]=[x for x in props if x["proposal_id"]!=proposal["proposal_id"]]
                         st.rerun()

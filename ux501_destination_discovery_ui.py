@@ -39,7 +39,7 @@ def _cached_visible_photos(identity: tuple[tuple[str, str], ...]) -> dict:
 def _render_destination_media(destination: dict, photo: dict | None) -> None:
     """Same size for every card, licensed provenance or honest fallback."""
     if photo and photo.get("local_path"):
-        st.image(photo["local_path"], caption=None, use_container_width=True)
+        st.image(photo["local_path"], caption=None, width="stretch")
         author = escape(photo["author"])
         license_label = escape(photo["license"])
         source = escape(photo["source_page"], quote=True)
@@ -287,12 +287,12 @@ def render_independent_destination_discovery(*, discovery=None, focused_destinat
                         st.caption("Destino descartado anteriormente")
                         st.button("Reconsiderar destino",
                                   key="ux502_restore_"+item["id"], type="primary",
-                                  use_container_width=True,
+                                  width="stretch",
                                   on_click=add_destination, args=(item["id"], discovery))
                     else:
                         st.button("Quero conhecer",
                                   key="ux502_add_"+item["id"], type="primary",
-                                  use_container_width=True,
+                                  width="stretch",
                                   on_click=add_destination, args=(item["id"], discovery))
                     with st.container(key=f"ux53_footer_destination_{item['id']}"):
                         with st.expander("Ver atrações e fontes · detalhes", expanded=focused is not None):

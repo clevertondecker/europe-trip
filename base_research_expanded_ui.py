@@ -66,7 +66,7 @@ def _five_city_comparison(study, five)->None:
                         st.button("Abrir detalhes · "+card["name"],
                                   key="ux40_open_"+card["id"],
                                   on_click=_open_city,args=(card["id"],),
-                                  use_container_width=True)
+                                  width="stretch")
     st.caption("As amostras são pequenas; a quantidade de evidências indica "
                "andamento da pesquisa, não preço, segurança ou adequação.")
     with st.expander("Comparação ferroviária completa, 15 destinos e simulação manual"):

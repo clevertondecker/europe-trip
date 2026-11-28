@@ -146,7 +146,7 @@ def render_chosen_places_cards(plan:dict,catalog:dict,routes:dict)->None:
                 with st.container(border=True):
                     photo=item["photo"]
                     if photo and photo.get("url"):
-                        st.image(photo["url"],use_container_width=True)
+                        st.image(photo["url"],width="stretch")
                         author=photo.get("author") or "Autor não informado"
                         license_name=photo.get("license") or "Licença não informada"
                         st.caption("Foto: "+author+" · "+license_name)
@@ -250,6 +250,6 @@ def render_trip_dashboard(plan: dict, trip_data: dict, finance_live: bool,
         if margin < 0:
             st.error("A projeção atual está acima do teto escolhido.")
         st.button("Ajustar orçamento →", key="dashboard_go_budget",
-                  use_container_width=True,on_click=_navigate,args=("Orçamento",))
+                  width="stretch",on_click=_navigate,args=("Orçamento",))
 
     render_chosen_places_cards(plan,catalog,routes)

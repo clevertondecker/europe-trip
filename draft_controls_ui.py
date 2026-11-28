@@ -15,7 +15,7 @@ def render_draft_controls(board:dict,plan:dict,catalog:dict,*,profile:str)->dict
             data=export_draft(board),
             file_name=f"nossa-europa-{profile}-rascunho.json",
             mime="application/json",
-            key="draft_export_"+profile,use_container_width=True)
+            key="draft_export_"+profile,width="stretch")
         st.caption("Arquivo .json exportado por este app")
         upload=st.file_uploader("Escolher backup do rascunho",type=["json"],
                                 key="draft_import_"+profile, max_upload_size=5)

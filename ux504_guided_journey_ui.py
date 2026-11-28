@@ -50,7 +50,7 @@ def render_guided_home(plan: dict, interests: dict | None = None) -> None:
             with action:
                 st.button("Abrir",key="ux504_step_"+step["id"],
                           on_click=request_step,args=(step["id"],),
-                          use_container_width=True)
+                          width="stretch")
     st.caption("Esta jornada apresenta o que já registramos; não indica reservas, "
                "comparação concluída ou custos verificados.")
 

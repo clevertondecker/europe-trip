@@ -68,7 +68,7 @@ def render_attraction_dialog(destination_id: str, base: str, catalog: dict, rout
                        " · datas existentes serão preservadas · somente nesta sessão.")
             if st.button("Atualizar passeio" if previous else "Adicionar ao meu roteiro",
                          key="explore_save_" + destination_id, disabled=not picked,
-                         use_container_width=True):
+                         width="stretch"):
                 try:
                     result=save_outing(base, mode, destination_id, picked)
                     st.session_state["ux45_explore_result"]=asdict(result)
