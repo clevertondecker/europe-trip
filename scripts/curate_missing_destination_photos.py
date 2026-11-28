@@ -17,6 +17,7 @@ import json
 from pathlib import Path
 import re
 import time
+import sys
 
 import requests
 from PIL import Image, ImageOps, UnidentifiedImageError
@@ -25,8 +26,9 @@ ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "data" / "destination_photo_assets.json"
 REPORT = ROOT / "docs" / "UX_ALL_DESTINATION_PHOTOS_AUDIT.json"
 WIKIPEDIA = "https://en.wikipedia.org/w/api.php"
-COMMONS = "https://commons.wikimedia.org/w/api.php"
-HEADERS = {"User-Agent": "NossaEuropa2027/1.0 (https://github.com/clevertondecker/europe-trip; contact: GitHub issues)"}
+sys.path.insert(0, str(ROOT))
+from commons_client import query_imageinfo, parse_metadata, USER_AGENT, is_image_url
+HEADERS = {"User-Agent": USER_AGENT}
 TITLES = {
     "lorrach": "Lörrach",
     "offenburg": "Offenburg",
@@ -142,42 +144,19 @@ def get_wikipedia_leads(missing: list[dict]):
 def licensed_commons_info(files: dict[str, str]):
     if not files:
         return {}, {}
-    payload = get_json(COMMONS, {
-        "action": "query", "format": "json", "formatversion": 2,
-        "prop": "imageinfo", "iiprop": "url|size|extmetadata",
-        "iiurlwidth": 960, "titles": "|".join(dict.fromkeys(files.values())),
-    })
+    payload = query_imageinfo(list(dict.fromkeys(files.values())))
     pages = {key(p["title"]): p for p in payload["query"]["pages"]}
     chosen, failures = {}, {}
     for destination_id, filename in files.items():
         page = pages.get(key(filename), {})
         info = (page.get("imageinfo") or [{}])[0]
-        meta = info.get("extmetadata", {})
-        license_name = plain(meta.get("LicenseShortName", {}).get("value", ""))
-        author = plain(meta.get("Artist", {}).get("value", ""))
-        license_link = meta.get("LicenseUrl", {}).get("value", "")
-        is_open = (bool(re.match(r"(?i)^CC BY(?:-SA)? \d", license_name)) or
-                   license_name.startswith(("CC0", "Public domain", "PD-")))
-        # Skip ambiguous/unattributed/non-commercial media.
-        if not (author and license_name and is_open):
-            failures[destination_id] = f"Unusable license/artist: {license_name!r}, {author[:45]!r}"
+        photo = parse_metadata({"query": {"pages": [page]}}, page.get("title", "")[5:])
+        if not photo or not is_image_url(photo["url"]):
+            failures[destination_id] = "Missing or rejected Commons metadata"
             continue
-        if not license_link.startswith("https://"):
-            if "CC BY-SA" in license_name:
-                license_link = "https://creativecommons.org/licenses/by-sa/" + license_name.split()[-1] + "/"
-            elif "CC BY " in license_name:
-                license_link = "https://creativecommons.org/licenses/by/" + license_name.split()[-1] + "/"
-            elif license_name.startswith("CC0"):
-                license_link = "https://creativecommons.org/publicdomain/zero/1.0/"
-            elif license_name.startswith(("Public domain", "PD-")):
-                license_link = "https://creativecommons.org/publicdomain/mark/1.0/"
-            else:
-                failures[destination_id] = "Open license lacks verifiable URL"
-                continue
-        url = info.get("thumburl") or info.get("url")
-        if not url or not url.startswith(("https://upload.wikimedia.org/",
-                                              "https://thumb.wikimedia.org/")):
-            failures[destination_id] = "Commons did not supply a direct photo URL"
+        url, author, license_name, license_link = (photo[k] for k in ("url", "author", "license", "license_url"))
+        if not license_link:
+            failures[destination_id] = "Open license lacks verifiable URL"
             continue
         width, height = info.get("width", 0), info.get("height", 0)
         if width < 600 or height < 350:
