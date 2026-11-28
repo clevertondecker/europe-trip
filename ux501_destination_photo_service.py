@@ -6,17 +6,10 @@ when Commons exposes reusable license and author metadata.
 """
 from __future__ import annotations
 
-from html import unescape
-from html.parser import HTMLParser
-import re
-import json
-from urllib.parse import urlencode, quote
-from urllib.request import Request, urlopen
+from urllib.parse import quote
+from commons_client import COMMONS_API, USER_AGENT, WIDTH, request_json as _request_json, query_imageinfo, parse_metadata
 
 WIKIPEDIA_API = "https://en.wikipedia.org/w/api.php"
-COMMONS_API = "https://commons.wikimedia.org/w/api.php"
-USER_AGENT = ("NossaEuropa2027/1.0 "
-              "(https://github.com/clevertondecker/europe-trip; contact via GitHub issues)")
 
 # Article titles are identifiers, not an image search query: this prevents
 # displaying pictures of unrelated places with similar names.
@@ -89,63 +82,19 @@ TRANSLATED_TITLES = {
 }
 
 
-class _PlainText(HTMLParser):
-    def __init__(self):
-        super().__init__()
-        self.parts = []
-
-    def handle_data(self, data):
-        self.parts.append(data)
-
-
-def _plain(value: str) -> str:
-    parser = _PlainText()
-    parser.feed(value or "")
-    return " ".join(unescape("".join(parser.parts)).split())[:140]
-
-
-def _request_json(url: str, params: dict) -> dict:
-    """Bounded Wikimedia Action API request; never download original images."""
-    request = Request(url + "?" + urlencode(params),
-                      headers={"User-Agent": USER_AGENT,
-                               "Accept": "application/json"})
-    with urlopen(request, timeout=6) as response:
-        return json.load(response)
-
-
 def _key(title: str) -> str:
     return title.replace("_", " ").strip().casefold()
 
 
-def _license_allowed(name: str) -> bool:
-    value = name.strip().casefold().replace("-", " ")
-    return bool(re.match(r"^cc by(?: sa)? \d", value) or
-                value.startswith(("cc0", "public domain", "pd ")))
-
-
 def _image_metadata(page: dict) -> dict | None:
-    info = (page.get("imageinfo") or [None])[0]
-    if not info:
-        return None
-    meta = info.get("extmetadata") or {}
-    license_name = _plain(meta.get("LicenseShortName", {}).get("value", ""))
-    author = _plain(meta.get("Artist", {}).get("value", ""))
-    license_url = meta.get("LicenseUrl", {}).get("value", "")
-    url = info.get("thumburl") or info.get("url", "")
     title = page.get("title", "")
-    if (not _license_allowed(license_name) or not author or
-            not title.startswith("File:") or
-            not url.startswith("https://upload.wikimedia.org/")):
+    if not title.startswith("File:"):
         return None
-    return {
-        "url": url,
-        "author": author,
-        "license": license_name,
-        "license_url": license_url if license_url.startswith("https://") else None,
-        "source_page": "https://commons.wikimedia.org/wiki/" +
-                       quote(title.replace(" ", "_"), safe=":()_-"),
-        "origin": "wikimedia_commons",
-    }
+    result = parse_metadata({"query":{"pages":[page]}}, title[5:])
+    if not result:
+        return None
+    return {**result, "source_page":"https://commons.wikimedia.org/wiki/" +
+            quote(title.replace(" ", "_"), safe=":()_-"), "origin":"wikimedia_commons"}
 
 
 def lookup_destination_photos(destinations: list[dict], fetch_json=None) -> dict[str, dict]:
@@ -174,7 +123,7 @@ def lookup_destination_photos(destinations: list[dict], fetch_json=None) -> dict
         response = fetch(WIKIPEDIA_API, {
             "action": "query", "format": "json", "formatversion": 2,
             "redirects": 1, "prop": "pageimages",
-            "piprop": "thumbnail|name", "pithumbsize": 720,
+            "piprop": "thumbnail|name", "pithumbsize": WIDTH,
             "titles": "|".join(dict.fromkeys(requested.values())),
         })
         query = response.get("query", {})
@@ -193,11 +142,7 @@ def lookup_destination_photos(destinations: list[dict], fetch_json=None) -> dict
             filenames[filename] = True
         if not filenames:
             return known
-        metadata = fetch(COMMONS_API, {
-            "action":"query","format":"json","formatversion":2,
-            "prop":"imageinfo","iiprop":"url|extmetadata",
-            "iiurlwidth":720,"titles":"|".join(filenames),
-        })
+        metadata = query_imageinfo(filenames, fetch_json=fetch)
         licensed = {_key(p["title"]):_image_metadata(p) for p in
                     metadata.get("query", {}).get("pages", [])}
         found = {key: licensed[_key(title)] for key,title in chosen.items()
