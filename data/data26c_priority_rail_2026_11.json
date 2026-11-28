@@ -222,13 +222,13 @@
     {
       "origin_id": "metz",
       "destination_id": "le_mans",
-      "oneway_min": 205,
-      "published_average_min": 242,
+      "oneway_min": 199,
+      "published_average_min": 241,
       "evidence_type": "official_route_minimum",
       "source_url": "https://www.sncf-connect.com/train/trajet/metz/le-mans",
       "source_checked_at": "2026-11-28",
       "source_capture_date": null,
-      "index_recency": "yesterday",
+      "index_recency": "today",
       "service_date": null,
       "evidence_level": "operator_city_level",
       "confidence": "medium",
@@ -241,18 +241,22 @@
       "valid_for_2027": false,
       "fare_couple_eur": null,
       "transfer_count": null,
-      "note": "Resumo de rota SNCF Connect consultado via índice web; mínimo e média publicados, sem data de serviço ou verificação de todos os trechos. A recência do índice é relativa, não uma data de captura comprovada."
+      "note": "Página oficial SNCF Connect aberta em 28/11/2026: mínimo 199 min e média publicada 241 min; estações publicadas METZ e LE MANS; serviços citados: INTERCITÉS, TGV INOUI, TER, OUIGO. Sem preço específico no resumo. Sem itinerário datado reconciliado, retorno ou disponibilidade 2027.",
+      "previous_index_summary": {
+        "minimum": 205,
+        "average": 242
+      }
     },
     {
       "origin_id": "nancy",
       "destination_id": "le_mans",
-      "oneway_min": 198,
-      "published_average_min": 239,
+      "oneway_min": 202,
+      "published_average_min": 270,
       "evidence_type": "official_route_minimum",
       "source_url": "https://www.sncf-connect.com/train/trajet/nancy/le-mans",
       "source_checked_at": "2026-11-28",
       "source_capture_date": null,
-      "index_recency": "4 days ago",
+      "index_recency": "today",
       "service_date": null,
       "evidence_level": "operator_city_level",
       "confidence": "medium",
@@ -265,18 +269,22 @@
       "valid_for_2027": false,
       "fare_couple_eur": null,
       "transfer_count": null,
-      "note": "Resumo de rota SNCF Connect consultado via índice web; mínimo e média publicados, sem data de serviço ou verificação de todos os trechos. A recência do índice é relativa, não uma data de captura comprovada."
+      "note": "Página oficial SNCF Connect aberta em 28/11/2026: mínimo 202 min e média publicada 270 min; estações publicadas NANCY e LE MANS; serviços citados: INTERCITÉS, TGV INOUI, TER, DB SNCF. Sem preço específico no resumo. Sem itinerário datado reconciliado, retorno ou disponibilidade 2027.",
+      "previous_index_summary": {
+        "minimum": 198,
+        "average": 239
+      }
     },
     {
       "origin_id": "mulhouse",
       "destination_id": "le_mans",
-      "oneway_min": 275,
-      "published_average_min": 317,
+      "oneway_min": 277,
+      "published_average_min": 334,
       "evidence_type": "official_route_minimum",
       "source_url": "https://www.sncf-connect.com/train/trajet/mulhouse/le-mans",
       "source_checked_at": "2026-11-28",
       "source_capture_date": null,
-      "index_recency": "2 months ago",
+      "index_recency": "today",
       "service_date": null,
       "evidence_level": "operator_city_level",
       "confidence": "medium",
@@ -289,18 +297,22 @@
       "valid_for_2027": false,
       "fare_couple_eur": null,
       "transfer_count": null,
-      "note": "Resumo de rota SNCF Connect consultado via índice web; mínimo e média publicados, sem data de serviço ou verificação de todos os trechos. A recência do índice é relativa, não uma data de captura comprovada."
+      "note": "Página oficial SNCF Connect aberta em 28/11/2026: mínimo 277 min e média publicada 334 min; estações publicadas MULHOUSE e LE MANS; serviços citados: TRAIN NOMAD, TGV INOUI, TER, TGV Lyria, DB SNCF. Sem preço específico no resumo. Sem itinerário datado reconciliado, retorno ou disponibilidade 2027.",
+      "previous_index_summary": {
+        "minimum": 275,
+        "average": 317
+      }
     },
     {
       "origin_id": "strasbourg",
       "destination_id": "le_mans",
       "oneway_min": 215,
-      "published_average_min": 266,
+      "published_average_min": 258,
       "evidence_type": "official_route_minimum",
       "source_url": "https://www.sncf-connect.com/train/trajet/strasbourg/le-mans",
       "source_checked_at": "2026-11-28",
       "source_capture_date": null,
-      "index_recency": "3 weeks ago",
+      "index_recency": "today",
       "service_date": null,
       "evidence_level": "operator_city_level",
       "confidence": "medium",
@@ -313,7 +325,11 @@
       "valid_for_2027": false,
       "fare_couple_eur": null,
       "transfer_count": null,
-      "note": "Resumo de rota SNCF Connect consultado via índice web; mínimo e média publicados, sem data de serviço ou verificação de todos os trechos. A recência do índice é relativa, não uma data de captura comprovada."
+      "note": "Página oficial SNCF Connect aberta em 28/11/2026: mínimo 215 min e média publicada 258 min; estações publicadas STRASBOURG e LE MANS; serviços citados: OUIGO, TER, TGV INOUI, DB SNCF. Calendário exibe preços a partir de EUR 66 por pessoa, ida, segunda classe, sujeitos a disponibilidade; não é cotação completa nem integra os 60 pares históricos. Sem itinerário datado reconciliado, retorno ou disponibilidade 2027.",
+      "previous_index_summary": {
+        "minimum": 215,
+        "average": 266
+      }
     },
     {
       "origin_id": "lille",
