@@ -54,7 +54,8 @@
         ],
         "service_legs_verified": false,
         "valid_for_2027": false,
-        "note": "Reproduces earlier index summary, not selected average 290. Multiple departure stations; no specific station assigned to selected observation."
+        "note": "Reproduces earlier index summary, not selected average 290. Multiple departure stations; no specific station assigned to selected observation.",
+        "modality_status": "rail_summary"
       }
     },
     {
@@ -123,7 +124,8 @@
         ],
         "service_legs_verified": false,
         "valid_for_2027": false,
-        "note": "Different dynamic summary from selected observation 242/310 and prior revalidation. No automatic replacement."
+        "note": "Different dynamic summary from selected observation 242/310 and prior revalidation. No automatic replacement.",
+        "modality_status": "rail_summary"
       }
     },
     {
@@ -189,7 +191,8 @@
         ],
         "service_legs_verified": false,
         "valid_for_2027": false,
-        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification."
+        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
       }
     },
     {
@@ -257,7 +260,8 @@
         ],
         "service_legs_verified": false,
         "valid_for_2027": false,
-        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification."
+        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
       }
     },
     {
@@ -306,7 +310,8 @@
         ],
         "service_legs_verified": false,
         "valid_for_2027": false,
-        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification."
+        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
       }
     },
     {
@@ -355,7 +360,8 @@
         ],
         "service_legs_verified": false,
         "valid_for_2027": false,
-        "note": "Selected numerical summary reproduced. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification."
+        "note": "Selected numerical summary reproduced. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
       }
     },
     {
@@ -404,7 +410,8 @@
         ],
         "service_legs_verified": false,
         "valid_for_2027": false,
-        "note": "Selected numerical summary reproduced. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification."
+        "note": "Selected numerical summary reproduced. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
       }
     },
     {
@@ -455,7 +462,8 @@
         ],
         "service_legs_verified": false,
         "valid_for_2027": false,
-        "note": "Selected numerical summary reproduced. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification."
+        "note": "Selected numerical summary reproduced. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
       }
     },
     {
@@ -504,7 +512,8 @@
         ],
         "service_legs_verified": false,
         "valid_for_2027": false,
-        "note": "Selected numerical summary reproduced. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification."
+        "note": "Selected numerical summary reproduced. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
       }
     },
     {
@@ -553,7 +562,8 @@
         ],
         "service_legs_verified": false,
         "valid_for_2027": false,
-        "note": "Selected numerical summary reproduced. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification."
+        "note": "Selected numerical summary reproduced. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
       }
     },
     {
@@ -598,7 +608,8 @@
         ],
         "service_legs_verified": false,
         "valid_for_2027": false,
-        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification."
+        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
       }
     },
     {
@@ -643,7 +654,8 @@
         ],
         "service_legs_verified": false,
         "valid_for_2027": false,
-        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification."
+        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
       }
     },
     {
@@ -688,7 +700,8 @@
         ],
         "service_legs_verified": false,
         "valid_for_2027": false,
-        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification."
+        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
       }
     },
     {
@@ -733,7 +746,8 @@
         ],
         "service_legs_verified": false,
         "valid_for_2027": false,
-        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification."
+        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
       }
     },
     {
@@ -778,7 +792,8 @@
         ],
         "service_legs_verified": false,
         "valid_for_2027": false,
-        "note": "Selected numerical summary reproduced. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification."
+        "note": "Selected numerical summary reproduced. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
       }
     },
     {
@@ -823,7 +838,8 @@
         ],
         "service_legs_verified": false,
         "valid_for_2027": false,
-        "note": "Selected numerical summary reproduced. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification."
+        "note": "Selected numerical summary reproduced. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
       }
     },
     {
@@ -868,7 +884,8 @@
         ],
         "service_legs_verified": false,
         "valid_for_2027": false,
-        "note": "Selected numerical summary reproduced. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification."
+        "note": "Selected numerical summary reproduced. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
       }
     },
     {
@@ -913,7 +930,8 @@
         ],
         "service_legs_verified": false,
         "valid_for_2027": false,
-        "note": "Selected numerical summary reproduced. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification."
+        "note": "Selected numerical summary reproduced. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
       }
     },
     {
@@ -958,7 +976,8 @@
         ],
         "service_legs_verified": false,
         "valid_for_2027": false,
-        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification."
+        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
       }
     },
     {
@@ -1003,7 +1022,8 @@
         ],
         "service_legs_verified": false,
         "valid_for_2027": false,
-        "note": "Selected numerical summary reproduced. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification."
+        "note": "Selected numerical summary reproduced. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
       }
     },
     {
@@ -1048,7 +1068,8 @@
         ],
         "service_legs_verified": false,
         "valid_for_2027": false,
-        "note": "Selected numerical summary reproduced. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification."
+        "note": "Selected numerical summary reproduced. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
       }
     },
     {
@@ -1097,7 +1118,8 @@
         ],
         "service_legs_verified": false,
         "valid_for_2027": false,
-        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification."
+        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
       }
     },
     {
@@ -1146,7 +1168,8 @@
         ],
         "service_legs_verified": false,
         "valid_for_2027": false,
-        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification."
+        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
       }
     },
     {
@@ -1216,7 +1239,8 @@
         ],
         "service_legs_verified": false,
         "valid_for_2027": false,
-        "note": "Earlier version reproduces both selected values; current average differs. Dinan, France, not Dinant, Belgium; individual legs not verified."
+        "note": "Earlier version reproduces both selected values; current average differs. Dinan, France, not Dinant, Belgium; individual legs not verified.",
+        "modality_status": "rail_summary"
       }
     },
     {
@@ -1274,7 +1298,8 @@
         ],
         "service_legs_verified": false,
         "valid_for_2027": false,
-        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification."
+        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
       }
     },
     {
@@ -1322,7 +1347,8 @@
         ],
         "service_legs_verified": false,
         "valid_for_2027": false,
-        "note": "Selected numerical summary reproduced. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification."
+        "note": "Selected numerical summary reproduced. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
       }
     },
     {
@@ -1372,7 +1398,8 @@
         ],
         "service_legs_verified": false,
         "valid_for_2027": false,
-        "note": "Selected numerical summary reproduced. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification."
+        "note": "Selected numerical summary reproduced. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
       }
     },
     {
@@ -1420,7 +1447,8 @@
         ],
         "service_legs_verified": false,
         "valid_for_2027": false,
-        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification."
+        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
       }
     },
     {
@@ -1469,7 +1497,8 @@
         ],
         "service_legs_verified": false,
         "valid_for_2027": false,
-        "note": "Selected numerical summary reproduced. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification."
+        "note": "Selected numerical summary reproduced. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
       }
     },
     {
@@ -1514,7 +1543,8 @@
         ],
         "service_legs_verified": false,
         "valid_for_2027": false,
-        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification."
+        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
       }
     },
     {
@@ -1564,7 +1594,8 @@
         ],
         "service_legs_verified": false,
         "valid_for_2027": false,
-        "note": "Selected numerical summary reproduced. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification."
+        "note": "Selected numerical summary reproduced. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
       }
     },
     {
@@ -1614,7 +1645,8 @@
         ],
         "service_legs_verified": false,
         "valid_for_2027": false,
-        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification."
+        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
       }
     },
     {
@@ -1664,7 +1696,8 @@
         ],
         "service_legs_verified": false,
         "valid_for_2027": false,
-        "note": "Selected numerical summary reproduced. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification."
+        "note": "Selected numerical summary reproduced. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
       }
     },
     {
@@ -1713,7 +1746,8 @@
         ],
         "service_legs_verified": false,
         "valid_for_2027": false,
-        "note": "Selected numerical summary reproduced. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification."
+        "note": "Selected numerical summary reproduced. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
       }
     },
     {
@@ -1762,7 +1796,8 @@
         ],
         "service_legs_verified": false,
         "valid_for_2027": false,
-        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification."
+        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
       }
     },
     {
@@ -1813,7 +1848,8 @@
         ],
         "service_legs_verified": false,
         "valid_for_2027": false,
-        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification."
+        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
       }
     },
     {
@@ -1862,7 +1898,8 @@
         ],
         "service_legs_verified": false,
         "valid_for_2027": false,
-        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification."
+        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
       }
     },
     {
@@ -1925,7 +1962,8 @@
         ],
         "service_legs_verified": false,
         "valid_for_2027": false,
-        "note": "Earlier opened version reproduces the selected durations; later version differs. No bus-only duration imported. Individual legs not verified."
+        "note": "Earlier opened version reproduces the selected durations; later version differs. No bus-only duration imported. Individual legs not verified.",
+        "modality_status": "rail_summary"
       }
     },
     {
@@ -1974,7 +2012,8 @@
         ],
         "service_legs_verified": false,
         "valid_for_2027": false,
-        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification."
+        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
       }
     },
     {
@@ -2024,7 +2063,25 @@
         ],
         "service_legs_verified": false,
         "valid_for_2027": false,
-        "note": "Selected numerical summary reproduced. Rail itinerary not corroborated by provider list; independent Rome2Rio rail routing via Luxembourg indicates 136 min but does not corroborate selected average or every leg; do not treat as an all-rail itinerary. https://www.rome2rio.com/s/Strasbourg/Arlon Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification."
+        "note": "Selected numerical summary reproduced. Rail itinerary not corroborated by provider list; independent Rome2Rio rail routing via Luxembourg indicates 136 min but does not corroborate selected average or every leg; do not treat as an all-rail itinerary. https://www.rome2rio.com/s/Strasbourg/Arlon Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification. Reconsulta direta Trainline (28/11/2026): FAQ reproduz 135/200; quadro 'Train and bus operators' lista somente Flixbus. As consultas oficiais confirmam segmentos possíveis, mas não os dois tempos selecionados. Excluir esta observação da cobertura de tempo ferroviário até corroboração.",
+        "modality_status": "inconclusive",
+        "official_cross_checks": [
+          {
+            "checked_at": "2026-11-28",
+            "source_url": "https://www.sncf-connect.com/fr-be/train/trajet/strasbourg/arlon",
+            "finding": "Página comercial genérica da rota sem duração numérica ou serviço identificado."
+          },
+          {
+            "checked_at": "2026-11-28",
+            "source_url": "https://www.sncf-connect.com/train/trajet/strasbourg/luxembourg",
+            "finding": "Operadoras ferroviárias publicadas no segmento Strasbourg–Luxembourg; não comprova os tempos Strasbourg–Arlon."
+          },
+          {
+            "checked_at": "2026-11-28",
+            "source_url": "https://www.belgiantrain.be/en/products/crossborder/luxembourg",
+            "finding": "SNCB confirma ligações IC e regionais entre Luxembourg e Arlon; sem itinerário completo Strasbourg–Arlon."
+          }
+        ]
       }
     },
     {
@@ -2074,7 +2131,8 @@
         ],
         "service_legs_verified": false,
         "valid_for_2027": false,
-        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification."
+        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
       }
     },
     {
@@ -2120,7 +2178,8 @@
         ],
         "service_legs_verified": false,
         "valid_for_2027": false,
-        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification."
+        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
       }
     }
   ],
