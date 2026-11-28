@@ -49,8 +49,20 @@ def validate_catalog_scope(bases, destinations):
                  "Bélgica":"BE", "Países Baixos":"NL", "Holanda":"NL"}
     base_catalog = {canonical_place(r["id"]): countries.get(r["country"]) for r in load_research(include_candidates=True)["cities"]}
     dest_catalog = {canonical_place(r["id"]): countries.get(r["country"]) for r in build_exploration_discovery()["destinations"]}
-    if any(base_catalog.get(b) != "FR" for b in bases) or any(dest_catalog.get(d) != COUNTRIES[d] for d in destinations):
-        raise ValueError("Identidade ou país divergente do catálogo")
+    # Bern is a historical research endpoint, not yet a tourism catalog entry.
+    # SBB documents its Swiss identity; do not add it to discovery or DATA24.
+    # https://www.sbb.ch/en/travel-information/stations/find-station/bern-station.html
+    research_only = {"bern": "CH"}
+    mismatches = []
+    for b in sorted(bases):
+        if base_catalog.get(b) != "FR":
+            mismatches.append(f"base {b}: {base_catalog.get(b)}")
+    for d in sorted(destinations):
+        actual = dest_catalog.get(d, research_only.get(d))
+        if actual != COUNTRIES[d]:
+            mismatches.append(f"destino {d}: {actual} != {COUNTRIES[d]}")
+    if mismatches:
+        raise ValueError("Identidade ou país divergente do catálogo: " + "; ".join(mismatches))
 
 def validate_review(row, checked):
     review = row["review"]
