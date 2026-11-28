@@ -11,8 +11,9 @@ from urllib.parse import urlsplit,quote
 
 from destination_photo_assets import display_photo_url
 
-PHOTO_HOSTS=frozenset({"commons.wikimedia.org","upload.wikimedia.org",
-                       "thumb.wikimedia.org"})
+from commons_client import IMAGE_HOSTS
+
+PHOTO_HOSTS = IMAGE_HOSTS | {"commons.wikimedia.org"}
 
 def permitted_photo_url(value:object)->str|None:
     if not isinstance(value,str) or not value.strip():
