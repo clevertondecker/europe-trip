@@ -64,23 +64,36 @@ class LocalDestinationPhotosTests(unittest.TestCase):
     def test_wikimedia_api_is_authoritative_not_a_guessed_cdn_path(self):
         import io
         import json
-        from destination_photo_assets import display_photo_url
-        url="https://commons.wikimedia.org/wiki/Special:FilePath/Centre_Pompidou_%C3%A0_Metz.jpg"
-        payload={"query":{"pages":{"17":{"imageinfo":[{
-            "thumburl":"https://upload.wikimedia.org/official/thumb.jpg"}]}}}}
-        class Response(io.BytesIO):
-            def __enter__(self): return self
-            def __exit__(self,*args): self.close()
-        display_photo_url.cache_clear()
-        with patch("urllib.request.urlopen",return_value=Response(
-                json.dumps(payload).encode())) as request:
-            self.assertEqual(display_photo_url(url),
-                             "https://upload.wikimedia.org/official/thumb.jpg")
-            self.assertEqual(request.call_count,1)
-        display_photo_url.cache_clear()
-        with patch("urllib.request.urlopen",side_effect=OSError("offline")):
-            self.assertEqual(display_photo_url(url),url)
-        display_photo_url.cache_clear()
+        import destination_photo_assets as assets
+        from commons_client import NEGATIVE_TTL
+        url = "https://commons.wikimedia.org/wiki/Special:FilePath/Interlaken.jpg"
+        thumbnail = "https://thumb.wikimedia.org/official/thumb.jpg"
+        payload = {"query": {"pages": [{"title": "File:Interlaken.jpg", "imageinfo": [{
+            "thumburl": thumbnail,
+            "extmetadata": {
+                "Artist": {"value": "Example author"},
+                "LicenseShortName": {"value": "CC BY-SA 4.0"},
+                "LicenseUrl": {"value": "https://creativecommons.org/licenses/by-sa/4.0/"},
+            },
+        }]}]}}
+        from collections import OrderedDict
+        with patch.object(assets, "_resolution_cache", OrderedDict()), \
+                patch.object(assets, "monotonic", return_value=100) as clock, \
+                patch("urllib.request.urlopen", side_effect=[
+                    TimeoutError("offline"), io.BytesIO(json.dumps(payload).encode())
+                ]) as request:
+            self.assertEqual(display_photo_url(url), url)
+            self.assertEqual(request.call_count, 1)
+            clock.return_value = 100 + NEGATIVE_TTL - 1
+            self.assertEqual(display_photo_url(url), url)
+            self.assertEqual(request.call_count, 1)
+            clock.return_value = 100 + NEGATIVE_TTL
+            self.assertEqual(display_photo_url(url), thumbnail)
+            self.assertEqual(request.call_count, 2)
+            clock.return_value += 86400
+            self.assertEqual(display_photo_url(url), thumbnail)
+            self.assertEqual(display_photo_url(thumbnail), thumbnail)
+            self.assertEqual(request.call_count, 2)
 
     def test_external_failure_has_deterministic_fallback(self):
         from unittest.mock import MagicMock
