@@ -1,6 +1,6 @@
 """UX 3.5: dates are suggestions, not bookings, and only confirmed changes persist."""
 import unittest
-from nav_helpers import open_public
+from tests.nav_helpers import open_public
 from copy import deepcopy
 from datetime import date
 from pathlib import Path

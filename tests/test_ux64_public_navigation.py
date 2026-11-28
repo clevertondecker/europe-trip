@@ -1,6 +1,6 @@
 """Legacy route identities survive 3-area visual migration."""
 import unittest
-from nav_helpers import open_public
+from tests.nav_helpers import open_public
 from ux64_navigation_model import (
     PUBLIC_AREAS, PUBLIC_TASKS, TARGETS,
     public_area, public_task, select_public_area, select_public_task,

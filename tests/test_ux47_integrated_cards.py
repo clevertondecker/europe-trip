@@ -1,6 +1,6 @@
 """UX 4.7: one read-only destination card, one existing editor."""
 import unittest
-from nav_helpers import open_public
+from tests.nav_helpers import open_public
 from copy import deepcopy
 from pathlib import Path
 from attractions_model import load_attractions,load_base_routes

@@ -1,6 +1,6 @@
 """UX 4.8: weekend draft model, conflict validation and Streamlit smoke."""
 import unittest
-from nav_helpers import open_public
+from tests.nav_helpers import open_public
 from copy import deepcopy
 from json import loads
 from streamlit.testing.v1 import AppTest

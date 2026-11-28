@@ -2,7 +2,7 @@
 from pathlib import Path
 from copy import deepcopy
 import unittest
-from nav_helpers import open_public
+from tests.nav_helpers import open_public
 from streamlit.testing.v1 import AppTest
 from attractions_model import load_attractions
 

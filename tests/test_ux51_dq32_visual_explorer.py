@@ -1,6 +1,6 @@
 """UX 5.1: readable route references and filter semantics (pure view projection)."""
 import unittest
-from nav_helpers import open_public
+from tests.nav_helpers import open_public
 from copy import deepcopy
 from pathlib import Path
 from streamlit.testing.v1 import AppTest

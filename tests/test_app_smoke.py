@@ -4,7 +4,7 @@ AppTest does not render a browser image or interactive maps; manual visual
 verification remains necessary after deployment.
 """
 import unittest
-from nav_helpers import open_public
+from tests.nav_helpers import open_public
 from pathlib import Path
 from streamlit.testing.v1 import AppTest
 

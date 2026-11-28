@@ -1,6 +1,6 @@
 """Runtime smoke coverage for the new Streamlit exploration flow."""
 import unittest
-from nav_helpers import open_public
+from tests.nav_helpers import open_public
 from pathlib import Path
 from streamlit.testing.v1 import AppTest
 

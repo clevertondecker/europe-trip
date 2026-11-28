@@ -1,6 +1,6 @@
 """Compact home is a dashboard; scenario configuration lives in task screens."""
 import unittest
-from nav_helpers import open_public
+from tests.nav_helpers import open_public
 from pathlib import Path
 from streamlit.testing.v1 import AppTest
 

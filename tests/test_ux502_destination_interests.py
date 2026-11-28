@@ -1,6 +1,6 @@
 """UX 5.0.2 — destinations are not attractions or confirmed outings."""
 import unittest
-from nav_helpers import open_public
+from tests.nav_helpers import open_public
 from copy import deepcopy
 from pathlib import Path
 from streamlit.testing.v1 import AppTest

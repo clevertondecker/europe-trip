@@ -2,7 +2,7 @@
 import ast
 from pathlib import Path
 import unittest
-from nav_helpers import open_public
+from tests.nav_helpers import open_public
 
 from ux501_destination_discovery_ui import _result_caption
 

@@ -1,6 +1,6 @@
 """UX 3.3 acceptance: one settings authority, safe what-if, and continuity."""
 import unittest
-from nav_helpers import open_public
+from tests.nav_helpers import open_public
 from copy import deepcopy
 from pathlib import Path
 from datetime import date

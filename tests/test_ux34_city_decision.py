@@ -1,6 +1,6 @@
 """UX 3.4 decision simulator: fixed assumptions, no fake lost trips or savings."""
 import unittest
-from nav_helpers import open_public
+from tests.nav_helpers import open_public
 from copy import deepcopy
 from pathlib import Path
 from streamlit.testing.v1 import AppTest
