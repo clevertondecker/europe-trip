@@ -129,6 +129,8 @@ def _documentary_detail(cell, raw):
         "source_url": None, "source_date": None, "station_caveat": None,
         "notes": None, "observations": [], "alternative": None,
         "variation": False,
+        "quality_review": deepcopy(cell.get("data26c_quality_review")),
+        "reviewed_observation": deepcopy(cell.get("data26c_reviewed_observation")),
     }
     if not timed:
         return detail

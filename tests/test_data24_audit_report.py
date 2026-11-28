@@ -92,11 +92,23 @@ class AuditReportTests(unittest.TestCase):
                 path.write_text("stale", encoding="utf-8")
                 self.assertEqual(main(["--output", str(path), "--check"]), 1)
 
-    def test_committed_report_is_current(self):
+    def test_committed_report_reproduces_historical_snapshot(self):
         root = Path(__file__).resolve().parents[1]
         report = root / "docs/audits/data24_research_coverage.md"
         self.assertEqual(report.read_text(encoding="utf-8"),
-                         render_report(self.audit))
+                         render_report(build_audit(projection_options={"data26c_overlay": {"by_pair": {}}})))
+
+    def test_current_audit_matches_live_coverage(self):
+        self.assertEqual(self.audit["rail_counts"], rail_coverage()["global"])
+        historical = build_audit(projection_options={"data26c_overlay": {"by_pair": {}}})
+        self.assertEqual(historical["rail_counts"]["eligible"], self.audit["rail_counts"]["eligible"])
+        self.assertGreater(self.audit["rail_counts"]["timed"], historical["rail_counts"]["timed"])
+        self.assertEqual(render_legacy_annex(historical), render_legacy_annex(self.audit))
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "current.md"
+            self.assertEqual(main(["--current", "--output", str(path)]), 0)
+            self.assertEqual(path.read_text(encoding="utf-8"), render_report(self.audit))
+            self.assertEqual(main(["--current", "--output", str(path), "--check"]), 0)
     
     def test_removed_inventory_is_not_imported_by_app(self):
         root = Path(__file__).resolve().parents[1]

@@ -1,4 +1,4 @@
-"""Documentary fare observations; never live availability or official costs."""
+"""Documentary fare and dated schedule observations; never live availability or official costs."""
 import json
 from copy import deepcopy
 from datetime import date, datetime, timezone
@@ -40,8 +40,67 @@ def identity(leg):
             leg["destination_station_id"], _utc(leg["departure_at"]), _utc(leg["arrival_at"]),
             service(leg), transfers)
 
+def _project_schedule_samples(samples):
+    """Reuse the temporal/return contract without inventing passenger or fare claims."""
+    if not isinstance(samples, list):
+        raise ValueError("Amostras de horários inválidas")
+    records, ids, seen = [], set(), set()
+    leg_fields = {"origin_id", "destination_id", "origin_station_id",
+                  "destination_station_id", "origin_station_label", "destination_station_label",
+                  "departure_at", "arrival_at", "calendar_dates_verified", "transfer_count",
+                  "transfer_legs", "source_url", "operator", "service_id",
+                  "origin_timezone", "destination_timezone"}
+    for raw in samples:
+        if not isinstance(raw, dict) or set(raw) != {"id", "checked_at", "outbound", "inbound"}:
+            raise ValueError("Horário datado não é cotação tarifária")
+        if not _text(raw["id"]) or raw["id"] in ids:
+            raise ValueError("Identidade de horário duplicada")
+        checked = date.fromisoformat(raw["checked_at"])
+        if checked.isoformat() != raw["checked_at"]:
+            raise ValueError("Data de consulta inválida")
+        legs = []
+        for leg in (raw["outbound"], raw["inbound"]):
+            if (not isinstance(leg, dict) or set(leg) != leg_fields
+                    or not _url(leg["source_url"])
+                    or any(not _text(leg[k]) for k in ("origin_station_label",
+                           "destination_station_label", "operator", "service_id"))
+                    or not all(leg[k].startswith("sncf_published:") for k in
+                               ("origin_station_id", "destination_station_id"))):
+                raise ValueError("Amostra de serviço sem proveniência ou rótulo de estação")
+            normalized = validate_service_leg(leg)
+            departure = datetime.fromisoformat(normalized["departure_at"])
+            if (departure.year != 2026 or checked > departure.date()
+                    or not normalized["calendar_date_applicable"]):
+                raise ValueError("Amostra histórica sem data comprovada")
+            legs.append(normalized)
+        out, back = legs
+        result = weekend_roundtrip_evidence(out, back)
+        if (result["status"] != "documented_legs_only"
+                or out["destination_station_id"] != back["origin_station_id"]
+                or out["origin_station_id"] != back["destination_station_id"]
+                or out["destination_station_label"] != back["origin_station_label"]
+                or out["origin_station_label"] != back["destination_station_label"]):
+            raise ValueError("Ida e retorno da amostra incompatíveis")
+        key = (identity(out), identity(back), checked, out["source_url"], back["source_url"])
+        if key in seen:
+            raise ValueError("Amostra de horário duplicada")
+        seen.add(key)
+        ids.add(raw["id"])
+        records.append({
+            "id": raw["id"], "checked_at": raw["checked_at"], "outbound": out, "inbound": back,
+            "outbound_duration_min": int((_utc(out["arrival_at"]) - _utc(out["departure_at"])).total_seconds() // 60),
+            "inbound_duration_min": int((_utc(back["arrival_at"]) - _utc(back["departure_at"])).total_seconds() // 60),
+            "gross_destination_minutes": int((_utc(back["departure_at"]) - _utc(out["arrival_at"])).total_seconds() // 60),
+            "net_visit_minutes": None, "last_mile_verified": False,
+            "station_identity_scope": "source_published_not_reconciled",
+            "roundtrip_status": result["status"], "outing_feasible": False,
+            "valid_for_2027": False,
+        })
+    return records
+
+
 def project_rail_fares(payload):
-    if not isinstance(payload, dict) or set(payload) != {"schema_version", "quotes"} or type(payload["schema_version"]) is not int or payload["schema_version"] != 1 or not isinstance(payload["quotes"], list):
+    if not isinstance(payload, dict) or set(payload) not in ({"schema_version", "quotes"}, {"schema_version", "quotes", "schedule_samples"}) or type(payload["schema_version"]) is not int or payload["schema_version"] != 1 or not isinstance(payload["quotes"], list):
         raise ValueError("Contrato tarifário inválido")
     ids, identities, records = set(), {}, []
     for raw in payload["quotes"]:
@@ -129,7 +188,9 @@ def project_rail_fares(payload):
                         "same_base_station": out["origin_station_id"] == back["destination_station_id"] if back else None,
                         "outing_feasible": False,
                         "independently_verified": False, "valid_for_2027": False})
+    schedules = _project_schedule_samples(payload.get("schedule_samples", []))
     return {"records": records, "documented": len(records),
+            "schedule_samples": schedules, "dated_roundtrip_samples": len(schedules),
             "roundtrips": sum(x["inbound"] is not None for x in records),
             "complete_documentation": sum(x["complete_documentation"] for x in records),
             "complete_oneway": sum(x["complete_documentation"] and x["scope"] == "oneway" for x in records),

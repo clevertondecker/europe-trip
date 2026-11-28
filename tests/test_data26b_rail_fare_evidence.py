@@ -195,3 +195,73 @@ class RailFareTest(unittest.TestCase):
                          "Disponibilidade desconhecida", "Calendário documentado",
                          "2 adultos", "Valor observado", "Total documentado"):
             self.assertIn(expected, text)
+
+
+    def test_production_dated_service_samples_are_not_quotes(self):
+        result = load_rail_fares()
+        samples = result["schedule_samples"]
+        self.assertEqual(result["dated_roundtrip_samples"], 5)
+        self.assertEqual({s["outbound"]["origin_id"]: s["gross_destination_minutes"]
+                          for s in samples}, {
+            "lille": 799, "metz": 682, "nancy": 684,
+            "mulhouse": 580, "strasbourg": 720,
+        })
+        for sample in samples:
+            self.assertEqual(sample["roundtrip_status"], "documented_legs_only")
+            self.assertEqual(sample["station_identity_scope"], "source_published_not_reconciled")
+            self.assertIsNone(sample["net_visit_minutes"])
+            self.assertFalse(sample["last_mile_verified"])
+            self.assertFalse(sample["outing_feasible"])
+            self.assertFalse(sample["valid_for_2027"])
+            for leg in (sample["outbound"], sample["inbound"]):
+                self.assertTrue(leg["calendar_date_applicable"])
+                self.assertEqual(leg["departure_at"][:10], "2026-11-29")
+                self.assertEqual(leg["transfer_count"], 0)
+                self.assertTrue(leg["service_id"])
+            self.assertNotIn("quote", sample)
+            self.assertNotIn("total_minor", sample)
+        # Date-specific service evidence cannot promote the fare coverage.
+        from data26b1_fare_reference_model import fare_reference_coverage
+        self.assertEqual(fare_reference_coverage(quotes=result),
+                         fare_reference_coverage(quotes=project_rail_fares({"schema_version": 1, "quotes": [
+                             r["quote"] for r in result["records"]]})))
+
+    def test_schedule_samples_reject_wrong_dates_prices_and_station_conflicts(self):
+        import json
+        from data26b_rail_fare_evidence_model import PATH
+        payload = json.loads(PATH.read_text(encoding="utf-8"))
+        payload["schedule_samples"] = [payload["schedule_samples"][0]]
+        for modify in (
+            lambda s: s.update(total_minor=4000),
+            lambda s: s.update(checked_at="2026-12-05"),
+            lambda s: s["inbound"].update(calendar_dates_verified=["2026-12-06"]),
+            lambda s: s["inbound"].update(origin_station_id="sncf_published:paris_est"),
+            lambda s: s["inbound"].update(origin_station_label="Paris Est"),
+            lambda s: s["inbound"].update(departure_at="2026-11-29T08:00:00+01:00"),
+            lambda s: s["outbound"].update(departure_at="2026-11-29T08:12:00+02:00"),
+        ):
+            with self.subTest(modification=modify):
+                altered = copy.deepcopy(payload)
+                modify(altered["schedule_samples"][0])
+                with self.assertRaises(ValueError):
+                    project_rail_fares(altered)
+
+    def test_schedule_sample_ui_separate_from_quote_cards(self):
+        from streamlit.testing.v1 import AppTest
+        script = """
+from ux132_research_coverage_ui import render_fare_evidence
+from data26b_rail_fare_evidence_model import load_rail_fares
+render_fare_evidence({"bases": [{"id": "lille", "name": "Lille"}],
+                      "destinations": [{"id": "paris", "name": "Paris"}]}, load_rail_fares())
+"""
+        app = AppTest.from_string(script).run(timeout=30)
+        self.assertFalse(app.exception)
+        self.assertFalse(app.warning)
+        tables = [d.value for d in app.dataframe if "Janela bruta" in d.value.columns]
+        self.assertEqual(len(tables), 1)
+        self.assertEqual(len(tables[0]), 5)
+        self.assertIn("13h19", list(tables[0]["Janela bruta"]))
+        rendered = " ".join(str(x.value) for x in [*app.markdown, *app.caption])
+        self.assertIn("Não são cotações para dois adultos", rendered)
+        self.assertIn("7014", rendered)
+        self.assertIn("7093", rendered)

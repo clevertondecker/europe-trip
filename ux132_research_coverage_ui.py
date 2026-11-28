@@ -130,7 +130,8 @@ def render_rail_coverage(*, discovery=None, research=None):
             st.dataframe(table, hide_index=True, width="stretch",
                          column_config=config, key="ux132_gaps_" + section)
             timed = { (c["destination_id"] if axis == "bases" else c["base_id"]): c
-                      for c in connections if c["category"] in ("historical", "reference_only") }
+                      for c in connections if c["category"] in ("historical", "reference_only")
+                      or c.get("quality_review") }
             if timed:
                 with st.expander("Consultar fonte e ressalvas"):
                     key = "ux132_connection_" + axis
@@ -157,6 +158,36 @@ def render_rail_coverage(*, discovery=None, research=None):
                         st.caption(str(c["notes"]))
                     if c["variation"]:
                         st.caption("Há variação entre referências; não implica contradição confirmada.")
+                    review = c.get("quality_review")
+                    original = c.get("reviewed_observation")
+                    if review and original:
+                        st.markdown("**Auditoria documental DATA26C**")
+                        reproduction = ("Valores reproduzidos" if review["selected_summary_reproduced"]
+                                        else "Valores divergentes — histórico preservado")
+                        modality = ("Modalidade inconclusiva — excluída da cobertura ferroviária"
+                                    if review["modality_status"] == "inconclusive"
+                                    else "Resumo ferroviário publicado; trechos não verificados")
+                        st.write(reproduction)
+                        st.caption(modality)
+                        st.caption("Confiança da referência: " + {"medium": "média", "low": "baixa"}.get(original["confidence"], original["confidence"]))
+                        st.caption("Observação original (mínimo / média): " +
+                                   format_minutes(original["minimum_min"]) + " / " +
+                                   format_minutes(original["average_min"]) +
+                                   " · " + original["checked_at"])
+                        st.link_button("Abrir fonte da observação auditada", original["source_url"])
+                        st.caption("Reconsulta: " + review["checked_at"])
+                        st.dataframe([{
+                            "Mínimo": format_minutes(s["minimum_min"]),
+                            "Média": format_minutes(s["average_min"]),
+                            "Origem publicada": ", ".join(s["origin_station_labels"]),
+                            "Chegada publicada": ", ".join(s["arrival_station_labels"]),
+                            "Versão indexada": s["index_recency"],
+                            "Base da modalidade": s["mode_basis"],
+                        } for s in review["samples"]], hide_index=True, width="stretch",
+                            key="ux132_review_samples_" + axis)
+                        st.caption(review["note"])
+                        for check in review.get("official_cross_checks", []):
+                            st.markdown(f'[{check["finding"]}]({check["source_url"]})')
                     if c["alternative"]:
                         alt = c["alternative"]
                         st.markdown("**Referência indicativa alternativa (não substitui o histórico)**")
@@ -201,8 +232,10 @@ def render_fare_evidence(view, fares=None):
             refs = load_fare_references()
             coverage = fare_reference_coverage(data=refs, quotes=fares)
             total = coverage["scope"]
-            st.caption(f'Pesquisa prioritária ({refs["checked_at"]}): {total["with_references"]}/{total["total"]} pares com referência indicativa (inclui legado); {total["complete_roundtrip"]}/{total["total"]} com cotação completa de ida e volta.')
-            st.caption(f'{total["pending"]} pares pendentes · {total["consulted_without_result"]} consultados sem resultado aproveitável nesta pesquisa.')
+            st.caption(f'Cobertura acumulada: {total["with_references"]}/{total["total"]} pares com referência indicativa (inclui legado); {total["complete_roundtrip"]}/{total["total"]} com cotação completa de ida e volta.')
+            batch = coverage["batch"]
+            st.caption(f'Pesquisa atual ({refs["checked_at"]}): {batch["batch_references"]}/{batch["total"]} pares com referência de calendário; {batch["net_new_references"]} novos pares e {batch["legacy_overlap"]} já documentados no legado.')
+            st.caption(f'{batch["pending"]} pares pendentes · {batch["consulted_without_result"]} consultados sem resultado aproveitável nesta pesquisa.')
             st.caption("Valores anunciados por pessoa, somente ida, em datas específicas. Marca ferroviária no calendário não comprova todos os trechos. Perfil, descontos e taxas podem ser desconhecidos.")
             labels = {"observed_calendar": "Calendário observado", "corroborated_price": "Histórico: preço corroborado", "divergent_price": "Histórico: preço divergente", "not_reproduced": "Histórico: não reproduzido", "not_reproduced_nonrail": "Histórico: oferta atual rodoviária"}
             def city(ident):
@@ -222,6 +255,82 @@ def render_fare_evidence(view, fares=None):
                 st.dataframe(rows, hide_index=True, column_config={"Fonte": st.column_config.LinkColumn("Fonte", display_text="Abrir fonte")}, key="ux132_fare_reference_rows")
             else:
                 st.caption("Nenhuma observação neste filtro.")
+            returns = refs.get("return_references", [])
+            if returns:
+                st.markdown("**Retorno — referências indicativas independentes**")
+                st.caption("Por pessoa, trecho único e segunda classe. Datas e serviços não vinculados às amostras de horários. Não somar com a ida para declarar uma cotação.")
+                st.dataframe([{
+                    "Origem": city(r["origin_id"]), "Destino": city(r["destination_id"]),
+                    "Data de viagem": r["travel_date"], "Preço indicativo": r["amount_minor"] / 100,
+                    "Moeda": r["currency"], "Marca": r["commercial_brand"],
+                    "Consulta": r["researched_at"], "Fonte": r["source_url"],
+                } for r in returns], hide_index=True, width="stretch",
+                    column_config={"Fonte": st.column_config.LinkColumn("Fonte", display_text="Abrir fonte")},
+                    key="ux132_return_calendar")
+            products = refs.get("regional_products", [])
+            if products:
+                st.markdown("**Produtos regionais e transfronteiriços**")
+                st.caption("Condições publicadas, não ofertas de reserva. Não alteram o orçamento nem confirmam validade em 2027.")
+                units = {"person_day": "pessoa/dia", "group_day": "grupo/dia", "person_roundtrip": "pessoa/ida e volta"}
+                eligibility = {"group_allowed": "Grupo inclui dois viajantes", "individual_ticket": "Bilhete individual",
+                               "requires_children": "Fórmula familiar: exige crianças conforme fonte", "unknown": "Elegibilidade não documentada"}
+                def product_price(p):
+                    if p["amount_minor"] is None:
+                        return "Preço não publicado"
+                    amount = p["amount_minor"]
+                    return (("A partir de " if p["price_kind"] == "from" else "") +
+                            f'{p["currency"]} {amount // 100},{amount % 100:02d} · {units[p["price_unit"]]}')
+                st.dataframe([{
+                    "Produto": p["name"], "Preço publicado": product_price(p),
+                    "Uso": eligibility[p["couple_use"]], "Validade": p["validity"],
+                    "Fonte": p["source_url"],
+                } for p in products], hide_index=True, width="stretch",
+                    column_config={"Fonte": st.column_config.LinkColumn("Fonte", display_text="Abrir fonte")},
+                    key="ux132_regional_products")
+                indexed = {p["id"]: p for p in products}
+                product_key = st.selectbox("Detalhar produto regional", list(indexed),
+                    format_func=lambda k: indexed[k]["name"],
+                    **widget_state("ux132_regional_product", next(iter(indexed)), lambda v: v in indexed))
+                p = indexed[product_key]
+                st.write(product_price(p) + " · " + eligibility[p["couple_use"]])
+                st.caption("Abrangência: " + p["geography"])
+                st.caption("Classe: " + {None: "Não documentada", "second": "2ª", "first": "1ª", "both": "1ª e 2ª"}[p["fare_class"]])
+                st.caption("Modalidades: " + ", ".join({"rail": "trem", "bus": "ônibus", "tram": "tram", "boat": "barco"}[m] for m in p["modes"]))
+                st.caption("Reservas: " + (p["reservations"] or "Não documentadas na fonte"))
+                st.caption(p["conditions"])
+                st.caption("Consulta: " + p["checked_at"] + " · " + p["operator"])
+                st.markdown(f'[Fonte oficial do produto]({p["source_url"]})')
+                for url in p["additional_source_urls"]:
+                    st.markdown(f'[Fonte complementar oficial]({url})')
+            samples = fares.get("schedule_samples", [])
+            if samples:
+                st.markdown("**Horários datados de ida e retorno — amostras documentais**")
+                st.caption(f'{len(samples)} pares de horários datados. Não são cotações para dois adultos nem confirmação de lugares. Estações identificadas na fonte, não reconciliadas.')
+                st.dataframe([{
+                    "Origem": city(s["outbound"]["origin_id"]),
+                    "Destino": city(s["outbound"]["destination_id"]),
+                    "Data da ida": s["outbound"]["departure_at"][:10],
+                    "Data do retorno": s["inbound"]["departure_at"][:10],
+                    "Duração da ida": format_minutes(s["outbound_duration_min"]),
+                    "Duração do retorno": format_minutes(s["inbound_duration_min"]),
+                    "Janela bruta": format_minutes(s["gross_destination_minutes"]),
+                    "Tempo líquido": "Não documentado",
+                } for s in samples], hide_index=True, width="stretch",
+                    key="ux132_dated_schedule_summary")
+                by_id = {s["id"]: s for s in samples}
+                chosen = st.selectbox("Detalhar amostra datada", list(by_id),
+                    format_func=lambda k: city(by_id[k]["outbound"]["origin_id"]) + " → " +
+                        city(by_id[k]["outbound"]["destination_id"]) + " · " +
+                        by_id[k]["outbound"]["departure_at"][:10],
+                    **widget_state("ux132_dated_schedule", next(iter(by_id)), lambda v: v in by_id))
+                sample = by_id[chosen]
+                st.caption("Consulta: " + sample["checked_at"] + " · horários locais publicados")
+                for label, leg in (("Ida", sample["outbound"]), ("Retorno", sample["inbound"])):
+                    st.write(f'**{label}** · {leg["operator"]} {leg["service_id"]}')
+                    st.caption(f'{leg["origin_station_label"]} → {leg["destination_station_label"]}')
+                    st.caption(f'{leg["departure_at"]} → {leg["arrival_at"]}')
+                    st.markdown(f'[Fonte do horário — {label}]({leg["source_url"]})')
+                st.caption("Janela bruta entre chegada e partida; última milha, tempo líquido, preços e viabilidade para 2027 não verificados.")
             if not fares["records"]:
                 st.caption("Nenhuma cotação individual cadastrada.")
             for record in fares["records"]:

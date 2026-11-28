@@ -51,7 +51,7 @@ class HousingEvidenceTests(unittest.TestCase):
         self.assertEqual(self.project(payload())["documented"], 0)
         self.assertEqual(self.project(source)["documented"], len(source["quotes"]))
         self.assertEqual(self.project(source)["independently_verified"], 0)
-        self.assertEqual(REPORT.read_bytes(), render_report(build_audit()).encode("utf-8"))
+        self.assertEqual(REPORT.read_bytes(), render_report(build_audit(projection_options={"data26c_overlay": {"by_pair": {}}})).encode("utf-8"))
 
     def test_validated_file_flows_to_coverage_without_promoting_confirmation(self):
         data = payload(record(1), record(2), record(3))

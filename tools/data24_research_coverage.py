@@ -171,9 +171,17 @@ def main(argv=None):
     parser.add_argument("--check", action="store_true", help="Verificar os artefatos versionados")
     parser.add_argument("--check-annex", action="store_true", help="Verificar também o anexo completo gerado localmente")
     parser.add_argument("--output", type=Path, default=REPORT)
+    parser.add_argument("--current", action="store_true",
+                        help="Incluir a pesquisa DATA26C; exige saída separada do relatório histórico")
     args = parser.parse_args(argv)
+    if args.current and (args.output.resolve() == REPORT.resolve()
+                         or args.output.parent.resolve() == REPORT.parent.resolve()):
+        parser.error("--current exige uma saída em diretório separado do snapshot DATA24")
     start = perf_counter()
-    audit = build_audit()
+    # Reproduce the committed DATA24 snapshot; current research is exported
+    # separately, never by overwriting its historical artifacts.
+    audit = build_audit(projection_options=None if args.current else
+                        {"data26c_overlay": {"by_pair": {}}})
     legacy_path = args.output.with_name("data24_legacy_evidence.json")
     files = {args.output: render_report(audit),
              legacy_path: render_legacy_annex(audit)}

@@ -1,6 +1,7 @@
 """UX124 contracts: one profile, same rail cells, no writes, sparse data."""
 import unittest
 from copy import deepcopy
+from unittest.mock import patch
 from streamlit.testing.v1 import AppTest
 from base_research_expanded_model import load_research
 from trip01_supplemental_discovery import build_exploration_discovery
@@ -72,7 +73,10 @@ class UnifiedProfileTests(unittest.TestCase):
         self.assertEqual(timed["missing"],0)
         self.assertTrue(all(r["priority"] is None for r in v["routes"]))
     def test_missing_wishlist_scope_reuses_exact_cells_and_priority(self):
-        v=city_profile("mulhouse")
+        # Exercise a fixed pre-DATA26C evidence scenario; new research must not
+        # make this filtering regression impossible to reproduce.
+        with patch("rail_reference_projection_model._cached_data26c", return_value={"by_pair": {}}):
+            v=city_profile("mulhouse")
         rows=v["routes"]
         missing=[r for r in rows if r["cell"]["category"]=="no_time"]
         self.assertGreaterEqual(len(missing),3)

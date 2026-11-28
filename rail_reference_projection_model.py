@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from routes7_reference_model import load_route_references, planning_reference
 from functools import lru_cache
+from copy import deepcopy
 from rail_gap_enrichment_model import load_gap_enrichment
 from data10_connectivity_model import load_connectivity_references
 from data11_priority_connectivity_model import load_priority_connectivity
@@ -15,6 +16,7 @@ from data13_directed_connectivity_model import load_data13
 from data22_supplemental_rail_model import load_data22
 from data23_france_candidates_model import load_data23
 from data25_priority_rail_model import load_data25
+from data26c_priority_rail_model import load_data26c_rail
 
 
 def format_minutes(value):
@@ -64,10 +66,15 @@ def _cached_data25():
     return load_data25()
 
 
+@lru_cache(maxsize=1)
+def _cached_data26c():
+    return load_data26c_rail()
+
+
 def decorate_comparison(result, *, references=None, gap_overlay=None,
                         connectivity_overlay=None, priority_overlay=None,
                         lille_overlay=None, data13_overlay=None, supplemental_overlay=None,
-                        candidate_overlay=None, data25_overlay=None):
+                        candidate_overlay=None, data25_overlay=None, data26c_overlay=None):
     """All matrix categories are mutually exclusive, including custom baskets."""
     refs = references if references is not None else load_route_references()
     gaps = gap_overlay if gap_overlay is not None else _cached_route_gaps()
@@ -81,6 +88,7 @@ def decorate_comparison(result, *, references=None, gap_overlay=None,
                     else _cached_data22())
     candidate = candidate_overlay if candidate_overlay is not None else _cached_data23()
     data25 = data25_overlay if data25_overlay is not None else _cached_data25()
+    data26c = data26c_overlay if data26c_overlay is not None else _cached_data26c()
     cells = {}
     categories = {
         "historical": 0, "reference_only": 0, "local": 0, "no_time": 0,
@@ -259,6 +267,58 @@ def decorate_comparison(result, *, references=None, gap_overlay=None,
                 "valid_for_2027": False,
                 "evidence_notes": new_row["note"],
             }
+        # DATA26C fills remaining gaps after every existing evidence source.
+        data26c_row = data26c["by_pair"].get(key) or data26c["by_pair"].get(source_key)
+        if (data26c_row is not None and evidence.get("display_min") is None
+                and row["evidence_status"] != "local"):
+            quality_review = deepcopy(data26c_row.get("quality_review"))
+            inconclusive = (quality_review or {}).get("modality_status") == "inconclusive"
+            # Do not inherit ROUTES7 metadata: an unreproduced snapshot may
+            # describe another observation, date, station or commercial offer.
+            published_origin = data26c_row.get("published_origin_station")
+            published_arrival = data26c_row.get("published_arrival_station")
+            evidence = {
+                "status": "modality_inconclusive" if inconclusive else "published_reference",
+                "display_basis": "data26c_inconclusive" if inconclusive else "data26c_priority_reference",
+                "display_min": None if inconclusive else data26c_row["oneway_min"],
+                "fastest_min": None if inconclusive else data26c_row["oneway_min"],
+                "average_min": None if inconclusive else data26c_row["published_average_min"],
+                "legacy_min": None,
+                "source_url": data26c_row["source_url"],
+                "reference_source_url": data26c_row["source_url"],
+                "checked_at": data26c_row["source_checked_at"],
+                "gap_checked_at": data26c_row["source_checked_at"],
+                "source_capture_date": data26c_row["source_capture_date"],
+                "confidence": data26c_row["confidence"],
+                "source_kind": data26c_row["evidence_type"],
+                "published_origin_station": published_origin,
+                "published_arrival_station": published_arrival,
+                "origin_station_id": data26c_row["origin_station_id"],
+                "destination_station_id": data26c_row["destination_station_id"],
+                "station_status": data26c_row["station_status"],
+                "station_comparability": "station_named_in_route_page" if (
+                    published_origin or published_arrival) else "city_level_ambiguous",
+                "comparability": "indicative_only_not_station_comparable",
+                "fastest_provenance": "data26c_published_summary",
+                "average_provenance": "data26c_published_summary",
+                "reference_display_allowed": not inconclusive,
+                "reference_differs_from_legacy": False,
+                "conflict_with_legacy": False,
+                "typical_time_known": False,
+                "weekend_return_known": False,
+                "valid_for_2027": False,
+                "evidence_notes": data26c_row["note"],
+                "data26c_quality_review": quality_review,
+                "data26c_reviewed_observation": {
+                    "minimum_min": data26c_row["oneway_min"],
+                    "average_min": data26c_row["published_average_min"],
+                    "source_url": data26c_row["source_url"],
+                    "checked_at": data26c_row["source_checked_at"],
+                    "confidence": data26c_row["confidence"],
+                    "published_origin_station": published_origin,
+                    "published_arrival_station": published_arrival,
+                },
+            }
         basis = evidence["display_basis"]
         if basis == "local_not_rail":
             category = "local"
@@ -303,9 +363,12 @@ def decorate_comparison(result, *, references=None, gap_overlay=None,
                          if evidence.get("source_kind") == "official_operator_minimum"
                          else "referência secundária · mínimo divulgado")
             label = f'~{format_minutes(evidence["display_min"])} · {qualifier}'
-        elif basis == "data25_priority_reference":
+        elif basis in ("data25_priority_reference", "data26c_priority_reference"):
             category = "reference_only"
-            label = f'~{format_minutes(evidence["display_min"])} · mínimo publicado · operadora'
+            qualifier = ("referência secundária · mínimo divulgado"
+                         if evidence.get("source_kind") == "secondary_sample"
+                         else "mínimo publicado · operadora")
+            label = f'~{format_minutes(evidence["display_min"])} · {qualifier}'
         elif basis == "data23_candidate_reference":
             category = "reference_only"
             label = f'~{format_minutes(evidence["display_min"])} · mínimo publicado · operadora'
@@ -323,7 +386,9 @@ def decorate_comparison(result, *, references=None, gap_overlay=None,
         else:
             category = "no_time"
             label = "Tempo não pesquisado"
-            if evidence["status"] == "unreproduced_snapshot":
+            if evidence["status"] == "modality_inconclusive":
+                label = "Tempo ferroviário não comprovado · modalidade inconclusiva"
+            elif evidence["status"] == "unreproduced_snapshot":
                 label += " · fonte original não reproduzida"
         categories[category] += 1
 
@@ -351,8 +416,14 @@ def decorate_comparison(result, *, references=None, gap_overlay=None,
             "supplemental_connectivity_applied": basis == "data22_supplemental_reference",
             "candidate_connectivity_applied": basis == "data23_candidate_reference",
             "data25_connectivity_applied": basis == "data25_priority_reference",
+            "data26c_connectivity_applied": basis == "data26c_priority_reference",
             "station_caveat": (
-                "Fonte refere-se à chegada na estação " + evidence["arrival_station"]
+                ("Estação publicada: " + " → ".join(name for name in (
+                    evidence.get("published_origin_station"), evidence.get("published_arrival_station")
+                ) if name) + "; não reconciliada, sem serviço datado.")
+                if basis == "data26c_priority_reference" and (evidence.get("published_origin_station")
+                    or evidence.get("published_arrival_station"))
+                else "Fonte refere-se à chegada na estação " + evidence["arrival_station"]
                 + "; não confirma acesso a atrações fora da estação."
                 if evidence.get("arrival_station")
                 else ("Referência por cidade; estação de embarque/chegada não reconciliada."

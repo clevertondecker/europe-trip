@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "checked_at": "2026-11-27",
+  "checked_at": "2026-11-28",
   "scope": {
     "bases": [
       "lille",
@@ -75,7 +75,15 @@
         "source_capture_date": null,
         "source_recency_reported": "today",
         "transport_mode": "rail_label",
-        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified"
+        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified",
+        "travel_date": "2026-12-05",
+        "origin_id": "lille",
+        "destination_id": "paris",
+        "currency": "EUR",
+        "passengers": 1,
+        "direction": "oneway",
+        "kind": "advertised_from",
+        "unit_provenance": "matching_observed_calendar"
       }
     },
     {
@@ -114,7 +122,15 @@
         "source_capture_date": null,
         "source_recency_reported": "today",
         "transport_mode": "rail_label",
-        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified"
+        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified",
+        "travel_date": "2026-11-28",
+        "origin_id": "metz",
+        "destination_id": "paris",
+        "currency": "EUR",
+        "passengers": 1,
+        "direction": "oneway",
+        "kind": "advertised_from",
+        "unit_provenance": "matching_observed_calendar"
       }
     },
     {
@@ -153,7 +169,15 @@
         "source_capture_date": null,
         "source_recency_reported": "today",
         "transport_mode": "rail_label",
-        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified"
+        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified",
+        "travel_date": "2026-12-05",
+        "origin_id": "nancy",
+        "destination_id": "paris",
+        "currency": "EUR",
+        "passengers": 1,
+        "direction": "oneway",
+        "kind": "advertised_from",
+        "unit_provenance": "matching_observed_calendar"
       }
     },
     {
@@ -192,7 +216,15 @@
         "source_capture_date": null,
         "source_recency_reported": "today",
         "transport_mode": "rail_label",
-        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified"
+        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified",
+        "travel_date": "2026-11-28",
+        "origin_id": "mulhouse",
+        "destination_id": "paris",
+        "currency": "EUR",
+        "passengers": 1,
+        "direction": "oneway",
+        "kind": "advertised_from",
+        "unit_provenance": "matching_observed_calendar"
       }
     },
     {
@@ -231,7 +263,15 @@
         "source_capture_date": null,
         "source_recency_reported": "today",
         "transport_mode": "rail_label",
-        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified"
+        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified",
+        "travel_date": "2026-12-05",
+        "origin_id": "strasbourg",
+        "destination_id": "paris",
+        "currency": "EUR",
+        "passengers": 1,
+        "direction": "oneway",
+        "kind": "advertised_from",
+        "unit_provenance": "matching_observed_calendar"
       }
     },
     {
@@ -270,7 +310,15 @@
         "source_capture_date": null,
         "source_recency_reported": "yesterday",
         "transport_mode": "rail_label",
-        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified"
+        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified",
+        "travel_date": "2026-12-05",
+        "origin_id": "lille",
+        "destination_id": "colmar",
+        "currency": "EUR",
+        "passengers": 1,
+        "direction": "oneway",
+        "kind": "advertised_from",
+        "unit_provenance": "matching_observed_calendar"
       }
     },
     {
@@ -309,7 +357,15 @@
         "source_capture_date": null,
         "source_recency_reported": "today",
         "transport_mode": "rail_label",
-        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified"
+        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified",
+        "travel_date": "2026-12-05",
+        "origin_id": "metz",
+        "destination_id": "colmar",
+        "currency": "EUR",
+        "passengers": 1,
+        "direction": "oneway",
+        "kind": "advertised_from",
+        "unit_provenance": "matching_observed_calendar"
       }
     },
     {
@@ -348,7 +404,15 @@
         "source_capture_date": null,
         "source_recency_reported": "today",
         "transport_mode": "rail_label",
-        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified"
+        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified",
+        "travel_date": "2026-11-28",
+        "origin_id": "mulhouse",
+        "destination_id": "colmar",
+        "currency": "EUR",
+        "passengers": 1,
+        "direction": "oneway",
+        "kind": "advertised_from",
+        "unit_provenance": "matching_observed_calendar"
       }
     },
     {
@@ -387,7 +451,15 @@
         "source_capture_date": null,
         "source_recency_reported": "today",
         "transport_mode": "rail_label",
-        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified"
+        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified",
+        "travel_date": "2026-11-28",
+        "origin_id": "strasbourg",
+        "destination_id": "colmar",
+        "currency": "EUR",
+        "passengers": 1,
+        "direction": "oneway",
+        "kind": "advertised_from",
+        "unit_provenance": "matching_observed_calendar"
       }
     },
     {
@@ -426,7 +498,15 @@
         "source_capture_date": null,
         "source_recency_reported": "today",
         "transport_mode": "rail_label",
-        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified"
+        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified",
+        "travel_date": "2026-11-28",
+        "origin_id": "mulhouse",
+        "destination_id": "basel",
+        "currency": "EUR",
+        "passengers": 1,
+        "direction": "oneway",
+        "kind": "advertised_from",
+        "unit_provenance": "matching_observed_calendar"
       }
     },
     {
@@ -465,7 +545,15 @@
         "source_capture_date": null,
         "source_recency_reported": "today",
         "transport_mode": "rail_label",
-        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified"
+        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified",
+        "travel_date": "2026-11-28",
+        "origin_id": "strasbourg",
+        "destination_id": "basel",
+        "currency": "EUR",
+        "passengers": 1,
+        "direction": "oneway",
+        "kind": "advertised_from",
+        "unit_provenance": "matching_observed_calendar"
       }
     },
     {
@@ -504,7 +592,15 @@
         "source_capture_date": null,
         "source_recency_reported": "today",
         "transport_mode": "rail_label",
-        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified"
+        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified",
+        "travel_date": "2026-12-05",
+        "origin_id": "nancy",
+        "destination_id": "reims",
+        "currency": "EUR",
+        "passengers": 1,
+        "direction": "oneway",
+        "kind": "advertised_from",
+        "unit_provenance": "matching_observed_calendar"
       }
     },
     {
@@ -543,7 +639,15 @@
         "source_capture_date": null,
         "source_recency_reported": "today",
         "transport_mode": "rail_label",
-        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified"
+        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified",
+        "travel_date": "2026-12-05",
+        "origin_id": "lille",
+        "destination_id": "amsterdam",
+        "currency": "EUR",
+        "passengers": 1,
+        "direction": "oneway",
+        "kind": "advertised_from",
+        "unit_provenance": "matching_observed_calendar"
       }
     },
     {
@@ -582,7 +686,15 @@
         "source_capture_date": null,
         "source_recency_reported": "today",
         "transport_mode": "rail_label",
-        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified"
+        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified",
+        "travel_date": "2026-12-05",
+        "origin_id": "lille",
+        "destination_id": "bruxelles",
+        "currency": "EUR",
+        "passengers": 1,
+        "direction": "oneway",
+        "kind": "advertised_from",
+        "unit_provenance": "matching_observed_calendar"
       }
     },
     {
@@ -621,7 +733,15 @@
         "source_capture_date": null,
         "source_recency_reported": "today",
         "transport_mode": "rail_label",
-        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified"
+        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified",
+        "travel_date": "2026-11-28",
+        "origin_id": "lille",
+        "destination_id": "reims",
+        "currency": "EUR",
+        "passengers": 1,
+        "direction": "oneway",
+        "kind": "advertised_from",
+        "unit_provenance": "matching_observed_calendar"
       }
     },
     {
@@ -660,7 +780,15 @@
         "source_capture_date": null,
         "source_recency_reported": "today",
         "transport_mode": "bus",
-        "note": "Calendar cheapest offer explicitly labelled AUTOCAR; excluded"
+        "note": "Calendar cheapest offer explicitly labelled AUTOCAR; excluded",
+        "travel_date": "2026-12-05",
+        "origin_id": "metz",
+        "destination_id": "reims",
+        "currency": null,
+        "passengers": null,
+        "direction": null,
+        "kind": null,
+        "unit_provenance": "not_documented"
       }
     },
     {
@@ -699,7 +827,15 @@
         "source_capture_date": null,
         "source_recency_reported": "today",
         "transport_mode": "rail_label",
-        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified"
+        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified",
+        "travel_date": "2026-12-05",
+        "origin_id": "strasbourg",
+        "destination_id": "reims",
+        "currency": "EUR",
+        "passengers": 1,
+        "direction": "oneway",
+        "kind": "advertised_from",
+        "unit_provenance": "matching_observed_calendar"
       }
     },
     {
@@ -738,7 +874,15 @@
         "source_capture_date": null,
         "source_recency_reported": "today",
         "transport_mode": "unknown",
-        "note": "Calendar shows price not yet available"
+        "note": "Calendar shows price not yet available",
+        "travel_date": "2026-12-06",
+        "origin_id": "metz",
+        "destination_id": "dijon",
+        "currency": null,
+        "passengers": null,
+        "direction": null,
+        "kind": null,
+        "unit_provenance": "not_documented"
       }
     },
     {
@@ -777,7 +921,15 @@
         "source_capture_date": null,
         "source_recency_reported": "today",
         "transport_mode": "rail_label",
-        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified"
+        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified",
+        "travel_date": "2026-11-28",
+        "origin_id": "nancy",
+        "destination_id": "dijon",
+        "currency": "EUR",
+        "passengers": 1,
+        "direction": "oneway",
+        "kind": "advertised_from",
+        "unit_provenance": "matching_observed_calendar"
       }
     },
     {
@@ -816,7 +968,15 @@
         "source_capture_date": null,
         "source_recency_reported": "today",
         "transport_mode": "rail_label",
-        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified"
+        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified",
+        "travel_date": "2026-11-28",
+        "origin_id": "strasbourg",
+        "destination_id": "dijon",
+        "currency": "EUR",
+        "passengers": 1,
+        "direction": "oneway",
+        "kind": "advertised_from",
+        "unit_provenance": "matching_observed_calendar"
       }
     },
     {
@@ -855,7 +1015,15 @@
         "source_capture_date": null,
         "source_recency_reported": "today",
         "transport_mode": "rail_label",
-        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified"
+        "note": "Calendar cell for recorded date; rail brand label only, full service legs not verified",
+        "travel_date": "2026-12-05",
+        "origin_id": "strasbourg",
+        "destination_id": "bruxelles",
+        "currency": "EUR",
+        "passengers": 1,
+        "direction": "oneway",
+        "kind": "advertised_from",
+        "unit_provenance": "matching_observed_calendar"
       }
     },
     {
@@ -1427,6 +1595,156 @@
       "status": "observed_calendar",
       "evidence_note": "Calendar 2026-12-05: EUR 105, TGV INOUI; published conditions: per person one way second class subject to availability; no full itinerary or passenger eligibility confirmed.",
       "review": null
+    },
+    {
+      "origin_id": "lille",
+      "destination_id": "paris",
+      "travel_date": "2026-12-05",
+      "amount_minor": 1900,
+      "currency": "EUR",
+      "passengers": 1,
+      "direction": "oneway",
+      "fare_class": "second",
+      "kind": "advertised_from",
+      "source_url": "https://www.sncf-connect.com/train/trajet/lille/paris",
+      "discount_eligibility": null,
+      "mandatory_fees_included": null,
+      "availability": null,
+      "service_id": null,
+      "valid_for_2027": false,
+      "researched_at": "2026-11-28",
+      "source_capture_date": null,
+      "source_recency_reported": "today",
+      "origin_country": "FR",
+      "destination_country": "FR",
+      "distributor": "SNCF Connect",
+      "commercial_brand": "OUIGO",
+      "actual_operator": null,
+      "transport_mode": "rail_label",
+      "passenger_profile": null,
+      "status": "observed_calendar",
+      "evidence_note": "SNCF Connect route calendar, 5 Dec 2026, consulted 28 Nov 2026. Advertised EUR price per person, one way, second class, subject to availability. Rail brand only; itinerary, two-adult availability, mandatory fees and fare conditions not independently confirmed. Comparable pilot outbound calendar only; not a quote.",
+      "review": null
+    },
+    {
+      "origin_id": "metz",
+      "destination_id": "paris",
+      "travel_date": "2026-12-05",
+      "amount_minor": 2500,
+      "currency": "EUR",
+      "passengers": 1,
+      "direction": "oneway",
+      "fare_class": "second",
+      "kind": "advertised_from",
+      "source_url": "https://www.sncf-connect.com/train/trajet/metz/paris",
+      "discount_eligibility": null,
+      "mandatory_fees_included": null,
+      "availability": null,
+      "service_id": null,
+      "valid_for_2027": false,
+      "researched_at": "2026-11-28",
+      "source_capture_date": null,
+      "source_recency_reported": "today",
+      "origin_country": "FR",
+      "destination_country": "FR",
+      "distributor": "SNCF Connect",
+      "commercial_brand": "OUIGO",
+      "actual_operator": null,
+      "transport_mode": "rail_label",
+      "passenger_profile": null,
+      "status": "observed_calendar",
+      "evidence_note": "SNCF Connect route calendar, 5 Dec 2026, consulted 28 Nov 2026. Advertised EUR price per person, one way, second class, subject to availability. Rail brand only; itinerary, two-adult availability, mandatory fees and fare conditions not independently confirmed. Comparable pilot outbound calendar only; not a quote.",
+      "review": null
+    },
+    {
+      "origin_id": "nancy",
+      "destination_id": "paris",
+      "travel_date": "2026-12-05",
+      "amount_minor": 3100,
+      "currency": "EUR",
+      "passengers": 1,
+      "direction": "oneway",
+      "fare_class": "second",
+      "kind": "advertised_from",
+      "source_url": "https://www.sncf-connect.com/train/trajet/nancy/paris",
+      "discount_eligibility": null,
+      "mandatory_fees_included": null,
+      "availability": null,
+      "service_id": null,
+      "valid_for_2027": false,
+      "researched_at": "2026-11-28",
+      "source_capture_date": null,
+      "source_recency_reported": "today",
+      "origin_country": "FR",
+      "destination_country": "FR",
+      "distributor": "SNCF Connect",
+      "commercial_brand": "Fluo",
+      "actual_operator": null,
+      "transport_mode": "rail_label",
+      "passenger_profile": null,
+      "status": "observed_calendar",
+      "evidence_note": "SNCF Connect route calendar, 5 Dec 2026, consulted 28 Nov 2026. Advertised EUR price per person, one way, second class, subject to availability. Rail brand only; itinerary, two-adult availability, mandatory fees and fare conditions not independently confirmed. Comparable pilot outbound calendar only; not a quote.",
+      "review": null
+    },
+    {
+      "origin_id": "mulhouse",
+      "destination_id": "paris",
+      "travel_date": "2026-12-05",
+      "amount_minor": 3800,
+      "currency": "EUR",
+      "passengers": 1,
+      "direction": "oneway",
+      "fare_class": "second",
+      "kind": "advertised_from",
+      "source_url": "https://www.sncf-connect.com/train/trajet/mulhouse/paris",
+      "discount_eligibility": null,
+      "mandatory_fees_included": null,
+      "availability": null,
+      "service_id": null,
+      "valid_for_2027": false,
+      "researched_at": "2026-11-28",
+      "source_capture_date": null,
+      "source_recency_reported": "today",
+      "origin_country": "FR",
+      "destination_country": "FR",
+      "distributor": "SNCF Connect",
+      "commercial_brand": "LYRIA",
+      "actual_operator": null,
+      "transport_mode": "rail_label",
+      "passenger_profile": null,
+      "status": "observed_calendar",
+      "evidence_note": "SNCF Connect route calendar, 5 Dec 2026, consulted 28 Nov 2026. Advertised EUR price per person, one way, second class, subject to availability. Rail brand only; itinerary, two-adult availability, mandatory fees and fare conditions not independently confirmed. Comparable pilot outbound calendar only; not a quote.",
+      "review": null
+    },
+    {
+      "origin_id": "strasbourg",
+      "destination_id": "paris",
+      "travel_date": "2026-12-05",
+      "amount_minor": 2900,
+      "currency": "EUR",
+      "passengers": 1,
+      "direction": "oneway",
+      "fare_class": "second",
+      "kind": "advertised_from",
+      "source_url": "https://www.sncf-connect.com/train/trajet/strasbourg/paris",
+      "discount_eligibility": null,
+      "mandatory_fees_included": null,
+      "availability": null,
+      "service_id": null,
+      "valid_for_2027": false,
+      "researched_at": "2026-11-28",
+      "source_capture_date": null,
+      "source_recency_reported": "today",
+      "origin_country": "FR",
+      "destination_country": "FR",
+      "distributor": "SNCF Connect",
+      "commercial_brand": "OUIGO",
+      "actual_operator": null,
+      "transport_mode": "rail_label",
+      "passenger_profile": null,
+      "status": "observed_calendar",
+      "evidence_note": "SNCF Connect route calendar, 5 Dec 2026, consulted 28 Nov 2026. Advertised EUR price per person, one way, second class, subject to availability. Rail brand only; itinerary, two-adult availability, mandatory fees and fare conditions not independently confirmed. Comparable pilot outbound calendar only; not a quote.",
+      "review": null
     }
   ],
   "gaps": [
@@ -1482,7 +1800,7 @@
       "origin_id": "lille",
       "destination_id": "bruges",
       "reason": "ambiguous_destination",
-      "source_url": null,
+      "source_url": "https://www.sncf-connect.com/train/trajet/lille/bruges",
       "researched_at": "2026-11-27",
       "source_capture_date": null
     },
@@ -1681,9 +1999,9 @@
     {
       "origin_id": "mulhouse",
       "destination_id": "bern",
-      "reason": "research_pending",
-      "source_url": null,
-      "researched_at": null,
+      "reason": "technical_failure",
+      "source_url": "https://www.sncf-connect.com/train/trajet/mulhouse/berne",
+      "researched_at": "2026-11-27",
       "source_capture_date": null
     },
     {
@@ -1737,9 +2055,9 @@
     {
       "origin_id": "strasbourg",
       "destination_id": "interlaken",
-      "reason": "research_pending",
-      "source_url": null,
-      "researched_at": null,
+      "reason": "technical_failure",
+      "source_url": "https://www.sncf-connect.com/train/trajet/strasbourg/interlaken",
+      "researched_at": "2026-11-27",
       "source_capture_date": null
     },
     {
@@ -1822,6 +2140,526 @@
       "source_url": "https://www.sbb.ch/en/help-and-contact/products-services/tickets/europe/tickets.html",
       "note": "General international ticket conditions only",
       "researched_at": "2026-11-27"
+    },
+    {
+      "origin_id": "metz",
+      "destination_id": "luxembourg_city",
+      "source_url": "https://www.sncf-connect.com/train/trajet/metz/luxembourg",
+      "note": "Route page confirms train service but provides no numerical price.",
+      "researched_at": "2026-11-27"
+    },
+    {
+      "origin_id": "nancy",
+      "destination_id": "luxembourg_city",
+      "source_url": "https://www.sncf-connect.com/train/trajet/nancy/luxembourg",
+      "note": "Route page confirms train service but provides no numerical price.",
+      "researched_at": "2026-11-27"
+    },
+    {
+      "origin_id": "metz",
+      "destination_id": "luxembourg_city",
+      "source_url": "https://www.ter.sncf.com/grand-est/tarifs-cartes/tarifs-transfrontaliers/tickets-Lorraine-Luxembourg",
+      "note": "Same-day roundtrip product, adult tariff exists; no numerical pair price, valid on train and coach; no exchanges or refunds.",
+      "researched_at": "2026-11-27"
+    },
+    {
+      "origin_id": "nancy",
+      "destination_id": "luxembourg_city",
+      "source_url": "https://www.ter.sncf.com/grand-est/tarifs-cartes/tarifs-transfrontaliers/billets-Luxembourg",
+      "note": "Full-price one-way product; date chosen at purchase, border station selected; no numerical pair price.",
+      "researched_at": "2026-11-27"
+    },
+    {
+      "origin_id": "mulhouse",
+      "destination_id": "freiburg",
+      "source_url": "https://www.ter.sncf.com/grand-est/tarifs-cartes/tarifs-transfrontaliers/tickets-Dual",
+      "note": "Published day product via Mülheim: Dual 1 EUR 14.80 for one person; Dual 2 EUR 28.10 described as family with two adults accompanied by two children aged 4–11. Not a dated service quote; couple eligibility for Dual 2 unproven.",
+      "researched_at": "2026-11-27"
+    },
+    {
+      "origin_id": "strasbourg",
+      "destination_id": "freiburg",
+      "source_url": "https://www.bahn.de/reisen/view/verbindung/strassburg/freiburg.shtml",
+      "note": "Retrieval failed; no forward price observed.",
+      "researched_at": "2026-11-27"
+    },
+    {
+      "origin_id": "lille",
+      "destination_id": "bruges",
+      "source_url": "https://www.sncf-connect.com/train/trajet/lille/bruges",
+      "note": "Title explicitly Bruges (Gironde), France; all prices excluded.",
+      "researched_at": "2026-11-27"
+    },
+    {
+      "origin_id": "mulhouse",
+      "destination_id": "bern",
+      "source_url": "https://www.sncf-connect.com/train/trajet/mulhouse/berne",
+      "note": "Retrieval failed; no price observed.",
+      "researched_at": "2026-11-27"
+    },
+    {
+      "origin_id": "strasbourg",
+      "destination_id": "interlaken",
+      "source_url": "https://www.sncf-connect.com/train/trajet/strasbourg/interlaken",
+      "note": "Retrieval failed; no price observed.",
+      "researched_at": "2026-11-27"
+    }
+  ],
+  "return_references": [
+    {
+      "origin_id": "paris",
+      "destination_id": "lille",
+      "travel_date": "2026-12-06",
+      "amount_minor": 1600,
+      "currency": "EUR",
+      "passengers": 1,
+      "direction": "oneway",
+      "fare_class": "second",
+      "kind": "advertised_from",
+      "source_url": "https://www.sncf-connect.com/train/trajet/paris/lille",
+      "discount_eligibility": null,
+      "mandatory_fees_included": null,
+      "availability": null,
+      "service_id": null,
+      "valid_for_2027": false,
+      "researched_at": "2026-11-28",
+      "source_capture_date": null,
+      "source_recency_reported": "today",
+      "origin_country": "FR",
+      "destination_country": "FR",
+      "distributor": "SNCF Connect",
+      "commercial_brand": "OUIGO",
+      "actual_operator": null,
+      "transport_mode": "rail_label",
+      "passenger_profile": null,
+      "status": "observed_calendar",
+      "evidence_note": "Calendário SNCF Connect de 06/12/2026, reconsultado em 28/11/2026. Valor inicial por pessoa, um trecho, segunda classe, sujeito à disponibilidade. Serviço, dois adultos, taxas e condições não verificados. Não vinculado aos serviços de 29/11/2026.",
+      "review": null
+    },
+    {
+      "origin_id": "paris",
+      "destination_id": "metz",
+      "travel_date": "2026-12-06",
+      "amount_minor": 4000,
+      "currency": "EUR",
+      "passengers": 1,
+      "direction": "oneway",
+      "fare_class": "second",
+      "kind": "advertised_from",
+      "source_url": "https://www.sncf-connect.com/train/trajet/paris/metz",
+      "discount_eligibility": null,
+      "mandatory_fees_included": null,
+      "availability": null,
+      "service_id": null,
+      "valid_for_2027": false,
+      "researched_at": "2026-11-28",
+      "source_capture_date": null,
+      "source_recency_reported": "today",
+      "origin_country": "FR",
+      "destination_country": "FR",
+      "distributor": "SNCF Connect",
+      "commercial_brand": "TGV INOUI",
+      "actual_operator": null,
+      "transport_mode": "rail_label",
+      "passenger_profile": null,
+      "status": "observed_calendar",
+      "evidence_note": "Calendário SNCF Connect de 06/12/2026, reconsultado em 28/11/2026. Valor inicial por pessoa, um trecho, segunda classe, sujeito à disponibilidade. Serviço, dois adultos, taxas e condições não verificados. Não vinculado aos serviços de 29/11/2026.",
+      "review": null
+    },
+    {
+      "origin_id": "paris",
+      "destination_id": "nancy",
+      "travel_date": "2026-12-06",
+      "amount_minor": 4300,
+      "currency": "EUR",
+      "passengers": 1,
+      "direction": "oneway",
+      "fare_class": "second",
+      "kind": "advertised_from",
+      "source_url": "https://www.sncf-connect.com/train/trajet/paris/nancy",
+      "discount_eligibility": null,
+      "mandatory_fees_included": null,
+      "availability": null,
+      "service_id": null,
+      "valid_for_2027": false,
+      "researched_at": "2026-11-28",
+      "source_capture_date": null,
+      "source_recency_reported": "today",
+      "origin_country": "FR",
+      "destination_country": "FR",
+      "distributor": "SNCF Connect",
+      "commercial_brand": "TGV INOUI",
+      "actual_operator": null,
+      "transport_mode": "rail_label",
+      "passenger_profile": null,
+      "status": "observed_calendar",
+      "evidence_note": "Calendário SNCF Connect de 06/12/2026, reconsultado em 28/11/2026. Valor inicial por pessoa, um trecho, segunda classe, sujeito à disponibilidade. Serviço, dois adultos, taxas e condições não verificados. Não vinculado aos serviços de 29/11/2026.",
+      "review": null
+    },
+    {
+      "origin_id": "paris",
+      "destination_id": "mulhouse",
+      "travel_date": "2026-12-06",
+      "amount_minor": 6500,
+      "currency": "EUR",
+      "passengers": 1,
+      "direction": "oneway",
+      "fare_class": "second",
+      "kind": "advertised_from",
+      "source_url": "https://www.sncf-connect.com/train/trajet/paris/mulhouse",
+      "discount_eligibility": null,
+      "mandatory_fees_included": null,
+      "availability": null,
+      "service_id": null,
+      "valid_for_2027": false,
+      "researched_at": "2026-11-28",
+      "source_capture_date": null,
+      "source_recency_reported": "today",
+      "origin_country": "FR",
+      "destination_country": "FR",
+      "distributor": "SNCF Connect",
+      "commercial_brand": "TGV INOUI",
+      "actual_operator": null,
+      "transport_mode": "rail_label",
+      "passenger_profile": null,
+      "status": "observed_calendar",
+      "evidence_note": "Calendário SNCF Connect de 06/12/2026, reconsultado em 28/11/2026. Valor inicial por pessoa, um trecho, segunda classe, sujeito à disponibilidade. Serviço, dois adultos, taxas e condições não verificados. Não vinculado aos serviços de 29/11/2026.",
+      "review": null
+    },
+    {
+      "origin_id": "paris",
+      "destination_id": "strasbourg",
+      "travel_date": "2026-12-06",
+      "amount_minor": 4700,
+      "currency": "EUR",
+      "passengers": 1,
+      "direction": "oneway",
+      "fare_class": "second",
+      "kind": "advertised_from",
+      "source_url": "https://www.sncf-connect.com/train/trajet/paris/strasbourg",
+      "discount_eligibility": null,
+      "mandatory_fees_included": null,
+      "availability": null,
+      "service_id": null,
+      "valid_for_2027": false,
+      "researched_at": "2026-11-28",
+      "source_capture_date": null,
+      "source_recency_reported": "today",
+      "origin_country": "FR",
+      "destination_country": "FR",
+      "distributor": "SNCF Connect",
+      "commercial_brand": "TGV INOUI",
+      "actual_operator": null,
+      "transport_mode": "rail_label",
+      "passenger_profile": null,
+      "status": "observed_calendar",
+      "evidence_note": "Calendário SNCF Connect de 06/12/2026, reconsultado em 28/11/2026. Valor inicial por pessoa, um trecho, segunda classe, sujeito à disponibilidade. Serviço, dois adultos, taxas e condições não verificados. Não vinculado aos serviços de 29/11/2026.",
+      "review": null
+    }
+  ],
+  "regional_products": [
+    {
+      "id": "fluo_group_weekend",
+      "name": "Pass Groupe Week-End",
+      "operator": "TER Fluo",
+      "source_url": "https://www.ter.sncf.com/grand-est/tarifs-cartes/tarifs-regionaux/pass-groupe-week-end",
+      "additional_source_urls": [],
+      "checked_at": "2026-11-28",
+      "amount_minor": 4000,
+      "currency": "EUR",
+      "price_kind": "fixed",
+      "price_unit": "group_day",
+      "group_min": 2,
+      "group_max": 5,
+      "couple_use": "group_allowed",
+      "fare_class": "second",
+      "validity": "Um sábado, domingo ou feriado escolhido (não o fim de semana inteiro).",
+      "geography": "Rede Fluo Grand Est; Basel e Luxemburgo nas ligações elegíveis; Paris Est fora do TGV.",
+      "modes": [
+        "rail",
+        "bus"
+      ],
+      "reservations": "Reserva gratuita obrigatória nos trens de/para Paris, sujeita a lotação.",
+      "conditions": "Sem acumular descontos; comprado online; reembolsável até véspera; reserva TER de Paris tem regras próprias.",
+      "valid_for_2027": false
+    },
+    {
+      "id": "alsa_group_alsace",
+      "name": "Alsa+ Groupe Journée — Alsácia",
+      "operator": "TER Fluo",
+      "source_url": "https://www.ter.sncf.com/grand-est/tarifs-cartes/tarifs-regionaux/alsa%2B-groupe-journee",
+      "additional_source_urls": [],
+      "checked_at": "2026-11-28",
+      "amount_minor": 4500,
+      "currency": "EUR",
+      "price_kind": "fixed",
+      "price_unit": "group_day",
+      "group_min": 2,
+      "group_max": 5,
+      "couple_use": "group_allowed",
+      "fare_class": "second",
+      "validity": "Um sábado, domingo ou feriado escolhido (não o fim de semana inteiro).",
+      "geography": "Zona Alsácia; Basel por TER elegível; Kehl apenas tram D, não estação ferroviária; exclusões de navetas e linhas.",
+      "modes": [
+        "rail",
+        "bus",
+        "tram"
+      ],
+      "reservations": null,
+      "conditions": "Viagens ilimitadas na zona escolhida; sem navetas de Natal/Europa Park.",
+      "valid_for_2027": false
+    },
+    {
+      "id": "alsa_group_department",
+      "name": "Alsa+ Groupe Journée — departamento",
+      "operator": "TER Fluo",
+      "source_url": "https://www.ter.sncf.com/grand-est/tarifs-cartes/tarifs-regionaux/alsa%2B-groupe-journee",
+      "additional_source_urls": [],
+      "checked_at": "2026-11-28",
+      "amount_minor": 2800,
+      "currency": "EUR",
+      "price_kind": "fixed",
+      "price_unit": "group_day",
+      "group_min": 2,
+      "group_max": 5,
+      "couple_use": "group_allowed",
+      "fare_class": "second",
+      "validity": "Um sábado, domingo ou feriado escolhido (não o fim de semana inteiro).",
+      "geography": "Bas-Rhin ou Haut-Rhin, uma zona escolhida; respeitar perímetro transfronteiriço e linhas excluídas.",
+      "modes": [
+        "rail",
+        "bus",
+        "tram"
+      ],
+      "reservations": null,
+      "conditions": "Não cobre automaticamente toda a Alsácia; sem navetas de Natal.",
+      "valid_for_2027": false
+    },
+    {
+      "id": "alsa_group_urban",
+      "name": "Alsa+ Groupe Journée — zona urbana",
+      "operator": "TER Fluo",
+      "source_url": "https://www.ter.sncf.com/grand-est/tarifs-cartes/tarifs-regionaux/alsa%2B-groupe-journee",
+      "additional_source_urls": [],
+      "checked_at": "2026-11-28",
+      "amount_minor": 720,
+      "currency": "EUR",
+      "price_kind": "fixed",
+      "price_unit": "group_day",
+      "group_min": 2,
+      "group_max": 5,
+      "couple_use": "group_allowed",
+      "fare_class": "second",
+      "validity": "Um sábado, domingo ou feriado escolhido (não o fim de semana inteiro).",
+      "geography": "Zona urbana selecionada: Strasbourg, Colmar, Mulhouse, Haguenau, Sélestat ou Saint-Louis.",
+      "modes": [
+        "rail",
+        "bus",
+        "tram"
+      ],
+      "reservations": null,
+      "conditions": "Não confundir zona urbana com passe intermunicipal; respeitar perímetro local e exclusões.",
+      "valid_for_2027": false
+    },
+    {
+      "id": "dual_1",
+      "name": "Ticket Dual 1",
+      "operator": "TER Fluo",
+      "source_url": "https://www.ter.sncf.com/grand-est/tarifs-cartes/tarifs-transfrontaliers/tickets-Dual",
+      "additional_source_urls": [],
+      "checked_at": "2026-11-28",
+      "amount_minor": 1480,
+      "currency": "EUR",
+      "price_kind": "fixed",
+      "price_unit": "person_day",
+      "group_min": 1,
+      "group_max": 1,
+      "couple_use": "individual_ticket",
+      "fare_class": null,
+      "validity": "Um dia.",
+      "geography": "Mulhouse/Bantzenheim ↔ Freiburg im Breisgau via Mülheim.",
+      "modes": [
+        "rail"
+      ],
+      "reservations": null,
+      "conditions": "Uma pessoa; venda em distribuidores regionais Grand Est. Classe e reserva não explicitadas.",
+      "valid_for_2027": false
+    },
+    {
+      "id": "dual_2_family",
+      "name": "Ticket Dual 2 — família",
+      "operator": "TER Fluo",
+      "source_url": "https://www.ter.sncf.com/grand-est/tarifs-cartes/tarifs-transfrontaliers/tickets-Dual",
+      "additional_source_urls": [],
+      "checked_at": "2026-11-28",
+      "amount_minor": 2810,
+      "currency": "EUR",
+      "price_kind": "fixed",
+      "price_unit": "group_day",
+      "group_min": 4,
+      "group_max": 4,
+      "couple_use": "requires_children",
+      "fare_class": null,
+      "validity": "Um dia.",
+      "geography": "Mulhouse/Bantzenheim ↔ Freiburg im Breisgau via Mülheim.",
+      "modes": [
+        "rail"
+      ],
+      "reservations": null,
+      "conditions": "Fonte especifica 2 adultos acompanhados de 2 crianças de 4–11 anos; não assumir que o casal sem crianças pode usar esta fórmula.",
+      "valid_for_2027": false
+    },
+    {
+      "id": "lorraine_luxembourg",
+      "name": "Ticket Lorraine Luxembourg",
+      "operator": "TER Fluo",
+      "source_url": "https://www.ter.sncf.com/grand-est/tarifs-cartes/tarifs-transfrontaliers/tickets-Lorraine-Luxembourg",
+      "additional_source_urls": [],
+      "checked_at": "2026-11-28",
+      "amount_minor": null,
+      "currency": null,
+      "price_kind": "not_published",
+      "price_unit": null,
+      "group_min": 1,
+      "group_max": 1,
+      "couple_use": "individual_ticket",
+      "fare_class": null,
+      "validity": "Ida e volta no mesmo dia.",
+      "geography": "Gare de Lorraine até gare luxemburguesa, TER Lorraine.",
+      "modes": [
+        "rail",
+        "bus"
+      ],
+      "reservations": null,
+      "conditions": "Selecionar Bettembourg Frontière ou Rodange Frontière na compra; adulto ou criança; sem troca/reembolso; preço não exibido.",
+      "valid_for_2027": false
+    },
+    {
+      "id": "saar_lor_lux",
+      "name": "Ticket Saar-Lorraine-Luxembourg",
+      "operator": "TER Fluo / CFL",
+      "source_url": "https://www.ter.sncf.com/grand-est/tarifs-cartes/tarifs-transfrontaliers/tickets-saar-lorraine-luxembourg",
+      "additional_source_urls": [
+        "https://www.cfl.lu/en-gb/ticket/international/europe/weekend-en-gr"
+      ],
+      "checked_at": "2026-11-28",
+      "amount_minor": null,
+      "currency": null,
+      "price_kind": "not_published",
+      "price_unit": null,
+      "group_min": 1,
+      "group_max": 5,
+      "couple_use": "group_allowed",
+      "fare_class": "second",
+      "validity": "Um sábado, domingo ou feriado escolhido (não o fim de semana inteiro).",
+      "geography": "Área elegível Lorraine, Sarre e Luxemburgo; ligação regional, não TGV.",
+      "modes": [
+        "rail"
+      ],
+      "reservations": null,
+      "conditions": "Individual ou grupo até 5; sem troca/reembolso; exclui ônibus Luxembourg–Saarbrücken Express; preço não exibido; CFL informa compra por telefone ou bilheteria.",
+      "valid_for_2027": false
+    },
+    {
+      "id": "db_luxemburg_spezial",
+      "name": "Luxemburg-Spezial (2ª classe)",
+      "operator": "DB",
+      "source_url": "https://www.bahn.de/angebot/regio/rheinland-pfalz/luxemburg-spezial",
+      "additional_source_urls": [],
+      "checked_at": "2026-11-28",
+      "amount_minor": 680,
+      "currency": "EUR",
+      "price_kind": "fixed",
+      "price_unit": "person_roundtrip",
+      "group_min": 1,
+      "group_max": 1,
+      "couple_use": "individual_ticket",
+      "fare_class": "second",
+      "validity": "Ida e volta dentro de um dia.",
+      "geography": "Trier Hafenstraße via Igel até Luxemburgo; todas as estações do Luxemburgo, DB/CFL regional.",
+      "modes": [
+        "rail"
+      ],
+      "reservations": null,
+      "conditions": "Adulto; tarifa online ou máquina; +2 EUR na venda assistida; não vende a bordo; interrupções permitidas durante validade.",
+      "valid_for_2027": false
+    },
+    {
+      "id": "db_rheinland_pfalz_two",
+      "name": "Rheinland-Pfalz/Saarland-Ticket — 2 viajantes",
+      "operator": "DB",
+      "source_url": "https://www.bahn.de/angebot/regio/laender-tickets/rheinland-pfalz-ticket",
+      "additional_source_urls": [],
+      "checked_at": "2026-11-28",
+      "amount_minor": 4000,
+      "currency": "EUR",
+      "price_kind": "fixed",
+      "price_unit": "group_day",
+      "group_min": 2,
+      "group_max": 2,
+      "couple_use": "group_allowed",
+      "fare_class": "second",
+      "validity": "Dias úteis 09h–03h seguinte; fins de semana e feriados 00h–03h seguinte.",
+      "geography": "Rheinland-Pfalz, Saarland, até Wasserbillig; RE/RB/S e redes elegíveis; exclusões VRN.",
+      "modes": [
+        "rail",
+        "bus",
+        "tram"
+      ],
+      "reservations": null,
+      "conditions": "Preço publicado para exatamente duas pessoas, online/máquina; +2 EUR balcão assistido; nomes no bilhete; sem troca/reembolso salvo direitos legais.",
+      "valid_for_2027": false
+    },
+    {
+      "id": "sbb_saver_day_no_card",
+      "name": "Saver Day Pass — sem Half Fare",
+      "operator": "SBB",
+      "source_url": "https://www.sbb.ch/en/offers/saver-day-pass?lang=en",
+      "additional_source_urls": [],
+      "checked_at": "2026-11-28",
+      "amount_minor": 5200,
+      "currency": "CHF",
+      "price_kind": "from",
+      "price_unit": "person_day",
+      "group_min": 1,
+      "group_max": 1,
+      "couple_use": "individual_ticket",
+      "fare_class": "second",
+      "validity": "Data escolhida até 05h do dia seguinte.",
+      "geography": "Área de validade do GA Travelcard; não pressupor cobertura de teleféricos/ferrovias de montanha fora da área.",
+      "modes": [
+        "rail",
+        "bus",
+        "tram",
+        "boat"
+      ],
+      "reservations": null,
+      "conditions": "Sem cartão Half Fare; compra antecipada 1 dia a 6 meses, quotas variáveis; reembolso gratuito em 30 min com login, depois excepcional.",
+      "valid_for_2027": false
+    },
+    {
+      "id": "sncb_luxembourg_weekend",
+      "name": "SNCB — bilhete transfronteiriço para Luxemburgo (fim de semana)",
+      "operator": "SNCB",
+      "source_url": "https://www.belgiantrain.be/en/products/crossborder/luxembourg",
+      "additional_source_urls": [],
+      "checked_at": "2026-11-28",
+      "amount_minor": null,
+      "currency": null,
+      "price_kind": "not_published",
+      "price_unit": null,
+      "group_min": 1,
+      "group_max": 1,
+      "couple_use": "individual_ticket",
+      "fare_class": "both",
+      "validity": "Sábado, domingo ou feriado; ida simples ou retorno.",
+      "geography": "Estações belgas ↔ Luxemburgo por ligações IC/regionais elegíveis (inclui Arlon).",
+      "modes": [
+        "rail"
+      ],
+      "reservations": null,
+      "conditions": "Adultos 26–64: desconto de 30% na parte belga; segunda classe dentro de Luxemburgo gratuita; preço total depende do percurso; mínimo belga 2,60 EUR em segunda classe. Não presumir Train+.",
+      "valid_for_2027": false
     }
   ]
 }

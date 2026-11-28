@@ -1,0 +1,2210 @@
+{
+  "schema_version": 1,
+  "scope": "audited_historical_route_gap_overlay",
+  "checked_at": "2026-11-28",
+  "records": [
+    {
+      "origin_id": "lille",
+      "destination_id": "saumur",
+      "oneway_min": 222,
+      "published_average_min": 290,
+      "evidence_type": "official_route_minimum",
+      "source_url": "https://www.sncf-connect.com/train/trajet/lille/saumur",
+      "source_checked_at": "2026-11-28",
+      "source_capture_date": null,
+      "index_recency": "today",
+      "service_date": null,
+      "evidence_level": "operator_city_level",
+      "confidence": "medium",
+      "direction": "outbound_only",
+      "origin_station_id": null,
+      "destination_station_id": null,
+      "station_status": "not_reconciled",
+      "return_weekend_verified": false,
+      "door_to_door_verified": false,
+      "valid_for_2027": false,
+      "fare_couple_eur": null,
+      "transfer_count": null,
+      "note": "Resumo oficial SNCF Connect reconsultado em 2026-11-28 via índice web atualizado hoje; mínimo e média publicados variam com a amostra. Sem itinerário datado, confirmação de todos os trechos ou garantia 2027.",
+      "previous_index_summary": {
+        "minimum": 222,
+        "average": 271
+      },
+      "quality_review": {
+        "checked_at": "2026-11-28",
+        "source_url": "https://www.sncf-connect.com/train/trajet/lille/saumur",
+        "direction": "outbound_only",
+        "origin_country": "FR",
+        "destination_country": "FR",
+        "selected_summary_reproduced": false,
+        "samples": [
+          {
+            "index_recency": "last month",
+            "minimum_min": 222,
+            "average_min": 271,
+            "origin_station_labels": [
+              "LILLE EUROPE",
+              "LILLE FLANDRES"
+            ],
+            "arrival_station_labels": [
+              "SAUMUR"
+            ],
+            "mode_basis": "explicit rail route summary"
+          }
+        ],
+        "service_legs_verified": false,
+        "valid_for_2027": false,
+        "note": "Reproduces earlier index summary, not selected average 290. Multiple departure stations; no specific station assigned to selected observation.",
+        "modality_status": "rail_summary"
+      }
+    },
+    {
+      "origin_id": "metz",
+      "destination_id": "saumur",
+      "oneway_min": 242,
+      "published_average_min": 310,
+      "evidence_type": "official_route_minimum",
+      "source_url": "https://www.sncf-connect.com/train/trajet/metz/saumur",
+      "source_checked_at": "2026-11-28",
+      "source_capture_date": null,
+      "index_recency": "2 months ago",
+      "service_date": null,
+      "evidence_level": "operator_city_level",
+      "confidence": "medium",
+      "direction": "outbound_only",
+      "origin_station_id": null,
+      "destination_station_id": null,
+      "station_status": "not_reconciled",
+      "return_weekend_verified": false,
+      "door_to_door_verified": false,
+      "valid_for_2027": false,
+      "fare_couple_eur": null,
+      "transfer_count": null,
+      "note": "Resumo de rota SNCF Connect consultado via índice web; mínimo e média publicados, sem data de serviço ou verificação de todos os trechos. A recência do índice é relativa, não uma data de captura comprovada.",
+      "revalidation": {
+        "checked_at": "2026-11-28",
+        "source_url": "https://www.sncf-connect.com/train/trajet/metz/saumur",
+        "status": "published_summary_reproduced",
+        "minimum_min": 242,
+        "average_min": 310,
+        "station_labels": [
+          "METZ",
+          "SAUMUR"
+        ],
+        "listed_rail_operators": [
+          "TGV INOUI",
+          "TER",
+          "INTERCITES",
+          "OUIGO"
+        ],
+        "connections": "published as possible; individual legs not verified",
+        "fare_status": "no numeric fare in route summary",
+        "service_date": null
+      },
+      "quality_review": {
+        "checked_at": "2026-11-28",
+        "source_url": "https://www.sncf-connect.com/train/trajet/metz/saumur",
+        "direction": "outbound_only",
+        "origin_country": "FR",
+        "destination_country": "FR",
+        "selected_summary_reproduced": false,
+        "samples": [
+          {
+            "index_recency": "today",
+            "minimum_min": 288,
+            "average_min": 327,
+            "origin_station_labels": [
+              "METZ"
+            ],
+            "arrival_station_labels": [
+              "SAUMUR"
+            ],
+            "mode_basis": "explicit rail route summary"
+          }
+        ],
+        "service_legs_verified": false,
+        "valid_for_2027": false,
+        "note": "Different dynamic summary from selected observation 242/310 and prior revalidation. No automatic replacement.",
+        "modality_status": "rail_summary"
+      }
+    },
+    {
+      "origin_id": "nancy",
+      "destination_id": "saumur",
+      "oneway_min": 275,
+      "published_average_min": 308,
+      "evidence_type": "official_route_minimum",
+      "source_url": "https://www.sncf-connect.com/train/trajet/nancy/saumur",
+      "source_checked_at": "2026-11-28",
+      "source_capture_date": null,
+      "index_recency": "3 months ago",
+      "service_date": null,
+      "evidence_level": "operator_city_level",
+      "confidence": "medium",
+      "direction": "outbound_only",
+      "origin_station_id": null,
+      "destination_station_id": null,
+      "station_status": "not_reconciled",
+      "return_weekend_verified": false,
+      "door_to_door_verified": false,
+      "valid_for_2027": false,
+      "fare_couple_eur": null,
+      "transfer_count": null,
+      "note": "Resumo de rota SNCF Connect consultado via índice web; mínimo e média publicados, sem data de serviço ou verificação de todos os trechos. A recência do índice é relativa, não uma data de captura comprovada.",
+      "revalidation": {
+        "checked_at": "2026-11-28",
+        "source_url": "https://www.sncf-connect.com/train/trajet/nancy/saumur",
+        "status": "published_summary_reproduced",
+        "minimum_min": 275,
+        "average_min": 308,
+        "station_labels": [
+          "NANCY",
+          "SAUMUR"
+        ],
+        "listed_rail_operators": [
+          "TGV INOUI",
+          "TER",
+          "INTERCITES"
+        ],
+        "connections": "published as possible; individual legs not verified",
+        "fare_status": "no numeric fare in route summary",
+        "service_date": null
+      },
+      "quality_review": {
+        "checked_at": "2026-11-28",
+        "source_url": "https://www.sncf-connect.com/train/trajet/nancy/saumur",
+        "direction": "outbound_only",
+        "origin_country": "FR",
+        "destination_country": "FR",
+        "selected_summary_reproduced": false,
+        "samples": [
+          {
+            "index_recency": "today",
+            "minimum_min": 276,
+            "average_min": 316,
+            "origin_station_labels": [
+              "NANCY"
+            ],
+            "arrival_station_labels": [],
+            "mode_basis": "Explicit SNCF rail-route summary (minimum and average in same table)."
+          }
+        ],
+        "service_legs_verified": false,
+        "valid_for_2027": false,
+        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
+      }
+    },
+    {
+      "origin_id": "strasbourg",
+      "destination_id": "saumur",
+      "oneway_min": 268,
+      "published_average_min": 324,
+      "evidence_type": "official_route_minimum",
+      "source_url": "https://www.sncf-connect.com/train/trajet/strasbourg/saumur",
+      "source_checked_at": "2026-11-28",
+      "source_capture_date": null,
+      "index_recency": "2 months ago",
+      "service_date": null,
+      "evidence_level": "operator_city_level",
+      "confidence": "medium",
+      "direction": "outbound_only",
+      "origin_station_id": null,
+      "destination_station_id": null,
+      "station_status": "not_reconciled",
+      "return_weekend_verified": false,
+      "door_to_door_verified": false,
+      "valid_for_2027": false,
+      "fare_couple_eur": null,
+      "transfer_count": null,
+      "note": "Resumo de rota SNCF Connect consultado via índice web; mínimo e média publicados, sem data de serviço ou verificação de todos os trechos. A recência do índice é relativa, não uma data de captura comprovada.",
+      "revalidation": {
+        "checked_at": "2026-11-28",
+        "source_url": "https://www.sncf-connect.com/train/trajet/strasbourg/saumur",
+        "status": "published_summary_reproduced",
+        "minimum_min": 268,
+        "average_min": 324,
+        "station_labels": [
+          "STRASBOURG",
+          "SAUMUR"
+        ],
+        "listed_rail_operators": [
+          "TGV INOUI",
+          "TER",
+          "INTERCITES",
+          "DB SNCF Voyageurs",
+          "OUIGO"
+        ],
+        "connections": "published as possible; individual legs not verified",
+        "fare_status": "no numeric fare in route summary",
+        "service_date": null
+      },
+      "quality_review": {
+        "checked_at": "2026-11-28",
+        "source_url": "https://www.sncf-connect.com/train/trajet/strasbourg/saumur",
+        "direction": "outbound_only",
+        "origin_country": "FR",
+        "destination_country": "FR",
+        "selected_summary_reproduced": false,
+        "samples": [
+          {
+            "index_recency": "today",
+            "minimum_min": 268,
+            "average_min": 328,
+            "origin_station_labels": [
+              "STRASBOURG"
+            ],
+            "arrival_station_labels": [],
+            "mode_basis": "Explicit SNCF rail-route summary (minimum and average in same table)."
+          }
+        ],
+        "service_legs_verified": false,
+        "valid_for_2027": false,
+        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
+      }
+    },
+    {
+      "origin_id": "lille",
+      "destination_id": "dinan",
+      "oneway_min": 313,
+      "published_average_min": 385,
+      "evidence_type": "official_route_minimum",
+      "source_url": "https://www.sncf-connect.com/train/trajet/lille/dinan",
+      "source_checked_at": "2026-11-28",
+      "source_capture_date": null,
+      "index_recency": "today",
+      "service_date": null,
+      "evidence_level": "operator_city_level",
+      "confidence": "medium",
+      "direction": "outbound_only",
+      "origin_station_id": null,
+      "destination_station_id": null,
+      "station_status": "not_reconciled",
+      "return_weekend_verified": false,
+      "door_to_door_verified": false,
+      "valid_for_2027": false,
+      "fare_couple_eur": null,
+      "transfer_count": null,
+      "note": "Resumo oficial SNCF Connect reconsultado em 2026-11-28 via índice web atualizado hoje; mínimo e média publicados variam com a amostra. Sem itinerário datado, confirmação de todos os trechos ou garantia 2027.",
+      "previous_index_summary": {
+        "minimum": 298,
+        "average": 375
+      },
+      "quality_review": {
+        "checked_at": "2026-11-28",
+        "source_url": "https://www.sncf-connect.com/train/trajet/lille/dinan",
+        "direction": "outbound_only",
+        "origin_country": "FR",
+        "destination_country": "FR",
+        "selected_summary_reproduced": false,
+        "samples": [
+          {
+            "index_recency": "last month",
+            "minimum_min": 298,
+            "average_min": 375,
+            "origin_station_labels": [],
+            "arrival_station_labels": [],
+            "mode_basis": "Explicit SNCF rail-route summary (minimum and average in same table)."
+          }
+        ],
+        "service_legs_verified": false,
+        "valid_for_2027": false,
+        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
+      }
+    },
+    {
+      "origin_id": "lille",
+      "destination_id": "le_mans",
+      "oneway_min": 157,
+      "published_average_min": 223,
+      "evidence_type": "official_route_minimum",
+      "source_url": "https://www.sncf-connect.com/train/trajet/lille/le-mans",
+      "source_checked_at": "2026-11-28",
+      "source_capture_date": null,
+      "index_recency": "today",
+      "service_date": null,
+      "evidence_level": "operator_city_level",
+      "confidence": "medium",
+      "direction": "outbound_only",
+      "origin_station_id": null,
+      "destination_station_id": null,
+      "station_status": "not_reconciled",
+      "return_weekend_verified": false,
+      "door_to_door_verified": false,
+      "valid_for_2027": false,
+      "fare_couple_eur": null,
+      "transfer_count": null,
+      "note": "Resumo oficial SNCF Connect reconsultado em 2026-11-28 via índice web atualizado hoje; mínimo e média publicados variam com a amostra. Sem itinerário datado, confirmação de todos os trechos ou garantia 2027.",
+      "previous_index_summary": {
+        "minimum": 157,
+        "average": 202
+      },
+      "quality_review": {
+        "checked_at": "2026-11-28",
+        "source_url": "https://www.sncf-connect.com/train/trajet/lille/le-mans",
+        "direction": "outbound_only",
+        "origin_country": "FR",
+        "destination_country": "FR",
+        "selected_summary_reproduced": true,
+        "samples": [
+          {
+            "index_recency": "today",
+            "minimum_min": 157,
+            "average_min": 223,
+            "origin_station_labels": [],
+            "arrival_station_labels": [],
+            "mode_basis": "Explicit SNCF rail-route summary (minimum and average in same table)."
+          }
+        ],
+        "service_legs_verified": false,
+        "valid_for_2027": false,
+        "note": "Selected numerical summary reproduced. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
+      }
+    },
+    {
+      "origin_id": "metz",
+      "destination_id": "le_mans",
+      "oneway_min": 199,
+      "published_average_min": 241,
+      "evidence_type": "official_route_minimum",
+      "source_url": "https://www.sncf-connect.com/train/trajet/metz/le-mans",
+      "source_checked_at": "2026-11-28",
+      "source_capture_date": null,
+      "index_recency": "today",
+      "service_date": null,
+      "evidence_level": "operator_city_level",
+      "confidence": "medium",
+      "direction": "outbound_only",
+      "origin_station_id": null,
+      "destination_station_id": null,
+      "station_status": "not_reconciled",
+      "return_weekend_verified": false,
+      "door_to_door_verified": false,
+      "valid_for_2027": false,
+      "fare_couple_eur": null,
+      "transfer_count": null,
+      "note": "Página oficial SNCF Connect aberta em 28/11/2026: mínimo 199 min e média publicada 241 min; estações publicadas METZ e LE MANS; serviços citados: INTERCITÉS, TGV INOUI, TER, OUIGO. Sem preço específico no resumo. Sem itinerário datado reconciliado, retorno ou disponibilidade 2027.",
+      "previous_index_summary": {
+        "minimum": 205,
+        "average": 242
+      },
+      "quality_review": {
+        "checked_at": "2026-11-28",
+        "source_url": "https://www.sncf-connect.com/train/trajet/metz/le-mans",
+        "direction": "outbound_only",
+        "origin_country": "FR",
+        "destination_country": "FR",
+        "selected_summary_reproduced": true,
+        "samples": [
+          {
+            "index_recency": "today",
+            "minimum_min": 199,
+            "average_min": 241,
+            "origin_station_labels": [],
+            "arrival_station_labels": [],
+            "mode_basis": "Explicit SNCF rail-route summary (minimum and average in same table)."
+          }
+        ],
+        "service_legs_verified": false,
+        "valid_for_2027": false,
+        "note": "Selected numerical summary reproduced. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
+      }
+    },
+    {
+      "origin_id": "nancy",
+      "destination_id": "le_mans",
+      "oneway_min": 202,
+      "published_average_min": 270,
+      "evidence_type": "official_route_minimum",
+      "source_url": "https://www.sncf-connect.com/train/trajet/nancy/le-mans",
+      "source_checked_at": "2026-11-28",
+      "source_capture_date": null,
+      "index_recency": "today",
+      "service_date": null,
+      "evidence_level": "operator_city_level",
+      "confidence": "medium",
+      "direction": "outbound_only",
+      "origin_station_id": null,
+      "destination_station_id": null,
+      "station_status": "not_reconciled",
+      "return_weekend_verified": false,
+      "door_to_door_verified": false,
+      "valid_for_2027": false,
+      "fare_couple_eur": null,
+      "transfer_count": null,
+      "note": "Página oficial SNCF Connect aberta em 28/11/2026: mínimo 202 min e média publicada 270 min; estações publicadas NANCY e LE MANS; serviços citados: INTERCITÉS, TGV INOUI, TER, DB SNCF. Sem preço específico no resumo. Sem itinerário datado reconciliado, retorno ou disponibilidade 2027.",
+      "previous_index_summary": {
+        "minimum": 198,
+        "average": 239
+      },
+      "quality_review": {
+        "checked_at": "2026-11-28",
+        "source_url": "https://www.sncf-connect.com/train/trajet/nancy/le-mans",
+        "direction": "outbound_only",
+        "origin_country": "FR",
+        "destination_country": "FR",
+        "selected_summary_reproduced": true,
+        "samples": [
+          {
+            "index_recency": "today",
+            "minimum_min": 202,
+            "average_min": 270,
+            "origin_station_labels": [
+              "NANCY"
+            ],
+            "arrival_station_labels": [],
+            "mode_basis": "Explicit SNCF rail-route summary (minimum and average in same table)."
+          }
+        ],
+        "service_legs_verified": false,
+        "valid_for_2027": false,
+        "note": "Selected numerical summary reproduced. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
+      }
+    },
+    {
+      "origin_id": "mulhouse",
+      "destination_id": "le_mans",
+      "oneway_min": 277,
+      "published_average_min": 334,
+      "evidence_type": "official_route_minimum",
+      "source_url": "https://www.sncf-connect.com/train/trajet/mulhouse/le-mans",
+      "source_checked_at": "2026-11-28",
+      "source_capture_date": null,
+      "index_recency": "today",
+      "service_date": null,
+      "evidence_level": "operator_city_level",
+      "confidence": "medium",
+      "direction": "outbound_only",
+      "origin_station_id": null,
+      "destination_station_id": null,
+      "station_status": "not_reconciled",
+      "return_weekend_verified": false,
+      "door_to_door_verified": false,
+      "valid_for_2027": false,
+      "fare_couple_eur": null,
+      "transfer_count": null,
+      "note": "Página oficial SNCF Connect aberta em 28/11/2026: mínimo 277 min e média publicada 334 min; estações publicadas MULHOUSE e LE MANS; serviços citados: TRAIN NOMAD, TGV INOUI, TER, TGV Lyria, DB SNCF. Sem preço específico no resumo. Sem itinerário datado reconciliado, retorno ou disponibilidade 2027.",
+      "previous_index_summary": {
+        "minimum": 275,
+        "average": 317
+      },
+      "quality_review": {
+        "checked_at": "2026-11-28",
+        "source_url": "https://www.sncf-connect.com/train/trajet/mulhouse/le-mans",
+        "direction": "outbound_only",
+        "origin_country": "FR",
+        "destination_country": "FR",
+        "selected_summary_reproduced": true,
+        "samples": [
+          {
+            "index_recency": "today",
+            "minimum_min": 277,
+            "average_min": 334,
+            "origin_station_labels": [],
+            "arrival_station_labels": [],
+            "mode_basis": "Explicit SNCF rail-route summary (minimum and average in same table)."
+          }
+        ],
+        "service_legs_verified": false,
+        "valid_for_2027": false,
+        "note": "Selected numerical summary reproduced. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
+      }
+    },
+    {
+      "origin_id": "strasbourg",
+      "destination_id": "le_mans",
+      "oneway_min": 215,
+      "published_average_min": 258,
+      "evidence_type": "official_route_minimum",
+      "source_url": "https://www.sncf-connect.com/train/trajet/strasbourg/le-mans",
+      "source_checked_at": "2026-11-28",
+      "source_capture_date": null,
+      "index_recency": "today",
+      "service_date": null,
+      "evidence_level": "operator_city_level",
+      "confidence": "medium",
+      "direction": "outbound_only",
+      "origin_station_id": null,
+      "destination_station_id": null,
+      "station_status": "not_reconciled",
+      "return_weekend_verified": false,
+      "door_to_door_verified": false,
+      "valid_for_2027": false,
+      "fare_couple_eur": null,
+      "transfer_count": null,
+      "note": "Página oficial SNCF Connect aberta em 28/11/2026: mínimo 215 min e média publicada 258 min; estações publicadas STRASBOURG e LE MANS; serviços citados: OUIGO, TER, TGV INOUI, DB SNCF. Calendário exibe preços a partir de EUR 66 por pessoa, ida, segunda classe, sujeitos a disponibilidade; não é cotação completa nem integra os 60 pares históricos. Sem itinerário datado reconciliado, retorno ou disponibilidade 2027.",
+      "previous_index_summary": {
+        "minimum": 215,
+        "average": 266
+      },
+      "quality_review": {
+        "checked_at": "2026-11-28",
+        "source_url": "https://www.sncf-connect.com/train/trajet/strasbourg/le-mans",
+        "direction": "outbound_only",
+        "origin_country": "FR",
+        "destination_country": "FR",
+        "selected_summary_reproduced": true,
+        "samples": [
+          {
+            "index_recency": "today",
+            "minimum_min": 215,
+            "average_min": 258,
+            "origin_station_labels": [],
+            "arrival_station_labels": [],
+            "mode_basis": "Explicit SNCF rail-route summary (minimum and average in same table)."
+          }
+        ],
+        "service_legs_verified": false,
+        "valid_for_2027": false,
+        "note": "Selected numerical summary reproduced. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
+      }
+    },
+    {
+      "origin_id": "lille",
+      "destination_id": "saint_malo",
+      "oneway_min": 271,
+      "published_average_min": 298,
+      "evidence_type": "official_route_minimum",
+      "source_url": "https://www.sncf-connect.com/train/trajet/lille/saint-malo",
+      "source_checked_at": "2026-11-28",
+      "source_capture_date": null,
+      "index_recency": "last month",
+      "service_date": null,
+      "evidence_level": "operator_city_level",
+      "confidence": "medium",
+      "direction": "outbound_only",
+      "origin_station_id": null,
+      "destination_station_id": null,
+      "station_status": "not_reconciled",
+      "return_weekend_verified": false,
+      "door_to_door_verified": false,
+      "valid_for_2027": false,
+      "fare_couple_eur": null,
+      "transfer_count": null,
+      "note": "Resumo de rota SNCF Connect consultado via índice web; mínimo e média publicados, sem data de serviço ou verificação de todos os trechos. A recência do índice é relativa, não uma data de captura comprovada.",
+      "quality_review": {
+        "checked_at": "2026-11-28",
+        "source_url": "https://www.sncf-connect.com/train/trajet/lille/saint-malo",
+        "direction": "outbound_only",
+        "origin_country": "FR",
+        "destination_country": "FR",
+        "selected_summary_reproduced": false,
+        "samples": [
+          {
+            "index_recency": "today",
+            "minimum_min": 268,
+            "average_min": 306,
+            "origin_station_labels": [],
+            "arrival_station_labels": [],
+            "mode_basis": "Explicit SNCF rail-route summary (minimum and average in same table)."
+          }
+        ],
+        "service_legs_verified": false,
+        "valid_for_2027": false,
+        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
+      }
+    },
+    {
+      "origin_id": "metz",
+      "destination_id": "saint_malo",
+      "oneway_min": 302,
+      "published_average_min": 322,
+      "evidence_type": "official_route_minimum",
+      "source_url": "https://www.sncf-connect.com/train/trajet/metz/saint-malo",
+      "source_checked_at": "2026-11-28",
+      "source_capture_date": null,
+      "index_recency": "last week",
+      "service_date": null,
+      "evidence_level": "operator_city_level",
+      "confidence": "medium",
+      "direction": "outbound_only",
+      "origin_station_id": null,
+      "destination_station_id": null,
+      "station_status": "not_reconciled",
+      "return_weekend_verified": false,
+      "door_to_door_verified": false,
+      "valid_for_2027": false,
+      "fare_couple_eur": null,
+      "transfer_count": null,
+      "note": "Resumo de rota SNCF Connect consultado via índice web; mínimo e média publicados, sem data de serviço ou verificação de todos os trechos. A recência do índice é relativa, não uma data de captura comprovada.",
+      "quality_review": {
+        "checked_at": "2026-11-28",
+        "source_url": "https://www.sncf-connect.com/train/trajet/metz/saint-malo",
+        "direction": "outbound_only",
+        "origin_country": "FR",
+        "destination_country": "FR",
+        "selected_summary_reproduced": false,
+        "samples": [
+          {
+            "index_recency": "today",
+            "minimum_min": 304,
+            "average_min": 323,
+            "origin_station_labels": [],
+            "arrival_station_labels": [],
+            "mode_basis": "Explicit SNCF rail-route summary (minimum and average in same table)."
+          }
+        ],
+        "service_legs_verified": false,
+        "valid_for_2027": false,
+        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
+      }
+    },
+    {
+      "origin_id": "nancy",
+      "destination_id": "saint_malo",
+      "oneway_min": 312,
+      "published_average_min": 344,
+      "evidence_type": "official_route_minimum",
+      "source_url": "https://www.sncf-connect.com/train/trajet/nancy/saint-malo",
+      "source_checked_at": "2026-11-28",
+      "source_capture_date": null,
+      "index_recency": "2 months ago",
+      "service_date": null,
+      "evidence_level": "operator_city_level",
+      "confidence": "medium",
+      "direction": "outbound_only",
+      "origin_station_id": null,
+      "destination_station_id": null,
+      "station_status": "not_reconciled",
+      "return_weekend_verified": false,
+      "door_to_door_verified": false,
+      "valid_for_2027": false,
+      "fare_couple_eur": null,
+      "transfer_count": null,
+      "note": "Resumo de rota SNCF Connect consultado via índice web; mínimo e média publicados, sem data de serviço ou verificação de todos os trechos. A recência do índice é relativa, não uma data de captura comprovada.",
+      "quality_review": {
+        "checked_at": "2026-11-28",
+        "source_url": "https://www.sncf-connect.com/train/trajet/nancy/saint-malo",
+        "direction": "outbound_only",
+        "origin_country": "FR",
+        "destination_country": "FR",
+        "selected_summary_reproduced": false,
+        "samples": [
+          {
+            "index_recency": "today",
+            "minimum_min": 313,
+            "average_min": 340,
+            "origin_station_labels": [],
+            "arrival_station_labels": [],
+            "mode_basis": "Explicit SNCF rail-route summary (minimum and average in same table)."
+          }
+        ],
+        "service_legs_verified": false,
+        "valid_for_2027": false,
+        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
+      }
+    },
+    {
+      "origin_id": "mulhouse",
+      "destination_id": "saint_malo",
+      "oneway_min": 387,
+      "published_average_min": 417,
+      "evidence_type": "official_route_minimum",
+      "source_url": "https://www.sncf-connect.com/train/trajet/mulhouse/saint-malo",
+      "source_checked_at": "2026-11-28",
+      "source_capture_date": null,
+      "index_recency": "2 months ago",
+      "service_date": null,
+      "evidence_level": "operator_city_level",
+      "confidence": "medium",
+      "direction": "outbound_only",
+      "origin_station_id": null,
+      "destination_station_id": null,
+      "station_status": "not_reconciled",
+      "return_weekend_verified": false,
+      "door_to_door_verified": false,
+      "valid_for_2027": false,
+      "fare_couple_eur": null,
+      "transfer_count": null,
+      "note": "Resumo de rota SNCF Connect consultado via índice web; mínimo e média publicados, sem data de serviço ou verificação de todos os trechos. A recência do índice é relativa, não uma data de captura comprovada.",
+      "quality_review": {
+        "checked_at": "2026-11-28",
+        "source_url": "https://www.sncf-connect.com/train/trajet/mulhouse/saint-malo",
+        "direction": "outbound_only",
+        "origin_country": "FR",
+        "destination_country": "FR",
+        "selected_summary_reproduced": false,
+        "samples": [
+          {
+            "index_recency": "today",
+            "minimum_min": 387,
+            "average_min": 407,
+            "origin_station_labels": [],
+            "arrival_station_labels": [],
+            "mode_basis": "Explicit SNCF rail-route summary (minimum and average in same table)."
+          }
+        ],
+        "service_legs_verified": false,
+        "valid_for_2027": false,
+        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
+      }
+    },
+    {
+      "origin_id": "strasbourg",
+      "destination_id": "saint_malo",
+      "oneway_min": 323,
+      "published_average_min": 343,
+      "evidence_type": "official_route_minimum",
+      "source_url": "https://www.sncf-connect.com/train/trajet/strasbourg/saint-malo",
+      "source_checked_at": "2026-11-28",
+      "source_capture_date": null,
+      "index_recency": "today",
+      "service_date": null,
+      "evidence_level": "operator_city_level",
+      "confidence": "medium",
+      "direction": "outbound_only",
+      "origin_station_id": null,
+      "destination_station_id": null,
+      "station_status": "not_reconciled",
+      "return_weekend_verified": false,
+      "door_to_door_verified": false,
+      "valid_for_2027": false,
+      "fare_couple_eur": null,
+      "transfer_count": null,
+      "note": "Resumo de rota SNCF Connect consultado via índice web; mínimo e média publicados, sem data de serviço ou verificação de todos os trechos. A recência do índice é relativa, não uma data de captura comprovada.",
+      "quality_review": {
+        "checked_at": "2026-11-28",
+        "source_url": "https://www.sncf-connect.com/train/trajet/strasbourg/saint-malo",
+        "direction": "outbound_only",
+        "origin_country": "FR",
+        "destination_country": "FR",
+        "selected_summary_reproduced": true,
+        "samples": [
+          {
+            "index_recency": "today",
+            "minimum_min": 323,
+            "average_min": 343,
+            "origin_station_labels": [],
+            "arrival_station_labels": [],
+            "mode_basis": "Explicit SNCF rail-route summary (minimum and average in same table)."
+          }
+        ],
+        "service_legs_verified": false,
+        "valid_for_2027": false,
+        "note": "Selected numerical summary reproduced. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
+      }
+    },
+    {
+      "origin_id": "lille",
+      "destination_id": "beaune",
+      "oneway_min": 229,
+      "published_average_min": 285,
+      "evidence_type": "official_route_minimum",
+      "source_url": "https://www.sncf-connect.com/train/trajet/lille/beaune",
+      "source_checked_at": "2026-11-28",
+      "source_capture_date": null,
+      "index_recency": "2 days ago",
+      "service_date": null,
+      "evidence_level": "operator_city_level",
+      "confidence": "medium",
+      "direction": "outbound_only",
+      "origin_station_id": null,
+      "destination_station_id": null,
+      "station_status": "not_reconciled",
+      "return_weekend_verified": false,
+      "door_to_door_verified": false,
+      "valid_for_2027": false,
+      "fare_couple_eur": null,
+      "transfer_count": null,
+      "note": "Página oficial SNCF Connect aberta e conferida em 2026-11-28: mínimo 3h49, média 4h45; valores publicados na mesma versão da página. Sem itinerário datado nem validação 2027. Recência relativa do índice, não data de captura confirmada.",
+      "quality_review": {
+        "checked_at": "2026-11-28",
+        "source_url": "https://www.sncf-connect.com/train/trajet/lille/beaune",
+        "direction": "outbound_only",
+        "origin_country": "FR",
+        "destination_country": "FR",
+        "selected_summary_reproduced": true,
+        "samples": [
+          {
+            "index_recency": "2 days ago",
+            "minimum_min": 229,
+            "average_min": 285,
+            "origin_station_labels": [],
+            "arrival_station_labels": [],
+            "mode_basis": "Explicit SNCF rail-route summary (minimum and average in same table)."
+          }
+        ],
+        "service_legs_verified": false,
+        "valid_for_2027": false,
+        "note": "Selected numerical summary reproduced. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
+      }
+    },
+    {
+      "origin_id": "lille",
+      "destination_id": "besancon",
+      "oneway_min": 272,
+      "published_average_min": 317,
+      "evidence_type": "official_route_minimum",
+      "source_url": "https://www.sncf-connect.com/train/trajet/lille/besancon",
+      "source_checked_at": "2026-11-28",
+      "source_capture_date": null,
+      "index_recency": "3 days ago",
+      "service_date": null,
+      "evidence_level": "operator_city_level",
+      "confidence": "medium",
+      "direction": "outbound_only",
+      "origin_station_id": null,
+      "destination_station_id": null,
+      "station_status": "not_reconciled",
+      "return_weekend_verified": false,
+      "door_to_door_verified": false,
+      "valid_for_2027": false,
+      "fare_couple_eur": null,
+      "transfer_count": null,
+      "note": "Página oficial SNCF Connect aberta e conferida em 2026-11-28: mínimo 4h32, média 5h17; valores publicados na mesma versão da página. Sem itinerário datado nem validação 2027. Recência relativa do índice, não data de captura confirmada.",
+      "quality_review": {
+        "checked_at": "2026-11-28",
+        "source_url": "https://www.sncf-connect.com/train/trajet/lille/besancon",
+        "direction": "outbound_only",
+        "origin_country": "FR",
+        "destination_country": "FR",
+        "selected_summary_reproduced": true,
+        "samples": [
+          {
+            "index_recency": "3 days ago",
+            "minimum_min": 272,
+            "average_min": 317,
+            "origin_station_labels": [],
+            "arrival_station_labels": [],
+            "mode_basis": "Explicit SNCF rail-route summary (minimum and average in same table)."
+          }
+        ],
+        "service_legs_verified": false,
+        "valid_for_2027": false,
+        "note": "Selected numerical summary reproduced. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
+      }
+    },
+    {
+      "origin_id": "metz",
+      "destination_id": "freiburg",
+      "oneway_min": 138,
+      "published_average_min": 188,
+      "evidence_type": "official_route_minimum",
+      "source_url": "https://www.sncf-connect.com/train/trajet/metz/fribourg-en-brisgau",
+      "source_checked_at": "2026-11-28",
+      "source_capture_date": null,
+      "index_recency": "today",
+      "service_date": null,
+      "evidence_level": "operator_city_level",
+      "confidence": "medium",
+      "direction": "outbound_only",
+      "origin_station_id": null,
+      "destination_station_id": null,
+      "station_status": "not_reconciled",
+      "return_weekend_verified": false,
+      "door_to_door_verified": false,
+      "valid_for_2027": false,
+      "fare_couple_eur": null,
+      "transfer_count": null,
+      "note": "Página oficial SNCF Connect aberta e conferida em 2026-11-28: mínimo 2h18, média 3h08; valores publicados na mesma versão da página. Sem itinerário datado nem validação 2027. Recência relativa do índice, não data de captura confirmada.",
+      "quality_review": {
+        "checked_at": "2026-11-28",
+        "source_url": "https://www.sncf-connect.com/train/trajet/metz/fribourg-en-brisgau",
+        "direction": "outbound_only",
+        "origin_country": "FR",
+        "destination_country": "DE",
+        "selected_summary_reproduced": true,
+        "samples": [
+          {
+            "index_recency": "today",
+            "minimum_min": 138,
+            "average_min": 188,
+            "origin_station_labels": [],
+            "arrival_station_labels": [],
+            "mode_basis": "Explicit SNCF rail-route summary (minimum and average in same table)."
+          }
+        ],
+        "service_legs_verified": false,
+        "valid_for_2027": false,
+        "note": "Selected numerical summary reproduced. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
+      }
+    },
+    {
+      "origin_id": "nancy",
+      "destination_id": "saarbrucken",
+      "oneway_min": 110,
+      "published_average_min": 144,
+      "evidence_type": "official_route_minimum",
+      "source_url": "https://www.sncf-connect.com/train/trajet/nancy/sarrebruck",
+      "source_checked_at": "2026-11-28",
+      "source_capture_date": null,
+      "index_recency": "3 weeks ago",
+      "service_date": null,
+      "evidence_level": "operator_city_level",
+      "confidence": "medium",
+      "direction": "outbound_only",
+      "origin_station_id": null,
+      "destination_station_id": null,
+      "station_status": "not_reconciled",
+      "return_weekend_verified": false,
+      "door_to_door_verified": false,
+      "valid_for_2027": false,
+      "fare_couple_eur": null,
+      "transfer_count": null,
+      "note": "Página oficial SNCF Connect aberta e conferida em 2026-11-28: mínimo 1h50, média 2h24; valores publicados na mesma versão da página. Sem itinerário datado nem validação 2027. Recência relativa do índice, não data de captura confirmada.",
+      "quality_review": {
+        "checked_at": "2026-11-28",
+        "source_url": "https://www.sncf-connect.com/train/trajet/nancy/sarrebruck",
+        "direction": "outbound_only",
+        "origin_country": "FR",
+        "destination_country": "DE",
+        "selected_summary_reproduced": false,
+        "samples": [
+          {
+            "index_recency": "today",
+            "minimum_min": 110,
+            "average_min": 151,
+            "origin_station_labels": [],
+            "arrival_station_labels": [],
+            "mode_basis": "Explicit SNCF rail-route summary (minimum and average in same table)."
+          }
+        ],
+        "service_legs_verified": false,
+        "valid_for_2027": false,
+        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
+      }
+    },
+    {
+      "origin_id": "metz",
+      "destination_id": "stuttgart",
+      "oneway_min": 155,
+      "published_average_min": 216,
+      "evidence_type": "official_route_minimum",
+      "source_url": "https://www.sncf-connect.com/train/trajet/metz/stuttgart",
+      "source_checked_at": "2026-11-28",
+      "source_capture_date": null,
+      "index_recency": "2 months ago",
+      "service_date": null,
+      "evidence_level": "operator_city_level",
+      "confidence": "medium",
+      "direction": "outbound_only",
+      "origin_station_id": null,
+      "destination_station_id": null,
+      "station_status": "not_reconciled",
+      "return_weekend_verified": false,
+      "door_to_door_verified": false,
+      "valid_for_2027": false,
+      "fare_couple_eur": null,
+      "transfer_count": null,
+      "note": "Metz e Stuttgart Hbf listadas; consulta da página arquivada, sem data de serviço para o mínimo. Tempos de ida publicados na versão efetivamente aberta em 2026-11-28, não uma confirmação para 2027.",
+      "quality_review": {
+        "checked_at": "2026-11-28",
+        "source_url": "https://www.sncf-connect.com/train/trajet/metz/stuttgart",
+        "direction": "outbound_only",
+        "origin_country": "FR",
+        "destination_country": "DE",
+        "selected_summary_reproduced": true,
+        "samples": [
+          {
+            "index_recency": "2 months ago",
+            "minimum_min": 155,
+            "average_min": 216,
+            "origin_station_labels": [],
+            "arrival_station_labels": [],
+            "mode_basis": "Explicit SNCF rail-route summary (minimum and average in same table)."
+          }
+        ],
+        "service_legs_verified": false,
+        "valid_for_2027": false,
+        "note": "Selected numerical summary reproduced. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
+      }
+    },
+    {
+      "origin_id": "nancy",
+      "destination_id": "stuttgart",
+      "oneway_min": 174,
+      "published_average_min": 246,
+      "evidence_type": "official_route_minimum",
+      "source_url": "https://www.sncf-connect.com/train/trajet/nancy/stuttgart",
+      "source_checked_at": "2026-11-28",
+      "source_capture_date": null,
+      "index_recency": "2 months ago",
+      "service_date": null,
+      "evidence_level": "operator_city_level",
+      "confidence": "medium",
+      "direction": "outbound_only",
+      "origin_station_id": null,
+      "destination_station_id": null,
+      "station_status": "not_reconciled",
+      "return_weekend_verified": false,
+      "door_to_door_verified": false,
+      "valid_for_2027": false,
+      "fare_couple_eur": null,
+      "transfer_count": null,
+      "note": "Nancy e Stuttgart Hbf listadas; consulta da página arquivada, sem data de serviço para o mínimo. Tempos de ida publicados na versão efetivamente aberta em 2026-11-28, não uma confirmação para 2027.",
+      "quality_review": {
+        "checked_at": "2026-11-28",
+        "source_url": "https://www.sncf-connect.com/train/trajet/nancy/stuttgart",
+        "direction": "outbound_only",
+        "origin_country": "FR",
+        "destination_country": "DE",
+        "selected_summary_reproduced": true,
+        "samples": [
+          {
+            "index_recency": "2 months ago",
+            "minimum_min": 174,
+            "average_min": 246,
+            "origin_station_labels": [],
+            "arrival_station_labels": [],
+            "mode_basis": "Explicit SNCF rail-route summary (minimum and average in same table)."
+          }
+        ],
+        "service_legs_verified": false,
+        "valid_for_2027": false,
+        "note": "Selected numerical summary reproduced. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
+      }
+    },
+    {
+      "origin_id": "metz",
+      "destination_id": "arlon",
+      "oneway_min": 81,
+      "published_average_min": 95,
+      "evidence_type": "secondary_sample",
+      "source_url": "https://www.thetrainline.com/en/train-times/metz-to-arlon",
+      "source_checked_at": "2026-11-28",
+      "source_capture_date": null,
+      "index_recency": "last month",
+      "service_date": null,
+      "evidence_level": "third_party_sample",
+      "confidence": "low",
+      "direction": "outbound_only",
+      "origin_station_id": null,
+      "destination_station_id": null,
+      "station_status": "not_reconciled",
+      "return_weekend_verified": false,
+      "door_to_door_verified": false,
+      "valid_for_2027": false,
+      "fare_couple_eur": null,
+      "transfer_count": null,
+      "note": "Resumo ferroviário de distribuidor. A versão aberta informa 1h21 e 1h35; outro índice apresenta valores diferentes. Tempos de ida publicados na versão efetivamente aberta em 2026-11-28, não uma confirmação para 2027.",
+      "quality_review": {
+        "checked_at": "2026-11-28",
+        "source_url": "https://www.thetrainline.com/en/train-times/metz-to-arlon",
+        "direction": "outbound_only",
+        "origin_country": "FR",
+        "destination_country": "BE",
+        "selected_summary_reproduced": false,
+        "samples": [
+          {
+            "index_recency": "today",
+            "minimum_min": 79,
+            "average_min": 93,
+            "origin_station_labels": [
+              "Metz"
+            ],
+            "arrival_station_labels": [
+              "Arlon"
+            ],
+            "mode_basis": "Explicit train-specific FAQ, both durations on same page; mixed bus/operator lists are not used for duration."
+          }
+        ],
+        "service_legs_verified": false,
+        "valid_for_2027": false,
+        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
+      }
+    },
+    {
+      "origin_id": "nancy",
+      "destination_id": "arlon",
+      "oneway_min": 153,
+      "published_average_min": 189,
+      "evidence_type": "secondary_sample",
+      "source_url": "https://www.thetrainline.com/en/train-times/nancy-to-arlon",
+      "source_checked_at": "2026-11-28",
+      "source_capture_date": null,
+      "index_recency": "last month",
+      "service_date": null,
+      "evidence_level": "third_party_sample",
+      "confidence": "low",
+      "direction": "outbound_only",
+      "origin_station_id": null,
+      "destination_station_id": null,
+      "station_status": "not_reconciled",
+      "return_weekend_verified": false,
+      "door_to_door_verified": false,
+      "valid_for_2027": false,
+      "fare_couple_eur": null,
+      "transfer_count": null,
+      "note": "FAQ explicitamente ferroviária; tabela de fornecedores inclui também ônibus. Não confirma modalidade de cada trecho. Tempos de ida publicados na versão efetivamente aberta em 2026-11-28, não uma confirmação para 2027.",
+      "quality_review": {
+        "checked_at": "2026-11-28",
+        "source_url": "https://www.thetrainline.com/en/train-times/nancy-to-arlon",
+        "direction": "outbound_only",
+        "origin_country": "FR",
+        "destination_country": "BE",
+        "selected_summary_reproduced": false,
+        "samples": [
+          {
+            "index_recency": "today",
+            "minimum_min": 130,
+            "average_min": 159,
+            "origin_station_labels": [
+              "Nancy"
+            ],
+            "arrival_station_labels": [
+              "Arlon"
+            ],
+            "mode_basis": "Explicit train-specific FAQ, both durations on same page; mixed bus/operator lists are not used for duration."
+          }
+        ],
+        "service_legs_verified": false,
+        "valid_for_2027": false,
+        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
+      }
+    },
+    {
+      "origin_id": "strasbourg",
+      "destination_id": "dinan",
+      "oneway_min": 329,
+      "published_average_min": 479,
+      "evidence_type": "secondary_sample",
+      "source_url": "https://www.thetrainline.com/en/train-times/strasbourg-to-dinan",
+      "source_checked_at": "2026-11-28",
+      "source_capture_date": null,
+      "index_recency": "3 months ago",
+      "service_date": null,
+      "evidence_level": "third_party_sample",
+      "confidence": "low",
+      "direction": "outbound_only",
+      "origin_station_id": null,
+      "destination_station_id": null,
+      "station_status": "not_reconciled",
+      "return_weekend_verified": false,
+      "door_to_door_verified": false,
+      "valid_for_2027": false,
+      "fare_couple_eur": null,
+      "transfer_count": null,
+      "note": "Versão aberta da página de Dinan, França, não Dinant, Bélgica. Média divergente da versão indexada. Tempos de ida publicados na versão efetivamente aberta em 2026-11-28, não uma confirmação para 2027.",
+      "previous_attempts": [
+        {
+          "origin_id": "strasbourg",
+          "destination_id": "dinan",
+          "reason": "technical_failure",
+          "source_url": "https://www.sncf-connect.com/train/trajet/strasbourg/dinan",
+          "source_checked_at": "2026-11-28"
+        }
+      ],
+      "quality_review": {
+        "checked_at": "2026-11-28",
+        "source_url": "https://www.thetrainline.com/en/train-times/strasbourg-to-dinan",
+        "direction": "outbound_only",
+        "origin_country": "FR",
+        "destination_country": "FR",
+        "selected_summary_reproduced": true,
+        "samples": [
+          {
+            "index_recency": "3 months ago",
+            "minimum_min": 329,
+            "average_min": 479,
+            "origin_station_labels": [
+              "Strasbourg"
+            ],
+            "arrival_station_labels": [
+              "Dinan"
+            ],
+            "mode_basis": "explicit train narrative gives both minimum and average"
+          },
+          {
+            "index_recency": "today",
+            "minimum_min": 329,
+            "average_min": 528,
+            "origin_station_labels": [
+              "Strasbourg"
+            ],
+            "arrival_station_labels": [
+              "Dinan"
+            ],
+            "mode_basis": "train FAQ gives both durations; SNCF listed"
+          }
+        ],
+        "service_legs_verified": false,
+        "valid_for_2027": false,
+        "note": "Earlier version reproduces both selected values; current average differs. Dinan, France, not Dinant, Belgium; individual legs not verified.",
+        "modality_status": "rail_summary"
+      }
+    },
+    {
+      "origin_id": "mulhouse",
+      "destination_id": "saumur",
+      "oneway_min": 344,
+      "published_average_min": 455,
+      "evidence_type": "secondary_sample",
+      "source_url": "https://www.thetrainline.com/fr/horaires-train/mulhouse-a-saumur",
+      "source_checked_at": "2026-11-28",
+      "source_capture_date": null,
+      "index_recency": "2 months ago",
+      "service_date": null,
+      "evidence_level": "third_party_sample",
+      "confidence": "low",
+      "direction": "outbound_only",
+      "origin_station_id": null,
+      "destination_station_id": null,
+      "station_status": "not_reconciled",
+      "return_weekend_verified": false,
+      "door_to_door_verified": false,
+      "valid_for_2027": false,
+      "fare_couple_eur": null,
+      "transfer_count": null,
+      "note": "FAQ ferroviária; lista geral inclui ônibus. Sem verificação de cada trecho. Tempos de ida publicados na versão efetivamente aberta em 2026-11-28, não uma confirmação para 2027.",
+      "previous_attempts": [
+        {
+          "origin_id": "mulhouse",
+          "destination_id": "saumur",
+          "reason": "technical_failure",
+          "source_url": "https://www.sncf-connect.com/train/trajet/mulhouse/saumur",
+          "source_checked_at": "2026-11-28"
+        }
+      ],
+      "quality_review": {
+        "checked_at": "2026-11-28",
+        "source_url": "https://www.thetrainline.com/fr/horaires-train/mulhouse-a-saumur",
+        "direction": "outbound_only",
+        "origin_country": "FR",
+        "destination_country": "FR",
+        "selected_summary_reproduced": false,
+        "samples": [
+          {
+            "index_recency": "today",
+            "minimum_min": 343,
+            "average_min": 448,
+            "origin_station_labels": [
+              "Mulhouse"
+            ],
+            "arrival_station_labels": [
+              "Saumur"
+            ],
+            "mode_basis": "Explicit train-specific FAQ, both durations on same page; mixed bus/operator lists are not used for duration."
+          }
+        ],
+        "service_legs_verified": false,
+        "valid_for_2027": false,
+        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
+      }
+    },
+    {
+      "origin_id": "metz",
+      "destination_id": "trier",
+      "oneway_min": 110,
+      "published_average_min": 143,
+      "evidence_type": "secondary_sample",
+      "source_url": "https://www.thetrainline.com/en/train-times/metz-to-trier-hbf",
+      "source_checked_at": "2026-11-28",
+      "source_capture_date": null,
+      "index_recency": "2 weeks ago",
+      "service_date": null,
+      "evidence_level": "third_party_sample",
+      "confidence": "low",
+      "direction": "outbound_only",
+      "origin_station_id": null,
+      "destination_station_id": null,
+      "station_status": "not_reconciled",
+      "published_arrival_station": "Trier Hbf",
+      "return_weekend_verified": false,
+      "door_to_door_verified": false,
+      "valid_for_2027": false,
+      "fare_couple_eur": null,
+      "transfer_count": null,
+      "note": "FAQ ferroviária; uma troca ou mais e SNCF citada. A página genérica Trier fornece valores diferentes; não usada. Mínimo e média da mesma versão de página aberta em 28/11/2026; não confirma serviço em 2027.",
+      "quality_review": {
+        "checked_at": "2026-11-28",
+        "source_url": "https://www.thetrainline.com/en/train-times/metz-to-trier-hbf",
+        "direction": "outbound_only",
+        "origin_country": "FR",
+        "destination_country": "DE",
+        "selected_summary_reproduced": true,
+        "samples": [
+          {
+            "index_recency": "today",
+            "minimum_min": 110,
+            "average_min": 143,
+            "origin_station_labels": [],
+            "arrival_station_labels": [
+              "Trier Hbf"
+            ],
+            "mode_basis": "Explicit train-specific FAQ, both durations on same page; mixed bus/operator lists are not used for duration."
+          }
+        ],
+        "service_legs_verified": false,
+        "valid_for_2027": false,
+        "note": "Selected numerical summary reproduced. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
+      }
+    },
+    {
+      "origin_id": "nancy",
+      "destination_id": "trier",
+      "oneway_min": 152,
+      "published_average_min": 213,
+      "evidence_type": "secondary_sample",
+      "source_url": "https://www.thetrainline.com/en/train-times/nancy-to-trier-hbf",
+      "source_checked_at": "2026-11-28",
+      "source_capture_date": null,
+      "index_recency": "today",
+      "service_date": null,
+      "evidence_level": "third_party_sample",
+      "confidence": "low",
+      "direction": "outbound_only",
+      "origin_station_id": null,
+      "destination_station_id": null,
+      "station_status": "not_reconciled",
+      "published_arrival_station": "Trier Hbf",
+      "return_weekend_verified": false,
+      "door_to_door_verified": false,
+      "valid_for_2027": false,
+      "fare_couple_eur": null,
+      "transfer_count": null,
+      "note": "FAQ ferroviária cita TGV, TER, SNCF e Deutsche Bahn e pelo menos uma troca. Mínimo e média da mesma versão de página aberta em 28/11/2026; não confirma serviço em 2027.",
+      "quality_review": {
+        "checked_at": "2026-11-28",
+        "source_url": "https://www.thetrainline.com/en/train-times/nancy-to-trier-hbf",
+        "direction": "outbound_only",
+        "origin_country": "FR",
+        "destination_country": "DE",
+        "selected_summary_reproduced": true,
+        "samples": [
+          {
+            "index_recency": "today",
+            "minimum_min": 152,
+            "average_min": 213,
+            "origin_station_labels": [
+              "Nancy"
+            ],
+            "arrival_station_labels": [
+              "Trier Hbf"
+            ],
+            "mode_basis": "Explicit train-specific FAQ, both durations on same page; mixed bus/operator lists are not used for duration."
+          }
+        ],
+        "service_legs_verified": false,
+        "valid_for_2027": false,
+        "note": "Selected numerical summary reproduced. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
+      }
+    },
+    {
+      "origin_id": "strasbourg",
+      "destination_id": "trier",
+      "oneway_min": 172,
+      "published_average_min": 267,
+      "evidence_type": "secondary_sample",
+      "source_url": "https://www.thetrainline.com/en/train-times/strasbourg-to-trier-hbf",
+      "source_checked_at": "2026-11-28",
+      "source_capture_date": null,
+      "index_recency": "last month",
+      "service_date": null,
+      "evidence_level": "third_party_sample",
+      "confidence": "low",
+      "direction": "outbound_only",
+      "origin_station_id": null,
+      "destination_station_id": null,
+      "station_status": "not_reconciled",
+      "published_arrival_station": "Trier Hbf",
+      "return_weekend_verified": false,
+      "door_to_door_verified": false,
+      "valid_for_2027": false,
+      "fare_couple_eur": null,
+      "transfer_count": null,
+      "note": "FAQ ferroviária cita SNCF e pelo menos uma troca. O quadro de fornecedores inclui ônibus; não valida todos os segmentos. Mínimo e média da mesma versão de página aberta em 28/11/2026; não confirma serviço em 2027.",
+      "quality_review": {
+        "checked_at": "2026-11-28",
+        "source_url": "https://www.thetrainline.com/en/train-times/strasbourg-to-trier-hbf",
+        "direction": "outbound_only",
+        "origin_country": "FR",
+        "destination_country": "DE",
+        "selected_summary_reproduced": false,
+        "samples": [
+          {
+            "index_recency": "today",
+            "minimum_min": 172,
+            "average_min": 254,
+            "origin_station_labels": [],
+            "arrival_station_labels": [
+              "Trier Hbf"
+            ],
+            "mode_basis": "Explicit train-specific FAQ, both durations on same page; mixed bus/operator lists are not used for duration."
+          }
+        ],
+        "service_legs_verified": false,
+        "valid_for_2027": false,
+        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
+      }
+    },
+    {
+      "origin_id": "metz",
+      "destination_id": "offenburg",
+      "oneway_min": 91,
+      "published_average_min": 162,
+      "evidence_type": "secondary_sample",
+      "source_url": "https://www.thetrainline.com/en/train-times/metz-to-offenburg",
+      "source_checked_at": "2026-11-28",
+      "source_capture_date": null,
+      "index_recency": "today",
+      "service_date": null,
+      "evidence_level": "third_party_sample",
+      "confidence": "low",
+      "direction": "outbound_only",
+      "origin_station_id": null,
+      "destination_station_id": null,
+      "station_status": "not_reconciled",
+      "return_weekend_verified": false,
+      "door_to_door_verified": false,
+      "valid_for_2027": false,
+      "fare_couple_eur": null,
+      "transfer_count": null,
+      "note": "FAQ ferroviária cita TGV, OUIGO, TER, SNCF. Quadro de 1/12/2026 contém uma viagem de 1h31; média sem data de serviço específica. Mínimo e média da mesma versão de página aberta em 28/11/2026; não confirma serviço em 2027.",
+      "quality_review": {
+        "checked_at": "2026-11-28",
+        "source_url": "https://www.thetrainline.com/en/train-times/metz-to-offenburg",
+        "direction": "outbound_only",
+        "origin_country": "FR",
+        "destination_country": "DE",
+        "selected_summary_reproduced": true,
+        "samples": [
+          {
+            "index_recency": "today",
+            "minimum_min": 91,
+            "average_min": 162,
+            "origin_station_labels": [
+              "Metz"
+            ],
+            "arrival_station_labels": [
+              "Offenburg"
+            ],
+            "mode_basis": "Explicit train-specific FAQ, both durations on same page; mixed bus/operator lists are not used for duration."
+          }
+        ],
+        "service_legs_verified": false,
+        "valid_for_2027": false,
+        "note": "Selected numerical summary reproduced. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
+      }
+    },
+    {
+      "origin_id": "nancy",
+      "destination_id": "offenburg",
+      "oneway_min": 123,
+      "published_average_min": 164,
+      "evidence_type": "secondary_sample",
+      "source_url": "https://www.thetrainline.com/en/train-times/nancy-to-offenburg",
+      "source_checked_at": "2026-11-28",
+      "source_capture_date": null,
+      "index_recency": "3 months ago",
+      "service_date": null,
+      "evidence_level": "third_party_sample",
+      "confidence": "low",
+      "direction": "outbound_only",
+      "origin_station_id": null,
+      "destination_station_id": null,
+      "station_status": "not_reconciled",
+      "return_weekend_verified": false,
+      "door_to_door_verified": false,
+      "valid_for_2027": false,
+      "fare_couple_eur": null,
+      "transfer_count": null,
+      "note": "FAQ ferroviária cita TGV, OUIGO, TER, SNCF e pelo menos uma troca. Mínimo e média da mesma versão de página aberta em 28/11/2026; não confirma serviço em 2027.",
+      "quality_review": {
+        "checked_at": "2026-11-28",
+        "source_url": "https://www.thetrainline.com/en/train-times/nancy-to-offenburg",
+        "direction": "outbound_only",
+        "origin_country": "FR",
+        "destination_country": "DE",
+        "selected_summary_reproduced": false,
+        "samples": [
+          {
+            "index_recency": "today",
+            "minimum_min": 129,
+            "average_min": 187,
+            "origin_station_labels": [],
+            "arrival_station_labels": [],
+            "mode_basis": "Explicit train-specific FAQ, both durations on same page; mixed bus/operator lists are not used for duration."
+          }
+        ],
+        "service_legs_verified": false,
+        "valid_for_2027": false,
+        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
+      }
+    },
+    {
+      "origin_id": "metz",
+      "destination_id": "kehl",
+      "oneway_min": 82,
+      "published_average_min": 116,
+      "evidence_type": "secondary_sample",
+      "source_url": "https://www.thetrainline.com/en/train-times/metz-to-kehl",
+      "source_checked_at": "2026-11-28",
+      "source_capture_date": null,
+      "index_recency": "3 months ago",
+      "service_date": null,
+      "evidence_level": "third_party_sample",
+      "confidence": "low",
+      "direction": "outbound_only",
+      "origin_station_id": null,
+      "destination_station_id": null,
+      "station_status": "not_reconciled",
+      "published_minimum_changes": 1,
+      "return_weekend_verified": false,
+      "door_to_door_verified": false,
+      "valid_for_2027": false,
+      "fare_couple_eur": null,
+      "transfer_count": null,
+      "note": "TGV e SNCF; amostra de horários da página datada de 25/08/2026. FAQ ferroviária consultada em 28/11/2026. Mínimo e média da mesma versão aberta; mínimo de trocas é do resumo da rota, não do itinerário mais rápido. Sem confirmação de retorno ou serviço 2027.",
+      "quality_review": {
+        "checked_at": "2026-11-28",
+        "source_url": "https://www.thetrainline.com/en/train-times/metz-to-kehl",
+        "direction": "outbound_only",
+        "origin_country": "FR",
+        "destination_country": "DE",
+        "selected_summary_reproduced": true,
+        "samples": [
+          {
+            "index_recency": "today",
+            "minimum_min": 82,
+            "average_min": 116,
+            "origin_station_labels": [
+              "Metz"
+            ],
+            "arrival_station_labels": [
+              "Kehl"
+            ],
+            "mode_basis": "Explicit train-specific FAQ, both durations on same page; mixed bus/operator lists are not used for duration."
+          }
+        ],
+        "service_legs_verified": false,
+        "valid_for_2027": false,
+        "note": "Selected numerical summary reproduced. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
+      }
+    },
+    {
+      "origin_id": "nancy",
+      "destination_id": "baden_baden",
+      "oneway_min": 126,
+      "published_average_min": 208,
+      "evidence_type": "secondary_sample",
+      "source_url": "https://www.thetrainline.com/en/train-times/nancy-to-baden-baden",
+      "source_checked_at": "2026-11-28",
+      "source_capture_date": null,
+      "index_recency": "2 months ago",
+      "service_date": null,
+      "evidence_level": "third_party_sample",
+      "confidence": "low",
+      "direction": "outbound_only",
+      "origin_station_id": null,
+      "destination_station_id": null,
+      "station_status": "not_reconciled",
+      "published_minimum_changes": 1,
+      "return_weekend_verified": false,
+      "door_to_door_verified": false,
+      "valid_for_2027": false,
+      "fare_couple_eur": null,
+      "transfer_count": null,
+      "note": "TGV, SNCF e Deutsche Bahn/ICE; preço em GBP não representa cotação do casal. FAQ ferroviária consultada em 28/11/2026. Mínimo e média da mesma versão aberta; mínimo de trocas é do resumo da rota, não do itinerário mais rápido. Sem confirmação de retorno ou serviço 2027.",
+      "quality_review": {
+        "checked_at": "2026-11-28",
+        "source_url": "https://www.thetrainline.com/en/train-times/nancy-to-baden-baden",
+        "direction": "outbound_only",
+        "origin_country": "FR",
+        "destination_country": "DE",
+        "selected_summary_reproduced": false,
+        "samples": [
+          {
+            "index_recency": "today",
+            "minimum_min": 134,
+            "average_min": 230,
+            "origin_station_labels": [
+              "Nancy"
+            ],
+            "arrival_station_labels": [
+              "Baden-Baden"
+            ],
+            "mode_basis": "Explicit train-specific FAQ, both durations on same page; mixed bus/operator lists are not used for duration."
+          }
+        ],
+        "service_legs_verified": false,
+        "valid_for_2027": false,
+        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
+      }
+    },
+    {
+      "origin_id": "metz",
+      "destination_id": "baden_baden",
+      "oneway_min": 137,
+      "published_average_min": 197,
+      "evidence_type": "secondary_sample",
+      "source_url": "https://www.thetrainline.com/train-times/metz-to-baden-baden",
+      "source_checked_at": "2026-11-28",
+      "source_capture_date": null,
+      "index_recency": "today",
+      "service_date": null,
+      "evidence_level": "third_party_sample",
+      "confidence": "low",
+      "direction": "outbound_only",
+      "origin_station_id": null,
+      "destination_station_id": null,
+      "station_status": "not_reconciled",
+      "published_minimum_changes": 1,
+      "return_weekend_verified": false,
+      "door_to_door_verified": false,
+      "valid_for_2027": false,
+      "fare_couple_eur": null,
+      "transfer_count": null,
+      "note": "TGV, OUIGO, TER e SNCF; média da página aberta 3h17, não 3h18 do índice. FAQ ferroviária consultada em 28/11/2026. Mínimo e média da mesma versão aberta; mínimo de trocas é do resumo da rota, não do itinerário mais rápido. Sem confirmação de retorno ou serviço 2027.",
+      "quality_review": {
+        "checked_at": "2026-11-28",
+        "source_url": "https://www.thetrainline.com/train-times/metz-to-baden-baden",
+        "direction": "outbound_only",
+        "origin_country": "FR",
+        "destination_country": "DE",
+        "selected_summary_reproduced": true,
+        "samples": [
+          {
+            "index_recency": "today",
+            "minimum_min": 137,
+            "average_min": 197,
+            "origin_station_labels": [
+              "Metz"
+            ],
+            "arrival_station_labels": [
+              "Baden-Baden"
+            ],
+            "mode_basis": "Explicit train-specific FAQ, both durations on same page; mixed bus/operator lists are not used for duration."
+          }
+        ],
+        "service_legs_verified": false,
+        "valid_for_2027": false,
+        "note": "Selected numerical summary reproduced. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
+      }
+    },
+    {
+      "origin_id": "metz",
+      "destination_id": "aachen",
+      "oneway_min": 266,
+      "published_average_min": 392,
+      "evidence_type": "secondary_sample",
+      "source_url": "https://www.thetrainline.com/train-times/metz-to-aachen-hbf",
+      "source_checked_at": "2026-11-28",
+      "source_capture_date": null,
+      "index_recency": "today",
+      "service_date": null,
+      "evidence_level": "third_party_sample",
+      "confidence": "low",
+      "direction": "outbound_only",
+      "origin_station_id": null,
+      "destination_station_id": null,
+      "station_status": "not_reconciled",
+      "published_arrival_station": "Aachen Hbf",
+      "published_minimum_changes": 2,
+      "return_weekend_verified": false,
+      "door_to_door_verified": false,
+      "valid_for_2027": false,
+      "fare_couple_eur": null,
+      "transfer_count": null,
+      "note": "TGV, OUIGO, SNCF e Eurostar; média da página aberta 6h32, índice 6h31. FAQ ferroviária consultada em 28/11/2026. Mínimo e média da mesma versão aberta; mínimo de trocas é do resumo da rota, não do itinerário mais rápido. Sem confirmação de retorno ou serviço 2027.",
+      "quality_review": {
+        "checked_at": "2026-11-28",
+        "source_url": "https://www.thetrainline.com/train-times/metz-to-aachen-hbf",
+        "direction": "outbound_only",
+        "origin_country": "FR",
+        "destination_country": "DE",
+        "selected_summary_reproduced": true,
+        "samples": [
+          {
+            "index_recency": "today",
+            "minimum_min": 266,
+            "average_min": 392,
+            "origin_station_labels": [],
+            "arrival_station_labels": [
+              "Aachen Hbf"
+            ],
+            "mode_basis": "Explicit train-specific FAQ, both durations on same page; mixed bus/operator lists are not used for duration."
+          }
+        ],
+        "service_legs_verified": false,
+        "valid_for_2027": false,
+        "note": "Selected numerical summary reproduced. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
+      }
+    },
+    {
+      "origin_id": "nancy",
+      "destination_id": "aachen",
+      "oneway_min": 315,
+      "published_average_min": 422,
+      "evidence_type": "secondary_sample",
+      "source_url": "https://www.thetrainline.com/en/train-times/nancy-to-aachen-hbf",
+      "source_checked_at": "2026-11-28",
+      "source_capture_date": null,
+      "index_recency": "2 months ago",
+      "service_date": null,
+      "evidence_level": "third_party_sample",
+      "confidence": "low",
+      "direction": "outbound_only",
+      "origin_station_id": null,
+      "destination_station_id": null,
+      "station_status": "not_reconciled",
+      "published_arrival_station": "Aachen Hbf",
+      "published_minimum_changes": 2,
+      "return_weekend_verified": false,
+      "door_to_door_verified": false,
+      "valid_for_2027": false,
+      "fare_couple_eur": null,
+      "transfer_count": null,
+      "note": "TGV, OUIGO, TER e SNCF; valores da página aberta diferem dos 5h13 e 6h34 do índice. FAQ ferroviária consultada em 28/11/2026. Mínimo e média da mesma versão aberta; mínimo de trocas é do resumo da rota, não do itinerário mais rápido. Sem confirmação de retorno ou serviço 2027.",
+      "quality_review": {
+        "checked_at": "2026-11-28",
+        "source_url": "https://www.thetrainline.com/en/train-times/nancy-to-aachen-hbf",
+        "direction": "outbound_only",
+        "origin_country": "FR",
+        "destination_country": "DE",
+        "selected_summary_reproduced": false,
+        "samples": [
+          {
+            "index_recency": "today",
+            "minimum_min": 313,
+            "average_min": 417,
+            "origin_station_labels": [],
+            "arrival_station_labels": [
+              "Aachen Hbf"
+            ],
+            "mode_basis": "Explicit train-specific FAQ, both durations on same page; mixed bus/operator lists are not used for duration."
+          }
+        ],
+        "service_legs_verified": false,
+        "valid_for_2027": false,
+        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
+      }
+    },
+    {
+      "origin_id": "lille",
+      "destination_id": "baden_baden",
+      "oneway_min": 290,
+      "published_average_min": 450,
+      "evidence_type": "secondary_sample",
+      "source_url": "https://www.thetrainline.com/en/train-times/lille-europe-to-baden-baden",
+      "source_checked_at": "2026-11-28",
+      "source_capture_date": null,
+      "index_recency": "2 months ago",
+      "service_date": null,
+      "evidence_level": "third_party_sample",
+      "confidence": "low",
+      "direction": "outbound_only",
+      "origin_station_id": null,
+      "destination_station_id": null,
+      "station_status": "not_reconciled",
+      "published_origin_station": "Lille-Europe",
+      "published_minimum_changes": 1,
+      "return_weekend_verified": false,
+      "door_to_door_verified": false,
+      "valid_for_2027": false,
+      "fare_couple_eur": null,
+      "transfer_count": null,
+      "note": "TGV, OUIGO, SNCF e Deutsche Bahn; média da página aberta 7h30, não 7h17 do índice. Origem específica Lille-Europe. FAQ ferroviária consultada em 28/11/2026. Mínimo e média da mesma versão aberta; mínimo de trocas é do resumo da rota, não do itinerário mais rápido. Sem confirmação de retorno ou serviço 2027.",
+      "quality_review": {
+        "checked_at": "2026-11-28",
+        "source_url": "https://www.thetrainline.com/en/train-times/lille-europe-to-baden-baden",
+        "direction": "outbound_only",
+        "origin_country": "FR",
+        "destination_country": "DE",
+        "selected_summary_reproduced": false,
+        "samples": [
+          {
+            "index_recency": "today",
+            "minimum_min": 291,
+            "average_min": 449,
+            "origin_station_labels": [
+              "Lille-Europe"
+            ],
+            "arrival_station_labels": [
+              "Baden-Baden"
+            ],
+            "mode_basis": "Explicit train-specific FAQ, both durations on same page; mixed bus/operator lists are not used for duration."
+          }
+        ],
+        "service_legs_verified": false,
+        "valid_for_2027": false,
+        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
+      }
+    },
+    {
+      "origin_id": "nancy",
+      "destination_id": "interlaken",
+      "oneway_min": 290,
+      "published_average_min": 377,
+      "evidence_type": "secondary_sample",
+      "source_url": "https://www.thetrainline.com/en/train-times/nancy-to-interlaken-ost",
+      "source_checked_at": "2026-11-28",
+      "source_capture_date": null,
+      "index_recency": "2 months ago",
+      "service_date": null,
+      "evidence_level": "third_party_sample",
+      "confidence": "low",
+      "direction": "outbound_only",
+      "origin_station_id": null,
+      "destination_station_id": null,
+      "station_status": "not_reconciled",
+      "published_arrival_station": "Interlaken Ost",
+      "published_minimum_changes": 2,
+      "return_weekend_verified": false,
+      "door_to_door_verified": false,
+      "valid_for_2027": false,
+      "fare_couple_eur": null,
+      "transfer_count": null,
+      "note": "TGV, TER, SNCF, TGV Lyria. Média 6h17 na versão aberta, distinta do índice (6h18). FAQ ferroviária consultada em 28/11/2026. Mínimo e média da mesma versão aberta; número mínimo de trocas refere-se ao resumo, não ao itinerário mais rápido. Sem confirmação de retorno ou serviço em 2027.",
+      "quality_review": {
+        "checked_at": "2026-11-28",
+        "source_url": "https://www.thetrainline.com/en/train-times/nancy-to-interlaken-ost",
+        "direction": "outbound_only",
+        "origin_country": "FR",
+        "destination_country": "CH",
+        "selected_summary_reproduced": false,
+        "samples": [
+          {
+            "index_recency": "today",
+            "minimum_min": 289,
+            "average_min": 388,
+            "origin_station_labels": [],
+            "arrival_station_labels": [
+              "Interlaken Ost"
+            ],
+            "mode_basis": "Explicit train-specific FAQ, both durations on same page; mixed bus/operator lists are not used for duration."
+          }
+        ],
+        "service_legs_verified": false,
+        "valid_for_2027": false,
+        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
+      }
+    },
+    {
+      "origin_id": "metz",
+      "destination_id": "interlaken",
+      "oneway_min": 289,
+      "published_average_min": 345,
+      "evidence_type": "secondary_sample",
+      "source_url": "https://www.thetrainline.com/en/train-times/metz-to-interlaken-ost",
+      "source_checked_at": "2026-11-28",
+      "source_capture_date": null,
+      "index_recency": "2 months ago",
+      "service_date": null,
+      "evidence_level": "third_party_sample",
+      "confidence": "low",
+      "direction": "outbound_only",
+      "origin_station_id": null,
+      "destination_station_id": null,
+      "station_status": "not_reconciled",
+      "published_arrival_station": "Interlaken Ost",
+      "published_minimum_changes": 2,
+      "return_weekend_verified": false,
+      "door_to_door_verified": false,
+      "valid_for_2027": false,
+      "fare_couple_eur": null,
+      "transfer_count": null,
+      "note": "TGV, OUIGO, SNCF, TGV Lyria. FAQ ferroviária consultada em 28/11/2026. Mínimo e média da mesma versão aberta; número mínimo de trocas refere-se ao resumo, não ao itinerário mais rápido. Sem confirmação de retorno ou serviço em 2027.",
+      "quality_review": {
+        "checked_at": "2026-11-28",
+        "source_url": "https://www.thetrainline.com/en/train-times/metz-to-interlaken-ost",
+        "direction": "outbound_only",
+        "origin_country": "FR",
+        "destination_country": "CH",
+        "selected_summary_reproduced": true,
+        "samples": [
+          {
+            "index_recency": "2 months ago",
+            "minimum_min": 289,
+            "average_min": 345,
+            "origin_station_labels": [
+              "Metz"
+            ],
+            "arrival_station_labels": [
+              "Interlaken Ost"
+            ],
+            "mode_basis": "rail narrative and train-specific summary; mixed train/bus operator list"
+          },
+          {
+            "index_recency": "today",
+            "minimum_min": 283,
+            "average_min": 353,
+            "origin_station_labels": [
+              "Metz"
+            ],
+            "arrival_station_labels": [
+              "Interlaken Ost"
+            ],
+            "mode_basis": "explicit train FAQ confirms both durations; mixed operator list includes Flixbus"
+          }
+        ],
+        "service_legs_verified": false,
+        "valid_for_2027": false,
+        "note": "Earlier opened version reproduces the selected durations; later version differs. No bus-only duration imported. Individual legs not verified.",
+        "modality_status": "rail_summary"
+      }
+    },
+    {
+      "origin_id": "metz",
+      "destination_id": "liege",
+      "oneway_min": 240,
+      "published_average_min": 268,
+      "evidence_type": "secondary_sample",
+      "source_url": "https://www.thetrainline.com/en/train-times/metz-to-liege-guillemins",
+      "source_checked_at": "2026-11-28",
+      "source_capture_date": null,
+      "index_recency": "3 months ago",
+      "service_date": null,
+      "evidence_level": "third_party_sample",
+      "confidence": "low",
+      "direction": "outbound_only",
+      "origin_station_id": null,
+      "destination_station_id": null,
+      "station_status": "not_reconciled",
+      "published_arrival_station": "Liège-Guillemins",
+      "published_minimum_changes": 2,
+      "return_weekend_verified": false,
+      "door_to_door_verified": false,
+      "valid_for_2027": false,
+      "fare_couple_eur": null,
+      "transfer_count": null,
+      "note": "Versão aberta com mínimo 4h e média 4h28; índice mais recente mostra 3h45 e 4h55, não combinado. FAQ ferroviária consultada em 28/11/2026. Mínimo e média da mesma versão aberta; número mínimo de trocas refere-se ao resumo, não ao itinerário mais rápido. Sem confirmação de retorno ou serviço em 2027.",
+      "quality_review": {
+        "checked_at": "2026-11-28",
+        "source_url": "https://www.thetrainline.com/en/train-times/metz-to-liege-guillemins",
+        "direction": "outbound_only",
+        "origin_country": "FR",
+        "destination_country": "BE",
+        "selected_summary_reproduced": false,
+        "samples": [
+          {
+            "index_recency": "today",
+            "minimum_min": 225,
+            "average_min": 265,
+            "origin_station_labels": [],
+            "arrival_station_labels": [
+              "Liège-Guillemins"
+            ],
+            "mode_basis": "Explicit train-specific FAQ, both durations on same page; mixed bus/operator lists are not used for duration."
+          }
+        ],
+        "service_legs_verified": false,
+        "valid_for_2027": false,
+        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
+      }
+    },
+    {
+      "origin_id": "strasbourg",
+      "destination_id": "arlon",
+      "oneway_min": 135,
+      "published_average_min": 200,
+      "evidence_type": "secondary_sample",
+      "source_url": "https://www.thetrainline.com/en/train-times/strasbourg-to-arlon",
+      "source_checked_at": "2026-11-28",
+      "source_capture_date": null,
+      "index_recency": "3 months ago",
+      "service_date": null,
+      "evidence_level": "third_party_sample",
+      "confidence": "low",
+      "direction": "outbound_only",
+      "origin_station_id": null,
+      "destination_station_id": null,
+      "station_status": "not_reconciled",
+      "published_minimum_changes": 1,
+      "return_weekend_verified": false,
+      "door_to_door_verified": false,
+      "valid_for_2027": false,
+      "fare_couple_eur": null,
+      "transfer_count": null,
+      "note": "FAQ separa trem de ônibus. Versão aberta diverge do índice de 2h23 e 4h18; não combinado. FAQ ferroviária consultada em 28/11/2026. Mínimo e média da mesma versão aberta; número mínimo de trocas refere-se ao resumo, não ao itinerário mais rápido. Sem confirmação de retorno ou serviço em 2027. Revisão de qualidade: embora a FAQ reproduza os tempos ferroviários, a lista de operadores cita apenas Flixbus. Modalidade de todos os trechos inconclusiva; não usar como itinerário ferroviário confirmado.",
+      "quality_review": {
+        "checked_at": "2026-11-28",
+        "source_url": "https://www.thetrainline.com/en/train-times/strasbourg-to-arlon",
+        "direction": "outbound_only",
+        "origin_country": "FR",
+        "destination_country": "BE",
+        "selected_summary_reproduced": true,
+        "samples": [
+          {
+            "index_recency": "today",
+            "minimum_min": 135,
+            "average_min": 200,
+            "origin_station_labels": [
+              "Strasbourg"
+            ],
+            "arrival_station_labels": [
+              "Arlon"
+            ],
+            "mode_basis": "Train-specific FAQ gives both values, but operator list names only Flixbus; modality of underlying services is inconclusive."
+          }
+        ],
+        "service_legs_verified": false,
+        "valid_for_2027": false,
+        "note": "Selected numerical summary reproduced. Rail itinerary not corroborated by provider list; independent Rome2Rio rail routing via Luxembourg indicates 136 min but does not corroborate selected average or every leg; do not treat as an all-rail itinerary. https://www.rome2rio.com/s/Strasbourg/Arlon Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification. Reconsulta direta Trainline (28/11/2026): FAQ reproduz 135/200; quadro 'Train and bus operators' lista somente Flixbus. As consultas oficiais confirmam segmentos possíveis, mas não os dois tempos selecionados. Excluir esta observação da cobertura de tempo ferroviário até corroboração.",
+        "modality_status": "inconclusive",
+        "official_cross_checks": [
+          {
+            "checked_at": "2026-11-28",
+            "source_url": "https://www.sncf-connect.com/fr-be/train/trajet/strasbourg/arlon",
+            "finding": "Página comercial genérica da rota sem duração numérica ou serviço identificado."
+          },
+          {
+            "checked_at": "2026-11-28",
+            "source_url": "https://www.sncf-connect.com/train/trajet/strasbourg/luxembourg",
+            "finding": "Operadoras ferroviárias publicadas no segmento Strasbourg–Luxembourg; não comprova os tempos Strasbourg–Arlon."
+          },
+          {
+            "checked_at": "2026-11-28",
+            "source_url": "https://www.belgiantrain.be/en/products/crossborder/luxembourg",
+            "finding": "SNCB confirma ligações IC e regionais entre Luxembourg e Arlon; sem itinerário completo Strasbourg–Arlon."
+          }
+        ]
+      }
+    },
+    {
+      "origin_id": "metz",
+      "destination_id": "namur",
+      "oneway_min": 182,
+      "published_average_min": 209,
+      "evidence_type": "secondary_sample",
+      "source_url": "https://www.thetrainline.com/en/train-times/metz-to-namur",
+      "source_checked_at": "2026-11-28",
+      "source_capture_date": null,
+      "index_recency": "2 months ago",
+      "service_date": null,
+      "evidence_level": "third_party_sample",
+      "confidence": "low",
+      "direction": "outbound_only",
+      "origin_station_id": null,
+      "destination_station_id": null,
+      "station_status": "not_reconciled",
+      "published_minimum_changes": 1,
+      "return_weekend_verified": false,
+      "door_to_door_verified": false,
+      "valid_for_2027": false,
+      "fare_couple_eur": null,
+      "transfer_count": null,
+      "note": "FAQ ferroviária cita TGV e SNCF; tarifa inicial em GBP não representa cotação do casal. FAQ ferroviária consultada em 28/11/2026. Mínimo e média da mesma versão aberta; número mínimo de trocas refere-se ao resumo, não ao itinerário mais rápido. Sem confirmação de retorno ou serviço em 2027.",
+      "quality_review": {
+        "checked_at": "2026-11-28",
+        "source_url": "https://www.thetrainline.com/en/train-times/metz-to-namur",
+        "direction": "outbound_only",
+        "origin_country": "FR",
+        "destination_country": "BE",
+        "selected_summary_reproduced": false,
+        "samples": [
+          {
+            "index_recency": "today",
+            "minimum_min": 182,
+            "average_min": 205,
+            "origin_station_labels": [
+              "Metz"
+            ],
+            "arrival_station_labels": [
+              "Namur"
+            ],
+            "mode_basis": "Explicit train-specific FAQ, both durations on same page; mixed bus/operator lists are not used for duration."
+          }
+        ],
+        "service_legs_verified": false,
+        "valid_for_2027": false,
+        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
+      }
+    },
+    {
+      "origin_id": "strasbourg",
+      "destination_id": "namur",
+      "oneway_min": 251,
+      "published_average_min": 372,
+      "evidence_type": "secondary_sample",
+      "source_url": "https://www.thetrainline.com/en/train-times/strasbourg-to-namur",
+      "source_checked_at": "2026-11-28",
+      "source_capture_date": null,
+      "index_recency": "2 months ago",
+      "service_date": null,
+      "evidence_level": "third_party_sample",
+      "confidence": "low",
+      "direction": "outbound_only",
+      "origin_station_id": null,
+      "destination_station_id": null,
+      "station_status": "not_reconciled",
+      "published_minimum_changes": 1,
+      "return_weekend_verified": false,
+      "door_to_door_verified": false,
+      "valid_for_2027": false,
+      "fare_couple_eur": null,
+      "transfer_count": null,
+      "note": "FAQ ferroviária cita TGV, OUIGO, TER e SNCF; tarifa inicial em GBP não representa cotação do casal. FAQ ferroviária consultada em 28/11/2026. Mínimo e média da mesma versão aberta; número mínimo de trocas refere-se ao resumo, não ao itinerário mais rápido. Sem confirmação de retorno ou serviço em 2027.",
+      "quality_review": {
+        "checked_at": "2026-11-28",
+        "source_url": "https://www.thetrainline.com/en/train-times/strasbourg-to-namur",
+        "direction": "outbound_only",
+        "origin_country": "FR",
+        "destination_country": "BE",
+        "selected_summary_reproduced": false,
+        "samples": [
+          {
+            "index_recency": "today",
+            "minimum_min": 251,
+            "average_min": 340,
+            "origin_station_labels": [],
+            "arrival_station_labels": [],
+            "mode_basis": "Explicit train-specific FAQ, both durations on same page; mixed bus/operator lists are not used for duration."
+          }
+        ],
+        "service_legs_verified": false,
+        "valid_for_2027": false,
+        "note": "Dynamic summary differs from selected historical observation; preserve both. Published station labels only where directly observed in inspected text; no station reconciliation, service-date or all-leg verification.",
+        "modality_status": "rail_summary"
+      }
+    }
+  ],
+  "known_unlinked_candidates": [],
+  "unresolved": [
+    {
+      "origin_id": "metz",
+      "destination_id": "dinan",
+      "reason": "technical_failure",
+      "source_url": "https://www.sncf-connect.com/train/trajet/metz/dinan",
+      "source_checked_at": "2026-11-28"
+    },
+    {
+      "origin_id": "nancy",
+      "destination_id": "dinan",
+      "reason": "technical_failure",
+      "source_url": "https://www.sncf-connect.com/train/trajet/nancy/dinan",
+      "source_checked_at": "2026-11-28"
+    },
+    {
+      "origin_id": "mulhouse",
+      "destination_id": "dinan",
+      "reason": "technical_failure",
+      "source_url": "https://www.sncf-connect.com/train/trajet/mulhouse/dinan",
+      "source_checked_at": "2026-11-28"
+    }
+  ]
+}
