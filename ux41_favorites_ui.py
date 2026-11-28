@@ -244,5 +244,5 @@ def render_favorite_comparison(study,five):
             with col:
                 st.button("Explorar "+choices[key]["name"],
                     key="ux41_open_"+key,on_click=_open_favorite_city,args=(key,),
-                    use_container_width=True)
+                    width="stretch")
     _persistence(study)

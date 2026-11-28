@@ -132,7 +132,7 @@ def _render_research_only_outings(base_id: str, catalog: dict) -> None:
         st.info("Nenhum destino corresponde aos filtros escolhidos.")
         return
     st.dataframe(pd.DataFrame(rows), hide_index=True,
-                 use_container_width=True)
+                 width="stretch")
     names = {row["destination_id"]: row["name"] for row in available}
     current = st.session_state.get("explore_readonly_destination")
     if current not in names:
@@ -699,7 +699,7 @@ def render_explorer(trip_data: dict, sync_sources: dict, map_view) -> None:
                                    f"CHF{partial['known_by_currency']['CHF']:.2f}; "
                                    "não é custo completo")
                     if st.button("Ver atrações e montar passeio",key=f"explore_open_{d['id']}",
-                                 use_container_width=True):
+                                 width="stretch"):
                         st.session_state["explore_selected_destination"]=d["id"]
                         st.rerun()
 
@@ -733,7 +733,7 @@ def render_explorer(trip_data: dict, sync_sources: dict, map_view) -> None:
         with st.expander("Discriminar valores e condições",expanded=False):
             if current_cost["breakdown"]:
                 st.dataframe(pd.DataFrame(current_cost["breakdown"]),hide_index=True,
-                             use_container_width=True)
+                             width="stretch")
             if current_cost["conditional"]:
                 st.warning("Tarifas reduzidas condicionais: "+"; ".join(current_cost["conditional"]))
             if current_cost["missing"]:
@@ -762,7 +762,7 @@ def render_explorer(trip_data: dict, sync_sources: dict, map_view) -> None:
                 picked=st.selectbox("Dia disponível (férias ou fim de semana)",
                                     [r["date"] for r in allowed],key="explore_schedule_day")
             if st.button("Adicionar passeio ao calendário",key="explore_schedule_add",
-                         use_container_width=True,disabled=not editable):
+                         width="stretch",disabled=not editable):
                 try:
                     schedule_visit(days,active_plan()["assignments"],picked,destid)
                     schedule_outing(base,st.session_state.get("ux_mode","Oficial"),picked,destid)
@@ -802,7 +802,7 @@ def render_explorer(trip_data: dict, sync_sources: dict, map_view) -> None:
             st.session_state["unified_city"]=by_id[base]["name"]
             st.session_state["main_navigation"]="Orçamento"
         st.button("Comparar no orçamento sem dupla contagem →",
-                  key="explore_to_budget",use_container_width=True,
+                  key="explore_to_budget",width="stretch",
                   on_click=_send_budget_reference)
         with st.expander("Backup técnico das atrações (opcional)"):
             st.caption("A seleção completa está no planejamento. "
@@ -815,7 +815,7 @@ def render_explorer(trip_data: dict, sync_sources: dict, map_view) -> None:
             st.download_button("Baixar arquivo de backup",
                                data=json.dumps(export,ensure_ascii=False,indent=2),
                                file_name="nossa_europa_2027_atracoes.json",
-                               mime="application/json",use_container_width=True)
+                               mime="application/json",width="stretch")
     st.caption("Fotos: Wikimedia Commons com atribuição e licença em cada card. "
                "Fontes de turismo e operadores consultadas em novembro/2026; "
                "rever todas as datas e condições antes de viajar.")

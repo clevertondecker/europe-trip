@@ -283,12 +283,12 @@ def _review_official_change(plan:dict,comparison:dict,
     if contextual_base is not None:
         keep,proceed=st.columns(2)
         if keep.button("Manter "+comparison["official_name"],
-                       key="ux115_keep_base",use_container_width=True):
+                       key="ux115_keep_base",width="stretch"):
             from rec03a_suggestions_ui import close_base_review
             close_base_review()
             st.rerun()
         open_review=proceed.button(action_label,key="ux34_open_review",
-                                   type="primary",use_container_width=True)
+                                   type="primary",width="stretch")
     else:
         open_review=st.button(action_label,key="ux34_open_review")
     if open_review:

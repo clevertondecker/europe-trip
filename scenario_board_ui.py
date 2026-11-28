@@ -29,7 +29,7 @@ def _currency(eur:float,chf:float)->str:
 def _photo(dest:dict):
     photo=dest.get("photo")
     if photo and photo.get("url"):
-        st.image(photo["url"],use_container_width=True)
+        st.image(photo["url"],width="stretch")
         st.caption(f"Foto: {photo['author']} · {photo['license']}")
     else:
         st.caption("Sem fotografia licenciada disponível")
@@ -261,11 +261,11 @@ def render_scenario_boards(plan:dict,scenarios:list[dict],catalog:dict,routes:di
     b1,b2=st.columns(2)
     with b1:
         if st.button("Desfazer última edição",key="scenario_undo_"+profile,
-                     disabled=not board["undo"],use_container_width=True):
+                     disabled=not board["undo"],width="stretch"):
             _update(profile,undo_board(board))
     with b2:
         if st.button("Restaurar sugestão original",key="scenario_reset_"+profile,
-                     use_container_width=True):
+                     width="stretch"):
             _update(profile,new_board(plan,scenario))
     st.markdown("#### O que mudou nesta simulação?")
     changed=sim["known_delta"]
@@ -291,7 +291,7 @@ def render_scenario_boards(plan:dict,scenarios:list[dict],catalog:dict,routes:di
     render_approval_diff(diff,names)
     approval_key="scenario_review_"+profile
     if st.button("Revisar e aplicar este roteiro",key="scenario_review_button_"+profile,
-                 use_container_width=True):
+                 width="stretch"):
         st.session_state[approval_key]=True
     if st.session_state.get(approval_key):
         st.warning("Revise destinos, atrações e datas. Nenhuma reserva será realizada.")
@@ -315,7 +315,7 @@ def render_scenario_boards(plan:dict,scenarios:list[dict],catalog:dict,routes:di
         yes,no=st.columns(2)
         with yes:
             if st.button("Confirmar aplicação",key="scenario_approve_"+profile,
-                         use_container_width=True):
+                         width="stretch"):
                 try:
                     candidate=board_to_approval(board,plan,sim)
                     updated=approve_profile_scenario(plan,candidate,approved=True)
@@ -327,6 +327,6 @@ def render_scenario_boards(plan:dict,scenarios:list[dict],catalog:dict,routes:di
                 except ValueError as exc:st.error(str(exc))
         with no:
             if st.button("Cancelar",key="scenario_cancel_"+profile,
-                         use_container_width=True):
+                         width="stretch"):
                 st.session_state[approval_key]=False
                 st.rerun()

@@ -154,7 +154,7 @@ def render_selection_toolbar(options,cities,*,navigation=None):
                               key="ux111_remove_"+base,
                               help="Remover "+cities[base]["name"]+" da comparação",
                               on_click=_remove_comparison_base,
-                              args=(base,tuple(options)),use_container_width=True)
+                              args=(base,tuple(options)),width="stretch")
         else:
             st.caption("Selecione uma cidade nos cartões para iniciar.")
         if len(selected)>5:
@@ -271,7 +271,7 @@ def render_card_actions(base,prefix,*,emphasize_profile=False,compact=False):
         st.button("Conhecer cidade",key=f"rec03a_handoff_profile_{prefix}_{base}",
                   type="primary" if emphasize_profile else "secondary",
                   on_click=queue_handoff,args=(st.session_state,"profile",[base]),
-                  use_container_width=True)
+                  width="stretch")
         return
     a,b,c=st.columns(3)
     a.button("Conhecer cidade",key=f"rec03a_handoff_profile_{prefix}_{base}",

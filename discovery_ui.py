@@ -44,7 +44,7 @@ def _render_suggestion(rec,plan,catalog,routes,trip_data,live,eurfx,chffx,use_ci
         with header:
             photo=rec.get("photo")
             if photo and photo.get("url"):
-                st.image(photo["url"],use_container_width=True)
+                st.image(photo["url"],width="stretch")
                 st.caption("Imagem: "+photo.get("author","")+" · "+photo.get("license",""))
         with detail:
             st.markdown("#### "+place_label(rec["name"],rec["country"],show_country=True))
@@ -90,13 +90,13 @@ def _render_suggestion(rec,plan,catalog,routes,trip_data,live,eurfx,chffx,use_ci
             with a:
                 if st.button("Revisar inclusão no roteiro",
                              key="advisor_discover_add_"+rec["destination_id"],
-                             use_container_width=True):
+                             width="stretch"):
                     st.session_state["ux45_discovery_review"]=rec["destination_id"]
                     st.session_state["ux45_discovery_revision"]=plan["revision"]
                     st.rerun()
             with b:
                 if st.button("Descartar",key="advisor_discover_dismiss_"+rec["destination_id"],
-                             use_container_width=True):
+                             width="stretch"):
                     updated=reject_destination(plan,rec["destination_id"],approved=True)
                     accept_approved_plan(updated)
                     st.rerun()
