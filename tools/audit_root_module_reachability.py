@@ -13,17 +13,9 @@ from pathlib import Path
 import subprocess
 
 ROOT = Path(__file__).resolve().parents[1]
-# Temporary review exceptions. Do not expand without a documented reason.
+# UX132 uses distinct documentary coverage; retaining the historical cache for explicit review.
 ALLOWLIST = {
-    "arch10b_documentary_parity": "Documentary rail audit; pending offline relocation",
-    "arch14_macro_coverage_cache": "Macro opportunity projection differs from UX132; pending decision",
-    "calendar_visit_model": "Repeated-visit prototype; pending reference audit",
-    "corridor_priority_pilot_model": "Research pilot with versioned data; pending offline relocation",
-    "geographic_base_screening_model": "Exploratory geographic study; pending reference audit",
-    "regional_opportunity_research_model": "Regional proposals with versioned data; pending offline relocation",
-    "route_research_evidence_model": "Research validation contract; pending offline relocation",
-    "rec02_diagnostics": "Standalone recommendation diagnostics; pending offline relocation",
-    "rec01_feasibility": "Standalone recommendation benchmark; pending offline relocation",
+    "arch14_macro_coverage_cache": "Historical DQ32 macro opportunity cache; UX132 uses DATA24 and separate attraction/living projections, not equivalent. Retained pending explicit product decision.",
 }
 SYMBOLS = (
     "upsert_flexible_choice", "remove_flexible_choice", "delete_package",
