@@ -1,0 +1,14 @@
+# DATA27 — Integração das evidências complementares do DATA26C
+
+Continuação autorizada pelo usuário em 28/11/2026, após merge do PR #278 (e720ec052458e6c6ce602f0b299d35461812edea; CI do HEAD 9f930b1 aprovado). Novo PR único, escopo congelado. A fonte de pesquisa é docs/prompts/DATA26C_DECISION_QUALITY_REVIEW.md, não uma fonte operacional. Não copiar alegações sem confrontar a fonte original; datas e preços indexados não provam disponibilidade futura.
+
+## Checklist de implementação
+- [ ] DATA26A / UX132C2: integrar 15 candidatos de hospedagem das cinco bases, em classificação documental distinta de cotação; reusar contrato existente, diferenciar candidato preliminar, mobiliário, serviços e internet anunciada versus comprovada. Janela hipotética 29/09–27/11/2027 (59 noites), dois adultos, sem editar TripPlan. Não preencher cotações sem total, taxas, caução, condições, cancelamento e disponibilidade efetivamente consultados. Registrar bloqueios.
+- [ ] Integrar cinco referências de transporte urbano contemporâneas com validade, preço por adulto/mês, fonte e elegibilidade, sem sobrescrever snapshot histórico nem inferir elegibilidade residencial. Cesta local completa só se evidência comparável; não inventar valores.
+- [ ] Integrar evidências das 11 atrações e acessos já pesquisados nos contratos existentes, preservando IDs, valores anteriores, conflitos, tarifas variáveis e expiradas; não converter distância reta em caminhada, nem declarar duração desconhecida como zero. Não alterar orçamento automaticamente.
+- [ ] Avaliar Colmar e Luxemburgo sob condições comparáveis às amostras Paris, somente se serviços datados acessíveis; preservar lacunas caso não. Nenhuma expansão indiscriminada da pesquisa.
+- [ ] Conferir revisão ferroviária, caso Strasbourg–Arlon e paridade DATA24/REC02 herdados do #278. Preservar denominadores 270/60, histórico, UX133, TripPlan, wishlist, orçamento, CHOICE/SCOPE/DRAFT, persistência e handoffs. Não criar motor, página ou ranking adicional.
+- [ ] Reutilizar Cobertura dos dados para evidências integradas, distinguindo tentativa, referência documental, cotação e disponibilidade; Markdown não é fonte de verdade em runtime.
+- [ ] Testes específicos de contratos, projeção e interface, preservar baseline, verificar suite completa e CI do HEAD final; QA desktop/mobile quando disponível, documentar se não realizado. Relatório por domínio, sem métrica agregada artificial. Manter draft até review e autorização específica de merge deste novo PR.
+
+Não reabrir #278. Commits pequenos, reais, com evidência e testes. Não declarar dados completos quando bloqueados; não fabricar fontes.
