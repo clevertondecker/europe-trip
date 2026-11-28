@@ -70,7 +70,6 @@ class PriorityRailResearchTests(unittest.TestCase):
             (("nancy", "interlaken"), "secondary_sample"),
             (("metz", "interlaken"), "secondary_sample"),
             (("metz", "liege"), "secondary_sample"),
-            (("strasbourg", "arlon"), "secondary_sample"),
             (("metz", "namur"), "secondary_sample"),
             (("strasbourg", "namur"), "secondary_sample"),
         ):
@@ -264,6 +263,35 @@ class PriorityRailResearchTests(unittest.TestCase):
         self.assertEqual(ambiguous["confidence"], "low")
         self.assertFalse(ambiguous["valid_for_2027"])
 
+    def test_audit_projections_preserve_original_and_isolate_inconclusive(self):
+        from ux132_research_coverage_model import build_coverage_view, connection_rows
+        view = build_coverage_view()
+        for row in load_data26c_rail()["records"]:
+            key = row["origin_id"], row["destination_id"]
+            with self.subTest(pair=key):
+                cell = view["pairs"][key]["cell"]
+                review = cell["data26c_quality_review"]
+                self.assertEqual(review, row["quality_review"])
+                self.assertEqual(cell["data26c_reviewed_observation"]["minimum_min"], row["oneway_min"])
+                detail = next(r for r in connection_rows(view, "bases", key[0], "Todas")
+                              if r["destination_id"] == key[1])
+                self.assertEqual(detail["quality_review"], review)
+                self.assertEqual(detail["reviewed_observation"], cell["data26c_reviewed_observation"])
+                if review["modality_status"] == "inconclusive":
+                    self.assertEqual(cell["category"], "no_time")
+                    self.assertIsNone(cell["display_min"])
+                    self.assertIsNone(cell["average_min"])
+                    self.assertFalse(cell["reference_display_allowed"])
+                    self.assertIsNone(detail["minimum"])
+                    self.assertIsNone(detail["source_url"])
+                    self.assertIn("modalidade inconclusiva", cell["label"])
+                else:
+                    self.assertEqual(cell["category"], "reference_only")
+                    self.assertEqual(cell["display_min"], row["oneway_min"])
+                    self.assertEqual(cell["average_min"], row["published_average_min"])
+        self.assertEqual(view["priority"]["eligible"], 270)
+        self.assertEqual(view["priority"]["timed"], 247)
+
     def test_documentary_coverage_before_after(self):
         dataset = load_data26c_rail()
         baseline = rail_coverage(projection_options={"data26c_overlay": {"by_pair": {}}})
@@ -284,6 +312,11 @@ class PriorityRailResearchTests(unittest.TestCase):
                 self.assertEqual(new["average_min"], record["published_average_min"])
                 self.assertFalse(new["valid_for_2027"])
                 self.assertFalse(new["weekend_return_known"])
+            elif key == ("strasbourg", "arlon"):
+                self.assertEqual(old["category"], "no_time")
+                self.assertEqual(new["category"], "no_time")
+                self.assertIsNone(new["display_min"])
+                self.assertEqual(new["data26c_quality_review"]["modality_status"], "inconclusive")
             else:
                 self.assertEqual(old, new)
         self.assertTrue(gains)
