@@ -7,12 +7,12 @@
       "origin_id": "lille",
       "destination_id": "saumur",
       "oneway_min": 222,
-      "published_average_min": 271,
+      "published_average_min": 290,
       "evidence_type": "official_route_minimum",
       "source_url": "https://www.sncf-connect.com/train/trajet/lille/saumur",
       "source_checked_at": "2026-11-28",
       "source_capture_date": null,
-      "index_recency": "last month",
+      "index_recency": "today",
       "service_date": null,
       "evidence_level": "operator_city_level",
       "confidence": "medium",
@@ -25,7 +25,11 @@
       "valid_for_2027": false,
       "fare_couple_eur": null,
       "transfer_count": null,
-      "note": "Resumo de rota SNCF Connect consultado via índice web; mínimo e média publicados, sem data de serviço ou verificação de todos os trechos. A recência do índice é relativa, não uma data de captura comprovada."
+      "note": "Resumo oficial SNCF Connect reconsultado em 2026-11-28 via índice web atualizado hoje; mínimo e média publicados variam com a amostra. Sem itinerário datado, confirmação de todos os trechos ou garantia 2027.",
+      "previous_index_summary": {
+        "minimum": 222,
+        "average": 271
+      }
     },
     {
       "origin_id": "metz",
@@ -102,13 +106,13 @@
     {
       "origin_id": "lille",
       "destination_id": "dinan",
-      "oneway_min": 298,
-      "published_average_min": 375,
+      "oneway_min": 313,
+      "published_average_min": 385,
       "evidence_type": "official_route_minimum",
       "source_url": "https://www.sncf-connect.com/train/trajet/lille/dinan",
       "source_checked_at": "2026-11-28",
       "source_capture_date": null,
-      "index_recency": "last month",
+      "index_recency": "today",
       "service_date": null,
       "evidence_level": "operator_city_level",
       "confidence": "medium",
@@ -121,18 +125,22 @@
       "valid_for_2027": false,
       "fare_couple_eur": null,
       "transfer_count": null,
-      "note": "Resumo de rota SNCF Connect consultado via índice web; mínimo e média publicados, sem data de serviço ou verificação de todos os trechos. A recência do índice é relativa, não uma data de captura comprovada."
+      "note": "Resumo oficial SNCF Connect reconsultado em 2026-11-28 via índice web atualizado hoje; mínimo e média publicados variam com a amostra. Sem itinerário datado, confirmação de todos os trechos ou garantia 2027.",
+      "previous_index_summary": {
+        "minimum": 298,
+        "average": 375
+      }
     },
     {
       "origin_id": "lille",
       "destination_id": "le_mans",
       "oneway_min": 157,
-      "published_average_min": 202,
+      "published_average_min": 223,
       "evidence_type": "official_route_minimum",
       "source_url": "https://www.sncf-connect.com/train/trajet/lille/le-mans",
       "source_checked_at": "2026-11-28",
       "source_capture_date": null,
-      "index_recency": "last week",
+      "index_recency": "today",
       "service_date": null,
       "evidence_level": "operator_city_level",
       "confidence": "medium",
@@ -145,7 +153,11 @@
       "valid_for_2027": false,
       "fare_couple_eur": null,
       "transfer_count": null,
-      "note": "Resumo de rota SNCF Connect consultado via índice web; mínimo e média publicados, sem data de serviço ou verificação de todos os trechos. A recência do índice é relativa, não uma data de captura comprovada."
+      "note": "Resumo oficial SNCF Connect reconsultado em 2026-11-28 via índice web atualizado hoje; mínimo e média publicados variam com a amostra. Sem itinerário datado, confirmação de todos os trechos ou garantia 2027.",
+      "previous_index_summary": {
+        "minimum": 157,
+        "average": 202
+      }
     },
     {
       "origin_id": "metz",
