@@ -17,10 +17,6 @@ ERROR = "rec03a_handoff_error"
 PREVIOUS = "rec03a_handoff_previous_manual"
 CHOICE = "rec03a_handoff_base_selection"
 SCOPE = "rec03a_scope"
-MANUAL_KEYS = (
-    ("ux503_bases", "ux504_bases_shadow"),
-    ("ux503_visible_destinations", "ux504_visible_destinations_shadow"),
-)
 
 
 def _ids(value, allowed, *, minimum=1, maximum=None):
