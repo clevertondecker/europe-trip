@@ -54,11 +54,6 @@ def open_detailed_impact()->None:
     set_task(state,"Meu roteiro","Melhorar meu roteiro")
 
 
-def close_overlays()->None:
-    st.session_state["workflow_settings_open"]=False
-    st.session_state["workflow_compare_open"]=False
-
-
 def resume_plan()->None:
     from ux_navigation import set_task
     plan=active_plan()
