@@ -3,6 +3,8 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
+from rail_reference_projection_model import decorate_comparison
 
 from data26c_priority_rail_model import DATA, load_data26c_rail
 from data24_coverage_model import rail_coverage
@@ -163,6 +165,58 @@ class PriorityRailResearchTests(unittest.TestCase):
             self.assertIsNone(data[key]["destination_station_id"])
             self.assertIsNone(data[key]["transfer_count"])
             self.assertFalse(data[key]["return_weekend_verified"])
+
+    def test_selected_observation_has_no_inherited_provenance(self):
+        record = load_data26c_rail()["by_pair"][("metz", "interlaken")]
+        row = {"base_id": "metz", "destination_id": "interlaken",
+               "evidence_status": "not_researched", "minimum_oneway_min": None,
+               "source_url": "https://example.org/historical",
+               "divergent_sources": False}
+        contaminated = {
+            "status": "unreproduced_snapshot", "display_min": None,
+            "display_basis": "unknown", "average_min": 999,
+            "arrival_station": "Interlaken West", "origin_station_id": "other",
+            "checked_at": "2025-01-01", "fastest_provenance": "unverified",
+            "rechecked_average_min": 888, "original_snapshot_average_min": 777,
+            "fare_couple_eur": 123, "commercial_brand": "other",
+            "service_date": "2027-09-18", "weekend_return_known": True,
+            "valid_for_2027": True, "typical_time_known": True,
+        }
+        empty = {"by_pair": {}}
+        with patch("rail_reference_projection_model.planning_reference", return_value=contaminated):
+            cell = decorate_comparison({"rows": [row]}, references=empty,
+                gap_overlay=empty, connectivity_overlay=empty, priority_overlay=empty,
+                lille_overlay=empty, data13_overlay=empty, supplemental_overlay=empty,
+                candidate_overlay={}, data25_overlay=empty,
+                data26c_overlay={"by_pair": {("metz", "interlaken"): record}}
+            )["cells"][("metz", "interlaken")]
+        self.assertEqual(cell["display_min"], record["oneway_min"])
+        self.assertEqual(cell["average_min"], record["published_average_min"])
+        self.assertEqual(cell["checked_at"], record["source_checked_at"])
+        self.assertEqual(cell["source_url"], record["source_url"])
+        self.assertEqual(cell["reference_source_url"], record["source_url"])
+        self.assertEqual(cell["confidence"], record["confidence"])
+        self.assertEqual(cell["evidence_notes"], record["note"])
+        self.assertEqual(cell["published_arrival_station"], "Interlaken Ost")
+        self.assertIsNone(cell["published_origin_station"])
+        self.assertIsNone(cell["origin_station_id"])
+        self.assertIsNone(cell["destination_station_id"])
+        self.assertEqual(cell["station_status"], "not_reconciled")
+        self.assertIn("Interlaken Ost", cell["station_caveat"])
+        for key in ("arrival_station", "rechecked_average_min", "original_snapshot_average_min",
+                    "fare_couple_eur", "commercial_brand", "service_date"):
+            self.assertNotIn(key, cell)
+        self.assertFalse(cell["weekend_return_known"])
+        self.assertFalse(cell["valid_for_2027"])
+        self.assertFalse(cell["typical_time_known"])
+        self.assertEqual(cell["historical_source_url"], row["source_url"])
+
+    def test_published_origin_is_preserved_without_reconciliation(self):
+        cell = rail_coverage()["pairs"][("lille", "baden_baden")]["cell"]
+        self.assertEqual(cell["published_origin_station"], "Lille-Europe")
+        self.assertIsNone(cell["origin_station_id"])
+        self.assertEqual(cell["station_status"], "not_reconciled")
+        self.assertIn("Lille-Europe", cell["station_caveat"])
 
     def test_documentary_coverage_before_after(self):
         dataset = load_data26c_rail()
