@@ -5,9 +5,10 @@ All other components default to not_evaluated. Optional overrides represent
 already performed lookups, with provenance checked before they are admitted.
 """
 from __future__ import annotations
+
+from evidence_validation import is_https_url
 from copy import deepcopy
 from datetime import date
-from urllib.parse import urlparse
 
 STATES=frozenset({"documented","historical_only","indicative_reference",
     "editorial_estimate","not_evaluated","unknown_after_lookup",
@@ -49,11 +50,6 @@ ALIASES={
     **{x:x for x in LOCAL_COMPONENTS},
 }
 
-def _https(value):
-    if not isinstance(value,str): return False
-    u=urlparse(value)
-    return u.scheme=="https" and bool(u.hostname)
-
 def _date(value):
     if not isinstance(value,str): raise ValueError("missing source date")
     return date.fromisoformat(value)
@@ -68,7 +64,7 @@ def _validate(component, supplied, *, base, dest, local):
         raise ValueError("not_applicable is not proof of an available connection")
     if state in {"documented","historical_only","indicative_reference",
                  "unknown_after_lookup","incompatible"}:
-        if not _https(v.get("source_url")) or not isinstance(v.get("source_dataset"),str) or not v["source_dataset"].strip():
+        if not is_https_url(v.get("source_url")) or not isinstance(v.get("source_dataset"),str) or not v["source_dataset"].strip():
             raise ValueError("claimed lookup/evidence needs source and dataset")
         _date(v.get("checked_at"))
     if state=="unknown_after_lookup":
@@ -148,7 +144,7 @@ def build_component_records(inventory, *, evidence_by_pair=None):
                     (local and c in RAIL_COMPONENTS) or
                     (not local and c in LOCAL_COMPONENTS)
                     else "not_evaluated")} for c in ALL_COMPONENTS}
-        if cat in {"historical","indicative"} and _https(row.get("source_url")):
+        if cat in {"historical","indicative"} and is_https_url(row.get("source_url")):
             states["outbound_rail_duration"]={
                 "state":"historical_only" if cat=="historical" else "indicative_reference",
                 "duration_min":duration,"source_url":row["source_url"],

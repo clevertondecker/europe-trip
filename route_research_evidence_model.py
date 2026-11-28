@@ -5,10 +5,11 @@ This module validates *additional* research without changing that precedence.
 """
 from __future__ import annotations
 
+from evidence_validation import is_https_url
+
 from copy import deepcopy
 from datetime import date, datetime, timezone
 from hashlib import sha256
-from urllib.parse import urlparse
 import json
 
 from rail_evidence_unified_model import canonical_place
@@ -53,11 +54,6 @@ def _time(value, field):
         raise ValueError(f"{field}: usar HH:MM") from exc
 
 
-def _https(value):
-    parsed = urlparse(value or "")
-    return parsed.scheme == "https" and bool(parsed.netloc)
-
-
 def validate_observation(record: dict) -> dict:
     """Validate and normalize one observation; never silently fill missing evidence."""
     if not isinstance(record, dict) or record.get("schema_version") != SCHEMA_VERSION:
@@ -99,7 +95,7 @@ def validate_observation(record: dict) -> dict:
     if row["evidence_state"] == "timed_observation":
         if type(minutes) is not int or minutes <= 0:
             raise ValueError("Duração pesquisada deve ser inteiro positivo")
-        if not _https(row.get("source_url")):
+        if not is_https_url(row.get("source_url")):
             raise ValueError("Tempo pesquisado exige URL HTTPS")
     elif minutes is not None:
         raise ValueError("Estado sem tempo não pode alegar duração")
@@ -110,12 +106,12 @@ def validate_observation(record: dict) -> dict:
                 and row.get("destination_station_id")):
             raise ValueError("Horário específico exige data, partida, chegada e estações")
     if row["evidence_state"] in ("timed_observation", "partial", "conflict"):
-        if not _https(row.get("source_url")):
+        if not is_https_url(row.get("source_url")):
             raise ValueError("Evidência pesquisada exige fonte HTTPS")
     if row["temporal_validity"] == "future_date_explicitly_verified":
         if (travel is None or travel.year < 2027 or
                 row["source_nature"] != "operator_date_specific_schedule" or
-                not _https(row.get("source_url")) or checked is None or
+                not is_https_url(row.get("source_url")) or checked is None or
                 timing["precision"] != "offset_aware"):
             raise ValueError("Validade futura requer observação do operador para a data")
     if row["temporal_validity"] == "historical_sample" and travel and travel.year >= 2027:

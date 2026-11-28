@@ -2,23 +2,10 @@
 import json
 import unittest
 from pathlib import Path
-from unittest.mock import patch
-from contextlib import ExitStack
-from importlib import import_module
 
 from evidence_validation import is_https_url
 
 ROOT = Path(__file__).resolve().parents[1]
-MODULES = (
-    "rail_transfer_contract", "tourism_visit_evidence_model",
-    "route_research_evidence_model", "ux506_decision_readiness_projection",
-    "data8_couple_cost_model", "rail_component_contract",
-    "data26a_housing_evidence_model", "ux132_research_coverage_model",
-)
-
-def _url_or_none(value):
-    return value if is_https_url(value) else None
-
 def _walk(value, location):
     if isinstance(value, dict):
         for key, item in value.items():
@@ -48,18 +35,13 @@ class EvidenceUrlTests(unittest.TestCase):
                     failures.append(f"{location}: {value!r}")
         self.assertFalse(failures, "\n".join(failures))
 
-    def test_research_loaders_with_candidate_rule(self):
-        with ExitStack() as stack:
-            for name in MODULES:
-                module = import_module(name)
-                replacement = _url_or_none if name == "ux132_research_coverage_model" else is_https_url
-                stack.enter_context(patch.object(module, "_https", replacement))
-            from tools.validate_research_data import main
-            main()
-            from tourism_visit_evidence_model import load_visit_evidence
-            from data8_couple_cost_model import load_cost_addons
-            from data26a_housing_evidence_model import load_housing_observations
-            from ux132_research_coverage_model import build_coverage_view
-            for loader in (load_visit_evidence, load_cost_addons, load_housing_observations, build_coverage_view):
-                with self.subTest(loader=loader.__name__):
-                    loader()
+    def test_research_loaders_with_shared_rule(self):
+        from tools.validate_research_data import main
+        main()
+        from tourism_visit_evidence_model import load_visit_evidence
+        from data8_couple_cost_model import load_cost_addons
+        from data26a_housing_evidence_model import load_housing_observations
+        from ux132_research_coverage_model import build_coverage_view
+        for loader in (load_visit_evidence, load_cost_addons, load_housing_observations, build_coverage_view):
+            with self.subTest(loader=loader.__name__):
+                loader()

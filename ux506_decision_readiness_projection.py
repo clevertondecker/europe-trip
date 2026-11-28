@@ -6,8 +6,9 @@ A rail/return/access identity match is NOT a timetable match or an outing.
 """
 from __future__ import annotations
 
+from evidence_validation import is_https_url
+
 from importlib import import_module
-from urllib.parse import urlparse
 
 from attractions_model import load_attractions
 from base_research_expanded_model import load_research
@@ -23,11 +24,6 @@ def _optional_research(module_name, function_name):
             return None
         raise
     return getattr(module, function_name)()
-
-
-def _https(value):
-    parsed = urlparse(value or "")
-    return parsed.scheme == "https" and bool(parsed.netloc)
 
 
 def build_decision_readiness(comparison: dict, *, discovery=None,
@@ -79,7 +75,7 @@ def build_decision_readiness(comparison: dict, *, discovery=None,
                 raise ValueError("Overlay turístico com identidade duplicada/inválida")
             if (entry.get("opening_state") != "verified_current_rule" or
                     not entry.get("opening_rule") or
-                    not _https(entry.get("source_url")) or
+                    not is_https_url(entry.get("source_url")) or
                     entry.get("valid_for_2027") is not False):
                 raise ValueError("Overlay turístico sem fonte/estado temporal")
             enriched[aid] = entry
@@ -223,7 +219,7 @@ def compatible_evidence_association(rail: dict | None, return_leg: dict | None,
                     "origin_station_id", "destination_station_id",
                     "source_url", "duration_min")):
                 reasons.append("incomplete_train_identity")
-            if not _https(leg.get("source_url")):
+            if not is_https_url(leg.get("source_url")):
                 reasons.append("source_missing")
             if type(leg.get("duration_min")) is not int or leg["duration_min"]<=0:
                 reasons.append("duration_missing")
@@ -245,7 +241,7 @@ def compatible_evidence_association(rail: dict | None, return_leg: dict | None,
                     reverse.get("direction") != "attraction_to_station"):
                 reasons.append("access_direction_mismatch")
             for record in (forward,reverse):
-                if (not _https(record.get("source_url")) or
+                if (not is_https_url(record.get("source_url")) or
                         record.get("state")!="verified_sample" or
                         type(record.get("duration_min")) is not int or
                         record["duration_min"]<=0):
@@ -264,7 +260,7 @@ def compatible_evidence_association(rail: dict | None, return_leg: dict | None,
             if (rail.get("destination_station_id") != access.get("arrival_station_id") or
                     return_leg.get("origin_station_id") != access.get("return_station_id")):
                 reasons.append("station_mismatch")
-            if not _https(access.get("source_url")):
+            if not is_https_url(access.get("source_url")):
                 reasons.append("source_missing")
             if type(access.get("duration_min")) is not int or access["duration_min"]<=0:
                 reasons.append("duration_missing")
