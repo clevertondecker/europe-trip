@@ -270,18 +270,38 @@ def decorate_comparison(result, *, references=None, gap_overlay=None,
         data26c_row = data26c["by_pair"].get(key) or data26c["by_pair"].get(source_key)
         if (data26c_row is not None and evidence.get("display_min") is None
                 and row["evidence_status"] != "local"):
+            # Do not inherit ROUTES7 metadata: an unreproduced snapshot may
+            # describe another observation, date, station or commercial offer.
+            published_origin = data26c_row.get("published_origin_station")
+            published_arrival = data26c_row.get("published_arrival_station")
             evidence = {
-                **evidence,
+                "status": "published_reference",
                 "display_basis": "data26c_priority_reference",
                 "display_min": data26c_row["oneway_min"],
+                "fastest_min": data26c_row["oneway_min"],
                 "average_min": data26c_row["published_average_min"],
+                "legacy_min": None,
                 "source_url": data26c_row["source_url"],
                 "reference_source_url": data26c_row["source_url"],
+                "checked_at": data26c_row["source_checked_at"],
                 "gap_checked_at": data26c_row["source_checked_at"],
+                "source_capture_date": data26c_row["source_capture_date"],
                 "confidence": data26c_row["confidence"],
                 "source_kind": data26c_row["evidence_type"],
-                "station_comparability": "city_level_ambiguous",
+                "published_origin_station": published_origin,
+                "published_arrival_station": published_arrival,
+                "origin_station_id": data26c_row["origin_station_id"],
+                "destination_station_id": data26c_row["destination_station_id"],
+                "station_status": data26c_row["station_status"],
+                "station_comparability": "station_named_in_route_page" if (
+                    published_origin or published_arrival) else "city_level_ambiguous",
                 "comparability": "indicative_only_not_station_comparable",
+                "fastest_provenance": "data26c_published_summary",
+                "average_provenance": "data26c_published_summary",
+                "reference_display_allowed": True,
+                "reference_differs_from_legacy": False,
+                "conflict_with_legacy": False,
+                "typical_time_known": False,
                 "weekend_return_known": False,
                 "valid_for_2027": False,
                 "evidence_notes": data26c_row["note"],
@@ -383,7 +403,12 @@ def decorate_comparison(result, *, references=None, gap_overlay=None,
             "data25_connectivity_applied": basis == "data25_priority_reference",
             "data26c_connectivity_applied": basis == "data26c_priority_reference",
             "station_caveat": (
-                "Fonte refere-se à chegada na estação " + evidence["arrival_station"]
+                ("Estação publicada: " + " → ".join(name for name in (
+                    evidence.get("published_origin_station"), evidence.get("published_arrival_station")
+                ) if name) + "; não reconciliada, sem serviço datado.")
+                if basis == "data26c_priority_reference" and (evidence.get("published_origin_station")
+                    or evidence.get("published_arrival_station"))
+                else "Fonte refere-se à chegada na estação " + evidence["arrival_station"]
                 + "; não confirma acesso a atrações fora da estação."
                 if evidence.get("arrival_station")
                 else ("Referência por cidade; estação de embarque/chegada não reconciliada."
