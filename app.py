@@ -167,10 +167,6 @@ def note(msg: str) -> None:
     st.markdown(f'<div class="note">{escape(msg)}</div>', unsafe_allow_html=True)
 
 
-def overline(label: str) -> None:
-    st.markdown(f'<div class="eyebrow">{escape(label)}</div>', unsafe_allow_html=True)
-
-
 def section(text: str) -> None:
     st.markdown(f'<div class="section-title">{escape(text)}</div>', unsafe_allow_html=True)
 
@@ -180,30 +176,6 @@ def map_view(places: list[dict], height: int = 430, show_labels: bool = True,
     """Backward-compatible app entrypoint forwarding to isolated renderer."""
     render_map_view(places,height=height,show_labels=show_labels,
                     center=center,zoom=zoom)
-
-
-def show_place(place: dict) -> None:
-    role=escape(place["role"])
-    st.markdown(f"**{escape(place['name'])} · {escape(place['country'])}**")
-    st.caption(f"{STATUS_LABEL[place['status']]} · {role}")
-    st.write(place["description"])
-    st.write(f"**Duração:** {place['duration']}")
-    url=data["sources"].get(place.get("source", ""))
-    if url:
-        st.link_button("Ver pesquisa ou decisão no Drive", url)
-
-
-def mini_budget() -> None:
-    selected = st.radio("Cenário", ["60k", "70k"], format_func=lambda x:"R$ 60 mil" if x=="60k" else "R$ 70 mil",
-                        horizontal=True, key="summary_budget")
-    scenario=get_scenario(data,selected)
-    calc=calculate_scenario(scenario)
-    st.metric("Total histórico simulado", money_brl(calc["base"]))
-    st.progress(min(1.0, calc["base"]/scenario["cap_brl"]))
-    st.caption(f"Limite {money_brl(scenario['cap_brl'])} · Margem {money_brl(calc['balance'])} · Reserva já incluída")
-    if calc["balance"] < 1000:
-        st.warning("Margem muito pequena. Não aprovar compras com estes valores sem novas cotações.")
-    st.link_button("Abrir planilha original",data["sources"]["spreadsheet"],width="stretch")
 
 
 def render_source_documents() -> None:
@@ -216,10 +188,6 @@ def render_source_documents() -> None:
     st.caption("Finanças: estimativas, não cotações ou reservas. Mapa: referências geográficas, não rotas contratadas.")
 
 
-def navigate_page(destination: str) -> None:
-    """Navigation from homepage controls, applied before the radio on rerun."""
-    st.session_state["main_navigation"] = destination
-
 def navigate_to_base_explorer() -> None:
     """Change navigation in a widget callback, before the sidebar is rendered."""
     st.session_state["main_navigation"] = "Roteiro"
@@ -227,20 +195,10 @@ def navigate_to_base_explorer() -> None:
     st.session_state["base_explorer_mode"] = "Destinos próximos"
 
 
-def navigate_to_attractions() -> None:
-    st.session_state["main_navigation"] = "Roteiro"
-    st.session_state["itinerary_section"] = "Guias e pesquisas"
-    st.session_state["guide_section"] = "Explorar atrações"
-
 def navigate_to_consultor() -> None:
     st.session_state["main_navigation"] = "Roteiro"
     st.session_state["itinerary_section"] = "Meus passeios"
 
-
-def _ux_area_changed() -> None:
-    st.session_state.pop("ux45_origin",None)
-    st.session_state.pop("flow_edit_target",None)
-    set_ux_area(st.session_state,st.session_state["ux_area"])
 
 def _ux64_legacy_sidebar_clicked(area: str) -> None:
     # Original indexed controls remain reachable in advanced navigation.
@@ -279,17 +237,6 @@ def _ux_legacy_page_changed() -> None:
     set_ux_legacy(st.session_state,st.session_state["main_navigation"],
                   st.session_state.get("itinerary_section"),
                   st.session_state.get("guide_section"))
-
-
-def _ux_legacy_itinerary_changed() -> None:
-    set_ux_legacy(st.session_state,"Roteiro",
-                  st.session_state["itinerary_section"],
-                  st.session_state.get("guide_section"))
-
-
-def _ux_legacy_guide_changed() -> None:
-    set_ux_legacy(st.session_state,"Roteiro","Guias e pesquisas",
-                  st.session_state["guide_section"])
 
 
 def _ux_budget_days_changed() -> None:
@@ -334,12 +281,6 @@ def _ux_mode_changed() -> None:
             candidate=official
         st.session_state["scenario_base_selected"]=candidate
         st.session_state["scenario_sidebar"]=candidate
-
-
-def _ux_return_to_official() -> None:
-    """Compact home action: return to approved context, not a TripPlan update."""
-    st.session_state["ux_mode"]="Oficial"
-    _ux_mode_changed()
 
 
 with st.sidebar:
