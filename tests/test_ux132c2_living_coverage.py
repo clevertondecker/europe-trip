@@ -51,7 +51,7 @@ class LivingCoverageTests(unittest.TestCase):
         self.assertFalse(self.view["official_plan_modified"])
 
     def test_versioned_audit_artifacts_are_unchanged(self):
-        audit = build_audit()
+        audit = build_audit(projection_options={"data26c_overlay": {"by_pair": {}}})
         self.assertEqual(REPORT.read_bytes(), render_report(audit).encode("utf-8"))
         annex = REPORT.with_name("data24_legacy_evidence.json")
         self.assertEqual(annex.read_bytes(), render_legacy_annex(audit).encode("utf-8"))
