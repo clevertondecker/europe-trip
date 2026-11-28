@@ -1,5 +1,6 @@
 """UX 5.1: readable route references and filter semantics (pure view projection)."""
 import unittest
+from nav_helpers import open_public
 from copy import deepcopy
 from pathlib import Path
 from streamlit.testing.v1 import AppTest
@@ -66,8 +67,7 @@ class DQ32PresentationTests(unittest.TestCase):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
         self.assertFalse(app.exception,[x.message for x in app.exception])
         official=deepcopy(app.session_state["advisor_plan"])
-        app.button(key="ux_sidebar_nav_1").click().run()
-        app.button(key="ux64_sidebar_nav_1").click().run()
+        open_public(app,"Planejar","Visão geral")
         app.button(key="ux125b_home_base_outings").click().run()
         app.selectbox(key="attractions_scenario_base").set_value("lille").run()
         self.assertFalse(app.exception,[x.message for x in app.exception])

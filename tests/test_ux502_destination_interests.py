@@ -1,5 +1,6 @@
 """UX 5.0.2 — destinations are not attractions or confirmed outings."""
 import unittest
+from nav_helpers import open_public
 from copy import deepcopy
 from pathlib import Path
 from streamlit.testing.v1 import AppTest
@@ -71,9 +72,7 @@ class DestinationInterestsAppTests(unittest.TestCase):
     def test_list_filter_priority_and_tripplan_isolation(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
         original=deepcopy(app.session_state["advisor_plan"])
-        app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
-        app.segmented_control(key="ux_section").set_value("Passeios").run()
-        app.segmented_control(key="ux64_public_task").set_value("Minha lista").run()
+        open_public(app,"Explorar","Minha lista")
         app.session_state["ux502_interests"]=set_interest(
             set_interest(empty_interests(),"colmar","must_visit"),
             "bruges_be","interested")
@@ -90,9 +89,7 @@ class DestinationInterestsAppTests(unittest.TestCase):
 
     def test_selectboxes_rebind_after_replacement_same_revision(self):
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
-        app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
-        app.segmented_control(key="ux_section").set_value("Passeios").run()
-        app.segmented_control(key="ux64_public_task").set_value("Minha lista").run()
+        open_public(app,"Explorar","Minha lista")
         first=set_interest(empty_interests(),"colmar","must_visit")
         app.session_state["ux502_interests"]=first
         app.run()
@@ -182,9 +179,7 @@ class PrivateWishlistPersistenceTests(unittest.TestCase):
         import continuity_ui
         from private_continuity_store import StorageConflict
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
-        app.button(key="ux_sidebar_nav_"+str(("Minha viagem", "Explorar", "Meu roteiro", "Orçamento").index("Explorar"))).click().run()
-        app.segmented_control(key="ux_section").set_value("Passeios").run()
-        app.segmented_control(key="ux64_public_task").set_value("Minha lista").run()
+        open_public(app,"Explorar","Minha lista")
         app.session_state["ux502_interests"]=deepcopy(self.interests)
         fake=Mock()
         fake.save.side_effect=StorageConflict("stale")
@@ -220,9 +215,7 @@ class PrivateWishlistPersistenceTests(unittest.TestCase):
         from unittest.mock import patch
         import continuity_ui
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
-        app.button(key="ux_sidebar_nav_1").click().run()
-        app.segmented_control(key="ux_section").set_value("Passeios").run()
-        app.segmented_control(key="ux64_public_task").set_value("Minha lista").run()
+        open_public(app,"Explorar","Minha lista")
         app.session_state["ux502_interests"]=deepcopy(self.interests)
         with patch.object(continuity_ui,"_private_store",return_value=None), \
              patch("ux502_destination_interests_ui.st.download_button") as download:
@@ -235,9 +228,7 @@ class PrivateWishlistPersistenceTests(unittest.TestCase):
         from unittest.mock import Mock,patch
         import continuity_ui
         app=AppTest.from_file(str(ROOT/"app.py"),default_timeout=120).run()
-        app.button(key="ux_sidebar_nav_1").click().run()
-        app.segmented_control(key="ux_section").set_value("Passeios").run()
-        app.segmented_control(key="ux64_public_task").set_value("Minha lista").run()
+        open_public(app,"Explorar","Minha lista")
         app.session_state["ux502_interests"]=deepcopy(self.interests)
         store=Mock()
         with patch.object(continuity_ui,"_private_store",return_value=store):
