@@ -503,6 +503,70 @@ def _featured_ids(result):
     return featured[:4]
 
 
+def _catalog_filter_changed(key):
+    state = st.session_state
+    state[key + "_shadow"] = state[key]
+    state["rec03a_page_shadow"] = 1
+    if key == "rec03a_country":
+        # The next render reconciles the city with the new country options.
+        pass
+
+
+def _clear_catalog_filters():
+    state = st.session_state
+    for key, default in (("rec03a_country", None), ("rec03a_city", None),
+                         ("rec03a_category", "Todas"), ("rec03a_page", 1)):
+        state[key + "_shadow"] = default
+        state.pop(key, None)
+
+
+def catalog_filter_options(candidates, cities, country=None):
+    ids = list(dict.fromkeys(c["base_id"] for c in candidates))
+    countries = sorted({cities[b]["country"] for b in ids}, key=str.casefold)
+    available = sorted((b for b in ids if country is None or cities[b]["country"] == country),
+                       key=lambda b: (cities[b]["name"].casefold(), b))
+    return countries, available
+
+
+def render_catalog_filters(candidates, cities):
+    countries, _ = catalog_filter_options(candidates, cities)
+    # Country None = suggestions unless a city is selected; explicit empty
+    # string = browse every country. Values are session-only, never CHOICE.
+    country_options = [None, "", *countries]
+    _restore_widget("rec03a_country", "rec03a_country_shadow", None,
+                    lambda x: x in country_options)
+    flags = {"França":"🇫🇷", "Alemanha":"🇩🇪", "Bélgica":"🇧🇪", "Luxemburgo":"🇱🇺",
+             "Suíça":"🇨🇭", "Países Baixos":"🇳🇱"}
+    left, right = st.columns(2)
+    country = left.selectbox("País", country_options,
+                             format_func=lambda x: "Sugestões automáticas" if x is None else
+                             "Todos os países" if x == "" else (flags.get(x, "") + " " + x).strip(),
+                             key="rec03a_country", on_change=_catalog_filter_changed,
+                             args=("rec03a_country",))
+    _, available = catalog_filter_options(candidates, cities, country or None)
+    city_options = [None, *available]
+    _restore_widget("rec03a_city", "rec03a_city_shadow", None,
+                    lambda x: x in city_options)
+    city = right.selectbox("Cidade-base", city_options,
+                           format_func=lambda x: "Todas as cidades" if x is None else cities[x]["name"],
+                           key="rec03a_city", on_change=_catalog_filter_changed,
+                           args=("rec03a_city",))
+    browsing = country is not None or city is not None
+    if not browsing:
+        return False, []
+    st.button("Limpar filtros", key="rec03a_clear_filters", on_click=_clear_catalog_filters)
+    categories = ("Todas", "Comparáveis", "Condicionais", "Para investigar")
+    _restore_widget("rec03a_category", "rec03a_category_shadow", "Todas",
+                    lambda x: x in categories)
+    category = st.selectbox("Disponibilidade de evidências", categories,
+                            key="rec03a_category", on_change=_catalog_filter_changed,
+                            args=("rec03a_category",))
+    groups = {"Comparáveis":"comparable", "Condicionais":"conditional", "Para investigar":"investigate"}
+    return True, [c for c in candidates if c["base_id"] in available
+                  and (city is None or c["base_id"] == city)
+                  and (category == "Todas" or c["group"] == groups[category])]
+
+
 def render_suggestions(*,plan,discovery=None,research=None):
     st.markdown(page_header(
         "Comparar cidades-base", "NOSSA EUROPA 2027 · EXPLORAR",
@@ -581,36 +645,8 @@ def render_suggestions(*,plan,discovery=None,research=None):
             variant="compact",
         ),unsafe_allow_html=True)
         render_selection_toolbar(options,cities,navigation="explore")
-        # Search is always accessible, without an extra checkbox first.
-        _restore_widget("rec03a_search","rec03a_search_shadow","",
-                        lambda x:isinstance(x,str))
-        search=st.text_input("Pesquisar cidade ou país",key="rec03a_search",
-                             placeholder="Ex.: Metz, Nancy, França",
-                             on_change=_remember,
-                             args=("rec03a_search","rec03a_search_shadow")).strip().casefold()
-        _restore_widget("rec03a_show_all","rec03a_show_all_shadow",False,
-                        lambda x:type(x) is bool)
-        show_all=st.checkbox(f"Ver todas as cidades ({len(result['candidates'])})",
-                             key="rec03a_show_all",on_change=_remember,
-                             args=("rec03a_show_all","rec03a_show_all_shadow"))
-        browsing=bool(search) or show_all
+        browsing, filtered = render_catalog_filters(result["candidates"], cities)
         if browsing:
-            if show_all:
-                categories=("Todas","Comparáveis","Condicionais","Para investigar")
-                _restore_widget("rec03a_category","rec03a_category_shadow","Todas",
-                                lambda x:x in categories)
-                category=st.selectbox("Disponibilidade de evidências",categories,
-                                      key="rec03a_category",on_change=_remember,
-                                      args=("rec03a_category","rec03a_category_shadow"))
-            else:
-                category="Todas"
-            groups={"Comparáveis":"comparable","Condicionais":"conditional",
-                    "Para investigar":"investigate"}
-            filtered=[c for c in result["candidates"] if
-                      (category=="Todas" or c["group"]==groups.get(category)) and
-                      (not search or search in
-                       (cities[c["base_id"]]["name"]+" "+
-                        cities[c["base_id"]]["country"]).casefold())]
             st.markdown("#### Catálogo de cidades-base")
             st.caption(f"{len(filtered)} de {len(result['candidates'])} cidades-base encontradas. Não é uma classificação das melhores bases.")
             if filtered:
@@ -643,7 +679,7 @@ def render_suggestions(*,plan,discovery=None,research=None):
                         with columns[index%len(columns)]:
                             _card(by_id[base],result,names,cities,plan["base_city"],options)
             else:
-                st.info("Não há destaques para este escopo. Pesquise uma cidade acima "
+                st.info("Não há destaques para este escopo. Selecione uma cidade acima "
                         "ou abra todas as alternativas.")
     else:
         st.markdown(section_heading(
