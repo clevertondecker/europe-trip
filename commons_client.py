@@ -9,15 +9,28 @@ import urllib.request
 def urlopen(*args, **kwargs):
     return urllib.request.urlopen(*args, **kwargs)
 
+IMAGE_HOSTS = frozenset({"upload.wikimedia.org", "thumb.wikimedia.org"})
+NEGATIVE_TTL = 300
+
+
+def is_image_url(value):
+    try:
+        p = urlsplit(value or "")
+        return (p.scheme == "https" and p.hostname in IMAGE_HOSTS and
+                p.username is None and p.password is None and p.port in (None, 443))
+    except (ValueError, TypeError):
+        return False
+
+
 def _plain(value):
-    return unescape(re.sub(r"<[^>]+>","",str(value or ""))).strip()
+    return " ".join(unescape(re.sub(r"<[^>]+>","",str(value or ""))).split())
 
 def parse_metadata(payload,file_title):
     pages=payload.get("query",{}).get("pages",{})
     if isinstance(pages,list):
         pages={str(i):v for i,v in enumerate(pages)}
     for page in pages.values():
-        if page.get("title")!="File:"+file_title:
+        if page.get("title")!="File:"+file_title or "missing" in page:
             continue
         infos=page.get("imageinfo") or []
         if not infos:
@@ -28,7 +41,6 @@ def parse_metadata(payload,file_title):
         license_name=_plain(meta.get("LicenseShortName",{}).get("value"))
         license_url=meta.get("LicenseUrl",{}).get("value","")
         image_url=info.get("thumburl") or info.get("url")
-        from urllib.parse import urlsplit
         p=urlsplit(license_url)
         name=license_name.casefold().strip()
         free_by=bool(re.fullmatch(r"cc by(?:-sa)? [1-9]\.\d",name))
@@ -40,9 +52,9 @@ def parse_metadata(payload,file_title):
                            and p.path.startswith("/publicdomain/"))))
         permitted=(free_by and url_free) or public_domain
         if (not author or not permitted or not image_url
-                or not image_url.startswith("https://upload.wikimedia.org/")):
+                or not is_image_url(image_url)):
             return None
-        return {"url":image_url,"author":author[:200],
+        return {"url":image_url,"author":author[:140],
                 "license":license_name,"license_url":license_url}
     return None
 
@@ -57,7 +69,7 @@ def file_path_title(url):
     prefix = "/wiki/Special:FilePath/"
     if p.scheme == "https" and p.netloc == "commons.wikimedia.org" and p.path.startswith(prefix):
         title = unquote(p.path[len(prefix):]).replace("_", " ")
-        if title and "/" not in title and chr(92) not in title:
+        if title and "/" not in title and chr(92) not in title and title.lower().endswith((".jpg", ".jpeg", ".png", ".webp")):
             return title
     return None
 
