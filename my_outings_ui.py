@@ -1,6 +1,8 @@
 """Direct editor for actual TripPlan outings, distinct from simulated proposals."""
 from __future__ import annotations
 
+from formatting import brl, REQUIRED
+
 from collections import defaultdict
 from html import escape
 
@@ -113,10 +115,9 @@ def render_my_outings(plan: dict, catalog: dict, *, routes: dict | None = None,
         known=float(financial["known_billets_brl"])
         st.markdown("#### Quanto dos passeios já está previsto no orçamento?")
         c1,c2,c3=st.columns(3)
-        money=lambda value:"R$ "+f"{value:,.0f}".replace(",",".")
-        c1.metric("Verba reservada",money(allowance))
-        c2.metric("Custos conhecidos dos escolhidos",money(known))
-        c3.metric("Saldo nominal da provisão",money(max(0,allowance-known)))
+        c1.metric("Verba reservada",brl(allowance, decimals=0, missing=REQUIRED))
+        c2.metric("Custos conhecidos dos escolhidos",brl(known, decimals=0, missing=REQUIRED))
+        c3.metric("Saldo nominal da provisão",brl(max(0,allowance-known), decimals=0, missing=REQUIRED))
         if allowance>0:
             st.progress(min(1.,known/allowance))
         st.caption("Projeção global do casal: "+money(financial["result"]["total"])+

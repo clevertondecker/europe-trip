@@ -1,6 +1,8 @@
 """Focused five-base evidence panel, strictly isolated from the approved TripPlan."""
 from __future__ import annotations
 
+from formatting import eur
+
 import streamlit as st
 
 from five_base_comparison_model import (
@@ -21,7 +23,7 @@ def _label(base:dict)->str:
 
 
 def _eur(v)->str:
-    return "Não cotado" if v is None else "€ "+f"{v:,.2f}".replace(",","_").replace(".",",").replace("_",".")
+    return eur(v, decimals=2, missing="Não cotado")
 
 
 def _save_destinations():
