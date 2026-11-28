@@ -10,7 +10,6 @@ from pathlib import Path
 from base_research_expanded_model import load_research
 
 PATH=Path(__file__).resolve().parent/"data"/"city_research_packs_2026_11.json"
-DEPARTURE_MIN_DATE="2027-09-04"
 
 
 def validate_city_packs(data:dict,canonical:dict|None=None)->dict:
