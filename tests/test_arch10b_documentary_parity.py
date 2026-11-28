@@ -2,7 +2,7 @@ import unittest
 import json
 from copy import deepcopy
 from five_base_comparison_model import load_five_base_evidence
-from arch10b_documentary_parity import documentary_rail_parity
+from tools.arch10b_documentary_parity import documentary_rail_parity
 from base_coverage_model import coverage_matrix
 
 

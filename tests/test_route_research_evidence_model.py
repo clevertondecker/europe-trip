@@ -2,7 +2,7 @@
 import unittest
 from copy import deepcopy
 
-from route_research_evidence_model import (
+from tools.route_research_evidence_model import (
     observation_id, journey_identity, legacy_projection,
     validate_observation, validate_observations,
 )

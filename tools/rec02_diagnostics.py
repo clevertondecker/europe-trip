@@ -8,7 +8,7 @@ import tracemalloc
 from base_recommendation_model import evaluate_matrix, recommend_bases
 from base_recommendation_evidence_model import build_recommendation_matrix
 from recommendation_scope_model import confirm_scope
-from rec01_feasibility import SCENARIOS, DATA23_SCENARIOS
+from tools.rec01_feasibility import SCENARIOS, DATA23_SCENARIOS
 from trip01_supplemental_discovery import build_exploration_discovery
 from base_research_expanded_model import load_research
 from base_explorer_model import load_exploration

@@ -7,7 +7,7 @@ from base_recommendation_model import evaluate_matrix, recommend_bases
 from base_recommendation_evidence_model import build_recommendation_matrix
 from recommendation_scope_model import confirm_scope, reconcile_scope
 from ux502_destination_interests_model import empty_interests, set_interest, remove_interest
-from rec01_feasibility import SCENARIOS, DATA23_SCENARIOS, coverage_report
+from tools.rec01_feasibility import SCENARIOS, DATA23_SCENARIOS, coverage_report
 from trip01_supplemental_discovery import build_exploration_discovery
 from base_research_expanded_model import load_research
 from rail_evidence_unified_model import load_rail_evidence
@@ -337,7 +337,7 @@ class RealRecommendationTests(unittest.TestCase):
 
     def test_diagnostics_real_and_expanded_synthetic(self):
         import json
-        from rec02_diagnostics import run_diagnostics
+        from tools.rec02_diagnostics import run_diagnostics
         report=run_diagnostics()
         self.assertEqual(set(report["examples"]),set(SCENARIOS)|set(DATA23_SCENARIOS)|{"product"})
         self.assertEqual(report["benchmark"]["all_real"]["destinations"],len(self.discovery["destinations"]))

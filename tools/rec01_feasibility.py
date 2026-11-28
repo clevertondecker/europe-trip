@@ -1,6 +1,6 @@
 """Reproduce REC01 coverage using actual validated repository loaders.
 
-Run from repository root: python rec01_feasibility.py
+Run from repository root: python -m tools.rec01_feasibility
 No claims about future timetable, costs, reachability or editorial verification.
 """
 from __future__ import annotations

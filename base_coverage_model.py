@@ -28,7 +28,6 @@ LABELS={
 UNRESEARCHED="Não pesquisado"
 PARTIAL="Parcial"
 DOCUMENTED="Pesquisado"
-RECHECK="A confirmar"
 # These are NOT weights for final city quality; they are requirements of
 # documentary coverage, disclosed individually to the traveler.
 REQUIREMENTS={

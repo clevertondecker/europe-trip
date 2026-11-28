@@ -10,7 +10,6 @@ from datetime import date,datetime,timezone
 from decimal import Decimal,InvalidOperation,ROUND_HALF_UP
 from uuid import UUID,uuid4
 
-from private_continuity_store import PrivateArchiveStore
 
 CATEGORIES=("housing","flight","intercity_train","local_transport","outing","ticket")
 UNITS=("stay","person_oneway","person_roundtrip","couple_roundtrip",
@@ -201,13 +200,6 @@ def housing_budget_whatif(quote:dict,plan:dict,allowance_brl,*,fx_brl_per_unit:s
     actual=_money(q["amount"])*rate
     delta=(actual-allowance).quantize(Decimal("0.01"),rounding=ROUND_HALF_UP)
     return {"delta_brl":str(delta),"reason":"Substituição hipotética da verba de moradia, não despesa adicional"}
-
-
-class PrivateQuoteStore(PrivateArchiveStore):
-    """Same GCS owner/credentials, distinct object from TripPlan and city studies."""
-    def __init__(self,bucket,service_account,owner_email):
-        super().__init__(bucket,service_account,owner_email)
-        self.key=self.key.removesuffix("current.json")+"ux38_quotes.json"
 
 
 def cloud_load(store)->tuple[dict,int|None]:

@@ -5,7 +5,7 @@ import tempfile
 from pathlib import Path
 import unittest
 
-from regional_opportunity_research_model import (
+from tools.regional_opportunity_research_model import (
     load_regional_opportunities, opportunity_projection, DATA,
 )
 

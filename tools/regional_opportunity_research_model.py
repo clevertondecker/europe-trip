@@ -11,7 +11,7 @@ from base_research_expanded_model import load_research
 from ux501_destination_discovery_model import build_destination_discovery
 from rail_evidence_unified_model import canonical_place
 
-DATA = Path(__file__).resolve().parent / "data/regional_opportunities_pilot_2026_11.json"
+DATA = Path(__file__).resolve().parents[1] / "data/regional_opportunities_pilot_2026_11.json"
 
 
 def load_regional_opportunities(path=DATA, *, discovery=None, research=None):

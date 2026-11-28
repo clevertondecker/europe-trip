@@ -25,7 +25,6 @@ INPUTS={
     "extra_local_transport":"Transporte adicional/transfer (€ total casal)",
     "additional_admissions":"Outros passeios e ingressos (€ total casal)",
 }
-LEGACY={"60k":12545,"70k":14636}
 
 
 def _eur(value:float)->str:

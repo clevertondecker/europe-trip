@@ -7,10 +7,10 @@ from __future__ import annotations
 from copy import deepcopy
 import streamlit as st
 from planning_store import (create_from_legacy,change_plan,set_package,
-                            remove_package,add_assignment,remove_assignment,
+                            add_assignment,remove_assignment,
                             sync_legacy_view,summary)
 from trip_plan_model import new_plan
-from plan_read_models import legacy_plan_projection, read_plan_view
+from plan_read_models import legacy_plan_projection
 from attractions_model import load_attractions
 from catalog_plan_validation import allowed_attractions
 
@@ -94,14 +94,6 @@ def select_package(destination:str,items:list[str])->dict:
                                valid_destinations=destinations,
                                valid_attractions=valid))
 
-def upsert_flexible_choice(destination:str,attraction_ids:list[str],
-                           period:str)->dict:
-    """Confirmed in-session user choice; no network write or mandatory date."""
-    from itinerary_flow_model import upsert_choice
-    return _commit(upsert_choice(bootstrap(),load_attractions(),
-                                 destination,attraction_ids,period))
-
-
 def commit_outing(destination:str,attraction_ids:list[str],
                   period:str|None=None,*,confirmed:bool=False):
     """Confirmed canonical change plus structured feedback for every UI entry."""
@@ -132,11 +124,6 @@ def delete_outing(destination:str,*,confirmed:bool=False):
     return result
 
 
-def remove_flexible_choice(destination:str)->dict:
-    from itinerary_flow_model import remove_choice
-    return _commit(remove_choice(bootstrap(),load_attractions(),destination))
-
-
 def schedule_italy_visit(destination:str,day:str|None)->dict:
     """Precise Italian day, optional and independent from French assignments."""
     from itinerary_flow_model import schedule_italy_day
@@ -149,9 +136,6 @@ def accept_italy_starter(variant:str,*,confirmed:bool=False)->dict:
     return _commit(adopt_italy_starter(bootstrap(),load_attractions(),
                                       variant,confirmed=confirmed))
 
-
-def delete_package(destination:str)->dict:
-    return _commit(remove_package(bootstrap(),destination))
 
 def schedule_package(day:str,destination:str)->dict:
     return _commit(add_assignment(bootstrap(),day,destination))
@@ -170,7 +154,3 @@ def update_interest(attraction_id:str,preference:str)->dict:
 def statistics()->dict:
     return summary(bootstrap())
 
-
-def active_plan_view()->dict:
-    """Independent read-only snapshot; cannot accidentally mutate TripPlan."""
-    return read_plan_view(bootstrap())

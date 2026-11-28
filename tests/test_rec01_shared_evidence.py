@@ -7,7 +7,7 @@ from base_recommendation_evidence_model import build_recommendation_matrix, cand
 from base_research_expanded_model import load_research
 from data23_france_candidates_model import REQUIRED_IDS
 from rail_reference_projection_model import decorate_comparison
-from rec01_feasibility import run_assessment, SCENARIOS, DATA23_SCENARIOS
+from tools.rec01_feasibility import run_assessment, SCENARIOS, DATA23_SCENARIOS
 from rail_pair_projection_model import pair_projection_row
 from ux503_destination_base_comparison_model import build_wishlist_matrix
 from trip01_supplemental_discovery import build_exploration_discovery

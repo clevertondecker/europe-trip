@@ -16,7 +16,7 @@ from evidence_query_model import get_rail_evidence
 from base_explorer_model import load_exploration
 from ux501_destination_discovery_model import build_destination_discovery
 
-DATA = Path(__file__).resolve().parent / "data/corridor_priority_pilot_2026_11.json"
+DATA = Path(__file__).resolve().parents[1] / "data/corridor_priority_pilot_2026_11.json"
 
 
 def load_pilot(path=DATA, *, research=None, discovery=None):

@@ -9,7 +9,6 @@ FRENCH_BUDGET = {
             "transport": 1158, "excursions": 3500, "french_days": 60},
 }
 # Components originated in the historical Drive workbook, NOT real confirmed 2027 quotes.
-SOURCE_URL = "https://drive.google.com/file/d/1_PgDDM-wPR5hlUyTRjdpxAwrnE0hhaqu/view"
 
 def audit_subtotals() -> dict[str, dict]:
     return {
