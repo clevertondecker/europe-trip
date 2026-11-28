@@ -1,5 +1,6 @@
 """Read-only supplemental trip candidates, isolated from frozen 30x46 rail research."""
 from __future__ import annotations
+from commons_client import is_image_url
 
 from copy import deepcopy
 import json
@@ -25,7 +26,7 @@ def append_trip01_candidates(discovery: dict, path: Path = DATA) -> dict:
         if not (-90 <= entry["lat"] <= 90 and -180 <= entry["lon"] <= 180):
             raise ValueError("Supplemental destination has invalid coordinates")
         photo = entry.get("photo")
-        if photo and (not photo.get("url", "").startswith(("https://upload.wikimedia.org/", "https://thumb.wikimedia.org/"))
+        if photo and (not is_image_url(photo.get("url"))
                       or not photo.get("source_page", "").startswith("https://commons.wikimedia.org/")
                       or not photo.get("author") or not photo.get("license")
                       or not photo.get("license_url", "").startswith("https://")):

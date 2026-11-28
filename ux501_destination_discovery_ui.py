@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import streamlit as st
 from html import escape
-from ux501_destination_photo_service import lookup_destination_photos
+from ux501_destination_photo_service import lookup_destination_photos, curated_destination_photo
 from destination_photo_assets import (local_destination_photo, preferred_destination_photo,
                                       display_photo_url)
 
@@ -29,11 +29,22 @@ def _cached_discovery():
 
 
 
-@st.cache_data(ttl=21600, show_spinner=False)
+from time import monotonic
+from commons_client import NEGATIVE_TTL
+
+_visible_photo_cache = {}
+
 def _cached_visible_photos(identity: tuple[tuple[str, str], ...]) -> dict:
-    # Fetch only the current page, once per cache TTL. No catalog writes.
-    return lookup_destination_photos(
-        [{"id":destination_id,"name":name} for destination_id,name in identity])
+    now = monotonic()
+    pending = [(i, n) for i, n in identity
+               if (i, n) not in _visible_photo_cache or _visible_photo_cache[i, n][1] <= now]
+    if pending:
+        found = lookup_destination_photos([{"id": i, "name": n} for i, n in pending])
+        for i, n in pending:
+            result = found.get(i)
+            _visible_photo_cache[i, n] = (result, float("inf") if result else monotonic() + NEGATIVE_TTL)
+    return {i: _visible_photo_cache[i, n][0] for i, n in identity
+            if _visible_photo_cache[i, n][0] is not None}
 
 
 def _render_destination_media(destination: dict, photo: dict | None) -> None:
@@ -52,8 +63,9 @@ def _render_destination_media(destination: dict, photo: dict | None) -> None:
             'Fonte original</a> · recortada para 16:9</div>',
             unsafe_allow_html=True)
         return
-    if photo and photo.get("url"):
-        url = escape(display_photo_url(photo["url"]), quote=True)
+    resolved_url = display_photo_url(photo["url"]) if photo and photo.get("url") else None
+    if resolved_url:
+        url = escape(resolved_url, quote=True)
         name = escape(photo.get("subject") or destination["name"], quote=True)
         # CSS backgrounds do not produce broken-image glyphs. When the
         # resource fails, the visible placeholder remains deterministic.
@@ -263,6 +275,7 @@ def render_independent_destination_discovery(*, discovery=None, focused_destinat
     missing_on_page = tuple((item["id"],item["name"]) for item in subset
                             if not item.get("photo") and
                             not local_photos.get(item["id"]) and
+                            not curated_destination_photo(item["id"]) and
                             item.get("research_status") != "supplemental_attractions_documented")
     fallback_photos = (_cached_visible_photos(missing_on_page)
                        if missing_on_page else {})
@@ -272,7 +285,7 @@ def render_independent_destination_discovery(*, discovery=None, focused_destinat
             columns = st.columns(len(row_items), border=True)
             for column, item in zip(columns, row_items):
                 with column:
-                    photo = preferred_destination_photo(item, fallback_photos.get(item["id"]))
+                    photo = preferred_destination_photo(item, curated_destination_photo(item["id"]) or fallback_photos.get(item["id"]))
                     _render_destination_media(item,photo)
                     st.markdown("**"+item["name"]+"** · "+item["country"])
                     # A short, sourced reason to explore: only catalogued

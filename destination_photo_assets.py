@@ -69,38 +69,29 @@ def preferred_destination_photo(destination: dict, online_photo: dict | None = N
 
 
 
-@lru_cache(maxsize=256)
-def display_photo_url(url: str) -> str:
-    """Use Wikimedia API imageinfo URLs, never synthesize the Commons CDN hash.
+from collections import OrderedDict
+from time import monotonic
+from commons_client import NEGATIVE_TTL, file_path_title, fetch_photo
 
-    The original Wikimedia FilePath URL is returned if Commons is unavailable;
-    callers render it as a CSS background with a stable no-image fallback.
-    """
-    from urllib.parse import unquote, urlsplit, urlencode
-    from urllib.request import urlopen, Request
-    p=urlsplit(url)
-    prefix="/wiki/Special:FilePath/"
-    if not (p.scheme=="https" and p.netloc=="commons.wikimedia.org"
-            and p.path.startswith(prefix)):
+_resolution_cache = OrderedDict()
+
+
+def display_photo_url(url: str) -> str:
+    """Direct URLs bypass lookup; failed lookups retry after a short TTL."""
+    title = file_path_title(url)
+    if not title:
         return url
-    title=unquote(p.path[len(prefix):]).replace("_"," ")
-    if not title or "/" in title or "\\" in title or not title.lower().endswith(
-            (".jpg",".jpeg",".png",".webp")):
-        return url
-    endpoint="https://commons.wikimedia.org/w/api.php?"+urlencode({
-        "action":"query","titles":"File:"+title,"prop":"imageinfo",
-        "iiprop":"url","iiurlwidth":"800","format":"json"})
-    try:
-        req=Request(endpoint,headers={"User-Agent":"EuropeTrip-Research/1.0",
-                                      "Accept":"application/json"})
-        with urlopen(req,timeout=4) as response:
-            payload=json.load(response)
-        for page in payload.get("query",{}).get("pages",{}).values():
-            for info in page.get("imageinfo",[]):
-                result=info.get("thumburl") or info.get("url")
-                parsed=urlsplit(result or "")
-                if parsed.scheme=="https" and parsed.netloc=="upload.wikimedia.org":
-                    return result
-    except (OSError,ValueError,TypeError,KeyError):
-        pass
-    return url
+    now = monotonic()
+    cached = _resolution_cache.get(title)
+    if cached is not None:
+        result, expires = cached
+        if now < expires:
+            _resolution_cache.move_to_end(title)
+            return result or url
+    photo = fetch_photo(title)
+    result = photo["url"] if photo else None
+    _resolution_cache[title] = (result, float("inf") if result else monotonic() + NEGATIVE_TTL)
+    _resolution_cache.move_to_end(title)
+    while len(_resolution_cache) > 256:
+        _resolution_cache.popitem(last=False)
+    return result or url
