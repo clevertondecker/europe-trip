@@ -5,7 +5,7 @@ are all owned by existing unchanged modules.
 """
 from __future__ import annotations
 
-from formatting import eur, amount
+from formatting import eur
 
 import streamlit as st
 

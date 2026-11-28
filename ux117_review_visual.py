@@ -1,7 +1,6 @@
 """Read-only UX117 presentation of the existing UX115 decision projection."""
-from formatting import amount, _RAISE, minutes, html_safe as _safe
+from formatting import amount, REQUIRED, minutes, html_safe as _safe
 from base_change_model import SIMILARITY_THRESHOLD_MINUTES
-from rail_reference_projection_model import format_minutes
 from ux_shared_ui_presentation import kpi_cards
 
 def _duration(value):
@@ -134,7 +133,7 @@ def subtotals_html(view):
             'Não inclui retornos, frequência, custos ou última milha. Não é uma economia garantida.</p></section>')
 
 def _money(value):
-    return amount(value, decimals=2, missing=_RAISE, absolute=True, trim_zeros=True)
+    return amount(value, decimals=2, missing=REQUIRED, absolute=True, trim_zeros=True)
 
 
 def housing_html(comparison,view):

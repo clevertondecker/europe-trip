@@ -1,7 +1,7 @@
 """The visible active-profile itinerary and approval controls for Meus passeios."""
 from __future__ import annotations
 
-from formatting import brl, _RAISE
+from formatting import brl, REQUIRED
 
 import streamlit as st
 
@@ -13,7 +13,7 @@ from destination_labels import destination_names
 
 
 def money(value:float)->str:
-    return brl(value, decimals=0, missing=_RAISE)
+    return brl(value, decimals=0, missing=REQUIRED)
 
 
 def render_active_preset(plan:dict,preset:dict,catalog:dict,*,routes:dict|None=None,

@@ -1,14 +1,14 @@
 """Display source-backed price observations without converting them into fake quotes."""
 from __future__ import annotations
 
-from formatting import brl, _RAISE
+from formatting import brl, REQUIRED
 
 import streamlit as st
 from research_cost_model import outing_research_snapshot,selected_trip_research,compare_city_bases
 
 
 def money(v:float)->str:
-    return brl(v, decimals=2, missing=_RAISE)
+    return brl(v, decimals=2, missing=REQUIRED)
 
 
 def render_researched_outing(guide:dict,eurfx:float,chffx:float,

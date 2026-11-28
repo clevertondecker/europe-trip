@@ -1,7 +1,7 @@
 """Adoption UX for already generated concrete per-profile budget itineraries."""
 from __future__ import annotations
 
-from formatting import brl, _RAISE
+from formatting import brl, REQUIRED
 
 import streamlit as st
 
@@ -14,7 +14,7 @@ from destination_labels import destination_names
 
 
 def _money(value:float)->str:
-    return brl(value, decimals=0, missing=_RAISE)
+    return brl(value, decimals=0, missing=REQUIRED)
 
 
 def _confirm_preset(plan:dict,option:dict)->None:

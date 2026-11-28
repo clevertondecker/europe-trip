@@ -1,7 +1,7 @@
 """Evidence-first weekend/daily shopping and reconciled budget dashboards."""
 from __future__ import annotations
 
-from formatting import brl, _RAISE
+from formatting import brl, REQUIRED
 
 import streamlit as st
 
@@ -9,7 +9,7 @@ from reconciled_trip_research import (grocery_reference,load_extended_research,
                                       reconcile_researched_itinerary)
 
 def _money(value:float)->str:
-    return brl(value, decimals=2, missing=_RAISE)
+    return brl(value, decimals=2, missing=REQUIRED)
 
 
 def render_grocery_and_weekend_examples()->None:

@@ -1,7 +1,7 @@
 """Editorial comparison UI for three real itinerary proposals."""
 from __future__ import annotations
 
-from formatting import brl, _RAISE
+from formatting import brl, REQUIRED
 
 from html import escape
 
@@ -14,7 +14,7 @@ from scenario_comparison_model import (scenario_comparison,comparison_table,
 
 
 def money(value:float)->str:
-    return brl(value, decimals=0, missing=_RAISE)
+    return brl(value, decimals=0, missing=REQUIRED)
 
 
 def _name(key:str,names:dict)->str:
